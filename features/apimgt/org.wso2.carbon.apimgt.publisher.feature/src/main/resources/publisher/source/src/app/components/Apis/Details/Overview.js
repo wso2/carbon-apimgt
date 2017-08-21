@@ -18,7 +18,7 @@
 
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
-import {Col, Row, Card, Form, Select, Dropdown, Tag, Menu, Button, Badge} from 'antd';
+import {Col, Popconfirm, Row, Card, Form, Select, Dropdown, Tag, Menu, Button, Badge, message} from 'antd';
 
 const FormItem = Form.Item;
 import Loading from '../../Base/Loading/Loading'
@@ -26,6 +26,7 @@ import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import Api from '../../../data/api'
 import {Redirect} from 'react-router-dom'
 import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation'
+import ApiPermissionValidation from '../../../data/ApiPermissionValidation'
 
 class Overview extends Component {
     constructor(props) {
@@ -36,6 +37,7 @@ class Overview extends Component {
         };
         this.api_uuid = this.props.match.params.api_uuid;
         this.downloadWSDL = this.downloadWSDL.bind(this);
+        this.handleApiDelete = this.handleApiDelete.bind(this);
     }
 
     componentDidMount() {
@@ -54,6 +56,26 @@ class Overview extends Component {
                 if (status === 404) {
                     this.setState({notFound: true});
                 }
+            }
+        );
+    }
+
+    handleApiDelete(e) {
+        this.setState({loading: true});
+        const api = new Api();
+        let promised_delete = api.deleteAPI(this.api_uuid);
+        promised_delete.then(
+            response => {
+                if (response.status !== 200) {
+                    console.log(response);
+                    message.error("Something went wrong while deleting the API!");
+                    this.setState({loading: false});
+                    return;
+                }
+                let redirect_url = "/apis/";
+                this.props.history.push(redirect_url);
+                message.success("API " + this.state.api.name + " was deleted successfully!");
+                this.setState({active: false, loading: false});
             }
         );
     }
@@ -95,12 +117,31 @@ class Overview extends Component {
 
     render() {
         let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
+        const api = this.state.api;
+        if (this.state.notFound) {
+            return <ResourceNotFound/>
+        }
+        if (!this.state.api) {
+            return <Loading/>
+        }
 
         const menu = (
             <Menu>
                 <Menu.Item>
                     <ScopeValidation resourceMethod={resourceMethod.PUT} resourcePath={resourcePath.SINGLE_API}>
-                        <Link to="">Edit</Link>
+                        <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
+                            <Link to="">Edit</Link>
+                        </ApiPermissionValidation>
+                    </ScopeValidation>
+                </Menu.Item>
+                <Menu.Item>
+                    <ScopeValidation resourceMethod={resourceMethod.DELETE} resourcePath={resourcePath.SINGLE_API}>
+                        <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.DELETE}
+                                                        userPermissions={this.state.api.userPermissionsForApi}>
+                            <Popconfirm title="Do you want to delete this api?" onConfirm={this.handleApiDelete}>
+                               <Link to="">Delete</Link>
+                            </Popconfirm>
+                        </ApiPermissionValidation>
                     </ScopeValidation>
                 </Menu.Item>
                 <Menu.Item>
@@ -115,13 +156,7 @@ class Overview extends Component {
             labelCol: {span: 6},
             wrapperCol: {span: 18}
         };
-        const api = this.state.api;
-        if (this.state.notFound) {
-            return <ResourceNotFound/>
-        }
-        if (!this.state.api) {
-            return <Loading/>
-        }
+
         return (
             <div>
                 <Row type="flex" justify="center">

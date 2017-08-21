@@ -26,27 +26,6 @@ class ApiThumb extends React.Component {
     constructor(props) {
         super(props);
         this.state = {active: true, loading: false};
-        this.handleApiDelete = this.handleApiDelete.bind(this);
-    }
-
-    handleApiDelete(e) {
-        this.setState({loading: true});
-        const api = new API();
-        const api_uuid = this.props.api.id;
-        const name = this.props.api.name;
-        let promised_delete = api.deleteAPI(api_uuid);
-        promised_delete.then(
-            response => {
-                if (response.status !== 200) {
-                    console.log(response);
-                    message.error("Something went wrong while deleting the " + name + " API!");
-                    this.setState({loading: false});
-                    return;
-                }
-                message.success(name + " API deleted successfully!");
-                this.setState({active: false, loading: false});
-            }
-        );
     }
 
     render() {
@@ -68,11 +47,6 @@ class ApiThumb extends React.Component {
                         <p className="description">{this.props.api.description}</p>
                         <div className="api-action-container">
                             <Link to={details_link}>More... <Icon type="edit"/></Link>
-                            <ScopeValidation resourceMethod={resourceMethod.DELETE} resourcePath={resourcePath.SINGLE_API}>
-                                <Popconfirm title="Confirm delete?" onConfirm={this.handleApiDelete}>
-                                    <Button loading={this.state.loading} type="default" shape="circle" icon="delete"/>
-                                </Popconfirm>
-                            </ScopeValidation>
                         </div>
                     </div>
                 </Card>
