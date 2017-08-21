@@ -183,11 +183,11 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
             for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
                 Path resource = entry.getValue();
                 Map<HttpMethod, Operation> operationsMap = resource.getOperationMap();
-                for (Map.Entry<HttpMethod, Operation> httpverbEntry : operationsMap.entrySet()) {
-                    List<Map<String, List<String>>> security = httpverbEntry.getValue().getSecurity();
+                for (Map.Entry<HttpMethod, Operation> httpVerbEntry : operationsMap.entrySet()) {
+                    List<Map<String, List<String>>> security = httpVerbEntry.getValue().getSecurity();
                     if (security != null) {
                         String scope = security.get(0).get(APIMgtConstants.OAUTH2SECURITY).get(0);
-                        String path = httpverbEntry.getKey() + "_" + entry.getKey();
+                        String path = httpVerbEntry.getKey() + "_" + entry.getKey();
                         if (!localConfigMap.get(namespace).containsKey(path)) {
                             localConfigMap.get(namespace).put(path, scope);
                         }
@@ -257,18 +257,18 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         }
         if (localConfigMap.containsKey(nameSpace)) {
             if (localConfigMap.get(nameSpace).containsKey(APIMgtConstants.SCOPES)) {
-                scopes = (Map<String, String>) localConfigMap.get(nameSpace).get(APIMgtConstants.SCOPES);
+                return  (Map<String, String>) localConfigMap.get(nameSpace).get(APIMgtConstants.SCOPES);
             }
         } else {
             populateConfigMapForScope(swagger, nameSpace);
             //security header is not found in deployment.yaml.hence, reading from swagger
-            Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
-            if (securityDefinitions != null) {
-                Map.Entry<String, SecuritySchemeDefinition> entry = securityDefinitions.entrySet().iterator().next();
-                OAuth2Definition securityDefinition = (OAuth2Definition) entry.getValue();
-                scopes = securityDefinition.getScopes();
-                localConfigMap.get(nameSpace).put(APIMgtConstants.SCOPES, scopes);
-            }
+        }
+        Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
+        if (securityDefinitions != null) {
+            Map.Entry<String, SecuritySchemeDefinition> entry = securityDefinitions.entrySet().iterator().next();
+            OAuth2Definition securityDefinition = (OAuth2Definition) entry.getValue();
+            scopes = securityDefinition.getScopes();
+            localConfigMap.get(nameSpace).put(APIMgtConstants.SCOPES, scopes);
         }
         return scopes;
     }

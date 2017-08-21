@@ -1404,8 +1404,14 @@ public class SampleTestObjectCreator {
 
     public static String getSampleApiSwagger() throws IOException {
         //swagger definition
-        InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("sampleApi.yaml");
-        String definition = IOUtils.toString(stream);
+        InputStream stream = null;
+        String definition = null;
+        try {
+            stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("sampleApi.yaml");
+            definition = IOUtils.toString(stream);
+        } finally {
+            stream.close();
+        }
         return definition;
     }
 }
