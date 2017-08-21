@@ -37,6 +37,7 @@ function getFromSubscriptionCache (string apiContext, string version, string con
         dto:SubscriptionDto dto;
         errors:TypeCastError err;
         dto, err = (dto:SubscriptionDto)subscription;
+        system:println(dto);
         return dto;
     } else {
         return null;
@@ -156,6 +157,7 @@ function getFromApplicationCache (string applicationId) (dto:ApplicationDto) {
         dto:ApplicationDto dto;
         errors:TypeCastError err;
         dto, err = (dto:ApplicationDto)application;
+        system:println(dto);
         return dto;
     } else {
         return null;
@@ -224,6 +226,7 @@ function getFromPolicyCache (string id) (dto:PolicyDto) {
         dto:PolicyDto dto;
         errors:TypeCastError err;
         dto, err = (dto:PolicyDto)policy;
+        system:println(dto);
         return dto;
     } else {
         return null;
