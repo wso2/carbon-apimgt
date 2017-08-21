@@ -138,7 +138,7 @@ class AuthManager {
         /* TODO: IMHO it's better to get this key (`wso2_user`) from configs */
     }
 
-    static getEnvironment() {
+    static getEnvironment(){
         let currentEnvironment = localStorage.getItem("currentEnv");
         return currentEnvironment;
     }
@@ -187,7 +187,7 @@ class AuthManager {
             user.scopes = response.data.scopes.split(" ");
             AuthManager.setUser(user);
 
-        }).catch(function (e) {
+        }).catch(function(e) {
             console.log(e); //
         });
         return promised_response;
