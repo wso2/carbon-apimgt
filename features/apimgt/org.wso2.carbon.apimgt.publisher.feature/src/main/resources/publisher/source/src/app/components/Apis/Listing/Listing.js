@@ -22,12 +22,19 @@ import qs from 'qs'
 import ApiThumb from './ApiThumb'
 import '../Apis.css'
 import API from '../../../data/api.js'
-import AuthManager from '../../../data/AuthManager'
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import {Link} from 'react-router-dom'
-import {Table, Popconfirm, Menu, Dropdown, Button, Row, Col, message} from 'antd';
-import {ScopeValidation,resourceMethod, resourcePath} from '../../../data/ScopeValidation';
+import {Table, Popconfirm, Menu, Dropdown, Row, Col, message} from 'antd';
+
+import Paper from 'material-ui/Paper';
+import Grid from 'material-ui/Grid';
+import Typography from 'material-ui/Typography';
+import Button from 'material-ui/Button';
+import GridIcon from 'material-ui-icons/GridOn';
+import ListIcon from 'material-ui-icons/List';
+
+
 
 const menu = (
     <Menu>
@@ -44,6 +51,7 @@ class Listing extends React.Component {
     constructor(props) {
         super(props);
         this.state = {listType: 'grid', apis: null};
+        this.handleApiDelete = this.handleApiDelete.bind(this);
     }
 
     componentDidMount() {
@@ -69,6 +77,32 @@ class Listing extends React.Component {
         this.setState({listType: value});
     }
 
+    handleApiDelete(api_uuid, name) {
+        const hideMessage = message.loading("Deleting the API ...",0);
+        const api = new API();
+        let promised_delete = api.deleteAPI(api_uuid);
+        promised_delete.then(
+            response => {
+                if (response.status !== 200) {
+                    console.log(response);
+                    message.error("Something went wrong while deleting the " + name + " API!");
+                    hideMessage();
+                    return;
+                }
+                message.success(name + " API deleted successfully!");
+                let api = this.state.apis;
+                for (let apiIndex in api.list) {
+                    if (api.list.hasOwnProperty(apiIndex) && api.list[apiIndex].id === api_uuid) {
+                        api.list.splice(apiIndex, 1);
+                        break;
+                    }
+                }
+                this.setState({active: false, apis: api});
+                hideMessage();
+            }
+        );
+    }
+
     render() {
         if (this.state.notFound) {
             return <ResourceNotFound/>
@@ -87,40 +121,72 @@ class Listing extends React.Component {
             title: 'Version',
             dataIndex: 'version',
             key: 'version',
+        }, {
+            title: 'Action',
+            key: 'action',
+            render: text => {
+                return (
+                    <Popconfirm title="Confirm delete?" onConfirm={() => this.handleApiDelete(text.id, text.name)}>
+                        <Button type="danger" icon="delete">Delete</Button>
+                    </Popconfirm>)
+            },
         }];
         return (
-            <div>
-                <div className="api-add-links">
-                    <ScopeValidation resourcePath={resourcePath.APIS} resourceMethod={resourceMethod.POST} >
-                        <Dropdown overlay={menu} placement="topRight">
-                            <Button shape="circle" icon="plus"/>
-                        </Dropdown>
-                    </ScopeValidation>
-                </div>
-                <div className="flex-container">
-                    <h2>All APIs</h2>
-                    <ButtonGroup className="api-type-selector">
-                        <Button type="default" icon="bars" onClick={() => this.setListType('list')}/>
-                        <Button type="default" icon="appstore" onClick={() => this.setListType('grid')}/>
-                    </ButtonGroup>
-                </div>
-                {
-                    this.state.apis ?
-                        this.state.listType === "list" ?
-                            <Row type="flex" justify="start">
-                                <Col span={24}>
-                                    <Table columns={columns} dataSource={this.state.apis.list} bordered
-                                           style={{margin: '10px'}}/>
-                                </Col>
-                            </Row>
-                            : <Row type="flex" justify="start">
-                            {this.state.apis.list.map((api, i) => {
-                                return <ApiThumb key={api.id} listType={this.state.listType} api={api}/>
-                            })}
-                        </Row>
-                        : <Loading/>
-                }
-            </div>
+                <Grid container>
+                    <Grid item xs={12}>
+                        <Paper>
+                            <Typography type="display2" gutterBottom
+                                        style={{fontWeight:"300",padding:"10px 0 0 30px",margin:"0px"
+                                            ,position:"relative"}}>
+                                All Apis
+                                <div style={{alignSelf:"flex-end", fontSize:"11px", margin:"auto", width: "200px",
+                                    display:"block", float:"right"}}>
+                                    <Button style={{padding:"0px", margin: "0px"}} color="primary" aria-label="add"  onClick={() => this.setListType('list')}
+                                            >
+                                        <ListIcon style={{width:"30px",height:"30px"}} />
+                                    </Button>
+                                    <Button style={{padding:"0px", margin: "0px"}} color="accent" aria-label="edit" onClick={() => this.setListType('grid')}
+                                            >
+                                        <GridIcon style={{width:"30px",height:"30px"}} />
+                                    </Button>
+                                </div>
+                            </Typography>
+                            <Typography type="caption" gutterBottom align="left"
+                                        style={{fontWeight:"300",padding:"10px 0 10px 30px",margin:"0px"}}>
+                                Listing all apis
+                            </Typography>
+
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={12} style={{marginLeft:"40px"}}>
+                            <div className="api-add-links">
+                                <Dropdown overlay={menu} placement="topRight">
+                                    <Button shape="circle" icon="plus"/>
+                                </Dropdown>
+                            </div>
+                            <div className="flex-container">
+
+                            </div>
+                            {
+                                this.state.apis ?
+                                    this.state.listType === "list" ?
+                                        <Row type="flex" justify="start">
+                                            <Col span={24}>
+                                                <Table columns={columns} dataSource={this.state.apis.list} bordered
+                                                       style={{margin: '10px'}}/>
+                                            </Col>
+                                        </Row>
+                                        : <Grid container>
+                                        {this.state.apis.list.map((api, i) => {
+                                            return <ApiThumb key={api.id} listType={this.state.listType} api={api}/>
+                                        })}
+                                    </Grid>
+                                    : <Loading/>
+                            }
+
+                    </Grid>
+                </Grid>
+
         );
     }
 }
