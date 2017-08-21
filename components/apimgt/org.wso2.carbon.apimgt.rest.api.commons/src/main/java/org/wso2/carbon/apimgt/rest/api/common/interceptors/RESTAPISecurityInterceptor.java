@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.api.RESTAPIAuthenticator;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
@@ -81,6 +82,27 @@ public class RESTAPISecurityInterceptor implements Interceptor {
         /* TODO: Following string contains check is done to avoid checking security headers in non API requests.
          * Consider this as a tempory fix until MSF4J support context based interceptor registration */
         String requestURI = request.getUri().toLowerCase(Locale.ENGLISH);
+
+        /*
+        * if request.method == option {
+        *   response.addHeader("allow-cross-origin", "*")
+        *   response.addHeader("allow-cross-origin-header")
+        *   response.addHeader("allow-cross-origin-method")
+        *   response
+        *   return false;
+        * */
+
+        response.setHeader("Access-Control-Allow-Origin",
+                "https://localhost:9292"); // TODo here the cross origin is alowed  .
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+        if (request.getHttpMethod().equals(APIConstants.HTTP_OPTIONS)) {
+
+            response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
+            response.setHeader("Access-Control-Allow-Headers", "Accept, Accept-Encoding, Accept-Language," +
+                    " authorization, Cache-Control, Connection, Cookie, Host, Pragma, Referer, User-Agent");
+            response.setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).send();
+            return false;
+        }
         if (!requestURI.contains("/api/am/")) {
             return true;
         }
