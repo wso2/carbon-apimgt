@@ -95,8 +95,7 @@ export default class LifeCycleUpdate extends Component {
                     <CheckboxGroup options={checkList} defaultValue={checkedItems} onChange={this.handleCheckItem}/>
                 }
                 <ScopeValidation resourcePath={resourcePath.API_CHANGE_LC} resourceMethod={resourceMethod.POST}>
-                <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.UPDATE}
-                                                     userPermissions={api.userPermissionsForApi}>
+                <ApiPermissionValidation userPermissions={api.userPermissionsForApi}>
                     <ButtonGroup style={{margin: "5px"}} onChange={this.updateLifeCycleState}>
                         {
                             is_workflow_pending ?

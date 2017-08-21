@@ -110,8 +110,7 @@ class Subscriptions extends Component {
             title: 'Access Control for',
             render: (a,b,c) => (
                     <div>
-                    <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.UPDATE}
-                                                                 userPermissions={this.state.api.userPermissionsForApi}>
+                    <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
                         <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.MANAGE_SUBSCRIPTION}
                                                                  userPermissions={this.state.api.userPermissionsForApi}>
                             <label htmlFor="production">Production </label>

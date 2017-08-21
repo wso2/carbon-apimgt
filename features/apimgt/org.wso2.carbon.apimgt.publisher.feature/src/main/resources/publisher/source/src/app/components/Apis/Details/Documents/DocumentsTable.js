@@ -105,13 +105,11 @@ class DocumentsTable extends Component {
             dataIndex: 'actions',
             key: 'actions',
             render: (text1, record) => (<div>
-                <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.UPDATE}
-                                                                 userPermissions={this.state.api.userPermissionsForApi}>
+                <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
                     <a href="#" onClick={() => this.props.onEditAPIDocument(record)}>Edit | </a>
                 </ApiPermissionValidation>
                 <a href="#" onClick={() => this.viewDocContentHandler(record)}>View | </a>
-                <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.UPDATE}
-                                                                 userPermissions={this.state.api.userPermissionsForApi}>
+                <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
                     <Popconfirm title="Are you sure you want to delete this document?"
                                 onConfirm={() => this.props.deleteDocHandler(record.documentId)}
                                 okText="Yes" cancelText="No">

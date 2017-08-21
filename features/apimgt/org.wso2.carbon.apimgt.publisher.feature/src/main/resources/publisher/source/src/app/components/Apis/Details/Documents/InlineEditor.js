@@ -132,8 +132,7 @@ class InlineEditor extends Component {
                             </Col>
                         </Row>
                         <Row gutter={1}>
-                            <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.UPDATE}
-                                                                 userPermissions={this.state.api.userPermissionsForApi}>
+                            <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
                             <Col span={2}>
                                     <Button type="primary"
                                             onClick={() => this.saveInlineDocContent(false)}>Save</Button>

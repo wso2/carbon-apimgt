@@ -252,8 +252,7 @@ class Resources extends React.Component{
                         }
                     )
                 }
-                <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.UPDATE}
-                                                     userPermissions={this.state.api.userPermissionsForApi}>
+                <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
                     <input type="button" onClick={this.updateResources} value="Save"/>
                 </ApiPermissionValidation>
 

@@ -456,8 +456,7 @@ class Permission extends Component {
                                     </Col>
                                 </Row>
                             </Card>
-                            <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.UPDATE}
-                                                                 userPermissions={this.state.api.userPermissionsForApi}>
+                            <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
                                 <Button loading={this.state.creating} type="primary"
                                         onClick={this.handleSubmit}>Update</Button>
                             </ApiPermissionValidation>

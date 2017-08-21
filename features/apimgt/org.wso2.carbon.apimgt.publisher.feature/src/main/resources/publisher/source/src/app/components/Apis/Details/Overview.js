@@ -129,8 +129,7 @@ class Overview extends Component {
             <Menu>
                 <Menu.Item>
                     <ScopeValidation resourceMethod={resourceMethod.PUT} resourcePath={resourcePath.SINGLE_API}>
-                        <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.UPDATE}
-                                     userPermissions={this.state.api.userPermissionsForApi}>
+                        <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
                             <Link to="">Edit</Link>
                         </ApiPermissionValidation>
                     </ScopeValidation>

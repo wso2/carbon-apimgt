@@ -216,8 +216,7 @@ class Endpoint extends Component {
                                            endpoint={this.state.sandboxEndpoint}
                                            match={this.props.match}/>
                 </Card>
-                <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.UPDATE}
-                                                     userPermissions={JSON.parse(this.state.api).userPermissionsForApi}>
+                <ApiPermissionValidation userPermissions={JSON.parse(this.state.api).userPermissionsForApi}>
                     <Button style={{margin: "5px"}} type="primary" onClick={() => this.updateEndpoints()}>Save</Button>
                 </ApiPermissionValidation>
             </div>

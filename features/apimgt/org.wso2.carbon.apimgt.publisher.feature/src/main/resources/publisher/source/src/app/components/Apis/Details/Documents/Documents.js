@@ -400,8 +400,7 @@ class Documents extends Component {
         }
         return (
             <div>
-                <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.UPDATE}
-                                                                 userPermissions={this.state.api.userPermissionsForApi}>
+                <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
                     <Button style={{marginBottom: 30}} onClick={this.addNewDocBtnListener}
                          type="primary">Add New Document</Button>
                 </ApiPermissionValidation>
