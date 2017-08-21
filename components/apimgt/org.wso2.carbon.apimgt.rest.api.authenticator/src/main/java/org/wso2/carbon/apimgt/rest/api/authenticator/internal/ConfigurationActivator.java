@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
@@ -16,6 +17,7 @@
  * under the License.
  */
 
+
 package org.wso2.carbon.apimgt.rest.api.authenticator.internal;
 
 import org.osgi.service.component.annotations.Component;
@@ -27,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
 /**
+
  * Class used to activate store configuration loading.
  */
 @Component(
@@ -35,6 +38,7 @@ import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 )
 public class ConfigurationActivator {
     private static final Logger log = LoggerFactory.getLogger(ConfigurationActivator.class);
+
 
     /**
      * Get the ConfigProvider service.
@@ -47,6 +51,7 @@ public class ConfigurationActivator {
             unbind = "unregisterConfigProvider")
     protected void registerConfigProvider(ConfigProvider configProvider) {
         ServiceReferenceHolder.getInstance().setConfigProvider(configProvider);
+
     }
 
     /**
@@ -55,6 +60,8 @@ public class ConfigurationActivator {
      * @param configProvider the ConfigProvider service that get unregistered.
      */
     protected void unregisterConfigProvider(ConfigProvider configProvider) {
+
        ServiceReferenceHolder.getInstance().setConfigProvider(null);
+
     }
 }
