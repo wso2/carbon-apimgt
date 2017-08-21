@@ -162,6 +162,10 @@ function authenticate (message m) (boolean, message) {
         system:println("Api key check...");
         string apiKey = apikeyHeader;
         subscriptionDto = holder:getFromSubscriptionCache(apiContext, version, apiKey);
+
+        system:println("subscriptionDto in Authentication.bal");
+        system:println(subscriptionDto);
+
         if (subscriptionDto != null) {
             boolean subscriptionBlocked = false;
             subscriptionBlocked, response = isSubscriptionBlocked(subscriptionDto, response, apiDto);

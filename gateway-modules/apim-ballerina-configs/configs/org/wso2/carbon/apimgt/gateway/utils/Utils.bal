@@ -340,6 +340,7 @@ function retrieveApplications () (boolean) {
     system:println("****************************************************************************************************************");
     return true;
 }
+
 function retrievePolicies () (boolean) {
     system:println("retrievePolicies() in Utils");
     string query = "/api/am/core/v1.0/policies";

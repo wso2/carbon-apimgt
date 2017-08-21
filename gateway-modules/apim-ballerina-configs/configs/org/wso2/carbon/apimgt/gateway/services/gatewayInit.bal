@@ -7,6 +7,7 @@ import org.wso2.carbon.apimgt.gateway.holders as holder;
 import ballerina.net.http;
 
 service<http> gatewayInitService {
+
     boolean isCacheInitialized = holder:initializeCache();
     boolean isMapsAdded = holder:addThrottleMaps();
     boolean isReady = initGateway();
