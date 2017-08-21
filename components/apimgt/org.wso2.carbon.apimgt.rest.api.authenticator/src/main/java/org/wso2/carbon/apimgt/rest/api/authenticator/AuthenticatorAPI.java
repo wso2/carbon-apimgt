@@ -309,14 +309,12 @@ public class AuthenticatorAPI implements Microservice {
                             .replaceAll("%3D", "="));
                     return Response.status(Response.Status.FOUND)
                             .header(HttpHeaders.LOCATION, redirectURI)
-                            .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext,
-                                    restAPIContextCookie)
+                            .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext, restAPIContextCookie)
                             .build();
                 } else {
                     return Response.status(Response.Status.FOUND)
                             .header(HttpHeaders.LOCATION, targetURIForRedirection).entity(authResponseBean)
-                            .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext,
-                                    restAPIContextCookie, authUserCookie)
+                            .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext, restAPIContextCookie, authUserCookie)
                             .build();
                 }
             }

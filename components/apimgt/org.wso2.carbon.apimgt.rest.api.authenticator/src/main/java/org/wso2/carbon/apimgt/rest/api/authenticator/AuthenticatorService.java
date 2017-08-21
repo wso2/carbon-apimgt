@@ -80,8 +80,7 @@ public class AuthenticatorService {
         grantTypes.add(KeyManagerConstants.PASSWORD_GRANT_TYPE);
         grantTypes.add(KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE);
         grantTypes.add(KeyManagerConstants.REFRESH_GRANT_TYPE);
-        APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance()
-                .getAPIMAppConfiguration();
+        APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance().getAPIMAppConfiguration();
         String callBackURL = appConfigs.getApimBaseUrl() + "login/callback/" + appName;
         // Get scopes of the application
         String scopes = getApplicationScopes(appName);
