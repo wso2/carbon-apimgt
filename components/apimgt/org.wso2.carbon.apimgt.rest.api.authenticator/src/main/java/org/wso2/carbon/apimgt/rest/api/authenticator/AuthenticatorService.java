@@ -81,7 +81,7 @@ public class AuthenticatorService {
         grantTypes.add(KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE);
         grantTypes.add(KeyManagerConstants.REFRESH_GRANT_TYPE);
         APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance().getAPIMAppConfiguration();
-        String callBackURL = appConfigs.getApimBaseUrl() + "login/callback/" + appName;
+        String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName;
         // Get scopes of the application
         String scopes = getApplicationScopes(appName);
         if (log.isDebugEnabled()) {
@@ -147,7 +147,7 @@ public class AuthenticatorService {
                 // Access token for authorization code grant type
                 APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance()
                         .getAPIMAppConfiguration();
-                String callBackURL = appConfigs.getApimBaseUrl() + "login/callback/" + appName;
+                String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName;
                 // Get the Authorization Code
                 if (requestURL.contains("code=")) {
                     String requestURLQueryParameters = requestURL.split("\\?")[1];
