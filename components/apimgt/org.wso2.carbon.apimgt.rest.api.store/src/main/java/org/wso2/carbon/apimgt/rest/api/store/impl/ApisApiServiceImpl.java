@@ -1,8 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -17,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -26,7 +23,6 @@ import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
-import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -69,7 +65,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdCommentsCommentIdDelete(String commentId, String apiId, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String existingFingerprint = apisApiIdCommentsCommentIdDeleteFingerprint(commentId, apiId, ifMatch,
@@ -105,7 +101,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdCommentsCommentIdGet(String commentId, String apiId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String existingFingerprint = apisApiIdCommentsCommentIdGetFingerprint(commentId, apiId, ifNoneMatch,
@@ -141,7 +137,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     public String apisApiIdCommentsCommentIdGetFingerprint(String commentId, String apiId, String ifNoneMatch,
             String ifModifiedSince, Request request) {
-        return getEtag(commentId);
+        return getEtag(commentId, request.getProperty("LOGGED_IN_USER").toString());
     }
 
     /**
@@ -157,7 +153,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     public String apisApiIdCommentsCommentIdPutFingerprint(String commentId, String apiId, CommentDTO body,
             String ifMatch, String ifUnmodifiedSince, Request request) {
-        return getEtag(commentId);
+        return getEtag(commentId, request.getProperty("LOGGED_IN_USER").toString());
     }
 
     /**
@@ -172,17 +168,18 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     public String apisApiIdCommentsCommentIdDeleteFingerprint(String commentId, String apiId, String ifMatch,
             String ifUnmodifiedSince, Request request) {
-        return getEtag(commentId);
+        return getEtag(commentId, request.getProperty("LOGGED_IN_USER").toString());
     }
 
     /**
      * Retrieves last updatedtime for a comment given the comment id
      *
      * @param commentId Comment ID
+     * @param loggedInUser
      * @return Last updated time
      */
-    private String getEtag(String commentId){
-        String username = RestApiUtil.getLoggedInUsername();
+    private String getEtag(String commentId, String loggedInUser){
+        String username = loggedInUser;
         try {
             String lastUpdatedTime = RestApiUtil.getConsumer(username).getLastUpdatedTimeOfComment(commentId);
             return ETagUtils.generateETag(lastUpdatedTime);
@@ -207,7 +204,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdCommentsGet(String apiId, Integer limit, Integer offset, Request request)
             throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             List<Comment> commentList = apiStore.getCommentsForApi(apiId);
@@ -236,7 +233,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdCommentsPost(String apiId, CommentDTO body, Request request)
             throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             Comment comment = CommentMappingUtil.fromDTOToComment(body, username);
@@ -248,7 +245,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                     RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId + RestApiConstants.SUBRESOURCE_PATH_COMMENTS
                             + "/" + createdCommentId);
 
-            String fingerprint = getEtag(comment.getUuid());
+            String fingerprint = getEtag(comment.getUuid(), request.getProperty("LOGGED_IN_USER").toString());
             return Response.status(Response.Status.CREATED).header(RestApiConstants.LOCATION_HEADER, location).header(HttpHeaders.ETAG,
                     "\"" + fingerprint + "\"").entity(createdCommentDTO)
                     .build();
@@ -282,7 +279,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdCommentsCommentIdPut(String commentId, String apiId, CommentDTO body,
             String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String existingFingerprint = apisApiIdCommentsCommentIdPutFingerprint(commentId, apiId, body, ifMatch,
@@ -297,7 +294,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             Comment updatedComment = apiStore.getCommentByUUID(commentId, apiId);
             CommentDTO updatedCommentDTO = CommentMappingUtil.fromCommentToDTO(updatedComment);
 
-            String newFingerprint = getEtag(commentId);
+            String newFingerprint = getEtag(commentId, request.getProperty("LOGGED_IN_USER").toString());
             return Response.ok().header(HttpHeaders.ETAG,
                     "\"" + newFingerprint + "\"").entity(updatedCommentDTO).build();
         } catch (APIManagementException e) {
@@ -326,7 +323,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId,
             String ifNoneMatch, String ifModifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String existingFingerprint = apisApiIdDocumentsDocumentIdContentGetFingerprint(apiId, documentId,
@@ -385,7 +382,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     public String apisApiIdDocumentsDocumentIdContentGetFingerprint(String apiId, String documentId, String ifNoneMatch,
             String ifModifiedSince, Request request) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestApiUtil.getConsumer(username)
                     .getLastUpdatedTimeOfDocumentContent(apiId, documentId);
@@ -415,7 +412,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
         DocumentDTO documentDTO = null;
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String existingFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId, ifNoneMatch,
@@ -454,7 +451,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     public String apisApiIdDocumentsDocumentIdGetFingerprint(String apiId, String documentId, String ifNoneMatch,
             String ifModifiedSince, Request request) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestApiUtil.getConsumer(username)
                     .getLastUpdatedTimeOfDocument(documentId);
@@ -486,7 +483,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         DocumentListDTO documentListDTO = null;
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             List<DocumentInfo> documentInfoResults = apiStore.getAllDocumentation(apiId, offset, limit);
@@ -520,7 +517,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
         APIDTO apiToReturn = null;
         try {
-            String username = RestApiUtil.getLoggedInUsername();
+            String username = RestApiUtil.getLoggedInUsername(request);
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String existingFingerprint = apisApiIdGetFingerprint(apiId, ifNoneMatch, ifModifiedSince, request);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
@@ -562,7 +559,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdRatingsGet(String apiId, Integer limit, Integer offset, Request request)
             throws NotFoundException {
         double avgRating;
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         int userRatingValue = 0;
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
@@ -589,7 +586,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdRatingsRatingIdGet(String apiId, String ratingId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             Rating rating = apiStore.getRatingByUUID(apiId, ratingId);
@@ -619,7 +616,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdUserRatingPut(String apiId, RatingDTO body, Request request)
             throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         String ratingId;
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
@@ -675,7 +672,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdWsdlGet(String apiId, String labelName, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         WSDLArchiveInfo wsdlArchiveInfo = null;
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
@@ -750,7 +747,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     public String apisApiIdGetFingerprint(String apiId, String ifNoneMatch, String ifModifiedSince,
                                           Request request) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestApiUtil.getConsumer(username).getLastUpdatedTimeOfAPI(apiId);
             return ETagUtils.generateETag(lastUpdatedTime);
@@ -776,7 +773,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch, String ifModifiedSince,
             Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String existingFingerprint = apisApiIdSwaggerGetFingerprint(apiId, ifNoneMatch, ifModifiedSince, request);
@@ -809,7 +806,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     public String apisApiIdSwaggerGetFingerprint(String apiId, String ifNoneMatch, String ifModifiedSince,
             Request request) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestApiUtil.getConsumer(username).getLastUpdatedTimeOfAPI(apiId);
             return ETagUtils.generateETag(lastUpdatedTime);
@@ -837,7 +834,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         List<API> apisResult = null;
         APIListDTO apiListDTO = null;
         try {
-            String username = RestApiUtil.getLoggedInUsername();
+            String username = RestApiUtil.getLoggedInUsername(request);
             APIStore apiStore = RestApiUtil.getConsumer(username);
             apisResult = apiStore.searchAPIs(query, offset, limit);
             // convert API

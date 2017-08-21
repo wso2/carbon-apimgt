@@ -48,7 +48,7 @@ public class ExportApiServiceImpl extends ExportApiService {
         String pathToExportDir = System.getProperty("java.io.tmpdir") + File.separator + "exported-api-archives-" +
                 UUID.randomUUID().toString();
         try {
-            publisher = RestAPIPublisherUtil.getApiPublisher(RestApiUtil.getLoggedInUsername());
+            publisher = RestAPIPublisherUtil.getApiPublisher(RestApiUtil.getLoggedInUsername(request));
             FileBasedApiImportExportManager importExportManager = new FileBasedApiImportExportManager(publisher,
                     pathToExportDir);
             apiDetails = importExportManager.getAPIDetails(limit, offset, query);

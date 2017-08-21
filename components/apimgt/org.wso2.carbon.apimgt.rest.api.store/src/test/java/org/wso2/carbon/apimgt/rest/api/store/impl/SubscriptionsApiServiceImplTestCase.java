@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.common.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.SubscriptionMappingUtil;
+import org.wso2.msf4j.Request;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -67,7 +68,8 @@ public class SubscriptionsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = TestUtil.getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         List<Subscription> subscriptionList = new ArrayList<>();
         subscriptionList.add(SampleTestObjectCreator.createSubscription(subsID1));
@@ -76,7 +78,7 @@ public class SubscriptionsApiServiceImplTestCase {
         Mockito.when(apiStore.getSubscriptionsByAPI(apiId)).thenReturn(subscriptionList);
 
         Response response = subscriptionsApiService.subscriptionsGet
-                (apiId, null, null, 0, 10, null, TestUtil.getRequest());
+                (apiId, null, null, 0, 10, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -93,7 +95,8 @@ public class SubscriptionsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = TestUtil.getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Application application = SampleTestObjectCreator.createDefaultApplication();
         List<Subscription> subscriptionList = new ArrayList<>();
@@ -105,7 +108,7 @@ public class SubscriptionsApiServiceImplTestCase {
                 .thenReturn(subscriptionList);
 
         Response response = subscriptionsApiService.subscriptionsGet
-                (null, applicationId, ApiType.STANDARD.toString(), 0, 10, null, TestUtil.getRequest());
+                (null, applicationId, ApiType.STANDARD.toString(), 0, 10, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -123,7 +126,8 @@ public class SubscriptionsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = TestUtil.getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Application application = SampleTestObjectCreator.createDefaultApplication();
         Endpoint api1SandBoxEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
@@ -140,7 +144,7 @@ public class SubscriptionsApiServiceImplTestCase {
                 SubscriptionMappingUtil.fromSubscriptionToDTO(SampleTestObjectCreator.createSubscription(subsID1));
 
         Response response = subscriptionsApiService.subscriptionsPost
-                (subscriptionDTO, TestUtil.getRequest());
+                (subscriptionDTO, request);
 
         Assert.assertEquals(404, response.getStatus());
     }
@@ -155,7 +159,8 @@ public class SubscriptionsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = TestUtil.getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
         workflowResponse.setWorkflowStatus(WorkflowStatus.APPROVED);
@@ -163,7 +168,7 @@ public class SubscriptionsApiServiceImplTestCase {
         Mockito.when(apiStore.deleteAPISubscription(subsID1)).thenReturn(workflowResponse);
 
         Response response = subscriptionsApiService.subscriptionsSubscriptionIdDelete
-                (subsID1, null, null, TestUtil.getRequest());
+                (subsID1, null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -178,14 +183,15 @@ public class SubscriptionsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = TestUtil.getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Subscription subscription = SampleTestObjectCreator.createSubscription(subsID1);
 
         Mockito.when(apiStore.getSubscriptionByUUID(subsID1)).thenReturn(subscription);
 
         Response response = subscriptionsApiService.subscriptionsSubscriptionIdGet
-                (subsID1, null, null, TestUtil.getRequest());
+                (subsID1, null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
