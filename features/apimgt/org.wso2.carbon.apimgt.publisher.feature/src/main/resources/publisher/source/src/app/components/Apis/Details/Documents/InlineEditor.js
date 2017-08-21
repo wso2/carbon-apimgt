@@ -23,7 +23,7 @@ import {Button, Row, Col, message} from 'antd';
 import "../../../../../../../node_modules/react-quill/dist/quill.snow.css"
 import API from '../../../../data/api.js'
 import Loading from '../../../Base/Loading/Loading'
-import {ApiPermissionValidation, permissionType} from '../../../../data/ApiPermissionValidation'
+import ApiPermissionValidation from '../../../../data/ApiPermissionValidation'
 
 class InlineEditor extends Component {
     constructor(props) {
@@ -132,7 +132,7 @@ class InlineEditor extends Component {
                             </Col>
                         </Row>
                         <Row gutter={1}>
-                            <ApiPermissionValidation checkingPermissionType={permissionType.UPDATE}
+                            <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.UPDATE}
                                                                  userPermissions={this.state.api.userPermissionsForApi}>
                             <Col span={2}>
                                     <Button type="primary"

@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import {Table} from 'antd';
 import API from '../../../../data/api'
 import Loading from '../../../Base/Loading/Loading'
-import {ApiPermissionValidation, permissionType} from '../../../../data/ApiPermissionValidation'
+import ApiPermissionValidation from '../../../../data/ApiPermissionValidation'
 
 class Subscriptions extends Component {
     constructor(props)   {
@@ -110,9 +110,9 @@ class Subscriptions extends Component {
             title: 'Access Control for',
             render: (a,b,c) => (
                     <div>
-                    <ApiPermissionValidation checkingPermissionType={permissionType.UPDATE}
+                    <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.UPDATE}
                                                                  userPermissions={this.state.api.userPermissionsForApi}>
-                        <ApiPermissionValidation checkingPermissionType={permissionType.MANAGE_SUBSCRIPTION}
+                        <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.MANAGE_SUBSCRIPTION}
                                                                  userPermissions={this.state.api.userPermissionsForApi}>
                             <label htmlFor="production">Production </label>
                             <input type="checkbox" checked={a.subscriptionStatus === "PROD_ONLY_BLOCKED" ||

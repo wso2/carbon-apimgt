@@ -22,7 +22,7 @@ import { Row, Col } from 'antd';
 import Api from '../../../../data/api'
 import Resource from './Resource'
 import Loading from '../../../Base/Loading/Loading'
-import {ApiPermissionValidation, permissionType} from '../../../../data/ApiPermissionValidation'
+import ApiPermissionValidation from '../../../../data/ApiPermissionValidation'
 
 const CheckboxGroup = Checkbox.Group;
 
@@ -252,7 +252,7 @@ class Resources extends React.Component{
                         }
                     )
                 }
-                <ApiPermissionValidation checkingPermissionType={permissionType.UPDATE}
+                <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.UPDATE}
                                                      userPermissions={this.state.api.userPermissionsForApi}>
                     <input type="button" onClick={this.updateResources} value="Save"/>
                 </ApiPermissionValidation>

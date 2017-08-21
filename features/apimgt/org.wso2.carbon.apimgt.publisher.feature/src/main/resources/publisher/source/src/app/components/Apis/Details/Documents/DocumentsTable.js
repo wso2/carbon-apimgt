@@ -21,7 +21,7 @@ import {Table, Popconfirm} from 'antd';
 import InlineEditor from "./InlineEditor";
 import API from '../../../../data/api.js'
 import Loading from '../../../Base/Loading/Loading'
-import {ApiPermissionValidation, permissionType} from '../../../../data/ApiPermissionValidation'
+import ApiPermissionValidation from '../../../../data/ApiPermissionValidation'
 
 class DocumentsTable extends Component {
     constructor(props) {
@@ -105,12 +105,12 @@ class DocumentsTable extends Component {
             dataIndex: 'actions',
             key: 'actions',
             render: (text1, record) => (<div>
-                <ApiPermissionValidation checkingPermissionType={permissionType.UPDATE}
+                <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.UPDATE}
                                                                  userPermissions={this.state.api.userPermissionsForApi}>
                     <a href="#" onClick={() => this.props.onEditAPIDocument(record)}>Edit | </a>
                 </ApiPermissionValidation>
                 <a href="#" onClick={() => this.viewDocContentHandler(record)}>View | </a>
-                <ApiPermissionValidation checkingPermissionType={permissionType.UPDATE}
+                <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.UPDATE}
                                                                  userPermissions={this.state.api.userPermissionsForApi}>
                     <Popconfirm title="Are you sure you want to delete this document?"
                                 onConfirm={() => this.props.deleteDocHandler(record.documentId)}

@@ -40,7 +40,7 @@ const FormItem = Form.Item;
 import Api from '../../../data/api'
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
-import {ApiPermissionValidation, permissionType} from '../../../data/ApiPermissionValidation'
+import ApiPermissionValidation from '../../../data/ApiPermissionValidation'
 import {Input} from 'antd';
 import {Checkbox} from 'antd';
 import {Table, Icon} from 'antd';
@@ -203,16 +203,16 @@ class Permission extends Component {
             var isManageSubscription = permissionSubJson['isManageSubscription'];
             var permissionArray = [];
             if (isRead) {
-                permissionArray.push(permissionType.READ);
+                permissionArray.push(ApiPermissionValidation.permissionType.READ);
             }
             if (isUpdate) {
-                permissionArray.push(permissionType.UPDATE);
+                permissionArray.push(ApiPermissionValidation.permissionType.UPDATE);
             }
             if (isDelete) {
-                permissionArray.push(permissionType.DELETE);
+                permissionArray.push(ApiPermissionValidation.permissionType.DELETE);
             }
             if (isManageSubscription) {
-                permissionArray.push(permissionType.MANAGE_SUBSCRIPTION);
+                permissionArray.push(ApiPermissionValidation.permissionType.MANAGE_SUBSCRIPTION);
             }
             groupPermissions['groupId'] = roleName;
             groupPermissions['permission'] = permissionArray;
@@ -246,16 +246,16 @@ class Permission extends Component {
 
                 var groupPermissions = {};
 
-                if(permissionArray.includes(permissionType.READ)) {
+                if(permissionArray.includes(ApiPermissionValidation.permissionType.READ)) {
                    isRead = true;
                 }
-                if (permissionArray.includes(permissionType.UPDATE)){
+                if (permissionArray.includes(ApiPermissionValidation.permissionType.UPDATE)){
                    isUpdate = true;
                 }
-                if (permissionArray.includes(permissionType.DELETE)) {
+                if (permissionArray.includes(ApiPermissionValidation.permissionType.DELETE)) {
                    isDelete = true;
                 }
-                if (permissionArray.includes(permissionType.MANAGE_SUBSCRIPTION)) {
+                if (permissionArray.includes(ApiPermissionValidation.permissionType.MANAGE_SUBSCRIPTION)) {
                    isManageSubscription = true;
                 }
                 groupPermissions['key'] = roleName;
@@ -286,23 +286,26 @@ class Permission extends Component {
             title: 'Read',
             dataIndex: 'isRead',
             key: 'isRead',
-            render: isChecked => <Checkbox checked={isChecked} name="read" value={permissionType.READ}></Checkbox>
+            render: isChecked => <Checkbox checked={isChecked} name="read"
+                                                         value={ApiPermissionValidation.permissionType.READ}></Checkbox>
         }, {
             title: 'Update',
             dataIndex: 'isUpdate',
             key: 'isUpdate',
-            render: isChecked => <Checkbox checked={isChecked} name="update" value={permissionType.UPDATE}></Checkbox>
+            render: isChecked => <Checkbox checked={isChecked} name="update"
+                                                       value={ApiPermissionValidation.permissionType.UPDATE}></Checkbox>
         }, {
             title: 'Delete',
             dataIndex: 'isDelete',
             key: 'isDelete',
-            render: isChecked => <Checkbox checked={isChecked} name="delete" value={permissionType.DELETE}></Checkbox>
+            render: isChecked => <Checkbox checked={isChecked} name="delete"
+                                                       value={ApiPermissionValidation.permissionType.DELETE}></Checkbox>
         }, {
             title: 'Manage Subscriptions',
             dataIndex: 'isManageSubscription',
             key: 'isManageSubscription',
             render: isChecked => <Checkbox checked={isChecked} name="manage_subscription"
-                                                                 value={permissionType.MANAGE_SUBSCRIPTION}></Checkbox>
+                                          value={ApiPermissionValidation.permissionType.MANAGE_SUBSCRIPTION}></Checkbox>
         }, {
             title: 'Action',
             key: 'action',
@@ -388,24 +391,24 @@ class Permission extends Component {
                                                                                 onChange={this.handleChangeRoleField}/>
                                             </Col>
                                             <Col span={2} style={{margin: "10px"}}>
-                                                <Checkbox name="readField" value={permissionType.READ}
+                                                <Checkbox name="readField" value={ApiPermissionValidation.permissionType.READ}
                                                   checked={this.state.readField} onChange={this.handleChangeReadField}>
                                                                                                         Read </Checkbox>
                                             </Col>
                                             <Col span={2} style={{margin: "10px"}}>
-                                                <Checkbox name="updateField" value={permissionType.UPDATE}
+                                                <Checkbox name="updateField" value={ApiPermissionValidation.permissionType.UPDATE}
                                                checked={this.state.updateField} onChange={this.handleChangeUpdateField}>
                                                                                                       Update </Checkbox>
                                             </Col>
                                             <Col span={2} style={{margin: "10px"}}>
-                                                <Checkbox name="deleteField" value={permissionType.DELETE}
+                                                <Checkbox name="deleteField" value={ApiPermissionValidation.permissionType.DELETE}
                                                checked={this.state.deleteField} onChange={this.handleChangeDeleteField}>
                                                                                                       Delete </Checkbox>
                                             </Col>
                                             <Col span={5} style={{margin: "10px"}}>
                                                 <Checkbox name="manageSubField"
-                                          value={permissionType.MANAGE_SUBSCRIPTION} checked={this.state.manageSubField}
-                                                                             onChange={this.handleChangeManageSubField}>
+                                          value={ApiPermissionValidation.permissionType.MANAGE_SUBSCRIPTION}
+                                         checked={this.state.manageSubField} onChange={this.handleChangeManageSubField}>
                                                 Manage Subscriptions </Checkbox>
                                             </Col>
                                             <Col span={1} style={{margin: "10px"}}>
@@ -453,7 +456,7 @@ class Permission extends Component {
                                     </Col>
                                 </Row>
                             </Card>
-                            <ApiPermissionValidation checkingPermissionType={permissionType.UPDATE}
+                            <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.UPDATE}
                                                                  userPermissions={this.state.api.userPermissionsForApi}>
                                 <Button loading={this.state.creating} type="primary"
                                         onClick={this.handleSubmit}>Update</Button>

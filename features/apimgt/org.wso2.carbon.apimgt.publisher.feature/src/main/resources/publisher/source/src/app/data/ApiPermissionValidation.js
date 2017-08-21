@@ -19,13 +19,6 @@
 
 import React from 'react';
 
-const permissionType = {
-    READ : "READ",
-    UPDATE : "UPDATE",
-    DELETE : "DELETE",
-    MANAGE_SUBSCRIPTION : "MANAGE_SUBSCRIPTION"
-}
-
 class ApiPermissionValidation extends React.Component {
     constructor(props){
         super(props);
@@ -43,4 +36,11 @@ class ApiPermissionValidation extends React.Component {
     }
 }
 
-module.exports = {ApiPermissionValidation, permissionType};
+ApiPermissionValidation.permissionType = {
+                                             READ : "READ",
+                                             UPDATE : "UPDATE",
+                                             DELETE : "DELETE",
+                                             MANAGE_SUBSCRIPTION : "MANAGE_SUBSCRIPTION"
+                                         };
+
+export default ApiPermissionValidation;

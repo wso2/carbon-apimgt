@@ -22,7 +22,7 @@ import {Button, message} from 'antd';
 import DocumentsTable from './DocumentsTable';
 import NewDocDiv from './NewDocDiv';
 import Loading from '../../../Base/Loading/Loading'
-import {ApiPermissionValidation, permissionType} from '../../../../data/ApiPermissionValidation'
+import ApiPermissionValidation from '../../../../data/ApiPermissionValidation'
 
 /*
  Documents tab related React components.
@@ -400,7 +400,7 @@ class Documents extends Component {
         }
         return (
             <div>
-                <ApiPermissionValidation checkingPermissionType={permissionType.UPDATE}
+                <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.UPDATE}
                                                                  userPermissions={this.state.api.userPermissionsForApi}>
                     <Button style={{marginBottom: 30}} onClick={this.addNewDocBtnListener}
                          type="primary">Add New Document</Button>

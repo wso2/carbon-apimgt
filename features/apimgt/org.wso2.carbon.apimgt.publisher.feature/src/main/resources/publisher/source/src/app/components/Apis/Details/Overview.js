@@ -26,7 +26,7 @@ import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import Api from '../../../data/api'
 import {Redirect} from 'react-router-dom'
 import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation'
-import {ApiPermissionValidation, permissionType} from '../../../data/ApiPermissionValidation'
+import ApiPermissionValidation from '../../../data/ApiPermissionValidation'
 
 class Overview extends Component {
     constructor(props) {
@@ -129,7 +129,7 @@ class Overview extends Component {
             <Menu>
                 <Menu.Item>
                     <ScopeValidation resourceMethod={resourceMethod.PUT} resourcePath={resourcePath.SINGLE_API}>
-                        <ApiPermissionValidation checkingPermissionType={permissionType.UPDATE}
+                        <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.UPDATE}
                                      userPermissions={this.state.api.userPermissionsForApi}>
                             <Link to="">Edit</Link>
                         </ApiPermissionValidation>
@@ -137,7 +137,7 @@ class Overview extends Component {
                 </Menu.Item>
                 <Menu.Item>
                     <ScopeValidation resourceMethod={resourceMethod.DELETE} resourcePath={resourcePath.SINGLE_API}>
-                        <ApiPermissionValidation checkingPermissionType={permissionType.DELETE}
+                        <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.DELETE}
                                                         userPermissions={this.state.api.userPermissionsForApi}>
                             <Popconfirm title="Do you want to delete this api?" onConfirm={this.handleApiDelete}>
                                <Link to="">Delete</Link>
