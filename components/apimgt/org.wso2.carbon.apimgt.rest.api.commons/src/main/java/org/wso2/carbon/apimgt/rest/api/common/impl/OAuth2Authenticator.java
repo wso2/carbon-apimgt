@@ -75,8 +75,18 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
     public boolean authenticate(Request request, Response responder, ServiceMethodInfo serviceMethodInfo)
             throws APIMgtSecurityException {
         Map map = ServiceReferenceHolder.getInstance().getAPIMConfiguration(); // added for the working purposes
-        System.out.print(map); // added for the working purposes
-        String environmentName = (String) map.get("environmentName");
+        String environmentName;
+        if (map != null) {
+
+            if (map.get("environmentName") != null) {
+                environmentName = (String) map.get("environmentName");
+            } else {
+                environmentName = "default";
+            }
+
+        } else {
+            environmentName = "default";
+        }
         ErrorHandler errorHandler = null;
         boolean isTokenValid = false;
         Headers headers = request.getHeaders();
