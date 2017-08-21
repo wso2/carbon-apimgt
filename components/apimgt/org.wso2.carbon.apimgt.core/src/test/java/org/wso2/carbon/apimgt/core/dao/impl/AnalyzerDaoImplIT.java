@@ -24,6 +24,9 @@ import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 import java.sql.Timestamp;
 import java.util.List;
 
+/**
+ * AnalyzerDaoImpl Test cases.
+ */
 public class AnalyzerDaoImplIT extends DAOIntegrationTestBase {
 
     @Test

@@ -21,11 +21,12 @@ import org.wso2.carbon.apimgt.core.models.analytics.APIInfo;
 import org.wso2.carbon.apimgt.core.models.analytics.APISubscriptionCount;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionCount;
+import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionInfo;
 
 import java.util.List;
 
 /**
- * Provides access to API Analytics data layer
+ * Provides access to API Analytics data layer.
  */
 public interface AnalyticsDAO {
 
@@ -80,9 +81,22 @@ public interface AnalyticsDAO {
      *
      * @param createdBy     Filter for api createdBy
      * @param fromTimestamp Filter for from timestamp
+     * @param toTimestamp   Filter for to timestamp
      * @return valid {@link SubscriptionCount} List or null
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     List<SubscriptionCount> getSubscriptionCount(String createdBy, String fromTimestamp,
                                                  String toTimestamp) throws APIMgtDAOException;
+
+    /**
+     * Retrieves Subscriptions info created over time.
+     *
+     * @param createdBy     Filter for api createdBy
+     * @param fromTimestamp Filter for from timestamp
+     * @param toTimestamp   Filter for to timestamp
+     * @return valid {@link SubscriptionInfo} List or null
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    List<SubscriptionInfo> getSubscriptionInfo(String createdBy, String fromTimestamp,
+                                               String toTimestamp) throws APIMgtDAOException;
 }

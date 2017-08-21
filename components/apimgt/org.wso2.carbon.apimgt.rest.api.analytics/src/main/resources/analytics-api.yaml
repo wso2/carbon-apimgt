@@ -58,8 +58,8 @@ securityDefinitions:
     flow: password
     tokenUrl: https://localhost:9443/token
     scopes:
-      apim:api_view: View API
-      apim:api_create: Create API
+      apim:application_graphs: View Graphs Releated to application
+      apim:api_graphs: View Graphs Releated to API
       apim:api_update: Update API
       apim:api_delete: Delete API
       apim:apidef_update: Update API Definition
@@ -275,12 +275,12 @@ paths:
             The requested media type is not supported
 
 #-----------------------------------------------------
-#  Retrieve Subscriptions created over time details
+#  Retrieve Subscriptions information
 #-----------------------------------------------------
 
   /subscription/subscription_info:
     get:
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/analytics/v1.0/subscription/subscriptions_created_over_time?from=2017-05-30%2012:32:41.972&to=2017-07-30%202:32:41.972&created_by=admin&subscribed_to=TestAPI"
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/analytics/v1.0/subscription/subscription_info?from=2017-05-30%2012:32:41.972&to=2017-07-30%202:32:41.972&created_by=admin&subscribed_to=TestAPI"
       x-wso2-request: |
         GET https://127.0.0.1:9443/api/am/analytics/v1.0/api/apis_created_over_time
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -308,7 +308,7 @@ paths:
                 The content type of the body.
               type: string
           schema:
-            $ref: '#/definitions/SubscriptionCountList'
+            $ref: '#/definitions/SubscriptionInfoList'
         406:
           description: |
             Not Acceptable.
@@ -512,7 +512,7 @@ definitions:
           $ref: '#/definitions/APIInfo'
 
 #-----------------------------------------------------
-# The API Subscription resource
+# The API Subscription Count resource
 #-----------------------------------------------------
   APISubscriptionCount:
     title: APISubscription object with subscription details.
@@ -578,11 +578,12 @@ definitions:
         format: int64
         description: |
           Number of subscriptions created
+
 #-----------------------------------------------------
-# The APISubscriptionList resource
+# The SubscriptionCountList resource
 #-----------------------------------------------------
   SubscriptionCountList:
-    title: SubscriptionCountList List
+    title: SubscriptionCount List
     properties:
       count:
         type: integer
@@ -602,3 +603,72 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/SubscriptionCount'
+
+#-----------------------------------------------------
+# The SubscriptionInfo resource
+#-----------------------------------------------------
+  SubscriptionInfo:
+    title: Subscription Information
+    properties:
+      id:
+        type: string
+        example: 01234567-0123-0123-0123-012345678901
+      name:
+        type: string
+        description: |
+          API Name
+        example: CalculatorAPI
+      version:
+        type: string
+        description: |
+          API version
+        example: 1.0.0
+      appName:
+        description: |
+          Name of the subscribed Application
+        type: string
+        example: Calculator Application
+      description:
+        type: string
+        description: |
+          Application desciprtion
+        example: A calculator Application that supports basic operations
+      createdTime:
+        type: integer
+        format: int64
+        description: |
+          Timestamp
+      subscriptionTier:
+        description: |
+          Subscribed application tier
+        type: string
+        example: Gold
+      subscriptionStatus:
+        description: |
+          Subscription Status
+        type: string
+        example: ACTIVE
+#-----------------------------------------------------
+# The SubscriptionInfoList resource
+#-----------------------------------------------------
+  SubscriptionInfoList:
+    title: SubscriptionInfoList List
+    properties:
+      count:
+        type: integer
+        description: |
+          Subscription Information
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified.
+          Empty if no more resources are to be returned.
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified.
+          Empty if current subset is the first subset returned.
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/SubscriptionInfo'

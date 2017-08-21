@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.core.models.analytics.APIInfo;
 import org.wso2.carbon.apimgt.core.models.analytics.APISubscriptionCount;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionCount;
+import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionInfo;
 
 import java.util.List;
 
@@ -107,6 +108,27 @@ public class AnalyzerImpl implements Analyzer {
             throw new AnalyticsException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return subscriptionCountList;
+    }
+
+    /**
+     * Retrieves Subscriptions info details.
+     *
+     * @param createdBy Filter for api createdBy
+     * @param fromTime  Filter for from timestamp
+     * @param toTime    Filter for to timestamp
+     * @return valid {@link SubscriptionInfo} List or null
+     * @throws APIManagementException if error occurs while accessing data layer
+     */
+    @Override
+    public List<SubscriptionInfo> getSubscriptionInfo(String createdBy, String fromTime, String toTime) throws APIManagementException {
+        List<SubscriptionInfo> subscriptionInfoList;
+        try {
+            subscriptionInfoList = getAnalyticsDAO().getSubscriptionInfo(createdBy, fromTime, toTime);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while fetching Subscription information";
+            throw new AnalyticsException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
+        return subscriptionInfoList;
     }
 
     public AnalyticsDAO getAnalyticsDAO() {

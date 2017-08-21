@@ -8,6 +8,7 @@ import org.wso2.msf4j.formparam.FileInfo;
 import org.wso2.msf4j.Request;
 
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionCountListDTO;
+import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionInfoListDTO;
 
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.analytics.NotFoundException;
@@ -18,6 +19,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 public abstract class SubscriptionApiService {
+    public abstract Response subscriptionSubscriptionInfoGet(String from
+ ,String to
+ ,String apiFilter
+ , Request request) throws NotFoundException;
     public abstract Response subscriptionSubscriptionsCreatedOverTimeGet(String from
  ,String to
  ,String apiFilter

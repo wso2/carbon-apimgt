@@ -21,6 +21,8 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.api.Analyzer;
 import org.wso2.carbon.apimgt.core.dao.AnalyticsDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.models.analytics.APICount;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 
 import java.util.ArrayList;
@@ -53,6 +55,37 @@ public class AnalyzerImplTestCase {
                 .getApplicationCount(USER_NAME, null, FROM_TIMESTAMP, TO_TIMESTAMP);
         Assert.assertNotNull(applicationCountListFromDB);
         verify(analyticsDAO, Mockito.times(1)).getApplicationCount(USER_NAME, null, FROM_TIMESTAMP, TO_TIMESTAMP);
+    }
+
+    @Test(description = "get application count test")
+    public void testGetApplicationCountFaulty() throws APIManagementException {
+        AnalyticsDAO analyticsDAO = Mockito.mock(AnalyticsDAO.class);
+        Analyzer analyzer = getAnalyzerImpl(analyticsDAO);
+        try {
+            List<ApplicationCount> applicationCountListFromDB = analyzer
+                    .getApplicationCount(USER_NAME, null, FROM_TIMESTAMP, TO_TIMESTAMP);
+            Assert.assertFalse(true);
+        } catch (APIMgtDAOException e){
+            Assert.assertTrue(true);
+        }
+
+    }
+
+    @Test(description = "get API count test")
+    public void testGetAPICount() throws APIManagementException {
+        AnalyticsDAO analyticsDAO = Mockito.mock(AnalyticsDAO.class);
+        APICount apiCount1 = new APICount();
+        APICount apiCount2 = new APICount();
+        List<APICount> apiCountList = new ArrayList<>();
+        apiCountList.add(apiCount1);
+        apiCountList.add(apiCount2);
+        Analyzer analyzer = getAnalyzerImpl(analyticsDAO);
+        when(analyticsDAO.getAPICount(USER_NAME, FROM_TIMESTAMP, TO_TIMESTAMP))
+                .thenReturn(apiCountList);
+        List<APICount> apiCountListFromDB = analyzer
+                .getAPICount(USER_NAME, FROM_TIMESTAMP, TO_TIMESTAMP);
+        Assert.assertNotNull(apiCountListFromDB);
+        verify(analyticsDAO, Mockito.times(1)).getAPICount(USER_NAME, FROM_TIMESTAMP, TO_TIMESTAMP);
     }
 
     private AnalyzerImpl getAnalyzerImpl(AnalyticsDAO analyticsDAO) {

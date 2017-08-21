@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.core.models.analytics.APIInfo;
 import org.wso2.carbon.apimgt.core.models.analytics.APISubscriptionCount;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionCount;
+import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.sql.Connection;
@@ -68,7 +69,7 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
             SimpleDateFormat dateFormat = new SimpleDateFormat(APIMgtConstants.DATE_TIME_FORMAT);
             try {
                 Timestamp fromTime = new Timestamp(dateFormat.parse(fromTimestamp).getTime());
-                Timestamp toTime = new java.sql.Timestamp(dateFormat.parse(toTimestamp).getTime());
+                Timestamp toTime = new Timestamp(dateFormat.parse(toTimestamp).getTime());
                 statement.setTimestamp(1, fromTime);
                 statement.setTimestamp(2, toTime);
                 if (!("all").equals(createdBy)) {
@@ -227,9 +228,9 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
     /**
      * Retrieves Subscription count information.
      *
-     * @param subscriptionFilter     Filter for api subscriptionFilter
-     * @param fromTimestamp Filter for from timestamp
-     * @param toTimestamp   @return valid {@link SubscriptionCount} List or null
+     * @param subscriptionFilter Filter for api subscriptionFilter
+     * @param fromTimestamp      Filter for from timestamp
+     * @param toTimestamp        @return valid {@link SubscriptionCount} List or null
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
@@ -293,6 +294,86 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
         }
         return subscriptionCountList;
 
+    }
+
+    /**
+     * Retrieves Subscriptions info created over time.
+     *
+     * @param createdBy     Filter for api createdBy
+     * @param fromTimestamp Filter for from timestamp
+     * @param toTimestamp   Filter for to timestamp
+     * @return valid {@link SubscriptionInfo} List or null
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    @Override
+    public List<SubscriptionInfo> getSubscriptionInfo(String createdBy, String fromTimestamp, String toTimestamp) throws
+            APIMgtDAOException {
+        final String query;
+        if (("all").equals(createdBy)) {
+            query = "SELECT sub.UUID, api.NAME as API_NAME, api.VERSION as API_VERSION, app.NAME as APP_NAME, " +
+                    "app.DESCRIPTION, sub.CREATED_TIME , policy.DISPLAY_NAME , sub.SUB_STATUS " +
+                    "FROM AM_API api, AM_SUBSCRIPTION sub, AM_APPLICATION app, AM_SUBSCRIPTION_POLICY policy " +
+                    "WHERE api.UUID = sub.API_ID " +
+                    "AND (sub.CREATED_TIME BETWEEN ? AND ?) " +
+                    "AND sub.APPLICATION_ID = app.UUID " +
+                    "AND sub.TIER_ID = policy.UUID ";
+        } else {
+            query = "SELECT sub.UUID, api.NAME as API_NAME, api.VERSION as API_VERSION, app.NAME as APP_NAME, " +
+                    "app.DESCRIPTION, sub.CREATED_TIME , policy.DISPLAY_NAME , sub.SUB_STATUS " +
+                    "FROM AM_API api, AM_SUBSCRIPTION sub, AM_APPLICATION app, AM_SUBSCRIPTION_POLICY policy " +
+                    "WHERE (sub.CREATED_TIME BETWEEN ? AND ?) " +
+                    "AND api.UUID = sub.API_ID " +
+                    "AND sub.APPLICATION_ID = app.UUID " +
+                    "AND sub.TIER_ID = policy.UUID " +
+                    "AND sub.CREATED_BY = ?";
+        }
+
+        List<SubscriptionInfo> subscriptionInfoList = new ArrayList<>();
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat(APIMgtConstants.DATE_TIME_FORMAT);
+            try {
+                Timestamp fromTime = new Timestamp(dateFormat.parse(fromTimestamp).getTime());
+                Timestamp toTime = new java.sql.Timestamp(dateFormat.parse(toTimestamp).getTime());
+                statement.setTimestamp(1, fromTime);
+                statement.setTimestamp(2, toTime);
+                if (!("all").equals(createdBy)) {
+                    log.debug("Setting created by to query:" + createdBy);
+                    statement.setString(3, createdBy);
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("Executing query " + query);
+                }
+                statement.execute();
+                try (ResultSet rs = statement.getResultSet()) {
+                    while (rs.next()) {
+                        SubscriptionInfo subscriptionInfo = new SubscriptionInfo();
+                        subscriptionInfo.setId(rs.getString("UUID"));
+                        subscriptionInfo.setName(rs.getString("API_NAME"));
+                        subscriptionInfo.setVersion(rs.getString("VERSION"));
+                        subscriptionInfo.setAppName(rs.getString("APP_NAME"));
+                        subscriptionInfo.setDescription(rs.getString("DESCRIPTION"));
+                        subscriptionInfo.setCreatedTime(rs.getTimestamp("CREATED_TIME").getTime());
+                        subscriptionInfo.setSubscriptionStatus(rs.getString("SUB_STATUS"));
+                        subscriptionInfo.setSubscriptionTier(rs.getString("DISPLAY_NAME"));
+                        subscriptionInfoList.add(subscriptionInfo);
+                    }
+                }
+            } catch (SQLException e) {
+                String errorMsg = "Error while retrieving subscription information from db";
+                log.error(errorMsg, e);
+                throw new APIMgtDAOException(errorMsg, e);
+            } catch (ParseException e) {
+                String errorMsg = "Error while parsing timestamp while retrieving subscription information from db";
+                log.error(errorMsg, e);
+                throw new APIMgtDAOException(errorMsg, e);
+            }
+        } catch (SQLException e) {
+            String errorMsg = "Error while creating database connection/prepared-statement";
+            log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
+        }
+        return subscriptionInfoList;
     }
 
     @Override

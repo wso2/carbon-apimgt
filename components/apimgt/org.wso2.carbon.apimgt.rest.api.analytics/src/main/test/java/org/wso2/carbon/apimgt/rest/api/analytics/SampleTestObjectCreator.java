@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.core.models.analytics.APIInfo;
 import org.wso2.carbon.apimgt.core.models.analytics.APISubscriptionCount;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionCount;
+import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionInfo;
 
 import java.util.Random;
 import java.util.UUID;
@@ -47,7 +48,7 @@ public class SampleTestObjectCreator {
     }
 
     /**
-     * Create Random APICount Object
+     * Create Random APICount Object.
      *
      * @return Random APICount Object
      */
@@ -102,5 +103,23 @@ public class SampleTestObjectCreator {
         subscriptionCount.setCount(new Random().nextInt());
         subscriptionCount.setTimestamp(ThreadLocalRandom.current().nextLong());
         return subscriptionCount;
+    }
+
+    /**
+     * Create Random SubscriptionInfo Object.
+     *
+     * @return Random SubscriptionInfo Object
+     */
+    public static SubscriptionInfo createRandomSubscriptionInfoObject() {
+        SubscriptionInfo subscriptionInfo = new SubscriptionInfo();
+        subscriptionInfo.setId(UUID.randomUUID().toString());
+        subscriptionInfo.setSubscriptionTier(UUID.randomUUID().toString());
+        subscriptionInfo.setSubscriptionStatus(UUID.randomUUID().toString());
+        subscriptionInfo.setVersion(UUID.randomUUID().toString());
+        subscriptionInfo.setName(UUID.randomUUID().toString());
+        subscriptionInfo.setCreatedTime(ThreadLocalRandom.current().nextLong());
+        subscriptionInfo.setDescription(UUID.randomUUID().toString());
+        subscriptionInfo.setAppName(UUID.randomUUID().toString());
+        return subscriptionInfo;
     }
 }

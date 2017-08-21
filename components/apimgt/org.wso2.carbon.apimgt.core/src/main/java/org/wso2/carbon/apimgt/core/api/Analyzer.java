@@ -21,6 +21,7 @@ import org.wso2.carbon.apimgt.core.models.analytics.APIInfo;
 import org.wso2.carbon.apimgt.core.models.analytics.APISubscriptionCount;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionCount;
+import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionInfo;
 
 import java.util.List;
 
@@ -29,15 +30,72 @@ import java.util.List;
  */
 public interface Analyzer {
 
+    /**
+     * Retrieves application counts created overtime information.
+     *
+     * @param createdBy    Filter for create user
+     * @param subscribedTo Filter for subscribed APIs
+     * @param fromTime     Filter for from timestamp
+     * @param toTime       Filter for to timestamp
+     * @return valid {@link ApplicationCount} List or null
+     * @throws APIManagementException if error occurs while accessing data
+     */
     List<ApplicationCount> getApplicationCount(String createdBy, String subscribedTo, String fromTime, String toTime)
             throws APIManagementException;
 
+    /**
+     * Retrieves APIs information.
+     *
+     * @param createdBy Filter for create user
+     * @param fromTime  Filter for from timestamp
+     * @param toTime    Filter for to timestamp
+     * @return valid {@link APIInfo} List or null
+     * @throws APIManagementException if error occurs while accessing data layer
+     */
     List<APIInfo> getAPIInfo(String createdBy, String fromTime, String toTime) throws APIManagementException;
 
+    /**
+     * Retrieves API counts created overtime information.
+     *
+     * @param createdBy Filter for create user
+     * @param fromTime  Filter for from timestamp
+     * @param toTime    Filter for to timestamp
+     * @return valid {@link APICount} List or null
+     * @throws APIManagementException if error occurs while accessing data layer
+     */
     List<APICount> getAPICount(String createdBy, String fromTime, String toTime) throws APIManagementException;
 
+    /**
+     * Retrieves subscription count information against an API.
+     *
+     * @param createdBy Filter for created user
+     * @return valid {@link APISubscriptionCount} List or null
+     * @throws APIManagementException if error occurs while accessing data layer
+     */
     List<APISubscriptionCount> getAPISubscriptionCount(String createdBy) throws APIManagementException;
 
+    /**
+     * Retrieves Subscriptions count created over time.
+     *
+     * @param createdBy Filter for api createdBy
+     * @param fromTime  Filter for from timestamp
+     * @param toTime    Filter for to timestamp
+     * @return valid {@link SubscriptionCount} List or null
+     * @throws APIManagementException if error occurs while accessing data layer
+     */
     List<SubscriptionCount> getSubscriptionCount(String createdBy, String fromTime, String toTime)
             throws APIManagementException;
+
+    /**
+     * Retrieves Subscriptions info details.
+     *
+     * @param createdBy Filter for api createdBy
+     * @param fromTime  Filter for from timestamp
+     * @param toTime    Filter for to timestamp
+     * @return valid {@link SubscriptionCount} List or null
+     * @throws APIManagementException if error occurs while accessing data layer
+     */
+    List<SubscriptionInfo> getSubscriptionInfo(String createdBy, String fromTime, String toTime)
+            throws APIManagementException;
+
 }

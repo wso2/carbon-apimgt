@@ -20,6 +20,7 @@ import org.wso2.carbon.apimgt.core.models.analytics.APIInfo;
 import org.wso2.carbon.apimgt.core.models.analytics.APISubscriptionCount;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionCount;
+import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionInfo;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.APICountDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.APICountListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.APIInfoDTO;
@@ -30,6 +31,8 @@ import org.wso2.carbon.apimgt.rest.api.analytics.dto.ApplicationCountDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.ApplicationCountListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionCountDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionCountListDTO;
+import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionInfoListDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,7 +102,7 @@ public class AnalyticsMappingUtil {
      * @return corresponding APISubscriptionCountListDTO object
      */
     public static APISubscriptionCountListDTO fromAPISubscriptionCountListToDTO(List<APISubscriptionCount>
-                                                                                       apiSubscriptionCountList) {
+                                                                                        apiSubscriptionCountList) {
         APISubscriptionCountListDTO apiSubscriptionListDTO = new APISubscriptionCountListDTO();
         List<APISubscriptionCountDTO> apiSubscriptionDTOList = new ArrayList<>();
         apiSubscriptionListDTO.setCount(apiSubscriptionCountList.size());
@@ -134,6 +137,27 @@ public class AnalyticsMappingUtil {
             subscriptionCountDTOList.add(subscriptionCountDTO);
         }
         subscriptionCountListDTO.setList(subscriptionCountDTOList);
+        return subscriptionCountListDTO;
+    }
+
+    public static SubscriptionInfoListDTO fromSubscriptionInfoListToDTO(List<SubscriptionInfo>
+                                                                                subscriptionInfoList) {
+        SubscriptionInfoListDTO subscriptionCountListDTO = new SubscriptionInfoListDTO();
+        List<SubscriptionInfoDTO> subscriptionInfoDTOList = new ArrayList<>();
+        subscriptionCountListDTO.setCount(subscriptionInfoList.size());
+        for (SubscriptionInfo subscriptionInfo : subscriptionInfoList) {
+            SubscriptionInfoDTO subscriptionInfoDTO = new SubscriptionInfoDTO();
+            subscriptionInfoDTO.setId(subscriptionInfo.getId());
+            subscriptionInfoDTO.setName(subscriptionInfo.getName());
+            subscriptionInfoDTO.setVersion(subscriptionInfo.getVersion());
+            subscriptionInfoDTO.setAppName(subscriptionInfo.getAppName());
+            subscriptionInfoDTO.setDescription(subscriptionInfo.getDescription());
+            subscriptionInfoDTO.setCreatedTime(subscriptionInfo.getCreatedTime());
+            subscriptionInfoDTO.setSubscriptionStatus(subscriptionInfo.getSubscriptionStatus());
+            subscriptionInfoDTO.setSubscriptionTier(subscriptionInfo.getSubscriptionTier());
+            subscriptionInfoDTOList.add(subscriptionInfoDTO);
+        }
+        subscriptionCountListDTO.setList(subscriptionInfoDTOList);
         return subscriptionCountListDTO;
     }
 

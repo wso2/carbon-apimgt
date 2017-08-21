@@ -89,8 +89,7 @@ public class ApiApi implements Microservice  {
     @Path("/subscriber_count_by_apis")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Retrieve Subscriber count by APIs ", notes = "Get subscriber count " +
-            "by APIs from summarized data. ", response = APISubscriptionCountListDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Retrieve Subscriber count by APIs ", notes = "Get subscriber count by APIs from summarized data. ", response = APISubscriptionCountListDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
         })

@@ -26,12 +26,14 @@ import org.wso2.carbon.apimgt.core.models.analytics.APIInfo;
 import org.wso2.carbon.apimgt.core.models.analytics.APISubscriptionCount;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionCount;
+import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionInfo;
 import org.wso2.carbon.apimgt.rest.api.analytics.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.APICountListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.APIInfoListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.APISubscriptionCountListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.ApplicationCountListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionCountListDTO;
+import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionInfoListDTO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,7 +100,7 @@ public class AnalyticsMappingUtilTestCase {
     }
 
     @Test
-    public void fromAPISubscriptionCountListToDTO() {
+    public void fromAPISubscriptionCountListToDTOTest() {
         List<APISubscriptionCount> apiSubscriptionCountList = new ArrayList<>();
         apiSubscriptionCountList.add(SampleTestObjectCreator.createRandomAPISubscriptionCountObject());
         apiSubscriptionCountList.add(SampleTestObjectCreator.createRandomAPISubscriptionCountObject());
@@ -118,7 +120,7 @@ public class AnalyticsMappingUtilTestCase {
     }
 
     @Test
-    public void fromSubscriptionCountListToDTO() {
+    public void fromSubscriptionCountListToDTOTest() {
         List<SubscriptionCount> subscriptionCountList = new ArrayList<>();
         subscriptionCountList.add(SampleTestObjectCreator.createRandomSubscriptionCountObject());
         subscriptionCountList.add(SampleTestObjectCreator.createRandomSubscriptionCountObject());
@@ -133,6 +135,35 @@ public class AnalyticsMappingUtilTestCase {
             Assert.assertEquals(Long.valueOf(subscriptionCountList.get(i).getTimestamp()),
                     Long.valueOf(subscriptionCountListToDTO.getList().get(i).getTime()));
         }
+    }
 
+    @Test
+    public void fromSubscriptionInfoListToDTOTest() {
+        List<SubscriptionInfo> subscriptionInfoList = new ArrayList<>();
+        subscriptionInfoList.add(SampleTestObjectCreator.createRandomSubscriptionInfoObject());
+        subscriptionInfoList.add(SampleTestObjectCreator.createRandomSubscriptionInfoObject());
+        subscriptionInfoList.add(SampleTestObjectCreator.createRandomSubscriptionInfoObject());
+        SubscriptionInfoListDTO subscriptionInfoListDTO = AnalyticsMappingUtil.
+                fromSubscriptionInfoListToDTO(subscriptionInfoList);
+
+        Assert.assertEquals(subscriptionInfoList.size(), subscriptionInfoListDTO.getList().size());
+        for (int i = 0; i < subscriptionInfoList.size(); i++) {
+            Assert.assertEquals(subscriptionInfoList.get(i).getName(),
+                    subscriptionInfoListDTO.getList().get(i).getName());
+            Assert.assertEquals(subscriptionInfoList.get(i).getId(),
+                    subscriptionInfoListDTO.getList().get(i).getId());
+            Assert.assertEquals(subscriptionInfoList.get(i).getDescription(),
+                    subscriptionInfoListDTO.getList().get(i).getDescription());
+            Assert.assertEquals(subscriptionInfoList.get(i).getAppName(),
+                    subscriptionInfoListDTO.getList().get(i).getAppName());
+            Assert.assertEquals(subscriptionInfoList.get(i).getVersion(),
+                    subscriptionInfoListDTO.getList().get(i).getVersion());
+            Assert.assertEquals(subscriptionInfoList.get(i).getSubscriptionStatus(),
+                    subscriptionInfoListDTO.getList().get(i).getSubscriptionStatus());
+            Assert.assertEquals(subscriptionInfoList.get(i).getSubscriptionTier(),
+                    subscriptionInfoListDTO.getList().get(i).getSubscriptionTier());
+            Assert.assertEquals(Long.valueOf(subscriptionInfoList.get(i).getCreatedTime()),
+                    Long.valueOf(subscriptionInfoListDTO.getList().get(i).getCreatedTime()));
+        }
     }
 }
