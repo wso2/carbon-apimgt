@@ -49,6 +49,7 @@ class Login extends Component {
     handleSubmit = (e) => {
         e.preventDefault();
         this.setState({loading: true});
+<<<<<<< HEAD
         this.setState({validate: true});
         let username = this.state.username;
         let password = this.state.password;
@@ -65,6 +66,38 @@ class Login extends Component {
                 this.setState({message: error});
                 console.log(error);
                 this.setState({loading: false});
+=======
+        this.props.form.validateFields((err, values) => {
+            if (!err) {
+                let username = values.userName;
+                let password = values.password;
+                let currentEnvironment = values.currentEnv;
+                if(typeof currentEnvironment == "undefined"){
+                    localStorage.setItem("currentEnv","default");
+                }else{
+                    localStorage.setItem("currentEnv",currentEnvironment);
+                }
+
+                var detailedValue ;
+                for (let value of this.state.env) {
+
+                    if (currentEnvironment == value.env) {
+
+                        detailedValue = value;
+                        console.log(detailedValue);
+                    }
+                }
+                let loginPromise = this.authManager.authenticateUser(username, password,detailedValue);
+                loginPromise.then((response) => {
+                    this.setState({isLogin: AuthManager.getUser(), loading: false});
+                }).catch((error) => {
+                        message.error("error");
+                        console.log(error);
+                        this.setState({loading: false});
+                    }
+                );
+            } else {
+>>>>>>> fixed issues and tested the UI part
             }
         );
     }
@@ -77,6 +110,15 @@ class Login extends Component {
         if (params.referrer) {
             this.setState({referrer: params.referrer});
         }
+<<<<<<< HEAD
+=======
+        let envDetails = this.configManager;
+        envDetails.env_response.then((response) => {
+            let enviromentDetails = response.data.environments;
+            this.setState({env: enviromentDetails});
+        });
+
+>>>>>>> fixed issues and tested the UI part
     }
 
 
@@ -95,6 +137,7 @@ class Login extends Component {
         this.setState({ messageOpen: false });
     };
     render() {
+<<<<<<< HEAD
         if (!this.state.isLogin) { // If not logged in, go to login page
             return (
             <div className="login-flex-container">
@@ -156,6 +199,62 @@ class Login extends Component {
                 </div>
             </div>
 
+=======
+        const {getFieldDecorator} = this.props.form;
+        const makeEmptySuffix = this.state.userNameEmpty ? <Icon type="close-circle" onClick={this.emitEmpty}/> : '';
+        const environmentLength = this.state.env.length;
+
+
+
+        if (!this.state.isLogin) { // If not logged in, go to login page
+            return (
+                <Form onSubmit={this.handleSubmit} className="login-form">
+                    <FormItem>
+                        {getFieldDecorator('userName', {
+                            rules: [{required: true, message: 'Please input your username!'}],
+                        })(
+                            <Input prefix={<Icon type="user" style={{fontSize: 13}}/>} placeholder="Username"
+                                   suffix={makeEmptySuffix}/>
+                        )}
+                    </FormItem>
+                    <FormItem>
+                        {getFieldDecorator('password', {
+                            rules: [{required: true, message: 'Please input your Password!'}],
+                        })(
+                            <Input prefix={<Icon type="lock" style={{fontSize: 13}}/>} type="password"
+                                   placeholder="Password"/>
+                        )}
+                    </FormItem>
+                    { environmentLength > 1 &&
+                        <FormItem
+                            hasFeedback>
+                            {getFieldDecorator('currentEnv', {
+                                initialValue: this.state.env[0].env,
+                                rules: [
+                                    {required: true, message: 'Please select Environment ! '},
+                                ],
+                            })(
+                                (<Select placeholder="Select Environment ">
+                                    {this.state.env.map(environment => <Option
+                                        key={environment.env}>{environment.env}</Option>)}
+                                </Select>)
+                            )}
+                        </FormItem>
+                    }
+                    <FormItem>
+                        {getFieldDecorator('remember', {
+                            valuePropName: 'checked',
+                            initialValue: true,
+                        })(
+                            <Checkbox>Remember me</Checkbox>
+                        )}
+                        <Button loading={this.state.loading} type="primary" htmlType="submit"
+                                className="login-form-button">
+                            Log in
+                        </Button>
+                    </FormItem>
+                </Form>
+>>>>>>> fixed issues and tested the UI part
             );
         } else {// If logged in, redirect to /apis page
             return (

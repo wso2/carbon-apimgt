@@ -18,6 +18,7 @@
 "use strict";
 
 import Utils from './utils'
+import AuthManager from './AuthManager'
 /**
  * Represent an user logged in to the application, There will be allays one user per session and
  * this user details will be persist in browser localstorage.
@@ -55,7 +56,9 @@ export default class User {
      * @returns {String|null}
      */
     getPartialToken() {
-        return Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1);
+        let evs = AuthManager.getEnvironment();
+        console.log(evs)
+        return Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1 + "_" + evs);
     }
 
     /**
@@ -65,8 +68,10 @@ export default class User {
      * @param path Path which need to be set to cookie
      */
     setPartialToken(newToken, validityPeriod, path) {
-        Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1);
-        Utils.setCookie(User.CONST.WSO2_AM_TOKEN_1, newToken, validityPeriod, path);
+        let currentenv = AuthManager.getEnvironment();
+        console.log(currentenv);
+        Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1 );
+        Utils.setCookie(User.CONST.WSO2_AM_TOKEN_1 + "_" + currentenv, newToken, validityPeriod, path);
     }
 
     /**
