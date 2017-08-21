@@ -39,15 +39,31 @@ public class BrokerConfigurations {
         return jmsConnectionConfiguration;
     }
 
+    public void setJmsConnectionConfiguration(JMSConnectionConfiguration jmsConnectionConfiguration) {
+        this.jmsConnectionConfiguration = jmsConnectionConfiguration;
+    }
+
     public String getStoreTopic() {
         return storeTopic;
+    }
+
+    public void setStoreTopic(String storeTopic) {
+        this.storeTopic = storeTopic;
     }
 
     public String getPublisherTopic() {
         return publisherTopic;
     }
 
+    public void setPublisherTopic(String publisherTopic) {
+        this.publisherTopic = publisherTopic;
+    }
+
     public String getThrottleTopic() {
         return throttleTopic;
+    }
+
+    public void setThrottleTopic(String throttleTopic) {
+        this.throttleTopic = throttleTopic;
     }
 }

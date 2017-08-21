@@ -1,0 +1,94 @@
+@App:name('composite_fault_event_pre_process')
+
+@source(type='wso2event', @map(type='wso2event'))
+Define stream CompositeFaultStream (
+api STRING,
+context STRING,
+version STRING,
+publisher STRING,
+subscription_policy STRING,
+uri_template STRING,
+method STRING,
+consumer_key STRING,
+application_name STRING,
+application_id STRING,
+application_owner STRING,
+user_id STRING,
+subscriber STRING,
+request_count INT,
+request_event_time LONG,
+gateway_domain STRING,
+gateway_ip STRING,
+is_throttled BOOL,
+throttled_reason STRING,
+throttled_policy STRING,
+client_ip STRING,
+user_agent STRING,
+host_name STRING,
+fault_count INT,
+fault_event_time LONG,
+fault_reason STRING
+);
+
+@sink(type='inMemory', topic='apim.analytics.request', @map(type='passThrough'))
+Define stream RequestStream (
+api STRING,
+context STRING,
+version STRING,
+publisher STRING,
+subscription_policy STRING,
+uri_template STRING,
+method STRING,
+consumer_key STRING,
+application_name STRING,
+application_id STRING,
+application_owner STRING,
+user_id STRING,
+subscriber STRING,
+request_count INT,
+request_event_time LONG,
+gateway_domain STRING,
+gateway_ip STRING,
+is_throttled BOOL,
+throttled_reason STRING,
+throttled_policy STRING,
+client_ip STRING,
+user_agent STRING,
+host_name STRING
+);
+
+@sink(type='inMemory', topic='apim.analytics.fault', @map(type='passThrough'))
+Define stream FaultStream (
+api STRING,
+context STRING,
+version STRING,
+publisher STRING,
+subscription_policy STRING,
+uri_template STRING,
+method STRING,
+consumer_key STRING,
+application_name STRING,
+application_id STRING,
+application_owner STRING,
+user_id STRING,
+subscriber STRING,
+fault_count INT,
+fault_event_time LONG,
+gateway_domain STRING,
+gateway_ip STRING,
+fault_reason STRING,
+host_name STRING
+);
+
+from CompositeFaultStream select
+api ,context ,version ,publisher ,subscription_policy ,uri_template ,method ,consumer_key ,application_name ,
+application_id ,application_owner ,user_id ,subscriber ,request_count ,request_event_time ,gateway_domain ,gateway_ip ,
+is_throttled ,throttled_reason ,throttled_policy ,client_ip ,user_agent ,host_name
+insert into RequestStream;
+
+from CompositeFaultStream select
+api ,context ,version ,publisher ,subscription_policy ,uri_template ,method ,consumer_key ,application_name ,
+application_id ,application_owner ,user_id ,subscriber ,fault_count ,fault_event_time ,gateway_domain ,gateway_ip ,
+fault_reason ,host_name
+insert into FaultStream;
+

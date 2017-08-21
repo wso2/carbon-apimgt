@@ -18,6 +18,7 @@
 "use strict";
 
 import Utils from './utils'
+import AuthManager from './AuthManager'
 /**
  * Represent an user logged in to the application, There will be allays one user per session and
  * this user details will be persist in browser localstorage.
@@ -55,18 +56,24 @@ export default class User {
      * @returns {String|null}
      */
     getPartialToken() {
-        return Utils.getCookie("WSO2_AM_TOKEN_1");
+        let evs = AuthManager.getEnvironment();
+        console.log(evs)
+        return Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1 + "_" + evs);
     }
 
     /**
      * Store the JavaScript accessible access token segment in cookie storage
      * @param {String} newToken : Part of the access token which needs when accessing REST API
      * @param {Number} validityPeriod : Validity period of the cookie in seconds
+     * @param path Path which need to be set to cookie
      */
     setPartialToken(newToken, validityPeriod, path) {
-        Utils.delete_cookie('WSO2_AM_TOKEN_1');
-        Utils.setCookie('WSO2_AM_TOKEN_1', newToken, validityPeriod, path);
+        let currentenv = AuthManager.getEnvironment();
+        console.log(currentenv);
+        Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1 );
+        Utils.setCookie(User.CONST.WSO2_AM_TOKEN_1 + "_" + currentenv, newToken, validityPeriod, path);
     }
+
     /**
      *
      * @param type
@@ -105,4 +112,5 @@ export default class User {
     }
 }
 
+User.CONST = {WSO2_AM_TOKEN_MSF4J: "WSO2_AM_TOKEN_MSF4J", WSO2_AM_TOKEN_1: "WSO2_AM_TOKEN_1", LOCALSTORAGE_USER: "wso2_user"};
 User._instance = null; // A private class variable to preserve the single instance of a swaggerClient

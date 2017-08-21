@@ -17,16 +17,22 @@
  */
 'use strict';
 
-import React, {Component} from 'react'
+import React from 'react'
+import {Switch, Route} from 'react-router-dom'
 
-const Endpoints = (props) => {
+import EndpointsListing from './Listing'
+import EndpointDetails from './Details'
+import EndpointCreate from './Create'
+import {PageNotFound} from '../Base/Errors'
 
+const Endpoints = () => {
     return (
-        <div>
-            <h2>
-                Global Endpoints Page
-            </h2>
-        </div>
+        <Switch>
+            <Route exact path="/endpoints" component={EndpointsListing}/>
+            <Route path="/endpoints/create" component={EndpointCreate}/>
+            <Route path={"/endpoints/:endpoint_uuid/"} component={EndpointDetails}/>
+            <Route component={PageNotFound}/>
+        </Switch>
     );
 };
 

@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.api.RESTAPIAuthenticator;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
+import org.wso2.carbon.apimgt.rest.api.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.messaging.Headers;
 import org.wso2.msf4j.Request;
@@ -44,6 +45,7 @@ import org.wso2.msf4j.util.SystemVariableUtil;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -51,6 +53,7 @@ import java.util.Optional;
  */
 public class OAuth2Authenticator implements RESTAPIAuthenticator {
     private static final Logger log = LoggerFactory.getLogger(OAuth2Authenticator.class);
+    private static final String LOGGED_IN_USER = "LOGGED_IN_USER";
     private static String authServerURL;
 
     static {
@@ -71,11 +74,25 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
     @Override
     public boolean authenticate(Request request, Response responder, ServiceMethodInfo serviceMethodInfo)
             throws APIMgtSecurityException {
+        Map map = ServiceReferenceHolder.getInstance().getAPIMConfiguration(); // added for the working purposes
+        String environmentName;
+        if (map != null) {
+
+            if (map.get("environmentName") != null) {
+                environmentName = (String) map.get("environmentName");
+            } else {
+                environmentName = "default";
+            }
+
+        } else {
+            environmentName = "default";
+        }
         ErrorHandler errorHandler = null;
         boolean isTokenValid = false;
         Headers headers = request.getHeaders();
         if (headers != null && headers.contains(RestApiConstants.COOKIE_HEADER) && isCookieExists(headers,
-                APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J)) {
+                APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J + "_" + environmentName)) {
+            // TODO for now hard coded the environment need to append the environmrnt
             String accessToken = null;
             String cookies = headers.get(RestApiConstants.COOKIE_HEADER);
             String partialTokenFromCookie = extractPartialAccessTokenFromCookie(cookies);
@@ -87,11 +104,13 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
                         partialTokenFromCookie;
             }
             isTokenValid = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
+            request.setProperty(LOGGED_IN_USER, getEndUserName(accessToken));
         } else if (headers != null && headers.contains(RestApiConstants.AUTHORIZATION_HTTP_HEADER)) {
             String authHeader = headers.get(RestApiConstants.AUTHORIZATION_HTTP_HEADER);
             String accessToken = extractAccessToken(authHeader);
             if (accessToken != null) {
                 isTokenValid = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
+                request.setProperty(LOGGED_IN_USER, getEndUserName(accessToken));
             }
         } else {
             throw new APIMgtSecurityException("Missing Authorization header in the request.`",
@@ -109,6 +128,18 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
 
         //scope validation
         return validateScopes(request, serviceMethodInfo, accessTokenInfo.getScopes(), restAPIResource);
+    }
+
+    /**
+     * Extract the EndUsername from accessToken.
+     *
+     * @param accessToken the access token
+     * @return loggedInUser if the token is a valid token
+     */
+    private String getEndUserName(String accessToken) throws APIMgtSecurityException {
+        String loggedInUser;
+        loggedInUser = validateToken(accessToken).getEndUserName();
+        return loggedInUser.substring(0, loggedInUser.lastIndexOf("@"));
     }
 
     /**
@@ -148,11 +179,15 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
      * @throws APIMgtSecurityException if the Authorization header is invalid
      */
     private String extractPartialAccessTokenFromCookie(String cookie) {
+        Map map = ServiceReferenceHolder.getInstance().getAPIMConfiguration(); // added for the working purposes
+        System.out.print(map); // added for the working purposes
+        String environmentName = (String) map.get("environmentName");
         if (cookie != null) {
             cookie = cookie.trim();
             String[] cookies = cookie.split(";");
             String token2 = Arrays.stream(cookies)
-                    .filter(name -> name.contains(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J))
+                    .filter(name -> name.contains(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J + "_"
+                            + environmentName))
                     .findFirst().orElse("");
             String tokensArr[] = token2.split("=");
             if (tokensArr.length == 2) {

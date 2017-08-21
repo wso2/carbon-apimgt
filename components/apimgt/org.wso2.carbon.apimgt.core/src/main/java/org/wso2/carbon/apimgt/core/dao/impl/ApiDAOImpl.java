@@ -22,7 +22,6 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -48,6 +47,8 @@ import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.util.ThrottleConstants;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -82,14 +83,15 @@ public class ApiDAOImpl implements ApiDAO {
 
     private final ApiDAOVendorSpecificStatements sqlStatements;
 
-    private static final String API_SUMMARY_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, DESCRIPTION, " +
-            "CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS FROM AM_API";
+    private static final String API_SUMMARY_SELECT = "SELECT DISTINCT UUID, PROVIDER, NAME, CONTEXT, VERSION, " +
+            "DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS, SECURITY_SCHEME FROM AM_API";
 
     private static final String API_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, IS_DEFAULT_VERSION, " +
             "DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, TECHNICAL_OWNER, TECHNICAL_EMAIL, " +
             "BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, CURRENT_LC_STATUS, " +
             "CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, " +
-            "CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API, UPDATED_BY, LC_WORKFLOW_STATUS FROM AM_API";
+            "CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API, UPDATED_BY, LC_WORKFLOW_STATUS, " +
+            "SECURITY_SCHEME FROM AM_API";
 
     private static final String COMPOSITE_API_SUMMARY_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, " +
             "DESCRIPTION, LC_WORKFLOW_STATUS FROM AM_API";
@@ -99,7 +101,8 @@ public class ApiDAOImpl implements ApiDAO {
             "UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, " +
             "CURRENT_LC_STATUS, CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_ALLOW_HEADERS, " +
             "CORS_ALLOW_METHODS, API_TYPE_ID, CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API, " +
-            "UPDATED_BY, LC_WORKFLOW_STATUS) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+            "UPDATED_BY, LC_WORKFLOW_STATUS, SECURITY_SCHEME) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?," +
+            "?,?,?,?,?,?,?,?)";
 
     private static final String API_DELETE = "DELETE FROM AM_API WHERE UUID = ?";
 
@@ -241,14 +244,28 @@ public class ApiDAOImpl implements ApiDAO {
 
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<API> getAPIs() throws APIMgtDAOException {
-        final String query = API_SUMMARY_SELECT + " WHERE API_TYPE_ID = " +
-                "(SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)";
-
+    public List<API> getAPIs(Set<String> roles, String user) throws APIMgtDAOException {
+        int roleCount = roles.size();
+        final String query;
+        if (roleCount > 0) {
+            query = API_SUMMARY_SELECT + " LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON UUID = API_ID WHERE" +
+                    " API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = '" + ApiType.STANDARD.toString()
+                    + "') AND (((PERMISSION.GROUP_ID IN (" + DAOUtil.getParameterString(roles.size()) + "))" +
+                    " AND PERMISSION.PERMISSION >= 4) OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))";
+        } else {
+            query = API_SUMMARY_SELECT + " LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON UUID = API_ID WHERE" +
+                    " API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = '" + ApiType.STANDARD.toString()
+                    + "') AND ((PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))";
+        }
         try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, ApiType.STANDARD.toString());
-
+                PreparedStatement statement = connection.prepareStatement(query)) {
+            int index = 0;
+            if (roleCount > 0) {
+                for (String role : roles) {
+                    statement.setString(++index, role);
+                }
+            }
+            statement.setString(++index, user);
             return constructAPISummaryList(connection, statement);
         } catch (SQLException e) {
             throw new APIMgtDAOException(e);
@@ -584,11 +601,11 @@ public class ApiDAOImpl implements ApiDAO {
                 connection.setAutoCommit(false);
 
                 addCompositeAPIRelatedInformation(connection, statement, api);
-
+                String policyUuid = DAOFactory.getPolicyDAO()
+                        .getSubscriptionPolicy(ThrottleConstants.DEFAULT_SUB_POLICY_UNLIMITED).getUuid();
                 APISubscriptionDAOImpl apiSubscriptionDAO = (APISubscriptionDAOImpl) DAOFactory.getAPISubscriptionDAO();
-                apiSubscriptionDAO.createSubscription(api.getId(), api.getApplicationId(),
-                        UUID.randomUUID().toString(), PolicyDAOImpl.UNLIMITED_TIER,
-                        APIMgtConstants.SubscriptionStatus.ACTIVE, connection);
+                apiSubscriptionDAO.createSubscription(api.getId(), api.getApplicationId(), UUID.randomUUID().toString(),
+                        policyUuid, APIMgtConstants.SubscriptionStatus.ACTIVE, connection);
 
                 connection.commit();
             } catch (SQLException e) {
@@ -647,18 +664,13 @@ public class ApiDAOImpl implements ApiDAO {
         statement.setString(26, api.getCopiedFromApiId());
         statement.setString(27, api.getUpdatedBy());
         statement.setString(28, APILCWorkflowStatus.APPROVED.toString());
+        statement.setInt(29, api.getSecurityScheme());
         statement.execute();
 
         if (API.Visibility.RESTRICTED == api.getVisibility()) {
             addVisibleRole(connection, apiPrimaryKey, api.getVisibleRoles());
         }
 
-        String wsdlUri = api.getWsdlUri();
-
-        if (wsdlUri != null) {
-            ApiResourceDAO.addTextResource(connection, apiPrimaryKey, UUID.randomUUID().toString(),
-                    ResourceCategory.WSDL_URI, MediaType.TEXT_PLAIN, wsdlUri, api.getCreatedBy());
-        }
         addTagsMapping(connection, apiPrimaryKey, api.getTags());
         addLabelMapping(connection, apiPrimaryKey, api.getLabels());
         addGatewayConfig(connection, apiPrimaryKey, api.getGatewayConfig(), api.getCreatedBy());
@@ -758,19 +770,6 @@ public class ApiDAOImpl implements ApiDAO {
 
                 if (API.Visibility.RESTRICTED == substituteAPI.getVisibility()) {
                     addVisibleRole(connection, apiID, substituteAPI.getVisibleRoles());
-                }
-
-                String wsdlUri = substituteAPI.getWsdlUri();
-                if (StringUtils.isBlank(wsdlUri)) {
-                    ApiResourceDAO.deleteUniqueResourceForCategory(connection, apiID, ResourceCategory.WSDL_URI);
-                } else {
-                    if (!ApiResourceDAO.isResourceExistsForCategory(connection, apiID, ResourceCategory.WSDL_URI)) {
-                        ApiResourceDAO.addTextResource(connection, apiID, UUID.randomUUID().toString(),
-                                ResourceCategory.WSDL_URI, MediaType.TEXT_PLAIN, wsdlUri, substituteAPI.getCreatedBy());
-                    } else {
-                        ApiResourceDAO.updateTextValueForCategory(connection, apiID,
-                                ResourceCategory.WSDL_URI, wsdlUri, substituteAPI.getUpdatedBy());
-                    }
                 }
 
                 deleteAPIPermission(connection, apiID);
@@ -914,6 +913,130 @@ public class ApiDAOImpl implements ApiDAO {
             }
         } catch (SQLException e) {
             throw new APIMgtDAOException("Data access error when updating API definition", e);
+        }
+    }
+
+    @Override
+    public boolean isWSDLArchiveExists(String apiId) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            return ApiResourceDAO
+                    .isResourceExistsForCategory(connection, apiId, ResourceCategory.WSDL_ZIP);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    @Override
+    public boolean isWSDLExists(String apiId) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            return ApiResourceDAO.isResourceExistsForCategory(connection, apiId, ResourceCategory.WSDL_ZIP)
+                    || ApiResourceDAO.isResourceExistsForCategory(connection, apiId, ResourceCategory.WSDL_TEXT);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+    
+    @Override
+    public String getWSDL(String apiId) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+
+            InputStream wsdlContent = ApiResourceDAO
+                    .getBinaryValueForCategory(connection, apiId, ResourceCategory.WSDL_TEXT, ApiType.STANDARD);
+
+            if (wsdlContent != null) {
+                return IOUtils.toString(wsdlContent, StandardCharsets.UTF_8);
+            }
+        } catch (SQLException | IOException e) {
+            throw new APIMgtDAOException(e);
+        }
+        return null;
+    }
+
+    @Override
+    public InputStream getWSDLArchive(String apiId) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            return ApiResourceDAO.getBinaryValueForCategory(connection, apiId, ResourceCategory.WSDL_ZIP,
+                    ApiType.STANDARD);
+        } catch (SQLException | IOException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    @Override
+    public void addOrUpdateWSDL(String apiId, byte[] wsdlContent, String updatedBy) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                if (!ApiResourceDAO.isResourceExistsForCategory(connection, apiId,
+                        ResourceCategory.WSDL_TEXT)) {
+                    if (ApiResourceDAO.isResourceExistsForCategory(connection, apiId,
+                            ResourceCategory.WSDL_ZIP)) {
+                        removeWSDLArchiveOfAPI(apiId);
+                    }
+                    ApiResourceDAO.addBinaryResource(connection, apiId, UUID.randomUUID().toString(),
+                            ResourceCategory.WSDL_TEXT, MediaType.TEXT_XML,
+                            new ByteArrayInputStream(wsdlContent), updatedBy);
+                } else {
+                    ApiResourceDAO.updateBinaryResourceForCategory(connection, apiId,
+                            ResourceCategory.WSDL_TEXT, new ByteArrayInputStream(wsdlContent), updatedBy);
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    @Override
+    public void addOrUpdateWSDLArchive(String apiID, InputStream inputStream, String updatedBy)
+            throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            try {
+                connection.setAutoCommit(false);
+                if (!ApiResourceDAO.isResourceExistsForCategory(connection, apiID,
+                        ResourceCategory.WSDL_ZIP)) {
+                    if (ApiResourceDAO.isResourceExistsForCategory(connection, apiID,
+                            ResourceCategory.WSDL_TEXT)) {
+                        removeWSDL(apiID);
+                    }
+                    ApiResourceDAO.addBinaryResource(connection, apiID, UUID.randomUUID().toString(),
+                            ResourceCategory.WSDL_ZIP, MediaType.APPLICATION_OCTET_STREAM, inputStream, updatedBy);
+                } else {
+                    ApiResourceDAO.updateBinaryResourceForCategory(connection, apiID,
+                            ResourceCategory.WSDL_ZIP, inputStream, updatedBy);
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw new APIMgtDAOException(e);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    @Override
+    public void removeWSDL(String apiId) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            ApiResourceDAO.deleteUniqueResourceForCategory(connection, apiId, ResourceCategory.WSDL_TEXT);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+    }
+
+    @Override
+    public void removeWSDLArchiveOfAPI(String apiId) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            ApiResourceDAO.deleteUniqueResourceForCategory(connection, apiId, ResourceCategory.WSDL_ZIP);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
         }
     }
 
@@ -1604,7 +1727,7 @@ public class ApiDAOImpl implements ApiDAO {
     public InputStream getDocumentFileContent(String resourceID) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             return ApiResourceDAO.getBinaryResource(connection, resourceID);
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             throw new APIMgtDAOException(e);
         }
     }
@@ -1768,14 +1891,12 @@ public class ApiDAOImpl implements ApiDAO {
     public boolean isDocumentExist(String apiId, DocumentInfo documentInfo) throws APIMgtDAOException {
         final String query = "SELECT AM_API_DOC_META_DATA.UUID FROM AM_API_DOC_META_DATA INNER JOIN AM_API_RESOURCES " +
                 "ON AM_API_DOC_META_DATA.UUID=AM_API_RESOURCES.UUID WHERE AM_API_RESOURCES.API_ID = ? AND " +
-                "AM_API_DOC_META_DATA.NAME=? AND AM_API_DOC_META_DATA.TYPE= ? AND AM_API_DOC_META_DATA.SOURCE_TYPE= ?";
+                "AM_API_DOC_META_DATA.NAME=?";
         boolean exist = false;
         try (Connection connection = DAOUtil.getConnection(); PreparedStatement preparedStatement = connection
                 .prepareStatement(query)) {
             preparedStatement.setString(1, apiId);
             preparedStatement.setString(2, documentInfo.getName());
-            preparedStatement.setString(3, documentInfo.getType().toString());
-            preparedStatement.setString(4, documentInfo.getSourceType().toString());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     exist = true;
@@ -1824,8 +1945,9 @@ public class ApiDAOImpl implements ApiDAO {
                         cacheTimeout(rs.getInt("CACHE_TIMEOUT")).
                         tags(getTags(connection, apiPrimaryKey)).
                         labels(getLabelNames(connection, apiPrimaryKey)).
-                        wsdlUri(ApiResourceDAO.getTextValueForCategory(connection, apiPrimaryKey, ResourceCategory
-                                .WSDL_URI)).
+                        wsdlUri(ApiResourceDAO.
+                                getTextValueForCategory(connection, apiPrimaryKey,
+                                        ResourceCategory.WSDL_TEXT)).
                         transport(getTransports(connection, apiPrimaryKey)).
                         endpoint(getEndPointsForApi(connection, apiPrimaryKey)).
                         apiPermission(getPermissionsStringForApi(connection, apiPrimaryKey)).
@@ -1842,6 +1964,7 @@ public class ApiDAOImpl implements ApiDAO {
                         policies(getSubscripitonPolciesByAPIId(connection, apiPrimaryKey)).copiedFromApiId(rs.getString
                         ("COPIED_FROM_API")).
                         workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).
+                        securityScheme(rs.getInt("SECURITY_SCHEME")).
                         apiPolicy(getApiPolicyByAPIId(connection, apiPrimaryKey)).build();
             }
         }
@@ -1862,11 +1985,13 @@ public class ApiDAOImpl implements ApiDAO {
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
                         workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).
-                        permissionMap(getPermissionMapForApi(connection, apiPrimaryKey)).build();
+                        permissionMap(getPermissionMapForApi(connection, apiPrimaryKey)).
+                        securityScheme(rs.getInt("SECURITY_SCHEME")).build();
 
                 apiList.add(apiSummary);
             }
-        }
+
+       }
 
         return apiList;
     }
@@ -2118,11 +2243,15 @@ public class ApiDAOImpl implements ApiDAO {
                     for (Map.Entry<String, Integer> entry : map.entrySet()) {
                         statement.setString(1, apiId);
                         statement.setString(2, entry.getKey());
-                        //if permission value is UPDATE or DELETE we by default give them read permission also.
-                        if (entry.getValue() < APIMgtConstants.Permission.READ_PERMISSION && entry.getValue() != 0) {
-                            statement.setInt(3, entry.getValue() + APIMgtConstants.Permission.READ_PERMISSION);
+                        Integer permissionValue = entry.getValue();
+                        //if permission value is UPDATE, DELETE or MANAGE_SUBSCRIPTION_PERMISSION we by default give
+                        // them read permission also. Have used the bitwise AND operation to check whether the
+                        // permission value passed by the user contains the read permission.
+                        if (permissionValue > APIMgtConstants.Permission.READ_PERMISSION
+                                && (permissionValue & APIMgtConstants.Permission.READ_PERMISSION) == 0) {
+                            statement.setInt(3, permissionValue + APIMgtConstants.Permission.READ_PERMISSION);
                         } else {
-                            statement.setInt(3, entry.getValue());
+                            statement.setInt(3, permissionValue);
                         }
                         statement.addBatch();
                     }
@@ -2149,11 +2278,15 @@ public class ApiDAOImpl implements ApiDAO {
                     for (Map.Entry<String, Integer> entry : map.entrySet()) {
                         statement.setString(1, apiId);
                         statement.setString(2, entry.getKey());
-                        //if permission value is UPDATE or DELETE we by default give them read permission also.
-                        if (entry.getValue() < APIMgtConstants.Permission.READ_PERMISSION && entry.getValue() != 0) {
-                            statement.setInt(3, entry.getValue() + APIMgtConstants.Permission.READ_PERMISSION);
+                        Integer permissionValue = entry.getValue();
+                        //if permission value is UPDATE, DELETE or MANAGE_SUBSCRIPTION_PERMISSION we by default give
+                        // them read permission also. Have used the bitwise AND operation to check whether the
+                        // permission value passed by the user contains the read permission.
+                        if (permissionValue > APIMgtConstants.Permission.READ_PERMISSION
+                                && (permissionValue & APIMgtConstants.Permission.READ_PERMISSION) == 0) {
+                            statement.setInt(3, permissionValue + APIMgtConstants.Permission.READ_PERMISSION);
                         } else {
-                            statement.setInt(3, entry.getValue());
+                            statement.setInt(3, permissionValue);
                         }
                         statement.addBatch();
                     }
@@ -2499,7 +2632,8 @@ public class ApiDAOImpl implements ApiDAO {
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> getAPIsByStatus(List<String> gatewayLabels, String status) throws APIMgtDAOException {
         final String query = "SELECT DISTINCT UUID, PROVIDER, A.NAME, CONTEXT, VERSION, DESCRIPTION, CURRENT_LC_STATUS,"
-                + " LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS FROM AM_API A INNER JOIN AM_API_LABEL_MAPPING M ON A.UUID"
+                + " LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS, SECURITY_SCHEME FROM AM_API A INNER JOIN " +
+                " AM_API_LABEL_MAPPING M ON A.UUID"
                 + " = M.API_ID INNER JOIN AM_LABELS L ON L.LABEL_ID = M.LABEL_ID WHERE L.NAME IN (" + DAOUtil
                 .getParameterString(gatewayLabels.size()) + ") AND A.CURRENT_LC_STATUS=?";
 
@@ -2522,7 +2656,8 @@ public class ApiDAOImpl implements ApiDAO {
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> getAPIsByGatewayLabel(List<String> gatewayLabels) throws APIMgtDAOException {
         final String query = "SELECT DISTINCT UUID, PROVIDER, A.NAME, CONTEXT, VERSION, DESCRIPTION, CURRENT_LC_STATUS,"
-                + " LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS FROM AM_API A INNER JOIN AM_API_LABEL_MAPPING M ON A.UUID"
+                + " LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS, SECURITY_SCHEME FROM AM_API A INNER JOIN " +
+                "AM_API_LABEL_MAPPING M ON A.UUID"
                 + " = M.API_ID INNER JOIN AM_LABELS L ON L.LABEL_ID = M.LABEL_ID WHERE L.NAME IN (" + DAOUtil
                 .getParameterString(gatewayLabels.size()) + ")";
 
@@ -2709,37 +2844,20 @@ public class ApiDAOImpl implements ApiDAO {
      * @return permission string
      * @throws SQLException - if error occurred while getting permissionMap of API from DB
      */
-    private StringBuilder getPermissionsStringForApi(Connection connection, String apiId) throws SQLException {
+    private String getPermissionsStringForApi(Connection connection, String apiId) throws SQLException {
         JSONArray permissionArray = new JSONArray();
         Map<String, Integer> permissionMap = getPermissionMapForApi(connection, apiId);
         for (Map.Entry<String, Integer> entry : permissionMap.entrySet()) {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put(APIMgtConstants.Permission.GROUP_ID, entry.getKey());
-            ArrayList<String> array = new ArrayList<String>();
-            Integer permissionValue = entry.getValue();
-            if (permissionValue == APIMgtConstants.Permission.READ_PERMISSION) {
-                array.add(APIMgtConstants.Permission.READ);
-            } else if (permissionValue == (APIMgtConstants.Permission.READ_PERMISSION
-                    + APIMgtConstants.Permission.UPDATE_PERMISSION)) {
-                array.add(APIMgtConstants.Permission.READ);
-                array.add(APIMgtConstants.Permission.UPDATE);
-            } else if (permissionValue == (APIMgtConstants.Permission.READ_PERMISSION
-                    + APIMgtConstants.Permission.DELETE_PERMISSION)) {
-                array.add(APIMgtConstants.Permission.READ);
-                array.add(APIMgtConstants.Permission.DELETE);
-            } else if (permissionValue == (APIMgtConstants.Permission.READ_PERMISSION
-                    + APIMgtConstants.Permission.UPDATE_PERMISSION + APIMgtConstants.Permission.DELETE_PERMISSION)) {
-                array.add(APIMgtConstants.Permission.READ);
-                array.add(APIMgtConstants.Permission.UPDATE);
-                array.add(APIMgtConstants.Permission.DELETE);
-            }
-            jsonObject.put(APIMgtConstants.Permission.PERMISSION, array);
+            jsonObject.put(APIMgtConstants.Permission.PERMISSION,
+                    APIUtils.constructApiPermissionsListForValue(entry.getValue()));
             permissionArray.add(jsonObject);
         }
         if (!permissionArray.isEmpty()) {
-            return new StringBuilder(permissionArray.toString());
+            return permissionArray.toString();
         } else {
-            return new StringBuilder("");
+            return "";
         }
     }
 

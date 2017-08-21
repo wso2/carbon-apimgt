@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.gateway.event.holder;
 import org.wso2.carbon.apimgt.ballerina.publisher;
 import ballerina.lang.system;
 import org.wso2.carbon.apimgt.gateway.dto;
+import org.wso2.carbon.apimgt.gateway.holders;
 
 publisher:EventConnector analyticsPublisher;
 publisher:EventConnector throttlePublisher;
@@ -28,7 +29,7 @@ function getThrottlingPublisher () (publisher:EventConnector) {
     if (initThrottle != false) {
         return throttlePublisher;
     } else {
-        system:println("Initiating new event publisher for throttleing");
+        system:println("Initiating new event publisher for throttling");
         map config = getThrottleConfigMap();
         publisher:EventConnector pub = getPublisherInstance(config);
         initThrottle = true;
@@ -43,40 +44,35 @@ function getPublisherInstance (map propertiesMap) (publisher:EventConnector) {
 }
 
 function getAnalyticsConfigMap () (map) {
-    //dto:AnalyticsInfoDTO dto = getAnalyticsConf ();
+    dto:AnalyticsInfoDTO dto = holders:getAnalyticsConf ();
     map propertiesMap = {
-                        "type":"binary",
-                        "receiverURLSet":"tcp://localhost:9612",
-                        "authURLSet":"ssl://localhost:9712",
-                        "username":"admin",
-                        "password":"admin",
+                        "type": dto.type,
+                        "receiverURLSet": dto.serverURL,
+                        "authURLSet": dto.authServerURL,
+                        "username": dto.credentials.username,
+                        "password": dto.credentials.password,
                         "configPath":"bre/conf/data.agent.config.yaml"
                         };
     return propertiesMap;
 }
 
 function getThrottleConfigMap () (map) {
-    //dto:ThrottlingInfoDTO dto = getThrottleConf ();
+    dto:ThrottlingInfoDTO dto = holders:getThrottleConf ();
     map propertiesMap = {
-                        "type":"binary",
-                        "receiverURLSet":"tcp://localhost:9612",
-                        "authURLSet":"ssl://localhost:9712",
-                        "username":"admin",
-                        "password":"admin",
+                        "type": dto.type,
+                        "receiverURLSet": dto.serverURL,
+                        "authURLSet": dto.authServerURL,
+                        "username": dto.credentials.username,
+                        "password": dto.credentials.password,
                         "configPath":"bre/conf/data.agent.config.yaml"
                         };
     return propertiesMap;
 }
 
 function getAnalyticsConf () (dto:AnalyticsInfoDTO) {
-    //todo: set the config from the core config
-    dto:AnalyticsInfoDTO dto = {};
-    dto.enabled = true;
-    return dto;
+    return holders:getAnalyticsConf ();
 }
 
 function getThrottleConf () (dto:ThrottlingInfoDTO) {
-    //todo: set the config from the core config
-    dto:ThrottlingInfoDTO dto = {};
-    return dto;
+    return holders:getThrottleConf ();
 }

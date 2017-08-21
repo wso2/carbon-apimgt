@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.SubscriptionThrottlePolicyDTO;
@@ -36,7 +35,6 @@ import org.wso2.carbon.apimgt.rest.api.admin.exceptions.UnsupportedThrottleLimit
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +54,7 @@ public class SubscriptionThrottlePolicyMappingUtil {
      *
      * @param subscriptionPolicies Array of Subscription Policies
      * @return A List DTO of converted Subscription Policies
-     * @throws SubscriptionThrottlePolicyException
+     * @throws SubscriptionThrottlePolicyException - If error occurs
      */
     public static SubscriptionThrottlePolicyListDTO fromSubscriptionPolicyArrayToListDTO(
             List<SubscriptionPolicy> subscriptionPolicies) throws SubscriptionThrottlePolicyException {
@@ -78,7 +76,7 @@ public class SubscriptionThrottlePolicyMappingUtil {
      *
      * @param policy Subscription Policy model object
      * @return Converted Subscription policy REST API DTO object
-     * @throws SubscriptionThrottlePolicyException
+     * @throws SubscriptionThrottlePolicyException - If error occurs
      */
     public static SubscriptionThrottlePolicyDTO fromSubscriptionThrottlePolicyToDTO(SubscriptionPolicy policy)
             throws SubscriptionThrottlePolicyException {
@@ -118,7 +116,7 @@ public class SubscriptionThrottlePolicyMappingUtil {
      *
      * @param dto Subscription policy DTO object
      * @return Converted Subscription policy model object
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
     @SuppressWarnings("unchecked") public static SubscriptionPolicy fromSubscriptionThrottlePolicyDTOToModel(
             SubscriptionThrottlePolicyDTO dto) throws APIManagementException {

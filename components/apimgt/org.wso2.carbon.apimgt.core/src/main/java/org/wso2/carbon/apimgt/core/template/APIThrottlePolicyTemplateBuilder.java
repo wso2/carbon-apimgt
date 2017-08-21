@@ -25,7 +25,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Condition;
 import org.wso2.carbon.apimgt.core.models.policy.Pipeline;
@@ -230,19 +229,6 @@ public class APIThrottlePolicyTemplateBuilder extends ThrottlePolicyTemplateBuil
             conditionString = PolicyConstants.INVERT_CONDITION + "(" + conditionString + ")";
         }
         return conditionString;
-    }
-
-    @Override
-    public Map<String, String> getThrottlePolicyTemplate() throws APITemplateException {
-        try {
-            templateMap = getThrottlePolicyTemplateForPipelines();
-            templateMap.put(apiPolicy.getPolicyName(), getThrottlePolicyTemplateForAPILevelDefaultCondition());
-        } catch (APITemplateException e) {
-            String errorMessage = "Error while creating template for advanced throttle policy.";
-            log.error(errorMessage, e);
-            throw new APITemplateException(errorMessage, ExceptionCodes.THROTTLE_TEMPLATE_EXCEPTION);
-        }
-        return templateMap;
     }
 
 }

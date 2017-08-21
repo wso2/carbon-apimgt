@@ -22,6 +22,7 @@ import qs from 'qs'
 import Configs from './ConfigManager'
 import Utils from './utils'
 import User from './User'
+import SingleClient from './SingleClient'
 
 class AuthManager {
     constructor() {
@@ -33,6 +34,7 @@ class AuthManager {
         this.userscope = null;
         this.bearer = "Bearer ";
         this.contextPath = "/publisher";
+        this.envs = "/login/infoenv";
     }
 
     static refreshTokenOnExpire() {
@@ -114,8 +116,9 @@ class AuthManager {
      * @returns {User | null} Is any user has logged in or not
      */
     static getUser() {
-        const userData = localStorage.getItem("wso2_user");
-        const partialToken = Utils.getCookie("WSO2_AM_TOKEN_1");
+        let currentenv = AuthManager.getEnvironment();
+        const userData = localStorage.getItem(User.CONST.LOCALSTORAGE_USER);
+        const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1 + "_" + currentenv);
         if (!(userData && partialToken)) {
             return null;
         }
@@ -129,15 +132,27 @@ class AuthManager {
      */
     static setUser(user) {
         if (!user instanceof User) {
-            throw "Invalid user object";
+            throw new Error("Invalid user object");
         }
-        localStorage.setItem("wso2_user", JSON.stringify(user.toJson()));
+        localStorage.setItem(User.CONST.LOCALSTORAGE_USER, JSON.stringify(user.toJson()));
         /* TODO: IMHO it's better to get this key (`wso2_user`) from configs */
     }
 
+    static getEnvironment(){
+        let currentEnvironment = localStorage.getItem("currentEnv");
+        return currentEnvironment;
+    }
+
     getTokenEndpoint() {
+        console.log("working");
         return this.host + this.token;
     }
+
+    getTokenEnpointEnv(detailedValue){
+
+        return window.location.protocol + "//" + detailedValue.envIsHost + this.token;
+    }
+
 
     /**
      * By given username and password Authenticate the user, Since this REST API has no swagger definition,
@@ -146,7 +161,10 @@ class AuthManager {
      * @param {String} password : Plain text password
      * @returns {AxiosPromise} : Promise object with the login request made
      */
-    authenticateUser(username, password) {
+    authenticateUser(username, password, detailedValue) {
+
+        let tokenDetails = (typeof detailedValue == 'undefined') ?  this.getTokenEndpoint(): this.getTokenEnpointEnv(detailedValue);
+
         const headers = {
             'Authorization': 'Basic deidwe',
             'Accept': 'application/json',
@@ -159,17 +177,22 @@ class AuthManager {
             validity_period: 3600,
             scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage apim:subscription_view apim:subscription_block apim:subscribe'
         };
-        let promised_response = axios.post(this.getTokenEndpoint(), qs.stringify(data), {headers: headers});
+        let promised_response = axios.post(tokenDetails, qs.stringify(data), {headers: headers }); // enable with credeantials
         promised_response.then(response => {
+            console.log(response.headers.setH);
             const validityPeriod = response.data.validityPeriod; // In seconds
             const WSO2_AM_TOKEN_1 = response.data.partialToken;
             const user = new User(response.data.authUser, response.data.idToken);
             user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/publisher");
             user.scopes = response.data.scopes.split(" ");
             AuthManager.setUser(user);
+
+        }).catch(function(e) {
+            console.log(e); //
         });
         return promised_response;
     }
+
 
     /**
      * Revoke the issued OAuth access token for currently logged in user and clear both cookie and localstorage data.
@@ -177,9 +200,10 @@ class AuthManager {
     logout() {
         let authHeader = this.bearer + AuthManager.getUser().getPartialToken();
         //TODO Will have to change the logout end point url to contain the app context(i.e. publisher/store, etc.)
-        let url = this.host + "/login/revoke";
+        let url = this.host + "/login/logout/publisher";
         let headers = {
             'Accept': 'application/json',
+            'Content-Type': 'application/json',
             'Authorization': authHeader
         };
         const promisedLogout = axios.post(url, null, {headers: headers});
@@ -206,6 +230,12 @@ class AuthManager {
             'X-Alt-Referer': referrer
         };
         return axios.post(url, qs.stringify(params), {headers: headers});
+    }
+
+    static hasScopes(resourcePath, resourceMethod) {
+        let userscopes = this.getUser().scopes;
+        let validScope = SingleClient.getScopeForResource(resourcePath, resourceMethod);
+        return validScope.then(scope => {return userscopes.includes(scope)});
     }
 
 }

@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -42,8 +43,10 @@ public final class UriTemplate {
     private final String uriTemplate;
     private final String httpVerb;
     private final String authType;
+    private final String contentType;
     private final Policy policy;
     private final Map<String, Endpoint> endpoint;
+    private final List<URITemplateParam> parameters;
 
     private UriTemplate(UriTemplateBuilder uriTemplateBuilder) {
         uriTemplate = uriTemplateBuilder.uriTemplate;
@@ -52,6 +55,8 @@ public final class UriTemplate {
         policy = uriTemplateBuilder.policy;
         endpoint = uriTemplateBuilder.endpoint;
         templateId = uriTemplateBuilder.templateId;
+        contentType = uriTemplateBuilder.contentType;
+        parameters = uriTemplateBuilder.parameters;
     }
 
     public String getUriTemplate() {
@@ -76,6 +81,14 @@ public final class UriTemplate {
 
     public String getTemplateId() {
         return templateId;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public List<URITemplateParam> getParameters() {
+        return parameters;
     }
 
     @Override
@@ -122,6 +135,8 @@ public final class UriTemplate {
         private Policy policy = APIUtils.getDefaultAPIPolicy();
         private Map<String, Endpoint> endpoint = Collections.emptyMap();
         public String templateId;
+        private String contentType;
+        private List<URITemplateParam> parameters;
 
         public UriTemplateBuilder() {
         }
@@ -133,6 +148,8 @@ public final class UriTemplate {
             this.endpoint = copy.endpoint;
             this.policy = copy.policy;
             this.templateId = copy.templateId;
+            this.contentType = copy.contentType;
+            this.parameters = copy.parameters;
         }
 
         public static UriTemplateBuilder getInstance() {
@@ -156,6 +173,16 @@ public final class UriTemplate {
 
         public UriTemplateBuilder templateId(String templateId) {
             this.templateId = templateId;
+            return this;
+        }
+
+        public UriTemplateBuilder contentType(String contentType) {
+            this.contentType = contentType;
+            return this;
+        }
+
+        public UriTemplateBuilder parameters(List<URITemplateParam> parameters) {
+            this.parameters = parameters;
             return this;
         }
 

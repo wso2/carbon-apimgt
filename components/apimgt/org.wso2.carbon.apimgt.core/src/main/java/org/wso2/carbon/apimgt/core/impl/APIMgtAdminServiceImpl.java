@@ -5,12 +5,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
+import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
+import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIConfigRetrievalException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -30,6 +33,7 @@ import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.core.workflow.Workflow;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,9 +54,10 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     private ApplicationDAO applicationDAO;
     private APIMConfigurations apimConfiguration;
     private APIGateway apiGateway;
+    private WorkflowDAO workflowDAO;
 
     public APIMgtAdminServiceImpl(APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, ApiDAO apiDAO,
-                                  LabelDAO labelDAO, ApplicationDAO applicationDAO, APIGateway apiGateway) {
+            LabelDAO labelDAO, ApplicationDAO applicationDAO, APIGateway apiGateway, WorkflowDAO workflowDAO) {
         this.apiSubscriptionDAO = apiSubscriptionDAO;
         this.policyDAO = policyDAO;
         this.apiDAO = apiDAO;
@@ -60,6 +65,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         this.apimConfiguration = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
         this.applicationDAO = applicationDAO;
         this.apiGateway = apiGateway;
+        this.workflowDAO = workflowDAO;
     }
 
     @Override
@@ -419,7 +425,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     public List<UriTemplate> getAllResourcesForApi(String apiContext, String apiVersion) throws APIManagementException {
         try {
             return apiDAO.getResourcesOfApi(apiContext, apiVersion);
-        } catch (APIManagementException e) {
+        } catch (APIMgtDAOException e) {
             String msg = "Couldn't retrieve resources for Api Name: " + apiContext;
             log.error(msg, e);
             throw new APIManagementException(msg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
@@ -649,5 +655,63 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             log.error(errorMessage, e);
             throw new APIManagementException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
+    }
+
+    @Override
+    public Workflow retrieveWorkflow(String workflowRefId) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving workflow for refId: " + workflowRefId);
+        }
+        try {
+            return workflowDAO.retrieveWorkflow(workflowRefId);    
+        } catch (APIMgtDAOException e) {
+            String message = "Error while retrieving workflow entry for :" + workflowRefId;
+            log.error(message, e);
+            throw new APIManagementException(message, e, e.getErrorHandler());
+        }    
+    }
+
+    @Override
+    public WorkflowResponse completeWorkflow(WorkflowExecutor workflowExecutor, Workflow workflow)
+            throws APIManagementException {
+        if (workflow.getWorkflowReference() == null) {
+            String message = "Error while changing the workflow. Missing reference";
+            log.error(message);
+            throw new APIManagementException(message, ExceptionCodes.WORKFLOW_EXCEPTION);
+        }
+        return workflow.completeWorkflow(workflowExecutor);
+    }
+
+    @Override
+    public List<Workflow> retrieveUncompletedWorkflowsByType(String type) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Requesting for uncompleted workflow information for type: " + type);
+        }
+        if (type == null) {
+            String message = "Error while retrieving workflow information. Missing workflow type";
+            log.error(message);
+            throw new APIManagementException(message, ExceptionCodes.WORKFLOW_RETRIEVE_EXCEPTION);
+        }
+        try {
+            return workflowDAO.retrieveUncompleteWorkflows(type);
+        } catch (APIMgtDAOException e) {
+            String message = "Error while retrieving workflow information";
+            log.error(message, e);
+            throw new APIManagementException(message, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }  
+    }
+
+    @Override
+    public List<Workflow> retrieveUncompletedWorkflows() throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Requesting all uncompleted workflow information ");
+        }
+        try {
+            return workflowDAO.retrieveUncompleteWorkflows();
+        } catch (APIMgtDAOException e) {
+            String message = "Error while retrieving workflow information";
+            log.error(message, e);
+            throw new APIManagementException(message, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }  
     }
 }

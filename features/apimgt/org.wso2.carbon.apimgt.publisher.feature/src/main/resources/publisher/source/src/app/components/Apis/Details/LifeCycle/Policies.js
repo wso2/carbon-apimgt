@@ -34,8 +34,10 @@ export default class Policies extends Component {
 
     handleChange(data) {
         this.setState({selectedPolicies: data});
+        if(this.props.handlePolicies){
+            this.props.handlePolicies(data);
+        }
     }
-
     changeTiers(event) {
         this.setState({loading: true});
         const api_uuid = this.props.api.id;
@@ -52,7 +54,7 @@ export default class Policies extends Component {
     }
 
     render() {
-        const currentPolicies = this.props.api.policies;
+        let currentPolicies = this.props.api ? this.props.api.policies : this.props.selectedPolicies;
         const policies = this.props.policies.map(
             policy => <Option key={policy.policyName}>{policy.displayName}</Option>);
         const props = {
@@ -68,8 +70,8 @@ export default class Policies extends Component {
                 <Select {...props}>
                     {policies}
                 </Select>
-                <Button style={{margin: "5px"}} type="primary" loading={this.state.loading}
-                        onClick={this.changeTiers}>Update</Button>
+                {this.props.api && <Button style={{margin: "5px"}} type="primary" loading={this.state.loading}
+                        onClick={this.changeTiers}>Update</Button> }
             </div>
 
         );

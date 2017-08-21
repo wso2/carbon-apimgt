@@ -26,6 +26,9 @@ public class APIInfoDTO   {
   @JsonProperty("lifeCycleStatus")
   private String lifeCycleStatus = null;
 
+  @JsonProperty("securityScheme")
+  private Integer securityScheme = null;
+
   public APIInfoDTO id(String id) {
     this.id = id;
     return this;
@@ -116,6 +119,24 @@ public class APIInfoDTO   {
     this.lifeCycleStatus = lifeCycleStatus;
   }
 
+  public APIInfoDTO securityScheme(Integer securityScheme) {
+    this.securityScheme = securityScheme;
+    return this;
+  }
+
+   /**
+   * Get securityScheme
+   * @return securityScheme
+  **/
+  @ApiModelProperty(example = "1", value = "")
+  public Integer getSecurityScheme() {
+    return securityScheme;
+  }
+
+  public void setSecurityScheme(Integer securityScheme) {
+    this.securityScheme = securityScheme;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -130,12 +151,13 @@ public class APIInfoDTO   {
         Objects.equals(this.name, apIInfo.name) &&
         Objects.equals(this.context, apIInfo.context) &&
         Objects.equals(this.version, apIInfo.version) &&
-        Objects.equals(this.lifeCycleStatus, apIInfo.lifeCycleStatus);
+        Objects.equals(this.lifeCycleStatus, apIInfo.lifeCycleStatus) &&
+        Objects.equals(this.securityScheme, apIInfo.securityScheme);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, version, lifeCycleStatus);
+    return Objects.hash(id, name, context, version, lifeCycleStatus, securityScheme);
   }
 
   @Override
@@ -148,6 +170,7 @@ public class APIInfoDTO   {
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
+    sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -23,7 +23,10 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APICommentException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
+import org.wso2.carbon.apimgt.core.exception.APINotFoundException;
 import org.wso2.carbon.apimgt.core.exception.APIRatingException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -38,6 +41,7 @@ import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.models.Tag;
 import org.wso2.carbon.apimgt.core.models.User;
+import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationResponse;
 
@@ -190,14 +194,14 @@ public interface APIStore extends APIManager {
     /**
      * Generates oAuth keys for an application.
      *
-     * @param applicationId   Id of the Application.
-     * @param tokenType       Token type (PRODUCTION | SANDBOX)
-     * @param callbackUrl     Callback URL
-     * @param grantTypes      List of grant types to be supported by the application
+     * @param applicationId Id of the Application.
+     * @param keyType       Key type (PRODUCTION | SANDBOX)
+     * @param callbackUrl   Callback URL
+     * @param grantTypes    List of grant types to be supported by the application
      * @return {@link OAuthApplicationInfo}  Generated OAuth client information
      * @throws APIManagementException If oauth application creation was failed
      */
-    OAuthApplicationInfo generateApplicationKeys(String applicationId, String tokenType,
+    OAuthApplicationInfo generateApplicationKeys(String applicationId, String keyType,
                                                  String callbackUrl, List<String> grantTypes)
             throws APIManagementException;
 
@@ -205,14 +209,46 @@ public interface APIStore extends APIManager {
      * Provision out-of-band OAuth clients (Semi-manual client registration)
      *
      * @param applicationId Application ID
-     * @param tokenType     Token type (PRODUCTION | SANDBOX)
+     * @param keyType       Key type (PRODUCTION | SANDBOX)
      * @param clientId      Client ID of the OAuth application
      * @param clientSecret  Client secret of the OAuth application
      * @return {@link OAuthApplicationInfo}  Existing OAuth client information
      * @throws APIManagementException If oauth application mapping was failed
      */
-    OAuthApplicationInfo provideApplicationKeys(String applicationId, String tokenType, String clientId,
-                                                String clientSecret) throws APIManagementException;
+    OAuthApplicationInfo mapApplicationKeys(String applicationId, String keyType, String clientId,
+                                            String clientSecret) throws APIManagementException;
+
+    /**
+     * Get application key information
+     *
+     * @param applicationId Application Id
+     * @return {@link OAuthApplicationInfo}  Application key information list
+     * @throws APIManagementException if error occurred while retrieving application keys
+     */
+    List<OAuthApplicationInfo> getApplicationKeys(String applicationId) throws APIManagementException;
+
+    /**
+     * Get application key information of a given key type
+     *
+     * @param applicationId Application Id
+     * @param keyType       Key Type (Production | Sandbox)
+     * @return {@link OAuthApplicationInfo}  Application key information
+     * @throws APIManagementException if error occurred while retrieving application keys
+     */
+    OAuthApplicationInfo getApplicationKeys(String applicationId, String keyType) throws APIManagementException;
+
+    /**
+     * Update grantTypes and callback URL of an application
+     *
+     * @param applicationId Application Id
+     * @param keyType       Key Type (Production | Sandbox)
+     * @param grantTypes    New Grant Type list
+     * @param callbackURL   New callback URL
+     * @return {@link OAuthApplicationInfo}  Application key information list
+     * @throws APIManagementException if error occurred while retrieving application keys
+     */
+    OAuthApplicationInfo updateGrantTypesAndCallbackURL(String applicationId, String keyType, List<String> grantTypes,
+                                                        String callbackURL) throws APIManagementException;
 
     /**
      * Generate an application access token (and revoke current token, if any)
@@ -489,6 +525,34 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException If failed to add the Composite API.
      */
     String addCompositeApiFromDefinition(String swaggerResourceUrl) throws APIManagementException;
+
+    /**
+     * Returns the WSDL of a given API UUID and gateway label name
+     * 
+     * @param apiId API Id
+     * @param labelName gateway label name
+     * @return WSDL of the API as {@link String}
+     * @throws APIMgtDAOException if error occurs while accessing the WSDL from the data layer
+     * @throws APIMgtWSDLException if error occurs while parsing/manipulating the WSDL
+     * @throws APINotFoundException If API cannot be found
+     * @throws LabelException If Label related error occurs
+     */
+    String getAPIWSDL(String apiId, String labelName)
+            throws APIMgtDAOException, APIMgtWSDLException, APINotFoundException, LabelException;
+
+    /**
+     * Returns the WSDL archive info of a given API UUID and gateway label name
+     *
+     * @param apiId API Id
+     * @param labelName gateway label name
+     * @return WSDL archive information {@link WSDLArchiveInfo}
+     * @throws APIMgtDAOException if error occurs while accessing the WSDL from the data layer
+     * @throws APIMgtWSDLException if error occurs while parsing/manipulating the WSDL
+     * @throws APINotFoundException If API cannot be found
+     * @throws LabelException If Label related error occurs
+     */
+    WSDLArchiveInfo getAPIWSDLArchive(String apiId, String labelName)
+            throws APIMgtDAOException, APIMgtWSDLException, APINotFoundException, LabelException;
 
     /**
      * Store user self signup

@@ -10,6 +10,7 @@
             <class name="org.wso2.carbon.apimgt.core.dao.impl.LabelDAOImplIT" />
             <class name="org.wso2.carbon.apimgt.core.dao.impl.WorkflowDAOIT" />
             <class name="org.wso2.carbon.apimgt.core.dao.impl.PolicyDAOImplIT" />
+            <class name="org.wso2.carbon.apimgt.core.dao.impl.FunctionDAOImplIT" />
         </classes>
     </test>
 </suite>

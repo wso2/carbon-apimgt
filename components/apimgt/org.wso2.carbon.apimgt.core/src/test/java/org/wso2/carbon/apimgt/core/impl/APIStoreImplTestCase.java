@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
+import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
@@ -64,6 +65,7 @@ import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionResponse;
 import org.wso2.carbon.apimgt.core.models.User;
+import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowConfig;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
@@ -86,6 +88,7 @@ import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -95,6 +98,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Test class for APIStore
@@ -131,6 +135,26 @@ public class APIStoreImplTestCase {
 
         ConfigProvider configProvider = Mockito.mock(ConfigProvider.class);
         ServiceReferenceHolder.getInstance().setConfigProvider(configProvider);
+    }
+
+    @Test(description = "Test getting composite API by UUID")
+    public void testGetCompositeAPIbyId() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        CompositeAPI api = SampleTestObjectCreator.createUniqueCompositeAPI().build();
+        String apiId = api.getId();
+        APIStore apiStore = getApiStoreImpl(apiDAO);
+        Mockito.when(apiDAO.getCompositeAPI(apiId)).thenReturn(api);
+        CompositeAPI apiReturned = apiStore.getCompositeAPIbyId(apiId);
+        Mockito.verify(apiDAO, Mockito.times(1)).getCompositeAPI(apiId);
+        Assert.assertEquals(apiReturned, api);
+
+        //Error path
+        Mockito.when(apiDAO.getCompositeAPI(apiId)).thenThrow(APIMgtDAOException.class);
+        try {
+            apiStore.getCompositeAPIbyId(apiId);
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Error occurred while retrieving API with id " + apiId);
+        }
     }
 
     @Test(description = "Search APIs with a search query")
@@ -186,6 +210,54 @@ public class APIStoreImplTestCase {
                 getAPIsByStatus(Arrays.asList(STATUS_CREATED, STATUS_PUBLISHED));
     }
 
+    @Test(description = "Retrieve a WSDL of an API")
+    public void testGetAPIWSDL() throws APIManagementException, IOException {
+        final String labelName = "SampleLabel";
+
+        Label label = SampleTestObjectCreator.createLabel(labelName).build();
+        Set<String> labels = new HashSet<>();
+        labels.add(label.getName());
+        API api = SampleTestObjectCreator.createDefaultAPI().labels(labels).build();
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
+        APIStore apiStore = getApiStoreImpl(apiDAO, labelDAO);
+        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Mockito.when(labelDAO.getLabelByName(labelName)).thenReturn(label);
+        Mockito.when(apiDAO.getWSDL(api.getId()))
+                .thenReturn(new String(SampleTestObjectCreator.createDefaultWSDL11Content()));
+        String expectedEndpoint = SampleTestObjectCreator.ACCESS_URL + labelName
+                + (api.getContext().startsWith("/") ? api.getContext() : "/" + api.getContext());
+        String updatedWSDL = apiStore.getAPIWSDL(api.getId(), label.getName());
+        Assert.assertTrue(updatedWSDL.contains(expectedEndpoint));
+    }
+
+    @Test(description = "Retrieve a WSDL archive of an API")
+    public void testGetAPIWSDLArchive() throws APIManagementException, IOException {
+        final String labelName = "SampleLabel";
+
+        Label label = SampleTestObjectCreator.createLabel(labelName).build();
+        Set<String> labels = new HashSet<>();
+        labels.add(label.getName());
+        API api = SampleTestObjectCreator.createDefaultAPI().labels(labels).build();
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        LabelDAO labelDAO = Mockito.mock(LabelDAO.class);
+        APIStore apiStore = getApiStoreImpl(apiDAO, labelDAO);
+        Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
+        Mockito.when(labelDAO.getLabelByName(labelName)).thenReturn(label);
+        Mockito.when(apiDAO.getWSDLArchive(api.getId()))
+                .thenReturn(SampleTestObjectCreator.createDefaultWSDL11ArchiveInputStream());
+        String expectedEndpoint = SampleTestObjectCreator.ACCESS_URL + labelName
+                + (api.getContext().startsWith("/") ? api.getContext() : "/" + api.getContext());
+        WSDLArchiveInfo archiveInfo = apiStore.getAPIWSDLArchive(api.getId(), label.getName());
+        Assert.assertNotNull(archiveInfo);
+        Assert.assertNotNull(archiveInfo.getWsdlInfo());
+        Assert.assertNotNull(archiveInfo.getWsdlInfo().getEndpoints());
+        Map<String, String> endpoints = archiveInfo.getWsdlInfo().getEndpoints();
+        Assert.assertTrue(endpoints.containsValue(expectedEndpoint));
+        Assert.assertFalse(endpoints.containsValue(SampleTestObjectCreator.ORIGINAL_ENDPOINT_STOCK_QUOTE));
+        Assert.assertFalse(endpoints.containsValue(SampleTestObjectCreator.ORIGINAL_ENDPOINT_WEATHER));
+    }
+
     @Test(description = "Add Composite API")
     public void testAddCompositeApi() throws APIManagementException {
         CompositeAPI.Builder apiBuilder = SampleTestObjectCreator.createUniqueCompositeAPI();
@@ -195,7 +267,8 @@ public class APIStoreImplTestCase {
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
         IdentityProvider idp = Mockito.mock(IdentityProvider.class);
-        APIStore apiStore = getApiStoreImpl(idp, apiDAO, apiSubscriptionDAO, gatewaySourceGenerator, apiGateway);
+        KeyManager km = Mockito.mock(KeyManager.class);
+        APIStore apiStore = getApiStoreImpl(idp, km, apiDAO, apiSubscriptionDAO, gatewaySourceGenerator, apiGateway);
         apiStore.addCompositeApi(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).addApplicationAssociatedAPI(apiBuilder.build());
     }
@@ -210,7 +283,7 @@ public class APIStoreImplTestCase {
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
         IdentityProvider idp = Mockito.mock(IdentityProvider.class);
-        APIStore apiStore = getApiStoreImpl(idp, apiDAO, apiSubscriptionDAO, gatewaySourceGenerator, apiGateway);
+        APIStore apiStore = getApiStoreImpl(idp, null, apiDAO, apiSubscriptionDAO, gatewaySourceGenerator, apiGateway);
 
         String ballerinaImpl = "Ballerina";
 
@@ -252,7 +325,7 @@ public class APIStoreImplTestCase {
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         IdentityProvider idp = Mockito.mock(IdentityProvider.class);
-        APIStore apiStore = getApiStoreImpl(idp, apiDAO, apiSubscriptionDAO, gatewaySourceGenerator, apiGateway);
+        APIStore apiStore = getApiStoreImpl(idp, null, apiDAO, apiSubscriptionDAO, gatewaySourceGenerator, apiGateway);
 
         apiStore.addCompositeApi(apiBuilder);
 
@@ -315,12 +388,6 @@ public class APIStoreImplTestCase {
         ApplicationCreationResponse response = apiStore.addApplication(application);
         Assert.assertNotNull(response.getApplicationUUID());
         Mockito.verify(applicationDAO, Mockito.times(1)).addApplication(application);
-    }
-
-    private APIStore getApiStoreImpl(ApplicationDAO applicationDAO, PolicyDAO policyDAO, WorkflowDAO workflowDAO,
-                                     APIGateway apiGateway) {
-        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, policyDAO, null, null, workflowDAO,
-                null, apiGateway);
     }
 
     @Test(description = "Add an application with null permission String")
@@ -547,8 +614,8 @@ public class APIStoreImplTestCase {
         Application application = new Application(APP_NAME, USER_NAME);
         application.setPolicy(new ApplicationPolicy(TIER));
         Mockito.when(applicationDAO.isApplicationNameExists(APP_NAME)).thenReturn(false);
-        Mockito.when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, TIER)).thenReturn
-                (null);
+        Mockito.when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, TIER))
+                .thenReturn(null);
         apiStore.addApplication(application);
     }
 
@@ -602,28 +669,45 @@ public class APIStoreImplTestCase {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         WorkflowDAO workflowDAO = Mockito.mock(WorkflowDAO.class);
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
-        APIStore apiStore = getApiStoreImpl(applicationDAO, workflowDAO, apiGateway);
-        Application application = new Application(APP_NAME, USER_NAME);
-        ApplicationPolicy applicationPolicy = new ApplicationPolicy(UUID, TIER);
-        application.setId(UUID);
-        application.setPolicy(applicationPolicy);
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        APIStore apiStore = getApiStoreImpl(applicationDAO, policyDAO, workflowDAO, apiGateway);
+        Application existingApplication = SampleTestObjectCreator.createDefaultApplication();
+        String appUUID = existingApplication.getUuid();
+        existingApplication.setStatus(ApplicationStatus.APPLICATION_APPROVED);
+        Mockito.when(applicationDAO.getApplication(appUUID)).thenReturn(existingApplication);
 
-        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, TIER))
-                .thenReturn(applicationPolicy);
-        application.setStatus(ApplicationStatus.APPLICATION_APPROVED);
-        Mockito.when(applicationDAO.getApplication(UUID)).thenReturn(application);
+        //Updating the existing application
+        Application updatedApplication = SampleTestObjectCreator.createDefaultApplication();
+        updatedApplication.setDescription("updated description");
+        ApplicationPolicy applicationPolicy = SampleTestObjectCreator.createDefaultApplicationPolicy();
+        applicationPolicy.setPolicyName(TIER);
+        updatedApplication.setPolicy(applicationPolicy);
+        updatedApplication.setStatus(ApplicationStatus.APPLICATION_APPROVED);
 
-        //update application's description
-        application.setDescription("updated description");
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application,
+                applicationPolicy.getPolicyName())).thenReturn(applicationPolicy);
 
-        apiStore.updateApplication(UUID, application);
-        Mockito.verify(applicationDAO, Mockito.times(1)).updateApplication(UUID, application);
-    }
+        apiStore.updateApplication(appUUID, updatedApplication);
+        Mockito.verify(applicationDAO, Mockito.times(1)).updateApplication(appUUID, updatedApplication);
 
-    private APIStore getApiStoreImpl(ApplicationDAO applicationDAO, WorkflowDAO workflowDAO, APIGateway apiGateway) {
-        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, null, null, null, workflowDAO, null,
-                apiGateway);
+        //Error
+        //APIMgtDAOException
+        Mockito.doThrow(APIMgtDAOException.class).when(applicationDAO).updateApplication(appUUID, updatedApplication);
+        try {
+            apiStore.updateApplication(appUUID, updatedApplication);
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Error occurred while updating the application - " + appUUID);
+        }
+
+        //Error path
+        //When specified tier in the updated application is invalid
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application,
+                applicationPolicy.getPolicyName())).thenReturn(null);
+        try {
+            apiStore.updateApplication(appUUID, updatedApplication);
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Specified tier " + applicationPolicy + " is invalid");
+        }
     }
 
     @Test(description = "Retrieve applications")
@@ -1360,91 +1444,110 @@ public class APIStoreImplTestCase {
     }
 
     private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO) {
-        return new APIStoreImpl(USER_NAME, null, apiDAO, null, null, null, null, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, apiDAO, null, null, null, null, null, null, null, null);
     }
 
-    private APIStoreImpl getApiStoreImpl(IdentityProvider idp, ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO,
+    private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO, LabelDAO labelDAO) {
+        return new APIStoreImpl(USER_NAME, null, null, apiDAO, null, null, null, null, labelDAO, null, null, null);
+    }
+
+    private APIStoreImpl getApiStoreImpl(IdentityProvider idp, KeyManager keyManager, ApiDAO apiDAO,
+                                         APISubscriptionDAO apiSubscriptionDAO,
                                          GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGateway) {
-        return new APIStoreImpl(USER_NAME, idp, apiDAO, null, apiSubscriptionDAO, null,
+        return new APIStoreImpl(USER_NAME, idp, keyManager, apiDAO, null, apiSubscriptionDAO, null,
                 null, null, null, gatewaySourceGenerator, apiGateway);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, null, null, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, null, applicationDAO, null, null, null, null, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, PolicyDAO policyDAO, WorkflowDAO workflowDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, policyDAO, null, null, workflowDAO, null,
-                null);
+        return new APIStoreImpl(USER_NAME, null, null, null, applicationDAO, null, policyDAO, null, null, workflowDAO,
+                null, null);
+    }
+
+    private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, PolicyDAO policyDAO, WorkflowDAO workflowDAO,
+                                         APIGateway apiGateway) {
+        return new APIStoreImpl(USER_NAME, null, null, null, applicationDAO, null, policyDAO, null, null, workflowDAO,
+                null, apiGateway);
     }
 
     private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO,
                                          APISubscriptionDAO apiSubscriptionDAO, WorkflowDAO workflowDAO) {
-        return new APIStoreImpl(USER_NAME, null, apiDAO, applicationDAO, apiSubscriptionDAO, null, null, null,
+        return new APIStoreImpl(USER_NAME, null, null, apiDAO, applicationDAO, apiSubscriptionDAO, null, null, null,
                 workflowDAO, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO,
                                          WorkflowDAO workflowDAO, APIGateway apiGateway) {
-        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, apiSubscriptionDAO, null, null, null,
+        return new APIStoreImpl(USER_NAME, null, null, null, applicationDAO, apiSubscriptionDAO, null, null, null,
                 workflowDAO, null, apiGateway);
     }
 
     private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO,
                                          APISubscriptionDAO apiSubscriptionDAO, WorkflowDAO workflowDAO,
                                          APIGateway apiGateway) {
-        return new APIStoreImpl(USER_NAME, null, apiDAO, applicationDAO, apiSubscriptionDAO, null, null, null,
+        return new APIStoreImpl(USER_NAME, null, null, apiDAO, applicationDAO, apiSubscriptionDAO, null, null, null,
                 workflowDAO, null, apiGateway);
     }
 
     private APIStoreImpl getApiStoreImpl(ApiDAO apiDAO, GatewaySourceGenerator gatewaySourceGenerator,
                                          APIGateway apiGateway) {
-        return new APIStoreImpl(USER_NAME, null, apiDAO, null, null, null, null, null, null, gatewaySourceGenerator,
-                apiGateway);
+        return new APIStoreImpl(USER_NAME, null, null, apiDAO, null, null, null, null, null, null,
+                gatewaySourceGenerator, apiGateway);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO,
                                          WorkflowDAO workflowDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, apiSubscriptionDAO, null, null, null,
+        return new APIStoreImpl(USER_NAME, null, null, null, applicationDAO, apiSubscriptionDAO, null, null, null,
                 workflowDAO, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, apiSubscriptionDAO, null, null, null, null, null,
-                null);
+        return new APIStoreImpl(USER_NAME, null, null, null, applicationDAO, apiSubscriptionDAO, null, null, null,
+                null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, WorkflowDAO workflowDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, null, null, null, workflowDAO, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, null, applicationDAO, null, null, null, null, workflowDAO,
+                null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(TagDAO tagDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, null, null, tagDAO, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, null, null, null, null, tagDAO, null, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(PolicyDAO policyDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, null, policyDAO, null, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, null, null, null, policyDAO, null, null, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(LabelDAO labelDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, null, null, null, null, labelDAO, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, null, null, null, null, null, labelDAO, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(ApplicationDAO applicationDAO, PolicyDAO policyDAO) {
-        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, policyDAO, null, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, null, applicationDAO, null, policyDAO, null, null, null,
+                null, null);
     }
 
     private APIStoreImpl getApiStoreImpl() {
-        return new APIStoreImpl(USER_NAME, null, null, null, null, null, null, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     private APIStoreImpl getApiStoreImpl(IdentityProvider identityProvider) {
-        return new APIStoreImpl(USER_NAME, identityProvider, null, null, null, null, null, null, null, null, null);
+        return new APIStoreImpl(USER_NAME, identityProvider, null, null, null, null, null, null, null, null,
+                null, null);
+    }
+
+    private APIStore getApiStoreImpl(ApplicationDAO applicationDAO, WorkflowDAO workflowDAO, APIGateway apiGateway) {
+        return new APIStoreImpl(USER_NAME, null, null, null, applicationDAO, null, null, null, null, workflowDAO, null,
+                apiGateway);
     }
 
     private APIStore getApiStoreImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
             apiSubscriptionDAO, WorkflowDAO workflowDAO, APIGateway apiGateway, PolicyDAO policyDAO) {
-        return new APIStoreImpl(USER_NAME, null, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, null, null,
-                workflowDAO, null, apiGateway);
+        return new APIStoreImpl(USER_NAME, null, null, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO,
+                null, null, workflowDAO, null, apiGateway);
     }
 }

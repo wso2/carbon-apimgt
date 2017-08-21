@@ -30,9 +30,13 @@ import io.swagger.models.Operation;
 import io.swagger.models.Path;
 import io.swagger.models.Response;
 import io.swagger.models.Swagger;
+import io.swagger.models.auth.OAuth2Definition;
+import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.models.parameters.BodyParameter;
+import io.swagger.models.parameters.FormParameter;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.PathParameter;
+import io.swagger.models.parameters.QueryParameter;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.StringProperty;
 import io.swagger.parser.SwaggerParser;
@@ -53,6 +57,7 @@ import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Scope;
+import org.wso2.carbon.apimgt.core.models.URITemplateParam;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
@@ -205,6 +210,21 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     }
 
     @Override
+    public Map<String, String> getScope(String resourceConfigJSON) throws APIManagementException {
+        SwaggerParser swaggerParser = new SwaggerParser();
+        Swagger swagger = swaggerParser.parse(resourceConfigJSON);
+        String basePath = swagger.getBasePath();
+        String nameSpace = getNamespaceFromBasePath(basePath);
+        if (nameSpace == null) {
+            return new HashMap<>();
+        }
+        Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
+        Map.Entry<String, SecuritySchemeDefinition> entry = securityDefinitions.entrySet().iterator().next();
+        OAuth2Definition securityDefinition = (OAuth2Definition) entry.getValue();
+        return securityDefinition.getScopes();
+    }
+
+    @Override
     public Map<String, Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
 
         SwaggerParser swaggerParser = new SwaggerParser();
@@ -245,8 +265,8 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 log.debug("vendor extensions are not found in provided swagger json. resourceConfigsJSON = "
                         + resourceConfigsJSON);
             }
+            return new HashMap<>();
         }
-        return new HashMap<>();
     }
 
     /*
@@ -318,15 +338,30 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         for (UriTemplate uriTemplate : api.getUriTemplates().values()) {
             String uriTemplateString = uriTemplate.getUriTemplate();
             List<Parameter> parameterList = getParameters(uriTemplateString);
-            if (!HttpMethod.GET.toString().equalsIgnoreCase(uriTemplate.getHttpVerb()) && !HttpMethod.DELETE.toString
-                    ().equalsIgnoreCase(uriTemplate.getHttpVerb()) && !HttpMethod.OPTIONS.toString().equalsIgnoreCase
-                    (uriTemplate.getHttpVerb()) && !HttpMethod.HEAD.toString().equalsIgnoreCase(uriTemplate
-                    .getHttpVerb())) {
-                parameterList.add(getDefaultBodyParameter());
+
+            if (uriTemplate.getParameters() == null || uriTemplate.getParameters().isEmpty()) {
+                if (!HttpMethod.GET.toString().equalsIgnoreCase(uriTemplate.getHttpVerb()) && !HttpMethod.DELETE
+                        .toString().equalsIgnoreCase(uriTemplate.getHttpVerb()) && !HttpMethod.OPTIONS.toString()
+                        .equalsIgnoreCase(uriTemplate.getHttpVerb()) && !HttpMethod.HEAD.toString()
+                        .equalsIgnoreCase(uriTemplate.getHttpVerb())) {
+                    parameterList.add(getDefaultBodyParameter());
+                }
+            } else {
+                for (URITemplateParam uriTemplateParam : uriTemplate.getParameters()) {
+                    Parameter parameter = getParameterFromURITemplateParam(uriTemplateParam);
+                    parameterList.add(parameter);
+                }
             }
+
             Operation operation = new Operation();
             operation.setParameters(parameterList);
             operation.setOperationId(uriTemplate.getTemplateId());
+            //having content types like */* can break swagger definition 
+            if (!StringUtils.isEmpty(uriTemplate.getContentType()) && !uriTemplate.getContentType().contains("*")) {
+                List<String> consumesList = new ArrayList<>();
+                consumesList.add(uriTemplate.getContentType());
+                operation.setConsumes(consumesList);
+            }
             operation.addResponse("200", getDefaultResponse());
             if (stringPathMap.containsKey(uriTemplateString)) {
                 Path path = stringPathMap.get(uriTemplateString);
@@ -495,5 +530,29 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         model.setProperties(properties);
         bodyParameter.setSchema(model);
         return bodyParameter;
+    }
+
+    private Parameter getParameterFromURITemplateParam(URITemplateParam uriTemplateParam) {
+        switch (uriTemplateParam.getParamType()) {
+        case BODY:
+            return getDefaultBodyParameter();
+        case PATH:
+            PathParameter pathParameter = new PathParameter();
+            pathParameter.setName(uriTemplateParam.getName());
+            pathParameter.setType(uriTemplateParam.getDataType());
+            return pathParameter;
+        case QUERY:
+            QueryParameter queryParameter = new QueryParameter();
+            queryParameter.setName(uriTemplateParam.getName());
+            queryParameter.setType(uriTemplateParam.getDataType());
+            return queryParameter;
+        case FORM_DATA:
+            FormParameter formParameter = new FormParameter();
+            formParameter.setName(uriTemplateParam.getName());
+            formParameter.setType(uriTemplateParam.getDataType());
+            return formParameter;
+        default:
+            return null;
+        }
     }
 }

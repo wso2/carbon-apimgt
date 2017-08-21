@@ -26,8 +26,10 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
+import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -76,8 +78,12 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
         ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
         //delete app
         applicationDAO.deleteApplication(app.getId());
-        Application appFromDB = applicationDAO.getApplication(app.getId());
-        Assert.assertNull(appFromDB);
+
+        try {
+            applicationDAO.getApplication(app.getId());
+        } catch (APIMgtDAOException ex) {
+            Assert.assertEquals(ex.getMessage(), "Application is not available in the system.");
+        }
     }
 
     @Test
@@ -253,24 +259,52 @@ public class ApplicationDAOImplIT extends DAOIntegrationTestBase {
     @Test
     public void testGetApplicationsForUser() throws Exception {
 
-
-    }
-
-    @Test
-    public void testGetApplicationsForGroup() throws Exception {
-
-
     }
 
     @Test
     public void testSearchApplicationsForUser() throws Exception {
 
-
     }
 
     @Test
-    public void testSearchApplicationsForGroup() throws Exception {
+    public void testAddAndGetApplicationKeys() throws Exception {
+        ApplicationDAO applicationDAO = DAOFactory.getApplicationDAO();
+        //add test app
+        Application app = TestUtil.addTestApplicationWithPermissions();
+        String appId = app.getId();
+        String prodConsumerKey = "prod-xxx";
+        String sandConsumerKey = "sand-yyy";
 
+        //add prod key
+        applicationDAO.addApplicationKeys(appId, KeyManagerConstants.OAUTH_CLIENT_PRODUCTION, prodConsumerKey);
+        //get by key type
+        OAuthApplicationInfo keysFromDB = applicationDAO.getApplicationKeys(appId,
+                KeyManagerConstants.OAUTH_CLIENT_PRODUCTION);
+        Assert.assertEquals(keysFromDB.getClientId(), prodConsumerKey);
+
+        //add sand key
+        applicationDAO.addApplicationKeys(appId, KeyManagerConstants.OAUTH_CLIENT_SANDBOX, sandConsumerKey);
+        //get all keys
+        List<OAuthApplicationInfo> allKeysFromDB = applicationDAO.getApplicationKeys(appId);
+        Assert.assertEquals(allKeysFromDB.size(), 2, "Wrong number of keys are returned.");
+
+        int i = 0; //this should stay 0 at the end
+        for (OAuthApplicationInfo oAuthApplicationInfo : allKeysFromDB) {
+            switch (oAuthApplicationInfo.getKeyType()) {
+                case KeyManagerConstants.OAUTH_CLIENT_PRODUCTION:
+                    Assert.assertEquals(oAuthApplicationInfo.getClientId(), prodConsumerKey);
+                    i++;
+                    break;
+                case KeyManagerConstants.OAUTH_CLIENT_SANDBOX:
+                    Assert.assertEquals(oAuthApplicationInfo.getClientId(), sandConsumerKey);
+                    i--;
+                    break;
+                default:
+                    Assert.fail("Invalid key type.");
+                    break;
+            }
+        }
+        Assert.assertEquals(i, 0, "Received key counts of each type is not 1");
     }
 
     private void validateAppTimestamps(Application appFromDB, Application expectedApp) {

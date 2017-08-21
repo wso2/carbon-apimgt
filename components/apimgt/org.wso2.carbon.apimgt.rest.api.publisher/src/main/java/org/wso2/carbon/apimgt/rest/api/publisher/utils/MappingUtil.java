@@ -39,9 +39,14 @@ import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponse_wsdlInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponse_wsdlInfo_bindingInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponse_wsdlInfo_endpointsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_businessInformationDTO;
@@ -100,6 +105,7 @@ public class MappingUtil {
         apidto.setLabels(new ArrayList<>(api.getLabels()));
         apidto.setTransport(new ArrayList<>(api.getTransport()));
         apidto.setUserPermissionsForApi(api.getUserSpecificApiPermissions());
+        apidto.setSecurityScheme(mapSecuritySchemeIntToList(api.getSecurityScheme()));
         for (Policy policy : api.getPolicies()) {
             apidto.addPoliciesItem(policy.getPolicyName());
         }
@@ -208,14 +214,17 @@ public class MappingUtil {
                 endpoint(fromEndpointListToMap(apidto.getEndpoint())).
                 visibleRoles(new HashSet<>(apidto.getVisibleRoles())).
                 policies(subscriptionPolicies).
-                permission(apidto.getPermission()).
+                apiPermission(apidto.getPermission()).
                 tags(new HashSet<>(apidto.getTags())).
                 labels(new HashSet<>(apidto.getLabels())).
                 transport(new HashSet<>(apidto.getTransport())).
                 isResponseCachingEnabled(Boolean.valueOf(apidto.getResponseCaching())).
                 businessInformation(businessInformation).
                 uriTemplates(uriTemplateList).
-                corsConfiguration(corsConfiguration);
+                corsConfiguration(corsConfiguration).
+                wsdlUri(apidto.getWsdlUri()).
+                securityScheme(mapSecuritySchemeListToInt(apidto.getSecurityScheme()));
+
         if (apidto.getIsDefaultVersion() != null) {
             apiBuilder.isDefaultVersion(apidto.getIsDefaultVersion());
         }
@@ -229,6 +238,7 @@ public class MappingUtil {
             Policy policy = new APIPolicy(apidto.getApiPolicy());
             apiBuilder.apiPolicy(policy);
         }
+
         return apiBuilder;
     }
 
@@ -265,7 +275,7 @@ public class MappingUtil {
             apiInfo.setLifeCycleStatus(apiSummary.getLifeCycleStatus());
             apiInfo.setVersion(apiSummary.getVersion());
             apiInfo.setWorkflowStatus(apiSummary.getWorkflowStatus());
-            apiInfo.setUserPermissionsForApi(apiSummary.getUserSpecificApiPermissions());
+            apiInfo.setSecurityScheme(mapSecuritySchemeIntToList(apiSummary.getSecurityScheme()));
             apiInfoList.add(apiInfo);
         }
         return apiInfoList;
@@ -318,6 +328,7 @@ public class MappingUtil {
                 summary(documentDTO.getSummary()).
                 name(documentDTO.getName()).
                 otherType(documentDTO.getOtherTypeName()).
+                fileName(documentDTO.getFileName()).
                 sourceType(DocumentInfo.SourceType.valueOf(documentDTO.getSourceType().toString())).
                 sourceURL(documentDTO.getSourceUrl()).
                 type(DocumentInfo.DocType.valueOf(documentDTO.getType().toString())).
@@ -337,6 +348,7 @@ public class MappingUtil {
         for (DocumentInfo documentInfo : documentInfoResults) {
             documentListDTO.addListItem(toDocumentDTO(documentInfo));
         }
+        documentListDTO.setCount(documentInfoResults.size());
         return documentListDTO;
     }
 
@@ -372,6 +384,8 @@ public class MappingUtil {
         for (Subscription subscription : subscriptionList) {
             subscriptionListDTO.addListItem(fromSubscription(subscription));
         }
+        //TODO need to change when pagination implementation goes on
+        subscriptionListDTO.count(subscriptionList.size());
         return subscriptionListDTO;
     }
 
@@ -469,6 +483,7 @@ public class MappingUtil {
         }
         return labelDTOs;
     }
+
     /**
      * Map WorkflowResponse to WorkflowResponseDTO
      * @param response WorkflowResponse object
@@ -479,6 +494,84 @@ public class MappingUtil {
         responseDTO.setWorkflowStatus(WorkflowStatusEnum.valueOf(response.getWorkflowStatus().toString()));
         responseDTO.setJsonPayload(response.getJSONPayload());
         return responseDTO;
+    }
+
+    /**
+     * Map WSDLInfo to APIDefinitionValidationResponseDTO
+     * 
+     * @param info WSDLInfo object
+     * @return {@link APIDefinitionValidationResponseDTO} based on provided {@link WSDLInfo} object
+     */
+    public static APIDefinitionValidationResponseDTO toWSDLValidationResponseDTO(WSDLInfo info) {
+        APIDefinitionValidationResponseDTO wsdlValidationResponseDTO = new APIDefinitionValidationResponseDTO();
+        wsdlValidationResponseDTO.setIsValid(info.getVersion() != null);
+
+        APIDefinitionValidationResponse_wsdlInfoDTO infoDTO = new APIDefinitionValidationResponse_wsdlInfoDTO();
+        infoDTO.setVersion(info.getVersion());
+        APIDefinitionValidationResponse_wsdlInfo_endpointsDTO endpointsDTO;
+
+        if (info.getEndpoints() != null) {
+            for (String endpointName : info.getEndpoints().keySet()) {
+                endpointsDTO = new APIDefinitionValidationResponse_wsdlInfo_endpointsDTO();
+                endpointsDTO.setName(endpointName);
+                endpointsDTO.setLocation(info.getEndpoints().get(endpointName));
+                infoDTO.addEndpointsItem(endpointsDTO);
+            }
+        }
+
+        //currently operations are supported only in WSDL 1.1
+        if (APIMgtConstants.WSDLConstants.WSDL_VERSION_11.equals(info.getVersion())) {
+            APIDefinitionValidationResponse_wsdlInfo_bindingInfoDTO bindingInfoDTO
+                    = new APIDefinitionValidationResponse_wsdlInfo_bindingInfoDTO();
+            bindingInfoDTO.setHasHttpBinding(info.hasHttpBindingOperations());
+            bindingInfoDTO.setHasSoapBinding(info.hasSoapBindingOperations());
+            infoDTO.setBindingInfo(bindingInfoDTO);
+        }
+
+        wsdlValidationResponseDTO.setWsdlInfo(infoDTO);
+        return wsdlValidationResponseDTO;
+    }
+
+    /**
+     * This method maps the security scheme list in to an integer values
+     *
+     * @param securityScheme security schemes list
+     * @return security scheme integer value
+     */
+    public static int mapSecuritySchemeListToInt(List<String> securityScheme) {
+        int securitySchemeValue = 0;
+        for(String scheme : securityScheme) {
+            switch (scheme) {
+                case "Oauth" : securitySchemeValue = securitySchemeValue | 2;
+                    break;
+                case "apikey" : securitySchemeValue = securitySchemeValue | 1;
+                    break;
+                default:break;
+            }
+        }
+
+        if (securityScheme.isEmpty()) {
+            securitySchemeValue = 1;
+        }
+
+        return securitySchemeValue;
+    }
+
+    /**
+     * This method maps the security scheme int in to a string list
+     *
+     * @param securityScheme security schemes int value
+     * @return security scheme list
+     */
+    public static List<String> mapSecuritySchemeIntToList(int securityScheme) {
+        List<String> securitySchemesList = new ArrayList<String>();
+        if ((securityScheme & 1) == 1) { //Oauth
+            securitySchemesList.add("Oauth");
+        }
+        if ((securityScheme & 2) == 2) { //apikey
+            securitySchemesList.add("apikey");
+        }
+        return securitySchemesList;
     }
 
 }

@@ -1,209 +1,52 @@
-.data-container, .error-details-container{
-    border-left: 3px solid #E38E4A;
-    background-color: white;
-    padding: 10px 35px;
-}
-.redirection-container .data-container{
-    padding:17px 25px;
-}
-.error-details-container{
-    background-color: #E2E2E2;
-}
-.data-container form h3{
-    margin-top: 10px;
-}
-.signup-form-wrapper .data-container form h3, .recover-form-wrapper .data-container form h3{
-    font-weight: 400;
-}
-.data-container a, .login a{
-    color: #E38E4A;
-    font-weight: 600;
-    display: inline-block;
-}
-.cancel-btn-font a{
-    color: #FFFFFF;
-}
-.data-container .btn-default, .error-details-container  .btn-default{
-    font-weight: 300;
-}
-.data-container .btn-primary, .error-details-container .btn-primary{
-    color: #ffffff;
-    background-color: #F27B21;
-    border: 1px solid #F27B21;
-}
-.data-container .btn-secondary, .error-details-container .btn-secondary{
-    color: #ffffff;
-    background-color: #595959;
-    border: 1px solid #595959;
-}
-.data-container .checkbox > input[type=checkbox]:checked + .helper:after{
-    background: #FFFFFF;
-    color: #000;
-}
-.data-container .checkbox > input[type=checkbox]:not(:disabled) + .helper:before{
-    border-width: 1px;
-}
-.spinner-container{
-    padding-top: 20px;
-}
-.brand-container{
-    padding-top: 26px;
+html, body {
+    height: 100%;
 }
 
-.brand-container h2{
-    text-transform: uppercase;
-    margin: 10px 0px;
-    font-size: 28px;
-    font-weight: 400;
+.login-flex-container {
+    border: 1px solid #ccc;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
-
-.redirection-container h3{
-    font-weight: 400;
+.login-flex-container .login-main-content {
+    background: #efefef;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-.extended-form{
-    display: none;
+.login-flex-container .login-main-content .login-form {
+    width: 450px;
+    min-height: 500px;
+    padding:20px;
 }
-
-@media (max-width: 767px){
-    .data-container h3{
-        font-size: 1.2em;
-        margin-top: 10px;
-    }
-    .data-container, .error-details-container {
-        padding:20px 20px;
-    }
-    .spinner-container{
-        padding-top: 60px;
-        padding-bottom: 20px;
-    }
-    .redirection-container h3{
-        font-weight: 300;
-    }
-    .http-code {
-        margin-top: 60px;
-        margin-bottom: 30px;
-        font-size: 2em;
-        font-weight: 400;
-        padding: 0px 20px;
-    }
-    .http-code span{
-        text-transform: uppercase;
-        font-size: 0.8em;
-        font-weight: 300;
-    }
-}
-
-@media (max-width: 767px) and (orientation:landscape){
-    .brand-container{
-        padding: 26px 130px 0px 130px;
-    }
-}
-
-@media (max-width: 991px) and (min-width: 768px){
-    .data-container h3{
-        font-size: 1.2em;
-        margin-top: 10px;
-    }
-    .spinner-container{
-        padding-top: 60px;
-        padding-bottom: 20px;
-    }
-    .redirection-container h3{
-        font-weight: 300;
-    }
-    .http-code {
-        margin-top: 60px;
-        margin-bottom: 30px;
-        font-size: 2em;
-        font-weight: 400;
-    }
-    .http-code span{
-        text-transform: uppercase;
-        font-size: 0.8em;
-        font-weight: 300;
-    }
-}
-@media (min-width: 991px){
-    .login-form-wrapper, .redirection-container, .error-container, .signup-form-wrapper, .recover-form-wrapper{
-        padding-top: 2%;
-        padding-bottom: 5%;
-    }
-    .error-details-container h3{
-        font-weight: 400;
-        text-transform: uppercase;
-    }
-    .data-container h3{
-        font-size: 1.5em;
-        margin-top: 10px;
-    }
-    .http-code{
-        margin-top: 24px;
-        font-size: 4.5em;
-        font-weight: 400;
-    }
-}
-@media (max-width: 991px) {
-    .data-container, .error-details-container {
-        border: 1px solid #E2E2E2;
-    }
-    .login-form-wrapper, .redirection-container, .error-container{
-        padding-bottom: 5%;
-    }
-    .error-details-container h3{
-        font-weight: 400;
-        text-transform: uppercase;
-    }
-    .brand-container h2 {
-        margin-bottom: 10%;
-    }
-    .data-container a{
-        margin: inherit;
-    }
-    .data-container .btn-primary {
-        color: #ffffff;
-        background-color: #231F20;
-        border: 1px solid #231F20;
-        width: 100%;
-    }
-}
-.header-default h1{
-    font-size: 18px;
-    display: inline-block;
-    padding: 0 0 0 10px;
-    margin: 0;
-}
-body {
-    background-color: white;
-}
-.data-container {
-    border-right: none;
-    border-bottom: none;
-    border-top: none;
-}
-.checkbox-font {
-    font-weight: 300;
-}
-.login-card-wrapper{
-    position:absolute;
-    top:50%;;
-    width:300px;
-    margin:-200px 0 0 -150px;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
-}
-.login-card{
+.login-flex-container .login-footer {
+    flex-basis: 50px;
     text-align: center;
-    padding: 0px 20px 20px 20px;
-    max-width: 300px;
+    background: #efefef;
 }
-.login-card .brand{
-    padding:0px;
+.login-form-submit{
+    margin-top:30px;
 }
-.login-card p{
-    font-size: 16px;
+.brand{
+    width:100px;
 }
-.login-form .login-form-forgot {
-    float: right;
+#react-root{
+    height: 100%;
 }
-.login-form .login-form-button {
-    width: 100%;
+@media (max-width: 601px){
+    .login-flex-container .login-main-content .login-form {
+        width: 100%;
+        min-height: 100%;
+        align-self: flex-start;
+    }
+    .login-paper{
+        align-items: flex-start;
+        display: flex;
+        width: 100%;
+        height: 100%;
+    }
+    .login-flex-container .login-footer {
+        background: #fff;
+    }
 }

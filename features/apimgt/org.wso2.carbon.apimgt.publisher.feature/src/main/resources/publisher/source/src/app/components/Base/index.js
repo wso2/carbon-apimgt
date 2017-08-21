@@ -15,61 +15,82 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
 
-import React, {Component} from 'react'
+import Header from './Header/Header'
 
-import  NavBar  from '../Apis/Details/NavBar';
-import {Layout, Breadcrumb, Icon, Menu} from 'antd';
-import ComposeHeader from './Header/ComposeHeader'
-import Footer from './Footer/Footer'
-const {Content, Sider} = Layout;
+import Drawer from 'material-ui/Drawer';
+import NavBar from  '../Apis/Details/NavBar'
+import Grid from 'material-ui/Grid';
+
+const defaultOffset = "250px";
 
 
-class Base extends Component {
-    constructor(props) {
+class Layout extends React.Component {
+    constructor(props){
         super(props);
         this.state = {
-            collapsed: false,
-            mode: 'inline'
+            drawerOpen: true,
+            showLeftMenu: false,
+            layoutLeftOffset: defaultOffset
+        };
+        this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
+    }
+    toggleDrawer = () => {
+        if( !this.state.showLeftMenu ) return;
+        this.setState({ drawerOpen: !this.state.drawerOpen });
+        this.setState({ layoutLeftOffset : (() => {return (this.state.drawerOpen ? "0px" : defaultOffset)})() });
+    };
+
+    componentDidMount() {
+        if(!this.props.showLeftMenu) { this.setState({layoutLeftOffset:"0px"})}
+        this.updateWindowDimensions();
+        window.addEventListener('resize', this.updateWindowDimensions);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.updateWindowDimensions);
+    }
+    componentWillReceiveProps(nextProps){
+        if(nextProps.showLeftMenu){
+            this.setState({showLeftMenu:nextProps.showLeftMenu});
+            if(nextProps.showLeftMenu) { this.setState({layoutLeftOffset:defaultOffset})}
         }
+
+    }
+    updateWindowDimensions() {
+        if(!this.state.showLeftMenu) {
+            return;
+        }
+        window.innerWidth < 650  ?
+            this.setState({drawerOpen:false,layoutLeftOffset:"0px"}) :
+            this.setState({drawerOpen:true,layoutLeftOffset:defaultOffset});
     }
 
-    onCollapse = (collapsed) => {
-        console.log(collapsed);
-        this.setState({
-            collapsed,
-            mode: collapsed ? 'vertical' : 'inline',
-        });
-    }
 
-
-
-    render() {
+    render(props){
+        //let params = qs.stringify({referrer: props.location.pathname});
         return (
-            <Layout style={{height:'100vh'}}>
-                <ComposeHeader />
-                <Content>
-                    <div className="custom-page-heading">
-                        <h1 className="api-heading">APIs</h1>
-                        <span>subheading</span>
-                    </div>
-                    <Layout className="custom-content-wrapper">
-                        {this.props.showLeftMenu ?
-                            <Sider
-                                collapsed={this.state.collapsed}
-                                onCollapse={this.onCollapse}
-                                width={200} style={{padding: '20px 0'}}>
-                                <NavBar/>
-                            </Sider> : <div/>}
-                        <Content >
-                            {this.props.children}
-                        </Content>
-                    </Layout>
-                </Content>
-                <Footer />
-            </Layout>
+            <div  style={{marginLeft:this.state.layoutLeftOffset}}  >
+                <Header toggleDrawer={this.toggleDrawer} showLeftMenu={this.state.showLeftMenu} />
+                <Drawer
+                    open={this.state.drawerOpen && this.state.showLeftMenu}
+                    onRequestClose={this.handleLeftClose}
+                    docked={true}
+                >
+                    <NavBar />
+                </Drawer>
+                <Grid container spacing={0} >
+                    <Grid item xs={12} >
+                        {this.props.children}
+                    </Grid>
+                </Grid>
+
+
+            </div>
         );
     }
+
 }
 
-export default Base;
+export default Layout;

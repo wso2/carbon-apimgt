@@ -30,13 +30,13 @@ public class KeyMgtConfigurations {
     @Element(description = "Key Manager Implementation class")
     private String keyManagerImplClass = "org.wso2.carbon.apimgt.core.impl.DefaultKeyManagerImpl";
     @Element(description = "DCR Endpoint URL")
-    private String dcrEndpoint = "http://localhost:9763/identity/connect/register";
+    private String dcrEndpoint = "https://localhost:9443/identity/connect/register";
     @Element(description = "Token Endpoint URL")
     private String tokenEndpoint = "https://localhost:9443/oauth2/token";
     @Element(description = "Revoke Endpoint URL")
     private String revokeEndpoint = "https://localhost:9443/oauth2/revoke";
     @Element(description = "Introspect Endpoint URL")
-    private String introspectEndpoint = "http://localhost:9763/oauth2/introspect";
+    private String introspectEndpoint = "https://localhost:9443/oauth2/introspect";
     @Element(description = "Key manager Credentials")
     private CredentialConfigurations keyManagerCredentials = new CredentialConfigurations();
     @Element(description = "Alias of Key Manager Certificate in Client Trust Store")
@@ -50,35 +50,71 @@ public class KeyMgtConfigurations {
         return keyManagerImplClass;
     }
 
+    public void setKeyManagerImplClass(String keyManagerImplClass) {
+        this.keyManagerImplClass = keyManagerImplClass;
+    }
+
     public String getDcrEndpoint() {
         return dcrEndpoint;
+    }
+
+    public void setDcrEndpoint(String dcrEndpoint) {
+        this.dcrEndpoint = dcrEndpoint;
     }
 
     public String getTokenEndpoint() {
         return tokenEndpoint;
     }
 
+    public void setTokenEndpoint(String tokenEndpoint) {
+        this.tokenEndpoint = tokenEndpoint;
+    }
+
     public String getRevokeEndpoint() {
         return revokeEndpoint;
+    }
+
+    public void setRevokeEndpoint(String revokeEndpoint) {
+        this.revokeEndpoint = revokeEndpoint;
     }
 
     public String getIntrospectEndpoint() {
         return introspectEndpoint;
     }
 
-    public long getDefaultTokenValidityPeriod() {
-        return defaultTokenValidityPeriod;
+    public void setIntrospectEndpoint(String introspectEndpoint) {
+        this.introspectEndpoint = introspectEndpoint;
     }
 
     public CredentialConfigurations getKeyManagerCredentials() {
         return keyManagerCredentials;
     }
 
+    public void setKeyManagerCredentials(CredentialConfigurations keyManagerCredentials) {
+        this.keyManagerCredentials = keyManagerCredentials;
+    }
+
     public String getKeyManagerCertAlias() {
         return keyManagerCertAlias;
     }
 
+    public void setKeyManagerCertAlias(String keyManagerCertAlias) {
+        this.keyManagerCertAlias = keyManagerCertAlias;
+    }
+
+    public long getDefaultTokenValidityPeriod() {
+        return defaultTokenValidityPeriod;
+    }
+
+    public void setDefaultTokenValidityPeriod(long defaultTokenValidityPeriod) {
+        this.defaultTokenValidityPeriod = defaultTokenValidityPeriod;
+    }
+
     public String getOidcUserinfoJWTSigningAlgo() {
         return oidcUserinfoJWTSigningAlgo;
+    }
+
+    public void setOidcUserinfoJWTSigningAlgo(String oidcUserinfoJWTSigningAlgo) {
+        this.oidcUserinfoJWTSigningAlgo = oidcUserinfoJWTSigningAlgo;
     }
 }

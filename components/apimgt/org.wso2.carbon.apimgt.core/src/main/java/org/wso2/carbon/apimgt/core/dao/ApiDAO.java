@@ -131,11 +131,13 @@ public interface ApiDAO {
     /**
      * Retrieves summary data of all available APIs.
      *
+     * @param roles The set of roles of the current user
+     * @param user The userName of the current user
      * @return {@code List<API>} matching results
      * @throws APIMgtDAOException if error occurs while accessing data layer
      *
      */
-    List<API> getAPIs() throws APIMgtDAOException;
+    List<API> getAPIs(Set<String> roles, String user) throws APIMgtDAOException;
 
     /**
      * Retrieves summary data of all available APIs with life cycle status that matches the status list provided
@@ -508,6 +510,79 @@ public interface ApiDAO {
      */
     void updateApiDefinition(String apiID, String swaggerDefinition, String updatedBy)
             throws APIMgtDAOException;
+
+    /**
+     * Checks whether an WSDL archive exists for an API.
+     * 
+     * @param apiId UUID of API
+     * @return true if an WSDL archive exists for an API
+     * @throws APIMgtDAOException If an error occurs while accessing data layer
+     */
+    boolean isWSDLArchiveExists(String apiId) throws APIMgtDAOException;
+
+    /**
+     * Checks whether an WSDL exists for an API.
+     *
+     * @param apiId UUID of API
+     * @return true if an WSDL exists for an API
+     * @throws APIMgtDAOException If an error occurs while accessing data layer
+     */
+    boolean isWSDLExists(String apiId) throws APIMgtDAOException;
+
+    /**
+     * Retrieves the WSDL of the API
+     *
+     * @param apiId UUID of the API
+     * @return WSDL as {@link String}
+     * @throws APIMgtDAOException If error occurs while accessing the WSDL from the data layer
+     */
+    String getWSDL(String apiId) throws APIMgtDAOException;
+
+    /**
+     * Gets a WSDL archive content stream for an API.
+     * 
+     * @param apiId UUID of API
+     * @return WSDL archive content of the API
+     * @throws APIMgtDAOException If error occurs while accessing the WSDL from the data layer
+     */
+    InputStream getWSDLArchive(String apiId) throws APIMgtDAOException;
+
+    /**
+     * Add a WSDL resource to an API
+     *
+     * @param apiId UUID of API
+     * @param wsdlContent WSDL content as byte array
+     * @param createdBy the user who adds the WSDL
+     * @throws APIMgtDAOException when updating the WSDL failed in DB level
+     */
+    void addOrUpdateWSDL(String apiId, byte[] wsdlContent, String createdBy) throws APIMgtDAOException;
+
+    /**
+     * Add WSDL archive if not exist. If Text WSDL exists, it will be removed from the DB.
+     * If a WSDL archive already exists, it will be updated with the new content. 
+     *
+     * @param apiID api uuid
+     * @param inputStream WSDL archive input stream
+     * @param updatedBy user who performs the action
+     * @throws APIMgtDAOException when updating the WSDL failed in DB level
+     */
+    void addOrUpdateWSDLArchive(String apiID, InputStream inputStream, String updatedBy) throws APIMgtDAOException;
+
+    /**
+     * Remove WSDL text resource of a particular API
+     * 
+     * @param apiId UUID of API
+     * @throws APIMgtDAOException if error occurs while deleting the WSDL from the data layer
+     */
+    void removeWSDL(String apiId) throws APIMgtDAOException;
+
+    /**
+     * Remove WSDL archive of an API
+     * 
+     * @param apiId UUID of API
+     * @throws APIMgtDAOException if error occurs while deleting the WSDL archive from the data layer
+     */
+    void removeWSDLArchiveOfAPI(String apiId) throws APIMgtDAOException;
 
     /**
      * Get gateway configuration of a given API

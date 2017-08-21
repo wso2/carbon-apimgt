@@ -29,14 +29,13 @@ public class APIMgtDAOException extends APIManagementException {
      * @param msg Error message
      * @param code Error code
      */
-   public APIMgtDAOException(String msg , ExceptionCodes code) {
-       super(msg, code);
-   }
-
-    public APIMgtDAOException(String msg , Throwable e, ExceptionCodes code) {
-        super(msg, e, code);
+    public APIMgtDAOException(String msg, ExceptionCodes code) {
+        super(msg, code);
     }
 
+    public APIMgtDAOException(String msg, Throwable e, ExceptionCodes code) {
+        super(msg, e, code);
+    }
 
     public APIMgtDAOException(String msg) {
         super(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);

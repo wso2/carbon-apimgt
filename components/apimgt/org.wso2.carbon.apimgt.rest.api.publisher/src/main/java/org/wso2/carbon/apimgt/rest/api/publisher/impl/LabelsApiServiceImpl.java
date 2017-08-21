@@ -25,7 +25,6 @@ public class LabelsApiServiceImpl extends LabelsApiService {
     /**
      * Get all the labels.
      *
-     * @param accept          Accept header value
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @param request         ms4j request object
@@ -33,10 +32,10 @@ public class LabelsApiServiceImpl extends LabelsApiService {
      * @throws NotFoundException If failed to get the label values
      */
     @Override
-    public Response labelsGet(String accept, String ifNoneMatch, String ifModifiedSince, Request request) throws
-            NotFoundException {
+    public Response labelsGet(String ifNoneMatch, String ifModifiedSince, Request request)
+            throws NotFoundException {
 
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
 
         try {
             List<Label> labels = RestAPIPublisherUtil.getApiPublisher(username).getAllLabels();

@@ -24,6 +24,8 @@ const ButtonGroup = Radio.Group;
 const CheckboxGroup = Checkbox.Group;
 
 import API from '../../../../data/api'
+import {ScopeValidation , resourceMethod, resourcePath} from '../../../../data/ScopeValidation'
+import ApiPermissionValidation from '../../../../data/ApiPermissionValidation'
 
 export default class LifeCycleUpdate extends Component {
     constructor() {
@@ -92,23 +94,27 @@ export default class LifeCycleUpdate extends Component {
                     !is_workflow_pending &&
                     <CheckboxGroup options={checkList} defaultValue={checkedItems} onChange={this.handleCheckItem}/>
                 }
-                <ButtonGroup style={{margin: "5px"}} onChange={this.updateLifeCycleState}>
-                    {
-                        is_workflow_pending ?
-                            (
-                                <div className="btn-group" role="group">
-                                    <input type="button" className="btn btn-primary wf-cleanup-btn"
-                                           defaultValue="Delete pending lifecycle state change request"/>
-                                </div>
-                            ) :
-                            (
-                                lcState.availableTransitionBeanList.map(
-                                    transition_state => lcState.state !== transition_state.targetState &&
-                                    <TransitionStateButton key={transition_state.event} state={transition_state}/>
-                                ) /* Skip when transitions available for current state , this occurs in states where have allowed re-publishing in prototype and published sates*/
-                            )
-                    }
-                </ButtonGroup>
+                <ScopeValidation resourcePath={resourcePath.API_CHANGE_LC} resourceMethod={resourceMethod.POST}>
+                <ApiPermissionValidation userPermissions={api.userPermissionsForApi}>
+                    <ButtonGroup style={{margin: "5px"}} onChange={this.updateLifeCycleState}>
+                        {
+                            is_workflow_pending ?
+                                (
+                                    <div className="btn-group" role="group">
+                                        <input type="button" className="btn btn-primary wf-cleanup-btn"
+                                               defaultValue="Delete pending lifecycle state change request"/>
+                                    </div>
+                                ) :
+                                (
+                                    lcState.availableTransitionBeanList.map(
+                                        transition_state => lcState.state !== transition_state.targetState &&
+                                        <TransitionStateButton key={transition_state.event} state={transition_state}/>
+                                    ) /* Skip when transitions available for current state , this occurs in states where have allowed re-publishing in prototype and published sates*/
+                                )
+                        }
+                    </ButtonGroup>
+                 </ApiPermissionValidation>
+                </ScopeValidation>
             </div>
         );
     }
