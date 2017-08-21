@@ -28,6 +28,7 @@ public class APIConstants {
 
     public static final String HTTP_METHOD = "HTTP_METHOD";
     public static final String REQUEST_URL = "REQUEST_URL";
+    public static final String HTTP_OPTIONS = "OPTIONS";
 
     /**
      * Represents Frontend Constants related to an API.
