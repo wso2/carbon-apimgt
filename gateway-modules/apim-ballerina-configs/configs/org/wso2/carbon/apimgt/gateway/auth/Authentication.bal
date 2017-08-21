@@ -71,13 +71,13 @@ function authenticate (message m) (boolean, message) {
     }
 
     if (resourceDto.authType == constants:AUTHENTICATION_TYPE_NONE) {
-        // set user as anonymous
-        // set throttling tier as unauthenticated
+    // set user as anonymous
+    // set throttling tier as unauthenticated
     }
 
     if (apiDto.securityScheme == 0) {
-        //pass request without authentication
-        //and return method
+    //pass request without authentication
+    //and return method
     }
 
     authHeader, authErr = extractHeaderWithName(constants:AUTHORIZATION, m);
@@ -92,7 +92,7 @@ function authenticate (message m) (boolean, message) {
         string authToken = strings:replace(authHeader, constants:BEARER, ""); //use split method instead
 
         if (strings:length(authToken) == 0) {
-            // token incorrect
+        // token incorrect
             gatewayUtil:constructAccessTokenNotFoundPayload(response);
             http:setStatusCode(response, 401);
             return false, response;
@@ -106,14 +106,14 @@ function authenticate (message m) (boolean, message) {
         }
 
         if (!introspectDto.active) {
-            // access token expired
+        // access token expired
             gatewayUtil:constructAccessTokenExpiredPayload(response);
             return false, response;
         }
 
         // if token had exp
         if (introspectDto.exp != -1) {
-            //put into cache
+        //put into cache
             holder:putIntoTokenCache(authToken, introspectDto);
         }
         if (introspectDto.username != "") {
@@ -153,7 +153,7 @@ function authenticate (message m) (boolean, message) {
                 response = m;
             }
         } else {
-            //subscription missing
+        //subscription missing
             gatewayUtil:constructSubscriptionNotFound(response);
             return false, response;
         }
@@ -162,10 +162,6 @@ function authenticate (message m) (boolean, message) {
         system:println("Api key check...");
         string apiKey = apikeyHeader;
         subscriptionDto = holder:getFromSubscriptionCache(apiContext, version, apiKey);
-
-        system:println("subscriptionDto in Authentication.bal");
-        system:println(subscriptionDto);
-
         if (subscriptionDto != null) {
             boolean subscriptionBlocked = false;
             subscriptionBlocked, response = isSubscriptionBlocked(subscriptionDto, response, apiDto);
@@ -253,6 +249,10 @@ function constructAPIKeyValidationDto (dto:SubscriptionDto subscriptionDto, dto:
     keyValidationInfoDTO.keyType = subscriptionDto.keyEnvType;
     keyValidationInfoDTO.subscriber = applicationDto.applicationOwner;
     keyValidationInfoDTO.resourcePath = resourceDto.uriTemplate;
+
+    system:println("keyValidationInfoDTO");
+    system:println(keyValidationInfoDTO);
+
     return keyValidationInfoDTO;
 }
 
@@ -294,18 +294,18 @@ function retrieveUserInfo (string token) (json) {
 }
 
 function isSubscriptionBlocked (dto:SubscriptionDto subscriptionDto, message response, dto:APIDTO apiDto)
-                                                                                                (boolean, message) {
+(boolean, message) {
     if (subscriptionDto.status == constants:SUBSCRIPTION_STATUS_BLOCKED) {
         gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
         return true, response;
     } else if ((subscriptionDto.status == constants:SUBSCRIPTION_STATUS_PROD_ONLY_BLOCKED) &&
-    (subscriptionDto.keyEnvType == constants:ENV_TYPE_PRODUCTION)) {
-            gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
-            return true, response;
+               (subscriptionDto.keyEnvType == constants:ENV_TYPE_PRODUCTION)) {
+        gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
+        return true, response;
     } else if ((subscriptionDto.status == constants:SUBSCRIPTION_STATUS_SANDBOX_ONLY_BLOCKED)
-      && (subscriptionDto.keyEnvType == constants:ENV_TYPE_SANDBOX)) {
-            gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
-            return true, response;
+               && (subscriptionDto.keyEnvType == constants:ENV_TYPE_SANDBOX)) {
+        gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
+        return true, response;
     }
     return false, response;
 }
