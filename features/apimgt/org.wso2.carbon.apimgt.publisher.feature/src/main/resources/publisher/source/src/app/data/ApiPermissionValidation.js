@@ -23,7 +23,7 @@ function ApiPermissionValidation(props) {
     var checkingPermissionType = props.checkingPermissionType;
     var userPermissions = props.userPermissions;
 
-    if(!userPermissions.includes(checkingPermissionType)) {
+    if(userPermissions.includes(checkingPermissionType)) {
         return (props.children);
     }
     return null;
