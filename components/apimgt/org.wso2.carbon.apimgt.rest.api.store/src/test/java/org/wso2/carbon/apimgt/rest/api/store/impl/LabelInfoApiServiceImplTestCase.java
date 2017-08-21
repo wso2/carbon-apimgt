@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.core.impl.APIStoreImpl;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
+import org.wso2.msf4j.Request;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -52,7 +53,8 @@ public class LabelInfoApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = TestUtil.getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         List<String> labelNames = new ArrayList<>();
         List<Label> labelList = new ArrayList<>();
@@ -60,7 +62,7 @@ public class LabelInfoApiServiceImplTestCase {
         Mockito.when(apiStore.getLabelInfo(labelNames, USER)).thenReturn(labelList);
 
         Response response = labelInfoApiService.labelInfoGet("label1", null, null,
-                TestUtil.getRequest());
+                request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -74,7 +76,8 @@ public class LabelInfoApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = TestUtil.getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         List<String> labelNames = new ArrayList<>();
         List<Label> labelList = new ArrayList<>();
@@ -82,7 +85,7 @@ public class LabelInfoApiServiceImplTestCase {
         Mockito.when(apiStore.getLabelInfo(labelNames, USER)).thenReturn(labelList);
 
         Response response = labelInfoApiService.labelInfoGet(null, null, null,
-                TestUtil.getRequest());
+                request);
 
         Assert.assertEquals(400, response.getStatus());
     }

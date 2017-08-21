@@ -41,7 +41,7 @@ public class TagsApiServiceImpl extends TagsApiService {
         TagListDTO tagListDTO = null;
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             List<Tag> tagList = apiStore.getAllTags();

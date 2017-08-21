@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.messaging.CarbonMessage;
+import org.wso2.carbon.transport.http.netty.message.HTTPCarbonMessage;
 import org.wso2.msf4j.Request;
 
 import java.io.InputStream;
@@ -51,6 +52,7 @@ import java.util.UUID;
 public class TestUtil {
 
     private final static Logger logger = LoggerFactory.getLogger(TestUtil.class);
+    private static final String USER = "admin";
 
     protected static void printTestMethodName() {
         logger.info("------------------ Test method: " + Thread.currentThread().getStackTrace()[2].getMethodName() +
@@ -59,14 +61,9 @@ public class TestUtil {
 
     // Sample request to be used by tests
     protected static Request getRequest() throws APIMgtSecurityException {
-        CarbonMessage carbonMessage = Mockito.mock(CarbonMessage.class);
+        CarbonMessage carbonMessage = new HTTPCarbonMessage();
+        carbonMessage.setProperty("LOGGED_IN_USER", USER);
         Request request = new Request(carbonMessage);
-
-        try {
-            PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(request);
-        } catch (Exception e) {
-            throw new APIMgtSecurityException("Error while mocking Request Object ", e);
-        }
         return request;
     }
 
