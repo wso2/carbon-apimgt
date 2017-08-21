@@ -50,5 +50,4 @@ public class AuthenticatorConstants {
     public static final String PUBLISHER_APPLICATION = "publisher";
     public static final String ADMIN_APPLICATION = "admin";
     public static final String EDITOR_APPLICATION = "editor";
-
 }
