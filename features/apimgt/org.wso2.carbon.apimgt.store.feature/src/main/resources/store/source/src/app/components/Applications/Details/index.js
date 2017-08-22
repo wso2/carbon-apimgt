@@ -17,11 +17,33 @@
  */
 
 import React, {Component} from 'react'
-import Base from './Base/index'
-import Apis from './Apis/Apis'
-import Applications from './Applications/Applications'
-import Login from './Login/Login'
-import Logout from './Logout'
-import Layout from './Layout/index'
+import BasicTabs from './NavTab.js'
 
-export {Base, Apis, Applications, Login, Logout, Layout}
+export default class Details extends Component {
+    componentDidMount() {
+        this.props.setLeftMenu(true);
+    }
+
+    componentWillUnmount() {
+        /* Hide the left side nav bar when detail page is unmount ,
+         since the left nav bar is currently only associated with details page*/
+        this.props.setLeftMenu(false);
+    }
+
+    render() {
+        return (
+            <div>
+                <div>
+                    <h1>Single App Page</h1>
+                </div>
+
+                <div>
+                    <BasicTabs/>
+                </div>
+            </div>
+
+
+        );
+    }
+
+}
