@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.core.models.User;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.dto.UserDTO;
+import org.wso2.msf4j.Request;
 
 import javax.ws.rs.core.Response;
 import java.util.UUID;
@@ -52,7 +53,8 @@ public class SelfSignupApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer()).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = TestUtil.getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         User user = new User();
         user.setEmail("john@john.doe");
@@ -70,7 +72,7 @@ public class SelfSignupApiServiceImplTestCase {
 
         Mockito.doNothing().when(apiStore).selfSignUp(user);
 
-        Response response = selfSignupApiService.selfSignupPost(userDTO, TestUtil.getRequest());
+        Response response = selfSignupApiService.selfSignupPost(userDTO, request);
 
         Assert.assertEquals(200, response.getStatus());
     }

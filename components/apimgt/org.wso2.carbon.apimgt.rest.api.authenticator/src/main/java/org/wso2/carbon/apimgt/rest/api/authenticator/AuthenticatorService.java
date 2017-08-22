@@ -35,7 +35,7 @@ import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
-import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMStoreConfigurations;
+import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMAppConfigurations;
 import org.wso2.carbon.apimgt.rest.api.authenticator.constants.AuthenticatorConstants;
 import org.wso2.carbon.apimgt.rest.api.authenticator.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.authenticator.utils.AuthUtil;
@@ -80,8 +80,8 @@ public class AuthenticatorService {
         grantTypes.add(KeyManagerConstants.PASSWORD_GRANT_TYPE);
         grantTypes.add(KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE);
         grantTypes.add(KeyManagerConstants.REFRESH_GRANT_TYPE);
-        APIMStoreConfigurations storeConfigs = ServiceReferenceHolder.getInstance().getAPIMStoreConfiguration();
-        String callBackURL = storeConfigs.getApimBaseUrl() + "login/callback/" + appName;
+        APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance().getAPIMAppConfiguration();
+        String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName;
         // Get scopes of the application
         String scopes = getApplicationScopes(appName);
         if (log.isDebugEnabled()) {
@@ -100,8 +100,8 @@ public class AuthenticatorService {
                 oAuthData.addProperty(KeyManagerConstants.OAUTH_CALLBACK_URIS, oAuthApplicationCallBackURL);
                 oAuthData.addProperty(KeyManagerConstants.TOKEN_SCOPES, scopes);
                 oAuthData.addProperty(KeyManagerConstants.AUTHORIZATION_ENDPOINT,
-                        storeConfigs.getAuthorizationEndpoint());
-                oAuthData.addProperty(AuthenticatorConstants.SSO_ENABLED, storeConfigs.isSsoEnabled());
+                        appConfigs.getAuthorizationEndpoint());
+                oAuthData.addProperty(AuthenticatorConstants.SSO_ENABLED, appConfigs.isSsoEnabled());
             } else {
                 String errorMsg = "No information available in OAuth application.";
                 log.error(errorMsg, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
@@ -145,8 +145,9 @@ public class AuthenticatorService {
         try {
             if (KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE.equals(grantType)) {
                 // Access token for authorization code grant type
-                APIMStoreConfigurations storeConfigs = ServiceReferenceHolder.getInstance().getAPIMStoreConfiguration();
-                String callBackURL = storeConfigs.getApimBaseUrl() + "login/callback/" + appName;
+                APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance()
+                        .getAPIMAppConfiguration();
+                String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName;
                 // Get the Authorization Code
                 if (requestURL.contains("code=")) {
                     String requestURLQueryParameters = requestURL.split("\\?")[1];

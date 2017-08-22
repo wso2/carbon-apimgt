@@ -19,7 +19,8 @@
 import ReactDOM from 'react-dom'
 import React from 'react'
 import Publisher from "./src/App.js"
-import { LocaleProvider } from 'antd';
-import enUS from 'antd/lib/locale-provider/en_US';
+import 'typeface-roboto'
+import 'material-design-icons'
+import 'material-ui-icons'
 
-ReactDOM.render(<LocaleProvider locale={enUS}><Publisher/></LocaleProvider>, document.getElementById("react-root"));
+ReactDOM.render(<Publisher/>, document.getElementById("react-root"));

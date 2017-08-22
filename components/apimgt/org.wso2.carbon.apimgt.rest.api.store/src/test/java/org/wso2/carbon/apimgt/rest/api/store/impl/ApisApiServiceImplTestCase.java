@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.RatingMappingUtil;
 import org.wso2.carbon.messaging.CarbonMessage;
+import org.wso2.carbon.transport.http.netty.message.HTTPCarbonMessage;
 import org.wso2.msf4j.Request;
 
 import javax.ws.rs.core.Response;
@@ -87,14 +88,15 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiStore)
                 .deleteComment(commentId, apiId, USER);
 
         javax.ws.rs.core.Response response =
                 apisApiService.apisApiIdCommentsCommentIdDelete
-                        (null, apiId, null, null, getRequest());
+                        (null, apiId, null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -110,13 +112,14 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.COMMENT_NOT_FOUND))
                 .when(apiStore).deleteComment(commentId, apiId, USER);
 
         Response response = apisApiService.apisApiIdCommentsCommentIdDelete
-                (commentId, apiId, IF_MATCH, IF_UNMODIFIED_SINCE, getRequest());
+                (commentId, apiId, IF_MATCH, IF_UNMODIFIED_SINCE, request);
 
         assertEquals(response.getStatus(), 404);
     }
@@ -133,18 +136,19 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         String existingFingerprint = "existingFingerprint";
 
         Mockito.when(apisApiService.apisApiIdCommentsCommentIdDeleteFingerprint
-                (commentId, apiId, "test", "test", getRequest()))
+                (commentId, apiId, "test", "test", request))
                 .thenReturn(existingFingerprint);
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(apiStore)
                 .deleteComment(commentId, apiId, USER);
 
         Response response = apisApiService.apisApiIdCommentsCommentIdDelete
-                (commentId, apiId, "test", "test", getRequest());
+                (commentId, apiId, "test", "test", request);
 
         assertEquals(response.getStatus(), 412);
     }
@@ -160,7 +164,8 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Comment comment = new Comment();
         comment.setUuid(commentId);
@@ -175,7 +180,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.when(apiStore.getCommentByUUID(commentId, apiId)).thenReturn(comment);
 
         Response response = apisApiService.apisApiIdCommentsCommentIdGet
-                (commentId, apiId, null, null, getRequest());
+                (commentId, apiId, null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -191,13 +196,14 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.COMMENT_NOT_FOUND))
                 .when(apiStore).getCommentByUUID(commentId, apiId);
 
         Response response = apisApiService.apisApiIdCommentsCommentIdGet
-                (commentId, apiId, null, null, getRequest());
+                (commentId, apiId, null, null, request);
 
         Assert.assertEquals(404, response.getStatus());
     }
@@ -212,7 +218,8 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Comment comment1 = new Comment();
         comment1.setUuid(UUID.randomUUID().toString());
@@ -237,7 +244,7 @@ public class ApisApiServiceImplTestCase {
         commentList.add(comment2);
 
         Mockito.when(apiStore.getCommentsForApi(apiId)).thenReturn(commentList);
-        Response response = apisApiService.apisApiIdCommentsGet(apiId, 3, 0, getRequest());
+        Response response = apisApiService.apisApiIdCommentsGet(apiId, 3, 0, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -252,12 +259,13 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.doThrow(new APICommentException("Error occurred", ExceptionCodes.COMMENT_NOT_FOUND))
                 .when(apiStore).getCommentsForApi(apiId);
 
-        Response response = apisApiService.apisApiIdCommentsGet(apiId, 3, 0, getRequest());
+        Response response = apisApiService.apisApiIdCommentsGet(apiId, 3, 0, request);
 
         Assert.assertEquals(404, response.getStatus());
     }
@@ -273,7 +281,8 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         CommentDTO commentDTO = new CommentDTO();
         commentDTO.setApiId(apiId);
@@ -294,7 +303,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.when(apiStore.getCommentByUUID(commentId, apiId)).thenReturn(comment);
 
         Response response = apisApiService.apisApiIdCommentsCommentIdPut
-                (commentId, apiId, commentDTO, null, null, getRequest());
+                (commentId, apiId, commentDTO, null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -310,7 +319,8 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         CommentDTO commentDTO = new CommentDTO();
         commentDTO.setApiId(apiId);
@@ -333,7 +343,7 @@ public class ApisApiServiceImplTestCase {
 
 
         Response response = apisApiService.apisApiIdCommentsCommentIdPut
-                (commentId, apiId, commentDTO, IF_MATCH, IF_UNMODIFIED_SINCE, getRequest());
+                (commentId, apiId, commentDTO, IF_MATCH, IF_UNMODIFIED_SINCE, request);
 
         Assert.assertEquals(ExceptionCodes.INTERNAL_ERROR.getHttpStatusCode(), response.getStatus());
     }
@@ -348,7 +358,8 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         String documentIdFile = UUID.randomUUID().toString();
         String documentIdInline = UUID.randomUUID().toString();
@@ -367,9 +378,9 @@ public class ApisApiServiceImplTestCase {
         Mockito.when(apiStore.getDocumentationContent(documentIdInline)).thenReturn(documentContentInline);
 
         Response responseFile = apisApiService.apisApiIdDocumentsDocumentIdContentGet
-                (apiId, documentIdFile, null, null, getRequest());
+                (apiId, documentIdFile, null, null, request);
         Response responseInline = apisApiService.apisApiIdDocumentsDocumentIdContentGet
-                (apiId, documentIdInline, null, null, getRequest());
+                (apiId, documentIdInline, null, null, request);
 
         Assert.assertEquals(200, responseFile.getStatus());
         Assert.assertEquals(200, responseInline.getStatus());
@@ -385,7 +396,8 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         String documentIdFile = UUID.randomUUID().toString();
         String documentIdInline = UUID.randomUUID().toString();
@@ -396,9 +408,9 @@ public class ApisApiServiceImplTestCase {
                 .when(apiStore).getDocumentationContent(documentIdInline);
 
         Response responseFile = apisApiService.apisApiIdDocumentsDocumentIdContentGet
-                (apiId, documentIdFile, null, null, getRequest());
+                (apiId, documentIdFile, null, null, request);
         Response responseInline = apisApiService.apisApiIdDocumentsDocumentIdContentGet
-                (apiId, documentIdInline, null, null, getRequest());
+                (apiId, documentIdInline, null, null, request);
 
         Assert.assertEquals(404, responseFile.getStatus());
         Assert.assertEquals(404, responseInline.getStatus());
@@ -415,7 +427,8 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         DocumentInfo documentInfoFile =
                 TestUtil.createAPIDoc(documentId, "documentInfo", "", "API1 documentation file", DocumentInfo.DocType.HOWTO,
@@ -424,7 +437,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.when(apiStore.getDocumentationSummary(documentId)).thenReturn(documentInfoFile);
 
         Response response = apisApiService.apisApiIdDocumentsDocumentIdGet
-                (apiId, documentId, null, null, getRequest());
+                (apiId, documentId, null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -440,13 +453,14 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.DOCUMENT_NOT_FOUND))
                 .when(apiStore).getDocumentationSummary(documentId);
 
         Response response = apisApiService.apisApiIdDocumentsDocumentIdGet
-                (apiId, documentId, null, null, getRequest());
+                (apiId, documentId, null, null, request);
 
         Assert.assertEquals(404, response.getStatus());
     }
@@ -462,7 +476,8 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         DocumentInfo documentInfo1 =
                 TestUtil.createAPIDoc(UUID.randomUUID().toString(), "documentInfo1", "", "API1 documentation 1", DocumentInfo.DocType.HOWTO,
@@ -478,7 +493,7 @@ public class ApisApiServiceImplTestCase {
         Mockito.when(apiStore.getAllDocumentation(apiId, 0, 10)).thenReturn(documentInfoList);
 
         Response response = apisApiService.apisApiIdDocumentsGet
-                (apiId, 10, 0, null, getRequest());
+                (apiId, 10, 0, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -493,13 +508,14 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.DOCUMENT_NOT_FOUND))
                 .when(apiStore).getAllDocumentation(apiId, 0, 10);
 
         Response response = apisApiService.apisApiIdDocumentsGet
-                (apiId, 10, 0, null, getRequest());
+                (apiId, 10, 0, null, request);
 
         Assert.assertEquals(404, response.getStatus());
     }
@@ -514,7 +530,8 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Endpoint api1SandBoxEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
                 (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("abcd").build();
@@ -525,7 +542,7 @@ public class ApisApiServiceImplTestCase {
 
         Mockito.when(apiStore.getAPIbyUUID(apiId)).thenReturn(api);
 
-        Response response = apisApiService.apisApiIdGet(apiId, null, null, getRequest());
+        Response response = apisApiService.apisApiIdGet(apiId, null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -540,12 +557,13 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.API_NOT_FOUND))
                 .when(apiStore).getAPIbyUUID(apiId);
 
-        Response response = apisApiService.apisApiIdGet(apiId, null, null, getRequest());
+        Response response = apisApiService.apisApiIdGet(apiId, null, null, request);
 
         Assert.assertEquals(404, response.getStatus());
     }
@@ -561,7 +579,8 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Rating rating = new Rating();
         rating.setApiId(apiId);
@@ -592,7 +611,7 @@ public class ApisApiServiceImplTestCase {
 
         Mockito.when(apiStore.getRatingsListForApi(apiId)).thenReturn(ratingList);
 
-        Response response = apisApiService.apisApiIdRatingsGet(apiId, 10, 0, getRequest());
+        Response response = apisApiService.apisApiIdRatingsGet(apiId, 10, 0, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -608,12 +627,13 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.doThrow(new APIRatingException("Error occurred", ExceptionCodes.RATING_NOT_FOUND))
                 .when(apiStore).getRatingForApiFromUser(apiId, USER);
 
-        Response response = apisApiService.apisApiIdRatingsGet(apiId, 10, 0, getRequest());
+        Response response = apisApiService.apisApiIdRatingsGet(apiId, 10, 0, request);
 
         Assert.assertEquals(404, response.getStatus());
     }
@@ -629,7 +649,8 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Rating rating = new Rating();
         rating.setApiId(apiId);
@@ -643,7 +664,7 @@ public class ApisApiServiceImplTestCase {
 
         Mockito.when(apiStore.getRatingByUUID(apiId, rateId)).thenReturn(rating);
 
-        Response response = apisApiService.apisApiIdRatingsGet(apiId, 10, 0, getRequest());
+        Response response = apisApiService.apisApiIdRatingsGet(apiId, 10, 0, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -659,12 +680,13 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.doThrow(new APIRatingException("Error occurred", ExceptionCodes.RATING_NOT_FOUND))
                 .when(apiStore).getRatingForApiFromUser(apiId, USER);
 
-        Response response = apisApiService.apisApiIdRatingsGet(apiId, 10, 0, getRequest());
+        Response response = apisApiService.apisApiIdRatingsGet(apiId, 10, 0, request);
 
         Assert.assertEquals(404, response.getStatus());
     }
@@ -680,7 +702,8 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Rating rating = new Rating();
         rating.setApiId(apiId);
@@ -709,7 +732,7 @@ public class ApisApiServiceImplTestCase {
                 .updateRating(apiId, ratingNow.getUuid(), rating);
         Mockito.when(apiStore.getRatingByUUID(apiId, ratingNow.getUuid())).thenReturn(ratingNow);
 
-        Response response = apisApiService.apisApiIdUserRatingPut(apiId, ratingDTO, getRequest());
+        Response response = apisApiService.apisApiIdUserRatingPut(apiId, ratingDTO, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -725,7 +748,8 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.doThrow(new APIRatingException("Error Occured", ExceptionCodes.RATING_NOT_FOUND))
                 .when(apiStore).getRatingForApiFromUser(apiId, USER);
@@ -742,7 +766,7 @@ public class ApisApiServiceImplTestCase {
 
         RatingDTO ratingDTO = RatingMappingUtil.fromRatingToDTO(rating);
 
-        Response response = apisApiService.apisApiIdUserRatingPut(apiId, ratingDTO, getRequest());
+        Response response = apisApiService.apisApiIdUserRatingPut(apiId, ratingDTO, request);
 
         Assert.assertEquals(404, response.getStatus());
     }
@@ -757,11 +781,12 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.when(apiStore.getApiSwaggerDefinition(apiId)).thenReturn("SWAGGER DEFINITION");
 
-        Response response = apisApiService.apisApiIdSwaggerGet(apiId, null, null, getRequest());
+        Response response = apisApiService.apisApiIdSwaggerGet(apiId, null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -776,12 +801,13 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.API_NOT_FOUND))
                 .when(apiStore).getApiSwaggerDefinition(apiId);
 
-        Response response = apisApiService.apisApiIdSwaggerGet(apiId, null, null, getRequest());
+        Response response = apisApiService.apisApiIdSwaggerGet(apiId, null, null, request);
 
         Assert.assertEquals(404, response.getStatus());
     }
@@ -793,11 +819,15 @@ public class ApisApiServiceImplTestCase {
         File file = new File(getClass().getClassLoader().getResource(WSDL_FILE_LOCATION).getFile());
         String wsdlContent = IOUtils.toString(new FileInputStream(file));
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
-        APIStore apiStore = powerMockDefaultAPIStore();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
         Mockito.doReturn(true).when(apiStore).isWSDLExists(uuid);
         Mockito.doReturn(false).when(apiStore).isWSDLArchiveExists(uuid);
         Mockito.doReturn(wsdlContent).when(apiStore).getAPIWSDL(uuid, "Sample");
-        Response response = apisApiService.apisApiIdWsdlGet(uuid, "Sample", null, null, getRequest());
+        Response response = apisApiService.apisApiIdWsdlGet(uuid, "Sample", null, null, request);
         Assert.assertEquals(response.getStatus(), 200);
         Assert.assertTrue(response.getEntity().toString().contains("StockQuote"));
     }
@@ -809,11 +839,15 @@ public class ApisApiServiceImplTestCase {
         File file = new File(getClass().getClassLoader().getResource(WSDL_FILE_LOCATION).getFile());
         String wsdlContent = IOUtils.toString(new FileInputStream(file));
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
-        APIStore apiStore = powerMockDefaultAPIStore();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
         Mockito.doReturn(true).when(apiStore).isWSDLExists(uuid);
         Mockito.doReturn(false).when(apiStore).isWSDLArchiveExists(uuid);
         Mockito.doReturn(wsdlContent).when(apiStore).getAPIWSDL(uuid, APIMgtConstants.LabelConstants.DEFAULT);
-        Response response = apisApiService.apisApiIdWsdlGet(uuid, null, null, null, getRequest());
+        Response response = apisApiService.apisApiIdWsdlGet(uuid, null, null, null, request);
         Assert.assertEquals(response.getStatus(), 200);
         Assert.assertTrue(response.getEntity().toString().contains("StockQuote"));
     }
@@ -823,12 +857,16 @@ public class ApisApiServiceImplTestCase {
         printTestMethodName();
         final String uuid = "11112222-3333-4444-5555-666677778888";
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
-        APIStore apiStore = powerMockDefaultAPIStore();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
         Mockito.doReturn(true).when(apiStore).isWSDLExists(uuid);
         Mockito.doReturn(true).when(apiStore).isWSDLArchiveExists(uuid);
         WSDLArchiveInfo archiveInfo = new WSDLArchiveInfo(WSDL_ZIP_LOCATION, WSDL_ZIP);
         Mockito.doReturn(archiveInfo).when(apiStore).getAPIWSDLArchive(uuid, "Sample");
-        Response response = apisApiService.apisApiIdWsdlGet(uuid, "Sample", null, null, getRequest());
+        Response response = apisApiService.apisApiIdWsdlGet(uuid, "Sample", null, null, request);
         Assert.assertEquals(response.getStatus(), 200);
         Assert.assertTrue(response.getEntity() instanceof File);
     }
@@ -838,9 +876,13 @@ public class ApisApiServiceImplTestCase {
         printTestMethodName();
         final String uuid = "11112222-3333-4444-5555-666677778888";
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
-        APIStore apiStore = powerMockDefaultAPIStore();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
         Mockito.doReturn(false).when(apiStore).isWSDLExists(uuid);
-        Response response = apisApiService.apisApiIdWsdlGet(uuid, "Sample", null, null, getRequest());
+        Response response = apisApiService.apisApiIdWsdlGet(uuid, "Sample", null, null, request);
         assertEquals(response.getStatus(), 204);
     }
 
@@ -849,12 +891,16 @@ public class ApisApiServiceImplTestCase {
         printTestMethodName();
         final String uuid = "11112222-3333-4444-5555-666677778888";
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
-        APIStore apiStore = powerMockDefaultAPIStore();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
         Mockito.doReturn(true).when(apiStore).isWSDLExists(uuid);
         Mockito.doReturn(false).when(apiStore).isWSDLArchiveExists(uuid);
         Mockito.doThrow(new APIMgtWSDLException("Error while retrieving WSDL", ExceptionCodes.INTERNAL_WSDL_EXCEPTION))
                 .when(apiStore).getAPIWSDL(uuid, "Sample");
-        Response response = apisApiService.apisApiIdWsdlGet(uuid, "Sample", null, null, getRequest());
+        Response response = apisApiService.apisApiIdWsdlGet(uuid, "Sample", null, null,request);
         assertEquals(response.getStatus(), 500);
     }
 
@@ -868,7 +914,8 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Endpoint api1SandBoxEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
                 (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("abcd").build();
@@ -882,7 +929,7 @@ public class ApisApiServiceImplTestCase {
 
         Mockito.when(apiStore.searchAPIs("", 0, 1)).thenReturn(apiList);
 
-        Response response = apisApiService.apisGet(10, 0, "", null, getRequest());
+        Response response = apisApiService.apisGet(10, 0, "", null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -897,26 +944,22 @@ public class ApisApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.API_NOT_FOUND))
                 .when(apiStore).searchAPIs("", 0, 10);
 
-        Response response = apisApiService.apisGet(10, 0, "", null, getRequest());
+        Response response = apisApiService.apisGet(10, 0, "", null, request);
 
         Assert.assertEquals(404, response.getStatus());
     }
 
     // Sample request to be used by tests
     private Request getRequest() throws APIMgtSecurityException {
-        CarbonMessage carbonMessage = Mockito.mock(CarbonMessage.class);
+        CarbonMessage carbonMessage = new HTTPCarbonMessage();
+        carbonMessage.setProperty("LOGGED_IN_USER", USER);
         Request request = new Request(carbonMessage);
-
-        try {
-            PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(request);
-        } catch (Exception e) {
-            throw new APIMgtSecurityException("Error while mocking Request Object ", e);
-        }
         return request;
     }
 
@@ -924,7 +967,8 @@ public class ApisApiServiceImplTestCase {
         APIStore apiStore = Mockito.mock(APIStoreImpl.class);
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
         return apiStore;
     }
 

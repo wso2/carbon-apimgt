@@ -26,11 +26,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 import org.wso2.msf4j.Request;
 
-import java.util.HashMap;
-import java.util.List;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
         "2017-01-03T15:53:15.692+05:30")
 public class EndpointsApiServiceImpl extends EndpointsApiService {
@@ -49,7 +44,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
     @Override
     public Response endpointsEndpointIdDelete(String endpointId, String ifMatch, String ifUnmodifiedSince,
             Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = endpointsEndpointIdGetFingerprint(endpointId, null, null,
@@ -85,7 +80,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
     @Override
     public Response endpointsEndpointIdGet(String endpointId, String ifNoneMatch, String ifModifiedSince,
             Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             Endpoint endPoint = apiPublisher.getEndpoint(endpointId);
@@ -132,7 +127,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
      */
     public String endpointsEndpointIdGetFingerprint(String endpointId, String ifMatch, String ifUnmodifiedSince,
             Request request) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username).getLastUpdatedTimeOfEndpoint(
                     endpointId);
@@ -160,7 +155,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
     @Override
     public Response endpointsEndpointIdPut(String endpointId, EndPointDTO body, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             Endpoint endpoint = MappingUtil.toEndpoint(body);
@@ -214,7 +209,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
     @Override
     public Response endpointsGet(String ifNoneMatch, String ifModifiedSince, Request request)
             throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             List<Endpoint> endpointList = apiPublisher.getAllEndpoints();
@@ -239,7 +234,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
 
     @Override
     public Response endpointsHead(String name, String ifNoneMatch, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         boolean status;
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -270,7 +265,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
     @Override
     public Response endpointsPost(EndPointDTO body, String ifNoneMatch, String ifModifiedSince,
             Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();;
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             Endpoint endpoint = MappingUtil.toEndpoint(body);
