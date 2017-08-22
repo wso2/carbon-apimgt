@@ -64,7 +64,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     @Override
     public Response applicationsApplicationIdDelete(String applicationId, String ifMatch, String ifUnmodifiedSince,
                                                     Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, request);
@@ -98,7 +98,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     public Response applicationsApplicationIdGet(String applicationId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
         ApplicationDTO applicationDTO = null;
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, ifNoneMatch,
@@ -146,7 +146,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     public Response applicationsApplicationIdGenerateKeysPost(String applicationId,
             ApplicationKeyGenerateRequestDTO body, Request request) throws NotFoundException {
         try {
-            String username = RestApiUtil.getLoggedInUsername();
+            String username = RestApiUtil.getLoggedInUsername(request);
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             OAuthApplicationInfo oAuthApp = apiConsumer.generateApplicationKeys(applicationId,
                     body.getKeyType().name(), body.getCallbackUrl(), body.getGrantTypesToBeSupported());
@@ -173,7 +173,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     @Override
     public Response applicationsApplicationIdKeysGet(String applicationId, Request request) throws NotFoundException {
         try {
-            String username = RestApiUtil.getLoggedInUsername();
+            String username = RestApiUtil.getLoggedInUsername(request);
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             List<OAuthApplicationInfo> oAuthApps = apiConsumer.getApplicationKeys(applicationId);
             List<ApplicationKeysDTO> appKeys = ApplicationKeyMappingUtil.fromApplicationKeyListToDTOList(oAuthApps);
@@ -202,7 +202,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     public Response applicationsApplicationIdKeysKeyTypeGet(String applicationId, String keyType,
             Request request) throws NotFoundException {
         try {
-            String username = RestApiUtil.getLoggedInUsername();
+            String username = RestApiUtil.getLoggedInUsername(request);
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             OAuthApplicationInfo oAuthApp = apiConsumer.getApplicationKeys(applicationId, keyType);
             ApplicationKeysDTO appKeys = ApplicationKeyMappingUtil.fromApplicationKeysToDTO(oAuthApp);
@@ -233,7 +233,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     public Response applicationsApplicationIdKeysKeyTypePut(String applicationId, String keyType,
             ApplicationKeysDTO body, Request request) throws NotFoundException {
         try {
-            String username = RestApiUtil.getLoggedInUsername();
+            String username = RestApiUtil.getLoggedInUsername(request);
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             OAuthApplicationInfo oAuthApp = apiConsumer.updateGrantTypesAndCallbackURL(applicationId, keyType,
                     body.getSupportedGrantTypes(), body.getCallbackUrl());
@@ -271,7 +271,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     public Response applicationsApplicationIdMapKeysPost(String applicationId,
             ApplicationKeyMappingRequestDTO body, Request request) throws NotFoundException {
         try {
-            String username = RestApiUtil.getLoggedInUsername();
+            String username = RestApiUtil.getLoggedInUsername(request);
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             OAuthApplicationInfo oAuthApp = apiConsumer.mapApplicationKeys(applicationId,
                     body.getKeyType().name(), body.getConsumerKey(), body.getConsumerSecret());
@@ -303,7 +303,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             ApplicationTokenGenerateRequestDTO body, String ifMatch, String ifUnmodifiedSince, Request request)
             throws NotFoundException {
         try {
-            String username = RestApiUtil.getLoggedInUsername();
+            String username = RestApiUtil.getLoggedInUsername(request);
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             ApplicationToken token = apiConsumer.generateApplicationToken(body.getConsumerKey(),
                     body.getConsumerSecret(), body.getScopes(), body.getValidityPeriod(), body.getRevokeToken());
@@ -331,7 +331,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      */
     public String applicationsApplicationIdGetFingerprint(String applicationId, String ifNoneMatch,
             String ifModifiedSince, Request request) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestApiUtil.getConsumer(username).getLastUpdatedTimeOfApplication(applicationId);
             return ETagUtils.generateETag(lastUpdatedTime);
@@ -358,7 +358,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO body, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
         ApplicationDTO updatedApplicationDTO = null;
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             String existingFingerprint = applicationsApplicationIdGetFingerprint(applicationId, null, null, request);
@@ -442,7 +442,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             Request request) throws NotFoundException {
 
         ApplicationListDTO applicationListDTO = null;
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
@@ -486,7 +486,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     public Response applicationsPost(ApplicationDTO body, Request request) throws NotFoundException {
         URI location = null;
         ApplicationDTO createdApplicationDTO = null;
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiConsumer = RestApiUtil.getConsumer(username);
             Application application = ApplicationMappingUtil.fromDTOtoApplication(body, username);

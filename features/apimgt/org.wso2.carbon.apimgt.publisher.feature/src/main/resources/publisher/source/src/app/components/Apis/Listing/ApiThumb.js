@@ -18,16 +18,32 @@
 
 import React from 'react'
 import {Link} from 'react-router-dom'
-import {Card, Col, Button, Icon, Popconfirm, message} from 'antd'
 import API from '../../../data/api'
-import {ScopeValidation, resourcePath, resourceMethod} from '../../../data/ScopeValidation'
+
+import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
+import Typography from 'material-ui/Typography';
+import Button from 'material-ui/Button';
+import Dialog, {
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+} from 'material-ui/Dialog';
+import Slide from 'material-ui/transitions/Slide';
+import Grid from 'material-ui/Grid';
+import DeleteIcon from 'material-ui-icons/Delete';
+
 
 class ApiThumb extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {active: true, loading: false};
+        this.state = {active: true, loading: false, open: false};
         this.handleApiDelete = this.handleApiDelete.bind(this);
     }
+
+    handleRequestClose = () => {
+        this.setState({ openUserMenu: false });
+    };
 
     handleApiDelete(e) {
         this.setState({loading: true});
@@ -40,7 +56,7 @@ class ApiThumb extends React.Component {
                 if (response.status !== 200) {
                     console.log(response);
                     message.error("Something went wrong while deleting the " + name + " API!");
-                    this.setState({loading: false});
+                    this.setState({open: false});
                     return;
                 }
                 message.success(name + " API deleted successfully!");
@@ -56,27 +72,51 @@ class ApiThumb extends React.Component {
             return null;
         }
         return (
-            <Col xs={24} sm={12} md={8} lg={6} xl={4}>
-                <Card className="custom-card" bodyStyle={{padding: 0}}>
-                    <div className="custom-image">
-                        <img alt="example" width="100%" src="/publisher/public/images/api/api-default.png"/>
-                    </div>
-                    <div className="custom-card">
-                        <h3>{name}</h3>
-                        <p>{version}</p>
-                        <p>{context}</p>
-                        <p className="description">{this.props.api.description}</p>
-                        <div className="api-action-container">
-                            <Link to={details_link}>More... <Icon type="edit"/></Link>
-                            <ScopeValidation resourceMethod={resourceMethod.DELETE} resourcePath={resourcePath.SINGLE_API}>
-                                <Popconfirm title="Confirm delete?" onConfirm={this.handleApiDelete}>
-                                    <Button loading={this.state.loading} type="default" shape="circle" icon="delete"/>
-                                </Popconfirm>
-                            </ScopeValidation>
-                        </div>
-                    </div>
+            <Grid item xs={12} sm={6} md={3} lg={2} xl={2}>
+                <Card>
+                    <CardMedia>
+                        <img src="/publisher/public/images/api/api-default.png" style={{width:"100%"}}/>
+                    </CardMedia>
+                    <CardContent>
+                        <Typography type="headline" component="h2">
+                            {name}
+                        </Typography>
+                        <Typography component="p">
+                            <p>{version}</p>
+                            <p>{context}</p>
+                            <p className="description">{this.props.api.description}</p>
+                        </Typography>
+                    </CardContent>
+                    <CardActions>
+                        <Link to={details_link}>
+                            <Button dense color="primary">
+                                More...
+                            </Button>
+                        </Link>
+                        <Button style={{float:"right"}} onClick={() => this.setState({ open: true })}><DeleteIcon /></Button>
+                        <Dialog open={this.state.openUserMenu} transition={Slide} onRequestClose={this.handleRequestClose}>
+                            <DialogTitle>
+                                {"Use Google's location service?"}
+                            </DialogTitle>
+                            <DialogContent>
+                                <DialogContentText>
+                                    Are you sure you want to delete the API ({name} - {version})?
+                                </DialogContentText>
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={this.handleRequestClose} color="primary">
+                                    Cancel
+                                </Button>
+                                <Button onClick={this.handleApiDelete} color="primary">
+                                    Delete
+                                </Button>
+                            </DialogActions>
+                        </Dialog>
+
+
+                    </CardActions>
                 </Card>
-            </Col>
+            </Grid>
         );
     }
 }

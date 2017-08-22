@@ -35,7 +35,7 @@ public class LabelsApiServiceImpl extends LabelsApiService {
     public Response labelsGet(String ifNoneMatch, String ifModifiedSince, Request request)
             throws NotFoundException {
 
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
 
         try {
             List<Label> labels = RestAPIPublisherUtil.getApiPublisher(username).getAllLabels();

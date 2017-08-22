@@ -21,6 +21,8 @@ import { Input, Icon, Checkbox, Button, Card, Tag, Form } from 'antd';
 import { Row, Col } from 'antd';
 import Api from '../../../../data/api'
 import Resource from './Resource'
+import Loading from '../../../Base/Loading/Loading'
+import ApiPermissionValidation from '../../../../data/ApiPermissionValidation'
 
 const CheckboxGroup = Checkbox.Group;
 
@@ -43,6 +45,25 @@ class Resources extends React.Component{
         this.updateResources = this.updateResources.bind(this);
     }
     componentDidMount() {
+
+        const api = new Api();
+        let promised_api_object = api.get(this.api_uuid);
+        promised_api_object.then(
+            response => {
+                this.setState({api: response.obj});
+            }
+        ).catch(
+            error => {
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
+            }
+        );
+
         let promised_api = this.api.getSwagger(this.api_uuid);
         promised_api.then((response) => {
             this.setState({swagger:response.obj});
@@ -191,6 +212,9 @@ class Resources extends React.Component{
         });
     }
     render(){
+        if (!this.state.api) {
+            return <Loading/>
+        }
         const selectBefore = (
             <span>/SwaggerPetstore/1.0.0</span>
         );
@@ -228,7 +252,9 @@ class Resources extends React.Component{
                         }
                     )
                 }
-                <input type="button" onClick={this.updateResources} value="Save"/>
+                <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
+                    <input type="button" onClick={this.updateResources} value="Save"/>
+                </ApiPermissionValidation>
 
             </div>
         )

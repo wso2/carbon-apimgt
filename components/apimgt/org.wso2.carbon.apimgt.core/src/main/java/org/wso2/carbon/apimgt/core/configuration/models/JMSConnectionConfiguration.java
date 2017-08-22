@@ -18,11 +18,13 @@
 
 package org.wso2.carbon.apimgt.core.configuration.models;
 
+import org.wso2.carbon.kernel.annotations.Configuration;
 import org.wso2.carbon.kernel.annotations.Element;
 
 /**
  * Class to hold JMS connection details
  */
+@Configuration(description = "JMS Connection configurations")
 public class JMSConnectionConfiguration {
 
     @Element(description = "Java naming factory initial")

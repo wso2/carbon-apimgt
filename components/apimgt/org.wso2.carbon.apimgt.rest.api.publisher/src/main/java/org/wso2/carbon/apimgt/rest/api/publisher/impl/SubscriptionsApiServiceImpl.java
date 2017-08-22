@@ -46,7 +46,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
     public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String blockState, String ifMatch,
                                                        String ifUnmodifiedSince, Request request) throws
             NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             Subscription subscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
@@ -103,7 +103,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
     @Override
     public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch,
             Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         List<Subscription> subscriptionList;
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -140,7 +140,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
     @Override
     public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = subscriptionsSubscriptionIdGetFingerprint(subscriptionId, ifNoneMatch,
@@ -185,7 +185,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      */
     public String subscriptionsSubscriptionIdGetFingerprint(String subscriptionId, String ifNoneMatch,
             String ifModifiedSince, Request request) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
                     .getLastUpdatedTimeOfSubscription(subscriptionId);
@@ -210,7 +210,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
     public Response subscriptionsUnblockSubscriptionPost(String subscriptionId, String ifMatch, String
             ifUnmodifiedSince, Request request) throws
             NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             Subscription subscription = apiPublisher.getSubscriptionByUUID(subscriptionId);

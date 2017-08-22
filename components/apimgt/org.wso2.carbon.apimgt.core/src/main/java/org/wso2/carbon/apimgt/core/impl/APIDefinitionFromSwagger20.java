@@ -161,6 +161,42 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         }
     }
 
+    /**
+     * This method populates resource to scope mappings into localConfigMap
+     *
+     * @param swagger   swagger oc of the apis
+     * @param namespace namespacee unique identifier of the api
+     */
+    private void populateConfigMapForScope(Swagger swagger, String namespace) {
+        //todo: Keep polulateConfigMapForScope and remove populateConfigMapForScopes after finalizing yamls
+        // todo: -without vendor extensions.
+        Map<String, String> configMap = ServiceReferenceHolder.getInstance().getRestAPIConfigurationMap(namespace);
+        //update local cache with configs defined in configuration file(dep.yaml)
+        if (!localConfigMap.containsKey(namespace)) {
+            localConfigMap.put(namespace, new ConcurrentHashMap<>());
+        }
+        if (configMap != null) {
+            localConfigMap.get(namespace).putAll(configMap);
+        }
+        //update local cache with the resource to scope mapping read from swagger
+        if (swagger != null) {
+            for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
+                Path resource = entry.getValue();
+                Map<HttpMethod, Operation> operationsMap = resource.getOperationMap();
+                for (Map.Entry<HttpMethod, Operation> httpVerbEntry : operationsMap.entrySet()) {
+                    List<Map<String, List<String>>> security = httpVerbEntry.getValue().getSecurity();
+                    if (security != null) {
+                        String scope = security.get(0).get(APIMgtConstants.OAUTH2SECURITY).get(0);
+                        String path = httpVerbEntry.getKey() + "_" + entry.getKey();
+                        if (!localConfigMap.get(namespace).containsKey(path)) {
+                            localConfigMap.get(namespace).put(path, scope);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public List<APIResource> parseSwaggerAPIResources(StringBuilder resourceConfigsJSON)
             throws APIManagementException {
@@ -215,13 +251,26 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         Swagger swagger = swaggerParser.parse(resourceConfigJSON);
         String basePath = swagger.getBasePath();
         String nameSpace = getNamespaceFromBasePath(basePath);
+        Map<String, String> scopes = null;
         if (nameSpace == null) {
             return new HashMap<>();
         }
+        if (localConfigMap.containsKey(nameSpace)) {
+            if (localConfigMap.get(nameSpace).containsKey(APIMgtConstants.SCOPES)) {
+                return  (Map<String, String>) localConfigMap.get(nameSpace).get(APIMgtConstants.SCOPES);
+            }
+        } else {
+            populateConfigMapForScope(swagger, nameSpace);
+            //security header is not found in deployment.yaml.hence, reading from swagger
+        }
         Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
-        Map.Entry<String, SecuritySchemeDefinition> entry = securityDefinitions.entrySet().iterator().next();
-        OAuth2Definition securityDefinition = (OAuth2Definition) entry.getValue();
-        return securityDefinition.getScopes();
+        if (securityDefinitions != null) {
+            Map.Entry<String, SecuritySchemeDefinition> entry = securityDefinitions.entrySet().iterator().next();
+            OAuth2Definition securityDefinition = (OAuth2Definition) entry.getValue();
+            scopes = securityDefinition.getScopes();
+            localConfigMap.get(nameSpace).put(APIMgtConstants.SCOPES, scopes);
+        }
+        return scopes;
     }
 
     @Override
