@@ -19,7 +19,7 @@
 import React, {Component} from 'react'
 
 import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom'
-import {Apis, Base, Login, Logout, Endpoints,Layout} from './app/components'
+import {Apis, Applications, Base, Login, Logout, Endpoints,Layout} from './app/components'
 import {PageNotFound} from './app/components/Base/Errors'
 import AuthManager from './app/data/AuthManager'
 import qs from 'qs'
@@ -96,6 +96,12 @@ class Store extends Component {
                         <Redirect exact from="/" to="/apis"/>
                         <Route path={"/login"} component={Login}/>
                         <Route path={"/logout"} component={Logout}/>
+                        <Layout>
+                            <Route path={"/applications"} showLeftMenu={this.state.showLeftMenu} render={ props => (<Applications setLeftMenu={this.setLeftMenu}/>)}/>
+                        </Layout>
+                        <Layout>
+                            <Route path={"/application/create"} showLeftMenu={this.state.showLeftMenu} render={ props => (<Applications setLeftMenu={this.setLeftMenu}/>)}/>
+                        </Layout>
                         <Layout><Route path={"/apis"} showLeftMenu={this.state.showLeftMenu} render={ props => (<Apis setLeftMenu={this.setLeftMenu}/>)}/></Layout>
                         <Route component={Protected}/>
                     </Switch>

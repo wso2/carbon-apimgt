@@ -17,11 +17,25 @@
  */
 
 import React, {Component} from 'react'
-import Base from './Base/index'
-import Apis from './Apis/Apis'
-import Applications from './Applications/Applications'
-import Login from './Login/Login'
-import Logout from './Logout'
-import Layout from './Layout/index'
+import {Route, Switch} from 'react-router-dom'
+import Listing from './Listing/Listing.js';
+import Details from './Details/index'
+import {PageNotFound} from '../Base/Errors'
 
-export {Base, Apis, Applications, Login, Logout, Layout}
+class Applications extends Component {
+    render() {
+        return (
+            <div>
+                <Switch>
+                    <Route exact path={"/applications"} component={Listing}/>
+                    <Route path={"/applications/:application_uuid/"} render={ props => (
+                        <Details {...props} setLeftMenu={this.props.setLeftMenu}/>)}/>
+                    <Route component={PageNotFound}/>
+                </Switch>
+
+            </div>
+        );
+    }
+}
+
+export default Applications;

@@ -27,6 +27,7 @@ import InboxIcon from 'material-ui-icons/Inbox';
 import DraftsIcon from 'material-ui-icons/Drafts';
 import StarIcon from 'material-ui-icons/Star';
 import SendIcon from 'material-ui-icons/Send';
+import {Link} from 'react-router-dom';
 
 
 const styleSheet = createStyleSheet(theme => ({
@@ -74,7 +75,9 @@ class Layout extends React.Component {
                         <ListItemIcon>
                             <StarIcon />
                         </ListItemIcon>
-                        <ListItemText primary="Applications" />
+                        <Link to="/applications">
+                            <ListItemText primary="Applications" />
+                        </Link>
                     </ListItem>
                     <ListItem button>
                         <ListItemIcon>
