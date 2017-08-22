@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 public class ApplicationUtils {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationUtils.class);
-
+    
     public static AccessTokenRequest createAccessTokenRequest(OAuthApplicationInfo oAuthApplication)
             throws APIManagementException {
 

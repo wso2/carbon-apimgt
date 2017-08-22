@@ -102,18 +102,18 @@ public class APIManagerFactory {
 
     private APIPublisher newProvider(String username) throws APIManagementException {
         try {
-            UserAwareAPIPublisher userAwareAPIPublisher = new UserAwareAPIPublisher(username, getIdentityProvider(),
+            APIPublisherImpl apiPublisher = new APIPublisherImpl(username, getIdentityProvider(), getKeyManager(),
                     DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(),
                     DAOFactory.getPolicyDAO(), geApiLifecycleManager(), DAOFactory.getLabelDAO(),
                     DAOFactory.getWorkflowDAO(), DAOFactory.getTagDAO(), new GatewaySourceGeneratorImpl(),
                     new APIGatewayPublisherImpl());
 
             // Register all the observers which need to observe 'Publisher' component
-            userAwareAPIPublisher.registerObserver(new EventLogger());
-            userAwareAPIPublisher.registerObserver(new FunctionTrigger(DAOFactory.getFunctionDAO(),
+            apiPublisher.registerObserver(new EventLogger());
+            apiPublisher.registerObserver(new FunctionTrigger(DAOFactory.getFunctionDAO(),
                     new RestCallUtilImpl()));
 
-            return userAwareAPIPublisher;
+            return apiPublisher;
         } catch (APIMgtDAOException e) {
             log.error("Couldn't Create API Provider", e);
             throw new APIMgtDAOException("Couldn't Create API Provider", ExceptionCodes.APIMGT_DAO_EXCEPTION);
@@ -125,7 +125,7 @@ public class APIManagerFactory {
         try {
             return new APIMgtAdminServiceImpl(DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(),
                     DAOFactory.getApiDAO(), DAOFactory.getLabelDAO(), DAOFactory.getApplicationDAO(), new
-                    APIGatewayPublisherImpl());
+                    APIGatewayPublisherImpl(), DAOFactory.getWorkflowDAO());
         } catch (APIMgtDAOException e) {
             log.error("Couldn't create API Management Admin Service", e);
             throw new APIMgtDAOException("Couldn't create API Management Admin Service",
@@ -139,7 +139,7 @@ public class APIManagerFactory {
         // username = null;
         // }
         try {
-            UserAwareAPIStore userAwareAPIStore = new UserAwareAPIStore(username, getIdentityProvider(),
+            APIStoreImpl userAwareAPIStore = new APIStoreImpl(username, getIdentityProvider(), getKeyManager(),
                     DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(),
                     DAOFactory.getPolicyDAO(), DAOFactory.getTagDAO(), DAOFactory.getLabelDAO(),
                     DAOFactory.getWorkflowDAO(), new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());

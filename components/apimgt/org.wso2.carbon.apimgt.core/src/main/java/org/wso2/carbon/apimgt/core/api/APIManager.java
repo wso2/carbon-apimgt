@@ -20,6 +20,7 @@
 package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
@@ -288,4 +289,21 @@ public interface APIManager {
      */
     Label getLabelByName(String labelName) throws APIManagementException;
 
+    /**
+     * Checks whether an WSDL archive exists for an API.
+     *
+     * @param apiId UUID of API
+     * @return true if an WSDL archive exists for an API
+     * @throws APIMgtDAOException If an error occurs while accessing data layer
+     */
+    boolean isWSDLArchiveExists(String apiId) throws APIMgtDAOException;
+
+    /**
+     * Checks whether an WSDL exists for an API.
+     *
+     * @param apiId UUID of API
+     * @return true if an WSDL exists for an API
+     * @throws APIMgtDAOException If an error occurs while accessing data layer
+     */
+    boolean isWSDLExists(String apiId) throws APIMgtDAOException;
 }

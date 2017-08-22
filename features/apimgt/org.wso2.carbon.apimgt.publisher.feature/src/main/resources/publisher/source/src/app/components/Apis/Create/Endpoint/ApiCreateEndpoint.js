@@ -21,9 +21,11 @@ import {Redirect} from 'react-router-dom'
 import API from '../../../../data/api.js'
 import {toast} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
+import Policies from '../../Details/LifeCycle/Policies.js'
 
+import {Form, Icon, Input, Button, message, Radio, Collapse, Card, Row, Col} from 'antd'
+import {ScopeValidation, resourceMethod, resourcePath} from '../../../../data/ScopeValidation';
 
-import {Form, Icon, Input, Button, message, Radio, Collapse, Row, Col} from 'antd'
 const Panel = Collapse.Panel;
 const FormItem = Form.Item;
 const RadioButton = Radio.Button;
@@ -32,13 +34,34 @@ const RadioGroup = Radio.Group;
 class EndpointForm extends React.Component {
     constructor(props) {
         super(props);
+        this.api = new API();
+        this.state = {
+            api: this.api
+        };
+        this.updateData = this.updateData.bind(this);
+    }
+
+    componentWillMount() {
+        this.updateData();
+    }
+
+    updateData() {
+        let promised_tier = this.api.policies('api');
+        promised_tier.then(response => {
+            let tiers = response.obj;
+            this.setState({policies: tiers});
+        })
+    }
+
+    handlePolicies(policies) {
+        this.state.selectedPolicies = policies;
     }
 
     createAPICallback = (response) => {
         let uuid = JSON.parse(response.data).id;
         let redirect_url = "/apis/" + uuid + "/overview";
         this.props.history.push(redirect_url);
-        message.success("Api Created Successfully. Now you can add resources, define endpoints etc..", opts);
+        message.success("Api Created Successfully. Now you can add resources, define endpoints etc..");
     };
     /**
      * Do create API from either swagger URL or swagger file upload.In case of URL pre fetch the swagger file and make a blob
@@ -70,10 +93,21 @@ class EndpointForm extends React.Component {
                     sandbox.inline.name += "_sandbox";
                     api_data['endpoint'] = [production, sandbox];
                 }
-                let new_api = new API('');
+                let new_api = new API();
                 let promised_create = new_api.create(api_data);
                 promised_create
-                    .then(this.createAPICallback)
+                    .then(response => {
+                        let uuid = JSON.parse(response.data).id;
+                        let promisedApi = this.api.get(uuid);
+                        promisedApi.then(response => {
+                            let api_data = JSON.parse(response.data);
+                            api_data.policies = this.state.selectedPolicies;
+                            let promised_update = this.api.update(api_data);
+                            promised_update.then(response => {
+                                this.createAPICallback(response);
+                            })
+                        });
+                    })
                     .catch(
                         function (error_response) {
                             let error_data = JSON.parse(error_response.data);
@@ -92,6 +126,11 @@ class EndpointForm extends React.Component {
 
 
     render() {
+        const props = {
+            policies: this.state.policies,
+            handlePolicies: this.handlePolicies.bind(this),
+            selectedPolicies: this.state.selectedPolicies
+        }
         const {getFieldDecorator} = this.props.form;
         return (
             <Form onSubmit={this.handleSubmit} className="login-form">
@@ -143,13 +182,22 @@ class EndpointForm extends React.Component {
                         </Collapse>
                     </Col>
                 </Row>
-
+                <Row>
+                    <Col span={12}>
+                        <ScopeValidation resourcePath={resourcePath.API_CHANGE_LC} resourceMethod={resourceMethod.POST}>
+                            <Card title="Business Plans" bordered={false} style={{margin: '5px'}}>
+                                {this.state.policies ? <Policies {...props}/> : ''}
+                            </Card>
+                        </ScopeValidation>
+                    </Col>
+                </Row>
 
                 <FormItem >
-
-                    <Button type="primary" htmlType="submit">
-                        Create
-                    </Button>
+                    <ScopeValidation resourcePath={resourcePath.APIS} resourceMethod={resourceMethod.POST}>
+                        <Button id="action-create" type="primary" htmlType="submit">
+                            Create
+                        </Button>
+                    </ScopeValidation>
                     <Button type="default" htmlType="button"
                             onClick={() => this.props.history.push("/api/create/home")}>
                         Cancel

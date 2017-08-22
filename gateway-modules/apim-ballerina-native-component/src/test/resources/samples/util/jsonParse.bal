@@ -32,3 +32,13 @@ function testParseJson () (boolean) {
         return false;
     }
 }
+
+function testInvalidJson () (boolean) {
+    string invalidJsonString = "{Invlid JSON}";
+    try{
+        json parsedJson = util:parse(invalidJsonString);
+    } catch (errors:Error err) {
+        return false;
+    }
+    return true;
+}

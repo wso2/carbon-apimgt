@@ -113,7 +113,7 @@ public class BrokerUtil {
      * Retrieve a new TopicConnection from broker connection pool
      *
      * @return  topicConnection  new topic connection to broker
-     * @throws BrokerException  If there is a failure to initialize broker connection factory
+     * @throws BrokerException  If there is a failure to init broker connection factory
      * @throws JMSException     If there is a failure to obtain topic connection
      */
     private static TopicConnection getTopicConnection() throws BrokerException, JMSException {

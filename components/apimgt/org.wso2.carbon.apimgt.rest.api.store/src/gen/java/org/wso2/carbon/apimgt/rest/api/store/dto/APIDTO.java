@@ -28,6 +28,9 @@ public class APIDTO extends BaseAPIDTO  {
   @JsonProperty("policies")
   private List<String> policies = new ArrayList<String>();
 
+  @JsonProperty("wsdlUri")
+  private String wsdlUri = null;
+
   @JsonProperty("businessInformation")
   private API_businessInformationDTO businessInformation = null;
 
@@ -113,6 +116,24 @@ public class APIDTO extends BaseAPIDTO  {
     this.policies = policies;
   }
 
+  public APIDTO wsdlUri(String wsdlUri) {
+    this.wsdlUri = wsdlUri;
+    return this;
+  }
+
+   /**
+   * Get wsdlUri
+   * @return wsdlUri
+  **/
+  @ApiModelProperty(value = "")
+  public String getWsdlUri() {
+    return wsdlUri;
+  }
+
+  public void setWsdlUri(String wsdlUri) {
+    this.wsdlUri = wsdlUri;
+  }
+
   public APIDTO businessInformation(API_businessInformationDTO businessInformation) {
     this.businessInformation = businessInformation;
     return this;
@@ -145,13 +166,14 @@ public class APIDTO extends BaseAPIDTO  {
         Objects.equals(this.isDefaultVersion, API.isDefaultVersion) &&
         Objects.equals(this.tags, API.tags) &&
         Objects.equals(this.policies, API.policies) &&
+        Objects.equals(this.wsdlUri, API.wsdlUri) &&
         Objects.equals(this.businessInformation, API.businessInformation) &&
         super.equals(o);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(lifeCycleStatus, isDefaultVersion, tags, policies, businessInformation, super.hashCode());
+    return Objects.hash(lifeCycleStatus, isDefaultVersion, tags, policies, wsdlUri, businessInformation, super.hashCode());
   }
 
   @Override
@@ -163,6 +185,7 @@ public class APIDTO extends BaseAPIDTO  {
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
+    sb.append("    wsdlUri: ").append(toIndentedString(wsdlUri)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("}");
     return sb.toString();

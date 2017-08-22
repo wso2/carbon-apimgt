@@ -26,7 +26,7 @@ import org.wso2.carbon.kernel.annotations.Element;
 public class JMSConnectionConfiguration {
 
     @Element(description = "Java naming factory initial")
-    private String javaNamingfactoryInitial = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory";
+    private String javaNamingFactoryInitial = "org.wso2.andes.jndi.PropertiesFileInitialContextFactory";
     @Element(description = "JMS Connectiontion factory JNDI name")
     private String jmsConnectionFactoryJNDIName = "TopicConnectionFactory";
     @Element(description = "Topic connection factory URL")
@@ -34,19 +34,35 @@ public class JMSConnectionConfiguration {
     @Element(description = "Destination topic name")
     private String topic = "myTopic";
 
-    public String getJavaNamingfactoryInitial() {
-        return javaNamingfactoryInitial;
+    public String getJavaNamingFactoryInitial() {
+        return javaNamingFactoryInitial;
+    }
+
+    public void setJavaNamingFactoryInitial(String javaNamingFactoryInitial) {
+        this.javaNamingFactoryInitial = javaNamingFactoryInitial;
     }
 
     public String getJmsConnectionFactoryJNDIName() {
         return jmsConnectionFactoryJNDIName;
     }
 
+    public void setJmsConnectionFactoryJNDIName(String jmsConnectionFactoryJNDIName) {
+        this.jmsConnectionFactoryJNDIName = jmsConnectionFactoryJNDIName;
+    }
+
     public String getTopicConnectionFactoryURL() {
         return topicConnectionFactoryURL;
     }
 
+    public void setTopicConnectionFactoryURL(String topicConnectionFactoryURL) {
+        this.topicConnectionFactoryURL = topicConnectionFactoryURL;
+    }
+
     public String getTopic() {
         return topic;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
     }
 }

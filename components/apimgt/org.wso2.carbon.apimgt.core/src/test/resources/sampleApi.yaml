@@ -1,0 +1,514 @@
+swagger: '2.0'
+######################################################
+# Prolog
+######################################################
+info:
+  version: "v1.0"
+  title: "WSO2 API Manager - Publisher API"
+  description: |
+    This specifies a **RESTful API** for WSO2 **API Manager** - Publisher.
+
+    Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.0.4/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources/publisher-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.
+  contact:
+    name: "WSO2"
+    url: "http://wso2.com/products/api-manager/"
+    email: "architecture@wso2.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+######################################################
+# The fixed parts of the URLs of the API
+######################################################
+
+# The schemes supported by the API
+schemes:
+  - https
+  - http
+
+# The domain of the API.
+# This is configured by the customer during deployment.
+# The given host is just an example.
+host: apis.wso2.com
+
+# The base path of the API.
+# Will be prefixed to all paths.
+basePath: /api/am/publisher/v1.0
+
+# The following media types can be passed as input in message bodies of the API.
+# The actual media type must be specified in the Content-Type header field of the request.
+# The default is json, i.e. the Content-Type header is not needed to
+# be set, but supporting it serves extensibility.
+consumes:
+  - application/json
+
+# The following media types may be passed as output in message bodies of the API.
+# The media type(s) consumable by the requestor is specified in the Accept header field
+# of the corresponding request.
+# The actual media type returned will be specfied in the Content-Type header field
+# of the of the response.
+# The default of the Accept header is json, i.e. there is not needed to
+# set the value, but supporting it serves extensibility.
+produces:
+  - application/json
+
+securityDefinitions:
+  OAuth2Security:
+    type: oauth2
+    flow: password
+    tokenUrl: https://localhost:9443/token
+    scopes:
+      apim:api_view: View API
+      apim:api_create: Create API
+      apim:api_update: Update API
+      apim:api_delete: Delete API
+
+security:
+  - OAuth2Security:
+    - apim:api_view
+
+######################################################
+# The "API Collection" resource APIs
+######################################################
+paths:
+  /apis:
+
+#-----------------------------------------------------
+# Retrieving the list of all APIs qualifying under a given search condition
+#-----------------------------------------------------
+    get:
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis"
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": \"This sample API provides Account Status Validation\",\n         \"name\": \"AccountVal\",\n         \"context\": \"/account\",\n         \"id\": \"2e81f147-c8a8-4f68-b4f0-69e0e7510b01\",\n         \"lifeCycleStatus\": \"PUBLISHED\"\n      },\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": null,\n         \"name\": \"api1\",\n         \"context\": \"/api1\",\n         \"id\": \"3e22d2fb-277a-4e9e-8c7e-1c0f7f73960e\",\n         \"lifeCycleStatus\": \"PUBLISHED\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}"
+      summary: |
+        Retrieve/Search APIs
+      description: |
+        This operation provides you a list of available APIs qualifying under a given search condition.
+
+        Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation.
+      parameters:
+        - $ref : '#/parameters/limit'
+        - $ref : '#/parameters/offset'
+        - name : query
+          in: query
+          description: |
+            **Search condition**.
+
+            You can search in attributes by using an **"<attribute>:"** modifier.
+
+            Eg.
+            "provider:wso2" will match an API if the provider of the API is exactly "wso2".
+
+            Additionally you can use wildcards.
+
+            Eg.
+            "provider:wso2*" will match an API if the provider of the API starts with "wso2".
+
+            Supported attribute modifiers are [**version, context, lifeCycleStatus,
+            description, subcontext, doc, provider**]
+
+            If no advanced attribute modifier has been specified, search will match the
+            given query string against API Name.
+
+          type: string
+        - $ref : "#/parameters/If-None-Match"
+      tags:
+        - API (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            List of qualifying APIs is returned.
+          schema:
+            $ref: '#/definitions/APIList'
+          headers:
+            Content-Type:
+              description: The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# The attibutes of the API existance check resource
+#-----------------------------------------------------
+    head:
+      x-wso2-curl: "curl -I -k -X HEAD \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9090/api/am/publisher/v1.0/apis?query=name%3AapiName"
+      x-wso2-request: |
+        HEAD https://localhost:9090/api/am/publisher/v1.0/apis?query=name%3AapiName HTTP/1.1
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK
+                        Connection: keep-alive
+                        Content-Length: 0"
+      summary: |
+        Check given API attibute name is already exist
+      description: |
+            Using this operation, you can check a given API context is already used. You need to provide the context name you want to check.
+      parameters:
+        - name : query
+          in: query
+          description: |
+            **Search condition**.
+
+            You can search in attributes by using an **"<attribute>:"** modifier.
+
+            Eg.
+            "provider:wso2" will match an API if the provider of the API is exactly "wso2".
+
+            Additionally you can use wildcards.
+
+            Eg.
+            "provider:wso2*" will match an API if the provider of the API starts with "wso2".
+
+            Supported attribute modifiers are [**version, context, lifeCycleStatus,
+            description, subcontext, doc, provider**]
+
+            If no advanced attribute modifier has been specified, search will match the
+            given query string against API Name.
+
+          type: string
+        - $ref : "#/parameters/If-None-Match"
+      tags:
+        - API (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            Requested API attibute status is returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+            description: |
+              Bad Request.
+              Requested API attribute does not meet requiremnts.
+        404:
+          description: |
+            Not Found.
+            Requested API attribute does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+#-----------------------------------------------------
+# Create a new API
+#-----------------------------------------------------
+    post:
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json https://127.0.0.1:9443/api/am/publisher/v1.0/apis"
+      x-wso2-request: "POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"PUBLISHED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": false,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\":    [\r\n      \"http\",\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"pizza\"],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 5000,\r\n      \"production\": 1000\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}"
+      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/7a2298c4-c905-403f-8fac-38c73301631f\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"CREATED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\":    [\r\n      \"http\",\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"pizza\"],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 5000,\r\n      \"production\": 1000\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}"
+      security:
+        - OAuth2Security:
+          - apim:api_create
+      summary: Create a new API
+      description: |
+        This operation can be used to create a new API specifying the details of the API in the payload. The new API will be in `CREATED` state.
+
+        There is a special capability for a user who has `APIM Admin` permission such that he can create APIs on behalf of other users. For that he can to specify `"provider" : "some_other_user"` in the payload so that the API's creator will be shown as `some_other_user` in the UI.
+      parameters:
+        - in: body
+          name: body
+          description: |
+            API object that needs to be added
+          required: true
+          schema:
+            $ref: '#/definitions/API'
+      tags:
+        - API (Collection)
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+            Location header contains URL of newly created entity.
+          schema:
+            $ref: '#/definitions/API'
+          headers:
+            Location:
+              description: |
+                The URL of the newly created resource.
+              type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        415:
+          description: |
+            Unsupported Media Type.
+            The entity of the request was in a not supported format.
+          schema:
+            $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# The API resource
+#-----------------------------------------------------
+  API:
+    title: API object
+    required:
+      - name
+      - context
+      - version
+      - policies
+      - isDefaultVersion
+      - transport
+      - visibility
+    properties:
+      id:
+        type: string
+        description: |
+          UUID of the api registry artifact
+        example: 01234567-0123-0123-0123-012345678901
+      name:
+        type: string
+        example: CalculatorAPI
+      description:
+        type: string
+        example: A calculator API that supports basic operations
+      context:
+        type: string
+        example: CalculatorAPI
+      version:
+        type: string
+        example: 1.0.0
+      provider:
+        description: |
+          If the provider value is not given user invoking the api will be used as the provider.
+        type: string
+        example: admin
+      wsdlUri:
+        description: |
+          WSDL URL if the API is based on a WSDL endpoint
+        type: string
+        example: "http://www.webservicex.com/globalweather.asmx?wsdl"
+      lifeCycleStatus:
+        type: string
+        example: CREATED
+      workflowStatus:
+        type: string
+        example: APPROVED
+      createdTime:
+        type: string
+        example: 2017-02-20T13:57:16.229
+      apiPolicy:
+        type: string
+        example: UNLIMITED
+      lastUpdatedTime:
+        type: string
+        example: 2017-02-20T13:57:16.229
+      responseCaching:
+        type: string
+        example: Disabled
+      cacheTimeout:
+        type: integer
+        example: 300
+      destinationStatsEnabled:
+        type: string
+        example: Disabled
+      isDefaultVersion:
+        type: boolean
+        example: false
+      transport:
+        description: |
+          Supported transports for the API (http and/or https).
+        type: array
+        items:
+          type: string
+        example: ["http","https"]
+      tags:
+        type: array
+        items:
+          type: string
+        example: ["substract","add"]
+      labels:
+        type: array
+        items:
+          type: string
+        example: ["public","private"]
+      policies:
+        type: array
+        items:
+          type: string
+        example: ["Unlimited"]
+      visibility:
+        type: string
+        enum:
+          - PUBLIC
+          - PRIVATE
+          - RESTRICTED
+          - CONTROLLED
+        example: PUBLIC
+      visibleRoles:
+        type: array
+        items:
+          type: string
+        example: []
+      permission:
+        type: string
+        example: "[{\"groupId\" : 1000, \"permission\" : [\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]"
+      userPermissionsForApi:
+        type: array
+        description: |
+          LoggedIn user permissions for the API
+        items:
+          type: string
+        example: ["READ","UPDATE"]
+      visibleTenants:
+        type: array
+        items:
+          type: string
+        example: []
+      gatewayEnvironments:
+        description: |
+          Comma separated list of gateway environments.
+        type: string
+        example: Production and Sandbox
+      sequences:
+        type: array
+        items:
+          $ref: '#/definitions/Sequence'
+        example: []
+      businessInformation:
+        properties:
+          businessOwner:
+            type: string
+            example: businessowner
+          businessOwnerEmail:
+            type: string
+            example: businessowner@wso2.com
+          technicalOwner:
+            type: string
+            example: technicalowner
+          technicalOwnerEmail:
+            type: string
+            example: technicalowner@wso2.com
+      corsConfiguration:
+        description: |
+          CORS configuration for the API
+        properties:
+          corsConfigurationEnabled:
+            type: boolean
+            default: false
+          accessControlAllowOrigins:
+            type: array
+            items:
+               type: string
+          accessControlAllowCredentials:
+            type: boolean
+            default: false
+          accessControlAllowHeaders:
+            type: array
+            items:
+              type: string
+          accessControlAllowMethods:
+            type: array
+            items:
+              type: string
+      endpoint:
+        type: array
+        items:
+         properties:
+          key:
+           type: string
+           example: "01234567-0123-0123-0123-012345678901"
+          inline:
+           $ref: '#/definitions/EndPoint'
+
+          type:
+            type: string
+            example: "Production"
+      securityScheme:
+        type: array
+        items:
+          type: string
+      operations:
+       type: array
+       items:
+        properties:
+          id:
+           type: string
+           example: "postapiresource"
+          uritemplate:
+            type: string
+            default: "/*"
+          httpVerb:
+            type: string
+            default: "GET"
+          authType:
+            type: string
+            default: "Any"
+          policy:
+            type: string
+            example: "Unlimited"
+          endpoint:
+            type: array
+            items:
+             properties:
+              key:
+               type: string
+               example: "01234567-0123-0123-0123-012345678901"
+              inline:
+               $ref: '#/definitions/EndPoint'
+              type:
+                type: string
+                example: "Production"
+
+
+#-----------------------------------------------------
+# The Error resource
+#-----------------------------------------------------
+  Error:
+    title: Error object returned with 4XX HTTP lifeCycleStatus
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: integer
+        format: int64
+      message:
+        type: string
+        description: Error message.
+      description:
+        type: string
+        description: |
+          A detail description about the error message.
+      moreInfo:
+        type: string
+        description: |
+          Preferably an url with more details about the error.
+      error:
+        type: array
+        description: |
+          If there are more than one error list them out.
+          For example, list out validation errors by each field.
+        items:
+          $ref: '#/definitions/ErrorListItem'

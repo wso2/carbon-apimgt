@@ -99,11 +99,11 @@ function getFromAPICache (string key) (dto:APIDTO) {
 }
 function setGatewayConf (dto:GatewayConfDTO conf) {
     gatewayConf = conf;
-    apimgtMaps:putMapEntry("sampleConfig", gatewayConf);
+    apimgtMaps:putMapEntry("gatewayConfig", gatewayConf);
     keyManagerConf = conf.keyManagerInfo;
 }
 function getGatewayConf () (dto:GatewayConfDTO) {
-    any dto = apimgtMaps:getMapEntry("sampleConfig");
+    any dto = apimgtMaps:getMapEntry("gatewayConfig");
     errors:TypeCastError err;
     if(dto!=null){
         gatewayConf, err = (dto:GatewayConfDTO)dto;
@@ -116,10 +116,12 @@ function getKeyManagerConf () (dto:KeyManagerInfoDTO) {
     return keyManagerConf;
 }
 function getAnalyticsConf () (dto:AnalyticsInfoDTO) {
+    getGatewayConf();
     return gatewayConf.analyticsInfo;
 }
 
 function getThrottleConf () (dto:ThrottlingInfoDTO) {
+    getGatewayConf();
     return gatewayConf.throttlingInfo;
 }
 

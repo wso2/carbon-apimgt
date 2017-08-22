@@ -26,11 +26,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 import org.wso2.msf4j.Request;
 
-import java.util.HashMap;
-import java.util.List;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
         "2017-01-03T15:53:15.692+05:30")
 public class EndpointsApiServiceImpl extends EndpointsApiService {
@@ -40,7 +35,6 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
      * Delete an endpoint by providing its ID
      *
      * @param endpointId        ID of the endpoint
-     * @param contentType       Content-Type header value
      * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param request           msf4j request object
@@ -48,13 +42,13 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response endpointsEndpointIdDelete(String endpointId, String contentType, String ifMatch,
-                                              String ifUnmodifiedSince, Request request) throws NotFoundException {
-        String username = "";
+    public Response endpointsEndpointIdDelete(String endpointId, String ifMatch, String ifUnmodifiedSince,
+            Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = endpointsEndpointIdGetFingerprint(endpointId, null, null,
-                    null, request);
+                    request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
@@ -77,7 +71,6 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
      * Retrieves an endpoint by providing its ID
      *
      * @param endpointId      ID of the endpoint
-     * @param contentType     Content-Type header value
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header
      * @param request         msf4j request object
@@ -85,9 +78,9 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response endpointsEndpointIdGet(String endpointId, String contentType, String ifNoneMatch,
-                                           String ifModifiedSince, Request request) throws NotFoundException {
-        String username = "";
+    public Response endpointsEndpointIdGet(String endpointId, String ifNoneMatch, String ifModifiedSince,
+            Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             Endpoint endPoint = apiPublisher.getEndpoint(endpointId);
@@ -98,7 +91,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
                 return Response.status(ExceptionCodes.ENDPOINT_NOT_FOUND.getHttpStatusCode()).entity(errorDTO).build();
             }
 
-            String existingFingerprint = endpointsEndpointIdGetFingerprint(endpointId, contentType, ifNoneMatch,
+            String existingFingerprint = endpointsEndpointIdGetFingerprint(endpointId, ifNoneMatch,
                     ifModifiedSince, request);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                     .contains(existingFingerprint)) {
@@ -127,15 +120,14 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
      * Retrieves the fingerprint of the endpoint identified by the UUID
      *
      * @param endpointId        ID of the endpoint
-     * @param contentType       Content-Type header value
      * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param request           msf4j request object
      * @return fingerprint of the endpoint
      */
-    public String endpointsEndpointIdGetFingerprint(String endpointId, String contentType, String ifMatch,
-                                                    String ifUnmodifiedSince, Request request) {
-        String username = RestApiUtil.getLoggedInUsername();
+    public String endpointsEndpointIdGetFingerprint(String endpointId, String ifMatch, String ifUnmodifiedSince,
+            Request request) {
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username).getLastUpdatedTimeOfEndpoint(
                     endpointId);
@@ -154,7 +146,6 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
      *
      * @param endpointId        ID of the endpoint
      * @param body              Updated endpoint details
-     * @param contentType       Content-Type header value
      * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param request           msf4j request object
@@ -162,9 +153,9 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response endpointsEndpointIdPut(String endpointId, EndPointDTO body, String contentType, String ifMatch,
-                                           String ifUnmodifiedSince, Request request) throws NotFoundException {
-        String username = "";
+    public Response endpointsEndpointIdPut(String endpointId, EndPointDTO body, String ifMatch,
+            String ifUnmodifiedSince, Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             Endpoint endpoint = MappingUtil.toEndpoint(body);
@@ -176,7 +167,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
                 return Response.status(ExceptionCodes.ENDPOINT_NOT_FOUND.getHttpStatusCode()).entity(errorDTO).build();
             }
 
-            String existingFingerprint = endpointsEndpointIdGetFingerprint(endpointId, null, null, null, request);
+            String existingFingerprint = endpointsEndpointIdGetFingerprint(endpointId, null, null, request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
@@ -185,7 +176,7 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
             Endpoint updatedEndpint = new Endpoint.Builder(endpoint).id(endpointId).build();
             apiPublisher.updateEndpoint(updatedEndpint);
             Endpoint updatedEndpoint = apiPublisher.getEndpoint(endpointId);
-            String newFingerprint = endpointsEndpointIdGetFingerprint(endpointId, null, null, null, request);
+            String newFingerprint = endpointsEndpointIdGetFingerprint(endpointId, null, null, request);
             return Response.ok().header(HttpHeaders.ETAG, "\"" + newFingerprint + "\"")
                     .entity(MappingUtil.toEndPointDTO(updatedEndpoint)).build();
         } catch (APIManagementException e) {
@@ -209,7 +200,6 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
     /**
      * Retrieve all endpoints available
      *
-     * @param accept          Accept header value
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header
      * @param request         msf4j request object
@@ -217,9 +207,9 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response endpointsGet(String accept, String ifNoneMatch, String ifModifiedSince, Request request)
+    public Response endpointsGet(String ifNoneMatch, String ifModifiedSince, Request request)
             throws NotFoundException {
-        String username = "";
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             List<Endpoint> endpointList = apiPublisher.getAllEndpoints();
@@ -243,9 +233,8 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
     }
 
     @Override
-    public Response endpointsHead(String name, String accept, String ifNoneMatch, Request request) throws
-            NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+    public Response endpointsHead(String name, String ifNoneMatch, Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
         boolean status;
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -267,8 +256,6 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
      * Adds a new Endpoint
      *
      * @param body            Endpoint details to be added
-     * @param contentType     Content-Type header value
-     * @param accept          Accept header value
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header
      * @param request         msf4j request object
@@ -276,9 +263,9 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response endpointsPost(EndPointDTO body, String contentType, String accept, String ifNoneMatch,
-                                  String ifModifiedSince, Request request) throws NotFoundException {
-        String username = "";
+    public Response endpointsPost(EndPointDTO body, String ifNoneMatch, String ifModifiedSince,
+            Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             Endpoint endpoint = MappingUtil.toEndpoint(body);
