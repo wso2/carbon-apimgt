@@ -23,6 +23,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
 import './ApiCreateSwagger.css'
 import Dropzone from 'react-dropzone'
+import {ScopeValidation, resourceMethod, resourcePath} from '../../../../data/ScopeValidation'
 
 import { Form, Icon, Input, Button, message, Upload, Radio } from 'antd';
 const FormItem = Form.Item;
@@ -162,10 +163,11 @@ class SwaggerForm extends React.Component {
                     )}
                 </FormItem>
                 <FormItem >
-
-                    <Button type="primary" htmlType="submit">
-                        Create
-                    </Button>
+                    <ScopeValidation resourceMethod={resourceMethod.POST} resourcePath={resourcePath.APIS}>
+                        <Button type="primary" htmlType="submit">
+                            Create
+                        </Button>
+                    </ScopeValidation>
                     <Button type="default" htmlType="button" onClick={() => this.props.history.push("/api/create/home")}>
                         Cancel
                     </Button>

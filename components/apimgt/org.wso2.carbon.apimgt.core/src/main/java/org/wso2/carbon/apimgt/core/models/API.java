@@ -79,7 +79,7 @@ public final class API {
         gatewayConfig = builder.gatewayConfig;
         apiDefinition = builder.apiDefinition;
         if (builder.apiPermission != null) {
-            apiPermission = builder.apiPermission.toString();
+            apiPermission = builder.apiPermission;
         } else {
             apiPermission = "";
         }
@@ -87,6 +87,7 @@ public final class API {
         workflowStatus = builder.workflowStatus;
         apiPolicy = builder.apiPolicy;
         userSpecificApiPermissions = builder.userSpecificApiPermissions;
+        securityScheme = builder.securityScheme;
     }
 
     public Map getPermissionMap() {
@@ -229,6 +230,10 @@ public final class API {
         return userSpecificApiPermissions;
     }
 
+    public int getSecurityScheme() {
+        return securityScheme;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -269,7 +274,8 @@ public final class API {
                 Objects.equals(lifecycleState, api.lifecycleState) &&
                 Objects.equals(uriTemplates, api.uriTemplates) &&
                 Objects.equals(copiedFromApiId, api.copiedFromApiId) &&
-                Objects.equals(endpoint, api.endpoint);
+                Objects.equals(endpoint, api.endpoint) &&
+                Objects.equals(securityScheme, api.securityScheme);
     }
 
     @Override
@@ -278,7 +284,7 @@ public final class API {
                 endpoint, gatewayConfig, wsdlUri, isResponseCachingEnabled, cacheTimeout, isDefaultVersion,
                 transport, tags, labels, visibility, visibleRoles, businessInformation, corsConfiguration,
                 applicationId, createdTime, createdBy, updatedBy, lastUpdatedTime, lifecycleState,
-                uriTemplates, copiedFromApiId, workflowStatus);
+                uriTemplates, copiedFromApiId, workflowStatus, securityScheme);
     }
 
 
@@ -321,10 +327,11 @@ public final class API {
     private String copiedFromApiId;
     private final String apiDefinition;
     private final Map permissionMap;
-    private final String apiPermission;
+    private String apiPermission;
     private final String workflowStatus;
     private final Policy apiPolicy;
     private List<String> userSpecificApiPermissions;
+    private int securityScheme;
 
     public String getWorkflowStatus() {
         return workflowStatus;
@@ -338,7 +345,6 @@ public final class API {
         private String id;
         private String provider;
         private String name;
-        private String permission;
 
         public APIBuilder(FileApi api) {
             id = api.getId();
@@ -377,9 +383,9 @@ public final class API {
             gatewayConfig = api.getGatewayConfig();
             apiDefinition = api.getApiDefinition();
             if (api.getApiPermission() != null) {
-                apiPermission = new StringBuilder(api.getApiPermission());
+                apiPermission = api.getApiPermission();
             } else {
-                apiPermission = new StringBuilder("");
+                apiPermission = "";
             }
             permissionMap = api.getPermissionMap();
             workflowStatus = api.getWorkflowStatus();
@@ -425,7 +431,7 @@ public final class API {
             return gatewayConfig;
         }
 
-        public StringBuilder getApiPermission() {
+        public String getApiPermission() {
             return apiPermission;
         }
 
@@ -482,16 +488,20 @@ public final class API {
             return userSpecificApiPermissions;
         }
 
+        public int getSecurityScheme() {
+            return securityScheme;
+        }
+
         private String version;
         private String context;
         private String description;
         private String lifeCycleStatus;
         private String lifecycleInstanceId;
         private Map permissionMap;
-        private StringBuilder apiPermission;
+        private String apiPermission;
         private Map<String, Endpoint> endpoint = Collections.EMPTY_MAP;
         private String gatewayConfig;
-        private String wsdlUri = "";
+        private String wsdlUri;
         private boolean isResponseCachingEnabled;
         private int cacheTimeout;
         private boolean isDefaultVersion;
@@ -515,6 +525,7 @@ public final class API {
         private String apiDefinition;
         private String workflowStatus;
         private List<String> userSpecificApiPermissions;
+        private int securityScheme;
 
         public APIBuilder(String provider, String name, String version) {
             this.provider = provider;
@@ -553,14 +564,15 @@ public final class API {
             this.copiedFromApiId = copy.copiedFromApiId;
             this.apiDefinition = copy.apiDefinition;
             if (copy.apiPermission != null) {
-                this.apiPermission = new StringBuilder(copy.apiPermission);
+                this.apiPermission = copy.apiPermission;
             } else {
-                this.apiPermission = new StringBuilder();
+                this.apiPermission = "";
             }
             this.apiPolicy = copy.apiPolicy;
             this.permissionMap = new HashMap<>();
             this.workflowStatus = copy.workflowStatus;
             this.userSpecificApiPermissions = new ArrayList<String>();
+            this.securityScheme = copy.securityScheme;
         }
 
         /**
@@ -680,7 +692,7 @@ public final class API {
             return this;
         }
 
-        public APIBuilder apiPermission(StringBuilder apiPermission) {
+        public APIBuilder apiPermission(String apiPermission) {
             this.apiPermission = apiPermission;
             return this;
         }
@@ -803,12 +815,6 @@ public final class API {
             this.policies = policies;
             return this;
         }
-
-        public APIBuilder permission(String permission) {
-            this.permission = permission;
-            return this;
-        }
-
 
         /**
          * Sets the {@code policies} and returns a reference to this APIBuilder so that the methods can be chained
@@ -971,6 +977,11 @@ public final class API {
             return this;
         }
 
+        public APIBuilder securityScheme(int securityScheme) {
+            this.securityScheme = securityScheme;
+            return this;
+        }
+
         /**
          * Returns a {@code API} built from the parameters previously set.
          *
@@ -1064,14 +1075,6 @@ public final class API {
             return permissionMap;
         }
 
-        public String getPermission() {
-            return permission;
-        }
-
-        public void setPermission(String permission) {
-            this.permission = permission;
-        }
-
         public String getWorkflowStatus() {
             return workflowStatus;
         }
@@ -1087,5 +1090,9 @@ public final class API {
 
     public void setUserSpecificApiPermissions(List<String> userSpecificApiPermissions) {
         this.userSpecificApiPermissions = userSpecificApiPermissions;
+    }
+
+    public void setApiPermission(String apiPermission) {
+        this.apiPermission = apiPermission;
     }
 }

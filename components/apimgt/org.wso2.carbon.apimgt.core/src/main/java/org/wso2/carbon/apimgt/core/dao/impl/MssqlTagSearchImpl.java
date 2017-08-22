@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 /**
  * SQL Statements that are specific to tag search in MSSQL Database.
  */
+
 class MssqlTagSearchImpl extends StoreApiAttributeTagSearch {
 
     @Override

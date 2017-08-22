@@ -77,10 +77,63 @@ public class LabelsApiServiceImplTest {
 
     }
 
+
     private Request getRequest() throws Exception {
         CarbonMessage carbonMessage = Mockito.mock(CarbonMessage.class);
         Request request = new Request(carbonMessage);
         PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(request);
         return request;
+    }
+
+    @Test
+    public void testLabelsLabelIdDelete() throws Exception {
+        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
+
+        LabelsApiServiceImpl labelService = new LabelsApiServiceImpl();
+        Mockito.doNothing().when(labelService.labelsLabelIdDelete("1", getRequest()));
+        Response response = labelService.labelsLabelIdDelete("1", getRequest());
+        Assert.assertEquals(response.getStatus(), Response.Status.OK);
+    }
+
+    @Test
+    public void testLabelsLabelIdPut() throws Exception {
+        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
+
+        List<Label> labels = new ArrayList<>();
+        Label label1 =  new Label.Builder().id("1").name("label1").type("GATEWAY").build();
+        Label label2 =  new Label.Builder().id("2").name("label2").type("STORE").build();
+        labels.add(label1);
+        labels.add(label2);
+
+        LabelsApiServiceImpl labelService = new LabelsApiServiceImpl();
+        Mockito.when(labelService.labelsLabelIdPut("1", LabelMappingUtil.fromLabelToDTO(label1), "application/Json",
+                getRequest())).thenReturn(Response.status(Response.Status.OK).
+                entity(LabelMappingUtil.fromLabelArrayToListDTO(labels)).build());
+
+        Response response = labelService.labelsLabelIdPut("1", LabelMappingUtil.fromLabelToDTO(label1),
+                "application/Json", getRequest());
+        Assert.assertEquals(response.getEntity(), LabelMappingUtil.fromLabelArrayToListDTO(labels));
+    }
+
+    @Test
+    public void testLabelsPost() throws Exception {
+        APIMgtAdminServiceImpl adminService = Mockito.mock(APIMgtAdminServiceImpl.class);
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
+
+        Label label1 =  new Label.Builder().id("1").name("label1").type("GATEWAY").build();
+
+        LabelsApiServiceImpl labelService = new LabelsApiServiceImpl();
+        Mockito.when(labelService.labelsPost(LabelMappingUtil.fromLabelToDTO(label1), "application/json", getRequest()))
+                .thenReturn(Response.status(Response.Status.CREATED).
+                        entity(LabelMappingUtil.fromLabelToDTO(label1)).build());
+
+        Response response = labelService.labelsPost(LabelMappingUtil.fromLabelToDTO(label1), "application/json",
+                getRequest());
+        Assert.assertEquals(response.getStatus(), Response.Status.CREATED);
     }
 }

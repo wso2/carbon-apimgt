@@ -25,7 +25,6 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
  * SQL Statements that are specific to attribute search in MSSQL Database.
  */
 class MssqlGenericSearchImpl extends StoreApiAttributeGenericSearch {
-
     @Override
     public String getStoreAttributeSearchQuery(StringBuilder roleListBuilder,
                                                StringBuilder searchQuery, int offset, int limit) {

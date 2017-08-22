@@ -26,4 +26,9 @@ public class GatewaysApiServiceImpl extends GatewaysApiService {
             throws NotFoundException {
         return Response.ok().build();
     }
+
+
+
+
+
 }

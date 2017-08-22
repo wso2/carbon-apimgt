@@ -399,4 +399,34 @@ public class LabelDAOImpl implements LabelDAO {
             throw new APIMgtDAOException(e);
         }
     }
+
+
+    /**
+     * @see LabelDAO#getLabelByName(String)
+     */
+    @Override
+    public Label getLabelByName(String labelName) throws APIMgtDAOException {
+
+        final String query = "SELECT LABEL_ID, NAME FROM AM_LABELS WHERE NAME = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, labelName);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return new Label.Builder().
+                            id(rs.getString("LABEL_ID")).
+                            name(rs.getString("NAME")).
+                            accessUrls(getLabelAccessUrls(rs.getString("LABEL_ID"))).build();
+                } else {
+                    return null;
+                }
+            }
+        } catch (SQLException e) {
+            String message = "Error while retrieving label [label name] " + labelName;
+            log.error(message, e);
+            throw new APIMgtDAOException(e);
+        }
+
+    }
 }

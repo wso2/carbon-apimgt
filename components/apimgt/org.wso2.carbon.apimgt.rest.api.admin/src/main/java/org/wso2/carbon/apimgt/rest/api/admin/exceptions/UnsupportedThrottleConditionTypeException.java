@@ -27,10 +27,6 @@ public class UnsupportedThrottleConditionTypeException extends APIManagementExce
         super(message);
     }
 
-    public UnsupportedThrottleConditionTypeException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
     public UnsupportedThrottleConditionTypeException(String msg, ExceptionCodes code) {
         super(msg, code);
     }

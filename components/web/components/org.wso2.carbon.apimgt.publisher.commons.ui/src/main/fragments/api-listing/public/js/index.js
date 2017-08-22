@@ -107,12 +107,6 @@ function initDataTable(raw_data) {
                 .addClass(cssEdit)
                 .append(icon.addClass("fw-edit"));
 
-            var userPermissions = data.userPermissionsForApi;
-
-            if(!userPermissions.includes("UPDATE")) {
-                edit_button.addClass('not-active');
-            }
-
             var cssDelete = "cu-reg-btn btn-delete text-danger api-listing-delete";
             if(!hasValidScopes("/apis/{apiId}", "delete")) {
                 cssDelete = "cu-reg-btn btn-delete text-danger api-listing-delete not-active";
@@ -121,10 +115,6 @@ function initDataTable(raw_data) {
                 .text('Delete ')
                 .addClass(cssDelete)
                 .append(icon.clone().removeClass("fw-edit").addClass("fw-delete"));
-
-            if(!userPermissions.includes("DELETE")) {
-                delete_button.addClass('not-active');
-            }
 
             return $('<div></div>').append(edit_button).append(delete_button).html();
         } else {

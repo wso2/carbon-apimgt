@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
  */
 class MssqlSubcontextSearchImpl extends StoreApiAttributeSubContextSearch {
 
-
     @Override
     public String getStoreAttributeSearchQuery(StringBuilder roleListBuilder,
                                                StringBuilder searchQuery, int offset, int limit) {

@@ -956,6 +956,9 @@ definitions:
       lifeCycleStatus:
         type: string
         example: 'CREATED'
+      securityScheme:
+        type: integer
+        example: 1
 
 #-----------------------------------------------------
 # The Policy resource

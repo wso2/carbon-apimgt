@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
  */
 class OracleTagSearchImpl extends StoreApiAttributeTagSearch {
 
-
     @Override
     public String getStoreAttributeSearchQuery(StringBuilder roleListBuilder,
                                                StringBuilder searchQuery, int offset, int limit) {

@@ -39,7 +39,7 @@ public class LabelsApiServiceImpl extends LabelsApiService {
             request) throws
             NotFoundException {
 
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
 
         try {
             List<Label> labels;

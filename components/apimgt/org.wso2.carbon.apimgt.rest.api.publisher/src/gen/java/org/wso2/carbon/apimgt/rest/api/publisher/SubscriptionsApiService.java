@@ -28,11 +28,9 @@ public abstract class SubscriptionsApiService {
     public abstract Response subscriptionsGet(String apiId
  ,Integer limit
  ,Integer offset
- ,String accept
  ,String ifNoneMatch
  , Request request) throws NotFoundException;
     public abstract Response subscriptionsSubscriptionIdGet(String subscriptionId
- ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;

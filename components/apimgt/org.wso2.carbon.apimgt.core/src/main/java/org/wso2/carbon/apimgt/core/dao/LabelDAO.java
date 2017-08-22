@@ -47,6 +47,14 @@ public interface LabelDAO {
      */
     Label getLabelByID(String labelID) throws APIMgtDAOException;
 
+    /**
+     * Returns matched label
+     *
+     * @param labelName The {@link String} Name of the label
+     * @return {@link Label} Label
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    Label getLabelByName(String labelName) throws APIMgtDAOException;
 
     /**
      * Remove label

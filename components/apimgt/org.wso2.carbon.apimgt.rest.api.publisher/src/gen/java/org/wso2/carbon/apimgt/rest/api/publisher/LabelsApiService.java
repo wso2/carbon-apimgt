@@ -5,6 +5,7 @@ import org.wso2.msf4j.Request;
 import javax.ws.rs.core.Response;
 
 public abstract class LabelsApiService {
+
     public abstract Response labelsGet(String labelType
  ,String accept
  ,String ifNoneMatch

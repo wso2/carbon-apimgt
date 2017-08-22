@@ -27,7 +27,8 @@ package org.wso2.carbon.apimgt.core.models;
 public enum ResourceCategory {
     SWAGGER,
     GATEWAY_CONFIG,
-    WSDL_URI,
+    WSDL_TEXT,
+    WSDL_ZIP,
     IMAGE,
     DOC
 }

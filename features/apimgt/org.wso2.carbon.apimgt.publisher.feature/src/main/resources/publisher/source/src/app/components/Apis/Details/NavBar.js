@@ -18,8 +18,9 @@
 
 import React, {Component} from 'react'
 import {Link, withRouter} from 'react-router-dom'
-import {Tabs} from 'antd'
-const TabPane = Tabs.TabPane;
+import Drawer from 'material-ui/Drawer';
+import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
+import MailIcon from 'material-ui-icons/Mail';
 
 class NavBar extends Component {
 
@@ -46,16 +47,21 @@ class NavBar extends Component {
         // This assume that last segment and segment before it contains detail page action and API UUID
         const [active_tab, api_uuid] = pathSegments.reverse();
         return (
-            <Tabs defaultActiveKey={active_tab} tabPosition={'left'}>
-                {Object.entries(NavBar.CONST).map(
-                    ([key, val]) => {
-                        return (
-                            <TabPane
-                                tab={ <Link name={val} to={"/apis/" + api_uuid + "/" + val}>{val}</Link> } key={val}/>
-                        );
-                    }
-                )}
-            </Tabs>
+            <div>
+            {Object.entries(NavBar.CONST).map(
+                ([key, val]) => {
+                    return (
+                    <ListItem button key={key} style={{width:"250px"}}>
+                        <ListItemIcon>
+                            <MailIcon />
+                        </ListItemIcon>
+                        <Link name={val} to={"/apis/" + api_uuid + "/" + val}><ListItemText primary={val} /></Link>
+
+                    </ListItem>
+                    )
+                }
+            )}
+            </div>
         )
     }
 }

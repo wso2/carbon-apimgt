@@ -26,7 +26,7 @@ import org.wso2.carbon.kernel.annotations.Element;
 public class DataPublisherConfigurations {
 
     @Element(description = "Reciever URL")
-    private String receiverURL = "tcp://localhost:7611";
+    private String receiverURL = "tcp://localhost:9612";
     @Element(description = "Data publisher credentials")
     private CredentialConfigurations dataPublisherCredentials = new CredentialConfigurations();
 
@@ -34,7 +34,15 @@ public class DataPublisherConfigurations {
         return receiverURL;
     }
 
+    public void setReceiverURL(String receiverURL) {
+        this.receiverURL = receiverURL;
+    }
+
     public CredentialConfigurations getDataPublisherCredentials() {
         return dataPublisherCredentials;
+    }
+
+    public void setDataPublisherCredentials(CredentialConfigurations dataPublisherCredentials) {
+        this.dataPublisherCredentials = dataPublisherCredentials;
     }
 }

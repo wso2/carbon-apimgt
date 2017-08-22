@@ -70,13 +70,15 @@ public class TierMappingUtil {
         dto.setName(tier.getPolicyName());
         dto.setDescription(tier.getDescription());
         dto.setTierLevel(TierDTO.TierLevelEnum.valueOf(StringUtils.upperCase(tierLevel)));
-        dto.setUnitTime(Long.valueOf(tier.getDefaultQuotaPolicy().getLimit().getUnitTime()));
+
+        dto.setUnitTime((long) tier.getDefaultQuotaPolicy().getLimit().getUnitTime());
 
         Limit limit = tier.getDefaultQuotaPolicy().getLimit();
         if (limit instanceof RequestCountLimit) {
-            dto.setRequestCount(Long.valueOf(((RequestCountLimit) limit).getRequestCount()));
+            dto.setRequestCount((long) (((RequestCountLimit) limit).getRequestCount()));
         } else if (limit instanceof BandwidthLimit) {
-            dto.setRequestCount(Long.valueOf(((BandwidthLimit) limit).getDataAmount()));
+            dto.setRequestCount((long) (((BandwidthLimit) limit).getDataAmount()));
+
         }
         //// TODO: 08/12/16 More fields to map 
         return dto;

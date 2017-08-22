@@ -35,11 +35,11 @@ public class LabelsApiServiceImpl extends LabelsApiService {
     @Override
     public Response labelsGet(String labelType, String accept, String ifNoneMatch, String ifModifiedSince,
                               Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             List<Label> labels;
-            if(labelType == null) {
+            if (labelType == null) {
                 labels = apiStore.getAllLabels();
             } else{
                 labels = apiStore.getLabelsByType(labelType);

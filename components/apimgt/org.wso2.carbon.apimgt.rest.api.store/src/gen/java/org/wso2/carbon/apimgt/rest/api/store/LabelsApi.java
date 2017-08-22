@@ -61,5 +61,6 @@ public class LabelsApi implements Microservice  {
 , @Context Request request)
     throws NotFoundException {
         return delegate.labelsGet(labelType,accept,ifNoneMatch,ifModifiedSince, request);
+
     }
 }

@@ -41,6 +41,8 @@ public class APISummary {
 
     private LocalDateTime lastUpdatedTime;
 
+    private int securityScheme;
+
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }
@@ -99,5 +101,13 @@ public class APISummary {
 
     public void setLastUpdatedTime(LocalDateTime lastUpdatedTime) {
         this.lastUpdatedTime = lastUpdatedTime;
+    }
+
+    public int getSecurityScheme() {
+        return securityScheme;
+    }
+
+    public void setSecurityScheme(int securityScheme) {
+        this.securityScheme = securityScheme;
     }
 }

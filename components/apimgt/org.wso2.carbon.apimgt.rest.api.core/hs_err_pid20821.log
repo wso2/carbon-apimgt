@@ -1,0 +1,824 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  SIGBUS (0x7) at pc=0xf76c8e06, pid=20821, tid=0xf672bb40
+#
+# JRE version: Java(TM) SE Runtime Environment (8.0_131-b11) (build 1.8.0_131-b11)
+# Java VM: Java HotSpot(TM) Server VM (25.131-b11 mixed mode linux-x86 )
+# Problematic frame:
+# C  [libc.so.6+0x133e06]
+#
+# Failed to write core dump. Core dumps have been disabled. To enable core dumping, try "ulimit -c unlimited" before starting Java again
+#
+# If you would like to submit a bug report, please visit:
+#   http://bugreport.java.com/bugreport/crash.jsp
+# The crash happened outside the Java Virtual Machine in native code.
+# See problematic frame for where to report the bug.
+#
+
+---------------  T H R E A D  ---------------
+
+Current thread (0xf6509400):  JavaThread "main" [_thread_in_native, id=20824, stack(0xf66db000,0xf672c000)]
+
+siginfo: si_signo: 7 (SIGBUS), si_code: 2 (BUS_ADRERR), si_addr: 0xa2da0000
+
+Registers:
+EAX=0xa2d9f4d0, EBX=0xf76ff940, ECX=0x0000641b, EDX=0xa28f09b0
+ESP=0xf6728bf4, EBP=0xf6728c98, ESI=0x0000642f, EDI=0x00000b20
+EIP=0xf76c8e06, EFLAGS=0x00010206, CR2=0xa2da0000
+
+Top of Stack: (sp=0xf6728bf4)
+0xf6728bf4:   a2047c38 f66231f0 f661c369 a28f09aa
+0xf6728c04:   a2d9f4d4 00006f61 f650a200 f650a200
+0xf6728c14:   f70aff4d d2981850 d1be1fd8 d29efaa0
+0xf6728c24:   d29efaa0 d2981850 f6728c7c f6506e30
+0xf6728c34:   f714f078 00000000 f6e8e4fe f714f078
+0xf6728c44:   f6509400 00000000 a2047c38 a2fe9190
+0xf6728c54:   692f6f61 73657267 00000000 0000642f
+0xf6728c64:   00006f61 a2047c38 a2d99077 a2d9f4d4 
+
+Instructions: (pc=0xf76c8e06)
+0xf76c8de6:   0f 6f e3 66 0f 3a 0f da 0a 66 0f 3a 0f d1 0a 8d
+0xf76c8df6:   7f 20 66 0f 7f 54 3a e0 66 0f 7f 5c 3a f0 72 30
+0xf76c8e06:   66 0f 6f 54 38 10 83 e9 20 66 0f 6f 5c 38 20 66
+0xf76c8e16:   0f 6f cb 66 0f 3a 0f da 0a 66 0f 3a 0f d4 0a 8d 
+
+Register to memory mapping:
+
+EAX=0xa2d9f4d0 is an unknown value
+EBX=0xf76ff940: <offset 0x16a940> in /lib/i386-linux-gnu/libc.so.6 at 0xf7595000
+ECX=0x0000641b is an unknown value
+EDX=0xa28f09b0 is an unknown value
+ESP=0xf6728bf4 is pointing into the stack for thread: 0xf6509400
+EBP=0xf6728c98 is pointing into the stack for thread: 0xf6509400
+ESI=0x0000642f is an unknown value
+EDI=0x00000b20 is an unknown value
+
+
+Stack: [0xf66db000,0xf672c000],  sp=0xf6728bf4,  free space=310k
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+C  [libc.so.6+0x133e06]
+C  [libzip.so+0x129a2]  ZIP_GetEntry2+0xe2
+C  [libzip.so+0x39b7]  Java_java_util_zip_ZipFile_getEntry+0x127
+J 132  java.util.zip.ZipFile.getEntry(J[BZ)J (0 bytes) @ 0xe726b087 [0xe726afe0+0xa7]
+J 230 C2 java.util.zip.ZipFile.getEntry(Ljava/lang/String;)Ljava/util/zip/ZipEntry; (86 bytes) @ 0xe72c7294 [0xe72c6f40+0x354]
+J 281 C2 sun.misc.URLClassPath$JarLoader.getResource(Ljava/lang/String;Z)Lsun/misc/Resource; (85 bytes) @ 0xe72e1b44 [0xe72e1ae0+0x64]
+J 527 C2 sun.misc.URLClassPath.getResource(Ljava/lang/String;Z)Lsun/misc/Resource; (83 bytes) @ 0xe7367828 [0xe73676e0+0x148]
+J 304 C1 java.net.URLClassLoader$1.run()Ljava/lang/Class; (63 bytes) @ 0xe72e13d4 [0xe72e1220+0x1b4]
+J 303 C1 java.net.URLClassLoader$1.run()Ljava/lang/Object; (5 bytes) @ 0xe72d9ed8 [0xe72d9e60+0x78]
+v  ~StubRoutines::call_stub
+V  [libjvm.so+0x50033f]  JavaCalls::call_helper(JavaValue*, methodHandle*, JavaCallArguments*, Thread*)+0x101f
+V  [libjvm.so+0x752b99]  os::os_exception_wrapper(void (*)(JavaValue*, methodHandle*, JavaCallArguments*, Thread*), JavaValue*, methodHandle*, JavaCallArguments*, Thread*)+0x19
+V  [libjvm.so+0x4fe90f]  JavaCalls::call(JavaValue*, methodHandle, JavaCallArguments*, Thread*)+0x2f
+V  [libjvm.so+0x581e40]  JVM_DoPrivileged+0x2a0
+C  [libjava.so+0x9f3a]  Java_java_security_AccessController_doPrivileged__Ljava_security_PrivilegedExceptionAction_2Ljava_security_AccessControlContext_2+0x3a
+J 309  java.security.AccessController.doPrivileged(Ljava/security/PrivilegedExceptionAction;Ljava/security/AccessControlContext;)Ljava/lang/Object; (0 bytes) @ 0xe72dd4cc [0xe72dd420+0xac]
+J 301 C1 java.net.URLClassLoader.findClass(Ljava/lang/String;)Ljava/lang/Class; (47 bytes) @ 0xe72ddb74 [0xe72dda40+0x134]
+j  java.lang.ClassLoader.loadClass(Ljava/lang/String;Z)Ljava/lang/Class;+70
+J 293 C1 sun.misc.Launcher$AppClassLoader.loadClass(Ljava/lang/String;Z)Ljava/lang/Class; (85 bytes) @ 0xe72df09c [0xe72de8e0+0x7bc]
+J 292 C1 java.lang.ClassLoader.loadClass(Ljava/lang/String;)Ljava/lang/Class; (7 bytes) @ 0xe72daa90 [0xe72da9a0+0xf0]
+v  ~StubRoutines::call_stub
+V  [libjvm.so+0x50033f]  JavaCalls::call_helper(JavaValue*, methodHandle*, JavaCallArguments*, Thread*)+0x101f
+V  [libjvm.so+0x752b99]  os::os_exception_wrapper(void (*)(JavaValue*, methodHandle*, JavaCallArguments*, Thread*), JavaValue*, methodHandle*, JavaCallArguments*, Thread*)+0x19
+V  [libjvm.so+0x50074c]  JavaCalls::call_virtual(JavaValue*, KlassHandle, Symbol*, Symbol*, JavaCallArguments*, Thread*)+0x25c
+V  [libjvm.so+0x500b35]  JavaCalls::call_virtual(JavaValue*, Handle, KlassHandle, Symbol*, Symbol*, Handle, Thread*)+0x55
+V  [libjvm.so+0x854216]  SystemDictionary::load_instance_class(Symbol*, Handle, Thread*)+0x3f6
+V  [libjvm.so+0x8531fc]  SystemDictionary::resolve_instance_class_or_null(Symbol*, Handle, Handle, Thread*)+0x6dc
+V  [libjvm.so+0x8545fe]  SystemDictionary::resolve_or_fail(Symbol*, Handle, Handle, bool, Thread*)+0x1e
+V  [libjvm.so+0x388cfd]  ConstantPool::klass_at_impl(constantPoolHandle, int, Thread*)+0x10d
+V  [libjvm.so+0x4f9de6]  InterpreterRuntime::ldc(JavaThread*, bool)+0x166
+j  org.wso2.carbon.apimgt.rest.api.core.impl.GatewaysApiServiceImplTest.testGatewaysRegisterPost()V+0
+v  ~StubRoutines::call_stub
+V  [libjvm.so+0x50033f]  JavaCalls::call_helper(JavaValue*, methodHandle*, JavaCallArguments*, Thread*)+0x101f
+V  [libjvm.so+0x752b99]  os::os_exception_wrapper(void (*)(JavaValue*, methodHandle*, JavaCallArguments*, Thread*), JavaValue*, methodHandle*, JavaCallArguments*, Thread*)+0x19
+V  [libjvm.so+0x4fe90f]  JavaCalls::call(JavaValue*, methodHandle, JavaCallArguments*, Thread*)+0x2f
+V  [libjvm.so+0x7c4f92]  Reflection::invoke(instanceKlassHandle, methodHandle, Handle, bool, objArrayHandle, BasicType, objArrayHandle, bool, Thread*)+0x4d2
+V  [libjvm.so+0x7c8328]  Reflection::invoke_method(oopDesc*, Handle, objArrayHandle, Thread*)+0x148
+V  [libjvm.so+0x592cef]  JVM_InvokeMethod+0x25f
+C  [libjava.so+0xd552]  Java_sun_reflect_NativeMethodAccessorImpl_invoke0+0x32
+j  sun.reflect.NativeMethodAccessorImpl.invoke0(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+0
+j  sun.reflect.NativeMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+100
+j  sun.reflect.DelegatingMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+6
+j  java.lang.reflect.Method.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+56
+j  org.testng.internal.MethodInvocationHelper.invokeMethod(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+235
+j  org.testng.internal.Invoker.invokeMethod(Ljava/lang/Object;Lorg/testng/ITestNGMethod;[Ljava/lang/Object;ILorg/testng/xml/XmlSuite;Ljava/util/Map;Lorg/testng/ITestClass;[Lorg/testng/ITestNGMethod;[Lorg/testng/ITestNGMethod;Lorg/testng/internal/ConfigurationGroupMethods;Lorg/testng/internal/Invoker$FailureContext;)Lorg/testng/ITestResult;+277
+j  org.testng.internal.Invoker.invokeTestMethod(Ljava/lang/Object;Lorg/testng/ITestNGMethod;[Ljava/lang/Object;ILorg/testng/xml/XmlSuite;Ljava/util/Map;Lorg/testng/ITestClass;[Lorg/testng/ITestNGMethod;[Lorg/testng/ITestNGMethod;Lorg/testng/internal/ConfigurationGroupMethods;Lorg/testng/internal/Invoker$FailureContext;)Lorg/testng/ITestResult;+29
+j  org.testng.internal.Invoker.invokeTestMethods(Lorg/testng/ITestNGMethod;Lorg/testng/xml/XmlSuite;Ljava/util/Map;Lorg/testng/internal/ConfigurationGroupMethods;Ljava/lang/Object;Lorg/testng/ITestContext;)Ljava/util/List;+675
+j  org.testng.internal.TestMethodWorker.invokeTestMethods(Lorg/testng/ITestNGMethod;Ljava/lang/Object;Lorg/testng/ITestContext;)V+19
+j  org.testng.internal.TestMethodWorker.run()V+60
+j  org.testng.TestRunner.privateRun(Lorg/testng/xml/XmlTest;)V+323
+j  org.testng.TestRunner.run()V+26
+j  org.testng.SuiteRunner.runTest(Lorg/testng/TestRunner;)V+1
+j  org.testng.SuiteRunner.runSequentially()V+31
+j  org.testng.SuiteRunner.privateRun()V+282
+j  org.testng.SuiteRunner.run()V+6
+j  org.testng.SuiteRunnerWorker.runSuite(Lorg/testng/internal/SuiteRunnerMap;Lorg/testng/xml/XmlSuite;)V+89
+j  org.testng.SuiteRunnerWorker.run()V+12
+j  org.testng.TestNG.runSuitesSequentially(Lorg/testng/xml/XmlSuite;Lorg/testng/internal/SuiteRunnerMap;ILjava/lang/String;)V+66
+j  org.testng.TestNG.runSuitesLocally()Ljava/util/List;+143
+j  org.testng.TestNG.run()V+81
+j  org.apache.maven.surefire.testng.TestNGExecutor.run([Ljava/lang/Class;Ljava/lang/String;Ljava/util/Map;Lorg/apache/maven/surefire/report/RunListener;Lorg/apache/maven/surefire/testng/TestNgTestSuite;Ljava/io/File;Ljava/lang/String;)V+359
+j  org.apache.maven.surefire.testng.TestNGDirectoryTestSuite.executeMulti(Lorg/apache/maven/surefire/util/TestsToRun;Lorg/apache/maven/surefire/report/ReporterFactory;)V+201
+j  org.apache.maven.surefire.testng.TestNGDirectoryTestSuite.execute(Lorg/apache/maven/surefire/util/TestsToRun;Lorg/apache/maven/surefire/report/ReporterFactory;)V+27
+j  org.apache.maven.surefire.testng.TestNGProvider.invoke(Ljava/lang/Object;)Lorg/apache/maven/surefire/suite/RunResult;+131
+j  org.apache.maven.surefire.booter.ForkedBooter.invokeProviderInSameClassLoader(Ljava/lang/Object;Ljava/lang/Object;Lorg/apache/maven/surefire/booter/ProviderConfiguration;ZLorg/apache/maven/surefire/booter/StartupConfiguration;Z)Lorg/apache/maven/surefire/suite/RunResult;+23
+j  org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(Ljava/lang/Object;Lorg/apache/maven/surefire/booter/StartupConfiguration;Lorg/apache/maven/surefire/booter/ProviderConfiguration;Ljava/io/PrintStream;)Lorg/apache/maven/surefire/suite/RunResult;+14
+j  org.apache.maven.surefire.booter.ForkedBooter.main([Ljava/lang/String;)V+183
+v  ~StubRoutines::call_stub
+V  [libjvm.so+0x50033f]  JavaCalls::call_helper(JavaValue*, methodHandle*, JavaCallArguments*, Thread*)+0x101f
+V  [libjvm.so+0x752b99]  os::os_exception_wrapper(void (*)(JavaValue*, methodHandle*, JavaCallArguments*, Thread*), JavaValue*, methodHandle*, JavaCallArguments*, Thread*)+0x19
+V  [libjvm.so+0x4fe90f]  JavaCalls::call(JavaValue*, methodHandle, JavaCallArguments*, Thread*)+0x2f
+V  [libjvm.so+0x548987]  jni_invoke_static(JNIEnv_*, JavaValue*, _jobject*, JNICallType, _jmethodID*, JNI_ArgumentPusher*, Thread*)+0x387
+V  [libjvm.so+0x55b40f]  jni_CallStaticVoidMethod+0xdf
+C  [libjli.so+0x7679]  JavaMain+0x8e9
+C  [libpthread.so.0+0x6f72]  start_thread+0xd2
+C  [libc.so.6+0xebf8e]  clone+0x5e
+
+Java frames: (J=compiled Java code, j=interpreted, Vv=VM code)
+J 132  java.util.zip.ZipFile.getEntry(J[BZ)J (0 bytes) @ 0xe726b043 [0xe726afe0+0x63]
+J 230 C2 java.util.zip.ZipFile.getEntry(Ljava/lang/String;)Ljava/util/zip/ZipEntry; (86 bytes) @ 0xe72c7294 [0xe72c6f40+0x354]
+J 281 C2 sun.misc.URLClassPath$JarLoader.getResource(Ljava/lang/String;Z)Lsun/misc/Resource; (85 bytes) @ 0xe72e1b44 [0xe72e1ae0+0x64]
+J 527 C2 sun.misc.URLClassPath.getResource(Ljava/lang/String;Z)Lsun/misc/Resource; (83 bytes) @ 0xe7367828 [0xe73676e0+0x148]
+J 304 C1 java.net.URLClassLoader$1.run()Ljava/lang/Class; (63 bytes) @ 0xe72e13d4 [0xe72e1220+0x1b4]
+J 303 C1 java.net.URLClassLoader$1.run()Ljava/lang/Object; (5 bytes) @ 0xe72d9ed8 [0xe72d9e60+0x78]
+v  ~StubRoutines::call_stub
+J 309  java.security.AccessController.doPrivileged(Ljava/security/PrivilegedExceptionAction;Ljava/security/AccessControlContext;)Ljava/lang/Object; (0 bytes) @ 0xe72dd488 [0xe72dd420+0x68]
+J 301 C1 java.net.URLClassLoader.findClass(Ljava/lang/String;)Ljava/lang/Class; (47 bytes) @ 0xe72ddb74 [0xe72dda40+0x134]
+j  java.lang.ClassLoader.loadClass(Ljava/lang/String;Z)Ljava/lang/Class;+70
+J 293 C1 sun.misc.Launcher$AppClassLoader.loadClass(Ljava/lang/String;Z)Ljava/lang/Class; (85 bytes) @ 0xe72df09c [0xe72de8e0+0x7bc]
+J 292 C1 java.lang.ClassLoader.loadClass(Ljava/lang/String;)Ljava/lang/Class; (7 bytes) @ 0xe72daa90 [0xe72da9a0+0xf0]
+v  ~StubRoutines::call_stub
+j  org.wso2.carbon.apimgt.rest.api.core.impl.GatewaysApiServiceImplTest.testGatewaysRegisterPost()V+0
+v  ~StubRoutines::call_stub
+j  sun.reflect.NativeMethodAccessorImpl.invoke0(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+0
+j  sun.reflect.NativeMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+100
+j  sun.reflect.DelegatingMethodAccessorImpl.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+6
+j  java.lang.reflect.Method.invoke(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+56
+j  org.testng.internal.MethodInvocationHelper.invokeMethod(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;+235
+j  org.testng.internal.Invoker.invokeMethod(Ljava/lang/Object;Lorg/testng/ITestNGMethod;[Ljava/lang/Object;ILorg/testng/xml/XmlSuite;Ljava/util/Map;Lorg/testng/ITestClass;[Lorg/testng/ITestNGMethod;[Lorg/testng/ITestNGMethod;Lorg/testng/internal/ConfigurationGroupMethods;Lorg/testng/internal/Invoker$FailureContext;)Lorg/testng/ITestResult;+277
+j  org.testng.internal.Invoker.invokeTestMethod(Ljava/lang/Object;Lorg/testng/ITestNGMethod;[Ljava/lang/Object;ILorg/testng/xml/XmlSuite;Ljava/util/Map;Lorg/testng/ITestClass;[Lorg/testng/ITestNGMethod;[Lorg/testng/ITestNGMethod;Lorg/testng/internal/ConfigurationGroupMethods;Lorg/testng/internal/Invoker$FailureContext;)Lorg/testng/ITestResult;+29
+j  org.testng.internal.Invoker.invokeTestMethods(Lorg/testng/ITestNGMethod;Lorg/testng/xml/XmlSuite;Ljava/util/Map;Lorg/testng/internal/ConfigurationGroupMethods;Ljava/lang/Object;Lorg/testng/ITestContext;)Ljava/util/List;+675
+j  org.testng.internal.TestMethodWorker.invokeTestMethods(Lorg/testng/ITestNGMethod;Ljava/lang/Object;Lorg/testng/ITestContext;)V+19
+j  org.testng.internal.TestMethodWorker.run()V+60
+j  org.testng.TestRunner.privateRun(Lorg/testng/xml/XmlTest;)V+323
+j  org.testng.TestRunner.run()V+26
+j  org.testng.SuiteRunner.runTest(Lorg/testng/TestRunner;)V+1
+j  org.testng.SuiteRunner.runSequentially()V+31
+j  org.testng.SuiteRunner.privateRun()V+282
+j  org.testng.SuiteRunner.run()V+6
+j  org.testng.SuiteRunnerWorker.runSuite(Lorg/testng/internal/SuiteRunnerMap;Lorg/testng/xml/XmlSuite;)V+89
+j  org.testng.SuiteRunnerWorker.run()V+12
+j  org.testng.TestNG.runSuitesSequentially(Lorg/testng/xml/XmlSuite;Lorg/testng/internal/SuiteRunnerMap;ILjava/lang/String;)V+66
+j  org.testng.TestNG.runSuitesLocally()Ljava/util/List;+143
+j  org.testng.TestNG.run()V+81
+j  org.apache.maven.surefire.testng.TestNGExecutor.run([Ljava/lang/Class;Ljava/lang/String;Ljava/util/Map;Lorg/apache/maven/surefire/report/RunListener;Lorg/apache/maven/surefire/testng/TestNgTestSuite;Ljava/io/File;Ljava/lang/String;)V+359
+j  org.apache.maven.surefire.testng.TestNGDirectoryTestSuite.executeMulti(Lorg/apache/maven/surefire/util/TestsToRun;Lorg/apache/maven/surefire/report/ReporterFactory;)V+201
+j  org.apache.maven.surefire.testng.TestNGDirectoryTestSuite.execute(Lorg/apache/maven/surefire/util/TestsToRun;Lorg/apache/maven/surefire/report/ReporterFactory;)V+27
+j  org.apache.maven.surefire.testng.TestNGProvider.invoke(Ljava/lang/Object;)Lorg/apache/maven/surefire/suite/RunResult;+131
+j  org.apache.maven.surefire.booter.ForkedBooter.invokeProviderInSameClassLoader(Ljava/lang/Object;Ljava/lang/Object;Lorg/apache/maven/surefire/booter/ProviderConfiguration;ZLorg/apache/maven/surefire/booter/StartupConfiguration;Z)Lorg/apache/maven/surefire/suite/RunResult;+23
+j  org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(Ljava/lang/Object;Lorg/apache/maven/surefire/booter/StartupConfiguration;Lorg/apache/maven/surefire/booter/ProviderConfiguration;Ljava/io/PrintStream;)Lorg/apache/maven/surefire/suite/RunResult;+14
+j  org.apache.maven.surefire.booter.ForkedBooter.main([Ljava/lang/String;)V+183
+v  ~StubRoutines::call_stub
+
+---------------  P R O C E S S  ---------------
+
+Java Threads: ( => current thread )
+  0xa3504000 JavaThread "SIGINT handler" daemon [_thread_blocked, id=25079, stack(0xa3709000,0xa375a000)]
+  0xa36b5c00 JavaThread "Service Thread" daemon [_thread_blocked, id=20846, stack(0xa318a000,0xa31db000)]
+  0xa36b2c00 JavaThread "C1 CompilerThread2" daemon [_thread_blocked, id=20845, stack(0xa31db000,0xa325c000)]
+  0xa36b1800 JavaThread "C2 CompilerThread1" daemon [_thread_blocked, id=20844, stack(0xa325c000,0xa32dd000)]
+  0xa36af800 JavaThread "C2 CompilerThread0" daemon [_thread_blocked, id=20843, stack(0xa32dd000,0xa335e000)]
+  0xa36ae000 JavaThread "JDWP Event Helper Thread" daemon [_thread_blocked, id=20834, stack(0xa33af000,0xa3400000)]
+  0xa36a2400 JavaThread "Signal Dispatcher" daemon [_thread_blocked, id=20832, stack(0xa632e000,0xa637f000)]
+  0xa3688c00 JavaThread "Finalizer" daemon [_thread_blocked, id=20831, stack(0xa652e000,0xa657f000)]
+  0xa3685c00 JavaThread "Reference Handler" daemon [_thread_blocked, id=20830, stack(0xa672e000,0xa677f000)]
+=>0xf6509400 JavaThread "main" [_thread_in_native, id=20824, stack(0xf66db000,0xf672c000)]
+
+Other Threads:
+  0xa3681400 VMThread [stack: 0xa375a000,0xa37db000] [id=20829]
+  0xa36b9400 WatcherThread [stack: 0xa3109000,0xa318a000] [id=20847]
+
+VM state:not at safepoint (normal execution)
+
+VM Mutex/Monitor currently owned by a thread: None
+
+Heap:
+ PSYoungGen      total 19200K, used 8550K [0xd16c0000, 0xd3c40000, 0xe6c00000)
+  eden space 16640K, 36% used [0xd16c0000,0xd1c9c010,0xd2700000)
+  from space 2560K, 99% used [0xd2980000,0xd2bfd8f0,0xd2c00000)
+  to   space 2560K, 0% used [0xd2700000,0xd2700000,0xd2980000)
+ ParOldGen       total 43776K, used 1288K [0xa6c00000, 0xa96c0000, 0xd16c0000)
+  object space 43776K, 2% used [0xa6c00000,0xa6d422c0,0xa96c0000)
+ Metaspace       used 7162K, capacity 7186K, committed 7320K, reserved 7472K
+
+Card table byte_map: [0xa69ff000,0xa6c00000] byte_map_base: 0xa64c9000
+
+Marking Bits: (ParMarkBitMap*) 0xf717f700
+ Begin Bits: [0xa4200000, 0xa5200000)
+ End Bits:   [0xa5200000, 0xa6200000)
+
+Polling page: 0xf778e000
+
+CodeCache: size=245760Kb used=2457Kb max_used=2457Kb free=243302Kb
+ bounds [0xe7190000, 0xe7400000, 0xf6190000]
+ total_blobs=944 nmethods=765 adapters=101
+ compilation: enabled
+
+Compilation events (10 events):
+Event: 10.382 Thread 0xa36b2c00 nmethod 759 0xe73f5548 code [0xe73f5680, 0xe73f5a58]
+Event: 10.382 Thread 0xa36af800 nmethod 758 0xe73f5b48 code [0xe73f5c60, 0xe73f60d0]
+Event: 10.383 Thread 0xa36b2c00  760       3       java.io.FileOutputStream::write (10 bytes)
+Event: 10.383 Thread 0xa36b2c00 nmethod 760 0xe73f5008 code [0xe73f5120, 0xe73f522c]
+Event: 10.386 Thread 0xa36b2c00  763       3       sun.reflect.Reflection::quickCheckMemberAccess (10 bytes)
+Event: 10.386 Thread 0xa36b2c00 nmethod 763 0xe73f46c8 code [0xe73f47e0, 0xe73f494c]
+Event: 10.387 Thread 0xa36b2c00  764       3       sun.reflect.UTF8::utf8Length (81 bytes)
+Event: 10.387 Thread 0xa36b2c00 nmethod 764 0xe73f3d88 code [0xe73f3ee0, 0xe73f43cc]
+Event: 10.401 Thread 0xa36b2c00  765       3       sun.reflect.annotation.AnnotationInvocationHandler::invoke (277 bytes)
+Event: 10.404 Thread 0xa36b2c00 nmethod 765 0xe73f6308 code [0xe73f65e0, 0xe73f7720]
+
+GC Heap History (8 events):
+Event: 9.804 GC heap before
+{Heap before GC invocations=1 (full 0):
+ PSYoungGen      total 19200K, used 16640K [0xd16c0000, 0xd2c00000, 0xe6c00000)
+  eden space 16640K, 100% used [0xd16c0000,0xd2700000,0xd2700000)
+  from space 2560K, 0% used [0xd2980000,0xd2980000,0xd2c00000)
+  to   space 2560K, 0% used [0xd2700000,0xd2700000,0xd2980000)
+ ParOldGen       total 43776K, used 0K [0xa6c00000, 0xa96c0000, 0xd16c0000)
+  object space 43776K, 0% used [0xa6c00000,0xa6c00000,0xa96c0000)
+ Metaspace       used 3235K, capacity 3272K, committed 3352K, reserved 4400K
+Event: 9.807 GC heap after
+Heap after GC invocations=1 (full 0):
+ PSYoungGen      total 19200K, used 2269K [0xd16c0000, 0xd2c00000, 0xe6c00000)
+  eden space 16640K, 0% used [0xd16c0000,0xd16c0000,0xd2700000)
+  from space 2560K, 88% used [0xd2700000,0xd2937630,0xd2980000)
+  to   space 2560K, 0% used [0xd2980000,0xd2980000,0xd2c00000)
+ ParOldGen       total 43776K, used 4K [0xa6c00000, 0xa96c0000, 0xd16c0000)
+  object space 43776K, 0% used [0xa6c00000,0xa6c01000,0xa96c0000)
+ Metaspace       used 3235K, capacity 3272K, committed 3352K, reserved 4400K
+}
+Event: 10.007 GC heap before
+{Heap before GC invocations=2 (full 0):
+ PSYoungGen      total 19200K, used 18909K [0xd16c0000, 0xd2c00000, 0xe6c00000)
+  eden space 16640K, 100% used [0xd16c0000,0xd2700000,0xd2700000)
+  from space 2560K, 88% used [0xd2700000,0xd2937630,0xd2980000)
+  to   space 2560K, 0% used [0xd2980000,0xd2980000,0xd2c00000)
+ ParOldGen       total 43776K, used 4K [0xa6c00000, 0xa96c0000, 0xd16c0000)
+  object space 43776K, 0% used [0xa6c00000,0xa6c01000,0xa96c0000)
+ Metaspace       used 4361K, capacity 4392K, committed 4504K, reserved 5424K
+Event: 10.009 GC heap after
+Heap after GC invocations=2 (full 0):
+ PSYoungGen      total 19200K, used 2288K [0xd16c0000, 0xd2c00000, 0xe6c00000)
+  eden space 16640K, 0% used [0xd16c0000,0xd16c0000,0xd2700000)
+  from space 2560K, 89% used [0xd2980000,0xd2bbc260,0xd2c00000)
+  to   space 2560K, 0% used [0xd2700000,0xd2700000,0xd2980000)
+ ParOldGen       total 43776K, used 8K [0xa6c00000, 0xa96c0000, 0xd16c0000)
+  object space 43776K, 0% used [0xa6c00000,0xa6c02000,0xa96c0000)
+ Metaspace       used 4361K, capacity 4392K, committed 4504K, reserved 5424K
+}
+Event: 10.230 GC heap before
+{Heap before GC invocations=3 (full 0):
+ PSYoungGen      total 19200K, used 18928K [0xd16c0000, 0xd2c00000, 0xe6c00000)
+  eden space 16640K, 100% used [0xd16c0000,0xd2700000,0xd2700000)
+  from space 2560K, 89% used [0xd2980000,0xd2bbc260,0xd2c00000)
+  to   space 2560K, 0% used [0xd2700000,0xd2700000,0xd2980000)
+ ParOldGen       total 43776K, used 8K [0xa6c00000, 0xa96c0000, 0xd16c0000)
+  object space 43776K, 0% used [0xa6c00000,0xa6c02000,0xa96c0000)
+ Metaspace       used 6072K, capacity 6090K, committed 6168K, reserved 6448K
+Event: 10.234 GC heap after
+Heap after GC invocations=3 (full 0):
+ PSYoungGen      total 19200K, used 2554K [0xd16c0000, 0xd2c00000, 0xe6c00000)
+  eden space 16640K, 0% used [0xd16c0000,0xd16c0000,0xd2700000)
+  from space 2560K, 99% used [0xd2700000,0xd297eb28,0xd2980000)
+  to   space 2560K, 0% used [0xd2980000,0xd2980000,0xd2c00000)
+ ParOldGen       total 43776K, used 433K [0xa6c00000, 0xa96c0000, 0xd16c0000)
+  object space 43776K, 0% used [0xa6c00000,0xa6c6c660,0xa96c0000)
+ Metaspace       used 6072K, capacity 6090K, committed 6168K, reserved 6448K
+}
+Event: 10.358 GC heap before
+{Heap before GC invocations=4 (full 0):
+ PSYoungGen      total 19200K, used 19191K [0xd16c0000, 0xd2c00000, 0xe6c00000)
+  eden space 16640K, 99% used [0xd16c0000,0xd26ff178,0xd2700000)
+  from space 2560K, 99% used [0xd2700000,0xd297eb28,0xd2980000)
+  to   space 2560K, 0% used [0xd2980000,0xd2980000,0xd2c00000)
+ ParOldGen       total 43776K, used 433K [0xa6c00000, 0xa96c0000, 0xd16c0000)
+  object space 43776K, 0% used [0xa6c00000,0xa6c6c660,0xa96c0000)
+ Metaspace       used 6900K, capacity 6957K, committed 7064K, reserved 7472K
+Event: 10.362 GC heap after
+Heap after GC invocations=4 (full 0):
+ PSYoungGen      total 19200K, used 2550K [0xd16c0000, 0xd3c40000, 0xe6c00000)
+  eden space 16640K, 0% used [0xd16c0000,0xd16c0000,0xd2700000)
+  from space 2560K, 99% used [0xd2980000,0xd2bfd8f0,0xd2c00000)
+  to   space 2560K, 0% used [0xd2700000,0xd2700000,0xd2980000)
+ ParOldGen       total 43776K, used 1288K [0xa6c00000, 0xa96c0000, 0xd16c0000)
+  object space 43776K, 2% used [0xa6c00000,0xa6d422c0,0xa96c0000)
+ Metaspace       used 6900K, capacity 6957K, committed 7064K, reserved 7472K
+}
+
+Deoptimization events (3 events):
+Event: 9.701 Thread 0xf6509400 Uncommon trap: reason=unstable_if action=reinterpret pc=0xe72b576c method=java.lang.String.indexOf([CII[CIII)I @ 3
+Event: 9.787 Thread 0xf6509400 Uncommon trap: reason=unstable_if action=reinterpret pc=0xe72dcf58 method=java.lang.String.replace(CC)Ljava/lang/String; @ 26
+Event: 10.160 Thread 0xf6509400 Uncommon trap: reason=unstable_if action=reinterpret pc=0xe733b214 method=java.util.concurrent.ConcurrentHashMap.get(Ljava/lang/Object;)Ljava/lang/Object; @ 127
+
+Internal exceptions (10 events):
+Event: 10.159 Thread 0xf6509400 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/PatternLayoutCustomizer> (0xd231d640) thrown at [/HUDSON/workspace/8-2-build-linux-i586/jdk8u131/8869/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
+Event: 10.184 Thread 0xf6509400 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/ConsoleAppenderBeanInfo> (0xd2383840) thrown at [/HUDSON/workspace/8-2-build-linux-i586/jdk8u131/8869/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
+Event: 10.185 Thread 0xf6509400 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/WriterAppenderBeanInfo> (0xd239c270) thrown at [/HUDSON/workspace/8-2-build-linux-i586/jdk8u131/8869/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
+Event: 10.185 Thread 0xf6509400 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/AppenderSkeletonBeanInfo> (0xd23b5d38) thrown at [/HUDSON/workspace/8-2-build-linux-i586/jdk8u131/8869/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
+Event: 10.186 Thread 0xf6509400 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/AppenderSkeletonCustomizer> (0xd23cf858) thrown at [/HUDSON/workspace/8-2-build-linux-i586/jdk8u131/8869/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
+Event: 10.188 Thread 0xf6509400 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/WriterAppenderCustomizer> (0xd23fd5a0) thrown at [/HUDSON/workspace/8-2-build-linux-i586/jdk8u131/8869/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
+Event: 10.189 Thread 0xf6509400 Exception <a 'java/lang/ClassNotFoundException': org/apache/log4j/ConsoleAppenderCustomizer> (0xd2421ce0) thrown at [/HUDSON/workspace/8-2-build-linux-i586/jdk8u131/8869/hotspot/src/share/vm/classfile/systemDictionary.cpp, line 210]
+Event: 10.203 Thread 0xf6509400 Exception <a 'sun/nio/fs/UnixException'> (0xd24a19f8) thrown at [/HUDSON/workspace/8-2-build-linux-i586/jdk8u131/8869/hotspot/src/share/vm/prims/jni.cpp, line 709]
+Event: 10.203 Thread 0xf6509400 Exception <a 'sun/nio/fs/UnixException'> (0xd24a26d0) thrown at [/HUDSON/workspace/8-2-build-linux-i586/jdk8u131/8869/hotspot/src/share/vm/prims/jni.cpp, line 709]
+Event: 65745.822 Thread 0xf6509400 Exception <a 'java/io/IOException'> (0xd1bdeaf0) thrown at [/HUDSON/workspace/8-2-build-linux-i586/jdk8u131/8869/hotspot/src/share/vm/prims/jni.cpp, line 709]
+
+Events (10 events):
+Event: 65746.737 Thread 0xf6509400 DEOPT PACKING pc=0xe72ddccc sp=0xf6729710
+Event: 65746.822 Thread 0xf6509400 DEOPT UNPACKING pc=0xe71cc850 sp=0xf67295c0 mode 1
+Event: 65746.822 Executing VM operation: RevokeBias
+Event: 65746.893 Executing VM operation: RevokeBias done
+Event: 65746.893 Thread 0xf6509400 DEOPT PACKING pc=0xe72ba940 sp=0xf6729760
+Event: 65746.951 Thread 0xf6509400 DEOPT UNPACKING pc=0xe71cc850 sp=0xf6729680 mode 1
+Event: 65746.951 Executing VM operation: RevokeBias
+Event: 65746.951 Executing VM operation: RevokeBias done
+Event: 65746.951 Thread 0xf6509400 DEOPT PACKING pc=0xe72ba770 sp=0xf6729840
+Event: 65746.951 Thread 0xf6509400 DEOPT UNPACKING pc=0xe71cc850 sp=0xf6729760 mode 1
+
+
+Dynamic libraries:
+08048000-08049000 r-xp 00000000 08:01 21011248                           /home/shani/SW/jdk1.8.0_131/jre/bin/java
+08049000-0804a000 rw-p 00000000 08:01 21011248                           /home/shani/SW/jdk1.8.0_131/jre/bin/java
+0938e000-093af000 rw-p 00000000 00:00 0                                  [heap]
+a1e64000-a2000000 rw-p 00000000 00:00 0 
+a2000000-a20bf000 rw-p 00000000 00:00 0 
+a20bf000-a2100000 ---p 00000000 00:00 0 
+a2149000-a22e0000 rw-p 00000000 00:00 0 
+a22e0000-a2300000 ---p 00000000 00:00 0 
+a2300000-a2400000 rw-p 00000000 00:00 0 
+a2400000-a2500000 rw-p 00000000 00:00 0 
+a2500000-a2600000 rw-p 00000000 00:00 0 
+a2600000-a26f9000 rw-p 00000000 00:00 0 
+a26f9000-a2700000 ---p 00000000 00:00 0 
+a2700000-a277d000 rw-p 00000000 00:00 0 
+a277d000-a2800000 ---p 00000000 00:00 0 
+a2800000-a28fe000 rw-p 00000000 00:00 0 
+a28fe000-a2900000 ---p 00000000 00:00 0 
+a2900000-a29de000 rw-p 00000000 00:00 0 
+a29de000-a2a00000 ---p 00000000 00:00 0 
+a2a00000-a2afb000 rw-p 00000000 00:00 0 
+a2afb000-a2b00000 ---p 00000000 00:00 0 
+a2b3e000-a2b43000 rw-p 00000000 00:00 0 
+a2b43000-a2b58000 r-xp 00000000 08:01 21011164                           /home/shani/SW/jdk1.8.0_131/jre/lib/i386/libnet.so
+a2b58000-a2b59000 rw-p 00015000 08:01 21011164                           /home/shani/SW/jdk1.8.0_131/jre/lib/i386/libnet.so
+a2b59000-a2b68000 r-xp 00000000 08:01 21011121                           /home/shani/SW/jdk1.8.0_131/jre/lib/i386/libnio.so
+a2b68000-a2b69000 rw-p 0000e000 08:01 21011121                           /home/shani/SW/jdk1.8.0_131/jre/lib/i386/libnio.so
+a2b69000-a2b6e000 r--s 0009a000 08:01 21011214                           /home/shani/SW/jdk1.8.0_131/jre/lib/jsse.jar
+a2b6e000-a2b70000 r--s 00008000 08:01 22833903                           /home/shani/.m2/repository/org/apache/maven/surefire/common-java5/2.18.1/common-java5-2.18.1.jar
+a2b70000-a2b71000 r--s 00008000 08:01 22833902                           /home/shani/.m2/repository/org/apache/maven/surefire/surefire-testng/2.18.1/surefire-testng-2.18.1.jar
+a2b71000-a2b73000 r--s 00008000 08:01 22833904                           /home/shani/.m2/repository/org/apache/maven/surefire/surefire-grouper/2.18.1/surefire-grouper-2.18.1.jar
+a2b73000-a2b75000 r--s 00006000 08:01 22833905                           /home/shani/.m2/repository/org/apache/maven/surefire/surefire-testng-utils/2.18.1/surefire-testng-utils-2.18.1.jar
+a2b75000-a2b77000 r--s 0000a000 08:01 21113524                           /home/shani/.m2/repository/org/powermock/powermock-reflect/1.6.4/powermock-reflect-1.6.4.jar
+a2b77000-a2b81000 r--s 000ae000 08:01 22833535                           /home/shani/.m2/repository/org/javassist/javassist/3.20.0-GA/javassist-3.20.0-GA.jar
+a2b81000-a2b84000 r--s 00017000 08:01 21113521                           /home/shani/.m2/repository/org/powermock/powermock-core/1.6.4/powermock-core-1.6.4.jar
+a2b84000-a2b85000 r--s 00004000 08:01 21113520                           /home/shani/.m2/repository/org/powermock/powermock-api-support/1.6.4/powermock-api-support-1.6.4.jar
+a2b85000-a2b87000 r--s 00009000 08:01 21534343                           /home/shani/.m2/repository/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.jar
+a2b87000-a2b89000 r--s 00009000 08:01 21113519                           /home/shani/.m2/repository/org/objenesis/objenesis/2.1/objenesis-2.1.jar
+a2b89000-a2ba5000 r--s 00103000 08:01 21024972                           /home/shani/.m2/repository/org/mockito/mockito-core/1.10.19/mockito-core-1.10.19.jar
+a2ba5000-a2ba9000 r--s 00015000 08:01 21024971                           /home/shani/.m2/repository/org/powermock/powermock-api-mockito/1.6.4/powermock-api-mockito-1.6.4.jar
+a2ba9000-a2bc7000 r--s 00110000 08:01 19970412                           /home/shani/.m2/repository/org/mockito/mockito-all/1.10.19/mockito-all-1.10.19.jar
+a2bc7000-a2bcc000 r--s 00040000 08:01 20722723                           /home/shani/.m2/repository/org/beanshell/bsh/2.0b4/bsh-2.0b4.jar
+a2bcc000-a2bce000 r--s 0000e000 08:01 22833441                           /home/shani/.m2/repository/com/beust/jcommander/1.48/jcommander-1.48.jar
+a2bce000-a2bdc000 r--s 000c7000 08:01 22833440                           /home/shani/.m2/repository/org/testng/testng/6.9.10/testng-6.9.10.jar
+a2bdc000-a2bde000 r--s 00007000 08:01 22833106                           /home/shani/.m2/repository/com/fasterxml/jackson/module/jackson-module-jaxb-annotations/2.7.4/jackson-module-jaxb-annotations-2.7.4.jar
+a2bde000-a2be0000 r--s 00006000 08:01 22833102                           /home/shani/.m2/repository/com/fasterxml/jackson/jaxrs/jackson-jaxrs-base/2.7.4/jackson-jaxrs-base-2.7.4.jar
+a2be0000-a2be2000 r--s 00003000 08:01 22833103                           /home/shani/.m2/repository/com/fasterxml/jackson/jaxrs/jackson-jaxrs-json-provider/2.7.4/jackson-jaxrs-json-provider-2.7.4.jar
+a2be2000-a2be5000 r--s 0002d000 08:01 22833076                           /home/shani/.m2/repository/org/wso2/eclipse/equinox/org.eclipse.equinox.ds/1.4.200.v20131126-2331/org.eclipse.equinox.ds-1.4.200.v20131126-2331.jar
+a2be5000-a2be8000 r--s 0000a000 08:01 22833105                           /home/shani/.m2/repository/javax/cache/cache-api/1.0.0/cache-api-1.0.0.jar
+a2be8000-a2bec000 r--s 0001b000 08:01 22833075                           /home/shani/.m2/repository/org/wso2/carbon/caching/org.wso2.carbon.caching/1.0.0/org.wso2.carbon.caching-1.0.0.jar
+a2bec000-a2bed000 r--s 0000a000 08:01 21540126                           /home/shani/.m2/repository/asm/asm/3.3.1/asm-3.3.1.jar
+a2bed000-a2bef000 r--s 00010000 08:01 22833104                           /home/shani/.m2/repository/net/minidev/asm/1.0.2/asm-1.0.2.jar
+a2bef000-a2bf0000 r--s 00002000 08:01 22833074                           /home/shani/.m2/repository/org/wso2/carbon/security/caas/org.wso2.carbon.security.caas.boot/1.0.0-m2/org.wso2.carbon.security.caas.boot-1.0.0-m2.jar
+a2bf0000-a2bf4000 r--s 0001d000 08:01 22833073                           /home/shani/.m2/repository/org/wso2/carbon/security/caas/org.wso2.carbon.security.caas/1.0.0-m2/org.wso2.carbon.security.caas-1.0.0-m2.jar
+a2bf4000-a2bf6000 r--s 00012000 08:01 22832783                           /home/shani/.m2/repository/org/wso2/carbon/apimgt/org.wso2.carbon.apimgt.rest.api.commons/7.0.37-SNAPSHOT/org.wso2.carbon.apimgt.rest.api.commons-7.0.37-SNAPSHOT.jar
+a2bf6000-a2bf7000 r--s 00004000 08:01 21534790                           /home/shani/.m2/repository/com/googlecode/json-simple/wso2/json-simple/1.1.wso2v1/json-simple-1.1.wso2v1.jar
+a2bf7000-a2bfe000 r--s 0003e000 08:01 21010439                           /home/shani/.m2/repository/org/ops4j/pax/logging/pax-logging-api/1.9.0/pax-logging-api-1.9.0.jar
+a2bfe000-a2c00000 r--s 00005000 08:01 21536214                           /home/shani/.m2/repository/javax/annotation/javax.annotation-api/1.2/javax.annotation-api-1.2.jar
+a2c00000-a2cfe000 rw-p 00000000 00:00 0 
+a2cfe000-a2d00000 ---p 00000000 00:00 0 
+a2d00000-a2d01000 r--s 00001000 08:01 21010438                           /home/shani/.m2/repository/io/github/openfeign/feign-gson/9.5.0/feign-gson-9.5.0.jar
+a2d01000-a2d02000 r--s 00000000 08:01 22833101                           /home/shani/.m2/repository/org/jvnet/animal-sniffer-annotation/1.0/animal-sniffer-annotation-1.0.jar
+a2d02000-a2d04000 r--s 00016000 08:01 21010437                           /home/shani/.m2/repository/io/github/openfeign/feign-core/9.5.0/feign-core-9.5.0.jar
+a2d04000-a2d08000 r--s 0002d000 08:01 21538890                           /home/shani/.m2/repository/com/nimbusds/wso2/nimbus-jose-jwt/2.26.1.wso2v2/nimbus-jose-jwt-2.26.1.wso2v2.jar
+a2d08000-a2d0f000 r--s 00064000 08:01 22037848                           /home/shani/.m2/repository/org/apache/commons/commons-lang3/3.4/commons-lang3-3.4.jar
+a2d0f000-a2d12000 r--s 00005000 08:01 21536439                           /home/shani/.m2/repository/org/apache/geronimo/specs/wso2/geronimo-jms_1.1_spec/1.1.0.wso2v1/geronimo-jms_1.1_spec-1.1.0.wso2v1.jar
+a2d12000-a2d20000 r--s 00081000 08:01 21535006                           /home/shani/.m2/repository/org/wso2/orbit/commons-collections/commons-collections/3.2.2.wso2v1/commons-collections-3.2.2.wso2v1.jar
+a2d20000-a2d25000 r--s 00040000 08:01 21535039                           /home/shani/.m2/repository/commons-lang/wso2/commons-lang/2.6.0.wso2v1/commons-lang-2.6.0.wso2v1.jar
+a2d25000-a2d2d000 r--s 00067000 08:01 22833067                           /home/shani/.m2/repository/org/wso2/orbit/org/apache/velocity/velocity/1.7.0.wso2v1/velocity-1.7.0.wso2v1.jar
+a2d2d000-a2d58000 r--s 001fc000 08:01 21536215                           /home/shani/.m2/repository/com/google/guava/guava/18.0/guava-18.0.jar
+a2d58000-a2d5b000 r--s 0001f000 08:01 20106631                           /home/shani/.m2/repository/io/swagger/swagger-models/1.5.10/swagger-models-1.5.10.jar
+a2d5b000-a2d64000 r--s 00046000 08:01 22067290                           /home/shani/.m2/repository/com/fasterxml/jackson/dataformat/jackson-dataformat-yaml/2.4.5/jackson-dataformat-yaml-2.4.5.jar
+a2d64000-a2d67000 r--s 00017000 08:01 21538517                           /home/shani/.m2/repository/io/swagger/swagger-core/1.5.10/swagger-core-1.5.10.jar
+a2d67000-a2d69000 r--s 00026000 08:01 22833068                           /home/shani/.m2/repository/org/wso2/orbit/io/swagger/swagger-parser/1.0.21.wso2v2/swagger-parser-1.0.21.wso2v2.jar
+a2d69000-a2d75000 r--s 00286000 08:01 19856273                           /home/shani/.m2/repository/com/h2database/wso2/h2-database-engine/1.2.140.wso2v3/h2-database-engine-1.2.140.wso2v3.jar
+a2d75000-a2d76000 r--s 00007000 08:01 22833065                           /home/shani/.m2/repository/org/wso2/carbon/lcm/org.wso2.carbon.lcm.sql/1.1.1/org.wso2.carbon.lcm.sql-1.1.1.jar
+a2d76000-a2d78000 r--s 00009000 08:01 22833064                           /home/shani/.m2/repository/org/wso2/carbon/lcm/org.wso2.carbon.lcm.core/1.1.1/org.wso2.carbon.lcm.core-1.1.1.jar
+a2d78000-a2d7c000 r--s 0000f000 08:01 22833099                           /home/shani/.m2/repository/com/google/code/findbugs/annotations/3.0.0/annotations-3.0.0.jar
+a2d7c000-a2d8c000 r--s 0009c000 08:01 22833097                           /home/shani/.m2/repository/org/hibernate/hibernate-validator/5.2.4.Final/hibernate-validator-5.2.4.Final.jar
+a2d8c000-a2d96000 r--s 0006b000 08:01 22833095                           /home/shani/.m2/repository/org/osgi/org.osgi.core/6.0.0/org.osgi.core-6.0.0.jar
+a2d96000-a2da1000 r--s 00091000 08:01 22418736                           /home/shani/.m2/repository/org/wso2/carbon/apimgt/org.wso2.carbon.apimgt.core/7.0.37-SNAPSHOT/org.wso2.carbon.apimgt.core-7.0.37-SNAPSHOT.jar
+a2da1000-a2db1000 r--s 00080000 08:01 22833094                           /home/shani/.m2/repository/joda-time/joda-time/2.4/joda-time-2.4.jar
+a2db1000-a2dc2000 r--s 00115000 08:01 22833090                           /home/shani/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.7.4/jackson-databind-2.7.4.jar
+a2dc2000-a2e00000 r--s 0025e000 08:01 21532219                           /home/shani/.m2/repository/org/bouncycastle/bcprov-jdk15on/1.50/bcprov-jdk15on-1.50.jar
+a2e00000-a2ff9000 rw-p 00000000 00:00 0 
+a2ff9000-a3000000 ---p 00000000 00:00 0 
+a3000000-a30fd000 rw-p 00000000 00:00 0 
+a30fd000-a3100000 ---p 00000000 00:00 0 
+a3100000-a3102000 r--s 0000e000 08:01 22833098                           /home/shani/.m2/repository/com/fasterxml/classmate/1.1.0/classmate-1.1.0.jar
+a3102000-a3106000 r--s 0000c000 08:01 21536232                           /home/shani/.m2/repository/javax/validation/validation-api/1.1.0.Final/validation-api-1.1.0.Final.jar
+a3106000-a3109000 r--s 0000e000 08:01 22833093                           /home/shani/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-joda/2.7.4/jackson-datatype-joda-2.7.4.jar
+a3109000-a310a000 ---p 00000000 00:00 0 
+a310a000-a318a000 rw-p 00000000 00:00 0                                  [stack:20847]
+a318a000-a318d000 ---p 00000000 00:00 0 
+a318d000-a31db000 rw-p 00000000 00:00 0                                  [stack:20846]
+a31db000-a31de000 ---p 00000000 00:00 0 
+a31de000-a325c000 rw-p 00000000 00:00 0                                  [stack:20845]
+a325c000-a325f000 ---p 00000000 00:00 0 
+a325f000-a32dd000 rw-p 00000000 00:00 0                                  [stack:20844]
+a32dd000-a32e0000 ---p 00000000 00:00 0 
+a32e0000-a335e000 rw-p 00000000 00:00 0                                  [stack:20843]
+a335e000-a3361000 ---p 00000000 00:00 0 
+a3361000-a33af000 rw-p 00000000 00:00 0 
+a33af000-a33b2000 ---p 00000000 00:00 0 
+a33b2000-a3400000 rw-p 00000000 00:00 0                                  [stack:20834]
+a3400000-a3421000 rw-p 00000000 00:00 0 
+a3421000-a3500000 ---p 00000000 00:00 0 
+a3500000-a3521000 rw-p 00000000 00:00 0 
+a3521000-a3600000 ---p 00000000 00:00 0 
+a3600000-a36fc000 rw-p 00000000 00:00 0 
+a36fc000-a3700000 ---p 00000000 00:00 0 
+a3700000-a3702000 r--s 0000f000 08:01 22833096                           /home/shani/.m2/repository/org/jboss/logging/jboss-logging/3.2.1.Final/jboss-logging-3.2.1.Final.jar
+a3702000-a3705000 r--s 00015000 08:01 21540153                           /home/shani/.m2/repository/javax/servlet/javax.servlet-api/3.1.0/javax.servlet-api-3.1.0.jar
+a3705000-a3709000 r--s 00018000 08:01 21536213                           /home/shani/.m2/repository/javax/ws/rs/javax.ws.rs-api/2.0/javax.ws.rs-api-2.0.jar
+a3709000-a370c000 ---p 00000000 00:00 0 
+a370c000-a375a000 rw-p 00000000 00:00 0                                  [stack:25079]
+a375a000-a375b000 ---p 00000000 00:00 0 
+a375b000-a37db000 rw-p 00000000 00:00 0                                  [stack:20829]
+a37db000-a39b4000 r--s 03d40000 08:01 21011210                           /home/shani/SW/jdk1.8.0_131/jre/lib/rt.jar
+a39b4000-a3dfa000 rw-p 00000000 00:00 0 
+a3dfa000-a3e00000 ---p 00000000 00:00 0 
+a3e00000-a6200000 rw-p 00000000 00:00 0 
+a6200000-a6221000 rw-p 00000000 00:00 0 
+a6221000-a6300000 ---p 00000000 00:00 0 
+a6300000-a6301000 r--s 00004000 08:01 20354929                           /home/shani/.m2/repository/io/swagger/swagger-annotations/1.5.10/swagger-annotations-1.5.10.jar
+a6301000-a6304000 r--s 0000a000 08:01 22833092                           /home/shani/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.7.4/jackson-annotations-2.7.4.jar
+a6304000-a6307000 r--s 0003b000 08:01 22833091                           /home/shani/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.7.4/jackson-core-2.7.4.jar
+a6307000-a630a000 r--s 0000b000 08:01 22833063                           /home/shani/.m2/repository/org/wso2/carbon/jndi/org.wso2.carbon.jndi/1.0.0-alpha/org.wso2.carbon.jndi-1.0.0-alpha.jar
+a630a000-a630d000 r--s 0001c000 08:01 21010434                           /home/shani/.m2/repository/com/zaxxer/HikariCP/2.4.1/HikariCP-2.4.1.jar
+a630d000-a630f000 r--s 00008000 08:01 21538851                           /home/shani/.m2/repository/org/apache/tomcat/tomcat-juli/7.0.47/tomcat-juli-7.0.47.jar
+a630f000-a6311000 r--s 0001d000 08:01 21535001                           /home/shani/.m2/repository/org/apache/tomcat/tomcat-jdbc/7.0.47/tomcat-jdbc-7.0.47.jar
+a6311000-a6314000 r--s 00023000 08:01 21535000                           /home/shani/.m2/repository/org/apache/tomcat/wso2/jdbc-pool/7.0.34.wso2v2/jdbc-pool-7.0.34.wso2v2.jar
+a6314000-a6315000 r--s 0000f000 08:01 21536607                           /home/shani/.m2/repository/org/json/json/20140107/json-20140107.jar
+a6315000-a631a000 r--s 00025000 08:01 22833062                           /home/shani/.m2/repository/org/wso2/carbon/org.wso2.carbon.core/5.2.0-m3/org.wso2.carbon.core-5.2.0-m3.jar
+a631a000-a631d000 r--s 0000e000 08:01 22833061                           /home/shani/.m2/repository/org/wso2/carbon/datasources/org.wso2.carbon.datasource.core/1.0.0/org.wso2.carbon.datasource.core-1.0.0.jar
+a631d000-a6321000 r--s 00029000 08:01 21534994                           /home/shani/.m2/repository/commons-io/wso2/commons-io/2.4.0.wso2v1/commons-io-2.4.0.wso2v1.jar
+a6321000-a6327000 r--s 0003d000 08:01 21536585                           /home/shani/.m2/repository/org/yaml/snakeyaml/1.17/snakeyaml-1.17.jar
+a6327000-a6329000 r--s 0000b000 08:01 21532218                           /home/shani/.m2/repository/net/minidev/json-smart/1.1.1/json-smart-1.1.1.jar
+a6329000-a632c000 r--s 00020000 08:01 22833089                           /home/shani/.m2/repository/com/nimbusds/nimbus-jose-jwt/2.25/nimbus-jose-jwt-2.25.jar
+a632c000-a632e000 r--s 0000d000 08:01 21534350                           /home/shani/.m2/repository/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar
+a632e000-a6331000 ---p 00000000 00:00 0 
+a6331000-a637f000 rw-p 00000000 00:00 0                                  [stack:20832]
+a637f000-a6380000 ---p 00000000 00:00 0 
+a6380000-a6400000 rw-p 00000000 00:00 0                                  [stack:20828]
+a6400000-a6421000 rw-p 00000000 00:00 0 
+a6421000-a6500000 ---p 00000000 00:00 0 
+a6500000-a6505000 r--s 00039000 08:01 21010433                           /home/shani/.m2/repository/org/apache/servicemix/bundles/org.apache.servicemix.bundles.commons-beanutils/1.8.3_2/org.apache.servicemix.bundles.commons-beanutils-1.8.3_2.jar
+a6505000-a650a000 r--s 00034000 08:01 21536435                           /home/shani/.m2/repository/com/google/code/gson/gson/2.7/gson-2.7.jar
+a650a000-a6513000 r--s 0006f000 08:01 21535042                           /home/shani/.m2/repository/log4j/log4j/1.2.17/log4j-1.2.17.jar
+a6513000-a651a000 r--s 0003a000 08:01 21513680                           /home/shani/.m2/repository/commons-codec/commons-codec/1.9/commons-codec-1.9.jar
+a651a000-a6521000 r--s 00049000 08:01 22833086                           /home/shani/.m2/repository/org/apache/httpcomponents/httpcore/4.4.4/httpcore-4.4.4.jar
+a6521000-a652e000 r--s 000a7000 08:01 22833087                           /home/shani/.m2/repository/org/apache/httpcomponents/httpclient/4.5.2/httpclient-4.5.2.jar
+a652e000-a6531000 ---p 00000000 00:00 0 
+a6531000-a657f000 rw-p 00000000 00:00 0                                  [stack:20831]
+a657f000-a6580000 ---p 00000000 00:00 0 
+a6580000-a6600000 rw-p 00000000 00:00 0                                  [stack:20827]
+a6600000-a6700000 rw-p 00000000 00:00 0 
+a6700000-a6701000 r--s 0000f000 08:01 21536606                           /home/shani/.m2/repository/org/json/wso2/json/3.0.0.wso2v1/json-3.0.0.wso2v1.jar
+a6701000-a6704000 r--s 00006000 08:01 21538255                           /home/shani/.m2/repository/com/google/code/findbugs/jsr305/3.0.0/jsr305-3.0.0.jar
+a6704000-a6706000 r--s 00005000 08:01 21010432                           /home/shani/.m2/repository/org/slf4j/slf4j-api/1.7.5/slf4j-api-1.7.5.jar
+a6706000-a6708000 r--s 00003000 08:01 21010429                           /home/shani/.m2/repository/org/wso2/msf4j/jaxrs-delegates/2.3.0-m1/jaxrs-delegates-2.3.0-m1.jar
+a6708000-a670c000 r--s 00013000 08:01 22833060                           /home/shani/.m2/repository/org/wso2/eclipse/osgi/org.eclipse.osgi.services/3.4.0.v20140312-2051/org.eclipse.osgi.services-3.4.0.v20140312-2051.jar
+a670c000-a6720000 r--s 00121000 08:01 22833059                           /home/shani/.m2/repository/org/wso2/eclipse/osgi/org.eclipse.osgi/3.10.2.v20150203-1939/org.eclipse.osgi-3.10.2.v20150203-1939.jar
+a6720000-a6722000 r--s 00009000 08:01 22833058                           /home/shani/.m2/repository/org/wso2/carbon/deployment/org.wso2.carbon.deployment.engine/5.1.0/org.wso2.carbon.deployment.engine-5.1.0.jar
+a6722000-a6724000 r--s 00007000 08:01 22833085                           /home/shani/.m2/repository/javax/websocket/javax.websocket-api/1.1/javax.websocket-api-1.1.jar
+a6724000-a672b000 r--s 0003b000 08:01 22833057                           /home/shani/.m2/repository/org/wso2/orbit/org/yaml/snakeyaml/1.16.0.wso2v1/snakeyaml-1.16.0.wso2v1.jar
+a672b000-a672e000 r--s 00012000 08:01 21536462                           /home/shani/.m2/repository/org/wso2/orbit/com/lmax/disruptor/3.3.2.wso2v2/disruptor-3.3.2.wso2v2.jar
+a672e000-a6731000 ---p 00000000 00:00 0 
+a6731000-a677f000 rw-p 00000000 00:00 0                                  [stack:20830]
+a677f000-a6780000 ---p 00000000 00:00 0 
+a6780000-a6800000 rw-p 00000000 00:00 0                                  [stack:20826]
+a6800000-a68fd000 rw-p 00000000 00:00 0 
+a68fd000-a6900000 ---p 00000000 00:00 0 
+a6900000-a6903000 r--s 00016000 08:01 21535003                           /home/shani/.m2/repository/commons-pool/commons-pool/1.5.6/commons-pool-1.5.6.jar
+a6903000-a6906000 r--s 00015000 08:01 21535002                           /home/shani/.m2/repository/commons-pool/wso2/commons-pool/1.5.6.wso2v1/commons-pool-1.5.6.wso2v1.jar
+a6906000-a6908000 r--s 00006000 08:01 22833083                           /home/shani/.m2/repository/io/netty/netty-resolver/4.1.7.Final/netty-resolver-4.1.7.Final.jar
+a6908000-a690f000 r--s 00052000 08:01 22833084                           /home/shani/.m2/repository/io/netty/netty-codec-http2/4.1.7.Final/netty-codec-http2-4.1.7.Final.jar
+a690f000-a691a000 r--s 0007b000 08:01 22833082                           /home/shani/.m2/repository/io/netty/netty-codec-http/4.1.7.Final/netty-codec-http-4.1.7.Final.jar
+a691a000-a6920000 r--s 00046000 08:01 22833081                           /home/shani/.m2/repository/io/netty/netty-codec/4.1.7.Final/netty-codec-4.1.7.Final.jar
+a6920000-a6926000 r--s 0004a000 08:01 22833080                           /home/shani/.m2/repository/io/netty/netty-handler/4.1.7.Final/netty-handler-4.1.7.Final.jar
+a6926000-a692f000 r--s 00060000 08:01 22833079                           /home/shani/.m2/repository/io/netty/netty-transport/4.1.7.Final/netty-transport-4.1.7.Final.jar
+a692f000-a697e000 rw-p 00000000 00:00 0 
+a697e000-a697f000 ---p 00000000 00:00 0 
+a697f000-a6a15000 rw-p 00000000 00:00 0                                  [stack:20825]
+a6a15000-a6b54000 ---p 00000000 00:00 0 
+a6b54000-a6b68000 rw-p 00000000 00:00 0 
+a6b68000-a6bff000 ---p 00000000 00:00 0 
+a6bff000-a96c0000 rw-p 00000000 00:00 0 
+a96c0000-d16c0000 ---p 00000000 00:00 0 
+d16c0000-d3c40000 rw-p 00000000 00:00 0 
+d3c40000-e6c00000 ---p 00000000 00:00 0 
+e6c00000-e6c01000 r--s 00000000 08:01 21536318                           /home/shani/.m2/repository/net/jcip/jcip-annotations/1.0/jcip-annotations-1.0.jar
+e6c01000-e6c05000 r--s 0003c000 08:01 22833078                           /home/shani/.m2/repository/io/netty/netty-buffer/4.1.7.Final/netty-buffer-4.1.7.Final.jar
+e6c05000-e6c12000 r--s 0009b000 08:01 22833077                           /home/shani/.m2/repository/io/netty/netty-common/4.1.7.Final/netty-common-4.1.7.Final.jar
+e6c12000-e6c15000 r--s 00022000 08:01 22833055                           /home/shani/.m2/repository/org/wso2/carbon/transport/org.wso2.carbon.transport.http.netty/4.3.0-m1/org.wso2.carbon.transport.http.netty-4.3.0-m1.jar
+e6c15000-e6c1a000 r--s 0002e000 08:01 21010428                           /home/shani/.m2/repository/org/wso2/msf4j/msf4j-core/2.3.0-m1/msf4j-core-2.3.0-m1.jar
+e6c1a000-e6c1f000 r--s 00020000 08:01 22833271                           /home/shani/.m2/repository/org/apache/maven/surefire/surefire-api/2.18.1/surefire-api-2.18.1.jar
+e6c1f000-e6c90000 rw-p 00000000 00:00 0 
+e6c90000-e6dd0000 ---p 00000000 00:00 0 
+e6dd0000-e6dda000 rw-p 00000000 00:00 0 
+e6dda000-e7190000 ---p 00000000 00:00 0 
+e7190000-e7400000 rwxp 00000000 00:00 0 
+e7400000-f6190000 ---p 00000000 00:00 0 
+f6190000-f6300000 r--p 001bc000 08:01 3152467                            /usr/lib/locale/locale-archive
+f6300000-f6500000 r--p 00000000 08:01 3152467                            /usr/lib/locale/locale-archive
+f6500000-f65fd000 rw-p 00000000 00:00 0 
+f65fd000-f6600000 ---p 00000000 00:00 0 
+f6600000-f6602000 r--s 00009000 08:01 22833054                           /home/shani/.m2/repository/org/wso2/carbon/org.wso2.carbon.launcher/5.1.0/org.wso2.carbon.launcher-5.1.0.jar
+f6602000-f6604000 r--s 00009000 08:01 22833056                           /home/shani/.m2/repository/org/wso2/carbon/messaging/org.wso2.carbon.messaging/2.3.0/org.wso2.carbon.messaging-2.3.0.jar
+f6604000-f6606000 r--s 00008000 08:01 22833270                           /home/shani/.m2/repository/org/apache/maven/surefire/surefire-booter/2.18.1/surefire-booter-2.18.1.jar
+f6606000-f6609000 r-xp 00000000 08:01 21011127                           /home/shani/SW/jdk1.8.0_131/jre/lib/i386/libdt_socket.so
+f6609000-f660a000 rw-p 00003000 08:01 21011127                           /home/shani/SW/jdk1.8.0_131/jre/lib/i386/libdt_socket.so
+f660a000-f6623000 r-xp 00000000 08:01 21011166                           /home/shani/SW/jdk1.8.0_131/jre/lib/i386/libzip.so
+f6623000-f6624000 rw-p 00019000 08:01 21011166                           /home/shani/SW/jdk1.8.0_131/jre/lib/i386/libzip.so
+f6624000-f662e000 r-xp 00000000 08:01 5506366                            /lib/i386-linux-gnu/libnss_files-2.19.so
+f662e000-f662f000 r--p 00009000 08:01 5506366                            /lib/i386-linux-gnu/libnss_files-2.19.so
+f662f000-f6630000 rw-p 0000a000 08:01 5506366                            /lib/i386-linux-gnu/libnss_files-2.19.so
+f6630000-f663a000 r-xp 00000000 08:01 5506355                            /lib/i386-linux-gnu/libnss_nis-2.19.so
+f663a000-f663b000 r--p 00009000 08:01 5506355                            /lib/i386-linux-gnu/libnss_nis-2.19.so
+f663b000-f663c000 rw-p 0000a000 08:01 5506355                            /lib/i386-linux-gnu/libnss_nis-2.19.so
+f663c000-f6651000 r-xp 00000000 08:01 5506351                            /lib/i386-linux-gnu/libnsl-2.19.so
+f6651000-f6652000 r--p 00015000 08:01 5506351                            /lib/i386-linux-gnu/libnsl-2.19.so
+f6652000-f6653000 rw-p 00016000 08:01 5506351                            /lib/i386-linux-gnu/libnsl-2.19.so
+f6653000-f666d000 rw-p 00000000 00:00 0 
+f666d000-f6675000 rw-s 00000000 08:01 24643950                           /tmp/hsperfdata_shani/20821
+f6675000-f66ac000 r-xp 00000000 08:01 21011156                           /home/shani/SW/jdk1.8.0_131/jre/lib/i386/libjdwp.so
+f66ac000-f66ad000 rw-p 00037000 08:01 21011156                           /home/shani/SW/jdk1.8.0_131/jre/lib/i386/libjdwp.so
+f66ad000-f66d1000 r-xp 00000000 08:01 21011161                           /home/shani/SW/jdk1.8.0_131/jre/lib/i386/libjava.so
+f66d1000-f66d2000 rw-p 00024000 08:01 21011161                           /home/shani/SW/jdk1.8.0_131/jre/lib/i386/libjava.so
+f66d2000-f66d9000 r-xp 00000000 08:01 5506361                            /lib/i386-linux-gnu/librt-2.19.so
+f66d9000-f66da000 r--p 00006000 08:01 5506361                            /lib/i386-linux-gnu/librt-2.19.so
+f66da000-f66db000 rw-p 00007000 08:01 5506361                            /lib/i386-linux-gnu/librt-2.19.so
+f66db000-f66de000 ---p 00000000 00:00 0 
+f66de000-f672c000 rw-p 00000000 00:00 0                                  [stack:20824]
+f672c000-f6770000 r-xp 00000000 08:01 5506345                            /lib/i386-linux-gnu/libm-2.19.so
+f6770000-f6771000 r--p 00043000 08:01 5506345                            /lib/i386-linux-gnu/libm-2.19.so
+f6771000-f6772000 rw-p 00044000 08:01 5506345                            /lib/i386-linux-gnu/libm-2.19.so
+f6772000-f70fe000 r-xp 00000000 08:01 21011147                           /home/shani/SW/jdk1.8.0_131/jre/lib/i386/server/libjvm.so
+f70fe000-f716c000 rw-p 0098b000 08:01 21011147                           /home/shani/SW/jdk1.8.0_131/jre/lib/i386/server/libjvm.so
+f716c000-f7595000 rw-p 00000000 00:00 0 
+f7595000-f773d000 r-xp 00000000 08:01 5506362                            /lib/i386-linux-gnu/libc-2.19.so
+f773d000-f773e000 ---p 001a8000 08:01 5506362                            /lib/i386-linux-gnu/libc-2.19.so
+f773e000-f7740000 r--p 001a8000 08:01 5506362                            /lib/i386-linux-gnu/libc-2.19.so
+f7740000-f7741000 rw-p 001aa000 08:01 5506362                            /lib/i386-linux-gnu/libc-2.19.so
+f7741000-f7744000 rw-p 00000000 00:00 0 
+f7744000-f7747000 r-xp 00000000 08:01 5506347                            /lib/i386-linux-gnu/libdl-2.19.so
+f7747000-f7748000 r--p 00002000 08:01 5506347                            /lib/i386-linux-gnu/libdl-2.19.so
+f7748000-f7749000 rw-p 00003000 08:01 5506347                            /lib/i386-linux-gnu/libdl-2.19.so
+f7749000-f775d000 r-xp 00000000 08:01 21011154                           /home/shani/SW/jdk1.8.0_131/jre/lib/i386/jli/libjli.so
+f775d000-f775e000 rw-p 00014000 08:01 21011154                           /home/shani/SW/jdk1.8.0_131/jre/lib/i386/jli/libjli.so
+f775e000-f775f000 rw-p 00000000 00:00 0 
+f775f000-f7777000 r-xp 00000000 08:01 5506352                            /lib/i386-linux-gnu/libpthread-2.19.so
+f7777000-f7778000 r--p 00018000 08:01 5506352                            /lib/i386-linux-gnu/libpthread-2.19.so
+f7778000-f7779000 rw-p 00019000 08:01 5506352                            /lib/i386-linux-gnu/libpthread-2.19.so
+f7779000-f777b000 rw-p 00000000 00:00 0 
+f777b000-f777c000 r--s 00002000 08:01 22833088                           /home/shani/.m2/repository/org/slf4j/slf4j-log4j12/1.7.22/slf4j-log4j12-1.7.22.jar
+f777c000-f777d000 r--s 00003000 08:01 21541901                           /home/shani/GIT/carbon-apimgt/components/apimgt/org.wso2.carbon.apimgt.rest.api.core/target/surefire/surefirebooter6311985205928578867.jar (deleted)
+f777d000-f777e000 rw-p 00000000 00:00 0 
+f777e000-f7785000 r-xp 00000000 08:01 5506350                            /lib/i386-linux-gnu/libnss_compat-2.19.so
+f7785000-f7786000 r--p 00006000 08:01 5506350                            /lib/i386-linux-gnu/libnss_compat-2.19.so
+f7786000-f7787000 rw-p 00007000 08:01 5506350                            /lib/i386-linux-gnu/libnss_compat-2.19.so
+f7787000-f7788000 r--p 00469000 08:01 3152467                            /usr/lib/locale/locale-archive
+f7788000-f778a000 r--p 006e1000 08:01 3152467                            /usr/lib/locale/locale-archive
+f778a000-f778c000 r-xp 00000000 08:01 21011140                           /home/shani/SW/jdk1.8.0_131/jre/lib/i386/libnpt.so
+f778c000-f778d000 rw-p 00001000 08:01 21011140                           /home/shani/SW/jdk1.8.0_131/jre/lib/i386/libnpt.so
+f778d000-f778e000 rw-p 00000000 00:00 0 
+f778e000-f778f000 r--p 00000000 00:00 0 
+f778f000-f779a000 r-xp 00000000 08:01 21011113                           /home/shani/SW/jdk1.8.0_131/jre/lib/i386/libverify.so
+f779a000-f779b000 rw-p 0000b000 08:01 21011113                           /home/shani/SW/jdk1.8.0_131/jre/lib/i386/libverify.so
+f779b000-f779d000 rw-p 00000000 00:00 0 
+f779d000-f779e000 r-xp 00000000 00:00 0                                  [vdso]
+f779e000-f77be000 r-xp 00000000 08:01 5506353                            /lib/i386-linux-gnu/ld-2.19.so
+f77be000-f77bf000 r--p 0001f000 08:01 5506353                            /lib/i386-linux-gnu/ld-2.19.so
+f77bf000-f77c0000 rw-p 00020000 08:01 5506353                            /lib/i386-linux-gnu/ld-2.19.so
+ffedc000-ffedd000 rwxp 00000000 00:00 0 
+fff0e000-fff30000 rw-p 00000000 00:00 0                                  [stack]
+
+VM Arguments:
+jvm_args: -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005 
+java_command: /home/shani/GIT/carbon-apimgt/components/apimgt/org.wso2.carbon.apimgt.rest.api.core/target/surefire/surefirebooter6311985205928578867.jar /home/shani/GIT/carbon-apimgt/components/apimgt/org.wso2.carbon.apimgt.rest.api.core/target/surefire/surefire2705645810308345814tmp /home/shani/GIT/carbon-apimgt/components/apimgt/org.wso2.carbon.apimgt.rest.api.core/target/surefire/surefire_03371229302265563292tmp
+java_class_path (initial): /home/shani/GIT/carbon-apimgt/components/apimgt/org.wso2.carbon.apimgt.rest.api.core/target/surefire/surefirebooter6311985205928578867.jar
+Launcher Type: SUN_STANDARD
+
+Environment Variables:
+JAVA_HOME=/home/shani/SW/jdk1.8.0_131
+PATH=/home/shani/.nvm/versions/node/v8.1.3/bin:/home/shani/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/home/shani/WUM/wum-uc-1.0.0-linux-x64/bin:/home/shani/WUM/wum-dev/bin:/home/shani/SW/apache-maven-3.0.4/bin
+LD_LIBRARY_PATH=/home/shani/usr/lib:
+SHELL=/bin/bash
+DISPLAY=:0
+
+Signal Handlers:
+SIGSEGV: [libjvm.so+0x8d7a50], sa_mask[0]=11111111011111111101111111111110, sa_flags=SA_RESTART|SA_SIGINFO
+SIGBUS: [libjvm.so+0x8d7a50], sa_mask[0]=11111111011111111101111111111110, sa_flags=SA_RESTART|SA_SIGINFO
+SIGFPE: [libjvm.so+0x754820], sa_mask[0]=11111111011111111101111111111110, sa_flags=SA_RESTART|SA_SIGINFO
+SIGPIPE: [libjvm.so+0x754820], sa_mask[0]=11111111011111111101111111111110, sa_flags=SA_RESTART|SA_SIGINFO
+SIGXFSZ: [libjvm.so+0x754820], sa_mask[0]=11111111011111111101111111111110, sa_flags=SA_RESTART|SA_SIGINFO
+SIGILL: [libjvm.so+0x754820], sa_mask[0]=11111111011111111101111111111110, sa_flags=SA_RESTART|SA_SIGINFO
+SIGUSR1: SIG_DFL, sa_mask[0]=00000000000000000000000000000000, sa_flags=none
+SIGUSR2: [libjvm.so+0x7560d0], sa_mask[0]=00100000000000000000000000000000, sa_flags=SA_RESTART|SA_SIGINFO
+SIGHUP: [libjvm.so+0x757580], sa_mask[0]=11111111011111111101111111111110, sa_flags=SA_RESTART|SA_SIGINFO
+SIGINT: [libjvm.so+0x757580], sa_mask[0]=11111111011111111101111111111110, sa_flags=SA_RESTART|SA_SIGINFO
+SIGTERM: [libjvm.so+0x757580], sa_mask[0]=11111111011111111101111111111110, sa_flags=SA_RESTART|SA_SIGINFO
+SIGQUIT: [libjvm.so+0x757580], sa_mask[0]=11111111011111111101111111111110, sa_flags=SA_RESTART|SA_SIGINFO
+
+
+---------------  S Y S T E M  ---------------
+
+OS:DISTRIB_ID=Ubuntu
+DISTRIB_RELEASE=14.04
+DISTRIB_CODENAME=trusty
+DISTRIB_DESCRIPTION="Ubuntu 14.04.3 LTS"
+
+uname:Linux 3.13.0-24-generic #47-Ubuntu SMP Fri May 2 23:30:00 UTC 2014 x86_64
+libc:glibc 2.19 NPTL 2.19 
+rlimit: STACK 8192k, CORE 0k, NPROC 61319, NOFILE 4096, AS infinity
+load average:16.57 6.77 3.99
+
+/proc/meminfo:
+MemTotal:        7870436 kB
+MemFree:         5599472 kB
+Buffers:           73900 kB
+Cached:           810320 kB
+SwapCached:        73944 kB
+Active:          1102352 kB
+Inactive:         665300 kB
+Active(anon):     690036 kB
+Inactive(anon):   200580 kB
+Active(file):     412316 kB
+Inactive(file):   464720 kB
+Unevictable:           0 kB
+Mlocked:               0 kB
+SwapTotal:       8077308 kB
+SwapFree:        7853300 kB
+Dirty:              2800 kB
+Writeback:             0 kB
+AnonPages:        827824 kB
+Mapped:            31544 kB
+Shmem:              6952 kB
+Slab:             402320 kB
+SReclaimable:     363540 kB
+SUnreclaim:        38780 kB
+KernelStack:        4056 kB
+PageTables:         8224 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:    12012524 kB
+Committed_AS:    2186348 kB
+VmallocTotal:   34359738367 kB
+VmallocUsed:      419600 kB
+VmallocChunk:   34359309692 kB
+HardwareCorrupted:     0 kB
+AnonHugePages:    200704 kB
+HugePages_Total:       0
+HugePages_Free:        0
+HugePages_Rsvd:        0
+HugePages_Surp:        0
+Hugepagesize:       2048 kB
+DirectMap4k:      181436 kB
+DirectMap2M:     7897088 kB
+
+
+CPU:total 4 (initial active 4) (2 cores per cpu, 2 threads per core) family 6 model 58 stepping 9, cmov, cx8, fxsr, mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, popcnt, avx, aes, clmul, erms, ht, tsc, tscinvbit, tscinv
+
+/proc/cpuinfo:
+processor	: 0
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 58
+model name	: Intel(R) Core(TM) i7-3520M CPU @ 2.90GHz
+stepping	: 9
+microcode	: 0x16
+cpu MHz		: 2901.000
+cache size	: 4096 KB
+physical id	: 0
+siblings	: 4
+core id		: 0
+cpu cores	: 2
+apicid		: 0
+initial apicid	: 0
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm ida arat epb xsaveopt pln pts dtherm tpr_shadow vnmi flexpriority ept vpid fsgsbase smep erms
+bogomips	: 5786.68
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 1
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 58
+model name	: Intel(R) Core(TM) i7-3520M CPU @ 2.90GHz
+stepping	: 9
+microcode	: 0x16
+cpu MHz		: 2901.000
+cache size	: 4096 KB
+physical id	: 0
+siblings	: 4
+core id		: 0
+cpu cores	: 2
+apicid		: 1
+initial apicid	: 1
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm ida arat epb xsaveopt pln pts dtherm tpr_shadow vnmi flexpriority ept vpid fsgsbase smep erms
+bogomips	: 5786.68
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 2
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 58
+model name	: Intel(R) Core(TM) i7-3520M CPU @ 2.90GHz
+stepping	: 9
+microcode	: 0x16
+cpu MHz		: 2901.000
+cache size	: 4096 KB
+physical id	: 0
+siblings	: 4
+core id		: 1
+cpu cores	: 2
+apicid		: 2
+initial apicid	: 2
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm ida arat epb xsaveopt pln pts dtherm tpr_shadow vnmi flexpriority ept vpid fsgsbase smep erms
+bogomips	: 5786.68
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+processor	: 3
+vendor_id	: GenuineIntel
+cpu family	: 6
+model		: 58
+model name	: Intel(R) Core(TM) i7-3520M CPU @ 2.90GHz
+stepping	: 9
+microcode	: 0x16
+cpu MHz		: 2400.000
+cache size	: 4096 KB
+physical id	: 0
+siblings	: 4
+core id		: 1
+cpu cores	: 2
+apicid		: 3
+initial apicid	: 3
+fpu		: yes
+fpu_exception	: yes
+cpuid level	: 13
+wp		: yes
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx rdtscp lm constant_tsc arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc aperfmperf eagerfpu pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm ida arat epb xsaveopt pln pts dtherm tpr_shadow vnmi flexpriority ept vpid fsgsbase smep erms
+bogomips	: 5786.68
+clflush size	: 64
+cache_alignment	: 64
+address sizes	: 36 bits physical, 48 bits virtual
+power management:
+
+
+
+Memory: 4k page, physical 7870436k(5599472k free), swap 8077308k(7853300k free)
+
+vm_info: Java HotSpot(TM) Server VM (25.131-b11) for linux-x86 JRE (1.8.0_131-b11), built on Mar 15 2017 01:26:42 by "java_re" with gcc 4.3.0 20080428 (Red Hat 4.3.0-8)
+
+time: Tue Aug  1 19:08:13 2017
+elapsed time: 65754 seconds (0d 18h 15m 54s)
+
