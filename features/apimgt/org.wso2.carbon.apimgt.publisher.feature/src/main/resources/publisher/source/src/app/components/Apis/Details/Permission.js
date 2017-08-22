@@ -60,6 +60,8 @@ class Permission extends Component {
             readField: false,
             updateField: false,
             deleteField: false,
+            apikeyField: false,
+            oauthField: false,
             manageSubField: false,
             permissionData: []
         };
@@ -72,6 +74,8 @@ class Permission extends Component {
         this.handleChangeReadField = this.handleChangeReadField.bind(this);
         this.handleChangeUpdateField = this.handleChangeUpdateField.bind(this);
         this.handleChangeDeleteField = this.handleChangeDeleteField.bind(this);
+        this.oauthField = this.handleOauthSelect.bind(this);
+        this.apikeyField = this.handleApiKeySelect.bind(this);
         this.handleChangeManageSubField = this.handleChangeManageSubField.bind(this);
     }
 
@@ -160,6 +164,14 @@ class Permission extends Component {
 
     handleChangeManageSubField(event) {
         this.setState({manageSubField: event.target.checked});
+    }
+
+    handleOauthSelect(event) {
+        this.setState(oauthField: event.target.checked);
+    }
+
+    handleApiKeySelect(event) {
+        this.setState({apikeyField: event.target.checked});
     }
 
     handleAddRole(permissionData) {
@@ -423,6 +435,23 @@ class Permission extends Component {
                                     <Col span={8}></Col>
                                     <Col span={16}>
                                         <Table columns={columns} dataSource={permissionData}/>
+                                    </Col>
+                                </Row>
+                            </Card>
+                            <Card bodyStyle={{padding: 5}}>
+                                <Row style={{marginBottom: "10px"}} type="flex" justify="center">
+                                    <Col span={8}>API Security Schemes</Col>
+                                    <Col span={16}>
+                                        <Row>
+                                            <Col span={8} style={{margin: "10px"}}>
+                                                <Checkbox name="oauthField" checked={this.state.oauthField}
+                                                onChange={this.handleOauthSelect}>Oauth</Checkbox>
+                                            </Col>
+                                            <Col span={8} style={{margin: "10px"}}>
+                                                <Checkbox name="apikeyField" checked={this.state.apikeyField}
+                                                onChange={this.handleApiKeySelect}>API Key</Checkbox>
+                                            </Col>
+                                        </Row>
                                     </Col>
                                 </Row>
                             </Card>
