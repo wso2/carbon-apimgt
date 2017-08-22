@@ -20,5 +20,6 @@ import React, {Component} from 'react'
 import Base from './Base/index'
 import Login from './Login/Login'
 import Logout from './Logout'
+import Tasks from './Tasks'
 
-export {Base, Login, Logout}
+export {Base, Login, Logout, Tasks}
