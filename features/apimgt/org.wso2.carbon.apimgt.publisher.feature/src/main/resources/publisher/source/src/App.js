@@ -90,7 +90,7 @@ class Protected extends Component {
                         );
             }
         } else {
-            return LoadingAnimation;
+            return null;
         }
     }
 }
