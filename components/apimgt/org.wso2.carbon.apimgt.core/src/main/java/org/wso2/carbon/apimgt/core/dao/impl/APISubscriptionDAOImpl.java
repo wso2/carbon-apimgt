@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APISubscriptionResults;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -77,8 +78,8 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 return createSubscriptionWithApiAndAppInformation(rs);
             }
         } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting api subscriptions(subscriptionId: " +
+                    subscriptionId + ")", e);
         }
     }
 
@@ -87,7 +88,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      *
      * @param apiId The UUID of API
      * @return A list of {@link Subscription} objects
-     * @throws APIMgtDAOException If failed to get subscriptions.
+     * @throws APIMgtDAOException   If failed to get subscriptions.
      */
     @Override
     public List<Subscription> getAPISubscriptionsByAPI(String apiId) throws APIMgtDAOException {
@@ -108,8 +109,8 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 return createSubscriptionsWithAppInformationOnly(rs);
             }
         } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "getting api subscriptions by api(apiId: " + apiId + ")", e);
         }
     }
 
@@ -136,8 +137,8 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 return createSubscriptionsWithApiInformationOnly(rs);
             }
         } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "getting api subscriptions by application(appId: " + applicationId + ")", e);
         }
     }
 
@@ -160,8 +161,9 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 return createSubscriptionsWithApiInformationOnly(rs);
             }
         } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "getting api subscriptions by application(appId: " + applicationId +
+                    ", apiType: " + apiType + ")", e);
         }
     }
 
@@ -169,7 +171,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
      * Retrieve the list of subscriptions of an Application which are in pending state
      *
      * @param applicationId The UUID of Application
-     * @return A list of {@link Subscription} objects which has pendig status
+     * @return A list of {@link Subscription} objects which has pending status
      * @throws APIMgtDAOException If failed to get subscriptions.
      */
     @Override
@@ -190,8 +192,8 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 return createSubscriptionsWithApiInformationOnly(rs);
             }
         } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "getting pending api subscriptions by application(appId: " + applicationId + ")", e);
         }
     }
 
@@ -218,8 +220,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 return createSubscriptionValidationDataFromResultSet(rs);
             }
         } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting api subscriptions for validation", e);
         }
     }
 
@@ -248,8 +249,9 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 return createSubscriptionValidationDataFromResultSet(rs);
             }
         } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "getting api subscriptions for validation(apiContext: " + apiContext +
+                    ", apiVersion: " + apiVersion + ")", e);
         }
     }
 
@@ -280,8 +282,9 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 return createSubscriptionValidationDataFromResultSet(rs);
             }
         } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "getting api subscriptions for validation(apiContext: " + apiContext +
+                    ", apiVersion: " + apiVersion + ", appId: " + applicationId + ")", e);
         }
     }
 
@@ -309,8 +312,9 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 return createSubscriptionValidationDataFromResultSet(rs);
             }
         } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "getting application subscriptions for validation(appId: " + applicationId +
+                    ", keyType: " + keyType + ")", e);
         }
     }
 
@@ -344,8 +348,8 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 return createSubscriptionsFromResultSet(rs);
             }
         } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "getting api subscriptions for user(username: " + username + ")", e);
         }
     }
 
@@ -421,13 +425,16 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 conn.commit();
             } catch (SQLException ex) {
                 conn.rollback();
-                throw new APIMgtDAOException(ex);
+                throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                        "adding api subscription(subscriptionId: " + uuid + ", apiId: " +
+                        apiId + ", appId: " + appId + ", policyId: " + policyId + ", status: " + status + ")", ex);
             } finally {
                 conn.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "adding api subscription(subscriptionId: " + uuid + ", apiId: " +
+                    apiId + ", appId: " + appId + ", policyId: " + policyId + ", status: " + status + ")", e);
         }
     }
 
@@ -449,13 +456,14 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 conn.commit();
             } catch (SQLException ex) {
                 conn.rollback();
-                throw new APIMgtDAOException(ex);
+                throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                        "deleting api subscription(subscriptionId: " + subscriptionId + ")", ex);
             } finally {
                 conn.setAutoCommit(originalAutoCommitState);
             }
         } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "deleting api subscription(subscriptionId: " + subscriptionId + ")", e);
         }
     }
 
@@ -478,8 +486,8 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 }
             }
         } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "getting api subscription count(apiId: " + apiId + ")", e);
         }
         return 0L;
     }
@@ -503,13 +511,12 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 conn.commit();
             } catch (SQLException ex) {
                 conn.rollback();
-                throw new APIMgtDAOException(ex);
+                throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "copying subscriptions", ex);
             } finally {
                 conn.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "copying subscriptions", e);
         }
     }
 
@@ -535,13 +542,14 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 conn.commit();
             } catch (SQLException ex) {
                 conn.rollback();
-                throw new APIMgtDAOException(ex);
+                throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                        "updating subscription status(subscriptionId: " + subId + ", status: " + subStatus + ")", ex);
             } finally {
                 conn.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "updating subscription status(subscriptionId: " + subId + ", status: " + subStatus + ")", e);
         }
     }
 
@@ -573,13 +581,14 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 conn.commit();
             } catch (SQLException ex) {
                 conn.rollback();
-                throw new APIMgtDAOException(ex);
+                throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                        "updating subscription policy(subscriptionId: " + subId + ", policy: " + policy + ")", ex);
             } finally {
                 conn.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "updating subscription policy(subscriptionId: " + subId + ", policy: " + policy + ")", e);
         }
     }
 
@@ -604,7 +613,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 "AND SUBS.TIER_ID = POLICY.UUID AND KEYS.APPLICATION_ID = APP.UUID";
         SubscriptionValidationResult validationInfo = new SubscriptionValidationResult(false);
         try (Connection conn = DAOUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(validateSubscriptionSql)) {
+             PreparedStatement ps = conn.prepareStatement(validateSubscriptionSql)) {
             ps.setString(1, apiContext);
             ps.setString(2, apiVersion);
             ps.setString(3, clientId);
@@ -624,8 +633,9 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 }
             }
         } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "validating subscription(apiContext: " + apiContext + ", apiVersion: "
+                    + apiVersion + ", clientId: " + clientId + ")", e);
         }
         return validationInfo;
     }
@@ -649,8 +659,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 subscriptionList.add(subValidationData);
             }
         } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "creating subscription validation data", e);
         }
         return subscriptionList;
     }
@@ -690,8 +699,8 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 subscription.setStatus(APIMgtConstants.SubscriptionStatus.valueOf(rs.getString("SUB_STATUS")));
             }
         } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "creating subscriptions api and app information", e);
         }
         return subscription;
     }
@@ -715,8 +724,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 subscriptionList.add(subscription);
             }
         } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "creating subscriptions api information", e);
         }
         return subscriptionList;
     }
@@ -738,8 +746,7 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 subscriptionList.add(subscription);
             }
         } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "creating subscriptions app information", e);
         }
         return subscriptionList;
     }
@@ -756,12 +763,10 @@ public class APISubscriptionDAOImpl implements APISubscriptionDAO {
                 if (rs.next()) {
                     throw new APIMgtDAOException("Subscription already exists for API " +
                             DAOFactory.getApiDAO().getAPI(apiId).getName() + " in Application " +
-                            DAOFactory.getApplicationDAO().getApplication(appId).getName());
+                            DAOFactory.getApplicationDAO().getApplication(appId).getName(),
+                            ExceptionCodes.SUBSCRIPTION_ALREADY_EXISTS);
                 }
             }
-        } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
         }
 
         //add new subscription

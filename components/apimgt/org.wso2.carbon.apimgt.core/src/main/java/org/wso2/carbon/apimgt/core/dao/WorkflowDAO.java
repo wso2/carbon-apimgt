@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.core.dao;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.workflow.Workflow;
 
+import java.util.Optional;
 import java.util.List;
 
 /**
@@ -59,7 +60,7 @@ public interface WorkflowDAO {
      * @return String external reference id
      * @throws APIMgtDAOException if API Manager core level exception occurred
      */
-    String getExternalWorkflowReferenceForPendingTask(String wfReference, String workflowType)
+    Optional<String> getExternalWorkflowReferenceForPendingTask(String wfReference, String workflowType)
             throws APIMgtDAOException;
 
     /**

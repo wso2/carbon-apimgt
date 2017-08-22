@@ -108,6 +108,7 @@ public class APIStoreImplTestCase {
     private static final String APP_NAME = "appname";
     private static final String USER_ID = "userid";
     private static final String API_ID = "apiid";
+    private static final String GROUP_ID = "groupdid";
     private static final String STATUS_CREATED = "CREATED";
     private static final String STATUS_PUBLISHED = "PUBLISHED";
     private static final String UUID = "7a2298c4-c905-403f-8fac-38c73301631f";
@@ -387,6 +388,12 @@ public class APIStoreImplTestCase {
         ApplicationCreationResponse response = apiStore.addApplication(application);
         Assert.assertNotNull(response.getApplicationUUID());
         Mockito.verify(applicationDAO, Mockito.times(1)).addApplication(application);
+    }
+
+    private APIStore getApiStoreImpl(ApplicationDAO applicationDAO, PolicyDAO policyDAO, WorkflowDAO workflowDAO,
+                                     APIGateway apiGateway) {
+        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, policyDAO, null, null, workflowDAO,
+                null, apiGateway);
     }
 
     @Test(description = "Add an application with null permission String")
@@ -917,7 +924,7 @@ public class APIStoreImplTestCase {
         Mockito.when(apiDAO.isAPIExists(api.getId())).thenReturn(true);
         Rating rating = SampleTestObjectCreator.createDefaultRating(api.getId());
         Mockito.when(apiDAO.getRatingByUUID(api.getId(), rating.getUuid())).thenReturn(rating);
-        Mockito.doThrow(new APIMgtDAOException("Error occurred while adding rating for api "))
+        Mockito.doThrow(new APIMgtDAOException("Error occurred while adding rating for api", new SQLException()))
                 .when(apiDAO).addRating(api.getId(), rating);
         apiStore.addRating(api.getId(), rating);
     }
@@ -930,7 +937,8 @@ public class APIStoreImplTestCase {
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         String randomUUIDForComment = java.util.UUID.randomUUID().toString();
-        Mockito.doThrow(new APIMgtDAOException("Error occurred while retrieving comment " + randomUUIDForComment))
+        Mockito.doThrow(new APIMgtDAOException("Error occurred while retrieving comment " + randomUUIDForComment,
+                new SQLException()))
                 .when(apiDAO).getCommentByUUID(randomUUIDForComment, api.getId());
         apiStore.getCommentByUUID(randomUUIDForComment, api.getId());
     }
@@ -954,7 +962,8 @@ public class APIStoreImplTestCase {
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
-        Mockito.doThrow(new APIMgtDAOException("Error occurred while adding comment for api id " + api.getId()))
+        Mockito.doThrow(new APIMgtDAOException("Error occurred while adding comment for api id " + api.getId(),
+                new SQLException()))
                 .when(apiDAO).addComment(comment, api.getId());
         apiStore.addComment(comment, api.getId());
     }
@@ -968,7 +977,8 @@ public class APIStoreImplTestCase {
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
         Mockito.when(apiDAO.getCommentByUUID(comment.getUuid(), api.getId())).thenReturn(comment);
-        Mockito.doThrow(new APIMgtDAOException("Error occurred while deleting comment " + comment.getUuid()))
+        Mockito.doThrow(new APIMgtDAOException("Error occurred while deleting comment " + comment.getUuid(),
+                new SQLException()))
                 .when(apiDAO).deleteComment(comment.getUuid(), api.getId());
         apiStore.deleteComment(comment.getUuid(), api.getId(), "admin");
     }
@@ -1007,7 +1017,8 @@ public class APIStoreImplTestCase {
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
         Comment comment = SampleTestObjectCreator.createDefaultComment(api.getId());
         Mockito.when(apiDAO.getCommentByUUID(comment.getUuid(), api.getId())).thenReturn(comment);
-        Mockito.doThrow(new APIMgtDAOException("Error occurred while updating comment " + comment.getUuid()))
+        Mockito.doThrow(new APIMgtDAOException("Error occurred while updating comment " + comment.getUuid(),
+                new SQLException()))
                 .when(apiDAO).updateComment(comment, comment.getUuid(), api.getId());
         apiStore.updateComment(comment, comment.getUuid(), api.getId(), "admin");
     }
@@ -1031,7 +1042,8 @@ public class APIStoreImplTestCase {
         APIStore apiStore = getApiStoreImpl(apiDAO);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiDAO.getAPI(api.getId())).thenReturn(api);
-        Mockito.doThrow(new APIMgtDAOException("Error occurred while retrieving all comments for api " + api.getId()))
+        Mockito.doThrow(new APIMgtDAOException("Error occurred while retrieving all comments for api " + api.getId(),
+                new SQLException()))
                 .when(apiDAO).getCommentsForApi(api.getId());
         apiStore.getCommentsForApi(api.getId());
     }
@@ -1090,7 +1102,8 @@ public class APIStoreImplTestCase {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
         APIStore apiStore = getApiStoreImpl(applicationDAO, apiSubscriptionDAO);
-        Mockito.doThrow(new APIMgtDAOException("Error occurred while deleting api subscription " + UUID))
+        Mockito.doThrow(new APIMgtDAOException("Error occurred while deleting api subscription " + UUID,
+                new SQLException()))
                 .when(apiSubscriptionDAO).deleteAPISubscription(UUID);
         apiStore.deleteAPISubscription(UUID);
     }
@@ -1099,7 +1112,8 @@ public class APIStoreImplTestCase {
     public void testGetAllTagsException() throws APIManagementException {
         TagDAO tagDAO = Mockito.mock(TagDAO.class);
         APIStore apiStore = getApiStoreImpl(tagDAO);
-        Mockito.when(tagDAO.getTags()).thenThrow(new APIMgtDAOException("Error occurred while retrieving tags"));
+        Mockito.when(tagDAO.getTags()).thenThrow(new APIMgtDAOException("Error occurred while retrieving tags",
+                new SQLException()));
         apiStore.getAllTags();
     }
 
@@ -1110,7 +1124,8 @@ public class APIStoreImplTestCase {
         APIStore apiStore = getApiStoreImpl(policyDAO);
         Mockito.when(policyDAO.getPoliciesByLevel(APIMgtAdminService.PolicyLevel.application)).
                 thenThrow(new APIMgtDAOException(
-                        "Error occurred while retrieving policies for policy level - " + APPLICATION_POLICY_LEVEL));
+                "Error occurred while retrieving policies for policy level - " + APPLICATION_POLICY_LEVEL,
+                        new SQLException()));
         apiStore.getPolicies(APIMgtAdminService.PolicyLevel.application);
     }
 
@@ -1120,7 +1135,8 @@ public class APIStoreImplTestCase {
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         APIStore apiStore = getApiStoreImpl(policyDAO);
         Mockito.when(policyDAO.getPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.application, POLICY_NAME))
-                .thenThrow(new APIMgtDAOException("Error occurred while retrieving policy - " + POLICY_NAME));
+                .thenThrow(new APIMgtDAOException("Error occurred while retrieving policy - " + POLICY_NAME,
+                        new SQLException()));
         apiStore.getPolicy(APIMgtAdminService.PolicyLevel.application, POLICY_NAME);
     }
 
@@ -1130,7 +1146,8 @@ public class APIStoreImplTestCase {
         APIStore apiStore = getApiStoreImpl(applicationDAO);
         Application application = new Application(APP_NAME, USER_NAME);
         application.setId(UUID);
-        Mockito.doThrow(new APIMgtDAOException("Error occurred while deleting the application - " + UUID)).when
+        Mockito.doThrow(new APIMgtDAOException("Error occurred while deleting the application - " + UUID,
+                new SQLException())).when
                 (applicationDAO)
                 .deleteApplication(UUID);
         apiStore.deleteApplication(UUID);
@@ -1143,7 +1160,8 @@ public class APIStoreImplTestCase {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         APIStore apiStore = getApiStoreImpl(applicationDAO);
         Mockito.when(applicationDAO.getApplication(UUID))
-                .thenThrow(new APIMgtDAOException("Error occurred while retrieving application - " + UUID));
+                .thenThrow(new APIMgtDAOException("Error occurred while retrieving application - " + UUID,
+                        new SQLException()));
         apiStore.getApplicationByUuid(UUID);
     }
 
@@ -1158,7 +1176,8 @@ public class APIStoreImplTestCase {
         application.setId(UUID);
         Mockito.when(apiSubscriptionDAO.getAPISubscriptionsByApplication(application.getId())).thenThrow(new
                 APIMgtDAOException(
-                "Error occurred while retrieving subscriptions for application - " + application.getName()));
+                "Error occurred while retrieving subscriptions for application - " + application.getName(),
+                new SQLException()));
         apiStore.getAPISubscriptionsByApplication(application);
     }
 
@@ -1169,7 +1188,8 @@ public class APIStoreImplTestCase {
         String[] statuses = {STATUS_CREATED, STATUS_PUBLISHED};
         Mockito.when(apiDAO.getAPIsByStatus(Arrays.asList(STATUS_CREATED, STATUS_PUBLISHED))).
                 thenThrow(new APIMgtDAOException(
-                        "Error occurred while fetching APIs for the given statuses - " + Arrays.toString(statuses)));
+                        "Error occurred while fetching APIs for the given statuses - " + Arrays.toString(statuses),
+                        new SQLException()));
         apiStore.getAllAPIsByStatus(1, 2, statuses);
     }
 
@@ -1179,8 +1199,9 @@ public class APIStoreImplTestCase {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         APIStore apiStore = getApiStoreImpl(applicationDAO);
         Mockito.when(applicationDAO.getApplicationByName(APP_NAME, USER_ID)).thenThrow(new APIMgtDAOException(
-                "Error occurred while fetching application for the given applicationName - " + APP_NAME));
-        apiStore.getApplicationByName(APP_NAME, USER_ID);
+                "Error occurred while fetching application for the given applicationName - " + APP_NAME
+                        + " with groupId - " + GROUP_ID, new SQLException()));
+        apiStore.getApplicationByName(APP_NAME, USER_ID, GROUP_ID);
     }
 
     @Test(description = "Exception when retrieving applications", expectedExceptions = APIManagementException.class)
@@ -1188,8 +1209,9 @@ public class APIStoreImplTestCase {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         APIStore apiStore = getApiStoreImpl(applicationDAO);
         Mockito.when(applicationDAO.getApplications(USER_ID)).thenThrow(new APIMgtDAOException(
-                "Error occurred while fetching applications for the given subscriber - " + USER_ID));
-        apiStore.getApplications(USER_ID);
+                "Error occurred while fetching applications for the given subscriber - " + USER_ID + " with groupId - "
+                        + GROUP_ID, new SQLException()));
+        apiStore.getApplications(USER_ID, GROUP_ID);
     }
 
     @Test(description = "Exception when updating an application", expectedExceptions = APIManagementException.class)
@@ -1242,7 +1264,8 @@ public class APIStoreImplTestCase {
         List<String> labels = new ArrayList<>();
         labels.add("label");
         Mockito.when(labelDAO.getLabelsByName(labels))
-                .thenThrow(new APIMgtDAOException("Error occurred while retrieving label information"));
+                .thenThrow(new APIMgtDAOException("Error occurred while retrieving label information",
+                        new SQLException()));
         apiStore.getLabelInfo(labels, USER_NAME);
     }
 
