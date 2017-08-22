@@ -24,11 +24,7 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 /**
  * SQL Statements that are specific to attribute search in MSSQL Database.
  */
-class MssqlGenericSearchImpl implements StoreApiAttributeSearch {
-
-    private static final String API_SUMMARY_SELECT_STORE = "SELECT UUID, PROVIDER, NAME, CONTEXT, " +
-            "VERSION, DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS " +
-            "FROM AM_API ";
+class MssqlGenericSearchImpl extends StoreApiAttributeGenericSearch {
 
     @Override
     public String getStoreAttributeSearchQuery(StringBuilder roleListBuilder,
@@ -47,8 +43,7 @@ class MssqlGenericSearchImpl implements StoreApiAttributeSearch {
                 "VISIBILITY = '" + API.Visibility.RESTRICTED + "' AND " +
                 "UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE ROLE IN (" +
                 roleListBuilder.toString() + ")) AND " +
-                searchQuery.toString() +
-                " ORDER BY NAME OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+                searchQuery.toString();
 
         return tagSearchQuery;
     }

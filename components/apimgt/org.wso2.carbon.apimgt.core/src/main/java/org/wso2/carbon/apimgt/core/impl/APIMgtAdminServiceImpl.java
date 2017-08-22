@@ -388,9 +388,9 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         }
     }
 
-    public void updateLabel(Label updatedLabel) throws APIManagementException {
+    public Label updateLabel(Label updatedLabel) throws APIManagementException {
         try {
-            labelDAO.updateLabel(updatedLabel);
+            return labelDAO.updateLabel(updatedLabel);
         } catch (APIMgtDAOException e) {
             String msg = "Error occurred while updating the label -" + updatedLabel.getId();
             log.error(msg, e);

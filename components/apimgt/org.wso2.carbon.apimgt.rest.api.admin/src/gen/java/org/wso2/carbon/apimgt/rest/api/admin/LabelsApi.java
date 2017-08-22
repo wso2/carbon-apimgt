@@ -44,22 +44,6 @@ import javax.ws.rs.core.Response;
 public class LabelsApi implements Microservice  {
    private final LabelsApiService delegate = LabelsApiServiceFactory.getLabelsApi();
 
-    @DELETE
-    
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Delete a Label", notes = "Delete a Label by label Id ", response = void.class, tags={ "Label", })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Label successfully deleted. ", response = void.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Label to be deleted does not exist. ", response = void.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = void.class) })
-    public Response labelsDelete(@ApiParam(value = "id of the label. ") @QueryParam("labelId") String labelId
-, @Context Request request)
-    throws NotFoundException {
-        return delegate.labelsDelete(labelId, request);
-    }
     @GET
     
     @Consumes({ "application/json" })
@@ -77,6 +61,42 @@ public class LabelsApi implements Microservice  {
     throws NotFoundException {
         return delegate.labelsGet(labelId,accept, request);
     }
+    @DELETE
+    @Path("/{labelId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Delete a Label", notes = "Delete a Label by label Id ", response = void.class, tags={ "Label", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Label successfully deleted. ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Label to be deleted does not exist. ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = void.class) })
+    public Response labelsLabelIdDelete(@ApiParam(value = "Label identifier ",required=true) @PathParam("labelId") String labelId
+, @Context Request request)
+    throws NotFoundException {
+        return delegate.labelsLabelIdDelete(labelId, request);
+    }
+    @PUT
+    @Path("/{labelId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Update a Label", notes = "Update a Label by label Id ", response = LabelDTO.class, tags={ "Label", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Label updated. ", response = LabelDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = LabelDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = LabelDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = LabelDTO.class) })
+    public Response labelsLabelIdPut(@ApiParam(value = "Label identifier ",required=true) @PathParam("labelId") String labelId
+,@ApiParam(value = "Label object with updated information " ,required=true) LabelDTO body
+,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
+, @Context Request request)
+    throws NotFoundException {
+        return delegate.labelsLabelIdPut(labelId,body,contentType, request);
+    }
     @POST
     
     @Consumes({ "application/json" })
@@ -93,25 +113,5 @@ public class LabelsApi implements Microservice  {
 , @Context Request request)
     throws NotFoundException {
         return delegate.labelsPost(body,contentType, request);
-    }
-    @PUT
-    
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Update a Label", notes = "Update a Label by label Id ", response = LabelDTO.class, tags={ "Label", })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Label updated. ", response = LabelDTO.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = LabelDTO.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = LabelDTO.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = LabelDTO.class) })
-    public Response labelsPut(@ApiParam(value = "Label object with updated information " ,required=true) LabelDTO body
-,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
-,@ApiParam(value = "id of the label. ") @QueryParam("labelId") String labelId
-, @Context Request request)
-    throws NotFoundException {
-        return delegate.labelsPut(body,contentType,labelId, request);
     }
 }

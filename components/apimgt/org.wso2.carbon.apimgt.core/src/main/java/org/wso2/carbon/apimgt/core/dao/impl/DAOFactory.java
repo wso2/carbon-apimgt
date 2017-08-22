@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -302,6 +303,47 @@ public class DAOFactory {
         setup();
 
         return functionDAO;
+    }
+
+    public static StoreApiAttributeSearch getStoreApiAttributeSearchQuery(String attributeType)
+            throws APIMgtDAOException {
+        StoreApiAttributeSearch storeApiAttributeSearch;
+        try (Connection connection = DAOUtil.getConnection()) {
+            String driverName = connection.getMetaData().getDriverName();
+
+            if (driverName.contains(MYSQL) || driverName.contains(H2) || driverName.contains(POSTGRE)) {
+              if (APIMgtConstants.TAG_SEARCH_TYPE_PREFIX.equalsIgnoreCase(attributeType)) {
+                  storeApiAttributeSearch = new StoreApiAttributeTagSearch();
+              } else if (APIMgtConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.equalsIgnoreCase(attributeType)) {
+                    storeApiAttributeSearch = new StoreApiAttributeSubContextSearch();
+              } else {
+                  storeApiAttributeSearch = new StoreApiAttributeGenericSearch();
+              }
+
+            } else if (driverName.contains(MS_SQL) || driverName.contains(MICROSOFT)) {
+                if (APIMgtConstants.TAG_SEARCH_TYPE_PREFIX.equalsIgnoreCase(attributeType)) {
+                    storeApiAttributeSearch = new MssqlTagSearchImpl();
+                } else if (APIMgtConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.equalsIgnoreCase(attributeType)) {
+                    storeApiAttributeSearch = new MssqlSubcontextSearchImpl();
+                } else {
+                    storeApiAttributeSearch = new MssqlGenericSearchImpl();
+                }
+            } else if (driverName.contains(ORACLE)) {
+                if (APIMgtConstants.TAG_SEARCH_TYPE_PREFIX.equalsIgnoreCase(attributeType)) {
+                    storeApiAttributeSearch = new OracleTagSearchImpl();
+                } else if (APIMgtConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.equalsIgnoreCase(attributeType)) {
+                    storeApiAttributeSearch = new OracleSubcontextSearchImpl();
+                } else {
+                    storeApiAttributeSearch = new OracleGenericSearchImpl();
+                }
+            } else {
+                throw new APIMgtDAOException("Unhandled DB Type detected");
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(e);
+        }
+
+       return   storeApiAttributeSearch;
     }
 
     private static void setup() throws APIMgtDAOException {

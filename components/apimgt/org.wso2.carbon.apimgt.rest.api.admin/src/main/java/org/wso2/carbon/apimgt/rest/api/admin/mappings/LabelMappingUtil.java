@@ -36,7 +36,7 @@ public class LabelMappingUtil {
      * @param labelList An array of Label model objects
      * @return A List DTO of Label DTOs derived from the array of model objects
      */
-    public static LabelListDTO fromLabelArrayToListDTO(List<Label> labelList){
+    public static LabelListDTO fromLabelArrayToListDTO(List<Label> labelList) {
         LabelListDTO listDTO = new LabelListDTO();
         List<LabelDTO> labelDTOList = new ArrayList<>();
         if (labelList != null) {
@@ -56,24 +56,24 @@ public class LabelMappingUtil {
      * @param label Label  model object
      * @return DTO object derived from the label model object
      */
-    public static LabelDTO fromLabelToDTO(Label label){
+    public static LabelDTO fromLabelToDTO(Label label) {
         LabelDTO labelDTO = new LabelDTO();
-        labelDTO.name(label.getName());
         labelDTO.accessUrls(label.getAccessUrls());
         labelDTO.description(label.getDescription());
-        labelDTO.setLabelTypeName(label.getType());
+        labelDTO.setName(label.getName());
         labelDTO.labelUUID(label.getId());
+        labelDTO.setType(label.getType());
         return labelDTO;
     }
 
-       /**
+    /**
      * convert label model object using Label DTO object
      *
      * @param dto    Label DTO object
      * @return Updated Policy object with common fields
      */
-    public static Label fromDTOTLabel(LabelDTO dto){
-       return new  Label.Builder().name(dto.getName()).id(dto.getLabelUUID()).type(dto.getLabelTypeName()).
+    public static Label fromDTOTLabel(LabelDTO dto) {
+       return new  Label.Builder().name(dto.getName()).id(dto.getLabelUUID()).type(dto.getType()).
                accessUrls(dto.getAccessUrls()).build();
     }
 

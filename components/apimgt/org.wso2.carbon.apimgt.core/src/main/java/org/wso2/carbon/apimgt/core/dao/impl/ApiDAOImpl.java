@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.core.dao.ApiType;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
@@ -387,7 +388,7 @@ public class ApiDAOImpl implements ApiDAO {
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             sqlStatements.setApiSearchStatement(statement, roles, user, searchString,
-                    ApiType.STANDARD, offset, limit);
+                    ApiType.STANDARD, offset, limit, new ArrayList<>());
 
             return constructAPISummaryList(connection, statement);
         } catch (SQLException e) {
@@ -401,12 +402,11 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> searchAPIsByAttributeInStore(List<String> roles, List<String> labels, Map<String, String>
-            attributeMap,
-                                                  int offset, int limit) throws APIMgtDAOException {
+            attributeMap, int offset, int limit) throws APIMgtDAOException {
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = sqlStatements.prepareAttributeSearchStatementForStore
-                     (connection, roles, attributeMap, offset, limit)) {
+                     (connection, roles, labels, attributeMap, offset, limit)) {
             DatabaseMetaData md = connection.getMetaData();
             Iterator<Map.Entry<String, String>> entries = attributeMap.entrySet().iterator();
 
@@ -464,16 +464,12 @@ public class ApiDAOImpl implements ApiDAO {
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<API> searchAPIsByStoreLabel(Set<String> roles, String user, String searchString,
                                             int offset, int limit, List<String> labels) throws APIMgtDAOException {
-        final String query = sqlStatements.getApiSearchByStoreLabelsQuery(roles.size(), labels.size());
-        try (Connection connection = DAOUtil.getConnection();
-             PreparedStatement statement = connection.prepareStatement(query)) {
-            sqlStatements.setApiSearchStatement(statement, roles, user, searchString,
-                    ApiType.STANDARD, offset, limit);
-
-            return constructAPISummaryList(connection, statement);
-        } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
-        }
+        //Since full text search is TBD, currently returns API's by status
+        List<String> statuses = new ArrayList<>();
+        statuses.add(APIStatus.PUBLISHED.getStatus());
+        statuses.add(APIStatus.PROTOTYPED.getStatus());
+        List<API> apiResults = getAPIsByStatus(roles, statuses, labels);
+        return apiResults;
     }
 
     @Override
@@ -484,7 +480,7 @@ public class ApiDAOImpl implements ApiDAO {
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             sqlStatements.setApiSearchStatement(statement, roles, user, searchString,
-                    ApiType.COMPOSITE, offset, limit);
+                    ApiType.COMPOSITE, offset, limit, new ArrayList<>());
 
             return getCompositeAPISummaryList(connection, statement);
         } catch (SQLException e) {

@@ -2,8 +2,9 @@ package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -21,8 +22,8 @@ public class LabelDTO   {
   @JsonProperty("description")
   private String description = null;
 
-  @JsonProperty("labelTypeName")
-  private String labelTypeName = null;
+  @JsonProperty("type")
+  private String type = null;
 
   @JsonProperty("accessUrls")
   private List<String> accessUrls = new ArrayList<String>();
@@ -80,17 +81,23 @@ public class LabelDTO   {
   public void setDescription(String description) {
     this.description = description;
   }
-   /**
-   * the  type of the label example: \"Gateway\" 
-   * @return labelTypeName
-  **/
-  @ApiModelProperty(required = true, value = "the  type of the label example: \"Gateway\" ")
-  public String getLabelTypeName() {
-    return labelTypeName;
+
+  public LabelDTO type(String type) {
+    this.type = type;
+    return this;
   }
 
-  public void setLabelTypeName(String labelTypeName) {
-    this.labelTypeName = labelTypeName;
+   /**
+   * the  type of the label example: \"Gateway\" 
+   * @return type
+  **/
+  @ApiModelProperty(required = true, value = "the  type of the label example: \"Gateway\" ")
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
   }
 
   public LabelDTO accessUrls(List<String> accessUrls) {
@@ -129,13 +136,13 @@ public class LabelDTO   {
     return Objects.equals(this.labelUUID, label.labelUUID) &&
         Objects.equals(this.name, label.name) &&
         Objects.equals(this.description, label.description) &&
-        Objects.equals(this.labelTypeName, label.labelTypeName) &&
+        Objects.equals(this.type, label.type) &&
         Objects.equals(this.accessUrls, label.accessUrls);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(labelUUID, name, description, labelTypeName, accessUrls);
+    return Objects.hash(labelUUID, name, description, type, accessUrls);
   }
 
   @Override
@@ -146,7 +153,7 @@ public class LabelDTO   {
     sb.append("    labelUUID: ").append(toIndentedString(labelUUID)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("    labelTypeName: ").append(toIndentedString(labelTypeName)).append("\n");
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    accessUrls: ").append(toIndentedString(accessUrls)).append("\n");
     sb.append("}");
     return sb.toString();

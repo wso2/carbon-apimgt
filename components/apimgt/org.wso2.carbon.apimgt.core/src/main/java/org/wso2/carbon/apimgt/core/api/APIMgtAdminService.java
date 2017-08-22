@@ -297,7 +297,7 @@ public interface APIMgtAdminService {
      * @param updatedLabel Updated Label
      * @throws APIManagementException if error occurs while accessing data layer
      */
-    void updateLabel(Label updatedLabel) throws APIManagementException;
+    Label updateLabel(Label updatedLabel) throws APIManagementException;
 
     /**
      * Retrieve API's gateway configuration

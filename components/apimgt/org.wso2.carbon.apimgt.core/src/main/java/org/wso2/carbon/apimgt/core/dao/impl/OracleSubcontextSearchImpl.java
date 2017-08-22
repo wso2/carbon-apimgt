@@ -25,18 +25,14 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 /**
  * SQL Statements that are specific to sub-context search in Oracle Database.
  */
-class OracleSubcontextSearchImpl implements StoreApiAttributeSearch {
-
-    private static final String API_SUMMARY_SELECT_STORE = "SELECT UUID, PROVIDER, NAME, " +
-            "CONTEXT, VERSION, DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, " +
-            "LC_WORKFLOW_STATUS FROM AM_API ";
+class OracleSubcontextSearchImpl extends StoreApiAttributeSubContextSearch {
 
     @Override
     public String getStoreAttributeSearchQuery(StringBuilder roleListBuilder,
                                                StringBuilder searchQuery, int offset, int limit) {
 
         //for subcontext search, need to check AM_API_OPERATION_MAPPING table
-        String subcontextSearchQuery = "SELECT * FROM (SELECT A.*, rownum rnum FROM (" + API_SUMMARY_SELECT_STORE +
+        String subcontextSearchQuery =  API_SUMMARY_SELECT_STORE +
                 " WHERE CURRENT_LC_STATUS  IN ('" +
                 APIStatus.PUBLISHED.getStatus() + "','" +
                 APIStatus.PROTOTYPED.getStatus() + "') AND " +
@@ -51,8 +47,7 @@ class OracleSubcontextSearchImpl implements StoreApiAttributeSearch {
                 "UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE ROLE IN (" +
                 roleListBuilder.toString() + ")) AND " +
                 "UUID IN (SELECT API_ID FROM AM_API_OPERATION_MAPPING WHERE " +
-                searchQuery.toString() + ") " +
-                " ORDER BY NAME) A WHERE rownum <= ?) WHERE rnum >= ?";
+                searchQuery.toString() + ") ";
 
         return subcontextSearchQuery;
     }

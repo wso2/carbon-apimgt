@@ -28,7 +28,6 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -46,19 +45,7 @@ public class MssqlSQLStatements implements ApiDAOVendorSpecificStatements {
                     + "API.CURRENT_LC_STATUS, API.LIFECYCLE_INSTANCE_ID, API.LC_WORKFLOW_STATUS, API.API_TYPE_ID "
                     + "FROM AM_API API LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON UUID = API_ID";
 
-    private Map<String, StoreApiAttributeSearch> searchMap;
-
     public MssqlSQLStatements() {
-        searchMap = new HashMap<>();
-        //for tag search, need to check AM_API_TAG_MAPPING and AM_TAGS tables
-        searchMap.put(APIMgtConstants.TAG_SEARCH_TYPE_PREFIX, new MssqlTagSearchImpl());
-        //for subcontext search, need to check AM_API_OPERATION_MAPPING table
-        searchMap.put(APIMgtConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX, new MssqlSubcontextSearchImpl());
-        //for any other attribute search, need to check AM_API table
-        searchMap.put(APIMgtConstants.PROVIDER_SEARCH_TYPE_PREFIX, new MssqlGenericSearchImpl());
-        searchMap.put(APIMgtConstants.VERSION_SEARCH_TYPE_PREFIX, new MssqlGenericSearchImpl());
-        searchMap.put(APIMgtConstants.CONTEXT_SEARCH_TYPE_PREFIX, new MssqlGenericSearchImpl());
-        searchMap.put(APIMgtConstants.DESCRIPTION_SEARCH_TYPE_PREFIX, new MssqlGenericSearchImpl());
     }
 
     /**
@@ -83,15 +70,18 @@ public class MssqlSQLStatements implements ApiDAOVendorSpecificStatements {
 
     /**
      * @see ApiDAOVendorSpecificStatements#setApiSearchStatement(PreparedStatement, Set, String, String, ApiType,
-     * int, int)
+     * int, int, List)
      */
     @Override
     @SuppressFBWarnings ({ "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
             "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE" })
     public void setApiSearchStatement(PreparedStatement statement, Set<String> roles, String user,
                                       String searchString, ApiType apiType,
-                                      int offset, int limit) throws SQLException {
+                                      int offset, int limit, List<String> labels) throws SQLException {
         int index = 0;
+        for (String label : labels) {
+            statement.setString(++index, label);
+        }
         statement.setString(++index, "\"" + searchString.toLowerCase(Locale.ENGLISH) + "*\"");
         statement.setString(++index, apiType.toString());
 
@@ -166,13 +156,14 @@ public class MssqlSQLStatements implements ApiDAOVendorSpecificStatements {
     }
 
     /**
-     * @see ApiDAOVendorSpecificStatements#prepareAttributeSearchStatementForStore(Connection connection, List,
+     * @see ApiDAOVendorSpecificStatements#prepareAttributeSearchStatementForStore(Connection connection, List, List,
      * Map, int, int)
      */
     @Override
     @SuppressFBWarnings({"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
             "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
     public PreparedStatement prepareAttributeSearchStatementForStore(Connection connection, List<String> roles,
+                                                                     List<String> labels,
                                                                      Map<String, String> attributeMap, int offset,
                                                                      int limit) throws APIMgtDAOException {
 
@@ -203,8 +194,10 @@ public class MssqlSQLStatements implements ApiDAOVendorSpecificStatements {
         //retrieve the attribute applicable for the search
         String searchAttribute = attributeMap.entrySet().iterator().next().getKey();
         //get the corresponding implementation based on the attribute to be searched
-        String query = searchMap.get(searchAttribute).
+        String query = DAOFactory.getStoreApiAttributeSearchQuery(searchAttribute).
                 getStoreAttributeSearchQuery(roleListBuilder, searchQuery, offset, limit);
+        query = "Select * from ( " + query + " ) " + getStoreAPIsByLabelJoinQuery(labels) + " ORDER BY NAME OFFSET ? " +
+                "ROWS FETCH NEXT ? ROWS ONLY";
 
         try {
             int queryIndex = 1;
@@ -226,6 +219,12 @@ public class MssqlSQLStatements implements ApiDAOVendorSpecificStatements {
                         toLowerCase(Locale.ENGLISH) + '%');
                 queryIndex++;
             }
+
+            for (String label : labels) {
+                statement.setString(queryIndex, label);
+                queryIndex++;
+            }
+
             statement.setInt(queryIndex, limit);
             //setting 0 as the default offset based on store-api.yaml and MSSQL specifications
             statement.setInt(++queryIndex, (offset < 0) ? 0 : offset);
@@ -235,18 +234,5 @@ public class MssqlSQLStatements implements ApiDAOVendorSpecificStatements {
             log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
-    }
-
-    @Override
-    public String  getApiSearchByStoreLabelsQuery(int roleCount, int labelCount) {
-        return API_SUMMARY_SELECT +
-                " INNER JOIN AM_API_LABEL_MAPPING LM ON API.UUID=LM.API_ID" +
-                " WHERE LM.LABEL_ID IN ( SELECT LABEL_ID FROM AM_LABELS WHERE LABEL_NAME IN (" +
-                DAOUtil.getParameterString(labelCount) + ")" +
-                " LEFT JOIN FTL_SEARCH_DATA (?, 0, 0) FT ON API.UUID=FT.KEYS[0]" +
-                " WHERE API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
-                " AND ((`GROUP_ID` IN (" + DAOUtil.getParameterString(roleCount) + ")) OR (PROVIDER = ?))" +
-                " AND FT.TABLE='AM_API'" +
-                " GROUP BY UUID ORDER BY NAME OFFSET ? LIMIT ?";
     }
 }

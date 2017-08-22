@@ -71,8 +71,8 @@ public class LabelsApiServiceImplTest {
         PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
 
         LabelsApiServiceImpl labelService = new LabelsApiServiceImpl();
-        Mockito.doNothing().when(labelService.labelsDelete("1", getRequest()));
-        Response response = labelService.labelsDelete("1", getRequest());
+        Mockito.doNothing().when(labelService.labelsLabelIdDelete("1", getRequest()));
+        Response response = labelService.labelsLabelIdDelete("1", getRequest());
         Assert.assertEquals(response.getStatus(), Response.Status.OK);
 
     }

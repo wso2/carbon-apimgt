@@ -1491,6 +1491,11 @@ paths:
             Unsupported media type.
             The entity of the request was in a not supported format.
 
+######################################################
+# The "Label BY ID  resource API
+######################################################
+  '/labels/{labelId}':
+
 #-----------------------------------------------------
 # Delete a Label
 #-----------------------------------------------------
@@ -1500,11 +1505,7 @@ paths:
       description: |
         Delete a Label by label Id
       parameters:
-       - name: labelId
-         description: |
-            id of the label.
-         in: query
-         type: string
+       - $ref : '#/parameters/labelId'
       tags:
         - Label
       responses:
@@ -1534,11 +1535,7 @@ paths:
       description: |
         Update a Label by label Id
       parameters:
-        - name: labelId
-          description: |
-            id of the label.
-          in: query
-          type: string
+        - $ref : '#/parameters/labelId'
         - in: body
           name: body
           description: |

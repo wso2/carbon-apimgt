@@ -24,11 +24,7 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 /**
  * SQL Statements that are specific to tag search in MSSQL Database.
  */
-class MssqlTagSearchImpl implements StoreApiAttributeSearch {
-
-    private static final String API_SUMMARY_SELECT_STORE = "SELECT UUID, PROVIDER, NAME, CONTEXT, " +
-            "VERSION, DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS " +
-            "FROM AM_API ";
+class MssqlTagSearchImpl extends StoreApiAttributeTagSearch {
 
     @Override
     public String getStoreAttributeSearchQuery(StringBuilder roleListBuilder,
@@ -49,8 +45,7 @@ class MssqlTagSearchImpl implements StoreApiAttributeSearch {
                 "UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE ROLE IN (" +
                 roleListBuilder.toString() + ")) AND " +
                 "UUID IN (SELECT API_ID FROM AM_API_TAG_MAPPING WHERE TAG_ID IN " +
-                "(SELECT TAG_ID FROM AM_TAGS WHERE " + searchQuery.toString() + ")) " +
-                "ORDER BY NAME OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+                "(SELECT TAG_ID FROM AM_TAGS WHERE " + searchQuery.toString() + ")) ";
 
         return tagSearchQuery;
     }

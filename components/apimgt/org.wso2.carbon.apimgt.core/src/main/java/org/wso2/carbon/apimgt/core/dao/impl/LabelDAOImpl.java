@@ -221,6 +221,8 @@ public class LabelDAOImpl implements LabelDAO {
     public Label updateLabel(Label updatedLabel) throws APIMgtDAOException {
         final String query = "UPDATE AM_LABELS SET NAME=? , TYPE_NAME=? WHERE LABEL_ID=?";
         String labelId = updatedLabel.getId();
+        List<String> accessURLs = updatedLabel.getAccessUrls();
+
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             try {
@@ -236,7 +238,9 @@ public class LabelDAOImpl implements LabelDAO {
                  connection.commit();
                  deleteLabelAccessUrlMappings(labelId);
                 if ("GATEWAY".equalsIgnoreCase(updatedLabel.getType())) {
-                   insertAccessUrlMappings(labelId, updatedLabel.getAccessUrls());
+                   insertAccessUrlMappings(labelId, accessURLs);
+                } else {
+                    accessURLs = new ArrayList<>();
                 }
             } catch (SQLException e) {
                 connection.rollback();
@@ -248,7 +252,7 @@ public class LabelDAOImpl implements LabelDAO {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
             return new Label.Builder().id(labelId).name(updatedLabel.getName()).
-                    description(updatedLabel.getDescription()).accessUrls(updatedLabel.getAccessUrls()).
+                    description(updatedLabel.getDescription()).accessUrls(accessURLs).
                     type(updatedLabel.getType()).build();
         } catch (SQLException e) {
             String message = "Error while updating the label [label ID] " + labelId;

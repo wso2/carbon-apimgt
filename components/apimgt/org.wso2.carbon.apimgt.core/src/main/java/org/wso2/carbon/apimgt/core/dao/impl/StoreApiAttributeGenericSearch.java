@@ -18,14 +18,14 @@
 
 package org.wso2.carbon.apimgt.core.dao.impl;
 
+import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIStatus;
+
 /**
  * This interface produces search queries for API store.
  */
-interface  StoreApiAttributeSearch {
+ class StoreApiAttributeGenericSearch implements StoreApiAttributeSearch {
 
-   public static final String API_SUMMARY_SELECT_STORE = "SELECT UUID, PROVIDER, NAME, CONTEXT, " +
-            "VERSION, DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS " +
-            "FROM AM_API ";
     /**
      * This method will return the query query to be executed, for each search type
      * (i.e - tag, subcontext or general search)
@@ -36,7 +36,22 @@ interface  StoreApiAttributeSearch {
      * @param limit           number of search results that will be returned.
      * @return the query to be executed, as a string
      */
-    String getStoreAttributeSearchQuery(StringBuilder roleListBuilder,
-                                               StringBuilder searchQuery, int offset, int limit);
+    public String getStoreAttributeSearchQuery(StringBuilder roleListBuilder,
+                                               StringBuilder searchQuery, int offset, int limit) {
 
+        return API_SUMMARY_SELECT_STORE + " WHERE CURRENT_LC_STATUS  IN ('" +
+                APIStatus.PUBLISHED.getStatus() + "','" +
+                APIStatus.PROTOTYPED.getStatus() + "') AND " +
+                "VISIBILITY = '" + API.Visibility.PUBLIC + "' AND " +
+                searchQuery.toString() +
+                " UNION " +
+                API_SUMMARY_SELECT_STORE + " WHERE CURRENT_LC_STATUS  IN ('" +
+                APIStatus.PUBLISHED.getStatus() + "','" +
+                APIStatus.PROTOTYPED.getStatus() + "') AND " +
+                "VISIBILITY = '" + API.Visibility.RESTRICTED + "' AND " +
+                "UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE ROLE IN (" +
+                roleListBuilder.toString() + ")) AND " +
+                searchQuery.toString();
+
+    }
 }
