@@ -74,8 +74,8 @@ class Permission extends Component {
         this.handleChangeReadField = this.handleChangeReadField.bind(this);
         this.handleChangeUpdateField = this.handleChangeUpdateField.bind(this);
         this.handleChangeDeleteField = this.handleChangeDeleteField.bind(this);
-        this.oauthField = this.handleOauthSelect.bind(this);
-        this.apikeyField = this.handleApiKeySelect.bind(this);
+        this.handleOauthSelect = this.handleOauthSelect.bind(this);
+        this.handleApiKeySelect = this.handleApiKeySelect.bind(this);
         this.handleChangeManageSubField = this.handleChangeManageSubField.bind(this);
     }
 
@@ -120,6 +120,8 @@ class Permission extends Component {
                 var api_data = JSON.parse(response.data);
                 var permissionString = this.createPermissionJsonString(this);
                 api_data.permission = permissionString;
+                var securitySchemeString = this.createSecuritySchemeJsonString(this);
+                api_data.securityScheme = securitySchemeString;
                 let promised_update = api.update(api_data);
                 promised_update.then(
                     response => {
@@ -167,7 +169,7 @@ class Permission extends Component {
     }
 
     handleOauthSelect(event) {
-        this.setState(oauthField: event.target.checked);
+        this.setState({oauthField: event.target.checked});
     }
 
     handleApiKeySelect(event) {
@@ -236,6 +238,18 @@ class Permission extends Component {
         } else {
             return updatedPermissionString;
         }
+    }
+
+    createSecuritySchemeJsonString() {
+        var securityScheme = [];
+        if(this.state.oauthField) {
+            securityScheme.push("Oauth");
+        }
+        if(this.state.apikeyField) {
+            securityScheme.push("apikey");
+        }
+        var securitySchemeString = JSON.stringify(securityScheme);
+        return securitySchemeString;
     }
 
     getExistingPermissions() {

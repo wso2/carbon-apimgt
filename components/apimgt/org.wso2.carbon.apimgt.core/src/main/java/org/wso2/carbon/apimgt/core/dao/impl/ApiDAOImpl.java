@@ -733,7 +733,7 @@ public class ApiDAOImpl implements ApiDAO {
                 + "IS_RESPONSE_CACHED = ?, CACHE_TIMEOUT = ?, TECHNICAL_OWNER = ?, TECHNICAL_EMAIL = ?, " +
                 "BUSINESS_OWNER = ?, BUSINESS_EMAIL = ?, CORS_ENABLED = ?, CORS_ALLOW_ORIGINS = ?, " +
                 "CORS_ALLOW_CREDENTIALS = ?, CORS_ALLOW_HEADERS = ?, CORS_ALLOW_METHODS = ?, LAST_UPDATED_TIME = ?," +
-                "UPDATED_BY = ?, LC_WORKFLOW_STATUS=? WHERE UUID = ?";
+                "UPDATED_BY = ?, LC_WORKFLOW_STATUS=?, SECURITY_SCHEME=? WHERE UUID = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -762,7 +762,8 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.setTimestamp(16, Timestamp.valueOf(LocalDateTime.now()));
                 statement.setString(17, substituteAPI.getUpdatedBy());
                 statement.setString(18, substituteAPI.getWorkflowStatus());
-                statement.setString(19, apiID);
+                statement.setInt(19, substituteAPI.getSecurityScheme());
+                statement.setString(20, apiID);
 
                 statement.execute();
 
