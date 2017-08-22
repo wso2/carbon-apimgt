@@ -23,6 +23,9 @@
 
  import API from '../../data/api'
 
+ //width of the table colum for the description section as a percentage
+ const description_table_width = '60%';
+
  class TasksListing extends Component {
    constructor(props) {
        super(props);
@@ -44,7 +47,6 @@
        promised_update.then(
            response => {
              if (response.status !== 200) {
-                 console.log(response);
                  message.error("Something went wrong while updating the workflow task!");
                  hideMessage();
                  return;
@@ -66,7 +68,7 @@
    componentDidMount() {
 
        const api = new API();
-       let type = "AM_" + this.workflow_type.toUpperCase() ;
+       const type = "AM_" + this.workflow_type.toUpperCase() ;
 
        const promised_workflows = api.getWorkflows(type);
        /* TODO: Handle catch case , auth errors and ect ~tmkb*/
@@ -86,7 +88,7 @@
        const columns = [{
            title: 'Description',
            dataIndex: 'description',
-            width: '60%'
+            width: description_table_width
        }, {
            title: 'Created Time',
            dataIndex: 'createdTime',
