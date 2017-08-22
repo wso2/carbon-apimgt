@@ -25,6 +25,7 @@ import ApiCreate from './app/components/Apis/Create/ApiCreate'
 import AuthManager from './app/data/AuthManager'
 import qs from 'qs'
 import Axios from 'axios';
+import LoadingAnimation from './app/components/Base/Loading/Loading.js';
 
 import 'antd/dist/antd.css'
 import {message} from 'antd'
@@ -90,7 +91,7 @@ class Protected extends Component {
                         );
             }
         } else {
-            return null;
+            return <LoadingAnimation/>;
         }
     }
 }

@@ -26,7 +26,6 @@ import Paper from 'material-ui/Paper';
 import Button from 'material-ui/Button';
 import Typography from 'material-ui/Typography';
 import Snackbar from 'material-ui/Snackbar';
-import './login.css'
 import User from '../../data/User'
 
 class Login extends Component {
