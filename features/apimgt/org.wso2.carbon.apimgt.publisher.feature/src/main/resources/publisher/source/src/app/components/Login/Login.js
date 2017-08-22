@@ -69,40 +69,6 @@ class Login extends Component {
                 this.setState({loading: false});
             }
         );
-
-        this.props.form.validateFields((err, values) => {
-                if (!err) {
-                    let username = values.userName;
-                    let password = values.password;
-                    let currentEnvironment = values.currentEnv;
-                    if (typeof currentEnvironment == "undefined") {
-                        localStorage.setItem("currentEnv", "default");
-                    } else {
-                        localStorage.setItem("currentEnv", currentEnvironment);
-                    }
-
-                    var detailedValue;
-                    for (let value of this.state.env) {
-
-                        if (currentEnvironment == value.env) {
-
-                            detailedValue = value;
-                            console.log(detailedValue);
-                        }
-                    }
-                    let loginPromise = this.authManager.authenticateUser(username, password, detailedValue);
-                    loginPromise.then((response) => {
-                        this.setState({isLogin: AuthManager.getUser(), loading: false});
-                    }).catch((error) => {
-                            message.error("error");
-                            console.log(error);
-                            this.setState({loading: false});
-                        }
-                    );
-                } else {
-                }
-            }
-        );
     }
 
     componentDidMount() {
@@ -113,6 +79,7 @@ class Login extends Component {
         if (params.referrer) {
             this.setState({referrer: params.referrer});
         }
+
         if (params.user_name) {
             this.setState({isLogin: true});
             const validityPeriod = params.validity_period; // In seconds
