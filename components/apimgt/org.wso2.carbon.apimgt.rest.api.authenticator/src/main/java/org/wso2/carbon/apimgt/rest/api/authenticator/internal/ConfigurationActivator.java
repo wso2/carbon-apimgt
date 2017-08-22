@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
 /**
- * Class used to activate store configuration loading.
+ * Class used to activate store/publisher application configuration loading.
  */
 @Component(
         name = "org.wso2.carbon.apimgt.rest.api.authenticator",

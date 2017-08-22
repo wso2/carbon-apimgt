@@ -52,7 +52,7 @@ public class AuthenticatorServiceTestCase {
         oAuthData.addProperty(KeyManagerConstants.OAUTH_CALLBACK_URIS, oAuthApplicationInfo.getCallBackURL());
         oAuthData.addProperty(KeyManagerConstants.TOKEN_SCOPES , scopes);
         oAuthData.addProperty(KeyManagerConstants.AUTHORIZATION_ENDPOINT, "https://localhost:9443/oauth2/authorize");
-        oAuthData.addProperty(AuthenticatorConstants.SSO_ENABLED, ServiceReferenceHolder.getInstance().getAPIMStoreConfiguration().isSsoEnabled());
+        oAuthData.addProperty(AuthenticatorConstants.SSO_ENABLED, ServiceReferenceHolder.getInstance().getAPIMAppConfiguration().isSsoEnabled());
 
         KeyManager keyManager = Mockito.mock(KeyManager.class);
         AuthenticatorService authenticatorService = new AuthenticatorService(keyManager);

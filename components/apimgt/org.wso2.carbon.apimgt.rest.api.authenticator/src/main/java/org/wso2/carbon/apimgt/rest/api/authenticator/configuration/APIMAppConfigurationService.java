@@ -18,25 +18,25 @@
 
 package org.wso2.carbon.apimgt.rest.api.authenticator.configuration;
 
-import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMStoreConfigurations;
+import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMAppConfigurations;
 import org.wso2.carbon.apimgt.rest.api.authenticator.internal.ServiceReferenceHolder;
 
 /**
- * Utility class for get store configurations.
+ * Utility class for get store/publisher configurations.
  */
-public class APIMStoreConfigurationService {
-    private static APIMStoreConfigurationService apimStoreConfigurationService = new APIMStoreConfigurationService();
-    private APIMStoreConfigurations apimStoreConfigurations;
+public class APIMAppConfigurationService {
+    private static APIMAppConfigurationService apimAppConfigurationService = new APIMAppConfigurationService();
+    private APIMAppConfigurations apimAppConfigurations;
 
-    private APIMStoreConfigurationService() {
-        apimStoreConfigurations = ServiceReferenceHolder.getInstance().getAPIMStoreConfiguration();
+    private APIMAppConfigurationService() {
+        apimAppConfigurations = ServiceReferenceHolder.getInstance().getAPIMAppConfiguration();
     }
 
-    public static APIMStoreConfigurationService getInstance() {
-        return apimStoreConfigurationService;
+    public static APIMAppConfigurationService getInstance() {
+        return apimAppConfigurationService;
     }
 
-    public APIMStoreConfigurations getApimStoreConfigurations() {
-        return apimStoreConfigurations;
+    public APIMAppConfigurations getApimAppConfigurations() {
+        return apimAppConfigurations;
     }
 }
