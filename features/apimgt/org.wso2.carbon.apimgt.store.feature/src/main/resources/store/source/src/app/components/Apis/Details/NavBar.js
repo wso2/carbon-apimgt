@@ -17,7 +17,7 @@
  */
 
 import React, {Component} from 'react'
-import {Link, withRouter} from 'react-router-dom'
+import {Link, withRouter, Redirect} from 'react-router-dom'
 import Paper from 'material-ui/Paper';
 import Grid from 'material-ui/Grid';
 import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
@@ -27,7 +27,6 @@ import Tabs, { Tab } from 'material-ui/Tabs';
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import Api from '../../../data/api'
-import {Select} from 'antd';
 
 class NavBar extends Component {
 
@@ -36,17 +35,15 @@ class NavBar extends Component {
         this.state = {
             api: null,
             notFound: false,
+            redirect: false,
             applications: [],
             dropDownApplications: [],
             dropDownPolicies: [],
             policies: [],
             index: 0
         };
+        this.handleClick = this.handleClick.bind(this);
         this.api_uuid = this.props.match.params.api_uuid;
-        this.dropDownApplications =  null;
-        this.dropDownPolicies =  [];
-        this.policies =  [];
-        this.applications = [];
     }
     static get CONST() {
         return {
@@ -59,34 +56,29 @@ class NavBar extends Component {
 
     componentDidMount() {
         const api = new Api();
-        let retrieveAPI = null;
+        let retrievedAPI = null;
         let retrievedApps = null;
+        let applications = [];
         let promised_api = api.getAPIById(this.api_uuid);
         promised_api.then(
             response => {
-            retrieveAPI = response.obj;
+            retrievedAPI = response.obj;
                 this.setState({api: response.obj});
         let promised_applications = api.getAllApplications();
         promised_applications.then(
             response => {
-            this.setState({applications: response.obj.list});
             retrievedApps = response.obj.list;
 
         let promised_subscriptions = api.getSubscriptions(this.api_uuid, null);
         promised_subscriptions.then(
             response => {
-            this.dropDownApplications = [<Option key="custom" onClick={this.handleClick} >New Application</Option>];
-
-        for (var i = 0; i < retrieveAPI.policies.length; i++) {
-            this.dropDownPolicies.push(<Option key={retrieveAPI.policies[i]}>{retrieveAPI.policies[i]}</Option>);
-        }
         var subscription = {};
         var subscriptions = response.obj.list;
         var application = {};
         var subscribedApp = false;
         for (var i = 0; i < retrievedApps.length; i++) {
             subscribedApp = false;
-            application = applications[i];
+            application = retrievedApps[i];
             if (application.lifeCycleStatus != "APPROVED") {
                 continue;
             }
@@ -98,10 +90,11 @@ class NavBar extends Component {
                 }
             }
             if(!subscribedApp) {
-                this.dropDownApplications.push(<Option key={application.id}>{application.name}</Option>);
+                applications.push(retrievedApps[i]);
             }
         }
-        this.setState({policies: retrieveAPI.policies});
+        this.setState({applications: response.obj.list});
+        this.setState({policies: retrievedAPI.policies});
     }).catch(
             error => {
             if (process.env.NODE_ENV !== "production") {
@@ -135,16 +128,6 @@ class NavBar extends Component {
             }
         );
         debugger;
-    };
-
-    populateApplicationDropdown(){
-        debugger;
-        return this.dropDownApplications;
-    };
-
-    populatePolicyDropdown(){
-        debugger;
-        return this.dropDownPolicies;
     };
 
     handleClick(){
@@ -200,8 +183,14 @@ class NavBar extends Component {
                         </Paper>
                     </Grid>
                 </Grid>
-                 <Select>{this.populateApplicationDropdown()}</Select>
-                 <Select>{this.populatePolicyDropdown()}</Select>
+                <select onChange={this.handleClick}>
+                     {this.state.applications.map( app => <option value='{app.id}'>{app.name}</option>)}
+                    <option></option>
+                    <option >New Application</option>
+                </select>
+                <select>
+                    {this.state.policies.map( policy => <option value={policy}>{policy}</option>)}
+                </select>
                 <AppBar position="static">
                     <Tabs index={this.state.index} onChange={this.handleChange}>
                         {Object.entries(NavBar.CONST).map(
