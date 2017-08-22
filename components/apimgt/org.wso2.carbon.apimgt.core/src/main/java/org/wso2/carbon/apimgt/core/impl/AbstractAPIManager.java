@@ -56,6 +56,7 @@ import org.wso2.carbon.apimgt.core.workflow.Workflow;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -646,17 +647,17 @@ public abstract class AbstractAPIManager implements APIManager {
     
     protected void cleanupPendingTask(WorkflowExecutor executor, String internalWFReference, String workflowType)
             throws APIMgtDAOException {
-        String externalWfReferenceId = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(internalWFReference,
-                workflowType);
-        if (externalWfReferenceId != null) {
+        Optional<String> externalWfReferenceId = getWorkflowDAO().
+                getExternalWorkflowReferenceForPendingTask(internalWFReference, workflowType);
+        if (externalWfReferenceId.isPresent()) {
             try {
-                executor.cleanUpPendingTask(externalWfReferenceId);
+                executor.cleanUpPendingTask(externalWfReferenceId.get());
             } catch (WorkflowException e) {
                 String warn = "Failed to clean pending task for " + internalWFReference + " of " + workflowType;
                 // failed cleanup processes are ignored to prevent failing the deletion process
                 log.warn(warn, e.getLocalizedMessage());
             }
-            getWorkflowDAO().deleteWorkflowEntryforExternalReference(externalWfReferenceId);
+            getWorkflowDAO().deleteWorkflowEntryforExternalReference(externalWfReferenceId.get());
         }
     }
     

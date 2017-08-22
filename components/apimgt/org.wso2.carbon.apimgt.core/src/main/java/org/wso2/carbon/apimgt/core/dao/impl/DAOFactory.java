@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -62,7 +63,8 @@ public class DAOFactory {
                 return apiDAO;
 
             } else {
-                throw new APIMgtDAOException("Editor archive storage path not provided");
+                throw new APIMgtDAOException("Editor archive storage path not provided",
+                        ExceptionCodes.APIM_DAO_EXCEPTION);
             }
         }
 
@@ -85,10 +87,11 @@ public class DAOFactory {
                 apiDAO = new ApiDAOImpl(new OracleSQLStatements());
 
             } else {
-                throw new APIMgtDAOException("Unhandled DB Type detected");
+                throw new APIMgtDAOException("Unhandled DB driver: " + driverName + " detected",
+                        ExceptionCodes.APIM_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting ApiDAO", e);
         }
 
         setup();
@@ -113,10 +116,11 @@ public class DAOFactory {
             } else if (driverName.contains(ORACLE)) {
                 appDAO = new ApplicationDAOImpl();
             } else {
-                throw new APIMgtDAOException("Unhandled DB Type detected");
+                throw new APIMgtDAOException("Unhandled DB driver: " + driverName + " detected",
+                        ExceptionCodes.APIM_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting ApplicationDAO", e);
         }
 
         setup();
@@ -143,10 +147,11 @@ public class DAOFactory {
             } else if (driverName.contains(ORACLE)) {
                 apiSubscriptionDAO = new APISubscriptionDAOImpl();
             } else {
-                throw new APIMgtDAOException("Unhandled DB Type detected");
+                throw new APIMgtDAOException("Unhandled DB driver: " + driverName + " detected",
+                        ExceptionCodes.APIM_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting APISubscriptionDAO", e);
         }
 
         setup();
@@ -173,10 +178,11 @@ public class DAOFactory {
             } else if (driverName.contains(ORACLE)) {
                 policyDAO = new PolicyDAOImpl();
             } else {
-                throw new APIMgtDAOException("Unhandled DB Type detected");
+                throw new APIMgtDAOException("Unhandled DB driver: " + driverName + " detected",
+                        ExceptionCodes.APIM_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting PolicyDAO", e);
         }
 
         setup();
@@ -201,10 +207,11 @@ public class DAOFactory {
             } else if (driverName.contains(ORACLE)) {
                 tagDAO = new TagDAOImpl();
             } else {
-                throw new APIMgtDAOException("Unhandled DB Type detected");
+                throw new APIMgtDAOException("Unhandled DB driver: " + driverName + " detected",
+                        ExceptionCodes.APIM_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting TagDAO", e);
         }
 
         setup();
@@ -229,10 +236,11 @@ public class DAOFactory {
             } else if (driverName.contains(ORACLE)) {
                 labelDAO = new LabelDAOImpl();
             } else {
-                throw new APIMgtDAOException("Unhandled DB Type detected");
+                throw new APIMgtDAOException("Unhandled DB driver: " + driverName + " detected",
+                        ExceptionCodes.APIM_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting LabelDAO", e);
         }
 
         setup();
@@ -257,10 +265,11 @@ public class DAOFactory {
             } else if (driverName.contains(ORACLE)) {
                 workflowDAO = new WorkflowDAOImpl();
             } else {
-                throw new APIMgtDAOException("Unhandled DB Type detected");
+                throw new APIMgtDAOException("Unhandled DB driver: " + driverName + " detected",
+                        ExceptionCodes.APIM_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting WorkflowDAO", e);
         }
 
         setup();
@@ -293,10 +302,11 @@ public class DAOFactory {
             } else if (driverName.contains(ORACLE)) {
                 functionDAO = new FunctionDAOImpl();
             } else {
-                throw new APIMgtDAOException("Unhandled DB Type detected");
+                throw new APIMgtDAOException("Unhandled DB driver: " + driverName + " detected",
+                        ExceptionCodes.APIM_DAO_EXCEPTION);
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting FunctionDAO", e);
         }
 
         setup();

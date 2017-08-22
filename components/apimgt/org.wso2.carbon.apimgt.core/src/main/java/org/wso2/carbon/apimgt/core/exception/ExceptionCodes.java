@@ -72,6 +72,8 @@ public enum ExceptionCodes implements ErrorHandler {
     NO_DELETE_PERMISSIONS(900333, "No permissions to delete API.", 403, "No permissions to delete API."),
     UNSUPPORTED_API_DEFINITION_TYPE(900334, "Unsupported Definition Type", 400,
             "Unsupported Definition Type. Only SWAGGER and WSDL are allowed."),
+    API_ATTRIBUTE_NOT_FOUND(900335, "API attribute not found", 404, "API attribute not found"),
+    SUBSCRIPTION_ALREADY_EXISTS(900336, "Subscription already exists", 409, "Subscription already exists"),
 
 
     // Generic codes
@@ -104,7 +106,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Workflow is already completed"),
     WORKFLOW_PENDING(900553, "Workflow exception", 409,
             "Pending workflow task exists for the seleted API"),
-    WORKFLOW_INV_PUBLISHER_WFTYPE(900554, "Workflow error", 500, "Invalid workflow type for publisher workflows"),
+    WORKFLOW_INVALID_WFTYPE(900554, "Workflow error", 500, "Invalid workflow type specified"),
     WORKFLOW_INV_STORE_WFTYPE(900555, "Workflow error", 500, "Invalid workflow type for store workflows"),
     WORKFLOW_STATE_MISSING(900556, "Workflow error", 400, "Workflow status is not defined"),
     WORKFLOW_NO_PENDING_TASK(900557, "Workflow error", 412,
@@ -198,6 +200,10 @@ public enum ExceptionCodes implements ErrorHandler {
             + "supported"),
     INVALID_DOCUMENT_CONTENT_DATA(900976, "Invalid document content data provided", 400, "Mismatch between provided " +
             "document content data and Document Source Type given");
+    BLOCK_CONDITION_UNSUPPORTED_API_CONTEXT(900977, "Block Condition Error", 400, "API Context does not exist"),
+    BLOCK_CONDITION_UNSUPPORTED_APP_ID_NAME(900978, "Block Condition Error", 400, "Application ID or Name does not " +
+            "exist"),
+    BLOCK_CONDITION_ALREADY_EXISTS(900979, "The Block Condition exists.", 409, " The Block Condition already exists");
 
     private final long errorCode;
     private final String errorMessage;

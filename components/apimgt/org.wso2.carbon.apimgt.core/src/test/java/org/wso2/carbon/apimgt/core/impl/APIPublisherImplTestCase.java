@@ -2461,6 +2461,7 @@ public class APIPublisherImplTestCase {
 
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, gatewaySourceGenerator, gateway);
         Endpoint endpoint = new Endpoint.Builder(SampleTestObjectCreator.createMockEndpoint()).build();
+        Mockito.when(apiDAO.updateEndpoint(endpoint)).thenReturn(true);
         apiPublisher.updateEndpoint(endpoint);
         Mockito.verify(apiDAO, Mockito.times(1)).updateEndpoint(endpoint);
 
@@ -2481,6 +2482,7 @@ public class APIPublisherImplTestCase {
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, gatewaySourceGenerator, gateway);
         Endpoint endpoint = new Endpoint.Builder(SampleTestObjectCreator.createMockEndpoint()).build();
         Mockito.when(apiDAO.isEndpointAssociated(endpoint.getId())).thenReturn(false);
+        Mockito.when(apiDAO.deleteEndpoint(endpoint.getId())).thenReturn(true);
         apiPublisher.deleteEndpoint(endpoint.getId());
         Mockito.verify(apiDAO, Mockito.times(1)).deleteEndpoint(endpoint.getId());
 
@@ -2600,6 +2602,7 @@ public class APIPublisherImplTestCase {
         Mockito.verify(apiDAO, Mockito.times(1)).addAPI(apiBuilder.build());
         Mockito.verify(apiDAO, Mockito.times(1)).getEndpointByName(apiEndpoint.getName());
     }
+
 
     @Test(description = "Test add api with Api Specific Endpoint")
     public void testAddResourceLevelEndpoint() throws APIManagementException, LifecycleException {
@@ -3178,6 +3181,12 @@ public class APIPublisherImplTestCase {
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO) {
         return new APIPublisherImpl(USER, null, null, apiDAO, null, apiSubscriptionDAO, null, null, null, null, null,
                 new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
+    }
+
+    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
+            apiSubscriptionDAO, APILifecycleManager apiLifecycleManager) {
+        return new APIPublisherImpl(USER, null, apiDAO, applicationDAO, apiSubscriptionDAO, null, apiLifecycleManager,
+                null, null, null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(LabelDAO labelDAO) {

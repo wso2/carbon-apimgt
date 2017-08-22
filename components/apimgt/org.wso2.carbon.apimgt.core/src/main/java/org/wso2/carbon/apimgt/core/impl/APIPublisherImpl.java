@@ -104,6 +104,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -2015,19 +2016,19 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     private void cleanupPendingTaskForAPIStateChange(String apiId) throws APIManagementException {
-        String workflowExtRef = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(apiId,
+        Optional<String> workflowExtRef = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(apiId,
                 WorkflowConstants.WF_TYPE_AM_API_STATE);
-        if (workflowExtRef != null) {
+        if (workflowExtRef.isPresent()) {
             WorkflowExecutor executor = WorkflowExecutorFactory.getInstance()
                     .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
             try {
-                executor.cleanUpPendingTask(workflowExtRef);
+                executor.cleanUpPendingTask(workflowExtRef.get());
             } catch (WorkflowException e) {
                 String warn = "Failed to clean pending api state change task for " + apiId;
                 // failed cleanup processes are ignored to prevent failing the deletion process
                 log.warn(warn, e.getLocalizedMessage());
             }
-            getWorkflowDAO().deleteWorkflowEntryforExternalReference(workflowExtRef);
+            getWorkflowDAO().deleteWorkflowEntryforExternalReference(workflowExtRef.get());
         }
     }
 
