@@ -24,6 +24,7 @@ import {PageNotFound} from './app/components/Base/Errors'
 import AuthManager from './app/data/AuthManager'
 import qs from 'qs'
 import Listing2 from './app/components/Listing2'
+import ApplicationCreate from './app/components/Applications/Create/ApplicationCreate'
 
 import './fonts/index.css';
 import './App.css'
@@ -92,20 +93,17 @@ class Store extends Component {
     render() {
         return (
             <Router basename="/store">
+                <Layout>
                     <Switch>
                         <Redirect exact from="/" to="/apis"/>
                         <Route path={"/login"} component={Login}/>
                         <Route path={"/logout"} component={Logout}/>
-                        <Layout>
-                            <Route path={"/applications"} showLeftMenu={this.state.showLeftMenu} render={ props => (<Applications setLeftMenu={this.setLeftMenu}/>)}/>
-                        </Layout>
-                        <Layout>
-                            <Route path={"/application/create"} showLeftMenu={this.state.showLeftMenu} render={ props => (<Applications setLeftMenu={this.setLeftMenu}/>)}/>
-                        </Layout>
-                        <Layout><Route path={"/apis"} showLeftMenu={this.state.showLeftMenu} render={ props => (<Apis setLeftMenu={this.setLeftMenu}/>)}/></Layout>
+                            <Route path={"/application/create"} render={ props => (<ApplicationCreate setLeftMenu={this.setLeftMenu}/>)}/>
+                            <Route path={"/applications"} render={ props => (<Applications setLeftMenu={this.setLeftMenu}/>)}/>
+                        <Route path={"/apis"} showLeftMenu={this.state.showLeftMenu} render={ props => (<Apis setLeftMenu={this.setLeftMenu}/>)}/>
                         <Route component={Protected}/>
                     </Switch>
-
+                </Layout>
             </Router>
         );
     }

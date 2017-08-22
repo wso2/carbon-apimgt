@@ -182,14 +182,15 @@ class Listing extends Component {
 
         return (
             <div>
-                <div class="page-header" id="Message">
+                <div className="page-header" id="Message">
                     <h2>Applications</h2>
                 </div>
-                <Button raised className={classes.button} onClick={ApplicationCreate}>
-                    <Link to={"/application/create"}>
-                        Add Application
-                    </Link>
-                </Button>
+
+                <Link to={"/application/create"}>
+                    <Button raised>
+                            Add Application
+                    </Button>
+                </Link>
                 <div>
                     <p>An application is a logical collection of APIs. Applications allow you to use a single access
                        token
