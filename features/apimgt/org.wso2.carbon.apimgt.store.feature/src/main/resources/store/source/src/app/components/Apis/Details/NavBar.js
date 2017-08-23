@@ -23,6 +23,7 @@ import Grid from 'material-ui/Grid';
 import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
 import AppBar from 'material-ui/AppBar';
 import Tabs, { Tab } from 'material-ui/Tabs';
+import Button from 'material-ui/Button';
 
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
@@ -36,15 +37,20 @@ class NavBar extends Component {
             api: null,
             notFound: false,
             redirect: false,
+            selectedApp: "",
+            selectedPolicy: "",
             applications: [],
             dropDownApplications: [],
             dropDownPolicies: [],
             policies: [],
             index: 0
         };
-        this.handleClick = this.handleClick.bind(this);
+        this.handleAppChange = this.handleAppChange.bind(this);
+        this.handlePolicyChange = this.handlePolicyChange.bind(this);
+        this.subscribe = this.subscribe.bind(this);
         this.api_uuid = this.props.match.params.api_uuid;
     }
+
     static get CONST() {
         return {
             OVERVIEW: "overview",
@@ -95,6 +101,9 @@ class NavBar extends Component {
         }
         this.setState({applications: response.obj.list});
         this.setState({policies: retrievedAPI.policies});
+        if (retrievedAPI.policies.length > 0) {
+            this.setState({selectedPolicy: retrievedAPI.policies[0]});
+        }
     }).catch(
             error => {
             if (process.env.NODE_ENV !== "production") {
@@ -130,13 +139,67 @@ class NavBar extends Component {
         debugger;
     };
 
-    handleClick(){
-        this.setState({redirect: true});
+    handleAppChange = (event, index) => {
+        let selectedApp = event.target.value;
+        if (selectedApp == "newApp") {
+            this.setState({redirect: true});
+        } else if(selectedApp != "") {
+            this.setState({selectedApp: selectedPolicy});
+        }
     };
 
-    handleChange = (event, index) => {
-        console.info(event);
-        this.setState({ index });
+    handlePolicyChange = (event, index) => {
+        let selectedPolicy = event.target.value;
+        this.setState({selectedPolicy: selectedPolicy});
+    };
+
+    subscribe () {
+        const api = new Api();
+        let apiId = this.state.api.id;
+        let applicationId = this.state.selectedApp;
+        let policy = this.state.selectedPolicy;
+        let applications = this.state.applications;
+        let newApplications = []
+        for(let i = 0; i < applications.length; i++) {
+            if(applications[i].id != applicationId ) {
+                newApplications.push(applications[i]);
+            }
+        }
+        let promised_subscription = api.subscribe(apiId, applicationId, policy);
+        promised_subscription.then(
+            response => {
+                noty({
+                    text: "Successfully subscribe to the API",
+                    type: 'success',
+                    dismissQueue: true,
+                    modal: true,
+                    progressBar: true,
+                    timeout: 5000,
+                    layout: 'top',
+                    theme: 'relax',
+                    maxVisible: 10
+                });
+            this.setState({applications: newApplications});
+            this.setState({selectedApp: ""});
+        }).catch((error) => {
+                noty({
+                    text: "Error while subscribing to the API",
+                    type: 'error',
+                    dismissQueue: true,
+                    modal: true,
+                    progressBar: true,
+                    timeout: 5000,
+                    layout: 'top',
+                    theme: 'relax',
+                    maxVisible: 10,
+                    callback: {
+                        afterClose: function () {
+                            window.location = loginPageUri;
+                        },
+                    }
+                });
+            }
+        );
     };
 
     render() {
@@ -148,9 +211,16 @@ class NavBar extends Component {
         // This assume that last segment and segment before it contains detail page action and API UUID
         const [active_tab, api_uuid] = pathSegments.reverse();
         const api = this.state.api;
+        const { redirect } = this.state;
+
+        if (redirect) {
+            return <Redirect to='/application   /create'/>;
+        }
+
         if (this.state.notFound) {
             return <ResourceNotFound/>
         }
+
         if (!this.state.api) {
             return <Loading/>
         }
@@ -183,14 +253,15 @@ class NavBar extends Component {
                         </Paper>
                     </Grid>
                 </Grid>
-                <select onChange={this.handleClick}>
+                <select onChange={this.handleAppChange}>
                      {this.state.applications.map( app => <option value='{app.id}'>{app.name}</option>)}
-                    <option></option>
-                    <option >New Application</option>
+                    <option value=""></option>
+                    <option value="newApp">New Application</option>
                 </select>
-                <select>
+                <select onChange={this.handlePolicyChange}>
                     {this.state.policies.map( policy => <option value={policy}>{policy}</option>)}
                 </select>
+                <Button color="primary" onClick={this.subscribe}>Subscribe</Button>
                 <AppBar position="static">
                     <Tabs index={this.state.index} onChange={this.handleChange}>
                         {Object.entries(NavBar.CONST).map(

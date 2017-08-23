@@ -48,6 +48,7 @@ class Listing extends React.Component {
         }
         // this.setState({listType: value});
     };
+
     componentDidMount() {
         let api = new API();
         let promised_apis = api.getAllAPIs();
@@ -69,6 +70,8 @@ class Listing extends React.Component {
 
 
     render() {
+        let forum_link = "/forum";
+        let create_app_link = "/application/create";
         if (this.state.notFound) {
             return <ResourceNotFound/>
         }
@@ -80,7 +83,6 @@ class Listing extends React.Component {
                     <BottomNavigationButton label="List" icon={<ListIcon />} />
                     <BottomNavigationButton label="Grid" icon={<GridOnIcon />} />
                 </BottomNavigation>
-
                 {
                     this.state.apis ?
                         this.state.listType === "list" ?
@@ -116,18 +118,38 @@ class Listing extends React.Component {
                                 <Grid item xs={6} sm={3}>
                                 </Grid>
                             </Grid>
-
-                            :
+                        :
                             <Grid container gutter={24} >
                                 {this.state.apis.list.map((api, i) => {
                                     return <ApiThumb api={api}/>
                                 })}
-
-
                             </Grid>
-                        : <div>Loading... </div>
+                    :
+                        <div>
+                            <Grid item xl={2} lg={3} md={4} sm={6} xs={12}>
+                                <Card>
+                                    <CardMedia>
+                                        <img alt="example" width="50%" src="/store/public/images/api/api-default.png"/>
+                                    </CardMedia>
+                                    <CardContent>
+                                        <Typography component="p">
+                                            <Link to={create_app_link}>Create New Application</Link>
+                                        </Typography>
+                                    </CardContent>
+                                </Card>
+                                <Card>
+                                    <CardMedia>
+                                        <img alt="example" width="50%" src="/store/public/images/api/api-default.png"/>
+                                    </CardMedia>
+                                    <CardContent>
+                                        <Typography component="p">
+                                                <Link to={forum_link}>Visit our API Forum</Link>
+                                        </Typography>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        </div>
                 }
-
             </div>
         );
     }

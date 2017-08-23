@@ -76,14 +76,8 @@ class Store extends Component {
      */
     componentWillMount(){
         console.info("component did mount ... ");
-        let loginPromise = this.authManager.authenticateUser("admin", "admin");
-        loginPromise.then((response) => {
-            console.info(response);
-        }).catch((error) => {
-                console.log(error);
-            }
-        );
     }
+
     setLeftMenu(status) {
         this.setState({
             showLeftMenu: status
