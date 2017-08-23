@@ -18,11 +18,7 @@
 package org.wso2.carbon.apimgt.plugin;
 
 import org.ballerinalang.BLangCompiler;
-import org.ballerinalang.BLangProgramArchiveBuilder;
-import org.ballerinalang.BLangProgramLoader;
-import org.ballerinalang.model.BLangProgram;
 import org.ballerinalang.util.BLangConstants;
-import org.ballerinalang.util.program.BLangPrograms;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,26 +33,22 @@ import java.nio.file.Paths;
  * This class is used to generate ballerina archives form the bal file.
  */
 public class GenerateArchives {
-    public static final String MAIN_TYPE = "main";
-    public static final String SERVICE_TYPE = "service";
     private static final Logger log = LoggerFactory.getLogger(GenerateArchives.class);
 
     public static void main(String[] args) {
-        String type = args[0];
-        String srcDir = args[1];
-        String packagePath = args[2];
-        String targetName = args[3];
-        new GenerateArchives().execute(type, srcDir, packagePath, targetName);
+        String srcDir = args[0];
+        String packagePath = args[1];
+        String targetName = args[2];
+        new GenerateArchives().execute(srcDir, packagePath, targetName);
     }
 
     /**
      * Generate archives
      *
-     * @param type        type of the bal file
      * @param packagePath package path to the bal
      * @param targetName  target file name
      */
-    public void execute(String type, String srcDir, String packagePath, String targetName) {
+    public void execute(String srcDir, String packagePath, String targetName) {
         Path sourcePath = Paths.get(packagePath);
         try {
             Path realPath = Paths.get(srcDir + File.separator + packagePath).toRealPath(LinkOption.NOFOLLOW_LINKS);
@@ -69,22 +61,7 @@ public class GenerateArchives {
             log.error("error reading from file: " + sourcePath + " reason: " + e.getMessage(), e);
             throw new RuntimeException("error reading from file: " + sourcePath + " reason: " + e.getMessage(), e);
         }
-
         Path programDirPath = Paths.get(srcDir);
-        BLangCompiler.compileAndWrite(programDirPath,Paths.get(packagePath), Paths.get(targetName));
-
-        /*
-        BLangProgram bLangProgram = null;
-        if (MAIN_TYPE.equals(type)) {
-            bLangProgram = new BLangProgramLoader().loadMain(programDirPath, sourcePath);
-        } else if (SERVICE_TYPE.equals(type)) {
-            bLangProgram = new BLangProgramLoader().loadService(programDirPath, sourcePath);
-        } else {
-            log.error("source type '" + type + "' not supported");
-            throw new RuntimeException("source type '" + type + "' not supported");
-        }
-
-        new BLangProgramArchiveBuilder().build(bLangProgram, targetName.trim());
-        */
+        BLangCompiler.compileAndWrite(programDirPath, Paths.get(packagePath), Paths.get(targetName));
     }
 }
