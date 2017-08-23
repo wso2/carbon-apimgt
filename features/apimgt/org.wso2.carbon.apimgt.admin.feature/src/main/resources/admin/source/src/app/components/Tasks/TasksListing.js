@@ -33,7 +33,7 @@
            workflows: null,
            selectedRowKeys: []
        };
-       this.workflow_type = props.match.params.workflow_type;
+       this.state.workflow_type = props.match.params.workflow_type;
        this.onSelectChange = this.onSelectChange.bind(this);
        this.handleWorkflowComplete = this.handleWorkflowComplete.bind(this);
    }
@@ -65,10 +65,32 @@
            }
        );
    }
-   componentDidMount() {
+
+   //Since Same component is used for all the tasks, this is implemented to reload the tables
+   componentWillReceiveProps(nextProps){
+
+     if(nextProps.match.params.workflow_type !== this.state.workflow_type) {
 
        const api = new API();
-       const type = "AM_" + this.workflow_type.toUpperCase() ;
+       const type = "AM_" + nextProps.match.params.workflow_type.toUpperCase() ;
+
+       const promised_workflows = api.getWorkflows(type);
+       /* TODO: Handle catch case , auth errors and ect ~tmkb*/
+       promised_workflows.then(
+           response => {
+              this.setState(
+                {
+                  workflows: response.obj.list,
+                  workflow_type: nextProps.match.params.workflow_type
+                });
+           }
+       );
+     }
+   }
+
+   componentDidMount() {
+       const api = new API();
+       const type = "AM_" + this.state.workflow_type.toUpperCase() ;
 
        const promised_workflows = api.getWorkflows(type);
        /* TODO: Handle catch case , auth errors and ect ~tmkb*/
