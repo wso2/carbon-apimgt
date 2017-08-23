@@ -46,7 +46,7 @@ import java.io.File;
  *
  * @since 7.0.34
  */
-@BallerinaAction(packageName = "org.wso2.carbon.apimgt.ballerina.publisher", actionName = "init",
+@BallerinaAction(packageName = "org.wso2.carbon.apimgt.ballerina.publisher", actionName = "<init>",
         connectorName = Constants.CONNECTOR_NAME, args = {
         @Argument(name = "c", type = TypeEnum.CONNECTOR) }, connectorArgs = {
         @Argument(name = "options", type = TypeEnum.MAP) })
