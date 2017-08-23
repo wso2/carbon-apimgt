@@ -17,7 +17,7 @@
 */
 package org.wso2.carbon.apimgt.ballerina.caching.util;
 
-import org.ballerinalang.BLangProgramLoader;
+import org.ballerinalang.BLangCompiler;
 import org.ballerinalang.util.codegen.ProgramFile;
 
 import java.net.URISyntaxException;
@@ -44,7 +44,7 @@ public class BTestUtils {
         Path programPath;
         try {
             programPath = Paths.get(BTestUtils.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-            return new BLangProgramLoader().loadMainProgramFile(programPath, Paths.get(sourceFilePath));
+            return BLangCompiler.compile(programPath, Paths.get(sourceFilePath));
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("error while running test: " + e.getMessage());
         }

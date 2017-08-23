@@ -3,7 +3,7 @@ package org.wso2.carbon.apimgt.gateway.services;
 import ballerina.net.jms;
 import ballerina.lang.system;
 
-@jms:config {
+@jms:configuration {
     initialContextFactory:"org.apache.activemq.jndi.ActiveMQInitialContextFactory",
     providerUrl:"tcp://localhost:61616",
     connectionFactoryType:"topic",
