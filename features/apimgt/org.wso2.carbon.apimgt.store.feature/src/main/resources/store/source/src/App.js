@@ -76,14 +76,8 @@ class Store extends Component {
      */
     componentWillMount(){
         console.info("component did mount ... ");
-        let loginPromise = this.authManager.authenticateUser("admin", "admin");
-        loginPromise.then((response) => {
-            console.info(response);
-        }).catch((error) => {
-                console.log(error);
-            }
-        );
     }
+
     setLeftMenu(status) {
         this.setState({
             showLeftMenu: status
@@ -98,8 +92,8 @@ class Store extends Component {
                         <Redirect exact from="/" to="/apis"/>
                         <Route path={"/login"} component={Login}/>
                         <Route path={"/logout"} component={Logout}/>
-                            <Route path={"/application/create"} render={ props => (<ApplicationCreate setLeftMenu={this.setLeftMenu}/>)}/>
-                            <Route path={"/applications"} render={ props => (<Applications setLeftMenu={this.setLeftMenu}/>)}/>
+                        <Route path={"/application/create"} render={ props => (<ApplicationCreate setLeftMenu={this.setLeftMenu}/>)}/>
+                        <Route path={"/applications"} render={ props => (<Applications setLeftMenu={this.setLeftMenu}/>)}/>
                         <Route path={"/apis"} showLeftMenu={this.state.showLeftMenu} render={ props => (<Apis setLeftMenu={this.setLeftMenu}/>)}/>
                         <Route component={Protected}/>
                     </Switch>

@@ -156,7 +156,7 @@ class API {
         var promise_get = this.client.then(
                 (client) => {
                 let payload = {body: application};
-                return client.apis["Application (individual)"].post_applications(
+                return client.apis["Create"].post_applications(
                     {payload}, this._requestMetaData());
         }
         );

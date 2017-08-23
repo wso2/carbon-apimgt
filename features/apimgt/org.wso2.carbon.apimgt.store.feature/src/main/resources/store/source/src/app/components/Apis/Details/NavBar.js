@@ -160,7 +160,7 @@ class NavBar extends Component {
         let policy = this.state.selectedPolicy;
         let applications = this.state.applications;
         let newApplications = []
-        for(i = 0; i < applications.length; i++) {
+        for(let i = 0; i < applications.length; i++) {
             if(applications[i].id != applicationId ) {
                 newApplications.push(applications[i]);
             }
@@ -214,7 +214,7 @@ class NavBar extends Component {
         const { redirect } = this.state;
 
         if (redirect) {
-            return <Redirect to='/applications/create'/>;
+            return <Redirect to='/application   /create'/>;
         }
 
         if (this.state.notFound) {
