@@ -51,30 +51,36 @@ function authenticate (message m) (boolean, message) {
 
     //check api status
     string apiIdentifier = apiContext + ":" + version;
+    system:println("[API-GW] Checking API available in cache");
     dto:APIDTO apiDto = holder:getFromAPICache(apiIdentifier);
 
     if (apiDto == null){
+        system:println("[API-GW] API not found in cache");
         http:setStatusCode(response, 404);
         return false, response;
     }
-
+    system:println("[API-GW] API is available in cache");
     if (constants:MAINTENANCE == apiDto.lifeCycleStatus) {
+        system:println("[API-GW] API is in MAINTENANCE state");
         gatewayUtil:constructAPIIsInMaintenance(response);
         return false, response;
     }
 
+    system:println("[API-GW] Validating resources");
     resourceDto = validateResource(apiContext, version, uriTemplate, httpVerb);
-
+    
     if (resourceDto == null) {
+        system:println("[API-GW] Resource validation failed");
         http:setStatusCode(response, 404);
         return false, response;
     }
-
+    system:println("[API-GW] Validating resources : success");
     if (resourceDto.authType == constants:AUTHENTICATION_TYPE_NONE) {
+        system:println("[API-GW] API's Auth Type is NONE");
         // set user as anonymous
         // set throttling tier as unauthenticated
     }
-
+    system:println("[API-GW] Security Scheme : " + apiDto.securityScheme);
     if (apiDto.securityScheme == 0) {
         //pass request without authentication
         //and return method
@@ -87,30 +93,35 @@ function authenticate (message m) (boolean, message) {
         http:setStatusCode(response, 400);
         return false, response;
     }
-
-    if (authErr == null && ((apiDto.securityScheme == 1) || (apiDto.securityScheme == 3))) {
+    system:println("[API-GW] Processing Security Schemes");
+    if (authErr == null && ((apiDto.securityScheme == 1) || (apiDto.securityScheme == 3) 
+            || (apiDto.securityScheme == -1))) {
         string authToken = strings:replace(authHeader, constants:BEARER, ""); //use split method instead
-
+        system:println("[API-GW] Auth Type is OAuth");
         if (strings:length(authToken) == 0) {
+            system:println("[API-GW] Access token not found");
             // token incorrect
             gatewayUtil:constructAccessTokenNotFoundPayload(response);
             http:setStatusCode(response, 401);
             return false, response;
         }
-
+        system:println("[API-GW] Retrieving OAuth token info from cache");
         dto:IntrospectDto introspectDto = holder:getFromTokenCache(authToken);
         if (introspectDto == null) {
+            system:println("[API-GW] OAuth token cache miss");
             introspectCacheHit = false;
+            system:println("[API-GW] Introspecting token");
             // if not exist
             introspectDto = doIntrospect(authToken);
         }
 
         if (!introspectDto.active) {
+            system:println("[API-GW] OAuth token is not active");
             // access token expired
             gatewayUtil:constructAccessTokenExpiredPayload(response);
             return false, response;
         }
-
+        system:println("[API-GW] OAuth token is active");
         // if token had exp
         if (introspectDto.exp != -1) {
             //put into cache
@@ -126,33 +137,41 @@ function authenticate (message m) (boolean, message) {
         }
         // if token come from cache hit
         if (introspectCacheHit) {
-
             if (introspectDto.exp < system:currentTimeMillis() / 1000) {
+                system:println("[API-GW] introspectCacheHit token expired");
                 holder:removeFromTokenCache(authToken);
                 gatewayUtil:constructAccessTokenExpiredPayload(response);
                 return false, response;
             }
         }
+        system:println("[API-GW] validating subscription");
         // validating subscription
         subscriptionDto = validateSubscription(apiContext, version, introspectDto);
 
         if (subscriptionDto != null) {
             boolean subscriptionBlocked = false;
+            system:println("[API-GW] Checking subscription blocked");
             subscriptionBlocked, response = isSubscriptionBlocked(subscriptionDto, response, apiDto);
             if (subscriptionBlocked) {
+                system:println("[API-GW] Subscription is blocked");
                 state = false;
                 return state, response;
             }
-
+            system:println("[API-GW] Validating subscription : success");
+            system:println("[API-GW] Validating scopes");
             if (validateScopes(resourceDto, introspectDto)) {
+                system:println("[API-GW] Validating scopes : success");
                 dto:KeyValidationDto keyValidationInfo =
                 constructKeyValidationDto(authToken, introspectDto, subscriptionDto, resourceDto);
                 util:setProperty(m, "KEY_VALIDATION_INFO", keyValidationInfo);
                 messages:setProperty(m, constants:KEY_TYPE, subscriptionDto.keyEnvType);
                 state = true;
                 response = m;
+            } else {
+                system:println("[API-GW] Validating scopes : failed");
             }
         } else {
+            system:println("[API-GW] Subscription not found");
             //subscription missing
             gatewayUtil:constructSubscriptionNotFound(response);
             return false, response;
@@ -180,6 +199,8 @@ function authenticate (message m) (boolean, message) {
             gatewayUtil:constructSubscriptionNotFound(response);
             return false, response;
         }
+    } else {
+        system:println("[API-GW] No security schemes matched for the API");
     }
 
     return state, response;
