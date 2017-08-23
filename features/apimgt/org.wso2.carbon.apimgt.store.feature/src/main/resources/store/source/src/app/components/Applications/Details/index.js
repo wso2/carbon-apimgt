@@ -18,10 +18,32 @@
 
 import React, {Component} from 'react'
 import BasicTabs from './NavTab.js'
+import API from '../../../data/api.js'
 
 export default class Details extends Component {
+
+    constructor(props){
+        super(props);
+    }
+
     componentDidMount() {
-        this.props.setLeftMenu(true);
+        const application = new API();
+        let promised_application = application.getApplication(this.applicationId);
+        promised_api.then(
+            response => {
+                this.setState({api: response.obj});
+            }
+        ).catch(
+            error => {
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
+            }
+        );
     }
 
     componentWillUnmount() {

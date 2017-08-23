@@ -19,8 +19,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import Button from 'material-ui/Button';
-import ApplicationCreate from '../Create/ApplicationCreate'
-import ListItemText from 'material-ui/List';
+import API from '../../../data/api.js'
 
 import PropTypes from 'prop-types';
 import { withStyles, createStyleSheet } from 'material-ui/styles';
@@ -115,46 +114,30 @@ const styleSheet = createStyleSheet(theme => ({
 
 class Listing extends Component {
 
+    constructor(props) {
+        super(props);
+    }
+
     componentDidMount() {
-        let applicationResponseObj = JSON.parse('{' +
-            '"count":4,' +
-            '"next":"",' +
-            '"previous":"",' +
-            '"list":[' +
-            '{' +
-            '"applicationId":"6fabb2fc-cece-47b1-9509-7d40d7c91f06",' +
-            '"name":"TestApp1",' +
-            '"subscriber":"admin",' +
-            '"throttlingTier":"Unlimited",' +
-            '"description":"sample app description",' +
-            '"lifeCycleStatus":"APPROVED"' +
-            '},' +
-            '{' +
-            '"applicationId":"5bc78bf8-711c-4866-ab03-265d1c61c58d",' +
-            '"name":"App2",' +
-            '"subscriber":"admin",' +
-            '"throttlingTier":"Unlimited",' +
-            '"description":"sample app description",' +
-            '"lifeCycleStatus":"APPROVED"' +
-            '},' +
-            '{"applicationId":"2f061596-df6f-4280-9a7a-a4b69f56ae7e",' +
-            '"name":"HelloApp",' +
-            '"subscriber":"admin",' +
-            '"throttlingTier":"50PerMin",' +
-            '"description":"sample app description",' +
-            '"lifeCycleStatus":"APPROVED"' +
-            '},' +
-            '{' +
-            '"applicationId":"3753f1a0-64d4-4251-b52f-b6cccdadb6f5",' +
-            '"name":"TenPerMinApp",' +
-            '"subscriber":"admin",' +
-            '"throttlingTier":"10PerMin",' +
-            '"description":"10 per min description",' +
-            '"lifeCycleStatus":"APPROVED"' +
-            '}]}');
-        let applicationData = [];
-        applicationResponseObj.list.map(item => applicationData.push(item));
-        this.setState({data: applicationData});
+        let applicationApi = new API();
+        let promised_applications = applicationApi.getAllApplications();
+        promised_applications.then((response) => {
+            let applicationResponseObj = response.body;
+            let applicationData = [];
+            applicationResponseObj.list.map(item => applicationData.push(item));
+            this.setState({data: applicationData});
+        }).catch(error => {
+            if (process.env.NODE_ENV !== "production")
+                console.log(error);
+            let status = error.status;
+            if (status === 404) {
+                this.setState({notFound: true});
+            } else if (status === 401) {
+                this.setState({isAuthorize: false});
+                let params = qs.stringify({reference: this.props.location.pathname});
+                this.props.history.push({pathname: "/login", search: params});
+            }
+        });
     }
 
     state = {

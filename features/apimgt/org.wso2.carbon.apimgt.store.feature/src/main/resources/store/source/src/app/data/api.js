@@ -131,7 +131,6 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getAllApplications(callback = null) {
-        debugger;
         var promise_get = this.client.then(
                 (client) => {
                 return client.apis["Application Collection"].get_applications(
@@ -152,12 +151,11 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     createApplication(application, callback = null) {
-        debugger;
         var promise_create = this.client.then(
                 (client) => {
-                let payload = {body: application};
-                return client.apis["Create"].post_applications(
-                    {payload}, this._requestMetaData());
+                    let payload = {body: application};
+                    return client.apis["Create"].post_applications(
+                        {payload}, this._requestMetaData());
         }
         );
         if (callback) {
