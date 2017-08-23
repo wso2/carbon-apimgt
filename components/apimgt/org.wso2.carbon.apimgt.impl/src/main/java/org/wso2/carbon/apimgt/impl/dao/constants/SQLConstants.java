@@ -382,8 +382,9 @@ public class SQLConstants {
 
     public static final String ADD_SUBSCRIBER_SQL =
             " INSERT" +
-            "   INTO AM_SUBSCRIBER (USER_ID, TENANT_ID, EMAIL_ADDRESS, DATE_SUBSCRIBED, CREATED_BY, CREATED_TIME) " +
-            " VALUES (?,?,?,?,?,?)";
+            "   INTO AM_SUBSCRIBER (USER_ID, TENANT_ID, EMAIL_ADDRESS, DATE_SUBSCRIBED, CREATED_BY, CREATED_TIME, " +
+                    "UPDATED_TIME) " +
+            " VALUES (?,?,?,?,?,?,?)";
 
     public static final String UPDATE_SUBSCRIBER_SQL =
             " UPDATE AM_SUBSCRIBER " +
@@ -416,8 +417,9 @@ public class SQLConstants {
 
     public static final String ADD_SUBSCRIPTION_SQL =
             " INSERT INTO " +
-            "   AM_SUBSCRIPTION (TIER_ID,API_ID,APPLICATION_ID,SUB_STATUS,SUBS_CREATE_STATE,CREATED_BY,CREATED_TIME,UUID) " +
-            " VALUES (?,?,?,?,?,?,?,?)";
+            "   AM_SUBSCRIPTION (TIER_ID,API_ID,APPLICATION_ID,SUB_STATUS,SUBS_CREATE_STATE,CREATED_BY,CREATED_TIME," +
+                    "UPDATED_TIME, UUID) " +
+            " VALUES (?,?,?,?,?,?,?,?,?)";
 
     public static final String GET_SUBSCRIPTION_UUID_SQL =
             " SELECT UUID " +
@@ -1226,8 +1228,9 @@ public class SQLConstants {
 
     public static final String APP_APPLICATION_SQL =
             " INSERT INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, " +
-            "   CALLBACK_URL, DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME,UUID)" +
-            " VALUES (?,?,?,?,?,?,?,?,?,?)";
+            "   CALLBACK_URL, DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_TIME," +
+                    "UUID)" +
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String UPDATE_APPLICATION_SQL =
             " UPDATE " +

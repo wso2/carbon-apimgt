@@ -1019,7 +1019,10 @@ public class ApiMgtDAO {
             ps.setString(3, subscriber.getEmail());
             ps.setTimestamp(4, new Timestamp(subscriber.getSubscribedDate().getTime()));
             ps.setString(5, subscriber.getName());
-            ps.setTimestamp(6, new Timestamp(subscriber.getSubscribedDate().getTime()));
+
+            Timestamp timestamp = new Timestamp(subscriber.getSubscribedDate().getTime());
+            ps.setTimestamp(6, timestamp);
+            ps.setTimestamp(7, timestamp);
             ps.executeUpdate();
 
             int subscriberId = 0;
@@ -1056,9 +1059,12 @@ public class ApiMgtDAO {
             ps.setString(1, subscriber.getName());
             ps.setInt(2, subscriber.getTenantId());
             ps.setString(3, subscriber.getEmail());
-            ps.setTimestamp(4, new Timestamp(subscriber.getSubscribedDate().getTime()));
+
+            Timestamp timestamp = new Timestamp(subscriber.getSubscribedDate().getTime());
+            ps.setTimestamp(4, timestamp);
+
             ps.setString(5, subscriber.getName());
-            ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
+            ps.setTimestamp(6, timestamp);
             ps.setInt(7, subscriber.getId());
             ps.executeUpdate();
 
@@ -1173,8 +1179,11 @@ public class ApiMgtDAO {
             preparedStForInsert.setString(4, status != null ? status : APIConstants.SubscriptionStatus.UNBLOCKED);
             preparedStForInsert.setString(5, APIConstants.SubscriptionCreatedStatus.SUBSCRIBE);
             preparedStForInsert.setString(6, subscriber);
-            preparedStForInsert.setTimestamp(7, new Timestamp(System.currentTimeMillis()));
-            preparedStForInsert.setString(8, UUID.randomUUID().toString());
+
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            preparedStForInsert.setTimestamp(7, timestamp);
+            preparedStForInsert.setTimestamp(8, timestamp);
+            preparedStForInsert.setString(9, UUID.randomUUID().toString());
 
             preparedStForInsert.executeUpdate();
             rs = preparedStForInsert.getGeneratedKeys();
@@ -1464,9 +1473,15 @@ public class ApiMgtDAO {
                 subscribedAPI.setTier(new Tier(resultSet.getString("TIER_ID")));
 
                 Timestamp createdTime = resultSet.getTimestamp("CREATED_TIME");
-                Timestamp updatedTime = resultSet.getTimestamp("UPDATED_TIME");
                 subscribedAPI.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime.getTime()));
-                subscribedAPI.setUpdatedTime(updatedTime == null ? null : String.valueOf(updatedTime.getTime()));
+                try {
+                    Timestamp updated_time = resultSet.getTimestamp("UPDATED_TIME");
+                    subscribedAPI.setUpdatedTime(
+                            updated_time == null ? null : String.valueOf(updated_time.getTime()));
+                } catch (SQLException e) {
+                    // fixing Timestamp issue with default value '0000-00-00 00:00:00'for existing applications created
+                    subscribedAPI.setUpdatedTime(subscribedAPI.getCreatedTime());
+                }
                 subscribedAPI.setApplication(application);
             }
             return subscribedAPI;
@@ -4124,8 +4139,11 @@ public class ApiMgtDAO {
             }
             ps.setString(7, application.getGroupId());
             ps.setString(8, subscriber.getName());
-            ps.setTimestamp(9, new Timestamp(System.currentTimeMillis()));
-            ps.setString(10, UUID.randomUUID().toString());
+
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            ps.setTimestamp(9, timestamp);
+            ps.setTimestamp(10, timestamp);
+            ps.setString(11, UUID.randomUUID().toString());
             ps.executeUpdate();
 
             rs = ps.getGeneratedKeys();
@@ -6001,10 +6019,16 @@ public class ApiMgtDAO {
                 application.setTier(rs.getString("APPLICATION_TIER"));
                 subscriber.setId(rs.getInt("SUBSCRIBER_ID"));
 
-                Timestamp updatedTime = rs.getTimestamp("UPDATED_TIME");
                 Timestamp createdTime = rs.getTimestamp("CREATED_TIME");
-                application.setLastUpdatedTime(updatedTime == null ? null : String.valueOf(updatedTime.getTime()));
                 application.setCreatedTime(createdTime == null ? null : String.valueOf(createdTime.getTime()));
+                try {
+                    Timestamp updated_time = rs.getTimestamp("UPDATED_TIME");
+                    application.setLastUpdatedTime(
+                            updated_time == null ? null : String.valueOf(updated_time.getTime()));
+                } catch (SQLException e) {
+                    // fixing Timestamp issue with default value '0000-00-00 00:00:00'for existing applications created
+                    application.setLastUpdatedTime(application.getCreatedTime());
+                }
 
                 Set<APIKey> keys = getApplicationKeys(subscriber.getName(), application.getId());
                 for (APIKey key : keys) {
