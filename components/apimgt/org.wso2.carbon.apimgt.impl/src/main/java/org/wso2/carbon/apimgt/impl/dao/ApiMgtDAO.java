@@ -1059,12 +1059,9 @@ public class ApiMgtDAO {
             ps.setString(1, subscriber.getName());
             ps.setInt(2, subscriber.getTenantId());
             ps.setString(3, subscriber.getEmail());
-
-            Timestamp timestamp = new Timestamp(subscriber.getSubscribedDate().getTime());
-            ps.setTimestamp(4, timestamp);
-
+            ps.setTimestamp(4, new Timestamp(subscriber.getSubscribedDate().getTime()));
             ps.setString(5, subscriber.getName());
-            ps.setTimestamp(6, timestamp);
+            ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
             ps.setInt(7, subscriber.getId());
             ps.executeUpdate();
 
