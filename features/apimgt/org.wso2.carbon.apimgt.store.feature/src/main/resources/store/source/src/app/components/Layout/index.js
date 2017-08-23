@@ -69,7 +69,9 @@ class Layout extends React.Component {
                         <ListItemIcon>
                             <InboxIcon />
                         </ListItemIcon>
-                        <ListItemText primary="APIs" />
+                        <Link to="/apis">
+                            <ListItemText primary="APIs" />
+                        </Link>
                     </ListItem>
                     <ListItem button>
                         <ListItemIcon>
@@ -83,13 +85,17 @@ class Layout extends React.Component {
                         <ListItemIcon>
                             <SendIcon />
                         </ListItemIcon>
-                        <ListItemText primary="Forum" />
+                        <Link to="/forum">
+                            <ListItemText primary="Forum" />
+                        </Link>
                     </ListItem>
                     <ListItem button>
                         <ListItemIcon>
                             <DraftsIcon />
                         </ListItemIcon>
-                        <ListItemText primary="Analytics" />
+                        <Link to="/analytics">
+                            <ListItemText primary="Analytics" />
+                        </Link>
                     </ListItem>
                 </List>
 

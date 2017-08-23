@@ -153,7 +153,7 @@ class API {
      */
     createApplication(application, callback = null) {
         debugger;
-        var promise_get = this.client.then(
+        var promise_create = this.client.then(
                 (client) => {
                 let payload = {body: application};
                 return client.apis["Create"].post_applications(
@@ -161,9 +161,9 @@ class API {
         }
         );
         if (callback) {
-            return promise_get.then(callback);
+            return promise_create.then(callback);
         } else {
-            return promise_get;
+            return promise_create;
         }
     }
 
