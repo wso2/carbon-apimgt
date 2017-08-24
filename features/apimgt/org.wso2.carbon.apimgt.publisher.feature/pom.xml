@@ -34,7 +34,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.wso2.carbon.hostobjects</groupId>
+            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.hostobjects.sso</artifactId>
         </dependency>
         <dependency>
@@ -135,7 +135,7 @@
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.api</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.impl</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.hostobjects</bundleDef>
-                                <bundleDef>org.wso2.carbon.hostobjects:org.wso2.carbon.hostobjects.sso</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.hostobjects.sso</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.registry.cache.stub:${carbon.apimgt.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.usage.client:${carbon.apimgt.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.identity.framework:org.wso2.carbon.identity.user.registration.stub:${carbon.identity.version}</bundleDef>
@@ -154,7 +154,7 @@
                             </importFeatures>
                             <importBundles>
                                 <importBundleDef>org.wso2.orbit.io.swagger:swagger-codegen:${swagger.codegen.version}</importBundleDef>
-                                <importBundleDef>org.wso2.carbon.hostobjects:org.wso2.carbon.hostobjects.sso</importBundleDef>
+                                <importBundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.hostobjects.sso</importBundleDef>
                                 <importBundleDef>org.wso2.carbon.mediation:org.wso2.carbon.rest.api.stub:${carbon.mediation.version}</importBundleDef>
                                 <importBundleDef>org.wso2.orbit.org.apache.pdfbox:pdfbox:${orbit.version.pdfbox}</importBundleDef>
                                 <importBundleDef>org.wso2.orbit.org.apache.pdfbox:fontbox:${orbit.version.pdfbox}</importBundleDef>

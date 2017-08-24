@@ -50,7 +50,7 @@
             <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.hostobjects</groupId>
+            <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.hostobjects.sso</artifactId>
         </dependency>
         <dependency>
@@ -210,7 +210,7 @@
                                 <importBundleDef>commons-io.wso2:commons-io:${commons-io.version}</importBundleDef>
                                 <importBundleDef>org.wso2.orbit.io.swagger:swagger-codegen:${swagger.codegen.version}</importBundleDef>
                                 <importBundleDef>org.wso2.orbit.org.apache.commons:commons-lang3:${commons-lang3.version}</importBundleDef>
-                                <importBundleDef>org.wso2.carbon.hostobjects:org.wso2.carbon.hostobjects.sso</importBundleDef>
+                                <importBundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.hostobjects.sso</importBundleDef>
                                 <importBundleDef>org.wso2.orbit.org.apache.pdfbox:pdfbox:${orbit.version.pdfbox}</importBundleDef>
                                 <importBundleDef>org.wso2.orbit.org.apache.pdfbox:fontbox:${orbit.version.pdfbox}</importBundleDef>
                                 <importBundleDef>com.github.dblock.waffle.wso2:waffle-jna:${waffle-jna.version}</importBundleDef>
