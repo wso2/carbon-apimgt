@@ -467,7 +467,7 @@
             </dependency>
 
             <dependency>
-                <groupId>org.wso2.carbon.hostobjects</groupId>
+                <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.hostobjects.sso</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
