@@ -81,7 +81,9 @@ class AuthManager {
      * @param {object} error_response
      */
     static unauthorizedErrorHandler(error_response) {
-        if (error_response.status !== 401) { /* Skip unrelated response code to handle in unauthorizedErrorHandler*/
+        debugger;
+        if (error_response.status !== 401) {
+            debugger;/* Skip unrelated response code to handle in unauthorizedErrorHandler*/
             throw error_response;
             /* re throwing the error since we don't handle it here and propagate to downstream error handlers in catch chain*/
         }
@@ -149,6 +151,10 @@ class AuthManager {
     }
 
     getTokenEnpointEnv(detailedValue){
+
+        console.log("working");
+        console.log(detailedValue);
+        console.log(detailedValue.envIsHost);
 
         return window.location.protocol + "//" + detailedValue.envIsHost + this.token;
     }

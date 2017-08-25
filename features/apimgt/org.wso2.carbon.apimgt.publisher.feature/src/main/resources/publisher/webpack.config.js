@@ -10,6 +10,10 @@ const config = {
         chunkFilename: "[name].bundle.js",
         publicPath: 'public/dist/'
     },
+    externals: {
+        "swagger": ""
+    },
+    devtool: "source-map",
     plugins: [],
     watch: false,
     module: {

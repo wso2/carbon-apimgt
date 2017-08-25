@@ -27,13 +27,16 @@ import Paper from 'material-ui/Paper';
 import Button from 'material-ui/Button';
 import Typography from 'material-ui/Typography';
 import Snackbar from 'material-ui/Snackbar';
-import User from '../../data/User'
+import User from '../../data/User';
+
+import './login.css';
+import { Menu, Dropdown, Icon, message } from 'antd';
 
 class Login extends Component {
 
     constructor(props) {
         super(props);
-        this.authManager = new AuthManager()
+        this.authManager = new AuthManager();
         this.configManager = new ConfigManager();
         this.state = {
             isLogin: false,
@@ -44,6 +47,10 @@ class Login extends Component {
             validate: false,
             messageOpen: false,
             message: ''
+            env: [],
+            anchorEl: undefined,
+            open: false,
+            key: 'default'
         };
     }
 
@@ -54,12 +61,25 @@ class Login extends Component {
         this.setState({validate: true});
         let username = this.state.username;
         let password = this.state.password;
-        if (!username || !password) {
-            this.setState({messageOpen: true});
+        let environment = this.state.key;
+        localStorage.setItem("currentEnv",environment);
+        if(!username || !password){
+            this.setState({ messageOpen: true });
             this.setState({message: 'Please fill both username and password fields'});
             return;
         }
-        let loginPromise = this.authManager.authenticateUser(username, password);
+
+        var detailedValue ;
+        for (let value of this.state.env) {
+
+            if (environment == value.env) {
+
+                detailedValue = value;
+                console.log(detailedValue);
+            }
+        }
+
+        let loginPromise = this.authManager.authenticateUser(username, password, detailedValue);
         loginPromise.then((response) => {
             this.setState({isLogin: AuthManager.getUser(), loading: false});
         }).catch((error) => {
@@ -93,6 +113,7 @@ class Login extends Component {
         let envDetails = this.configManager;
         envDetails.env_response.then((response) => {
             let enviromentDetails = response.data.environments;
+            console.log(enviromentDetails);
             this.setState({env: enviromentDetails});
         });
     }
@@ -113,67 +134,89 @@ class Login extends Component {
         this.setState({messageOpen: false});
     };
 
+    onClick =({ key }) =>{
+        console.log(key);
+        this.setState({key:key})
+    }
+
     render() {
+        console.log(this.state.env);
+        const arrayies = this.state.env;
+        const environmentLength = this.state.env.length;
         if (!this.state.isLogin) { // If not logged in, go to login page
             return (
-                <div className="login-flex-container">
-                    <Snackbar
-                        anchorOrigin={{vertical: 'top', horizontal: 'center'}}
-                        open={this.state.messageOpen}
-                        onRequestClose={this.handleRequestClose}
-                        SnackbarContentProps={{
-                            'aria-describedby': 'message-id',
-                        }}
-                        message={<span id="message-id">{this.state.message}</span>}
-                    />
-                    <div className="login-main-content">
-                        <Paper className="login-paper">
+            <div className="login-flex-container">
+                <Snackbar
+                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                    open={this.state.messageOpen}
+                    onRequestClose={this.handleRequestClose}
+                    SnackbarContentProps={{
+                        'aria-describedby': 'message-id',
+                    }}
+                    message={<span id="message-id">{this.state.message}</span>}
+                />
+                <div className="login-main-content">
+                    <Paper className="login-paper">
 
-                            <form onSubmit={this.handleSubmit} className="login-form">
-                                <div>
-                                    <img className="brand" src="/publisher/public/images/logo.svg" alt="wso2-logo"/>
-                                    <Typography type="subheading" gutterBottom>
-                                        API Publisher
-                                    </Typography>
-                                    <Typography type="caption" gutterBottom>
-                                        Login to continue
-                                    </Typography>
-                                </div>
+                        <form onSubmit={this.handleSubmit} className="login-form">
+                            <div>
+                                <img className="brand" src="/publisher/public/images/logo.svg" alt="wso2-logo"/>
+                                <Typography type="subheading" gutterBottom>
+                                    API Publisher
+                                </Typography>
+                                <Typography type="caption" gutterBottom>
+                                    Login to continue
+                                </Typography>
+                            </div>
 
-                                <TextField
-                                    error={!this.state.username && this.state.validate}
-                                    id="username"
-                                    label="Username"
-                                    type="text"
-                                    autoComplete="username"
-                                    margin="normal"
-                                    style={{width: "100%"}}
-                                    onChange={this.handleUsernameChange}
-                                />
-                                <TextField
-                                    error={!this.state.password && this.state.validate}
-                                    id="password"
-                                    label="Password"
-                                    type="password"
-                                    autoComplete="current-password"
-                                    margin="normal"
-                                    style={{width: "100%"}}
-                                    onChange={this.handlePasswordChange}
-                                />
+                            <TextField
+                                error={!this.state.username && this.state.validate}
+                                id="username"
+                                label="Username"
+                                type="text"
+                                autoComplete="username"
+                                margin="normal"
+                                style={{width:"100%"}}
+                                onChange={this.handleUsernameChange}
+                            />
+                            <TextField
+                                error={!this.state.password && this.state.validate}
+                                id="password"
+                                label="Password"
+                                type="password"
+                                autoComplete="current-password"
+                                margin="normal"
+                                style={{width:"100%"}}
+                                onChange={this.handlePasswordChange}
+                            />
 
-                                <Button type="submit" raised color="primary" className="login-form-submit">
-                                    Login
-                                </Button>
 
-                            </form>
-                        </Paper>
-                    </div>
-                    <div className="login-footer">
-                        WSO2 | © 2017
-                        <a href="http://wso2.com/" target="_blank"><i
-                            className="icon fw fw-wso2"/> Inc</a>.
-                    </div>
+                        { environmentLength > 1 &&
+                            <div>
+                                <Dropdown overlay={<Menu onClick={this.onClick}>
+                                {this.state.env.map(environment => <Menu.Item
+                                    key={environment.env}>{environment.env}</Menu.Item>)}
+                            </Menu>}>
+                                <a className="ant-dropdown-link" href="#">
+                                    Environments <Icon type="down" />
+                                </a>
+                            </Dropdown></div>
+
+                        }
+
+                            <Button type="submit" raised color="primary"  className="login-form-submit">
+                                Login
+                            </Button>
+
+                        </form>
+                    </Paper>
                 </div>
+                <div className="login-footer">
+                    WSO2 | © 2017
+                    <a href="http://wso2.com/" target="_blank"><i
+                        className="icon fw fw-wso2"/> Inc</a>.
+                </div>
+            </div>
             );
         } else {// If logged in, redirect to /apis page
             return (
