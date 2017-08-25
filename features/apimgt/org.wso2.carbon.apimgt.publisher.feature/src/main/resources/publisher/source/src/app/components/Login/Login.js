@@ -20,19 +20,23 @@ import React, {Component} from 'react'
 import './login.css'
 import {Switch, Redirect} from 'react-router-dom'
 import AuthManager from '../../data/AuthManager'
+import ConfigManager from '../../data/ConfigManager'
 import qs from 'qs'
 import TextField from 'material-ui/TextField';
 import Paper from 'material-ui/Paper';
 import Button from 'material-ui/Button';
 import Typography from 'material-ui/Typography';
 import Snackbar from 'material-ui/Snackbar';
+
 import './login.css'
+import { Menu, Dropdown, Icon, message } from 'antd';
 
 class Login extends Component {
 
     constructor(props) {
         super(props);
         this.authManager = new AuthManager();
+        this.configManager = new ConfigManager();
         this.state = {
             isLogin: false,
             referrer: "/",
@@ -41,7 +45,11 @@ class Login extends Component {
             password: '',
             validate: false,
             messageOpen: false,
-            message:''
+            message:'',
+            env: [],
+            anchorEl: undefined,
+            open: false,
+            key: 'default'
         };
     }
 
@@ -52,12 +60,25 @@ class Login extends Component {
         this.setState({validate: true});
         let username = this.state.username;
         let password = this.state.password;
+        let environment = this.state.key;
+        localStorage.setItem("currentEnv",environment);
         if(!username || !password){
             this.setState({ messageOpen: true });
             this.setState({message: 'Please fill both username and password fields'});
             return;
         }
-        let loginPromise = this.authManager.authenticateUser(username, password);
+
+        var detailedValue ;
+        for (let value of this.state.env) {
+
+            if (environment == value.env) {
+
+                detailedValue = value;
+                console.log(detailedValue);
+            }
+        }
+
+        let loginPromise = this.authManager.authenticateUser(username, password, detailedValue);
         loginPromise.then((response) => {
             this.setState({isLogin: AuthManager.getUser(), loading: false});
         }).catch((error) => {
@@ -80,9 +101,9 @@ class Login extends Component {
         let envDetails = this.configManager;
         envDetails.env_response.then((response) => {
             let enviromentDetails = response.data.environments;
+            console.log(enviromentDetails);
             this.setState({env: enviromentDetails});
         });
-
 
     }
 
@@ -101,7 +122,16 @@ class Login extends Component {
     handleRequestClose = () => {
         this.setState({ messageOpen: false });
     };
+
+
+    onClick =({ key }) =>{
+        console.log(key);
+        this.setState({key:key})
+    }
     render() {
+        console.log(this.state.env);
+        const arrayies = this.state.env;
+        const environmentLength = this.state.env.length;
 
         if (!this.state.isLogin) { // If not logged in, go to login page
             return (
@@ -149,6 +179,20 @@ class Login extends Component {
                                 style={{width:"100%"}}
                                 onChange={this.handlePasswordChange}
                             />
+
+
+                        { environmentLength > 1 &&
+                            <div>
+                                <Dropdown overlay={<Menu onClick={this.onClick}>
+                                {this.state.env.map(environment => <Menu.Item
+                                    key={environment.env}>{environment.env}</Menu.Item>)}
+                            </Menu>}>
+                                <a className="ant-dropdown-link" href="#">
+                                    Environments <Icon type="down" />
+                                </a>
+                            </Dropdown></div>
+
+                        }
 
                             <Button type="submit" raised color="primary"  className="login-form-submit">
                                 Login

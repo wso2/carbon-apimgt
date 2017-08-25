@@ -19,6 +19,7 @@
 import React from 'react'
 import {Link, withRouter} from "react-router-dom";
 import AuthManager from '../../../data/AuthManager.js';
+import ConfigManager from '../../../data/ConfigManager.js';
 import qs from 'qs'
 
 import AppBar from 'material-ui/AppBar';
@@ -65,9 +66,21 @@ class Header extends React.Component {
             openMainMenu: false,
             searchVisible: false,
             openTips: false,
-            showLeftMenu: this.props.showLeftMenu
+            showLeftMenu: this.props.showLeftMenu,
+            availableEnv:[]
         }
     }
+    componentDidMount(){
+        let envdetails = new ConfigManager();
+        envdetails.env_response.then((response) =>{
+            let allAvailableEnv = response.data.environments;
+            console.log(allAvailableEnv);
+            this.setState({availableEnv: allAvailableEnv});
+
+        })
+        //console.log(this.state.availableEnv);
+    }
+
     handleClickUserMenu = event => {
         this.setState({ openUserMenu: true, anchorElUserMenu: event.currentTarget });
     };

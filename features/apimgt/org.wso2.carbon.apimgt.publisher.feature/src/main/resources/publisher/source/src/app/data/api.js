@@ -157,6 +157,8 @@ class API {
     getAll(callback = null) {
         var promise_get_all = this.client.then(
             (client) => {
+                // client.http.withCredentials = "same-origin";
+                // client.http.withCredentials = "include";
                 return client.apis["API (Collection)"].get_apis({}, this._requestMetaData());
             }
         );
@@ -218,6 +220,7 @@ class API {
     getSwagger(id, callback = null) {
         var promise_get = this.client.then(
             (client) => {
+
                 return client.apis["API (Individual)"].get_apis__apiId__swagger(
                     {apiId: id}, this._requestMetaData());
             }

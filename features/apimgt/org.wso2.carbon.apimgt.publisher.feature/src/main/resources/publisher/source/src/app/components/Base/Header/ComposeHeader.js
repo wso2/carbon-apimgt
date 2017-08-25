@@ -44,7 +44,7 @@ class ComposeHeader extends Component {
             this.setState({availableEnv: allAvailableEnv});
 
         })
-
+       console.log(this);
     }
 
     handleClick = (e) =>{
