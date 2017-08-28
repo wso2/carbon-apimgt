@@ -18,6 +18,7 @@
 import React from 'react';
 
 import Header from './Header/Header'
+import Footer from './Footer/Footer'
 
 import PropTypes from 'prop-types';
 import { withStyles, createStyleSheet } from 'material-ui/styles';
@@ -29,11 +30,24 @@ import StarIcon from 'material-ui-icons/Star';
 import SendIcon from 'material-ui-icons/Send';
 import {Link} from 'react-router-dom';
 
+import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
+import createPalette from 'material-ui/styles/palette';
+import lightBlue from 'material-ui/colors/lightBlue';
+import deepOrange from 'material-ui/colors/deepOrange';
+
+const theme = createMuiTheme({
+    palette: createPalette({
+      primary: lightBlue,
+      accent: deepOrange,
+      type: 'light'
+    })
+});
+//console.log();
 
 const styleSheet = createStyleSheet(theme => ({
     root: {
         flexGrow: 1,
-        marginLeft: 195
+        marginLeft: 210
     },
     paper: {
         padding: 16,
@@ -102,6 +116,9 @@ class Layout extends React.Component {
             </div>
         );
         return (
+
+        <MuiThemeProvider theme={theme}>
+          <div className="main">
             <div className={classes.root}>
                 <Drawer
                     open={this.state.drawerOpen}
@@ -112,7 +129,11 @@ class Layout extends React.Component {
                 </Drawer>
                 <Header/>
                 {this.props.children}
+
             </div>
+            <Footer />
+          </div>
+        </MuiThemeProvider>
         );
     }
 

@@ -23,6 +23,7 @@ import qs from 'qs'
 
 import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
+import Avatar from 'material-ui/Avatar';
 import IconButton from 'material-ui/IconButton';
 import MenuIcon from 'material-ui-icons/Menu';
 import Typography from 'material-ui/Typography';
@@ -59,18 +60,17 @@ class Header extends React.Component {
                     </IconButton>
                     <Typography type="title" color="inherit" style={{flex:1}}>
                         <Link to="/" style={{ textDecoration: 'none' }}>
-                            <Button color="primary">
-                                <img className="brand" src="/store/public/images/logo.svg" alt="wso2-logo"/>
-                                <span style={{fontSize:"20px"}}>APIM Store</span>
+                            <Button>
+                                <img className="brand" src="/store/public/images/logo-inverse.svg" alt="wso2-logo"/>
+                                <span>APIM Store</span>
                             </Button>
-
                         </Link>
                     </Typography>
                     { AuthManager.getUser() ?
                         <div>
-                            <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClick}>
-                                Open Menu
-                            </Button>
+                            <IconButton aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClick}>
+                                <Avatar alt="admin" src="/store/public/images/user.png"/>
+                            </IconButton>
                             <Menu
                                 id="simple-menu"
                                 anchorEl={this.state.anchorEl}
@@ -80,7 +80,7 @@ class Header extends React.Component {
                                 <MenuItem onClick={this.handleRequestClose}>Change Password</MenuItem>
 
                                 <MenuItem onClick={this.handleRequestClose}>
-                                    <Link to="/logout" style={{color:"#000",textDecoration: 'none'}}>Logout</Link>
+                                    <Link to="/logout">Logout</Link>
                                 </MenuItem>
                             </Menu>
                         </div>
