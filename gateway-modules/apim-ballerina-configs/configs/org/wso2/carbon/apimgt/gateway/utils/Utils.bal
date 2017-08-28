@@ -40,6 +40,11 @@ function constructAPIIsInMaintenance (message response) {
     messages:setJsonPayload(response, payload);
 }
 
+function constructIncorrectAuthorization (message response) {
+    json payload = {"code":900902, "message":"Incorrect authorization details found"}; //
+    messages:setJsonPayload(response, payload);
+}
+
 function fromJsonToIntrospectDto (json introspectResponse) (dto:IntrospectDto) {
     dto:IntrospectDto introspectDto = {};
     introspectDto.active, err = (boolean)introspectResponse.active;
