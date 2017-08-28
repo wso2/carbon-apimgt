@@ -61,7 +61,7 @@ public class SubscriptionThrottlePolicyMappingUtilTest {
 
         Assert.assertNotNull(dto);
         Assert.assertEquals(dto.getPolicyName(), name);
-        Assert.assertEquals(dto.getPolicyId(), uuid);
+        Assert.assertEquals(dto.getId(), uuid);
         Assert.assertEquals(dto.getDefaultLimit().getRequestCountLimit().getRequestCount().intValue(),
                 requestCountLimit.getRequestCount());
         Assert.assertEquals(dto.getCustomAttributes().get(0).getName(), "dwd");

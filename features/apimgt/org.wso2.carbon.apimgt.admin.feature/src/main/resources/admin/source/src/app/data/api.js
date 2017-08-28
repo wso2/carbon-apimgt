@@ -56,7 +56,7 @@ class API {
         return this.client.then(
             (client) => {
                 return client.apis["Workflows (Collection)"].get_workflows(
-                    {type:type}, this._requestMetaData());
+                    {workflowType:type}, this._requestMetaData());
             }
         );
     }

@@ -567,7 +567,7 @@ public class CommonThrottleMappingUtil {
     public static <T extends ThrottlePolicyDTO> T updateFieldsFromToPolicyToDTO(Policy policy, T dto)
             throws UnsupportedThrottleLimitTypeException {
 
-        dto.setPolicyId(policy.getUuid());
+        dto.setId(policy.getUuid());
         dto.setDisplayName(policy.getDisplayName());
         dto.setIsDeployed(policy.isDeployed());
         dto.setDescription(policy.getDescription());
