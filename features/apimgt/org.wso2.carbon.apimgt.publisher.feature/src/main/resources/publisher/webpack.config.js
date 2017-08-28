@@ -39,6 +39,10 @@ const config = {
                 }, {
                     loader: "less-loader" // compiles Less to CSS
                 }]
+            },
+            {
+                test: /\.(woff|woff2|eot|ttf|svg)$/,
+                loader: 'url-loader?limit=100000'
             }
         ]
     }

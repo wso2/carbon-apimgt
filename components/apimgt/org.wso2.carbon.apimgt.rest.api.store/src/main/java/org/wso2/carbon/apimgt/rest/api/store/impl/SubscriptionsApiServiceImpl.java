@@ -66,7 +66,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
         List<Subscription> subscribedApiList = null;
         SubscriptionListDTO subscriptionListDTO = null;
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
@@ -133,7 +133,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      */
     @Override
     public Response subscriptionsPost(SubscriptionDTO body, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         SubscriptionDTO subscriptionDTO = null;
         URI location = null;
         try {
@@ -232,7 +232,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                                                       String ifUnmodifiedSince, Request request) throws
             NotFoundException {
 
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String existingFingerprint = subscriptionsSubscriptionIdGetFingerprint(subscriptionId, null, null,
@@ -271,7 +271,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
     @Override
     public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         SubscriptionDTO subscriptionDTO = null;
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
@@ -308,7 +308,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      */
     public String subscriptionsSubscriptionIdGetFingerprint(String subscriptionId, String ifNoneMatch,
             String ifModifiedSince, Request request) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestApiUtil.getConsumer(username).getLastUpdatedTimeOfSubscription(subscriptionId);
             return ETagUtils.generateETag(lastUpdatedTime);

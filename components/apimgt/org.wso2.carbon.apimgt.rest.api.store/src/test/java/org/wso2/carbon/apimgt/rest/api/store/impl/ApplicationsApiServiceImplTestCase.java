@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.messaging.CarbonMessage;
+import org.wso2.carbon.transport.http.netty.message.HTTPCarbonMessage;
 import org.wso2.msf4j.Request;
 
 import javax.ws.rs.core.Response;
@@ -76,7 +77,8 @@ public class ApplicationsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         WorkflowResponse workflowResponse = new GeneralWorkflowResponse();
         workflowResponse.setWorkflowStatus(WorkflowStatus.APPROVED);
@@ -84,7 +86,7 @@ public class ApplicationsApiServiceImplTestCase {
         Mockito.when(apiStore.deleteApplication(applicationId)).thenReturn(workflowResponse);
 
         Response response = applicationsApiService.applicationsApplicationIdDelete
-                (applicationId, null, null, TestUtil.getRequest());
+                (applicationId, null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -99,13 +101,14 @@ public class ApplicationsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.APPLICATION_NOT_FOUND))
                 .when(apiStore).deleteApplication(applicationId);
 
         Response response = applicationsApiService.applicationsApplicationIdDelete
-                (applicationId, null, null, TestUtil.getRequest());
+                (applicationId, null, null,request);
 
         Assert.assertEquals(404, response.getStatus());
     }
@@ -120,14 +123,15 @@ public class ApplicationsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Application application = getSampleApplication(applicationId);
 
         Mockito.when(apiStore.getApplication(applicationId, USER)).thenReturn(application);
 
         Response response = applicationsApiService.applicationsApplicationIdGet
-                (applicationId, null, null, getRequest());
+                (applicationId, null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -142,13 +146,14 @@ public class ApplicationsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.APPLICATION_NOT_FOUND))
                 .when(apiStore).getApplication(applicationId, USER);
 
         Response response = applicationsApiService.applicationsApplicationIdGet
-                (applicationId, null, null, getRequest());
+                (applicationId, null, null, request);
 
         Assert.assertEquals(404, response.getStatus());
     }
@@ -163,7 +168,8 @@ public class ApplicationsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         List<String> grantTypes = new ArrayList<>();
         grantTypes.add("password");
@@ -185,7 +191,7 @@ public class ApplicationsApiServiceImplTestCase {
         applicationKeyGenerateRequestDTO.setGrantTypesToBeSupported(grantTypes);
 
         Response response = applicationsApiService.applicationsApplicationIdGenerateKeysPost
-                (applicationId, applicationKeyGenerateRequestDTO, getRequest());
+                (applicationId, applicationKeyGenerateRequestDTO, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -200,7 +206,8 @@ public class ApplicationsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         List<String> grantTypes = new ArrayList<>();
         grantTypes.add("password");
@@ -221,7 +228,7 @@ public class ApplicationsApiServiceImplTestCase {
         applicationKeyGenerateRequestDTO.setGrantTypesToBeSupported(grantTypes);
 
         Response response = applicationsApiService.applicationsApplicationIdGenerateKeysPost
-                (applicationId, applicationKeyGenerateRequestDTO, getRequest());
+                (applicationId, applicationKeyGenerateRequestDTO, request);
 
         Assert.assertEquals(500, response.getStatus());
     }
@@ -236,13 +243,14 @@ public class ApplicationsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         List<OAuthApplicationInfo> oAuthApplicationInfoList = new ArrayList<>();
 
         Mockito.when(apiStore.getApplicationKeys(applicationId)).thenReturn(oAuthApplicationInfoList);
 
-        Response response = applicationsApiService.applicationsApplicationIdKeysGet(applicationId, getRequest());
+        Response response = applicationsApiService.applicationsApplicationIdKeysGet(applicationId, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -257,12 +265,13 @@ public class ApplicationsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.APPLICATION_KEY_MAPPING_NOT_FOUND))
                 .when(apiStore).getApplicationKeys(applicationId);
 
-        Response response = applicationsApiService.applicationsApplicationIdKeysGet(applicationId, getRequest());
+        Response response = applicationsApiService.applicationsApplicationIdKeysGet(applicationId,request);
 
         Assert.assertEquals(404, response.getStatus());
     }
@@ -278,7 +287,8 @@ public class ApplicationsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         List<String> grantTypes = new ArrayList<>();
         grantTypes.add("password");
@@ -293,7 +303,7 @@ public class ApplicationsApiServiceImplTestCase {
         Mockito.when(apiStore.getApplicationKeys(applicationId, keyType)).thenReturn(oAuthApplicationInfo);
 
         Response response = applicationsApiService.applicationsApplicationIdKeysKeyTypeGet
-                (applicationId, keyType, getRequest());
+                (applicationId, keyType, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -309,13 +319,14 @@ public class ApplicationsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.APPLICATION_KEY_MAPPING_NOT_FOUND))
                 .when(apiStore).getApplicationKeys(applicationId, keyType);
 
         Response response = applicationsApiService.applicationsApplicationIdKeysKeyTypeGet
-                (applicationId, keyType, getRequest());
+                (applicationId, keyType, request);
 
         Assert.assertEquals(404, response.getStatus());
     }
@@ -334,7 +345,8 @@ public class ApplicationsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         ApplicationTokenDTO applicationTokenDTO = new ApplicationTokenDTO();
         applicationTokenDTO.setAccessToken(accessToken);
@@ -362,7 +374,7 @@ public class ApplicationsApiServiceImplTestCase {
                 .thenReturn(oAuthApplicationInfo);
 
         Response response = applicationsApiService.applicationsApplicationIdKeysKeyTypePut
-                (applicationId, keyType, applicationKeysDTO, getRequest());
+                (applicationId, keyType, applicationKeysDTO, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -381,7 +393,8 @@ public class ApplicationsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         ApplicationTokenDTO applicationTokenDTO = new ApplicationTokenDTO();
         applicationTokenDTO.setAccessToken(accessToken);
@@ -403,7 +416,7 @@ public class ApplicationsApiServiceImplTestCase {
                 .when(apiStore).updateGrantTypesAndCallbackURL(applicationId, keyType, grantTypes, null);
 
         Response response = applicationsApiService.applicationsApplicationIdKeysKeyTypePut
-                (applicationId, keyType, applicationKeysDTO, getRequest());
+                (applicationId, keyType, applicationKeysDTO, request);
 
         Assert.assertEquals(500, response.getStatus());
     }
@@ -421,7 +434,8 @@ public class ApplicationsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         ApplicationToken applicationToken = new ApplicationToken();
         applicationToken.setAccessToken(accessToken);
@@ -440,7 +454,7 @@ public class ApplicationsApiServiceImplTestCase {
         generateRequestDTO.setValidityPeriod(10000);
 
         Response response = applicationsApiService.applicationsApplicationIdGenerateTokenPost
-                (applicationId, generateRequestDTO, null, null, getRequest());
+                (applicationId, generateRequestDTO, null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -458,7 +472,8 @@ public class ApplicationsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         ApplicationTokenGenerateRequestDTO generateRequestDTO = new ApplicationTokenGenerateRequestDTO();
         generateRequestDTO.setConsumerKey(clientID);
@@ -472,7 +487,7 @@ public class ApplicationsApiServiceImplTestCase {
                 (clientID, clientSecret, "SCOPE1", 10000, "revokeToken");
 
         Response response = applicationsApiService.applicationsApplicationIdGenerateTokenPost
-                (applicationId, generateRequestDTO, null, null, getRequest());
+                (applicationId, generateRequestDTO, null, null, request);
 
         Assert.assertEquals(500, response.getStatus());
     }
@@ -490,7 +505,8 @@ public class ApplicationsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         ApplicationTokenDTO applicationTokenDTO = new ApplicationTokenDTO();
         applicationTokenDTO.setAccessToken(accessToken);
@@ -533,7 +549,7 @@ public class ApplicationsApiServiceImplTestCase {
         Mockito.when(apiStore.getApplication(applicationId, USER)).thenReturn(getSampleApplication(applicationId));
 
         Response response = applicationsApiService.applicationsApplicationIdPut
-                (applicationId, applicationDTO, null, null, getRequest());
+                (applicationId, applicationDTO, null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -551,7 +567,8 @@ public class ApplicationsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         ApplicationTokenDTO applicationTokenDTO = new ApplicationTokenDTO();
         applicationTokenDTO.setAccessToken(accessToken);
@@ -592,7 +609,7 @@ public class ApplicationsApiServiceImplTestCase {
                 .when(apiStore).updateApplication(applicationId, getSampleApplication(applicationId));
 
         Response response = applicationsApiService.applicationsApplicationIdPut
-                (applicationId, applicationDTO, null, null, getRequest());
+                (applicationId, applicationDTO, null, null, request);
 
         Assert.assertEquals(500, response.getStatus());
     }
@@ -608,7 +625,8 @@ public class ApplicationsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Application application1 = getSampleApplication(applicationId1);
         Application application2 = getSampleApplication(applicationId2);
@@ -620,7 +638,7 @@ public class ApplicationsApiServiceImplTestCase {
         Mockito.when(apiStore.getApplications(USER)).thenReturn(applicationList);
 
         Response response = applicationsApiService.applicationsGet
-                (null, 10, 0, null, getRequest());
+                (null, 10, 0, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -636,7 +654,8 @@ public class ApplicationsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Application application1 = getSampleApplication(applicationId1);
         Application application2 = getSampleApplication(applicationId2);
@@ -649,7 +668,7 @@ public class ApplicationsApiServiceImplTestCase {
         Mockito.when(apiStore.getApplications(USER)).thenReturn(applicationList);
 
         Response response = applicationsApiService.applicationsGet
-                ("*", 10, 0, null, getRequest());
+                ("*", 10, 0, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -663,13 +682,14 @@ public class ApplicationsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.APPLICATION_NOT_FOUND))
                 .when(apiStore).getApplicationByName(USER, "*");
 
         Response response = applicationsApiService.applicationsGet
-                ("*", 10, 0, null, getRequest());
+                ("*", 10, 0, null, request);
 
         Assert.assertEquals(404, response.getStatus());
     }
@@ -687,7 +707,8 @@ public class ApplicationsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Application application = getSampleApplication(applicationId);
 
@@ -724,7 +745,7 @@ public class ApplicationsApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.INTERNAL_ERROR))
                 .when(apiStore).addApplication(application);
 
-        Response response = applicationsApiService.applicationsPost(applicationDTO, getRequest());
+        Response response = applicationsApiService.applicationsPost(applicationDTO, request);
 
         Assert.assertEquals(500, response.getStatus());
     }
@@ -742,7 +763,8 @@ public class ApplicationsApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Application application = getSampleApplication(applicationId);
 
@@ -784,21 +806,16 @@ public class ApplicationsApiServiceImplTestCase {
         applicationDTO.setToken(applicationTokenDTO);
         applicationDTO.setKeys(applicationKeysDTOList);
 
-        Response response = applicationsApiService.applicationsPost(applicationDTO, getRequest());
+        Response response = applicationsApiService.applicationsPost(applicationDTO, request);
 
         Assert.assertEquals(201, response.getStatus());
     }
 
     // Sample request to be used by tests
     private Request getRequest() throws APIMgtSecurityException {
-        CarbonMessage carbonMessage = Mockito.mock(CarbonMessage.class);
+        CarbonMessage carbonMessage = new HTTPCarbonMessage();
+        carbonMessage.setProperty("LOGGED_IN_USER", USER);
         Request request = new Request(carbonMessage);
-
-        try {
-            PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(request);
-        } catch (Exception e) {
-            throw new APIMgtSecurityException("Error while mocking Request Object ", e);
-        }
         return request;
     }
 
