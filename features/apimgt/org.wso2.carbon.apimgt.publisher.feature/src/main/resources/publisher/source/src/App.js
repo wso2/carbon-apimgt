@@ -58,7 +58,6 @@ class Protected extends Component {
         this.setState({
             showLeftMenu: status
         });
-        console.info("some one call", status);
     }
 
     render() {
