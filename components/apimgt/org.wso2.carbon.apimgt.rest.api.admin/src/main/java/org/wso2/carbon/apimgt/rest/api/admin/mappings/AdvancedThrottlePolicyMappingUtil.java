@@ -70,7 +70,7 @@ public class AdvancedThrottlePolicyMappingUtil {
     public static APIPolicy fromAdvancedPolicyDTOToPolicy(AdvancedThrottlePolicyDTO dto)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
 
-        APIPolicy apiPolicy = new APIPolicy(dto.getPolicyId(), dto.getPolicyName());
+        APIPolicy apiPolicy = new APIPolicy(dto.getId(), dto.getPolicyName());
         apiPolicy = CommonThrottleMappingUtil.updateFieldsFromDTOToPolicy(dto, apiPolicy);
 
         List<Pipeline> pipelines = CommonThrottleMappingUtil.fromConditionalGroupDTOListToPipelineList(
