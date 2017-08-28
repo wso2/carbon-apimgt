@@ -84,7 +84,6 @@ class Permission extends Component {
         let promised_api = api.get(this.api_uuid);
         promised_api.then(
             response => {
-                debugger;
                 this.setState({api: response.obj});
                 this.getExistingPermissions(this);
                 this.getExistingSecuritySchemes(this);
@@ -119,7 +118,6 @@ class Permission extends Component {
         let promised_api = api.get(this.api_uuid);
         promised_api.then(
             response => {
-                debugger;
                 var api_data = JSON.parse(response.data);
                 var permissionString = this.createPermissionJsonString(this);
                 api_data.permission = permissionString;
@@ -128,7 +126,6 @@ class Permission extends Component {
                 let promised_update = api.update(api_data);
                 promised_update.then(
                     response => {
-                        debugger;
                         message.success("Permissions updated successfully");
                     }
                 ).catch (
