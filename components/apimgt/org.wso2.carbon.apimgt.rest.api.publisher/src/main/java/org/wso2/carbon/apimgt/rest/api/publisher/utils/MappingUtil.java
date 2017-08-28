@@ -542,16 +542,12 @@ public class MappingUtil {
         int securitySchemeValue = 0;
         for(String scheme : securityScheme) {
             switch (scheme) {
-                case "Oauth" : securitySchemeValue = securitySchemeValue | 2;
+                case "Oauth" : securitySchemeValue = securitySchemeValue | 1;
                     break;
-                case "apikey" : securitySchemeValue = securitySchemeValue | 1;
+                case "apikey" : securitySchemeValue = securitySchemeValue | 2;
                     break;
                 default:break;
             }
-        }
-
-        if (securityScheme.isEmpty()) {
-            securitySchemeValue = 3;
         }
 
         return securitySchemeValue;

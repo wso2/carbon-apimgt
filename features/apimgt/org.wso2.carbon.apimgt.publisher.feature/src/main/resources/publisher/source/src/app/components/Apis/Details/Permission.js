@@ -74,8 +74,8 @@ class Permission extends Component {
         this.handleChangeReadField = this.handleChangeReadField.bind(this);
         this.handleChangeUpdateField = this.handleChangeUpdateField.bind(this);
         this.handleChangeDeleteField = this.handleChangeDeleteField.bind(this);
-        this.handleOauthSelect = this.handleOauthSelect.bind(this);
-        this.handleApiKeySelect = this.handleApiKeySelect.bind(this);
+        this.toggleOauthSelect = this.toggleOauthSelect.bind(this);
+        this.toggleApiKeySelect = this.toggleApiKeySelect.bind(this);
         this.handleChangeManageSubField = this.handleChangeManageSubField.bind(this);
     }
 
@@ -84,8 +84,10 @@ class Permission extends Component {
         let promised_api = api.get(this.api_uuid);
         promised_api.then(
             response => {
+                debugger;
                 this.setState({api: response.obj});
                 this.getExistingPermissions(this);
+                this.getExistingSecuritySchemes(this);
             }
         ).catch(
             error => {
@@ -117,14 +119,16 @@ class Permission extends Component {
         let promised_api = api.get(this.api_uuid);
         promised_api.then(
             response => {
+                debugger;
                 var api_data = JSON.parse(response.data);
                 var permissionString = this.createPermissionJsonString(this);
                 api_data.permission = permissionString;
-                var securitySchemeString = this.createSecuritySchemeJsonString(this);
-                api_data.securityScheme = securitySchemeString;
+                var securitySchemes = this.createSecuritySchemeArray(this);
+                api_data.securityScheme = securitySchemes;
                 let promised_update = api.update(api_data);
                 promised_update.then(
                     response => {
+                        debugger;
                         message.success("Permissions updated successfully");
                     }
                 ).catch (
@@ -168,11 +172,11 @@ class Permission extends Component {
         this.setState({manageSubField: event.target.checked});
     }
 
-    handleOauthSelect(event) {
+    toggleOauthSelect(event) {
         this.setState({oauthField: event.target.checked});
     }
 
-    handleApiKeySelect(event) {
+    toggleApiKeySelect(event) {
         this.setState({apikeyField: event.target.checked});
     }
 
@@ -240,16 +244,30 @@ class Permission extends Component {
         }
     }
 
-    createSecuritySchemeJsonString() {
-        var securityScheme = [];
+    createSecuritySchemeArray() {
+        var securitySchemes = [];
         if(this.state.oauthField) {
-            securityScheme.push("Oauth");
+            securitySchemes.push("Oauth");
         }
         if(this.state.apikeyField) {
-            securityScheme.push("apikey");
+            securitySchemes.push("apikey");
         }
-        var securitySchemeString = JSON.stringify(securityScheme);
-        return securitySchemeString;
+
+        return securitySchemes;
+    }
+
+    getExistingSecuritySchemes() {
+        var securitySchemes = this.state.api.securityScheme;
+        if (securitySchemes.includes("Oauth")) {
+            this.setState({oauthField: true});
+        } else {
+            this.setState({oauthField: false});
+        }
+        if (securitySchemes.includes("apikey")) {
+            this.setState({apikeyField: true});
+        } else {
+            this.setState({apikeyField: false});
+        }
     }
 
     getExistingPermissions() {
@@ -459,46 +477,48 @@ class Permission extends Component {
                                         <Row>
                                             <Col span={8} style={{margin: "10px"}}>
                                                 <Checkbox name="oauthField" checked={this.state.oauthField}
-                                                onChange={this.handleOauthSelect}>Oauth</Checkbox>
+                                                onChange={this.toggleOauthSelect}>Oauth</Checkbox>
                                             </Col>
                                             <Col span={8} style={{margin: "10px"}}>
                                                 <Checkbox name="apikeyField" checked={this.state.apikeyField}
-                                                onChange={this.handleApiKeySelect}>API Key</Checkbox>
+                                                onChange={this.toggleApiKeySelect}>API Key</Checkbox>
                                             </Col>
                                         </Row>
                                     </Col>
                                 </Row>
                             </Card>
-                            <Card bodyStyle={{padding: 5}}>
-                                <Row style={{marginBottom: "10px"}} type="flex" justify="center">
-                                    <Col span={8}>API Scopes</Col>
-                                    <Col span={16}>
-                                        <Row>
-                                            <Col span={8} style={{margin: "10px"}}>
-                                                <Input name="scopeKey" placeholder="scopeKey"/>
-                                            </Col>
-                                            <Col span={8} style={{margin: "10px"}}>
-                                                <Input name="scopeName" placeholder="scopeName"/>
-                                            </Col>
-                                        </Row>
-                                        <Row>
-                                            <Col span={16} style={{margin: "10px"}}>
-                                                <Input name="roles" placeholder="roles"/>
-                                            </Col>
-                                        </Row>
-                                        <Row>
-                                            <Col span={16} style={{margin: "10px"}}>
-                                                <Input name="descriptions" placeholder="descriptions"/>
-                                            </Col>
-                                        </Row>
-                                        <Row>
-                                            <Col span={16} style={{margin: "10px"}}>
-                                                <Table columns={columnsOfScopeTable} dataSource={dataOfScopes}/>
-                                            </Col>
-                                        </Row>
-                                    </Col>
-                                </Row>
-                            </Card>
+                            {this.state.oauthField ?
+                                (<Card bodyStyle={{padding: 5}}>
+                                    <Row style={{marginBottom: "10px"}} type="flex" justify="center">
+                                        <Col span={8}>API Scopes</Col>
+                                        <Col span={16}>
+                                            <Row>
+                                                <Col span={8} style={{margin: "10px"}}>
+                                                    <Input name="scopeKey" placeholder="scopeKey"/>
+                                                </Col>
+                                                <Col span={8} style={{margin: "10px"}}>
+                                                    <Input name="scopeName" placeholder="scopeName"/>
+                                                </Col>
+                                            </Row>
+                                            <Row>
+                                                <Col span={16} style={{margin: "10px"}}>
+                                                    <Input name="roles" placeholder="roles"/>
+                                                </Col>
+                                            </Row>
+                                            <Row>
+                                                <Col span={16} style={{margin: "10px"}}>
+                                                    <Input name="descriptions" placeholder="descriptions"/>
+                                                </Col>
+                                            </Row>
+                                            <Row>
+                                                <Col span={16} style={{margin: "10px"}}>
+                                                    <Table columns={columnsOfScopeTable} dataSource={dataOfScopes}/>
+                                                </Col>
+                                            </Row>
+                                        </Col>
+                                    </Row>
+                                </Card>) : <p/>
+                            }
                             <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
                                 <Button loading={this.state.creating} type="primary"
                                         onClick={this.handleSubmit}>Update</Button>
