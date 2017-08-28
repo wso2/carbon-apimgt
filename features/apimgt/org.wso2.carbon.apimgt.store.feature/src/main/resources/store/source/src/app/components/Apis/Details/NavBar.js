@@ -136,7 +136,7 @@ class NavBar extends Component {
                 }
             }
         );
-        debugger;
+        //debugger;
     };
 
     handleAppChange = (event, index) => {

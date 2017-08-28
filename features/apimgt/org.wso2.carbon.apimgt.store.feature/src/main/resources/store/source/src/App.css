@@ -15,7 +15,6 @@ body{
 }
 .footer{
     padding: 20px;
-    width: 100%;
 }
 .ant-menu-horizontal > .ant-menu-submenu.logoutLink{
     float: right;
