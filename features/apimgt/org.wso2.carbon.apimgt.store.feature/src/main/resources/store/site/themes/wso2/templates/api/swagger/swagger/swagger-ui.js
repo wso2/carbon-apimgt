@@ -3317,6 +3317,20 @@ var ApiKeyAuthorization = module.exports.ApiKeyAuthorization = function (name, v
 };
 
 ApiKeyAuthorization.prototype.apply = function (obj) {
+  var urlSplitPath = obj.url.split("/*");
+  if (urlSplitPath.length > 1 ) {
+       obj.url = urlSplitPath[0] + "/" + urlSplitPath[1];
+  } else {
+       obj.url = urlSplitPath[0];
+  }
+
+  var urlSplitPathWithQuery = obj.url.split("/?");
+  if (urlSplitPathWithQuery.length > 1 ) {
+       obj.url = urlSplitPathWithQuery[0] + "?" + urlSplitPathWithQuery[1];
+  } else {
+       obj.url = urlSplitPathWithQuery[0];
+  }
+
   if (this.type === 'query') {
     // see if already applied.  If so, don't do it again
 

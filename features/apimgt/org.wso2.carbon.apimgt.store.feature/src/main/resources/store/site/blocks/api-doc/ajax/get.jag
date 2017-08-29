@@ -189,11 +189,21 @@ var log = new Log();
         var paths = {}; //fix for /*, {url-template}*
         for (var property in jsonObj.paths) {
             if (jsonObj.paths.hasOwnProperty(property)) {
+                var isEndsWithSlashStar = false;
+                // Check if resource ends with /*
+                if (property.indexOf("/*", this.length - "/*".length) !== -1) {
+                    log.debug("Ends with /*");
+                    isEndsWithSlashStar = true;
+                }
+                log.debug("Resource " + stringify(property));
+
+                // Remove any * characters that may exist in resource but not the trailing /*
                 var tempResource = property.replace("*","");
-                if(tempResource.lastIndexOf("/")==(tempResource.length-1)){
+                if (isEndsWithSlashStar) {
                    tempResource += "*";
                 }
-            paths[tempResource] = jsonObj.paths[property];            }
+                paths[tempResource] = jsonObj.paths[property];
+            }
         }
         jsonObj.paths = paths;
         print(JSON.stringify(jsonObj));
