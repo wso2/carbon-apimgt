@@ -496,7 +496,7 @@ public class APIKeyValidator {
         }
         if(apiInfoDTO.getResources()!=null){
             for (ResourceInfoDTO resourceInfoDTO : apiInfoDTO.getResources()) {
-                if ((resourceString.trim()).equalsIgnoreCase(resourceInfoDTO.getUrlPattern().trim())) {
+                if (isResourcePathMatching(resourceString, resourceInfoDTO)) {
                     for (VerbInfoDTO verbDTO : resourceInfoDTO.getHttpVerbs()) {
                         if (verbDTO.getHttpVerb().equals(httpMethod)) {
                             if(log.isDebugEnabled()){
@@ -514,6 +514,24 @@ public class APIKeyValidator {
         }
         }
         return null;
+    }
+
+    private boolean isResourcePathMatching(String resourceString, ResourceInfoDTO resourceInfoDTO) {
+        String resource = resourceString.trim();
+        String urlPattern = resourceInfoDTO.getUrlPattern().trim();
+
+        if (resource.equalsIgnoreCase(urlPattern)) {
+            return true;
+        }
+
+        // If the urlPattern is only one character longer than the resource and the urlPattern ends with a '/'
+        if (resource.length() + 1 == urlPattern.length() && urlPattern.endsWith("/")) {
+            // Check if resource is equal to urlPattern if the trailing '/' of the urlPattern is ignored
+            String urlPatternWithoutSlash = urlPattern.substring(0, urlPattern.length() - 1);
+            return resource.equalsIgnoreCase(urlPatternWithoutSlash);
+        }
+
+        return false;
     }
 
     private APIInfoDTO doGetAPIInfo(String context, String apiVersion) throws APISecurityException{
