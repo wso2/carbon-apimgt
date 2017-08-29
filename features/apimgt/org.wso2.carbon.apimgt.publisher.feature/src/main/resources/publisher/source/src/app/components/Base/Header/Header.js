@@ -107,6 +107,7 @@ class Header extends React.Component {
         this.setState({searchVisible:!this.state.searchVisible});
     }
     handleClickTips = event => {
+
         this.setState({ openTips: true, anchorElTips: event.currentTarget });
     };
     handleRequestCloseTips = () => {
@@ -240,6 +241,13 @@ class Header extends React.Component {
                                         <Link to="/logout" style={{color: "#000", textDecoration: 'none'}}>Logout</Link>
                                     </MenuItem>
                                 </Menu>
+
+                                <select color="contrast">
+                                    <option value="volvo">Volvo</option>
+                                    <option value="saab">Saab</option>
+                                    <option value="opel">Opel</option>
+                                    <option value="audi">Audi</option>
+                                </select>
                             </div>
                             :
                             <div></div> }

@@ -11,7 +11,7 @@ const config = {
         publicPath: 'public/dist/'
     },
     externals: {
-        "swagger": ""
+        "swagger-client": "SwaggerClient"
     },
     devtool: "source-map",
     plugins: [],

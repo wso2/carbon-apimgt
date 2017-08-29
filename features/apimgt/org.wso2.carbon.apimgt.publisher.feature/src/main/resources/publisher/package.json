@@ -36,7 +36,6 @@
     "react-select": "^1.0.0-rc.6",
     "react-tap-event-plugin": "^2.0.1",
     "react-toastify": "^1.7.0",
-    "swagger-client": "3.0.19",
     "typeface-roboto": "0.0.35",
     "url-loader": "^0.5.9"
   },
