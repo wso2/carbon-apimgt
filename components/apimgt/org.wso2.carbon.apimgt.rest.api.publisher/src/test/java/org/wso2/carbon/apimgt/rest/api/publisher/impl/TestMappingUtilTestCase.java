@@ -391,12 +391,9 @@ public class TestMappingUtilTestCase {
     void testSecuritySchemeIntToListMapping() {
         int securityScheme = 3;
         List<String> securitySchemeList = MappingUtil.mapSecuritySchemeIntToList(securityScheme);
-
         List<String> testList = new ArrayList<String>();
         testList.add("Oauth");
         testList.add("apikey");
-
-
         assertEquals(securitySchemeList, testList);
     }
 
@@ -405,8 +402,6 @@ public class TestMappingUtilTestCase {
         List<String> testList = new ArrayList<String>();
         testList.add("Oauth");
         testList.add("apikey");
-
-
         int securityScheme = MappingUtil.mapSecuritySchemeListToInt(testList);
         assertEquals(securityScheme, 3);
     }
