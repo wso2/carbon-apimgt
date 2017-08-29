@@ -72,8 +72,6 @@ console.log("working")
 
         this._client = this._client.then((Swagger)=>{
             Swagger.http.credentials = 'include';
-            Swagger.http.credentials = 'true';
-            Swagger.http.credentials = 'same-origin';
         return Swagger;
         });
 

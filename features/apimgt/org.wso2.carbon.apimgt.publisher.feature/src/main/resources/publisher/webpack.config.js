@@ -9,7 +9,7 @@ const config = {
         filename: '[name].js'
     },
     externals: {
-        "swagger": ""
+        "swagger-client": "SwaggerClient"
     },
     devtool: "source-map",
     plugins: [],
