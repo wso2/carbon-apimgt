@@ -65,7 +65,7 @@ public class AnalyzerImplTestCase {
             List<ApplicationCount> applicationCountListFromDB = analyzer
                     .getApplicationCount(USER_NAME, null, FROM_TIMESTAMP, TO_TIMESTAMP);
             Assert.assertFalse(true);
-        } catch (APIMgtDAOException e){
+        } catch (APIMgtDAOException e) {
             Assert.assertTrue(true);
         }
 

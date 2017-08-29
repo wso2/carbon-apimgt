@@ -27,7 +27,7 @@ public class ApiApiServiceImpl extends ApiApiService {
     @Override
     public Response apiApisCreatedOverTimeGet(String from, String to, String createdBy, Request request)
             throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Retrieving APIs created over time. [From: " + from + " to: " + to + " " +
@@ -49,7 +49,7 @@ public class ApiApiServiceImpl extends ApiApiService {
 
     @Override
     public Response apiSubscriberCountByApisGet(String createdBy, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Retrieving APIs created over time. [created by: " + createdBy + "]");
@@ -71,7 +71,7 @@ public class ApiApiServiceImpl extends ApiApiService {
     @Override
     public Response apiApiInfoGet(String from, String to, String createdBy, String apiFilter, Request request)
             throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Retrieving API information. [From: " + from + " to: " + to + " created by: " +

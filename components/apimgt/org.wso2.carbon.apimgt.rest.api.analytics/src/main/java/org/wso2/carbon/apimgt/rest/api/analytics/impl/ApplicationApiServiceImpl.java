@@ -21,18 +21,17 @@ public class ApplicationApiServiceImpl extends ApplicationApiService {
     private static final Logger log = LoggerFactory.getLogger(ApplicationApiServiceImpl.class);
 
     @Override
-    public Response applicationApplicationsCreatedOverTimeGet(String from, String to, String createdBy,
-            String subscribedTo, String apiFilter, Request request) throws NotFoundException {
+    public Response applicationApplicationsCreatedOverTimeGet(String from, String to,Request request) throws NotFoundException {
 
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Retrieving applications created over time. " +
-                        "From: " + from + " to: " + to + " created by: " + createdBy);
+                        "From: " + from + " to: " + to);
             }
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
             List<ApplicationCount> applicationCountList = analyzer
-                    .getApplicationCount(createdBy, subscribedTo, from, to);
+                    .getApplicationCount(from, to);
             ApplicationCountListDTO applicationCountListDTO = AnalyticsMappingUtil
                     .fromApplicationCountToListDTO(applicationCountList);
             return Response.ok().entity(applicationCountListDTO).build();

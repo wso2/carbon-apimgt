@@ -46,14 +46,12 @@ public interface AnalyticsDAO {
     /**
      * Retrieves APIs created overtime information.
      *
-     * @param createdBy     Filter for create user
      * @param fromTimestamp Filter for from timestamp
      * @param toTimestamp   Filter for to timestamp
      * @return valid {@link APIInfo} List or null
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    List<APIInfo> getAPIInfo(String createdBy, String fromTimestamp,
-                             String toTimestamp) throws APIMgtDAOException;
+    List<APIInfo> getAPIInfo(String fromTimestamp, String toTimestamp) throws APIMgtDAOException;
 
     /**
      * Retrieves APIs created overtime information.

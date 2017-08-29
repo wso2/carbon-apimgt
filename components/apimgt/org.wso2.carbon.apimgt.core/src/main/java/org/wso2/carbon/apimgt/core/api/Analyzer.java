@@ -33,14 +33,12 @@ public interface Analyzer {
     /**
      * Retrieves application counts created overtime information.
      *
-     * @param createdBy    Filter for create user
-     * @param subscribedTo Filter for subscribed APIs
      * @param fromTime     Filter for from timestamp
      * @param toTime       Filter for to timestamp
      * @return valid {@link ApplicationCount} List or null
      * @throws APIManagementException if error occurs while accessing data
      */
-    List<ApplicationCount> getApplicationCount(String createdBy, String subscribedTo, String fromTime, String toTime)
+    List<ApplicationCount> getApplicationCount(String fromTime, String toTime)
             throws APIManagementException;
 
     /**

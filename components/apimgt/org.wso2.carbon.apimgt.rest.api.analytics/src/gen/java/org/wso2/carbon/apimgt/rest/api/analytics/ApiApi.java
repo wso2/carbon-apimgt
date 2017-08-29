@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiParam;
 
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.APICountListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.APIInfoListDTO;
-import org.wso2.carbon.apimgt.rest.api.analytics.dto.APISubscriptionCountListDTO;
+import org.wso2.carbon.apimgt.rest.api.analytics.dto.APISubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.factories.ApiApiServiceFactory;
 
 import org.wso2.msf4j.Microservice;
@@ -50,7 +50,7 @@ public class ApiApi implements Microservice  {
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve APIs created over time details ", notes = "Get application created over time details from summarized data. ", response = APIInfoListDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
-            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
+            
         })
     }, tags={  })
     @io.swagger.annotations.ApiResponses(value = { 
@@ -71,7 +71,7 @@ public class ApiApi implements Microservice  {
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve APIs created over time details ", notes = "Get application created over time details from summarized data. ", response = APICountListDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
-            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
+            
         })
     }, tags={  })
     @io.swagger.annotations.ApiResponses(value = { 
@@ -89,15 +89,15 @@ public class ApiApi implements Microservice  {
     @Path("/subscriber_count_by_apis")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Retrieve Subscriber count by APIs ", notes = "Get subscriber count by APIs from summarized data. ", response = APISubscriptionCountListDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Retrieve Subscriber count by APIs ", notes = "Get subscriber count by APIs from summarized data. ", response = APISubscriptionListDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
-            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
+            
         })
     }, tags={  })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested subscriber count by API information is returned ", response = APISubscriptionCountListDTO.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested subscriber count by API information is returned ", response = APISubscriptionListDTO.class),
         
-        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = APISubscriptionCountListDTO.class) })
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = APISubscriptionListDTO.class) })
     public Response apiSubscriberCountByApisGet(@ApiParam(value = "application creator name. In case of any creator, the value shold be equal to 'all' ",required=true) @QueryParam("created_by") String createdBy
 , @Context Request request)
     throws NotFoundException {

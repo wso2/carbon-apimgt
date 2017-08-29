@@ -29,7 +29,7 @@ public class SubscriptionApiServiceImpl extends SubscriptionApiService {
     @Override
     public Response subscriptionSubscriptionInfoGet(String from, String to, String apiFilter, Request request)
             throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Retrieving subscriptions info. [created by: " + apiFilter +
@@ -52,7 +52,7 @@ public class SubscriptionApiServiceImpl extends SubscriptionApiService {
     @Override
     public Response subscriptionSubscriptionsCreatedOverTimeGet(String from, String to, String apiFilter,
                                                                 Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Retrieving subscriptions created over time. [created by: " + apiFilter +

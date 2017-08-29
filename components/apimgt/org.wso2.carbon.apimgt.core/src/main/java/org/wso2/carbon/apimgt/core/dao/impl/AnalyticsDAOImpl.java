@@ -92,16 +92,13 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                 }
             } catch (SQLException e) {
                 String errorMsg = "Error while retrieving ApplicationCount information from db";
-                log.error(errorMsg, e);
                 throw new APIMgtDAOException(errorMsg, e);
             } catch (ParseException e) {
                 String errorMsg = "Error while parsing timestamp while retrieving ApplicationCount information from db";
-                log.error(errorMsg, e);
                 throw new APIMgtDAOException(errorMsg, e);
             }
         } catch (SQLException e) {
             String errorMsg = "Error while creating database connection/prepared-statement";
-            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
         return applicationCountList;
@@ -109,17 +106,13 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
 
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<APICount> getAPICount(String createdBy, String fromTimestamp, String toTimestamp)
+    public List<APICount> getAPICount(String fromTimestamp, String toTimestamp)
             throws APIMgtDAOException {
         final String query;
-        if (("all").equals(createdBy)) {
-            query = "SELECT COUNT(UUID) AS count, CREATED_TIME AS time FROM AM_API WHERE "
-                    + "CREATED_TIME BETWEEN ? AND ? GROUP BY CREATED_TIME ORDER BY CREATED_TIME ASC";
-        } else {
-            query = "SELECT COUNT(UUID) AS count, CREATED_TIME AS time FROM AM_API WHERE "
-                    + "(CREATED_TIME BETWEEN ? AND ?) AND CREATED_BY = ? GROUP BY CREATED_TIME ORDER BY "
-                    + "CREATED_TIME ASC";
-        }
+
+        query = "SELECT COUNT(UUID) AS count, CREATED_TIME AS time FROM AM_API WHERE "
+                + "(CREATED_TIME BETWEEN ? AND ?) AND CREATED_BY = ? GROUP BY CREATED_TIME ORDER BY "
+                + "CREATED_TIME ASC";
 
         List<APICount> apiInfoList = new ArrayList<>();
         try (Connection connection = DAOUtil.getConnection();
@@ -130,10 +123,6 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                 Timestamp toTime = new java.sql.Timestamp(dateFormat.parse(toTimestamp).getTime());
                 statement.setTimestamp(1, fromTime);
                 statement.setTimestamp(2, toTime);
-                if (!("all").equals(createdBy)) {
-                    log.debug("Setting created by to query:" + createdBy);
-                    statement.setString(3, createdBy);
-                }
                 if (log.isDebugEnabled()) {
                     log.debug("Executing query " + query);
                 }
@@ -150,16 +139,13 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                 }
             } catch (SQLException e) {
                 String errorMsg = "Error while retrieving API count information from db";
-                log.error(errorMsg, e);
                 throw new APIMgtDAOException(errorMsg, e);
             } catch (ParseException e) {
                 String errorMsg = "Error while parsing timestamp while retrieving API count information from db";
-                log.error(errorMsg, e);
                 throw new APIMgtDAOException(errorMsg, e);
             }
         } catch (SQLException e) {
             String errorMsg = "Error while creating database connection/prepared-statement";
-            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
         return apiInfoList;
@@ -214,12 +200,10 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                 }
             } catch (SQLException e) {
                 String errorMsg = "Error while retrieving API subscription count information from db";
-                log.error(errorMsg, e);
                 throw new APIMgtDAOException(errorMsg, e);
             }
         } catch (SQLException e) {
             String errorMsg = "Error while creating database connection/prepared-statement";
-            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
         return apiSubscriptionCountList;
@@ -279,17 +263,14 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                 }
             } catch (SQLException e) {
                 String errorMsg = "Error while retrieving subscription count information from db";
-                log.error(errorMsg, e);
                 throw new APIMgtDAOException(errorMsg, e);
             } catch (ParseException e) {
                 String errorMsg = "Error while parsing timestamp while retrieving subscription count information " +
                         "from db";
-                log.error(errorMsg, e);
                 throw new APIMgtDAOException(errorMsg, e);
             }
         } catch (SQLException e) {
             String errorMsg = "Error while creating database connection/prepared-statement";
-            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
         return subscriptionCountList;
@@ -306,6 +287,7 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
+    @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<SubscriptionInfo> getSubscriptionInfo(String createdBy, String fromTimestamp, String toTimestamp) throws
             APIMgtDAOException {
         final String query;
@@ -361,11 +343,9 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                 }
             } catch (SQLException e) {
                 String errorMsg = "Error while retrieving subscription information from db";
-                log.error(errorMsg, e);
                 throw new APIMgtDAOException(errorMsg, e);
             } catch (ParseException e) {
                 String errorMsg = "Error while parsing timestamp while retrieving subscription information from db";
-                log.error(errorMsg, e);
                 throw new APIMgtDAOException(errorMsg, e);
             }
         } catch (SQLException e) {
@@ -427,16 +407,13 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                 }
             } catch (SQLException e) {
                 String errorMsg = "Error while retrieving API count information from db";
-                log.error(errorMsg, e);
                 throw new APIMgtDAOException(errorMsg, e);
             } catch (ParseException e) {
                 String errorMsg = "Error while parsing timestamp while retrieving API count information from db";
-                log.error(errorMsg, e);
                 throw new APIMgtDAOException(errorMsg, e);
             }
         } catch (SQLException e) {
             String errorMsg = "Error while creating database connection/prepared-statement";
-            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
         return apiInfoList;

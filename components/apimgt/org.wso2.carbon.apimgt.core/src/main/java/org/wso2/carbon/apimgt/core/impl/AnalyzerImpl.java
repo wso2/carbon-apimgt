@@ -61,11 +61,10 @@ public class AnalyzerImpl implements Analyzer {
     }
 
     @Override
-    public List<APIInfo> getAPIInfo(String createdBy, String fromTime,
-                                    String toTime) throws APIManagementException {
+    public List<APIInfo> getAPIInfo( String fromTime, String toTime) throws APIManagementException {
         List<APIInfo> apiInfoList;
         try {
-            apiInfoList = getAnalyticsDAO().getAPIInfo(createdBy, fromTime, toTime);
+            apiInfoList = getAnalyticsDAO().getAPIInfo(fromTime, toTime);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while fetching API information";
             throw new AnalyticsException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
@@ -120,7 +119,8 @@ public class AnalyzerImpl implements Analyzer {
      * @throws APIManagementException if error occurs while accessing data layer
      */
     @Override
-    public List<SubscriptionInfo> getSubscriptionInfo(String createdBy, String fromTime, String toTime) throws APIManagementException {
+    public List<SubscriptionInfo> getSubscriptionInfo(String createdBy, String fromTime, String toTime) throws
+            APIManagementException {
         List<SubscriptionInfo> subscriptionInfoList;
         try {
             subscriptionInfoList = getAnalyticsDAO().getSubscriptionInfo(createdBy, fromTime, toTime);
