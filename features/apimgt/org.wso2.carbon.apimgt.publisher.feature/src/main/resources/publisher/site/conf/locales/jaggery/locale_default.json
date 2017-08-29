@@ -545,5 +545,6 @@
     "Use Default Context": "Use Default Context",
     "approval waiting topic":"Pending lifecycle state change",
     "approval waiting message":"Lifecycle state change request has been submitted.",
-    "Delete Task" : "Delete Task"
+    "Delete Task" : "Delete Task",
+    "Number of API Subscribers": "Number of API Subscribers"
 }
