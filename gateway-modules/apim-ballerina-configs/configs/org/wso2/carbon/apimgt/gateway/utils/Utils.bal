@@ -41,7 +41,7 @@ function constructAPIIsInMaintenance (message response) {
 }
 
 function constructIncorrectAuthorization (message response) {
-    json payload = {"code":900902, "message":"Incorrect authorization details found"}; //
+    json payload = {"code":900902, "message":"Incorrect authorization details found"}; 
     messages:setJsonPayload(response, payload);
 }
 
