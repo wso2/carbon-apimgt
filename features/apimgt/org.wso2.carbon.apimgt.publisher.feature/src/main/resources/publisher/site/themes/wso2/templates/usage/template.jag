@@ -17,7 +17,7 @@
                   <thead>
                   <tr>
                     <th><%=i18n.localize("Version")%></th>
-                    <th><%=i18n.localize("Number of API calls")%></th>
+                    <th><%=i18n.localize("Number of API Subscribers")%></th>
                   </tr>
                   </thead>
               </table>
