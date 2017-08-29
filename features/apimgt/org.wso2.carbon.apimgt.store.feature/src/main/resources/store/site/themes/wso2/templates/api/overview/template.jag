@@ -24,7 +24,9 @@
                 %>
                 <div  class="well well-sm add-margin-bottom-1x"><%=encode.forHtml(transports[t]) %>://<%=domainValue%><%= contextWithoutTenant %>
                     <%if (api.isDefaultVersion){
-                        var contextWithoutTenantANDVersion = contextWithoutTenant.replace(api.version, "");%>
+                        var contextWithoutTenantAndVersion = contextWithoutTenant;
+                        contextWithoutTenantAndVersion = contextWithoutTenantAndVersion.replace(api.version + "/", "");
+                        contextWithoutTenantAndVersion = contextWithoutTenantAndVersion.replace(api.version, "");%>
 +                       <br/><%= encode.forHtml(transports[t]) %>://<%=domainValue%><%= contextWithoutTenantANDVersion %>
                     <%}%>
                 </div>
