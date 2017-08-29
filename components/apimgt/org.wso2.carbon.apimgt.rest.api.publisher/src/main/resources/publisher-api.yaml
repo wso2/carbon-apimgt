@@ -3587,50 +3587,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-  /endpoints/discoverable-services:
-
-#-----------------------------------------------------
-# Retrieve a list of service endpoints of a cluster
-#-----------------------------------------------------
-    post:
-      consumes: "application/json"
-      produces: "application/json"
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints/discoverable-services\""
-      x-wso2-request: "POST https://127.0.0.1:9292/api/am/publisher/v1.0/endpoints/discoverable-services\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\nmasterEndpoint: \"https://195.172.91.121:8443/\"\n}"
-      x-wso2-response:
-#      security:
-#        - OAuth2Security:
-#          - apim:api_create
-      summary: Get a list of service endpoints of a cluster - service discovery
-      description: |
-        This operation can be used to discover services, using a given url of the cluster.
-      parameters:
-        - in: body
-          name: body
-          description: Pet object that needs to be added to the store
-          required: true
-          schema:
-            $ref: '#/definitions/MasterEndpoint'
-      tags:
-        - Endpoint (Collection)
-      responses:
-        200:
-          description: |
-            OK.
-            Successful response with the discovered services list as an entity in the body.
-          schema:
-            $ref: '#/definitions/DiscoveredServices'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-        400:
-          description: |
-            Bad Request.
-            Invalid request (or validation error)
-          schema:
-            $ref: '#/definitions/Error'
 
 ######################################################
 # The "Label Collection" resource API
@@ -4845,79 +4801,6 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/EndPoint'
-
-#-----------------------------------------------------
-# Master Endpoint URL to Discover Services resource
-#-----------------------------------------------------
-  MasterEndpoint :
-    title: Master Endpoint URL to Discover Services
-    properties:
-      masterEndpoint:
-        type: string
-        description: |
-          Master Url of the Cluster to Discover Services.
-        example: "https://195.172.91.121:8443/"
-#-----------------------------------------------------
-# The Discovered Services List resource
-#-----------------------------------------------------
-  DiscoveredServices:
-    title: Discovered Services of the Cluster
-    properties:
-      services:
-        type: array
-        items:
-          $ref: '#/definitions/DiscoveredService'
-#-----------------------------------------------------
-# The Discovered Service Endpoint resource
-#-----------------------------------------------------
-  DiscoveredService :
-    title: A Discovered Service
-    properties:
-      serviceName:
-        type: string
-        description: |
-          Name of the service.
-        example: "publicNewsFeedService"
-      ports:
-        type: array
-        description: |
-          Ports of the service containing the URLs.
-        items:
-          $ref: '#/definitions/DiscoveredServicePort'
-#-----------------------------------------------------
-# The Discovered Service Endpoint Port resource
-#-----------------------------------------------------
-  DiscoveredServicePort:
-    title: Port with its URLs of a Discovered Service
-    properties:
-      urls:
-        type: array
-        description: |
-          URLs.
-        items:
-          $ref: '#/definitions/DiscoveredServiceURL'
-      port:
-        type: int
-        description: |
-          Port number of the service.
-        example: 8080
-#-----------------------------------------------------
-# The Discovered Service Endpoint URL resource
-#-----------------------------------------------------
-  DiscoveredServiceURL:
-    title: A Set of URLs That Belong to a Port of a Discovered Service
-    properties:
-      type:
-        type: string
-        description: |
-          Type of the URL
-        example: "NodePort"
-      url:
-        type: string
-        description: |
-          URL of the service endpoint together with its port.
-        example: "http://123.123.23.23:8080"
-
 
 #-----------------------------------------------------
 # The Label resource
