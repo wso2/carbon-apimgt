@@ -387,10 +387,13 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         swagger.setInfo(info);
 
         if ((api.getSecurityScheme() & 2) == 2) { //apikey
-            swagger.securityDefinition("apikey", new ApiKeyAuthDefinition("apikey", In.HEADER));
+            log.debug("API security scheme : API Key Scheme");
+            swagger.securityDefinition(APIMgtConstants.SWAGGER_APIKEY, new ApiKeyAuthDefinition(
+                    APIMgtConstants.SWAGGER_APIKEY, In.HEADER));
         }
         if ((api.getSecurityScheme() & 1) == 1) {
-            swagger.securityDefinition("oauth2", new OAuth2Definition());
+            log.debug("API security Scheme : Oauth");
+            swagger.securityDefinition(APIMgtConstants.SWAGGER_OAUTH2, new OAuth2Definition());
         }
 
         Map<String, Path> stringPathMap = new HashMap();
@@ -422,14 +425,16 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 operation.setConsumes(consumesList);
             }
             operation.addResponse("200", getDefaultResponse());
-            if (!uriTemplate.getAuthType().equals(APIMgtConstants.AUTH_NO_AUTHENTICATION) &&
+            if (!APIMgtConstants.AUTH_NO_AUTHENTICATION.equals(uriTemplate.getAuthType()) &&
                     ((api.getSecurityScheme() & 2) == 2)) {
-              operation.addSecurity("apikey", null);
+                log.debug("API security scheme : API Key Scheme ---- Resource Auth Type : Not None");
+                operation.addSecurity(APIMgtConstants.SWAGGER_APIKEY, null);
             }
 
-            if (!uriTemplate.getAuthType().equals(APIMgtConstants.AUTH_NO_AUTHENTICATION) &&
+            if (!APIMgtConstants.AUTH_NO_AUTHENTICATION.equals(uriTemplate.getAuthType()) &&
                     ((api.getSecurityScheme() & 1) == 1)) {
-                operation.addSecurity("oauth2", null);
+                log.debug("API security scheme : Oauth Scheme ---- Resource Auth Type : Not None");
+                operation.addSecurity(APIMgtConstants.SWAGGER_OAUTH2, null);
             }
 
             if (stringPathMap.containsKey(uriTemplateString)) {

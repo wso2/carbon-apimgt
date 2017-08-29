@@ -733,7 +733,7 @@ public class ApiDAOImpl implements ApiDAO {
                 + "IS_RESPONSE_CACHED = ?, CACHE_TIMEOUT = ?, TECHNICAL_OWNER = ?, TECHNICAL_EMAIL = ?, " +
                 "BUSINESS_OWNER = ?, BUSINESS_EMAIL = ?, CORS_ENABLED = ?, CORS_ALLOW_ORIGINS = ?, " +
                 "CORS_ALLOW_CREDENTIALS = ?, CORS_ALLOW_HEADERS = ?, CORS_ALLOW_METHODS = ?, LAST_UPDATED_TIME = ?," +
-                "UPDATED_BY = ?, LC_WORKFLOW_STATUS=?, SECURITY_SCHEME=? WHERE UUID = ?";
+                "UPDATED_BY = ?, LC_WORKFLOW_STATUS = ?, SECURITY_SCHEME = ? WHERE UUID = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
