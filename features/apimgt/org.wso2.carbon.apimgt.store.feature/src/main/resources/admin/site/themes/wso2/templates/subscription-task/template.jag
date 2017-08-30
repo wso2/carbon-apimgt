@@ -94,8 +94,8 @@ else{
                               	<button class="btn js_assignBtn pull-left" id="js_assignBtn<%=String(i)%>" data="<%=tasks[i].id%>" iteration="<%=String(i)%>"><%=i18n.localize("Assign To Me")%></button>
                               	<button class="btn js_startBtn pull-left" id="js_startBtn<%=String(i)%>" style="display: none" data="<%=tasks[i].id%>" iteration="<%=String(i)%>"><%=i18n.localize("Start")%></button>
                               	</div>
-                              <div class="col-sm-6">
-	                              <select id="js_stateDropDown<%=String(i)%>" style="display: none" class="form-control js_stateDropDown pull-left" style="margin-right: 6px;">
+                              <div class="col-sm-6" style="display: none">
+	                              <select id="js_stateDropDown<%=String(i)%>" class="form-control js_stateDropDown pull-left" style="margin-right: 6px;">
 		                              <option value="APPROVED"><%=i18n.localize("Approve")%></option>
 		                              <option value="REJECTED"><%=i18n.localize("Reject")%></option>
 	                              </select>
