@@ -875,7 +875,7 @@ msgid "Add Advanced Throttle Policy"
 msgstr ""
 
 #: site/themes/wso2/templates/policy/resource/policy-add/template.jag:18
-msgid "Edit Advanced Throttle Throttle Policy"
+msgid "Edit Advanced Throttle Policy"
 msgstr ""
 
 #: site/themes/wso2/templates/policy/resource/policy-add/template.jag:64
