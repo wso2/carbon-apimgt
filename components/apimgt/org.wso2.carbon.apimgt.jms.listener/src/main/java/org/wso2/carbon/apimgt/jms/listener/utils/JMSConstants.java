@@ -311,4 +311,12 @@ public class JMSConstants {
      */
     public static final String JMSX_GROUP_SEQ = "JMSXGroupSeq";
 
+    /**
+     * Parameter for jndi security credentials in jms configs of axis2.xml
+     */
+    public static final String PARAM_NAMING_SECURITY_CREDENTIALS = "java.naming.security.credentials";
+    
+    public static final String CONNECTION_STRING_QUEUE = "connectionfactory.QueueConnectionFactory";
+    
+    public static final String CONNECTION_STRING_TOPIC = "connectionfactory.TopicConnectionFactory";
 }

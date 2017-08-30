@@ -28,6 +28,9 @@ import javax.naming.Context;
 import javax.naming.NameNotFoundException;
 import javax.naming.NamingException;
 import javax.naming.Reference;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 
 /**
@@ -36,6 +39,7 @@ import java.util.*;
 public class JMSUtils extends BaseUtils {
 
     private static final Log log = LogFactory.getLog(JMSUtils.class);
+    private static final String MASKING_STRING = "***";
 
     /**
      * Get a String property from the JMS message
@@ -562,6 +566,77 @@ public class JMSUtils extends BaseUtils {
             throw e;
         }
     }
+    
+    /**
+     * Masks the sensitive parameters in axis2.xml configs for JMS for error logging. Do not use for info logs.
+     * @param sensitiveParamsTable Hash table with axis2 configs
+     * @return the hash table with masked values.
+     */
+	public static Hashtable<String, String> maskAxis2ConfigSensitiveParameters(
+			Hashtable<String, String> sensitiveParamsTable) {
 
+		Hashtable<String, String> maskedParamsTable = new Hashtable<String, String>(sensitiveParamsTable);
+		if (maskedParamsTable.get(JMSConstants.PARAM_JMS_PASSWORD) != null) {
+			maskedParamsTable.put(JMSConstants.PARAM_JMS_PASSWORD, MASKING_STRING);
+		}
+		if (sensitiveParamsTable.get(JMSConstants.PARAM_NAMING_SECURITY_CREDENTIALS) != null) {
+			maskedParamsTable.put(JMSConstants.PARAM_NAMING_SECURITY_CREDENTIALS, MASKING_STRING);
+		}
+		if (sensitiveParamsTable.get(JMSConstants.CONNECTION_STRING_QUEUE) != null) {
+			maskedParamsTable.put(JMSConstants.CONNECTION_STRING_QUEUE, getMaskedConnectionString(
+					sensitiveParamsTable.get(JMSConstants.CONNECTION_STRING_QUEUE), MASKING_STRING));
+		}
+		if (sensitiveParamsTable.get(JMSConstants.CONNECTION_STRING_TOPIC) != null) {			
+			maskedParamsTable.put(JMSConstants.CONNECTION_STRING_TOPIC, getMaskedConnectionString(
+					sensitiveParamsTable.get(JMSConstants.CONNECTION_STRING_TOPIC), MASKING_STRING));
+		}
+
+		return maskedParamsTable;
+	}
+	
+	private static String getMaskedConnectionString(String connectionString, String maskString) {
+		String maskedConnectionString;
+		try {
+			URI url = new URI(connectionString);
+			String userInfo = url.getUserInfo();
+			if (userInfo == null) {
+				// Fix for Java 1.5 which doesn't parse UserInfo for non http
+				// URIs
+				userInfo = url.getAuthority();
+
+				if (userInfo != null) {
+					int atIndex = userInfo.indexOf('@');
+
+					if (atIndex != -1) {
+						userInfo = userInfo.substring(0, atIndex);
+					} else {
+						userInfo = null;
+					}
+				}
+			}
+
+			if (userInfo == null) {
+				// url does not contain any user related information. return the
+				// url as it is
+				return connectionString;
+			} else {
+				// user info = user:pass
+				int colonIndex = userInfo.indexOf(':');
+				if (colonIndex == -1) {
+					// password is not in the url. 
+					return connectionString.replace(userInfo, maskString);
+				} else {				
+					return connectionString.replace(userInfo, maskString + ":" + maskString);
+				}
+			}
+		} catch (URISyntaxException ignore) {
+			// If the provided url cannot be parsed, then a custom message will
+			// be printed instead of the invalid url. 
+			log.error("Error while parsing the JMS connection url");
+			maskedConnectionString = "Invalid connection url";
+		}
+
+		return maskedConnectionString;
+	}
 
 }
