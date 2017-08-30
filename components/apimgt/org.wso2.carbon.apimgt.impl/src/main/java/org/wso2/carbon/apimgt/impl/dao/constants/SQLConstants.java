@@ -2322,7 +2322,7 @@ public class SQLConstants {
                     " WHERE" +
                     "   TENANT_ID =? AND" +
                     "   KEY_TEMPLATE =? AND" +
-                    "   NAME !=?";
+                    "   NAME =?";
 
     public static final String GET_APP_POLICIES =
             " SELECT "+
