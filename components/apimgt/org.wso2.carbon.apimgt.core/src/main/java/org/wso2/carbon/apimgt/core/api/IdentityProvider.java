@@ -38,6 +38,15 @@ public interface IdentityProvider extends KeyManager {
     public String getIdOfUser(String userName) throws IdentityProviderException;
 
     /**
+     * Get the user Email of SCIM user.
+     *
+     * @param userId Email of user
+     * @return the Email of the user
+     * @throws IdentityProviderException if error occurred while getting user ID of user
+     */
+    public String getEmailOfUser(String userId) throws IdentityProviderException;
+
+    /**
      * Get the role name list of a user.
      *
      * @param userId User Id

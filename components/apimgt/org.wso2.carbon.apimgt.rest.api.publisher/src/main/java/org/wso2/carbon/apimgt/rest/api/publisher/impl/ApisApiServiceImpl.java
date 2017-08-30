@@ -1216,11 +1216,15 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisCopyApiPost(String newVersion, String apiId, Request request) throws NotFoundException {
         APIDTO newVersionedApi;
+        String apiName, newApiVersion;
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String newAPIVersionId = apiPublisher.createNewAPIVersion(apiId, newVersion);
             newVersionedApi = MappingUtil.toAPIDto(apiPublisher.getAPIbyUUID(newAPIVersionId));
+            apiName = newVersionedApi.getName();
+            newApiVersion = newVersionedApi.getVersion();
+            apiPublisher.sendMailNotification(apiPublisher, apiId, newApiVersion, apiName);
             return Response.status(Response.Status.CREATED).entity(newVersionedApi).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while create new API version " + apiId;

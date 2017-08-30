@@ -552,4 +552,7 @@ public interface APIPublisher extends APIManager {
      */
     WSDLArchiveInfo extractAndValidateWSDLArchive(InputStream inputStream)
             throws APIMgtDAOException, APIMgtWSDLException;
+
+    void sendMailNotification(APIPublisher apiPublisher, String apiId, String apiVersion, String apiName)
+            throws APIManagementException;
 }
