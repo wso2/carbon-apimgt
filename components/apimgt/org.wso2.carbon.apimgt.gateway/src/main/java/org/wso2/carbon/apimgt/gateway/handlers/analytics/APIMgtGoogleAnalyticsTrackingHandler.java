@@ -72,8 +72,8 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
 
         Entry entry = msgCtx.getConfiguration().getEntryDefinition(configKey);
         if (entry == null) {
-            handleException("Cannot find Google Analytics configuration using key: " + configKey);
-            return false;
+            log.warn("Cannot find Google Analytics configuration using key: " + configKey);
+            return true;
         }
         Object entryValue = null;
         boolean reCreate = false;
@@ -91,16 +91,16 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
         
         if ( reCreate || config == null) {
         	if (entryValue == null || !(entryValue instanceof OMElement)) {
-                handleException("Unable to load Google Analytics configuration using key: " + configKey);
-                return false;
+                log.warn("Unable to load Google Analytics configuration using key: " + configKey);
+                return true;
             }
         	version = entry.getVersion();
             config = new GoogleAnalyticsConfig((OMElement)entryValue);
         }
         
         if (config == null) {
-			handleException("Unable to load Google Analytics configuration using key: " + configKey);
-            return false;
+            log.warn("Unable to create Google Analytics configuration using key: " + configKey);
+            return true;
 		}
 		
 		if (!config.enabled) {
