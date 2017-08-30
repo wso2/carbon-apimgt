@@ -347,7 +347,7 @@ var publishedInExternalStores=<%=publishedInExternalStores%>;
 
 </form>
         <div id="lifecycle-rendering-area" class="lifecycle-rendering-area add-margin-top-4x add-margin-bottom-4x">
-            <svg width=900 height=600 ><g/></svg>
+            <svg width=900 height=500><g/></svg>
         </div> 
         <% } %>
         <div class="page-header">

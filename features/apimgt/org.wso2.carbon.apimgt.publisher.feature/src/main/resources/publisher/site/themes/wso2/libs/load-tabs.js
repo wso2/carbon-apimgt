@@ -448,10 +448,12 @@ var loadLC = function () {
                     inner = svg.select("g");
 
 // Set up zoom support
-                var zoom = d3.behavior.zoom().on("zoom", function () {
+                var zoom = d3.behavior.zoom();
+                zoom.on("zoom", function () {
                     inner.attr("transform", "translate(" + d3.event.translate + ")" +
                         "scale(" + d3.event.scale + ")");
                 });
+                zoom.scaleExtent([0.3, 2]);
                 svg.call(zoom);
 
 // Create the renderer
@@ -459,11 +461,12 @@ var loadLC = function () {
 
 // Run the renderer. This is what draws the final graph.
                 render(inner, g);
-
+                var initialScale = 1;
+                var initialX = (svg.attr('width') - g.graph().width * initialScale) / 2;
+                var initialY = 10;
 // Center the graph
-                var initialScale = 1.2;
-
-                svg.attr('height', g.graph().height * initialScale + 40);
+                inner.attr("transform", "translate(" + [initialX, initialY] + ") scale(" + initialScale + ")");
+                zoom.translate([initialX, initialY]).scale(initialScale).event(svg);
             } else {
                 if (json.message == "AuthenticateError") {
                     jagg.showLogin();
