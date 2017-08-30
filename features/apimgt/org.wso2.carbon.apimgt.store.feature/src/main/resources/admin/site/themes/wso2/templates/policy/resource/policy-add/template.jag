@@ -15,7 +15,7 @@
     var action = "new";
     if(policyName != null && policyName != ""){
         action = "edit";
-        pageTitle = i18n.localize("Edit Advanced Throttle Throttle Policy");
+        pageTitle = i18n.localize("Edit Advanced Throttle Policy");
         nameFieldDisableStatus = "readonly";
         var mod = jagg.module("policy");
         var apiPolicy = mod.getAPIPolicy(policyName).apiPolicy;
