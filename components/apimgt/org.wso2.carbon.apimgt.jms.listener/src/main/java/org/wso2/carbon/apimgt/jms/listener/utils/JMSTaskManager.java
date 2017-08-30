@@ -927,8 +927,8 @@ public class JMSTaskManager {
                         getInitialContext(), ConnectionFactory.class, getConnFactoryJNDIName());
                 log.debug("Connected to the JMS connection factory : " + getConnFactoryJNDIName());
             } catch (NamingException e) {
-                handleException("Error looking up connection factory : " + getConnFactoryJNDIName() +
-                                " using JNDI properties : " + jmsProperties, e);
+				handleException("Error looking up connection factory : " + getConnFactoryJNDIName()
+						+ " using JNDI properties : " + JMSUtils.maskAxis2ConfigSensitiveParameters(jmsProperties), e);
             }
 
             Connection connection = null;
@@ -952,8 +952,8 @@ public class JMSTaskManager {
                         log.error("Error when cleaning up connection:" + ex.getMessage(), e);
                     }
                 }
-                handleException("Error acquiring a JMS connection to : " + getConnFactoryJNDIName() +
-                                " using JNDI properties : " + jmsProperties, e);
+				handleException("Error acquiring a JMS connection to : " + getConnFactoryJNDIName()
+						+ " using JNDI properties : " + JMSUtils.maskAxis2ConfigSensitiveParameters(jmsProperties), e);
             }
             return connection;
         }
@@ -1046,15 +1046,15 @@ public class JMSTaskManager {
                             break;
                         }
                         default: {
-                            handleException("Error looking up JMS destination : " +
-                                            getDestinationJNDIName() + " using JNDI properties : " +
-                                            jmsProperties, e);
+						handleException("Error looking up JMS destination : " + getDestinationJNDIName()
+								+ " using JNDI properties : "
+								+ JMSUtils.maskAxis2ConfigSensitiveParameters(jmsProperties), e);
                         }
                     }
                 } catch (JMSException j) {
-                    handleException("Error looking up JMS destination and auto " +
-                                    "creating JMS destination : " + getDestinationJNDIName() +
-                                    " using JNDI properties : " + jmsProperties, e);
+					handleException("Error looking up JMS destination and auto " + "creating JMS destination : "
+							+ getDestinationJNDIName() + " using JNDI properties : "
+							+ JMSUtils.maskAxis2ConfigSensitiveParameters(jmsProperties), e);
                 }
             }
         }
@@ -1077,8 +1077,8 @@ public class JMSTaskManager {
                 return
                         JMSUtils.lookup(context, UserTransaction.class, getUserTransactionJNDIName());
             } catch (NamingException e) {
-                handleException("Error looking up UserTransaction : " + getUserTransactionJNDIName() +
-                                " using JNDI properties : " + jmsProperties, e);
+				handleException("Error looking up UserTransaction : " + getUserTransactionJNDIName()
+						+ " using JNDI properties : " + JMSUtils.maskAxis2ConfigSensitiveParameters(jmsProperties), e);
             }
         }
 
@@ -1091,8 +1091,8 @@ public class JMSTaskManager {
                     log.debug("Acquired shared UserTransaction for " + jmsConsumerName);
                 }
             } catch (NamingException e) {
-                handleException("Error looking up UserTransaction : " + getUserTransactionJNDIName() +
-                                " using JNDI properties : " + jmsProperties, e);
+				handleException("Error looking up UserTransaction : " + getUserTransactionJNDIName()
+						+ " using JNDI properties : " + JMSUtils.maskAxis2ConfigSensitiveParameters(jmsProperties), e);
             }
         }
         return sharedUserTransaction;
