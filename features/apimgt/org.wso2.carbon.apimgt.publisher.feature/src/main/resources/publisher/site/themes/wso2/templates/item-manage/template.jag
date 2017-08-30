@@ -823,7 +823,7 @@
                                    }
                                 %>
                                      <% if(status=="BLOCKED" || status=="DEPRECATED" || status=="RETIRED" || wfStatus=="CREATED"){ %>
-                                     <a class="btn btn-primary" id="publish_api" disabled title="<%=i18n.localize("Save & Publish")%>"><%=i18n.localize("Save & Publish")%></a>
+                                     <a class="btn btn-primary" id="publish_api_disabled" disabled title="<%=i18n.localize("Save & Publish")%>"><%=i18n.localize("Save & Publish")%></a>
                                      <%} else{%>
                                      <a class="btn btn-primary has-spinner" id="publish_api" title="<%=i18n.localize("Save & Publish")%>"><%=i18n.localize("Save & Publish")%></a>
                                      <%}%>
