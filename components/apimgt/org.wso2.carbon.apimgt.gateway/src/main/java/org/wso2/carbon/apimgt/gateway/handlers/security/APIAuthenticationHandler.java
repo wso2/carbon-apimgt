@@ -265,10 +265,13 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         if (requestURI != null) {
             logMessage = logMessage + " for requestURI=" + requestURI;
         }
-        long reqIncomingTimestamp = Long.parseLong((String) ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext().getProperty(APIMgtGatewayConstants.REQUEST_RECEIVED_TIME));
-        incomingReqTime = new Date(reqIncomingTimestamp);
-        logMessage = logMessage + " at time=" + incomingReqTime;
+        String requestReceivedTime = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .getProperty(APIMgtGatewayConstants.REQUEST_RECEIVED_TIME);
+        if (requestReceivedTime != null) {
+            long reqIncomingTimestamp = Long.parseLong(requestReceivedTime);
+            incomingReqTime = new Date(reqIncomingTimestamp);
+            logMessage = logMessage + " at time=" + incomingReqTime;
+        }
 
         String remoteIP = (String) axisMC.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
         if (remoteIP != null) {
