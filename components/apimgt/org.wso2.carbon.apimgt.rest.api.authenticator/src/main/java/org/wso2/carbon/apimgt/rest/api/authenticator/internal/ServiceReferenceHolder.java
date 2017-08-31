@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.authenticator.internal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMAppConfigurations;
+import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMConfigurations;
 import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
@@ -34,6 +35,7 @@ public class ServiceReferenceHolder {
     private static ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private ConfigProvider configProvider;
     private APIMAppConfigurations config = null;
+    private APIMConfigurations config1 = null;
 
     private ServiceReferenceHolder() {
 
