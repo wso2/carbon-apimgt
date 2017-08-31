@@ -152,7 +152,16 @@
 	{{#ifCond keyState 'COMPLETED'}}
 		<%=i18n.localize("Error! You have partially created keys. Please click the Clean Up button and try again.")%>
 		<button title="<%=i18n.localize("Error! You have partially created keys. Please click the Clean Up button and try again.")%>"  class="btn btn-primary btn-providekeys generateAgainBtn"
-					data-keyType="PRODUCTION"
+					data-keyType={{type}}
+					data-applicationName={{name}}>
+					Clean up
+		</button>
+	{{/ifCond}}
+	
+	{{#ifCond keyState 'APPROVED'}}
+		<%=i18n.localize("Error! You have partially created keys. Please click the Clean Up button and try again.")%>
+		<button title="<%=i18n.localize("Error! You have partially created keys. Please click the Clean Up button and try again.")%>"  class="btn btn-primary btn-providekeys generateAgainBtn"
+					data-keyType={{type}}
 					data-applicationName={{name}}>
 					Clean up
 		</button>

@@ -120,6 +120,7 @@ GrantTypes.prototype.getMap = function(selected){
         this.element = $(element);
 
         this.app = options.app;
+        this.app.type = options.type;
         this.type = options.type;
         this.app.show_keys = ( $.cookie('OAuth_key_visibility') === 'true');
         this.grants = new GrantTypes(options.grant_types);
