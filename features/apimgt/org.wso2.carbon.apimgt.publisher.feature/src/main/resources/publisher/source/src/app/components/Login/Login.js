@@ -28,6 +28,7 @@ import Button from 'material-ui/Button';
 import Typography from 'material-ui/Typography';
 import Snackbar from 'material-ui/Snackbar';
 import User from '../../data/User'
+import Menu, { MenuItem } from 'material-ui/Menu';
 
 class Login extends Component {
 
@@ -88,6 +89,16 @@ class Login extends Component {
             user.scopes = params.scopes.split(" ");
             AuthManager.setUser(user);
         }
+         let envDetails = this.configManager;
+        console.log("working1");
+        envDetails.env_response.then((response) => {
+            console.log("working1");
+            let enviromentDetails = response.data.environments;
+            console.log(enviromentDetails);
+            this.setState({env: enviromentDetails});
+        });
+        console.log("working1");
+        console.log(this.state.env);
     }
 
 
@@ -105,7 +116,17 @@ class Login extends Component {
     handleRequestClose = () => {
         this.setState({ messageOpen: false });
     };
+    handleClick = event => {
+        this.setState({ open: true, anchorEl: event.currentTarget });
+    };
+
+    handleRequestCloseting = () => {
+        this.setState({ open: false });
+    };
+
     render() {
+        console.log("working")
+        //this.state.env.map(environment => <MenuItem>{environment.env}</MenuItem>)
         if (!this.state.isLogin) { // If not logged in, go to login page
             return (
             <div className="login-flex-container">
@@ -152,7 +173,27 @@ class Login extends Component {
                                 style={{width:"100%"}}
                                 onChange={this.handlePasswordChange}
                             />
-
+                            {<div>
+                                <Button
+                                    aria-owns={this.state.open ? 'simple-menu' : null}
+                                    aria-haspopup="true"
+                                    onClick={this.handleClick}
+                                >
+                                    Environments
+                                </Button>
+                                <Menu
+                                    id="simple-menu"
+                                    anchorEl={this.state.anchorEl}
+                                    open={this.state.open}
+                                    onRequestClose={this.handleRequestCloseting}
+                                >
+                                   ( {this.state.env.map(environment => <MenuItem
+                                        onClick={this.handleRequestCloseting}>{environment.env}</MenuItem>)})
+                                    <MenuItem onClick={this.handleRequestCloseting}>Profile</MenuItem>
+                                    <MenuItem onClick={this.handleRequestCloseting}>My account</MenuItem>
+                                    <MenuItem onClick={this.handleRequestCloseting}>Logout</MenuItem>
+                                </Menu>
+                            </div>}
                             <Button type="submit" raised color="primary"  className="login-form-submit">
                                 Login
                             </Button>
