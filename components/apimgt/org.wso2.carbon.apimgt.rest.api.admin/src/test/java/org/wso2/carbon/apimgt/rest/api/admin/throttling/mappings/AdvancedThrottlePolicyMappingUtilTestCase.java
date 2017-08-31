@@ -75,7 +75,7 @@ public class AdvancedThrottlePolicyMappingUtilTestCase {
         String uuid = UUID.randomUUID().toString();
         String description = "Sample Description";
         dto.setDescription(description);
-        dto.setPolicyId(uuid);
+        dto.setId(uuid);
         ThrottleLimitDTO throttleLimitDTO = new ThrottleLimitDTO();
         throttleLimitDTO.setType("RequestCountLimit");
         throttleLimitDTO.setTimeUnit("s");

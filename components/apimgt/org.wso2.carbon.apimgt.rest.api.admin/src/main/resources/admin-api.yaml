@@ -1699,13 +1699,7 @@ paths:
       parameters:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-        - name: type
-          in: query
-          description: |
-            List all the uncompleted workflow tasks for the given type of workflows. 
-            If not provided, list all the uncompleted tasks.
-          required: false
-          type: string
+        - $ref: '#/parameters/workflowType-Q'        
       tags:
         - Workflows (Collection)
       responses:
@@ -1952,6 +1946,15 @@ parameters:
     required: true
     type: string
 
+# Workflow type
+# Specified as part of the query string
+  workflowType-Q:
+    name: workflowType
+    in: query
+    description: |
+      Type of the worklfow
+    required: false
+    type: string
 ######################################################
 # The resources used by some of the APIs above within the message body
 ######################################################
