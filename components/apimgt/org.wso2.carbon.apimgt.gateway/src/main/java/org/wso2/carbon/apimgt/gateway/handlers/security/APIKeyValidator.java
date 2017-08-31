@@ -428,7 +428,7 @@ public class APIKeyValidator {
             if (selectedApi != null){
                 Resource[] selectedAPIResources = selectedApi.getResources();
 
-                Set<Resource> acceptableResources = new HashSet<Resource>();
+                Set<Resource> acceptableResources = new LinkedHashSet<Resource>();
 
                 for(Resource resource : selectedAPIResources){
                     //If the requesting method is OPTIONS or if the Resource contains the requesting method
