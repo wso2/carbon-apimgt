@@ -22,11 +22,12 @@ import {Route, Switch, Redirect} from 'react-router-dom'
 import Overview from './Overview'
 import NavBar from './NavBar'
 import LifeCycle from './LifeCycle/LifeCycle'
+import Documents from './Documents/Documents'
 import {PageNotFound} from '../../Base/Errors/index'
-import Resources from './Resources'
-import Permission from './Permission'
+import Resources from './Resources/Resources'
+import PermissionFormWrapper from './Permission'
 import Endpoints from './Endpoints'
-import Documents from './Documents'
+import Subscriptions from './Subscriptions/Subscriptions'
 
 export default class Details extends Component {
     componentDidMount() {
@@ -40,7 +41,7 @@ export default class Details extends Component {
     }
 
     render() {
-        let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/" + NavBar.CONST.OVERVIEW;
+        let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
         return (
             <div className="tab-content">
                 <Switch>
@@ -48,9 +49,10 @@ export default class Details extends Component {
                     <Route path="/apis/:api_uuid/overview" component={Overview}/>
                     <Route path="/apis/:api_uuid/lifecycle" component={LifeCycle}/>
                     <Route path="/apis/:api_uuid/resources" component={Resources}/>
-                    <Route path="/apis/:api_uuid/permission" component={Permission}/>
+                    <Route path="/apis/:api_uuid/permission" component={PermissionFormWrapper}/>
                     <Route path="/apis/:api_uuid/documents" component={Documents}/>
                     <Route path="/apis/:api_uuid/endpoints" component={Endpoints}/>
+                    <Route path="/apis/:api_uuid/subscriptions" component={Subscriptions}/>
                     <Route component={PageNotFound}/>
                 </Switch>
             </div>

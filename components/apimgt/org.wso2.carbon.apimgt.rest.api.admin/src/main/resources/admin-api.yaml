@@ -52,33 +52,24 @@ consumes:
 produces:
   - application/json
 
-x-wso2-security:
-  apim:
-    x-wso2-scopes:
-      - description: ""
-        roles: admin
-        name: apim:tier_view
-        key: apim:tier_view
-      - description: ""
-        roles: admin
-        name: apim:tier_manage
-        key: apim:tier_manage
-      - description: ""
-        roles: admin
-        name: apim:bl_view
-        key: apim:bl_view
-      - description: ""
-        roles: admin
-        name: apim:bl_manage
-        key: apim:bl_manage
-      - description: ""
-        roles: admin
-        name: apim:label_view
-        key: apim:label_view
-      - description: ""
-        roles: admin
-        name: apim:label_manage
-        key: apim:label_manage
+securityDefinitions:
+  OAuth2Security:
+    type: oauth2
+    flow: password
+    tokenUrl: https://localhost:9443/token
+    scopes:
+      apim:tier_view: View Tier
+      apim:tier_manage: Manage Tier
+      apim:bl_view:  Blocking condition view
+      apim:bl_manage: Blocking condition Manage
+      apim:label_view: Label view
+      apim:label_manage: Label manage
+      apim:workflow_view: Workflow view
+      apim:workflow_approve: Workflow approve
+
+security:
+  - OAuth2Security:
+    - apim:tier_view
 
 ######################################################
 # The "API Collection" resource APIs
@@ -90,12 +81,13 @@ paths:
 # Retrieve all Application level throttle policies
 #-----------------------------------------------------
     get:
-      x-scope: apim:tier_view
+      security:
+        - OAuth2Security:
+          - apim:tier_view
       summary: Get all Application level throttle policies
       description: |
         Get all Application level throttle policies
       parameters:
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -137,7 +129,9 @@ paths:
 # Add a Application level throttle policy
 #-----------------------------------------------------
     post:
-      x-scope: apim:tier_manage
+      security:
+        - OAuth2Security:
+          - apim:tier_manage
       summary: Add an Application level throttle policy
       description: |
         Add an Application level throttle policy
@@ -149,7 +143,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/ApplicationThrottlePolicy'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - Application Policies
       responses:
@@ -194,7 +187,9 @@ paths:
 # Retrieve a certain Application level Policy
 #-----------------------------------------------------
     get:
-      x-scope: apim:tier_view
+      security:
+        - OAuth2Security:
+          - apim:tier_view
       summary: Retrieve an Application Policy
       description: |
         Retrieve an Application Policy providing the policy name.
@@ -247,7 +242,9 @@ paths:
 # Delete an Application level throttle policy
 #-----------------------------------------------------
     delete:
-      x-scope: apim:tier_manage
+      security:
+        - OAuth2Security:
+          - apim:tier_manage
       summary: Delete an Application level throttle policy
       description: |
         Delete an Application level throttle policy
@@ -279,7 +276,9 @@ paths:
 # Update an Application level throttle policy
 #-----------------------------------------------------
     put:
-      x-scope: apim:tier_manage
+      security:
+        - OAuth2Security:
+          - apim:tier_manage
       summary: Update an Application level throttle policy
       description: |
         Update an Application level throttle policy
@@ -292,7 +291,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/ApplicationThrottlePolicy'
-        - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -351,12 +349,13 @@ paths:
 # Retrieve all Subscription level policies
 #-----------------------------------------------------
     get:
-      x-scope: apim:tier_view
+      security:
+        - OAuth2Security:
+          - apim:tier_view
       summary: Get all Subscription level throttle policies
       description: |
         Get all Subscription level throttle policies
       parameters:
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -398,7 +397,9 @@ paths:
 # Add a Subscription level throttle policy
 #-----------------------------------------------------
     post:
-      x-scope: apim:tier_manage
+      security:
+        - OAuth2Security:
+          - apim:tier_manage
       summary: Add a Subscription level throttle policy
       description: |
         Add a Subscription level throttle policy
@@ -410,7 +411,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/SubscriptionThrottlePolicy'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - Subscription Policies
       responses:
@@ -455,7 +455,9 @@ paths:
 # Retrieve a certain Subscription Policy
 #-----------------------------------------------------
     get:
-      x-scope: apim:tier_view
+      security:
+        - OAuth2Security:
+          - apim:tier_view
       summary: Retrieve a Subscription Policy
       description: |
         Retrieve a Subscription Policy providing the policy name.
@@ -508,7 +510,9 @@ paths:
 # Delete a Subscription level throttle policy
 #-----------------------------------------------------
     delete:
-      x-scope: apim:tier_manage
+      security:
+        - OAuth2Security:
+          - apim:tier_manage
       summary: Delete a Subscription level throttle policy
       description: |
         Delete a Subscription level throttle policy
@@ -540,7 +544,9 @@ paths:
 # Update a Subscription throttle policy
 #-----------------------------------------------------
     put:
-      x-scope: apim:tier_manage
+      security:
+        - OAuth2Security:
+          - apim:tier_manage
       summary: Update a Subscription level throttle policy
       description: |
         Update a Subscription level throttle policy
@@ -553,7 +559,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/SubscriptionThrottlePolicy'
-        - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -612,12 +617,13 @@ paths:
 # Retrieve all Advanced level policies
 #-----------------------------------------------------
     get:
-      x-scope: apim:tier_view
+      security:
+        - OAuth2Security:
+          - apim:tier_view
       summary: Get all Advanced level throttle policies
       description: |
         Get all Advanced level throttle policies
       parameters:
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -659,7 +665,9 @@ paths:
 # Add an Advanced level throttle policy
 #-----------------------------------------------------
     post:
-      x-scope: apim:tier_manage
+      security:
+        - OAuth2Security:
+          - apim:tier_manage
       summary: Add an Advanced level throttle policy
       description: |
         Add an Advanced level throttle policy
@@ -671,7 +679,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/AdvancedThrottlePolicy'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - Advanced Policies
       responses:
@@ -716,7 +723,9 @@ paths:
 # Retrieve a certain Advanced Throttling Policy
 #-----------------------------------------------------
     get:
-      x-scope: apim:tier_view
+      security:
+        - OAuth2Security:
+          - apim:tier_view
       summary: Retrieve an Advanced Policy
       description: |
         Retrieve a Advanced Policy providing the policy name.
@@ -769,7 +778,9 @@ paths:
 # Delete an Advanced level throttle policy
 #-----------------------------------------------------
     delete:
-      x-scope: apim:tier_manage
+      security:
+        - OAuth2Security:
+          - apim:tier_manage
       summary: Delete an Advanced level throttle policy
       description: |
         Delete an Advanced level throttle policy
@@ -801,7 +812,9 @@ paths:
 # Update an Advanced throttle policy
 #-----------------------------------------------------
     put:
-      x-scope: apim:tier_manage
+      security:
+        - OAuth2Security:
+          - apim:tier_manage
       summary: Update an Advanced level throttle policy
       description: |
         Update an Advanced level throttle policy
@@ -814,7 +827,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/AdvancedThrottlePolicy'
-        - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -873,12 +885,13 @@ paths:
 # Retrieve all Blocking conditions
 #-----------------------------------------------------
     get:
-      x-scope: apim:bl_view
+      security:
+        - OAuth2Security:
+          - apim:bl_view
       summary: Get all blocking condtions
       description: |
         Get all blocking condtions
       parameters:
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -920,7 +933,9 @@ paths:
 # Add a Custom Rule
 #-----------------------------------------------------
     post:
-      x-scope: apim:bl_manage
+      security:
+        - OAuth2Security:
+          - apim:bl_manage
       summary: Add a Blocking condition
       description: |
         Add a Blocking condition
@@ -932,7 +947,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/BlockingCondition'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - Blacklist
       responses:
@@ -977,7 +991,9 @@ paths:
 # Retrieve a Blocking condition
 #-----------------------------------------------------
     get:
-      x-scope: apim:bl_view
+      security:
+        - OAuth2Security:
+          - apim:bl_view
       summary: Retrieve a Blocking Condition
       description: |
         Retrieve a Blocking Condition providing the condition Id
@@ -1030,7 +1046,9 @@ paths:
 # Delete a Blocking condition
 #-----------------------------------------------------
     delete:
-      x-scope: apim:bl_manage
+      security:
+        - OAuth2Security:
+          - apim:bl_manage
       summary: Delete a Blocking condition
       description: |
         Delete a Blocking condition
@@ -1063,7 +1081,9 @@ paths:
 # Update an Blacklist condition
 #-----------------------------------------------------
     put:
-      x-scope: apim:bl_manage
+      security:
+        - OAuth2Security:
+          - apim:bl_manage
       summary: Update a blacklist condition
       description: |
         Update a blacklist condition
@@ -1076,7 +1096,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/BlockingCondition'
-        - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -1135,12 +1154,13 @@ paths:
 # Retrieve all Custom Rules
 #-----------------------------------------------------
     get:
-      x-scope: apim:tier_view
+      security:
+        - OAuth2Security:
+          - apim:tier_view
       summary: Get all Custom Rules
       description: |
         Get all Custom Rules
       parameters:
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -1182,7 +1202,9 @@ paths:
 # Add a Custom Rule
 #-----------------------------------------------------
     post:
-      x-scope: apim:tier_manage
+      security:
+        - OAuth2Security:
+          - apim:tier_manage
       summary: Add a Custom Rule
       description: |
         Add a Custom Rule
@@ -1194,7 +1216,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/CustomRule'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - Custom Rules
       responses:
@@ -1239,7 +1260,9 @@ paths:
 # Retrieve a certain Custom Rule
 #-----------------------------------------------------
     get:
-      x-scope: apim:tier_view
+      security:
+        - OAuth2Security:
+          - apim:tier_view
       summary: Retrieve a Custom Rule
       description: |
         Retrieve a Custom Rule providing the policy name.
@@ -1292,7 +1315,9 @@ paths:
 # Delete a Custom Rule
 #-----------------------------------------------------
     delete:
-      x-scope: apim:tier_manage
+      security:
+        - OAuth2Security:
+          - apim:tier_manage
       summary: Delete a Custom Rule
       description: |
         Delete a Custom Rule
@@ -1324,7 +1349,9 @@ paths:
 # Update a Custom Rule
 #-----------------------------------------------------
     put:
-      x-scope: apim:tier_manage
+      security:
+        - OAuth2Security:
+          - apim:tier_manage
       summary: Update a Custom Rule
       description: |
         Update a Custom Rule
@@ -1337,7 +1364,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/CustomRule'
-        - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -1396,12 +1422,13 @@ paths:
 # Retrieve all labels
 #-----------------------------------------------------
     get:
-      x-scope: apim:label_view
+      security:
+        - OAuth2Security:
+          - apim:label_view
       summary: Get all registered Labels
       description: |
         Get all registered Labels
       parameters:
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -1443,7 +1470,9 @@ paths:
 # Add a Label
 #-----------------------------------------------------
     post:
-      x-scope: apim:label_manage
+      security:
+        - OAuth2Security:
+          - apim:label_manage
       summary: Add a Label
       description: |
         Add a new gateway/store Label
@@ -1455,7 +1484,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Label'
-        - $ref: '#/parameters/Content-Type'
       tags:
         - Label Collection
       responses:
@@ -1500,7 +1528,9 @@ paths:
 # Retrieve a Label
 #-----------------------------------------------------
     get:
-      x-scope: apim:label_view
+      security:
+        - OAuth2Security:
+          - apim:label_view
       summary: Retrieve a Label
       description: |
         Retrieve a Label for labelId
@@ -1553,7 +1583,9 @@ paths:
 # Delete a Label
 #-----------------------------------------------------
     delete:
-      x-scope: apim:label_manage
+      security:
+        - OAuth2Security:
+          - apim:label_manage
       summary: Delete a Label
       description: |
         Delete a Label by label Id
@@ -1585,7 +1617,9 @@ paths:
 # Update a Label
 #-----------------------------------------------------
     put:
-      x-scope: apim:label_manage
+      security:
+        - OAuth2Security:
+          - apim:label_manage
       summary: Update a Label
       description: |
         Update a Label by label Id
@@ -1598,7 +1632,6 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Label'
-        - $ref: '#/parameters/Content-Type'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
@@ -1649,6 +1682,157 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
+# The "workflows collection" resource API
+######################################################
+  '/workflows':
+
+#-----------------------------------------------------
+# Retrieve all workflows entries
+#-----------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+          - apim:workflow_view
+      summary: Get all the uncompleted Workflows
+      description: |
+        Get all uncompleted workflows entries
+      parameters:
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+        - $ref: '#/parameters/workflowType-Q'        
+      tags:
+        - Workflows (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            Workflows returned
+          schema:
+            $ref: '#/definitions/WorkflowList'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional reuquests.
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# The "Workflow approval" resource API
+######################################################
+  /workflows/{workflowReferenceId}:
+
+#-------------------------------------------------------------------
+# Resume the workflow by approving or rejecting the workflow request
+#-------------------------------------------------------------------
+    put:
+      security:
+        - OAuth2Security:
+          - apim:workflow_approve
+      summary: Update workflow status
+      description: |
+        This operation can be used to approve or reject a workflow task. .
+      parameters:
+       - $ref: '#/parameters/workflowReferenceId'
+       - in: body
+         name: body
+         description: |
+            Workflow event that need to be updated
+         required: true
+         schema:
+           $ref: '#/definitions/WorkflowRequest'
+      tags:
+        - Workflows (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Workflow request information is returned.
+          schema:
+            $ref: '#/definitions/WorkflowResponse'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Workflow for the given reference in not found.
+          schema:
+            $ref: '#/definitions/Error'
+
+#-------------------------------------------------------------------
+# Retrieve workflow information for the given reference id
+#-------------------------------------------------------------------
+    get:
+      security:
+        - OAuth2Security:
+          - apim:workflow_view
+      summary: Retrieve workflow information
+      description: |
+        This operation can be used to retrieve a workflow task. 
+      parameters:
+       - $ref: '#/parameters/workflowReferenceId'
+
+      tags:
+        - Workflows (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Workflow request information is returned.
+          schema:
+            $ref: '#/definitions/Workflow'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Workflow for the given reference in not found.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
@@ -1692,25 +1876,6 @@ parameters:
       Label identifier
     type: string
     required: true
-
-# The HTTP Accept header
-  Accept:
-    name: Accept
-    in: header
-    description: |
-      Media types acceptable for the response. Default is JSON.
-    default: JSON
-    type: string
-
-# The HTTP Content-Type header
-  Content-Type:
-    name: Content-Type
-    in: header
-    description: |
-      Media type of the entity in the body. Default is JSON.
-    default: JSON
-    required: true
-    type : string
 
 # The HTTP If-None-Match header
 # Used to avoid retrieving data that are already cached
@@ -1771,6 +1936,25 @@ parameters:
     default: 0
     type: integer
 
+# Workflow reference ID
+# Specified as part of the path expression
+  workflowReferenceId:
+    name: workflowReferenceId
+    in: path
+    description: |
+      Workflow reference id
+    required: true
+    type: string
+
+# Workflow type
+# Specified as part of the query string
+  workflowType-Q:
+    name: workflowType
+    in: query
+    description: |
+      Type of the worklfow
+    required: false
+    type: string
 ######################################################
 # The resources used by some of the APIs above within the message body
 ######################################################
@@ -2260,6 +2444,93 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Label'
+
+#-----------------------------------------------------
+# The workflow request resource
+#-----------------------------------------------------
+  WorkflowRequest:
+    title: Workflow Complete Request
+    required:
+      - status
+    properties:
+      status:
+        description: |
+          This attribute declares whether this workflow task is approved or rejected.
+        type: string
+        enum:
+          - APPROVED
+          - REJECTED
+        example: APPROVED
+      attributes:
+        description: |
+          Custom attributes to complete the workflow task
+        type: object
+        additionalProperties:
+          type: string
+        example: {}
+      description:
+        type: string
+        example: "Approve workflow request."
+
+#-----------------------------------------------------
+# The workflow executor's response resource
+#-----------------------------------------------------
+  WorkflowResponse:
+    title: Workflow Response
+    required:
+      - workflowStatus
+    properties:
+      workflowStatus:
+        description: |
+          This attribute declares whether this workflow task is approved or rejected.
+        type: string
+        enum:
+          - CREATED
+          - APPROVED
+          - REJECTED
+          - REGISTERED
+        example: APPROVED
+      jsonPayload:
+        description: |
+          Attributes that returned after the workflow execution
+        type: string
+#-----------------------------------------------------
+# The Workflow List resource
+#-----------------------------------------------------
+  WorkflowList:
+    title: Workflow List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of workflow entries returned.
+        example: 1
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/Workflow'
+
+#-----------------------------------------------------
+# The Workflow Info resource
+#-----------------------------------------------------
+  Workflow:
+    title: Workflow object details.
+    properties:
+      referenceId:
+        type: string
+        example: 12225615-0c99-43db-b691-c7e1bc23e149
+      type:
+        type: string
+        example: AM_APPLICATION_CREATION
+      description:
+        type: string
+        example: Application created by foo 
+      createdTime:
+        type: string
+        example: CREATED
+      workflowStatus:
+        type: string
+        example: APPROVED
 
 #-----------------------------------------------------
 # END-OF-FILE

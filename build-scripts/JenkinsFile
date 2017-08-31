@@ -3,82 +3,52 @@ def mvnHome = env.MVN_HOME;
 String dockerHost = env.DOCKER_HOST;
 String nodeLabel = env.NODE_LABEL;
 String repositoryName = 'carbon-apimgt';
-String user = env.GIT_USER;
-String gitCredentialsID = env.GIT_CREDENTIALS_ID;
-String gitEmail = env.GIT_EMAIL;
 node("${nodeLabel}") {
     try{
         stage('Preparation') {
-            withCredentials(
-                    [[$class          : 'UsernamePasswordMultiBinding',
-                      credentialsId   : gitCredentialsID,
-                      usernameVariable: 'GIT_USERNAME',
-                      passwordVariable: 'GIT_PASSWORD']]) {
-
-                checkout([
-                        $class                           : 'GitSCM',
-                        branches                         : [[name: '*/master']],
-                        doGenerateSubmoduleConfigurations: false,
-                        extensions                       : [[$class: 'LocalBranch', localBranch: 'master'],
-                                                            [$class: 'RelativeTargetDirectory', relativeTargetDir: repositoryName]],
-                        submoduleCfg                     : [],
-                        userRemoteConfigs                :
-                                [[credentialsId: gitCredentialsID,
-                                  url          : "https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${user}/${repositoryName}.git"]]]);
-                dir(repositoryName) {
-                    withCredentials(
-                            [[$class          : 'UsernamePasswordMultiBinding',
-                              credentialsId   : gitCredentialsID,
-                              usernameVariable: 'GIT_USERNAME',
-                              passwordVariable: 'GIT_PASSWORD']]) {
-                        sh("git config user.name ${GIT_USERNAME}");
-                        sh("git config user.email ${gitEmail}");
-                    }
-                }
-            }
+            checkout([$class: 'GitSCM', branches: [[name: '*/master']],
+                      doGenerateSubmoduleConfigurations: false,
+                      extensions                       : [[$class: 'LocalBranch', localBranch: 'master'],
+                                                          [$class: 'RelativeTargetDirectory', relativeTargetDir: repositoryName]],
+                      submoduleCfg: [],
+                      userRemoteConfigs: [[url: 'https://github.com/wso2/carbon-apimgt']]]);
         }
         stage('Building carbon-apimgt with unit test') {
             // Run the maven build
-            withEnv(["PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin"]) {
-                sh "mvn clean install -Dmaven.test.failure.ignore "
+            dir(repositoryName) {
+                withEnv(["PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin:${env.NODE_HOME}/bin"]) {
+                    sh "mvn clean install -Dmaven.test.failure.ignore "
+                }
             }
         }
         stage('Running Test on H2 database') {
-            withEnv(["PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin",
-                    "DOCKER_HOST=${dockerHost}"]) {
-                sh "mvn verify -P local-h2 -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
-            }
+            runProfileTests(mvnHome,dockerHost,repositoryName,'local-h2');
         }
         stage('Running Test on Mysql database') {
-            withEnv(["PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin",
-                    "DOCKER_HOST=${dockerHost}"]) {
-                sh "mvn verify -P local-mysql -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
-            }
+            runProfileTests(mvnHome,dockerHost,repositoryName,'local-mysql');
         }
         stage('Running Test on Oracle database') {
-            withEnv(["PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin",
-                    "DOCKER_HOST=${dockerHost}"]) {
-                sh "mvn verify -P local-oracle -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
-            }
+            runProfileTests(mvnHome,dockerHost,repositoryName,'local-oracle');
         }
         stage('Running Test on PostgreSql database') {
-            withEnv(["PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin",
-                    "DOCKER_HOST=${dockerHost}"]) {
-                sh "mvn verify -P local-postgres -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
-            }
+            runProfileTests(mvnHome,dockerHost,repositoryName,'local-postgres');
         }
         stage('Running Test on Mssql database') {
-            withEnv(["PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin",
-                    "DOCKER_HOST=${dockerHost}"]) {
-                sh "mvn verify -P local-mssql -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
-            }
+            runProfileTests(mvnHome,dockerHost,repositoryName,'local-mssql');
         }
         currentBuild.result = 'SUCCESS'
     } catch (any) {
         currentBuild.result = 'FAILURE'
         throw any //rethrow exception to prevent the build from proceeding
     }finally{
-        step([$class: 'JacocoPublisher', exclusionPattern: '**/rest/api/*/dto/*.class,**/rest/api/*/factories/*.class,**/rest/api/*/*.class'])
+        step([$class: 'JacocoPublisher', changeBuildStatus: true, exclusionPattern: '**/carbon/apimgt/authenticator/*.class,**/apimgt/ballerina/deployment/*.class,**/carbon/apimgt/authenticator/**/*.class,**/dto/*.class,**/exception/*.class,**/exceptions/*.class,**/models/*.class,**/models/**/*.class,**/rest/api/*/factories/*.class,**/rest/api/*/*.class', maximumBranchCoverage: '32', maximumClassCoverage: '55', maximumComplexityCoverage: '30', maximumInstructionCoverage: '40', maximumLineCoverage: '50', maximumMethodCoverage: '50', minimumBranchCoverage: '32', minimumClassCoverage: '55', minimumComplexityCoverage: '30', minimumInstructionCoverage: '40', minimumMethodCoverage: '50'])
         step([$class: 'Mailer', notifyEveryUnstableBuild: true, recipients: '', sendToIndividuals: true])
+    }
+}
+def runProfileTests(String mvnHome,String dockerHost,String repositoryName,String profileName){
+    dir(repositoryName) {
+        withEnv(["PATH+MAVEN=${mvnHome}/bin:${env.JAVA_HOME}/bin:${env.NODE_HOME}/bin","DOCKER_HOST=${dockerHost}"]) {
+            sh "mvn verify -P ${profileName} -f components/apimgt/org.wso2.carbon.apimgt.core/pom.xml -Dmaven.test.failure.ignore -Dskip.surefire.test=true"
+        }
     }
 }

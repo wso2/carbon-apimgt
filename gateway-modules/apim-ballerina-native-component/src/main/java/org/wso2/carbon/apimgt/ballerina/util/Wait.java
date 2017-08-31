@@ -44,7 +44,7 @@ public class Wait extends AbstractNativeFunction {
 
     @Override
     public BValue[] execute(Context context) {
-        int value = getIntArgument(context, 0);
+        long value = getIntArgument(context, 0);
         try {
             Thread.sleep(value);
             return new BValue[] {new BInteger(0)};

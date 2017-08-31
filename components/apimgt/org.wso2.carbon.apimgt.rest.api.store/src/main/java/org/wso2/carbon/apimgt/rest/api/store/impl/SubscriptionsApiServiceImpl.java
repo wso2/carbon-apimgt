@@ -38,8 +38,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
-        "2016-11-01T13:48:55.078+05:30")
+/**
+ * Implementation of Subscriptions resource
+ */
 public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
     private static final Logger log = LoggerFactory.getLogger(SubscriptionsApiServiceImpl.class);
@@ -54,19 +55,18 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @param applicationId ID of the Application
      * @param offset        offset value
      * @param limit         limit value
-     * @param accept        accept header value
      * @param ifNoneMatch   If-None-Match header value
      * @param request       msf4j request object
      * @return Subscription List
      * @throws NotFoundException If failed to get the subscription
      */
     @Override
-    public Response subscriptionsGet(String apiId, String applicationId, String apiType, Integer offset, Integer limit,
-                                     String accept, String ifNoneMatch, Request request) throws NotFoundException {
+    public Response subscriptionsGet(String apiId, String applicationId, String apiType, Integer offset,
+            Integer limit, String ifNoneMatch, Request request) throws NotFoundException {
 
         List<Subscription> subscribedApiList = null;
         SubscriptionListDTO subscriptionListDTO = null;
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
@@ -127,15 +127,13 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * Adds a new subscription
      *
      * @param body        Subscription details to be added
-     * @param contentType Content-Type header value
      * @param request     msf4j request object
      * @return Newly added subscription as the response
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response subscriptionsPost(SubscriptionDTO body, String contentType, Request request)
-            throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+    public Response subscriptionsPost(SubscriptionDTO body, Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
         SubscriptionDTO subscriptionDTO = null;
         URI location = null;
         try {
@@ -234,10 +232,10 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                                                       String ifUnmodifiedSince, Request request) throws
             NotFoundException {
 
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
-            String existingFingerprint = subscriptionsSubscriptionIdGetFingerprint(subscriptionId, null, null, null,
+            String existingFingerprint = subscriptionsSubscriptionIdGetFingerprint(subscriptionId, null, null,
                     request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
@@ -264,7 +262,6 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * Retrieves a single subscription
      *
      * @param subscriptionId  Id of the subscription
-     * @param accept          accept header value
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @param request         msf4j request object
@@ -272,14 +269,13 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response subscriptionsSubscriptionIdGet(String subscriptionId, String accept, String ifNoneMatch,
-                                                   String ifModifiedSince, Request request)
-            throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+    public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch,
+            String ifModifiedSince, Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
         SubscriptionDTO subscriptionDTO = null;
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
-            String existingFingerprint = subscriptionsSubscriptionIdGetFingerprint(subscriptionId, accept, ifNoneMatch,
+            String existingFingerprint = subscriptionsSubscriptionIdGetFingerprint(subscriptionId, ifNoneMatch,
                     ifModifiedSince, request);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                     .contains(existingFingerprint)) {
@@ -305,15 +301,14 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      * Retrieves the fingerprint of a subscription given its UUID
      *
      * @param subscriptionId  Id of the subscription
-     * @param accept          Accept header value
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @param request         msf4j request object
      * @return the fingerprint of the subscription
      */
-    public String subscriptionsSubscriptionIdGetFingerprint(String subscriptionId, String accept, String ifNoneMatch,
-                                                            String ifModifiedSince, Request request) {
-        String username = RestApiUtil.getLoggedInUsername();
+    public String subscriptionsSubscriptionIdGetFingerprint(String subscriptionId, String ifNoneMatch,
+            String ifModifiedSince, Request request) {
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestApiUtil.getConsumer(username).getLastUpdatedTimeOfSubscription(subscriptionId);
             return ETagUtils.generateETag(lastUpdatedTime);

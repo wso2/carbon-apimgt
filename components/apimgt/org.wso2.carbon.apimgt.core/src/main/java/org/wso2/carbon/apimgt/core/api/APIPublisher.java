@@ -21,6 +21,8 @@
 package org.wso2.carbon.apimgt.core.api;
 
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
@@ -29,11 +31,13 @@ import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 import org.wso2.carbon.lcm.sql.beans.LifecycleHistoryBean;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.List;
@@ -400,6 +404,84 @@ public interface APIPublisher extends APIManager {
     void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException;
 
     /**
+     * Returns the WSDL of a given API UUID as {@link String}.
+     * 
+     * @param apiId API UUID
+     * @return WSDL of the API as {@link String}
+     * @throws APIMgtDAOException if error occurs while accessing the WSDL from the data layer
+     */
+    String getAPIWSDL(String apiId) throws APIMgtDAOException;
+
+    /**
+     * Returns an stream from the ZIP wsdl archive of a particular API stored in DB.
+     * 
+     * @param apiId UUID of API
+     * @return an stream from the ZIP wsdl archive of a particular API stored in DB
+     * @throws APIMgtDAOException if error occurs while accessing the WSDL from the data layer
+     */
+    InputStream getAPIWSDLArchive(String apiId) throws APIMgtDAOException;
+
+    /**
+     * Creates an API using a WSDL archive stream.
+     * 
+     * @param apiBuilder {@code APIBuilder} instance
+     * @param inputStream WSDL archive stream
+     * @param isHttpBinding states whether http binding operations should be used to create resources
+     * @return UUID of the created API
+     * @throws APIManagementException If fails to add the API
+     */
+    String addAPIFromWSDLArchive(API.APIBuilder apiBuilder, InputStream inputStream, boolean isHttpBinding)
+            throws APIManagementException;
+
+    /**
+     * Creates an API using a WSDL file.
+     *
+     * @param apiBuilder {@code APIBuilder} instance
+     * @param inputStream WSDL archive stream
+     * @param isHttpBinding states whether http binding operations should be used to create resources
+     * @return UUID of the created API
+     * @throws APIManagementException If fails to add the API
+     */
+    String addAPIFromWSDLFile(API.APIBuilder apiBuilder, InputStream inputStream, boolean isHttpBinding)
+            throws APIManagementException;
+
+    /**
+     * Creates an API using a WSDL URL.
+     *
+     * @param apiBuilder {@code APIBuilder} instance
+     * @param wsdlUrl WSDL URL
+     * @param isHttpBinding states whether http binding operations should be used to create resources
+     * @return UUID of the created API
+     * @throws APIManagementException If fails to add the API
+     * @throws IOException Error occurs while accessing the URL
+     */
+    String addAPIFromWSDLURL(API.APIBuilder apiBuilder, String wsdlUrl, boolean isHttpBinding)
+            throws APIManagementException, IOException;
+
+    /**
+     * Updates a WSDL (single file) of an API.
+     * 
+     * @param apiId UUID of API
+     * @param inputStream WSDL file stream
+     * @return updated WSDL content
+     * @throws APIMgtDAOException If data layer error occurs while updating the WSDL
+     * @throws APIMgtWSDLException If WSDL content error occurs while updating the WSDL
+     */
+    String updateAPIWSDL(String apiId, InputStream inputStream)
+            throws APIMgtDAOException, APIMgtWSDLException;
+
+    /**
+     * Updates a WSDL archive of an API.
+     *
+     * @param apiId UUID of API
+     * @param inputStream WSDL file stream
+     * @throws APIMgtDAOException If data layer error occurs while updating the WSDL
+     * @throws APIMgtWSDLException If WSDL content error occurs while updating the WSDL
+     */
+    void updateAPIWSDLArchive(String apiId, InputStream inputStream)
+            throws APIMgtDAOException, APIMgtWSDLException;
+
+    /**
      * Get list of policies of an particular tier level.
      *
      * @param tierLevel Tier level.
@@ -459,4 +541,15 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException if API Manager core level exception occurred
      */
     boolean isEndpointExist(String name) throws APIManagementException;
+
+    /**
+     * Extract the WSDL archive and validate
+     *
+     * @param inputStream WSDL archive input stream
+     * @return {@link WSDLArchiveInfo} object with WSDL information
+     * @throws APIMgtDAOException  If an error occurred from DAO layer
+     * @throws APIMgtWSDLException If an error occurred while processing WSDL files
+     */
+    WSDLArchiveInfo extractAndValidateWSDLArchive(InputStream inputStream)
+            throws APIMgtDAOException, APIMgtWSDLException;
 }

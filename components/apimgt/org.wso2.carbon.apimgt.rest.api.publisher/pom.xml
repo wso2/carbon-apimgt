@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>7.0.34-SNAPSHOT</version>
+        <version>7.0.41-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -98,27 +98,43 @@
             <artifactId>org.wso2.carbon.apimgt.rest.api.commons</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jacoco</groupId>
+            <artifactId>org.jacoco.agent</artifactId>
+            <classifier>runtime</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
 
         <plugins>
-            <!--plugin>
+            <!-- <plugin>
                 <groupId>org.wso2.maven.plugins</groupId>
                 <artifactId>swagger2msf4j-maven-plugin</artifactId>
                 <version>1.0-SNAPSHOT</version>
                 <configuration>
                     <inputSpec>${project.basedir}/src/main/resources/publisher-api.yaml</inputSpec>
                 </configuration>
-            </plugin-->
+            </plugin> -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -169,6 +185,10 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
 
@@ -188,16 +208,18 @@
             com.google.gson.*; version="${google.code.gson.import.version.range}",
             org.apache.commons.lang3.*; version="${apache.commons.lang3.import.version.range}",
             org.json.simple.*,
-	        org.apache.commons.io.*,
+            org.apache.commons.io.*,
             com.fasterxml.jackson.core.*,
-            com.fasterxml.jackson.databind.*
+            com.fasterxml.jackson.databind.*,
+            javax.wsdl.*,
+            org.apache.woden.*
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.rest.api.publisher.internal,
             org.wso2.carbon.apimgt.rest.api.publisher.*; version="${carbon.apimgt.version}",
         </export.package>
         <carbon.component>
-            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="10"
+            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="7"
         </carbon.component>
     </properties>
 </project>

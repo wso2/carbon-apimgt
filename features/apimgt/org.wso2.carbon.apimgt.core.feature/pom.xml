@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>7.0.34-SNAPSHOT</version>
+        <version>7.0.41-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -132,6 +132,18 @@
         <dependency>
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>wsdl4j.wso2</groupId>
+            <artifactId>wsdl4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.woden.wso2</groupId>
+            <artifactId>woden</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ws.commons.schema.wso2</groupId>
+            <artifactId>XmlSchema</artifactId>
         </dependency>
     </dependencies>
 
@@ -358,6 +370,18 @@
                                 <bundle>
                                     <symbolicName>io.github.openfeign.feign-gson</symbolicName>
                                     <version>${feign.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>wsdl4j</symbolicName>
+                                    <version>${wsdl4j.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>woden</symbolicName>
+                                    <version>${apache.woden.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>XmlSchema</symbolicName>
+                                    <version>${xmlschema.version}</version>
                                 </bundle>
                             </bundles>
                         </configuration>

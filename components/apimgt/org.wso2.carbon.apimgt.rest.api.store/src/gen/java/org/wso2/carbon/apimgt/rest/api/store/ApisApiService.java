@@ -33,73 +33,65 @@ public abstract class ApisApiService {
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdCommentsCommentIdGet(String commentId
  ,String apiId
- ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdCommentsCommentIdPut(String commentId
  ,String apiId
  ,CommentDTO body
- ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdCommentsGet(String apiId
  ,Integer limit
  ,Integer offset
- ,String accept
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdCommentsPost(String apiId
  ,CommentDTO body
- ,String contentType
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdDocumentsDocumentIdContentGet(String apiId
  ,String documentId
- ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdDocumentsDocumentIdGet(String apiId
  ,String documentId
- ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdDocumentsGet(String apiId
  ,Integer limit
  ,Integer offset
- ,String accept
  ,String ifNoneMatch
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdGet(String apiId
- ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdRatingsGet(String apiId
  ,Integer limit
  ,Integer offset
- ,String accept
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdRatingsRatingIdGet(String apiId
  ,String ratingId
- ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdSwaggerGet(String apiId
- ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisApiIdUserRatingPut(String apiId
  ,RatingDTO body
- ,String contentType
+ , Request request) throws NotFoundException;
+    public abstract Response apisApiIdWsdlGet(String apiId
+ ,String labelName
+ ,String ifNoneMatch
+ ,String ifModifiedSince
  , Request request) throws NotFoundException;
     public abstract Response apisGet(Integer limit
  ,Integer offset
  ,String query
- ,String accept
  ,String ifNoneMatch
  , Request request) throws NotFoundException;
 }

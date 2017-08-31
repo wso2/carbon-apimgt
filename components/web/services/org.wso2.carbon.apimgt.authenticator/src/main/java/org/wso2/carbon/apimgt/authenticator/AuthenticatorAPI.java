@@ -148,8 +148,8 @@ public class AuthenticatorAPI implements Microservice {
     }
 
     @POST
-    @Produces (MediaType.APPLICATION_JSON)
-    @Path ("/revoke")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/logout")
     public Response logout(@Context Request request) {
         String appContext = AuthUtil.getAppContext(request);
         String restAPIContext;
@@ -189,7 +189,5 @@ public class AuthenticatorAPI implements Microservice {
         errorDTO.setCode(ExceptionCodes.INVALID_AUTHORIZATION_HEADER.getErrorCode());
         errorDTO.setMessage(ExceptionCodes.INVALID_AUTHORIZATION_HEADER.getErrorMessage());
         return Response.status(Response.Status.UNAUTHORIZED).entity(errorDTO).build();
-
     }
-
 }

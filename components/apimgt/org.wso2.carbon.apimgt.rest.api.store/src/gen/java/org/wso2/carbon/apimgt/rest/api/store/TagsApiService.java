@@ -21,7 +21,6 @@ import javax.ws.rs.core.SecurityContext;
 public abstract class TagsApiService {
     public abstract Response tagsGet(Integer limit
  ,Integer offset
- ,String accept
  ,String ifNoneMatch
  , Request request) throws NotFoundException;
 }

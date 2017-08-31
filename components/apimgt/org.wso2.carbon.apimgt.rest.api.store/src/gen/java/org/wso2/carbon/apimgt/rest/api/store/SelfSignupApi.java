@@ -48,7 +48,11 @@ public class SelfSignupApi implements Microservice  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "User self signup API ", response = UserDTO.class, tags={ "Signup", })
+    @io.swagger.annotations.ApiOperation(value = "", notes = "User self signup API ", response = UserDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:self-signup", description = "Self Sign-up")
+        })
+    }, tags={ "Signup", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = UserDTO.class),
         
@@ -56,9 +60,8 @@ public class SelfSignupApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = UserDTO.class) })
     public Response selfSignupPost(@ApiParam(value = "User object to represent the new user " ,required=true) UserDTO body
-,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
 , @Context Request request)
     throws NotFoundException {
-        return delegate.selfSignupPost(body,contentType, request);
+        return delegate.selfSignupPost(body, request);
     }
 }

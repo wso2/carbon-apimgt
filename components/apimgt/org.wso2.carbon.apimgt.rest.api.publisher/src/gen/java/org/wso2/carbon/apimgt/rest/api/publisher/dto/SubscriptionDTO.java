@@ -127,7 +127,7 @@ public class SubscriptionDTO   {
    * Get subscriptionStatus
    * @return subscriptionStatus
   **/
-  @ApiModelProperty(example = "BLOCKED", value = "")
+  @ApiModelProperty(example = "BLOCKED", required = true, value = "")
   public SubscriptionStatusEnum getSubscriptionStatus() {
     return subscriptionStatus;
   }

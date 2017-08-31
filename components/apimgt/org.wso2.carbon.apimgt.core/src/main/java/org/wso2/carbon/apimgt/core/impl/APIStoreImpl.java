@@ -35,7 +35,9 @@ import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
+import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.api.LabelExtractor;
+import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
@@ -51,10 +53,11 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
+import org.wso2.carbon.apimgt.core.exception.APINotFoundException;
 import org.wso2.carbon.apimgt.core.exception.APIRatingException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
-import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -76,11 +79,13 @@ import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.Tag;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.User;
+import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.template.APIConfigContext;
 import org.wso2.carbon.apimgt.core.template.dto.CompositeAPIEndpointDTO;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
+import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
@@ -95,6 +100,7 @@ import org.wso2.carbon.apimgt.core.workflow.SubscriptionDeletionWorkflow;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -129,6 +135,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      * Constructor.
      *
      * @param username   Logged in user's username
+     * @param idp Identity Provider Object
+     * @param keyManager Key Manager Object
      * @param apiDAO  API Data Access Object
      * @param applicationDAO  Application Data Access Object
      * @param apiSubscriptionDAO   API Subscription Data Access Object
@@ -139,12 +147,12 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      * @param gatewaySourceGenerator GatewaySourceGenerator object
      * @param apiGateway APIGateway object
      */
-    public APIStoreImpl(String username, IdentityProvider idp, ApiDAO apiDAO, ApplicationDAO applicationDAO,
-                        APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, TagDAO tagDAO, LabelDAO labelDAO,
-            WorkflowDAO workflowDAO, GatewaySourceGenerator gatewaySourceGenerator,
-            APIGateway apiGateway) {
-        super(username, idp, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, new APILifeCycleManagerImpl(),
-                labelDAO, workflowDAO, tagDAO, gatewaySourceGenerator, apiGateway);
+    public APIStoreImpl(String username, IdentityProvider idp, KeyManager keyManager, ApiDAO apiDAO,
+                        ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
+                        TagDAO tagDAO, LabelDAO labelDAO, WorkflowDAO workflowDAO,
+                        GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGateway) {
+        super(username, idp, keyManager, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO,
+                new APILifeCycleManagerImpl(), labelDAO, workflowDAO, tagDAO, gatewaySourceGenerator, apiGateway);
     }
 
     /**
@@ -209,7 +217,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     @Override
     public WorkflowResponse updateApplication(String uuid, Application application) throws APIManagementException {
         try {
-            //get old app 
+            //get old app
             Application existingApplication = getApplicationDAO().getApplication(uuid);
             if (existingApplication != null) {
                 WorkflowExecutor executor = WorkflowExecutorFactory.getInstance()
@@ -239,8 +247,12 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
                 workflow.setCreatedTime(LocalDateTime.now());
 
-                String workflowDescription = "Update application from : " + existingApplication.toString()
-                        + " to : " + application.toString();
+                String workflowDescription = "Update application " + existingApplication.getName() + " with tier "
+                        + existingApplication.getPolicy().getPolicyName() + " and description \'"
+                        + existingApplication.getDescription() + "\' To " + application.getName() + " with tier "
+                        + application.getPolicy().getPolicyName() + " and description \'" + application.getDescription()
+                        + "\' by " + getUsername();
+
                 workflow.setWorkflowDescription(workflowDescription);
 
                 //setting attributes for internal use. These are set to use from outside the executor's method
@@ -282,7 +294,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
-    public OAuthApplicationInfo generateApplicationKeys(String applicationId, String tokenType,
+    public OAuthApplicationInfo generateApplicationKeys(String applicationId, String keyType,
                                                         String callbackUrl, List<String> grantTypes)
             throws APIManagementException {
         if (log.isDebugEnabled()) {
@@ -291,10 +303,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
         Application application = getApplicationByUuid(applicationId);
 
-        OAuthAppRequest oauthAppRequest = new OAuthAppRequest(application.getName(), callbackUrl, tokenType,
+        OAuthAppRequest oauthAppRequest = new OAuthAppRequest(application.getName(), callbackUrl, keyType,
                 grantTypes);
 
-        OAuthApplicationInfo oauthAppInfo = getIdentityProvider().createApplication(oauthAppRequest);
+        OAuthApplicationInfo oauthAppInfo = getKeyManager().createApplication(oauthAppRequest);
 
         if (log.isDebugEnabled()) {
             log.debug("Application key generation was successful for application: " + application.getName()
@@ -302,7 +314,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         }
 
         try {
-            getApplicationDAO().addApplicationKeys(applicationId, tokenType, oauthAppInfo);
+            getApplicationDAO().addApplicationKeys(applicationId, keyType, oauthAppInfo.getClientId());
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while saving key data for application: " + application.getName();
             log.error(errorMsg, e);
@@ -315,7 +327,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         }
 
         List<SubscriptionValidationData> subscriptionValidationData = getApiSubscriptionDAO()
-                .getAPISubscriptionsOfAppForValidation(applicationId, tokenType);
+                .getAPISubscriptionsOfAppForValidation(applicationId, keyType);
         if (subscriptionValidationData != null && !subscriptionValidationData.isEmpty()) {
             getApiGateway().addAPISubscription(subscriptionValidationData);
         }
@@ -324,8 +336,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
-    public OAuthApplicationInfo provideApplicationKeys(String applicationId, String tokenType, String clientId,
-                                                       String clientSecret) throws APIManagementException {
+    public OAuthApplicationInfo mapApplicationKeys(String applicationId, String keyType, String clientId,
+                                                   String clientSecret) throws APIManagementException {
         if (log.isDebugEnabled()) {
             log.debug("Semi-manual client registering for App: " + applicationId + " and Client ID: " + clientId);
         }
@@ -334,19 +346,19 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             String msg = "One of input values is null or empty. Application Id: " + applicationId + " Client Id: "
                     + clientId + (StringUtils.isEmpty(clientSecret) ? " Client Secret: " + clientSecret : "");
             log.error(msg);
-            throw new KeyManagementException(msg, ExceptionCodes.OAUTH2_APP_MAP_FAILED);
+            throw new APIManagementException(msg, ExceptionCodes.OAUTH2_APP_MAP_FAILED);
         }
 
         //Checking whether given consumer key and secret match with an existing OAuth app.
         //If they does not match, throw an exception.
-        OAuthApplicationInfo oAuthApp = getIdentityProvider().retrieveApplication(clientId);
+        OAuthApplicationInfo oAuthApp = getKeyManager().retrieveApplication(clientId);
         if (oAuthApp == null || !clientSecret.equals(oAuthApp.getClientSecret())) {
             String msg = "Unable to find OAuth app. The provided Client Id is invalid. Client Id: " + clientId;
-            throw new KeyManagementException(msg, ExceptionCodes.OAUTH2_APP_MAP_FAILED);
+            throw new APIManagementException(msg, ExceptionCodes.OAUTH2_APP_MAP_FAILED);
         }
 
         try {
-            getApplicationDAO().addApplicationKeys(applicationId, tokenType, oAuthApp);
+            getApplicationDAO().addApplicationKeys(applicationId, keyType, clientId);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while saving key data.";
             log.error(errorMsg, e);
@@ -356,7 +368,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         log.debug("Application keys are successfully saved in the database");
 
         List<SubscriptionValidationData> subscriptionValidationData = getApiSubscriptionDAO()
-                .getAPISubscriptionsOfAppForValidation(applicationId, tokenType);
+                .getAPISubscriptionsOfAppForValidation(applicationId, keyType);
         if (subscriptionValidationData != null && !subscriptionValidationData.isEmpty()) {
             getApiGateway().addAPISubscription(subscriptionValidationData);
         }
@@ -366,6 +378,106 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                     + " and Client ID: " + clientId);
         }
         return oAuthApp;
+    }
+
+    @Override
+    public List<OAuthApplicationInfo> getApplicationKeys(String applicationId) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Getting keys of App: " + applicationId);
+        }
+
+        if (StringUtils.isEmpty(applicationId)) {
+            String msg = "Input value is null or empty. Application Id: " + applicationId;
+            log.error(msg);
+            throw new APIManagementException(msg, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
+        }
+
+        try {
+            List<OAuthApplicationInfo> allKeysFromDB = getApplicationDAO().getApplicationKeys(applicationId);
+            for (OAuthApplicationInfo keys : allKeysFromDB) {
+                OAuthApplicationInfo oAuthApp = getKeyManager().retrieveApplication(keys.getClientId());
+                keys.setClientSecret(oAuthApp.getClientSecret());
+                keys.setGrantTypes(oAuthApp.getGrantTypes());
+                keys.setCallBackURL(oAuthApp.getCallBackURL());
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieved all keys of App: " + applicationId);
+            }
+            return allKeysFromDB;
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while getting keys of application: " + applicationId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
+        }
+    }
+
+    @Override
+    public OAuthApplicationInfo getApplicationKeys(String applicationId, String keyType) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Getting " + keyType + " keys of App: " + applicationId);
+        }
+
+        if (StringUtils.isEmpty(applicationId) || StringUtils.isEmpty(keyType)) {
+            String msg = "One of input values is null or empty. Application Id: " + applicationId + " Key Type: "
+                    + keyType;
+            log.error(msg);
+            throw new APIManagementException(msg, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
+        }
+
+        try {
+            OAuthApplicationInfo keysFromDB = getApplicationDAO().getApplicationKeys(applicationId, keyType);
+            OAuthApplicationInfo oAuthApp = getKeyManager().retrieveApplication(keysFromDB.getClientId());
+            keysFromDB.setClientSecret(oAuthApp.getClientSecret());
+            keysFromDB.setGrantTypes(oAuthApp.getGrantTypes());
+            keysFromDB.setCallBackURL(oAuthApp.getCallBackURL());
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieved " + keyType + " keys of App: " + applicationId);
+            }
+            return keysFromDB;
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while getting " + keyType + " keys of application: " + applicationId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
+        }
+    }
+
+    @Override
+    public OAuthApplicationInfo updateGrantTypesAndCallbackURL(String applicationId, String keyType,
+                                                               List<String> grantTypes, String callbackURL)
+            throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Updating " + keyType + " grant type/callback of App: " + applicationId);
+        }
+
+        if (StringUtils.isEmpty(applicationId) || StringUtils.isEmpty(keyType)) {
+            String msg = "One of input values is null or empty. Application Id: " + applicationId + " Key Type: "
+                    + keyType;
+            log.error(msg);
+            throw new APIManagementException(msg, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
+        }
+
+        if (grantTypes == null || grantTypes.isEmpty() || StringUtils.isEmpty(callbackURL)) {
+            String msg = "Both Grant Types list and Callback URL can't be null or empty at once.";
+            log.error(msg);
+            throw new APIManagementException(msg, ExceptionCodes.OAUTH2_APP_RETRIEVAL_FAILED);
+        }
+
+        try {
+            OAuthApplicationInfo appFromDB = getApplicationDAO().getApplicationKeys(applicationId, keyType);
+            OAuthApplicationInfo oAuthApp = getKeyManager().retrieveApplication(appFromDB.getClientId());
+            oAuthApp.setGrantTypes(grantTypes);
+            oAuthApp.setCallBackURL(callbackURL);
+            oAuthApp = getKeyManager().updateApplication(oAuthApp);
+            if (log.isDebugEnabled()) {
+                log.debug("Updated " + keyType + " grant type/callback of App: " + applicationId);
+            }
+            return oAuthApp;
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while updating " + keyType + " grant type/callback of application: "
+                    + applicationId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
+        }
     }
 
     @Override
@@ -384,7 +496,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         accessTokenRequest.setValidityPeriod(validityPeriod);
         accessTokenRequest.setTokenToRevoke(tokenToBeRevoked);
 
-        AccessTokenInfo newToken = getIdentityProvider().getNewAccessToken(accessTokenRequest);
+        AccessTokenInfo newToken = getKeyManager().getNewAccessToken(accessTokenRequest);
 
         ApplicationToken applicationToken = new ApplicationToken();
         applicationToken.setAccessToken(newToken.getAccessToken());
@@ -538,7 +650,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 log.error(errorMsg);
                 throw new APIManagementException(errorMsg, ExceptionCodes.SUBSCRIPTION_NOT_FOUND);
             } else {
-                //remove pending tasks for subscription creation first 
+                //remove pending tasks for subscription creation first
                 cleanupPendingTaskForSubscriptionDeletion(subscription);
 
                 SubscriptionDeletionWorkflow workflow = new SubscriptionDeletionWorkflow(getApiSubscriptionDAO(),
@@ -548,7 +660,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
                 workflow.setStatus(WorkflowStatus.CREATED);
                 workflow.setCreatedTime(LocalDateTime.now());
-                workflow.setExternalWorkflowReference(UUID.randomUUID().toString());        
+                workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
                 workflow.setSubscriber(getUsername());
 
                 String workflowDescription = "Subscription deletion workflow for the subscription to api "
@@ -557,10 +669,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                         + subscription.getApplication().getName() + " with tier " + subscription.getPolicy()
                         + " by " + getUsername();
                 workflow.setWorkflowDescription(workflowDescription);
-                
+
                 WorkflowResponse response = removeSubscriptionWFExecutor.execute(workflow);
                 workflow.setStatus(response.getWorkflowStatus());
-                
+
 
                 if (WorkflowStatus.CREATED != response.getWorkflowStatus()) {
                     completeWorkflow(removeSubscriptionWFExecutor, workflow);
@@ -995,7 +1107,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         try {
             appId = apiBuilder.getApplicationId();
             List<Subscription> subscriptions = getApiSubscriptionDAO().getAPISubscriptionsByApplication(
-                                                                       apiBuilder.getApplicationId(), ApiType.STANDARD);
+                    apiBuilder.getApplicationId(), ApiType.STANDARD);
             for (Subscription subscription : subscriptions) {
                 CompositeAPIEndpointDTO endpointDTO = new CompositeAPIEndpointDTO();
                 API api = subscription.getApi();
@@ -1004,7 +1116,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 endpointDTO.setTransportType(APIMgtConstants.HTTPS);
                 // TODO: replace host with gateway domain host
                 String endpointUrl = APIMgtConstants.HTTPS + "://" + config.getHostname() + "/" + api.getContext()
-                                     + "/" + api.getVersion();
+                        + "/" + api.getVersion();
                 endpointDTO.setEndpointUrl(endpointUrl);
                 endpointDTOs.add(endpointDTO);
             }
@@ -1049,9 +1161,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
             APIUtils.verifyValidityOfApiUpdate(apiBuilder, originalAPI);
 
-            try {
+            try (InputStream gatewayConfig = getApiDAO().getCompositeAPIGatewayConfig(apiBuilder.getId())) {
                 String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
-                InputStream gatewayConfig = getApiDAO().getCompositeAPIGatewayConfig(apiBuilder.getId());
                 GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
                 APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.build(), config
                         .getGatewayPackageName());
@@ -1088,7 +1199,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 throw new APIManagementException(errorMsg, e, e.getErrorHandler());
             } catch (IOException e) {
                 String errorMsg = "Error occurred while reading gateway configuration the API - " +
-                                        apiBuilder.getName();
+                        apiBuilder.getName();
                 log.error(errorMsg, e);
                 throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
             }
@@ -1231,6 +1342,82 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         }
     }
 
+    @Override
+    public String getAPIWSDL(String apiId, String labelName)
+            throws APIMgtDAOException, APIMgtWSDLException, APINotFoundException, LabelException {
+        API api = getApiDAO().getAPI(apiId);
+        if (api == null) {
+            throw new APINotFoundException("API with id " + apiId + " not found.", ExceptionCodes.API_NOT_FOUND);
+        }
+
+        //api.getLabels() should not be null and the labels should contain labelName
+        if ((api.getLabels() == null || !api.getLabels().contains(labelName))) {
+            throw new LabelException("API with id " + apiId + " does not contain label " + labelName,
+                    ExceptionCodes.LABEL_NOT_FOUND_IN_API);
+        }
+
+        String wsdl = getApiDAO().getWSDL(apiId);
+        Label label = getLabelDAO().getLabelByName(labelName);
+
+        if (!StringUtils.isEmpty(wsdl)) {
+            WSDLProcessor processor;
+            try {
+                processor = WSDLProcessFactory.getInstance()
+                        .getWSDLProcessor(wsdl.getBytes(APIMgtConstants.ENCODING_UTF_8));
+                return new String(processor.getUpdatedWSDL(api, label), APIMgtConstants.ENCODING_UTF_8);
+            } catch (UnsupportedEncodingException e) {
+                throw new APIMgtWSDLException("WSDL content is not in utf-8 encoding", e,
+                        ExceptionCodes.CANNOT_PROCESS_WSDL_CONTENT);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public WSDLArchiveInfo getAPIWSDLArchive(String apiId, String labelName)
+            throws APIMgtDAOException, APIMgtWSDLException, APINotFoundException, LabelException {
+        API api = getApiDAO().getAPI(apiId);
+        if (api == null) {
+            throw new APINotFoundException("API with id " + apiId + " not found.", ExceptionCodes.API_NOT_FOUND);
+        }
+
+        //api.getLabels() should not be null and the labels should contain labelName
+        if ((api.getLabels() == null || !api.getLabels().contains(labelName))) {
+            throw new LabelException("API with id " + apiId + " does not contain label " + labelName,
+                    ExceptionCodes.LABEL_NOT_FOUND_IN_API);
+        }
+
+        try (InputStream wsdlZipInputStream = getApiDAO().getWSDLArchive(apiId)) {
+            String rootPath = System.getProperty(APIMgtConstants.JAVA_IO_TMPDIR)
+                    + File.separator + APIMgtConstants.WSDLConstants.WSDL_ARCHIVES_FOLDERNAME
+                    + File.separator + UUID.randomUUID().toString();
+            String archivePath = rootPath + File.separator + APIMgtConstants.WSDLConstants.WSDL_ARCHIVE_FILENAME;
+            String extractedLocation = APIFileUtils.extractUploadedArchive(wsdlZipInputStream,
+                    APIMgtConstants.WSDLConstants.EXTRACTED_WSDL_ARCHIVE_FOLDERNAME, archivePath, rootPath);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully extracted WSDL archive in path: " + extractedLocation);
+            }
+            Label label = getLabelDAO().getLabelByName(labelName);
+            WSDLProcessor processor = WSDLProcessFactory.getInstance().getWSDLProcessorForPath(extractedLocation);
+            String wsdlPath = processor.getUpdatedWSDLPath(api, label);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully updated WSDLs in path [" + extractedLocation + "] with endpoints of label: "
+                        + labelName + " and context of API " + api.getContext());
+            }
+            String wsdlArchiveProcessedFileName =
+                    api.getProvider() + "-" + api.getName() + "-" + api.getVersion() + "-" + labelName + "-wsdl";
+            APIFileUtils.archiveDirectory(wsdlPath, rootPath, wsdlArchiveProcessedFileName);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully archived WSDL files: " + wsdlPath);
+            }
+            WSDLArchiveInfo archiveInfo = new WSDLArchiveInfo(rootPath, wsdlArchiveProcessedFileName + ".zip");
+            archiveInfo.setWsdlInfo(processor.getWsdlInfo());
+            return archiveInfo;
+        } catch (IOException e) {
+            throw new APIMgtWSDLException(e);
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -1367,7 +1554,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             if (application == null) {
                 String message = "Application cannot be found for id :" + appId;
                 throw new APIManagementException(message, ExceptionCodes.APPLICATION_NOT_FOUND);
-            }           
+            }
             //delete application creation pending tasks
             cleanupPendingTaskForApplicationDeletion(application);
             WorkflowExecutor removeApplicationWFExecutor = WorkflowExecutorFactory.getInstance().
@@ -1412,7 +1599,7 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         // get subscriptions with pending status
         List<Subscription> pendingSubscriptions = getApiSubscriptionDAO()
                 .getPendingAPISubscriptionsByApplication(appId);
-  
+
         String applicationStatus = application.getStatus();
 
         if (pendingSubscriptions == null || pendingSubscriptions.isEmpty()) {
@@ -1435,9 +1622,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             }
         }
         //delete pending tasks for application update if any
-        cleanupPendingTask(updateApplicationWFExecutor, appId, WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);        
+        cleanupPendingTask(updateApplicationWFExecutor, appId, WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
     }
-    
+
     private void cleanupPendingTaskForSubscriptionDeletion(Subscription subscription) throws APIManagementException {
         WorkflowExecutor createSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance()
                 .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);

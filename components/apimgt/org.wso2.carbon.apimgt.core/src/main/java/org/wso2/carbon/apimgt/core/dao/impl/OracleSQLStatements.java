@@ -45,8 +45,9 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
     private static final String API_SUMMARY_SELECT =
             "SELECT A.*, rownum rnum from (SELECT  DISTINCT API.UUID, API.PROVIDER, API.NAME, API.CONTEXT, API"
                     + ".VERSION, API.DESCRIPTION,"
-                    + "API.CURRENT_LC_STATUS, API.LIFECYCLE_INSTANCE_ID, API.LC_WORKFLOW_STATUS, API.API_TYPE_ID "
-                    + "FROM AM_API API LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON UUID = API_ID ";
+                    + "API.CURRENT_LC_STATUS, API.LIFECYCLE_INSTANCE_ID, API.LC_WORKFLOW_STATUS, API.API_TYPE_ID, "
+                    + "API.SECURITY_SCHEME FROM AM_API API LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON "
+                    + "UUID = API_ID ";
 
     private static final String API_SUMMARY_SELECT_STORE = "SELECT UUID, PROVIDER, NAME, " +
             "CONTEXT, VERSION, DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, " +
@@ -77,7 +78,9 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
                     API_SUMMARY_SELECT +
                     " WHERE (CONTAINS(INDEXER, ?, 1) > 0)" +
                     " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
-                    " AND ((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) + ")) OR (PROVIDER = ?))" +
+                    " AND (((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) + "))" +
+                    " AND PERMISSION.PERMISSION >= " + APIMgtConstants.Permission.READ_PERMISSION +
+                    ") OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
                     " ORDER BY NAME " +
                     ") A WHERE rownum <= ?) where rnum >= ?";
         } else {
@@ -85,7 +88,7 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
                     API_SUMMARY_SELECT +
                     " WHERE (CONTAINS(INDEXER, ?, 1) > 0)" +
                     " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
-                    " AND PROVIDER = ?" +
+                    " AND ((PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
                     " ORDER BY NAME " +
                     ") A WHERE rownum <= ?) where rnum >= ?";
         }
@@ -136,20 +139,16 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
         }
 
         if (roleCount > 0) {
-            return "SELECT * FROM (" +
-                    API_SUMMARY_SELECT +
-                    " WHERE " + searchQuery.toString() +
+            return "SELECT * FROM (" + API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() +
                     " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
-                    " AND ((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) + ")) OR  (PROVIDER = ?))" +
-                    " ORDER BY NAME" +
-                    ")  A WHERE rownum <= ?) where rnum >= ?";
+                    " AND (((GROUP_ID IN (" + DAOUtil.getParameterString(roleCount) +
+                    ")) AND PERMISSION.PERMISSION >= " + APIMgtConstants.Permission.READ_PERMISSION +
+                    ") OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" +
+                    " ORDER BY NAME" + ")  A WHERE rownum <= ?) where rnum >= ?";
         } else {
-            return "SELECT * FROM (" +
-                    API_SUMMARY_SELECT +
-                    " WHERE " + searchQuery.toString() +
+            return "SELECT * FROM (" + API_SUMMARY_SELECT + " WHERE " + searchQuery.toString() +
                     " AND API.API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = ?)" +
-                    " AND PROVIDER = ?" +
-                    " ORDER BY NAME" +
+                    " AND ((PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))" + " ORDER BY NAME" +
                     ")  A WHERE rownum <= ?) where rnum >= ?";
         }
     }

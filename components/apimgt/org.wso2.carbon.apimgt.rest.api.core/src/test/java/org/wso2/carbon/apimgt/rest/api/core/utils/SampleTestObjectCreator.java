@@ -18,45 +18,19 @@
 
 package org.wso2.carbon.apimgt.rest.api.core.utils;
 
-import static org.wso2.carbon.apimgt.core.dao.impl.PolicyDAOImpl.SECONDS_TIMUNIT;
-import static org.wso2.carbon.apimgt.core.dao.impl.PolicyDAOImpl.UNLIMITED_TIER;
-import static org.wso2.carbon.apimgt.core.models.policy.PolicyConstants.REQUEST_COUNT_TYPE;
-import static org.wso2.carbon.apimgt.core.util.APIMgtConstants.SANDBOX_ENDPOINT;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
-import org.apache.commons.collections.map.HashedMap;
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
-import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
-import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import com.google.common.net.InetAddresses;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
-import org.wso2.carbon.apimgt.core.models.Comment;
-import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
-import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
-import org.wso2.carbon.apimgt.core.models.Label;
-import org.wso2.carbon.apimgt.core.models.Rating;
+import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
+import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
+import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
-import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.BandwidthLimit;
@@ -73,30 +47,73 @@ import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
-import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
-import org.wso2.carbon.apimgt.core.util.APIUtils;
-import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationWorkflow;
-import org.wso2.carbon.apimgt.core.workflow.Workflow;
-import org.wso2.carbon.lcm.core.impl.LifecycleState;
+import org.wso2.carbon.apimgt.rest.api.core.dto.LabelDTO;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+
+import static org.wso2.carbon.apimgt.core.models.policy.PolicyConstants.REQUEST_COUNT_TYPE;
+
+/**
+ * Creates sample objects used for test cases.
+ */
 public class SampleTestObjectCreator {
 
+    protected static final String ADMIN_ROLE_ID = "cfbde56e-4352-498e-b6dc-85a6f1f8b058";
+    protected static final String DEVELOPER_ROLE_ID = "cfdce56e-8434-498e-b6dc-85a6f2d8f035";
+    private static final String HTTP = "http";
+    private static final String TAG_FOOD = "food";
+    private static final String TAG_BEVERAGE = "beverage";
+    private static final String API_VERSION = "1.0.0";
+    private static final String NAME_BUSINESS_OWNER_1 = "John Doe";
+    private static final String NAME_BUSINESS_OWNER_2 = "Jane Doe";
+    private static final String EMAIL_BUSINESS_OWNER_1 = "john.doe@annonymous.com";
+    private static final String EMAIL_BUSINESS_OWNER_2 = "jane.doe@annonymous.com";
     private static final String SAMPLE_API_POLICY = "SampleAPIPolicy";
     private static final String SAMPLE_API_POLICY_DESCRIPTION = "SampleAPIPolicy Description";
     private static final String SAMPLE_APP_POLICY = "SampleAppPolicy";
     private static final String SAMPLE_APP_POLICY_DESCRIPTION = "SampleAppPolicy Description";
     private static final String SAMPLE_SUBSCRIPTION_POLICY = "SampleSubscriptionPolicy";
     private static final String SAMPLE_SUBSCRIPTION_POLICY_DESCRIPTION = "SampleSubscriptionPolicy Description";
+    private static final String SAMPLE_API_WSDL = "http://www.webservicex.net/globalweather.asmx?op=GetWeather?wsdl";
     private static final String TIME_UNIT_SECONDS = "s";
     private static final String TIME_UNIT_MONTH = "Month";
+    private static final String CUSTOMER_ROLE = "customer";
+    private static final String EMPLOYEE_ROLE = "employee";
+    private static final String MANAGER_ROLE = "manager";
+    private static final String ALLOWED_HEADER_AUTHORIZATION = "Authorization";
+    private static final String ALLOWED_HEADER_CUSTOM = "X-Custom";
+    private static final String API_CREATOR = "Adam Doe";
     private static final String SAMPLE_CUSTOM_RULE = "Sample Custom Rule";
+    private static final String GOLD_TIER = "Gold";
+    private static final String SILVER_TIER = "Silver";
+    private static final String BRONZE_TIER = "Bronze";
+    private static final String FIFTY_PER_MIN_TIER = "50PerMin";
+    protected static APIPolicy goldApiPolicy = new APIPolicy(UUID.randomUUID().toString(), GOLD_TIER);
+    protected static SubscriptionPolicy silverSubscriptionPolicy =
+            new SubscriptionPolicy(UUID.randomUUID().toString(), SILVER_TIER);
+    protected static SubscriptionPolicy bronzeSubscriptionPolicy =
+            new SubscriptionPolicy(UUID.randomUUID().toString(), BRONZE_TIER);
+    protected static ApplicationPolicy fiftyPerMinApplicationPolicy =
+            new ApplicationPolicy(UUID.randomUUID().toString(), FIFTY_PER_MIN_TIER);
+    protected static String apiDefinition;
 
     /**
      * create default api policy
      *
      * @return APIPolicy object is returned
      */
-    public static APIPolicy createDefaultAPIPolicy() {
+    protected static APIPolicy createDefaultAPIPolicy() {
         APIPolicy apiPolicy = new APIPolicy(SAMPLE_API_POLICY);
         apiPolicy.setUuid(UUID.randomUUID().toString());
         apiPolicy.setDisplayName(SAMPLE_API_POLICY);
@@ -170,14 +187,14 @@ public class SampleTestObjectCreator {
         pipelineList.add(pipeline1);
         pipelineList.add(pipeline2);
         return pipelineList;
-}
+    }
 
     /**
      * Create default api policy with bandwidth limit as quota policy
      *
      * @return APIPolicy object with bandwidth limit as quota policy is returned
      */
-    public static APIPolicy createDefaultAPIPolicyWithBandwidthLimit() {
+    protected static APIPolicy createDefaultAPIPolicyWithBandwidthLimit() {
         BandwidthLimit bandwidthLimit = new BandwidthLimit(TIME_UNIT_MONTH, 1, 1000, PolicyConstants.MB);
         QuotaPolicy defaultQuotaPolicy = new QuotaPolicy();
         defaultQuotaPolicy.setType(PolicyConstants.BANDWIDTH_TYPE);
@@ -197,7 +214,7 @@ public class SampleTestObjectCreator {
      *
      * @return
      */
-    public static ApplicationPolicy createDefaultApplicationPolicy() {
+    protected static ApplicationPolicy createDefaultApplicationPolicy() {
         ApplicationPolicy applicationPolicy = new ApplicationPolicy(SAMPLE_APP_POLICY);
         applicationPolicy.setUuid(UUID.randomUUID().toString());
         applicationPolicy.setDisplayName(SAMPLE_APP_POLICY);
@@ -213,9 +230,9 @@ public class SampleTestObjectCreator {
     /**
      * Create a subscription policy.
      *
-     * @return
+     * @return SubscriptionPolicy object
      */
-    public static SubscriptionPolicy createDefaultSubscriptionPolicy() {
+    protected static SubscriptionPolicy createDefaultSubscriptionPolicy() {
         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(SAMPLE_SUBSCRIPTION_POLICY);
         subscriptionPolicy.setUuid(UUID.randomUUID().toString());
         subscriptionPolicy.setDisplayName(SAMPLE_SUBSCRIPTION_POLICY);
@@ -231,9 +248,9 @@ public class SampleTestObjectCreator {
     /**
      * Create a custom policy.
      *
-     * @return
+     * @return CustomPolicy object
      */
-    public static CustomPolicy createDefaultCustomPolicy() {
+    protected static CustomPolicy createDefaultCustomPolicy() {
         CustomPolicy customPolicy = new CustomPolicy(SAMPLE_CUSTOM_RULE);
         customPolicy.setKeyTemplate("$userId");
         String siddhiQuery = "FROM RequestStream SELECT userId, ( userId == 'admin@carbon.super' ) AS isEligible , "
@@ -246,4 +263,189 @@ public class SampleTestObjectCreator {
         customPolicy.setDescription("Sample custom policy");
         return customPolicy;
     }
+
+    /**
+     * Create SubscriptionValidationData object.
+     *
+     * @return SubscriptionValidationData object
+     */
+    public static SubscriptionValidationData createSubscriptionValidationData() {
+        SubscriptionValidationData subscriptionData = new SubscriptionValidationData(UUID.randomUUID().toString(),
+                UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        subscriptionData.setSubscriptionPolicy(UUID.randomUUID().toString());
+        return subscriptionData;
+    }
+
+    /**
+     * Create a sample unique LabelDTO object.
+     *
+     * @return LabelDTO object
+     */
+    protected static LabelDTO createUniqueLabelDTO() {
+        LabelDTO labelDTO = new LabelDTO();
+        labelDTO.setName(UUID.randomUUID().toString());
+        List<String> accessURLs = new ArrayList<>();
+        accessURLs.add(UUID.randomUUID().toString());
+        accessURLs.add(UUID.randomUUID().toString());
+        accessURLs.add(UUID.randomUUID().toString());
+        labelDTO.setAccessUrls(accessURLs);
+        return labelDTO;
+    }
+
+    /**
+     * Create unique URI template objects.
+     *
+     * @return UriTemplate object
+     */
+    public static UriTemplate createUniqueUriTemplate() {
+        UriTemplate.UriTemplateBuilder uriTemplate = UriTemplate.UriTemplateBuilder.getInstance().
+                templateId(UUID.randomUUID().toString())
+                .uriTemplate(UUID.randomUUID().toString());
+        return uriTemplate.build();
+    }
+
+    /**
+     * Create unique RegistrationSummary  objects.
+     *
+     * @return RegistrationSummary object
+     */
+    protected static RegistrationSummary createUniqueRegistrationSummary() {
+        RegistrationSummary registrationSummary = new RegistrationSummary(ServiceReferenceHolder.getInstance()
+                .getAPIMConfiguration());
+        return registrationSummary;
+    }
+
+    /**
+     * Create unique PolicyValidationData  objects.
+     *
+     * @return PolicyValidationData object
+     */
+    protected static PolicyValidationData createUniquePolicyValidationDataObject() {
+        PolicyValidationData policyValidationData = new PolicyValidationData(UUID.randomUUID().toString(),
+                UUID.randomUUID().toString(), false);
+        return policyValidationData;
+    }
+
+    /**
+     * Create unique Endpoint  objects.
+     *
+     * @return Endpoint object
+     */
+    public static Endpoint createUniqueEndpoint() {
+        Endpoint endpoint = new Endpoint.Builder().id(UUID.randomUUID().toString()).name(UUID.randomUUID().toString()).
+                type(UUID.randomUUID().toString()).endpointConfig(UUID.randomUUID().toString()).
+                applicableLevel(UUID.randomUUID().toString()).security(UUID.randomUUID().toString()).
+                maxTps(ThreadLocalRandom.current().nextLong()).config(UUID.randomUUID().toString()).build();
+        return endpoint;
+    }
+
+    /**
+     * Create unique BlockConditions  objects.
+     *
+     * @return BlockConditions object
+     */
+    public static BlockConditions createUniqueBlockConditions(String conditionType) {
+        BlockConditions blockConditions = new BlockConditions();
+        blockConditions.setUuid(UUID.randomUUID().toString());
+        blockConditions.setConditionId(new Random().nextInt());
+        blockConditions.setConditionType(conditionType);
+        if ((APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE).equals(conditionType)) {
+            // Generate random IP addresses
+            blockConditions.setEndingIP(InetAddresses.fromInteger(new Random().nextInt()).getHostAddress());
+            blockConditions.setStartingIP(InetAddresses.fromInteger(new Random().nextInt()).getHostAddress());
+        } else if ((APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_IP).equals(conditionType)) {
+            blockConditions.setConditionValue(InetAddresses.fromInteger(new Random().nextInt()).getHostAddress());
+        }
+        blockConditions.setEnabled(new Random().nextBoolean());
+        return blockConditions;
+    }
+
+    /**
+     * Create a Random Application.
+     *
+     * @return Application Object
+     */
+    public static Application createRandomApplication() {
+        Application application = new Application(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        application.setId(UUID.randomUUID().toString());
+        application.setDescription("This is a test application");
+        application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
+        application.setPolicy(fiftyPerMinApplicationPolicy);
+        application.setCreatedTime(LocalDateTime.now());
+        application.setUpdatedUser("admin");
+        application.setUpdatedTime(LocalDateTime.now());
+        return application;
+    }
+
+    /**
+     * Create an unique API.
+     *
+     * @return APIBuilder with unique API details
+     */
+    public static API.APIBuilder createUniqueAPI() {
+        Set<String> transport = new HashSet<>();
+        transport.add(HTTP);
+
+        Set<String> tags = new HashSet<>();
+        tags.add(TAG_FOOD);
+        tags.add(TAG_BEVERAGE);
+
+        Set<Policy> policies = new HashSet<>();
+        policies.add(silverSubscriptionPolicy);
+        policies.add(bronzeSubscriptionPolicy);
+
+        BusinessInformation businessInformation = new BusinessInformation();
+        businessInformation.setBusinessOwner(NAME_BUSINESS_OWNER_1);
+        businessInformation.setBusinessOwnerEmail(EMAIL_BUSINESS_OWNER_1);
+        businessInformation.setTechnicalOwner(NAME_BUSINESS_OWNER_2);
+        businessInformation.setBusinessOwnerEmail(EMAIL_BUSINESS_OWNER_2);
+
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.setEnabled(true);
+        corsConfiguration.setAllowMethods(
+                Arrays.asList(APIMgtConstants.FunctionsConstants.GET, APIMgtConstants.FunctionsConstants.POST,
+                        APIMgtConstants.FunctionsConstants.DELETE));
+        corsConfiguration.setAllowHeaders(Arrays.asList(ALLOWED_HEADER_AUTHORIZATION, ALLOWED_HEADER_CUSTOM));
+        corsConfiguration.setAllowCredentials(true);
+        corsConfiguration.setAllowOrigins(Arrays.asList("*"));
+
+        String permissionJson = "[{\"groupId\" : \"developer\", \"permission\" : "
+                + "[\"READ\",\"UPDATE\"]},{\"groupId\" : \"admin\", \"permission\" : [\"READ\",\"UPDATE\"," +
+                "\"DELETE\"]}]";
+
+        Map permissionMap = new HashMap();
+        permissionMap.put(DEVELOPER_ROLE_ID, 6);
+        permissionMap.put(ADMIN_ROLE_ID, 7);
+
+        API.APIBuilder apiBuilder = new API.APIBuilder(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+                API_VERSION).
+                id(UUID.randomUUID().toString()).
+                context(UUID.randomUUID().toString()).
+                description("Get Food & Beverage Info").
+                lifeCycleStatus(APIStatus.CREATED.getStatus()).
+                endpoint(Collections.emptyMap()).
+                wsdlUri(SAMPLE_API_WSDL).
+                isResponseCachingEnabled(true).
+                cacheTimeout(120).
+                isDefaultVersion(true).
+                apiPolicy(goldApiPolicy).
+                transport(transport).
+                tags(tags).
+                policies(policies).
+                visibility(API.Visibility.RESTRICTED).
+                visibleRoles(new HashSet<>(Arrays.asList(CUSTOMER_ROLE, MANAGER_ROLE, EMPLOYEE_ROLE))).
+                businessInformation(businessInformation).
+                corsConfiguration(corsConfiguration).
+                apiPermission(permissionJson).
+                permissionMap(permissionMap).
+                createdTime(LocalDateTime.now()).
+                createdBy(API_CREATOR).
+                uriTemplates(Collections.emptyMap()).
+                apiDefinition(apiDefinition).
+                lastUpdatedTime(LocalDateTime.now());
+
+        return apiBuilder;
+    }
+
+
 }

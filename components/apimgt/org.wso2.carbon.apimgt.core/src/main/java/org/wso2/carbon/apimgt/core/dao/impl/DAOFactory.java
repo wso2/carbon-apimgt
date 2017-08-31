@@ -307,5 +307,6 @@ public class DAOFactory {
     private static void setup() throws APIMgtDAOException {
         ApiDAOImpl.initResourceCategories();
         ApiDAOImpl.initApiTypes();
+        LabelDAOImpl.initDefaultLabels();
     }
 }

@@ -5,6 +5,8 @@ import org.wso2.carbon.apimgt.ballerina.caching;
 import org.wso2.carbon.apimgt.ballerina.maps as apimgtMaps;
 import ballerina.lang.system;
 import ballerina.lang.maps;
+import ballerina.lang.errors;
+
 map endpointCache = {};
 dto:GatewayConfDTO gatewayConf = {};
 dto:KeyManagerInfoDTO keyManagerConf = {};
@@ -14,7 +16,10 @@ string apiCoreUrl;
 function getFromTokenCache (string key) (dto:IntrospectDto) {
     any introspect = caching:getCacheEntry(constants:TOKEN_CACHE, key);
     if (introspect != null) {
-        return (dto:IntrospectDto)introspect;
+        dto:IntrospectDto dto;
+        errors:TypeCastError err;
+        dto, err = (dto:IntrospectDto)introspect;
+        return dto;
     } else {
         return null;
     }
@@ -26,7 +31,10 @@ function getFromSubscriptionCache (string apiContext, string version, string con
     string key = apiContext + ":" + version + ":" + consumerKey;
     any subscription = caching:getCacheEntry(constants:SUBSCRIPTION_CACHE, key);
     if (subscription != null) {
-        return (dto:SubscriptionDto)subscription;
+        dto:SubscriptionDto dto;
+        errors:TypeCastError err;
+        dto, err = (dto:SubscriptionDto)subscription;
+        return dto;
     } else {
         return null;
     }
@@ -40,9 +48,13 @@ function getFromResourceCache (string apiContext, string apiVersion, string reso
     string key = apiContext + ":" + apiVersion;
     any resourceMapEntry = caching:getCacheEntry(constants:RESOURCE_CACHE, key);
     if (resourceMapEntry != null) {
-        map resourceMap = (map)resourceMapEntry;
+        errors:TypeCastError err;
+        map resourceMap;
+        resourceMap, err = (map)resourceMapEntry;
         if (resourceMap[internalKey] != null) {
-            return (dto:ResourceDto)resourceMap[internalKey];
+            dto:ResourceDto dto;
+            dto, err = (dto:ResourceDto)resourceMap[internalKey];
+            return dto;
         } else {
             return null;
         }
@@ -55,8 +67,9 @@ function putIntoResourceCache (string apiContext, string apiVersion, dto:Resourc
     string key = apiContext + ":" + apiVersion;
     map resourceMap = {};
     any resourceMapEntry = caching:getCacheEntry(constants:RESOURCE_CACHE, key);
+    errors:TypeCastError err;
     if (resourceMapEntry != null) {
-        resourceMap = (map)resourceMapEntry;
+        resourceMap, err = (map)resourceMapEntry;
         caching:removeCacheEntry(constants:RESOURCE_CACHE, key);
     }
     resourceMap[internalKey] = resourceDto;
@@ -76,26 +89,39 @@ function removeFromAPICache (dto:APIDTO apidto) {
 function getFromAPICache (string key) (dto:APIDTO) {
     any api = caching:getCacheEntry(constants:API_CACHE, key);
     if (api != null) {
-        return (dto:APIDTO)api;
+        dto:APIDTO dto;
+        errors:TypeCastError err;
+        dto, err = (dto:APIDTO)api;
+        return dto;
     } else {
         return null;
     }
 }
 function setGatewayConf (dto:GatewayConfDTO conf) {
     gatewayConf = conf;
+    apimgtMaps:putMapEntry("gatewayConfig", gatewayConf);
     keyManagerConf = conf.keyManagerInfo;
 }
 function getGatewayConf () (dto:GatewayConfDTO) {
+    any dto = apimgtMaps:getMapEntry("gatewayConfig");
+    errors:TypeCastError err;
+    if(dto!=null){
+        gatewayConf, err = (dto:GatewayConfDTO)dto;
+        keyManagerConf = gatewayConf.keyManagerInfo;
+    }
     return gatewayConf;
 }
 function getKeyManagerConf () (dto:KeyManagerInfoDTO) {
+    getGatewayConf();
     return keyManagerConf;
 }
 function getAnalyticsConf () (dto:AnalyticsInfoDTO) {
+    getGatewayConf();
     return gatewayConf.analyticsInfo;
 }
 
 function getThrottleConf () (dto:ThrottlingInfoDTO) {
+    getGatewayConf();
     return gatewayConf.throttlingInfo;
 }
 
@@ -105,7 +131,10 @@ function putIntoApplicationCache (dto:ApplicationDto applicationDto) {
 function getFromApplicationCache (string applicationId) (dto:ApplicationDto) {
     any application = caching:getCacheEntry(constants:APPLICATION_CACHE, applicationId);
     if (application != null) {
-        return (dto:ApplicationDto)application;
+        dto:ApplicationDto dto;
+        errors:TypeCastError err;
+        dto, err = (dto:ApplicationDto)application;
+        return dto;
     } else {
         return null;
     }
@@ -143,7 +172,10 @@ function initializeCache () (boolean) {
 }
 function getFromUserInfoCache (string userId) (json) {
     if (userInfoCache[userId] != null) {
-        return (json)userInfoCache[userId];
+        json value;
+        errors:TypeCastError err;
+        value, err = (json)userInfoCache[userId];
+        return value;
     } else {
         return null;
     }
@@ -159,7 +191,10 @@ function putIntoPolicyCache (dto:PolicyDto policyDto) {
 function getFromPolicyCache (string id) (dto:PolicyDto) {
     any policy = caching:getCacheEntry(constants:POLICY_CACHE, id);
     if (policy != null) {
-        return (dto:PolicyDto)policy;
+        dto:PolicyDto dto;
+        errors:TypeCastError err;
+        dto, err = (dto:PolicyDto)policy;
+        return dto;
     } else {
         return null;
     }
@@ -178,7 +213,10 @@ function getFromEndpointCache (string endpointId) (dto:EndpointDto) {
     any endpoint = caching:getCacheEntry(constants:ENDPOINT_CACHE, endpointId);
     if (endpoint != null) {
         system:println("not null");
-        return (dto:EndpointDto)endpoint;
+        dto:EndpointDto dto;
+        errors:TypeCastError err;
+        dto, err = (dto:EndpointDto)endpoint;
+        return dto;
     } else {
         return null;
     }
@@ -191,8 +229,9 @@ function addBlockConditions (dto:BlockConditionDto blockConditionDto) {
     any entry = apimgtMaps:getMapEntry(constants:BLOCK_CONDITION_MAP);
     system:println(blockConditionDto.key);
     map blockConditionMap = {};
+    errors:TypeCastError err;
     if (entry != null) {
-        blockConditionMap = (map)entry;
+        blockConditionMap, err = (map)entry;
     }
     blockConditionMap[blockConditionDto.key] = blockConditionDto;
     apimgtMaps:putMapEntry(constants:BLOCK_CONDITION_MAP, blockConditionMap);
@@ -200,8 +239,9 @@ function addBlockConditions (dto:BlockConditionDto blockConditionDto) {
 function removeBlockCondition (dto:BlockConditionDto blockConditionDto) {
     any entry = apimgtMaps:getMapEntry(constants:BLOCK_CONDITION_MAP);
     map blockConditionMap = {};
+    errors:TypeCastError err;
     if (entry != null) {
-        blockConditionMap = (map)entry;
+        blockConditionMap, err = (map)entry;
     }
     maps:remove(blockConditionMap,blockConditionDto.key);
     apimgtMaps:putMapEntry(constants:BLOCK_CONDITION_MAP, blockConditionMap);
@@ -209,8 +249,9 @@ function removeBlockCondition (dto:BlockConditionDto blockConditionDto) {
 function updateBlockCondition (dto:BlockConditionDto blockConditionDto) {
     any entry = apimgtMaps:getMapEntry(constants:BLOCK_CONDITION_MAP);
     map blockConditionMap = {};
+    errors:TypeCastError err;
     if (entry != null) {
-        blockConditionMap = (map)entry;
+        blockConditionMap, err = (map)entry;
     }
     maps:remove(blockConditionMap,blockConditionDto.key);
     if (blockConditionDto.enabled) {
@@ -221,8 +262,9 @@ function updateBlockCondition (dto:BlockConditionDto blockConditionDto) {
 function getBlockConditionMap ()(map) {
     any entry = apimgtMaps:getMapEntry(constants:BLOCK_CONDITION_MAP);
     map blockConditionMap = {};
+    errors:TypeCastError err;
     if (entry != null) {
-        blockConditionMap = (map)entry;
+        blockConditionMap, err = (map)entry;
     }
     return blockConditionMap;
 }

@@ -8,7 +8,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>web-parent</artifactId>
-        <version>7.0.34-SNAPSHOT</version>
+        <version>7.0.41-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -54,6 +54,10 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -76,7 +80,7 @@
                             javax.ws.rs.*,
                             org.apache.commons.lang3.*,
                             org.apache.commons.*,
-                            com.google.gson.*;
+                            com.google.gson.*;version="${google.code.gson.import.version.range}"
                         </Import-Package>
                     </instructions>
                 </configuration>
@@ -90,6 +94,18 @@
                     <!--<target>1.8</target>-->
                 <!--</configuration>-->
             <!--</plugin>-->
+            <plugin>
+                <groupId>org.wso2.carbon</groupId>
+                <artifactId>org.wso2.carbon.extensions.configuration.maven.plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>create-doc</goal>
+                        </goals>
+                        <phase>compile</phase>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

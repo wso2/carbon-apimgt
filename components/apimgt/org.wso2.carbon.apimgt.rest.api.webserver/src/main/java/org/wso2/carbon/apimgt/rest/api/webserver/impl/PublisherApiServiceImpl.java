@@ -34,24 +34,29 @@ public class PublisherApiServiceImpl extends PublisherApiService {
             log.error(errorMessage, e);
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-
+        String[] apps = {"publisher","store_new", "admin"};
         String[] parts = path.split("/");
         // folder name ex: publisher or store or admin
         String context = parts[1];
         String filePath = "./deployment/webapps/" + context + "public/index.html";
-        if (context.toLowerCase(Locale.ENGLISH).equals("publisher")) {
-            context = "publisher";
-            path = "/" + context + "/" + String.join("/", Arrays.copyOfRange(parts, 2, parts.length));
-        }
-        //#TODO read from config file
+
+        for (String app : apps) {
+            if (context.toLowerCase(Locale.ENGLISH).equals(app)) {
+                context = app;
+                path = "/" + context + "/" + String.join("/", Arrays.copyOfRange(parts, 2, parts.length));
+            }
+            //#TODO read from config file
         /* TODO: Check the dot containment in last segment separated by '/' or use regex to capture file extension */
-        if ("publisher".equals(context)) {
-            if (rawUri.contains(".")) {
-                filePath = "./deployment/webapps" + path;
-            } else {
-                filePath = "./deployment/webapps/" + context + "/public/index.html";
+            if (app.equals(context)) {
+                if (rawUri.split("\\?")[0].contains(".")) {
+                    filePath = "./deployment/webapps" + path;
+                } else {
+                    filePath = "./deployment/webapps/" + context + "/public/index.html";
+                }
             }
         }
+
+
 
         File file = new File(filePath);
         if (file.exists()) {
@@ -63,4 +68,3 @@ public class PublisherApiServiceImpl extends PublisherApiService {
     }
 
 }
-

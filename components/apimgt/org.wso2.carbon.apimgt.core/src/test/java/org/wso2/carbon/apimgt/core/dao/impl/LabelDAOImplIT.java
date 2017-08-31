@@ -23,7 +23,6 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
-import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.Label;
@@ -50,7 +49,7 @@ public class LabelDAOImplIT extends DAOIntegrationTestBase {
 
         List<Label> labelsFromDb = labelDAO.getLabels();
         Assert.assertNotNull(labelsFromDb);
-        Assert.assertEquals(labelsFromDb.size(), 2);
+        Assert.assertEquals(labelsFromDb.size(), 3);
     }
 
     @Test
@@ -73,7 +72,7 @@ public class LabelDAOImplIT extends DAOIntegrationTestBase {
 
         List<Label> labelsFromDb = labelDAO.getLabels();
         Assert.assertNotNull(labelsFromDb);
-        Assert.assertEquals(labelsFromDb.size(), 1);
+        Assert.assertEquals(labelsFromDb.size(), 2);
     }
 
     @Test
@@ -191,9 +190,8 @@ public class LabelDAOImplIT extends DAOIntegrationTestBase {
         labelDAO.updateLabel(updatedLabel);
         List<Label> labelsFromDb = labelDAO.getLabels();
         Assert.assertNotNull(labelsFromDb);
-        Assert.assertEquals(labelsFromDb.size(), 1);
-        Assert.assertTrue(labelsFromDb.get(0).equals(updatedLabel),
-                TestUtil.printDiff(labelsFromDb.get(0), updatedLabel));
+        Assert.assertEquals(labelsFromDb.size(), 2);
+        Assert.assertTrue(labelsFromDb.contains(updatedLabel));
     }
 
 }

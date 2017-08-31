@@ -23,9 +23,13 @@ import {Apis, Base, Login, Logout, Endpoints} from './app/components'
 import {PageNotFound} from './app/components/Base/Errors'
 import ApiCreate from './app/components/Apis/Create/ApiCreate'
 import AuthManager from './app/data/AuthManager'
-import qs from 'qs'
 
-import 'antd/dist/antd.css';
+import qs from 'qs'
+import Axios from 'axios';
+import LoadingAnimation from './app/components/Base/Loading/Loading.js';
+
+import 'antd/dist/antd.css'
+import {message} from 'antd'
 import './App.css'
 
 /**
@@ -34,8 +38,17 @@ import './App.css'
 class Protected extends Component {
     constructor(props) {
         super(props);
-        this.state = {showLeftMenu: false};
+        this.state = {showLeftMenu: false, authConfigs: null};
         this.setLeftMenu = this.setLeftMenu.bind(this);
+        message.config({top: '48px'}); // .custom-header height + some offset
+        /* TODO: need to fix the header to avoid conflicting with messages ~tmkb*/
+        this.handleResponse = this.handleResponse.bind(this);
+        /* TODO: Get apim base url from config*/
+        Axios.get("https://localhost:9292/login/login/publisher").then(this.handleResponse);
+    }
+
+    handleResponse = (response) => {
+        this.setState({ authConfigs: response.data});
     }
 
     /**
@@ -55,7 +68,7 @@ class Protected extends Component {
             return (
                 <Base showLeftMenu={this.state.showLeftMenu}>
                     <Switch>
-                        <Route exact path={"/"} component={ApiCreate}/>{/* TODO: redirects to apis listing or render apis listing here ~tmkb*/}
+                        <Redirect exact from="/" to="/apis"/>
                         <Route path={"/apis"} render={ props => (<Apis setLeftMenu={this.setLeftMenu}/>)}/>
                         <Route path={"/endpoints"} component={Endpoints}/>
                         <Route path={"/api/create"} component={ApiCreate}/>
@@ -65,17 +78,29 @@ class Protected extends Component {
             );
         }
         let params = qs.stringify({referrer: this.props.location.pathname});
-        return (
-            <Redirect to={{pathname: '/login', search: params}}/>
-        );
+        if (this.state.authConfigs) {
+            if (this.state.authConfigs.is_sso_enabled) {
+                var authorizationEndpoint = this.state.authConfigs.authorizationEndpoint;
+                var client_id = this.state.authConfigs.client_id;
+                var callback_URL = this.state.authConfigs.callback_url;
+                var scopes = this.state.authConfigs.scopes;
+                window.location = authorizationEndpoint+"?response_type=code&client_id="+client_id+"&redirect_uri="+callback_URL+"&scope="+scopes;
+            } else {
+                return (
+                            <Redirect to={{pathname: '/login', search: params}}/>
+                        );
+            }
+        } else {
+            return <LoadingAnimation/>;
+        }
     }
-
 }
 
 /**
  * Define base routes for the application
  */
 class Publisher extends Component {
+
 
     render() {
         return (

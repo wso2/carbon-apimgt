@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-gateway-modules</artifactId>
-        <version>7.0.34-SNAPSHOT</version>
+        <version>7.0.41-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -29,8 +29,103 @@
     <packaging>pom</packaging>
     <name>APIM Ballerina Configs</name>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>apim-ballerina-plugin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ballerinalang</groupId>
+            <artifactId>ballerina-launcher</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.ballerinalang</groupId>
+            <artifactId>ballerina-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.ballerina.native</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.ballerina.publisher</artifactId>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <id>auth</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>org.wso2.carbon.apimgt.plugin.GenerateArchives</mainClass>
+                            <arguments>
+                                <argument>main</argument>
+                                <argument>${project.basedir}/configs</argument>
+                                <argument>org/wso2/carbon/apimgt/gateway/auth/</argument>
+                                <argument>${project.build.directory}/auth</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>throttle</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>org.wso2.carbon.apimgt.plugin.GenerateArchives</mainClass>
+                            <arguments>
+                                <argument>main</argument>
+                                <argument>${project.basedir}/configs</argument>
+                                <argument>org/wso2/carbon/apimgt/gateway/throttle/</argument>
+                                <argument>${project.build.directory}/throttle</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>services</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>org.wso2.carbon.apimgt.plugin.GenerateArchives</mainClass>
+                            <arguments>
+                                <argument>service</argument>
+                                <argument>${project.basedir}/configs</argument>
+                                <argument>org/wso2/carbon/apimgt/gateway/services/</argument>
+                                <argument>${project.build.directory}/services</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>analytics</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>org.wso2.carbon.apimgt.plugin.GenerateArchives</mainClass>
+                            <arguments>
+                                <argument>main</argument>
+                                <argument>${project.basedir}/configs</argument>
+                                <argument>org/wso2/carbon/apimgt/gateway/handler/</argument>
+                                <argument>${project.build.directory}/analytics</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>

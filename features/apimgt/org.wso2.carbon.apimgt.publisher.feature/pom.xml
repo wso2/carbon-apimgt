@@ -20,14 +20,14 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>7.0.34-SNAPSHOT</version>
+        <version>7.0.41-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.publisher.feature</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 Carbon - API web apps Feature</name>
+    <name>WSO2 Carbon - API Publisher Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the core bundles required for API management back end
     </description>

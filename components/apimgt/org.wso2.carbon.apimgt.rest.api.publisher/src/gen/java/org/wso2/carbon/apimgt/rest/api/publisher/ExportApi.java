@@ -47,7 +47,11 @@ public class ExportApi implements Microservice  {
     @Path("/apis")
     @Consumes({ "application/json" })
     @Produces({ "application/zip" })
-    @io.swagger.annotations.ApiOperation(value = "Export information related to an API.", notes = "This operation can be used to export information related to a particular API. ", response = File.class, tags={ "Export Configuration", })
+    @io.swagger.annotations.ApiOperation(value = "Export information related to an API.", notes = "This operation can be used to export information related to a particular API. ", response = File.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "Export Configuration", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Export Configuration returned. ", response = File.class),
         
@@ -57,11 +61,10 @@ public class ExportApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = File.class) })
     public Response exportApisGet(@ApiParam(value = "API search query ",required=true) @QueryParam("query") String query
-,@ApiParam(value = "Media type of the entity in the body. Default is application/json. " ,required=true, defaultValue="application/json")@HeaderParam("Content-Type") String contentType
 ,@ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
 ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
 , @Context Request request)
     throws NotFoundException {
-        return delegate.exportApisGet(query,contentType,limit,offset, request);
+        return delegate.exportApisGet(query,limit,offset, request);
     }
 }

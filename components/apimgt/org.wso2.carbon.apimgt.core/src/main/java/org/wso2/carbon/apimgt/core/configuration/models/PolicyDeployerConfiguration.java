@@ -18,11 +18,13 @@
 
 package org.wso2.carbon.apimgt.core.configuration.models;
 
+import org.wso2.carbon.kernel.annotations.Configuration;
 import org.wso2.carbon.kernel.annotations.Element;
 
 /**
  * Class to hold PolicyDeployer configurations
  */
+@Configuration(description = "Policy Deployer connection configurations")
 public class PolicyDeployerConfiguration {
 
     @Element(description = "DAS execution plan REST API")
@@ -34,7 +36,15 @@ public class PolicyDeployerConfiguration {
         return serverURL;
     }
 
+    public void setServerURL(String serverURL) {
+        this.serverURL = serverURL;
+    }
+
     public CredentialConfigurations getPolicyDeployerCredentials() {
         return policyDeployerCredentials;
+    }
+
+    public void setPolicyDeployerCredentials(CredentialConfigurations policyDeployerCredentials) {
+        this.policyDeployerCredentials = policyDeployerCredentials;
     }
 }

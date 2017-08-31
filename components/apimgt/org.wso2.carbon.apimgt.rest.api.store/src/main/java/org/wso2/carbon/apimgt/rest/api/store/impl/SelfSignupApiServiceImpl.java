@@ -44,7 +44,7 @@ public class SelfSignupApiServiceImpl extends SelfSignupApiService {
     private static final Logger log = LoggerFactory.getLogger(SelfSignupApiServiceImpl.class);
 
     @Override
-    public Response selfSignupPost(UserDTO body, String contentType, Request request) throws NotFoundException {
+    public Response selfSignupPost(UserDTO body, Request request) throws NotFoundException {
         try {
             APIStore apiStore = RestApiUtil.getConsumer();
             apiStore.selfSignUp(MiscMappingUtil.fromUserDTOToUser(body));

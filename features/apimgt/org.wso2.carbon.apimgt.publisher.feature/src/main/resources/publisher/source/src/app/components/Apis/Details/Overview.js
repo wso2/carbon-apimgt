@@ -18,12 +18,25 @@
 
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
-import {Col, Row, Card, Form, Select, Dropdown, Tag, Menu, Button, Badge} from 'antd';
+import {Col, Popconfirm, Row, Form, Select, Dropdown, Tag, Menu, Badge, message} from 'antd';
 
 const FormItem = Form.Item;
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import Api from '../../../data/api'
+import {Redirect} from 'react-router-dom'
+import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation'
+import ApiPermissionValidation from '../../../data/ApiPermissionValidation'
+
+import Paper from 'material-ui/Paper';
+import Grid from 'material-ui/Grid';
+import Typography from 'material-ui/Typography';
+import Button from 'material-ui/Button';
+import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
+import Table, { TableBody, TableCell, TableRow } from 'material-ui/Table';
+import IconButton from 'material-ui/IconButton';
+import { Delete, Edit, CreateNewFolder, Description  }from 'material-ui-icons';
+import Confirm from '../../Shared/Confirm'
 
 class Overview extends Component {
     constructor(props) {
@@ -33,6 +46,8 @@ class Overview extends Component {
             notFound: false
         };
         this.api_uuid = this.props.match.params.api_uuid;
+        this.downloadWSDL = this.downloadWSDL.bind(this);
+        this.handleApiDelete = this.handleApiDelete.bind(this);
     }
 
     componentDidMount() {
@@ -55,24 +70,63 @@ class Overview extends Component {
         );
     }
 
-    render() {
-        const menu = (
-            <Menu>
-                <Menu.Item>
-                    <Link to="">Edit</Link>
-                </Menu.Item>
-                <Menu.Item>
-                    <Link to="">Create New Version</Link>
-                </Menu.Item>
-                <Menu.Item>
-                    <Link to="">View Swagger</Link>
-                </Menu.Item>
-            </Menu>
+    handleApiDelete(e) {
+        this.setState({loading: true});
+        const api = new Api();
+        let promised_delete = api.deleteAPI(this.api_uuid);
+        promised_delete.then(
+            response => {
+                if (response.status !== 200) {
+                    console.log(response);
+                    message.error("Something went wrong while deleting the API!");
+                    this.setState({loading: false});
+                    return;
+                }
+                let redirect_url = "/apis/";
+                this.props.history.push(redirect_url);
+                message.success("API " + this.state.api.name + " was deleted successfully!");
+                this.setState({active: false, loading: false});
+            }
         );
-        const formItemLayout = {
-            labelCol: {span: 6},
-            wrapperCol: {span: 18}
-        };
+    }
+
+    downloadWSDL() {
+        const api = new Api();
+        let promised_wsdl = api.getWSDL(this.api_uuid);
+        promised_wsdl.then(
+            response => {
+                let windowUrl = window.URL || window.webkitURL;
+                let binary = new Blob([response.data]);
+                let url = windowUrl.createObjectURL(binary);
+                let anchor = document.createElement('a');
+                anchor.href = url;
+                if (response.headers['content-disposition']) {
+                    anchor.download = Overview.getWSDLFileName(response.headers['content-disposition']);
+                } else {
+                    //assumes a single WSDL in text format
+                    anchor.download = this.state.api.provider +
+                        "-" + this.state.api.name + "-" + this.state.api.version + ".wsdl"
+                }
+                anchor.click();
+                windowUrl.revokeObjectURL(url);
+            }
+        )
+    }
+
+    static getWSDLFileName(content_disposition_header) {
+        let filename = "default.wsdl";
+        if (content_disposition_header && content_disposition_header.indexOf('attachment') !== -1) {
+            let filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+            let matches = filenameRegex.exec(content_disposition_header);
+            if (matches !== null && matches[1]) {
+                filename = matches[1].replace(/['"]/g, '');
+            }
+        }
+        return filename;
+    }
+
+    render() {
+        let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
         const api = this.state.api;
         if (this.state.notFound) {
             return <ResourceNotFound/>
@@ -80,70 +134,121 @@ class Overview extends Component {
         if (!this.state.api) {
             return <Loading/>
         }
-        return (
-            <div>
-                <Row type="flex" justify="center">
-                    <Col span={4}>
 
-                        <Card bodyStyle={{padding: 10}}>
-                            <div className="custom-image">
+
+
+        return (
+                <Grid container>
+                    <Grid item xs={12}>
+                        <Paper style={{display:"flex"}}>
+                            <Typography type="display2" gutterBottom className="page-title">
+                                {api.name} - <span style={{fontSize:"50%"}}>Overview</span>
+                            </Typography>
+                            <ScopeValidation resourceMethod={resourceMethod.PUT} resourcePath={resourcePath.SINGLE_API}>
+                                <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
+                                    <Button aria-owns="simple-menu" aria-haspopup="true" >
+                                        <Edit /> Edit
+                                    </Button>
+                                </ApiPermissionValidation>
+                            </ScopeValidation>
+
+                            <ScopeValidation resourceMethod={resourceMethod.DELETE} resourcePath={resourcePath.SINGLE_API}>
+                                <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.DELETE}
+                                                         userPermissions={this.state.api.userPermissionsForApi}>
+                                    <Popconfirm title="Do you want to delete this api?" onConfirm={this.handleApiDelete}>
+                                        <Button aria-owns="simple-menu" aria-haspopup="true" >
+                                            <Delete /> Delete
+                                        </Button>
+                                    </Popconfirm>
+                                </ApiPermissionValidation>
+                            </ScopeValidation>
+
+                            <Button aria-owns="simple-menu" aria-haspopup="true" >
+                                <CreateNewFolder /> Create New Version
+                            </Button>
+                            <Button aria-owns="simple-menu" aria-haspopup="true" >
+                                <Description /> View Swagger
+                            </Button>
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3} lg={3} xl={2} style={{paddingLeft:"40px"}}>
+
+                        <Card>
+                            <CardMedia
+                                image="/publisher/public/images/api/api-default.png"
+                                title="Contemplative Reptile"
+                            >
                                 <img alt="API thumb" width="100%" src="/publisher/public/images/api/api-default.png"/>
-                            </div>
-                            <div className="custom-card">
-                                <Badge status="processing" text={api.lifeCycleStatus}/>
-                                <p>11 Apps</p>
-                                <a href={"/store/apis/" + this.api_uuid} target="_blank" title="Store">View in store</a>
-                            </div>
+                            </CardMedia>
+                            <CardContent>
+
+                            </CardContent>
+                            <CardActions>
+                                {api.lifeCycleStatus}
+
+                                <Button dense color="primary">
+                                    <a href={"/store/apis/" + this.api_uuid} target="_blank" title="Store">View in store</a>
+                                </Button>
+                            </CardActions>
                         </Card>
-                    </Col>
-                    <Col span={15} offset={1}>
-                        <Form layout="vertical">
-                            <FormItem {...formItemLayout} label="API Name">
-                                <span className="ant-form-text">{api.name}</span>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Version">
-                                <span className="ant-form-text">{api.version}</span>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Context">
-                                <span className="ant-form-text">{api.context}</span>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Last Updated">
-                                <span className="ant-form-text">{api.createdTime}</span>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Business Plans">
-                                <span className="ant-form-text">{api.policies.map(policy => policy + ", ")}</span>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Tags">
-                                <span className="ant-form-text">
-                                    <Tag><a href="#somelink">Social</a></Tag>
-                                    <Tag><a href="#somelink">Facebook</a></Tag>
-                                </span>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Labels">
-                                <span className="ant-form-text">
-                                      <Tag color="pink">pink</Tag>
-                                      <Tag color="red">red</Tag>
-                                      <Tag color="orange">orange</Tag>
-                                      <Tag color="green">green</Tag>
-                                </span>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Business Owner">
-                                <span className="ant-form-text">{"WSO2"}</span>
-                                <a className="ant-form-text" href="#email">{"(bizdev@wso2.com)"}</a>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Tech Owner">
-                                <span className="ant-form-text">{"WSO2 Support"}</span>
-                                <a className="ant-form-text" href="#email">{"(support@wso2.com)"}</a>
-                            </FormItem>
-                        </Form>
-                    </Col>
-                </Row>
-                <div className="api-add-links">
-                    <Dropdown overlay={menu} placement="topCenter">
-                        <Button shape="circle" icon="edit"/>
-                    </Dropdown>
-                </div>
-            </div>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={9} lg={9} xl={10} >
+                        <Paper>
+                            <Table>
+                                <TableBody>
+
+                                    <TableRow>
+                                        <TableCell style={{width:"100px"}}>Visibility</TableCell><TableCell>{api.visibility}</TableCell>
+                                    </TableRow>
+
+                                    <TableRow>
+                                        <TableCell>Version</TableCell><TableCell>{api.version}</TableCell>
+                                    </TableRow>
+
+                                    <TableRow>
+                                        <TableCell>Context</TableCell><TableCell>{api.context}</TableCell>
+                                    </TableRow>
+                                    {
+                                        api.endpoint.map( ep => <TableRow>
+                                            <TableCell>{ep.type}</TableCell>
+                                            <TableCell>{ep.inline ? ep.inline.endpointConfig.serviceUrl : ''}</TableCell>
+                                        </TableRow>)
+                                    }
+                                    <TableRow>
+                                        <TableCell>Date Created</TableCell><TableCell>{api.createdTime}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell>Date Last Updated</TableCell><TableCell>{api.lastUpdatedTime}</TableCell>
+                                    </TableRow>
+
+                                    <TableRow>
+                                        <TableCell>Default API Version</TableCell><TableCell>{api.isDefaultVersion}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell>Published Environments</TableCell><TableCell>not-supported-yet</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell>Policies</TableCell>
+                                        <TableCell>
+                                            {api.policies.map(policy => policy + ", ")}
+                                        </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell>WSDL URLs</TableCell>
+                                        <TableCell>
+                                            {
+                                                api.wsdlUri && (
+                                                    <a onClick={this.downloadWSDL}>Download</a>
+                                                )
+                                            }
+                                        </TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
+                        </Paper>
+
+                    </Grid>
+                </Grid>
         );
     }
 }
