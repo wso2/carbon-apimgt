@@ -81,9 +81,7 @@ class AuthManager {
      * @param {object} error_response
      */
     static unauthorizedErrorHandler(error_response) {
-        debugger;
-        if (error_response.status !== 401) {
-            debugger;/* Skip unrelated response code to handle in unauthorizedErrorHandler*/
+        if (error_response.status !== 401) { /* Skip unrelated response code to handle in unauthorizedErrorHandler*/
             throw error_response;
             /* re throwing the error since we don't handle it here and propagate to downstream error handlers in catch chain*/
         }
@@ -146,15 +144,10 @@ class AuthManager {
     }
 
     getTokenEndpoint() {
-        console.log("working");
         return this.host + this.token;
     }
 
     getTokenEnpointEnv(detailedValue){
-
-        console.log("working");
-        console.log(detailedValue);
-        console.log(detailedValue.envIsHost);
 
         return window.location.protocol + "//" + detailedValue.envIsHost + this.token;
     }
@@ -183,9 +176,8 @@ class AuthManager {
             validity_period: 3600,
             scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage apim:subscription_view apim:subscription_block apim:subscribe'
         };
-        let promised_response = axios.post(tokenDetails, qs.stringify(data), {headers: headers }); // enable with credeantials
+        let promised_response = axios.post(tokenDetails, qs.stringify(data), {headers: headers});
         promised_response.then(response => {
-            console.log(response.headers.setH);
             const validityPeriod = response.data.validityPeriod; // In seconds
             const WSO2_AM_TOKEN_1 = response.data.partialToken;
             const user = new User(response.data.authUser, response.data.idToken);

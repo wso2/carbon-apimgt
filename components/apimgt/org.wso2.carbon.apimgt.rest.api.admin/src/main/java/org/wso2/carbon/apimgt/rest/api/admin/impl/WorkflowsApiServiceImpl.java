@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -54,15 +53,15 @@ public class WorkflowsApiServiceImpl extends WorkflowsApiService {
     private static final Logger log = LoggerFactory.getLogger(WorkflowsApiServiceImpl.class);
 
     @Override
-    public Response workflowsGet(String accept, String ifNoneMatch, String ifModifiedSince, String type,
+    public Response workflowsGet(String ifNoneMatch, String ifModifiedSince, String workflowType,
             Request request) throws NotFoundException {
         try {
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             List<Workflow> workflowList;
-            if (type == null) {
+            if (workflowType == null) {
                 workflowList = apiMgtAdminService.retrieveUncompletedWorkflows();
             } else {
-                workflowList = apiMgtAdminService.retrieveUncompletedWorkflowsByType(type);
+                workflowList = apiMgtAdminService.retrieveUncompletedWorkflowsByType(workflowType);
             }
 
             WorkflowListDTO workflowListDTO = WorkflowMappingUtil.toWorkflowListDTO(workflowList);

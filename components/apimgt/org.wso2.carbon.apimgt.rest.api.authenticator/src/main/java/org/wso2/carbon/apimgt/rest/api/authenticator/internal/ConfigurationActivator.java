@@ -24,10 +24,11 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
 /**
- * Class used to activate store configuration loading.
+ * Class used to activate store/publisher application configuration loading.
  */
 @Component(
         name = "org.wso2.carbon.apimgt.rest.api.authenticator",
@@ -47,6 +48,7 @@ public class ConfigurationActivator {
             unbind = "unregisterConfigProvider")
     protected void registerConfigProvider(ConfigProvider configProvider) {
         ServiceReferenceHolder.getInstance().setConfigProvider(configProvider);
+
     }
 
     /**

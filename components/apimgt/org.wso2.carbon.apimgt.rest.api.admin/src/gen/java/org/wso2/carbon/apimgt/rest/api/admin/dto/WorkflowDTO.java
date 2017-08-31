@@ -71,7 +71,7 @@ public class WorkflowDTO   {
    * Get description
    * @return description
   **/
-  @ApiModelProperty(example = "Application creation workflow for TestApplication with tier Unlimited by admin", value = "")
+  @ApiModelProperty(example = "Application created by foo", value = "")
   public String getDescription() {
     return description;
   }

@@ -247,8 +247,12 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
                 workflow.setCreatedTime(LocalDateTime.now());
 
-                String workflowDescription = "Update application from : " + existingApplication.toString()
-                        + " to : " + application.toString();
+                String workflowDescription = "Update application " + existingApplication.getName() + " with tier "
+                        + existingApplication.getPolicy().getPolicyName() + " and description \'"
+                        + existingApplication.getDescription() + "\' To " + application.getName() + " with tier "
+                        + application.getPolicy().getPolicyName() + " and description \'" + application.getDescription()
+                        + "\' by " + getUsername();
+
                 workflow.setWorkflowDescription(workflowDescription);
 
                 //setting attributes for internal use. These are set to use from outside the executor's method
