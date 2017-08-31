@@ -729,6 +729,12 @@ public class ApisApiServiceImpl extends ApisApiService {
             body.setContext(apiInfo.getContextTemplate());
             body.setStatus(apiInfo.getStatus().getStatus());
             body.setType(APIDTO.TypeEnum.valueOf(apiInfo.getType()));
+            //Since there is separate API to change the thumbnail, set the existing thumbnail URL
+            //If user needs to remove the thumbnail url, this will give the flexibility to do it via an empty string value
+            String thumbnailUrl = body.getThumbnailUri();
+            if (!StringUtils.isWhitespace(thumbnailUrl)) {
+                body.setThumbnailUri(apiInfo.getThumbnailUrl());
+            }
 
             //validation for tiers
             List<String> tiersFromDTO = body.getTiers();

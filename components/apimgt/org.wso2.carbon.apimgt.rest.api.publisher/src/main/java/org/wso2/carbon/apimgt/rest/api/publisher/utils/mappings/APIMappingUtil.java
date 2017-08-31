@@ -371,6 +371,7 @@ public class APIMappingUtil {
         model.setEndpointConfig(dto.getEndpointConfig());
         model.setWsdlUrl(dto.getWsdlUri());
         model.setType(dto.getType().toString());
+        model.setThumbnailUrl(dto.getThumbnailUri());
 
         if (dto.getStatus() != null) {
             model.setStatus(mapStatusFromDTOToAPI(dto.getStatus()));
@@ -557,6 +558,9 @@ public class APIMappingUtil {
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
         apiInfoDTO.setStatus(api.getStatus().toString());
+        if (!StringUtils.isBlank(api.getThumbnailUrl())) {
+            apiInfoDTO.setThumbnailUri(getThumbnailUri(api.getUUID()));
+        }
         return apiInfoDTO;
     }
 
