@@ -35,7 +35,6 @@ public class ServiceReferenceHolder {
     private static ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private ConfigProvider configProvider;
     private APIMAppConfigurations config = null;
-    //TODO from Ravindu Code and Renamed config to config_env
     private APIMConfigurations config_env = null;
 
     private ServiceReferenceHolder() {
@@ -106,24 +105,5 @@ public class ServiceReferenceHolder {
                     "org.wso2.carbon.apimgt.rest.api.authenticator.internal.APIMAppConfiguration", e);
         }
         return null;
-    }
-
-    public APIMConfigurations getAPIMConfiguration() {
-        try {
-            if (configProvider != null) {
-                config1 = configProvider.getConfigurationObject(APIMConfigurations.class);
-            } else {
-                log.error("Configuration provider is null");
-            }
-        } catch (CarbonConfigurationException e) {
-            log.error("error getting config : org.wso2.carbon.apimgt.core.internal.APIMConfiguration", e);
-        }
-
-        if (config1 == null) {
-            config1 = new APIMConfigurations();
-            log.info("Setting default configurations...");
-        }
-
-        return config1;
     }
 }
