@@ -14,6 +14,7 @@ import org.wso2.msf4j.formparam.FormDataParam;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.InputStream;
+import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -37,6 +38,7 @@ import javax.ws.rs.core.Response;
 @Path("/api/am/core/v1.[\\d]+/applications")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
+@ApplicationPath("/applications")
 @io.swagger.annotations.Api(description = "the applications API")
 public class ApplicationsApi implements Microservice  {
    private final ApplicationsApiService delegate = ApplicationsApiServiceFactory.getApplicationsApi();

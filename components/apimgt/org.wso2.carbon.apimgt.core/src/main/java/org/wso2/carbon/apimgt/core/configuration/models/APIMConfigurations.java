@@ -22,6 +22,8 @@ import org.wso2.carbon.kernel.annotations.Configuration;
 import org.wso2.carbon.kernel.annotations.Element;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Class to hold APIM configuration parameters and generate yaml file
@@ -77,71 +79,152 @@ public class APIMConfigurations {
     @Element(description = "rating upper limit")
     private int ratingMaxValue = 5;
 
-    public String getHostname() {
-        return hostname;
-    }
+    @Element(description = "WSDL processor implementations")
+    private List<String> wsdlProcessors = Arrays.asList(
+            "org.wso2.carbon.apimgt.core.impl.WSDL11ProcessorImpl",
+            "org.wso2.carbon.apimgt.core.impl.WSDL20ProcessorImpl");
 
     public boolean isReverseProxyEnabled() {
         return reverseProxyEnabled;
     }
 
-    public String getLabelExtractorImplClass() {
-        return labelExtractorImplClass;
+    public void setReverseProxyEnabled(boolean reverseProxyEnabled) {
+        this.reverseProxyEnabled = reverseProxyEnabled;
+    }
+
+    public String getHostname() {
+        return hostname;
+    }
+
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
     }
 
     public String getPublisherContext() {
         return publisherContext;
     }
 
+    public void setPublisherContext(String publisherContext) {
+        this.publisherContext = publisherContext;
+    }
+
     public String getStoreContext() {
         return storeContext;
+    }
+
+    public void setStoreContext(String storeContext) {
+        this.storeContext = storeContext;
     }
 
     public String getAdminContext() {
         return adminContext;
     }
 
+    public void setAdminContext(String adminContext) {
+        this.adminContext = adminContext;
+    }
+
     public String getGatewayPackageName() {
         return gatewayPackageName;
+    }
+
+    public void setGatewayPackageName(String gatewayPackageName) {
+        this.gatewayPackageName = gatewayPackageName;
     }
 
     public String getGatewayPackageNamePath() {
         return gatewayPackageNamePath;
     }
 
+    public void setGatewayPackageNamePath(String gatewayPackageNamePath) {
+        this.gatewayPackageNamePath = gatewayPackageNamePath;
+    }
+
+    public String getLabelExtractorImplClass() {
+        return labelExtractorImplClass;
+    }
+
+    public void setLabelExtractorImplClass(String labelExtractorImplClass) {
+        this.labelExtractorImplClass = labelExtractorImplClass;
+    }
+
     public KeyMgtConfigurations getKeyManagerConfigs() {
         return keyManagerConfigs;
+    }
+
+    public void setKeyManagerConfigs(KeyMgtConfigurations keyManagerConfigs) {
+        this.keyManagerConfigs = keyManagerConfigs;
     }
 
     public IdentityProviderConfigurations getIdentityProviderConfigs() {
         return identityProviderConfigs;
     }
 
+    public void setIdentityProviderConfigs(IdentityProviderConfigurations identityProviderConfigs) {
+        this.identityProviderConfigs = identityProviderConfigs;
+    }
+
     public BrokerConfigurations getBrokerConfigurations() {
         return brokerConfigurations;
+    }
+
+    public void setBrokerConfigurations(BrokerConfigurations brokerConfigurations) {
+        this.brokerConfigurations = brokerConfigurations;
     }
 
     public JWTConfigurations getJwtConfigurations() {
         return jwtConfigurations;
     }
 
+    public void setJwtConfigurations(JWTConfigurations jwtConfigurations) {
+        this.jwtConfigurations = jwtConfigurations;
+    }
+
     public AnalyticsConfigurations getAnalyticsConfigurations() {
         return analyticsConfigurations;
+    }
+
+    public void setAnalyticsConfigurations(AnalyticsConfigurations analyticsConfigurations) {
+        this.analyticsConfigurations = analyticsConfigurations;
     }
 
     public ThrottlingConfigurations getThrottlingConfigurations() {
         return throttlingConfigurations;
     }
 
+    public void setThrottlingConfigurations(ThrottlingConfigurations throttlingConfigurations) {
+        this.throttlingConfigurations = throttlingConfigurations;
+    }
+
     public String getCommentModeratorRole() {
         return commentModeratorRole;
+    }
+
+    public void setCommentModeratorRole(String commentModeratorRole) {
+        this.commentModeratorRole = commentModeratorRole;
+    }
+
+    public int getCommentMaxLength() {
+        return commentMaxLength;
+    }
+
+    public void setCommentMaxLength(int commentMaxLength) {
+        this.commentMaxLength = commentMaxLength;
     }
 
     public int getRatingMaxValue() {
         return ratingMaxValue;
     }
 
-    public int getCommentMaxLength() {
-        return commentMaxLength;
+    public void setRatingMaxValue(int ratingMaxValue) {
+        this.ratingMaxValue = ratingMaxValue;
+    }
+
+    public List<String> getWsdlProcessors() {
+        return wsdlProcessors;
+    }
+
+    public void setWsdlProcessors(List<String> wsdlProcessors) {
+        this.wsdlProcessors = wsdlProcessors;
     }
 }

@@ -23,7 +23,7 @@
     <parent>
         <artifactId>carbon-apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>7.0.34-SNAPSHOT</version>
+        <version>7.0.41-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -38,8 +38,10 @@
         <module>org.wso2.carbon.apimgt.rest.api.admin.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.webserver.feature</module>
         <module>org.wso2.carbon.apimgt.publisher.feature</module>
+        <module>org.wso2.carbon.apimgt.store.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.core.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.authenticator.feature</module>
+        <module>org.wso2.carbon.apimgt.admin.feature</module>
     </modules>
 
 

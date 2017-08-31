@@ -39,4 +39,16 @@ public class AuthenticatorConstants {
     public static final String BEARER_PREFIX = "bearer";
     public static final String COOKIE_EXPIRE_TIME = "Expires=Thu, 01-Jan-1970 00:00:01 GMT";
     public static final String REST_CONTEXT = "/api/am";
+    public static final String AUTH_USER = "LOGGED_IN_USER";
+    public static final String CONSUMER_KEY = "CONSUMER_KEY";
+    public static final String CONSUMER_SECRET = "CONSUMER_SECRET";
+    public static final String SSO_ENABLED = "is_sso_enabled";
+    public static final String APPLICATION_KEY_TYPE = "Application";
+    public static final String REQUEST_URL = "REQUEST_URL";
+    public static final String STORE_APPLICATION = "store";
+    public static final String STORE_NEW_APPLICATION = "store_new";
+    public static final String PUBLISHER_APPLICATION = "publisher";
+    public static final String ADMIN_APPLICATION = "admin";
+    public static final String EDITOR_APPLICATION = "editor";
+    public static final String AUTHORIZATION_CODE_CALLBACK_URL = "login/callback/";
 }

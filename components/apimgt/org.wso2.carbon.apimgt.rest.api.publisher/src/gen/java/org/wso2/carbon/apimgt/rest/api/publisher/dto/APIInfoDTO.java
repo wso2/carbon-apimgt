@@ -37,8 +37,8 @@ public class APIInfoDTO   {
   @JsonProperty("workflowStatus")
   private String workflowStatus = null;
 
-  @JsonProperty("userPermissionsForApi")
-  private List<String> userPermissionsForApi = new ArrayList<String>();
+  @JsonProperty("securityScheme")
+  private List<String> securityScheme = new ArrayList<String>();
 
   public APIInfoDTO id(String id) {
     this.id = id;
@@ -184,27 +184,27 @@ public class APIInfoDTO   {
     this.workflowStatus = workflowStatus;
   }
 
-  public APIInfoDTO userPermissionsForApi(List<String> userPermissionsForApi) {
-    this.userPermissionsForApi = userPermissionsForApi;
+  public APIInfoDTO securityScheme(List<String> securityScheme) {
+    this.securityScheme = securityScheme;
     return this;
   }
 
-  public APIInfoDTO addUserPermissionsForApiItem(String userPermissionsForApiItem) {
-    this.userPermissionsForApi.add(userPermissionsForApiItem);
+  public APIInfoDTO addSecuritySchemeItem(String securitySchemeItem) {
+    this.securityScheme.add(securitySchemeItem);
     return this;
   }
 
    /**
-   * LoggedIn user permissions for the API 
-   * @return userPermissionsForApi
+   * Get securityScheme
+   * @return securityScheme
   **/
-  @ApiModelProperty(example = "[&quot;READ&quot;,&quot;UPDATE&quot;]", value = "LoggedIn user permissions for the API ")
-  public List<String> getUserPermissionsForApi() {
-    return userPermissionsForApi;
+  @ApiModelProperty(value = "")
+  public List<String> getSecurityScheme() {
+    return securityScheme;
   }
 
-  public void setUserPermissionsForApi(List<String> userPermissionsForApi) {
-    this.userPermissionsForApi = userPermissionsForApi;
+  public void setSecurityScheme(List<String> securityScheme) {
+    this.securityScheme = securityScheme;
   }
 
 
@@ -225,12 +225,12 @@ public class APIInfoDTO   {
         Objects.equals(this.provider, apIInfo.provider) &&
         Objects.equals(this.lifeCycleStatus, apIInfo.lifeCycleStatus) &&
         Objects.equals(this.workflowStatus, apIInfo.workflowStatus) &&
-        Objects.equals(this.userPermissionsForApi, apIInfo.userPermissionsForApi);
+        Objects.equals(this.securityScheme, apIInfo.securityScheme);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, workflowStatus, userPermissionsForApi);
+    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, workflowStatus, securityScheme);
   }
 
   @Override
@@ -246,7 +246,7 @@ public class APIInfoDTO   {
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
-    sb.append("    userPermissionsForApi: ").append(toIndentedString(userPermissionsForApi)).append("\n");
+    sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("}");
     return sb.toString();
   }

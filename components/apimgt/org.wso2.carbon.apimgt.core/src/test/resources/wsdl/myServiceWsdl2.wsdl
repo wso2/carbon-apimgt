@@ -1,0 +1,61 @@
+<?xml version = "1.0" encoding = "utf-8" ?>
+<description
+    xmlns = "http://www.w3.org/ns/wsdl"
+    targetNamespace = "http://yoursite.com/MyService"
+    xmlns:tns = "http://yoursite.com/MyService"
+    xmlns:stns = "http://yoursite.com/MyService/schema"
+    xmlns:wsoap = "http://www.w3.org/ns/wsdl/soap"
+    xmlns:soap = "http://www.w3.org/2003/05/soap-envelope"
+    xmlns:wsdlx = "http://www.w3.org/ns/wsdl-extensions">
+ 
+    <documentation>
+        This document describes my Service. You can find additional information in
+        the following web page: http://yoursite.com/MyService/help.html
+    </documentation>
+ 
+    <types>
+        <xs:schema
+        xmlns:xs = "http://www.w3.org/2001/XMLSchema"
+        targetNamespace = "http://yoursite.com/MyService/schema"
+        xmlns = "http://yoursite.com/MyService/schema" >
+            <xs:element name = "checkServiceStatus" type="tCheckServiceStatus" />
+            <xs:complexType name = "tCheckServiceStatus" >
+                <xs:sequence>
+                    <xs:element name = "checkDate" type = "xs:date" />
+                    <xs:element name = "serviceName" type = "xs:string" />
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name = " checkServiceStatusResponse" type = "xs:double" />
+            <xs:element name = "dataError" type = "xs:string" />
+        </xs:schema>
+    </types>
+ 
+    <interface name = "myServiceInterface">
+        <fault name = "dataFault" element = "stns:dataError" />
+        <operation name = "checkServiceStatusOp"
+            pattern = "http://www.w3.org/ns/wsdl/in-out"
+            style= " http://www.w3.org/ns/wsdl/style/iri"
+            wsdlx:safe = "true">
+            <input messageLabel = "In" element = "stns:checkServiceStatus" />
+            <output messageLabel = "Out" element = "stns:checkServiceStatusResponse"/>
+            <outfault messageLabel = "Out" ref = "tns:dataFault" />
+        </operation>
+    </interface>
+ 
+    <binding name = "myServiceInterfaceSOAPBinding" 
+          interface = "tns:myServiceInterface"
+          type = "http://www.w3.org/ns/wsdl/soap"
+          wsoap:protocol = "http://www.w3.org/2003/05/soap/bindings/HTTP/">
+        <operation ref = "tns:checkServiceStatusOp" 
+      wsoap:mep = "http://www.w3.org/2003/05/soap/mep/soap-response"/>
+        <fault ref = "tns:dataFault" 
+      wsoap:code = "soap:Sender"/>
+    </binding>
+ 
+    <service name = "myService" 
+       interface = "tns:myServiceInterface">
+        <endpoint name = "myServiceEndpoint" 
+               binding = "tns:myServiceInterfaceSOAPBinding"
+               address = "http://yoursite.com/MyService"/>
+    </service>
+</description>

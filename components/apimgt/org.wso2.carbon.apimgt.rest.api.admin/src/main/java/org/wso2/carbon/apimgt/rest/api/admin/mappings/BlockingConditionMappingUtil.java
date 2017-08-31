@@ -38,7 +38,7 @@ public class BlockingConditionMappingUtil {
      *
      * @param blockConditionList A List of Block Conditions
      * @return REST API List DTO object derived from Block Condition list
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
     public static BlockingConditionListDTO fromBlockConditionListToListDTO(List<BlockConditions> blockConditionList)
             throws UnsupportedThrottleLimitTypeException {
@@ -60,7 +60,7 @@ public class BlockingConditionMappingUtil {
      *
      * @param blockCondition Block condition model object
      * @return Block condition DTO object derived from block condition model object
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
     public static BlockingConditionDTO fromBlockingConditionToDTO(BlockConditions blockCondition)
             throws UnsupportedThrottleLimitTypeException {
@@ -71,18 +71,11 @@ public class BlockingConditionMappingUtil {
         dto.setConditionId(blockCondition.getUuid());
         dto.setConditionType(blockCondition.getConditionType());
         dto.setStatus(blockCondition.isEnabled());
-        if (blockCondition.getConditionType()
-                .equals(APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE)) {
+        if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITION_IP_RANGE
+                .equals(blockCondition.getConditionType())) {
             dto.setIpCondition(fromBlockConditionToIpConditionDTO(blockCondition));
         }
         String conditionValue = blockCondition.getConditionValue();
-        if (APIMgtConstants.ThrottlePolicyConstants.BLOCKING_CONDITIONS_IP.equals(blockCondition.getConditionType())) {
-            int index = conditionValue.indexOf(":");
-            if (index > -1) {
-                // Removing Tenant Domain from IP
-                conditionValue = conditionValue.substring(index + 1, conditionValue.length());
-            }
-        }
         dto.setConditionValue(conditionValue);
         return dto;
     }
@@ -92,7 +85,7 @@ public class BlockingConditionMappingUtil {
      *
      * @param blockingConditionDTO blockindConditionDTO to be converted
      * @return BlockCondition Object
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
     public static BlockConditions fromBlockingConditionDTOToBlockCondition(BlockingConditionDTO blockingConditionDTO)
             throws UnsupportedThrottleLimitTypeException {

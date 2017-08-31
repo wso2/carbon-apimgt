@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.core.models.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.core.models.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
-import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.BandwidthLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ConditionalGroupDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.CustomAttributeDTO;
@@ -64,8 +63,8 @@ public class CommonThrottleMappingUtil {
      *
      * @param conditionalGroupDTOs a list of Conditional Group DTOs
      * @return Derived list of Pipelines from list of Conditional Group DTOs
-     * @throws UnsupportedThrottleLimitTypeException
-     * @throws UnsupportedThrottleConditionTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
+     * @throws UnsupportedThrottleConditionTypeException - If error occurs
      */
     public static List<Pipeline> fromConditionalGroupDTOListToPipelineList(
             List<ConditionalGroupDTO> conditionalGroupDTOs)
@@ -82,11 +81,12 @@ public class CommonThrottleMappingUtil {
      *
      * @param pipelines A list of pipeline objects
      * @return Derived list of DTO objects from Pipeline list
-     * @throws UnsupportedThrottleLimitTypeException
-     * @throws UnsupportedThrottleConditionTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
+     * @throws UnsupportedThrottleConditionTypeException - If error occurs
      */
     public static List<ConditionalGroupDTO> fromPipelineListToConditionalGroupDTOList(List<Pipeline> pipelines)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
+
         List<ConditionalGroupDTO> groupDTOs = new ArrayList<>();
         if (pipelines != null) {
             for (Pipeline pipeline : pipelines) {
@@ -101,11 +101,12 @@ public class CommonThrottleMappingUtil {
      *
      * @param dto Conditional Group DTO
      * @return Derived Pipeline object from Conditional Group DTO
-     * @throws UnsupportedThrottleLimitTypeException
-     * @throws UnsupportedThrottleConditionTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
+     * @throws UnsupportedThrottleConditionTypeException - If error occurs
      */
     public static Pipeline fromConditionalGroupDTOToPipeline(ConditionalGroupDTO dto)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
+
         Pipeline pipeline = new Pipeline();
         pipeline.setDescription(dto.getDescription());
         pipeline.setEnabled(true);
@@ -121,11 +122,12 @@ public class CommonThrottleMappingUtil {
      *
      * @param pipeline Pipeline object
      * @return Derived DTO object from Pipeline object
-     * @throws UnsupportedThrottleLimitTypeException
-     * @throws UnsupportedThrottleConditionTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
+     * @throws UnsupportedThrottleConditionTypeException - If error occurs
      */
     public static ConditionalGroupDTO fromPipelineToConditionalGroupDTO(Pipeline pipeline)
             throws UnsupportedThrottleLimitTypeException, UnsupportedThrottleConditionTypeException {
+
         ConditionalGroupDTO groupDTO = new ConditionalGroupDTO();
         groupDTO.setDescription(pipeline.getDescription());
         groupDTO.setLimit(fromQuotaPolicyToDTO(pipeline.getQuotaPolicy()));
@@ -140,10 +142,11 @@ public class CommonThrottleMappingUtil {
      *
      * @param throttleConditionDTOs list of Throttle Condition DTOs
      * @return Derived list of model Condition objects from Throttle Condition DTOs
-     * @throws UnsupportedThrottleConditionTypeException
+     * @throws UnsupportedThrottleConditionTypeException - If error occurs
      */
     public static List<Condition> fromDTOListToConditionList(List<ThrottleConditionDTO> throttleConditionDTOs)
             throws UnsupportedThrottleConditionTypeException {
+
         List<Condition> conditions = new ArrayList<>();
         if (throttleConditionDTOs != null) {
             for (ThrottleConditionDTO dto : throttleConditionDTOs) {
@@ -158,10 +161,11 @@ public class CommonThrottleMappingUtil {
      *
      * @param conditions List of Condition objects
      * @return a list of Throttle Condition DTO objects derived from a list of model Condition objects
-     * @throws UnsupportedThrottleConditionTypeException
+     * @throws UnsupportedThrottleConditionTypeException - If error occurs
      */
     public static List<ThrottleConditionDTO> fromConditionListToDTOList(List<Condition> conditions)
             throws UnsupportedThrottleConditionTypeException {
+
         List<ThrottleConditionDTO> dtoList = new ArrayList<>();
         if (conditions != null) {
             for (Condition condition : conditions) {
@@ -192,7 +196,7 @@ public class CommonThrottleMappingUtil {
             String msg = "Throttle Condition type " + dto.getType() + " is not supported";
             log.error(msg);
             throw new UnsupportedThrottleConditionTypeException(msg,
-                    ExceptionCodes.UNSUPPORTED_THROTTLE_CONDITION_TYPE);
+                                                                ExceptionCodes.UNSUPPORTED_THROTTLE_CONDITION_TYPE);
         }
     }
 
@@ -201,9 +205,9 @@ public class CommonThrottleMappingUtil {
      *
      * @param condition Throttle condition model object
      * @return Derived DTO object from the model object
-     * @throws UnsupportedThrottleConditionTypeException
+     * @throws UnsupportedThrottleConditionTypeException - If error occurs
      */
-    public static ThrottleConditionDTO fromConditionToDTO(Condition condition)   //.................
+    public static ThrottleConditionDTO fromConditionToDTO(Condition condition)
             throws UnsupportedThrottleConditionTypeException {
         if (condition instanceof IPCondition) {
             return fromIPConditionToDTO((IPCondition) condition);
@@ -225,7 +229,7 @@ public class CommonThrottleMappingUtil {
      *
      * @param dto Throttle limit DTO object
      * @return Derived Quota policy object from DTO
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
     public static QuotaPolicy fromDTOToQuotaPolicy(ThrottleLimitDTO dto) throws UnsupportedThrottleLimitTypeException {
         QuotaPolicy quotaPolicy = new QuotaPolicy();
@@ -239,12 +243,14 @@ public class CommonThrottleMappingUtil {
      *
      * @param quotaPolicy Quota Policy object
      * @return Throttle Limit DTO object derived from the Quota Policy object
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
     public static ThrottleLimitDTO fromQuotaPolicyToDTO(QuotaPolicy quotaPolicy)
             throws UnsupportedThrottleLimitTypeException {
+
         Limit limit = quotaPolicy.getLimit();
         String throttleLimitType = quotaPolicy.getType();
+
         if (PolicyConstants.REQUEST_COUNT_TYPE.equals(throttleLimitType)) {
             if (limit instanceof RequestCountLimit) {
                 RequestCountLimit requestCountLimit = (RequestCountLimit) limit;
@@ -275,7 +281,7 @@ public class CommonThrottleMappingUtil {
      *
      * @param dto Throttle Limit DTO object
      * @return Limit object derived from DTO
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
 
     public static Limit fromDTOToLimit(ThrottleLimitDTO dto) throws UnsupportedThrottleLimitTypeException {
@@ -368,7 +374,9 @@ public class CommonThrottleMappingUtil {
     public static IPCondition fromDTOToIPCondition(ThrottleConditionDTO dto)
             throws UnsupportedThrottleConditionTypeException {
         String ipConditionType = mapIPConditionTypeFromDTOToModel(dto.getIpCondition().getIpConditionType());
+
         IPCondition ipCondition = new IPCondition(ipConditionType);
+
         ipCondition = updateFieldsFromDTOToCondition(dto, ipCondition);
         ipCondition.setSpecificIP(dto.getIpCondition().getSpecificIP());
         ipCondition.setStartingIP(dto.getIpCondition().getStartingIP());
@@ -537,7 +545,7 @@ public class CommonThrottleMappingUtil {
      * @param policy Policy model object
      * @param <T>    Type of Policy model
      * @return Updated Policy object with common fields
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
     public static <T extends Policy> T updateFieldsFromDTOToPolicy(ThrottlePolicyDTO dto, T policy)
             throws UnsupportedThrottleLimitTypeException {
@@ -554,12 +562,12 @@ public class CommonThrottleMappingUtil {
      * @param policy Policy model object
      * @param <T>    Type of Throttle Policy DTO object model
      * @return Updated Throttle Policy DTO object with common fields
-     * @throws UnsupportedThrottleLimitTypeException
+     * @throws UnsupportedThrottleLimitTypeException - If error occurs
      */
     public static <T extends ThrottlePolicyDTO> T updateFieldsFromToPolicyToDTO(Policy policy, T dto)
             throws UnsupportedThrottleLimitTypeException {
 
-        dto.setPolicyId(policy.getUuid());
+        dto.setId(policy.getUuid());
         dto.setDisplayName(policy.getDisplayName());
         dto.setIsDeployed(policy.isDeployed());
         dto.setDescription(policy.getDescription());

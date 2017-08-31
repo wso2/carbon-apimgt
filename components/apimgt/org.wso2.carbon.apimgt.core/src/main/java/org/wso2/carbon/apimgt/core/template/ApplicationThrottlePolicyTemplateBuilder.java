@@ -24,11 +24,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 
 import java.io.StringWriter;
-import java.util.Map;
 
 /**
  * Siddhi query builder for application throttle policy.
@@ -80,15 +78,4 @@ public class ApplicationThrottlePolicyTemplateBuilder extends ThrottlePolicyTemp
         return policyTemplateLocation + POLICY_VELOCITY_APP + XML_EXTENSION;
     }
 
-
-    @Override public Map<String, String> getThrottlePolicyTemplate() throws APITemplateException {
-        try {
-            templateMap.put(applicationPolicy.getPolicyName(), getThrottlePolicyForAppLevel());
-        } catch (APITemplateException e) {
-            String errorMessage = "Error while creating template for application throttle policy.";
-            log.error(errorMessage, e);
-            throw new APITemplateException(errorMessage, ExceptionCodes.THROTTLE_TEMPLATE_EXCEPTION);
-        }
-        return templateMap;
-    }
 }

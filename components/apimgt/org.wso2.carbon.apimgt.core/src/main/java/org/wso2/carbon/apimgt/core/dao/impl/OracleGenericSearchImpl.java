@@ -28,7 +28,7 @@ class OracleGenericSearchImpl implements StoreApiAttributeSearch {
 
     private static final String API_SUMMARY_SELECT_STORE = "SELECT UUID, PROVIDER, NAME, " +
             "CONTEXT, VERSION, DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, " +
-            "LC_WORKFLOW_STATUS FROM AM_API ";
+            "LC_WORKFLOW_STATUS, SECURITY_SCHEME FROM AM_API ";
 
     @Override
     public String getStoreAttributeSearchQuery(StringBuilder roleListBuilder,

@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>7.0.34-SNAPSHOT</version>
+        <version>7.0.41-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -69,14 +69,14 @@
     </dependencies>
     <build>
         <plugins>
-            <plugin>
+            <!--plugin>
                 <groupId>org.wso2.maven.plugins</groupId>
                 <artifactId>swagger2msf4j-maven-plugin</artifactId>
                 <version>1.0-SNAPSHOT</version>
                 <configuration>
                     <inputSpec>${project.basedir}/src/main/resources/webserver-api.yaml</inputSpec>
                 </configuration>
-            </plugin>
+            </plugin-->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>

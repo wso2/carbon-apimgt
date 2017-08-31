@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ /*
-  ~ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
   ~ *
   ~ * Licensed under the Apache License, Version 2.0 (the "License");
   ~ * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>7.0.34-SNAPSHOT</version>
+    <version>7.0.41-SNAPSHOT</version>
 
     <name>WSO2 Carbon - API Management Aggregator POM</name>
 
@@ -115,6 +115,18 @@
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.publisher.feature</artifactId>
+                <version>${carbon.apimgt.version}</version>
+                <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.store.feature</artifactId>
+                <version>${carbon.apimgt.version}</version>
+                <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.admin.feature</artifactId>
                 <version>${carbon.apimgt.version}</version>
                 <type>zip</type>
             </dependency>
@@ -277,6 +289,11 @@
             <dependency>
                 <groupId>org.powermock</groupId>
                 <artifactId>powermock-api-mockito</artifactId>
+                <version>${powermock.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-module-junit4</artifactId>
                 <version>${powermock.version}</version>
             </dependency>
             <dependency>
@@ -494,17 +511,52 @@
             <dependency>
                 <groupId>org.ballerinalang</groupId>
                 <artifactId>ballerina-core</artifactId>
-                <version>0.8.1</version>
+                <version>${ballerina.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.ballerinalang</groupId>
                 <artifactId>workspace-service</artifactId>
-                <version>0.8.2</version>
+                <version>${ballerina.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-log4j12</artifactId>
                 <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.woden.wso2</groupId>
+                <artifactId>woden</artifactId>
+                <version>${apache.woden.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>wsdl4j.wso2</groupId>
+                <artifactId>wsdl4j</artifactId>
+                <version>${wsdl4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ws.commons.schema.wso2</groupId>
+                <artifactId>XmlSchema</artifactId>
+                <version>${xmlschema.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>apim-ballerina-plugin</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ballerinalang</groupId>
+                <artifactId>ballerina-launcher</artifactId>
+                <version>${ballerina.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.ballerina.native</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.ballerina.publisher</artifactId>
+                <version>${carbon.apimgt.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -651,7 +703,8 @@
                             </goals>
                             <configuration>
                                 <dataFile>${basedir}/target/coverage-reports/aggregate.exec</dataFile>
-                                <outputDirectory>${basedir}/target/coverage-reports/site/jacoco-aggregate</outputDirectory>
+                                <outputDirectory>${basedir}/target/coverage-reports/site/jacoco-aggregate
+                                </outputDirectory>
                             </configuration>
                         </execution>
                         <execution>
@@ -683,7 +736,8 @@
                     <version>${maven.surefire.plugin.version}</version>
                     <configuration>
                         <systemPropertyVariables>
-                            <jacoco-agent.destfile>${basedir}/target/coverage-reports/jacoco-ut.exec</jacoco-agent.destfile>
+                            <jacoco-agent.destfile>${basedir}/target/coverage-reports/jacoco-ut.exec
+                            </jacoco-agent.destfile>
                         </systemPropertyVariables>
                     </configuration>
                 </plugin>
@@ -693,7 +747,8 @@
                     <version>2.19.1</version>
                     <configuration>
                         <systemPropertyVariables>
-                            <jacoco-agent.destfile>${basedir}/target/coverage-reports/jacoco-it.exec</jacoco-agent.destfile>
+                            <jacoco-agent.destfile>${basedir}/target/coverage-reports/jacoco-it.exec
+                            </jacoco-agent.destfile>
                         </systemPropertyVariables>
                     </configuration>
                     <executions>
@@ -741,7 +796,7 @@
         <!-- Dependencies -->
         <carbon.kernel.version>5.2.0-m3</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[5.1.0, 6.0.0)</carbon.kernel.package.import.version.range>
-        <carbon.apimgt.version>7.0.34-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>7.0.41-SNAPSHOT</carbon.apimgt.version>
 
         <carbon.datasources.version>1.0.0</carbon.datasources.version>
 
@@ -781,8 +836,8 @@
 
         <antlr4.runtime.version>4.5.1.wso2v1</antlr4.runtime.version>
         <plugin.version.antlr>4.5.1</plugin.version.antlr>
-        <mockito.version>1.9.0</mockito.version>
-        <powermock.version>1.4.11</powermock.version>
+        <mockito.version>1.10.19</mockito.version>
+        <powermock.version>1.6.4</powermock.version>
         <geronimo.version>1.6</geronimo.version>
         <geronimo.stax.version>1.0.1</geronimo.stax.version>
         <javax.version>1.8.0_45</javax.version>
@@ -869,5 +924,10 @@
         <nimbusds.import.version.range>[2.26.1, 2.26.2)</nimbusds.import.version.range>
         <geronimo-jms.version>1.1.0.wso2v1</geronimo-jms.version>
         <geronimo-jms.import.version.range>[1.1.0, 1.2.0)</geronimo-jms.import.version.range>
+        <apache.woden.version>1.0.0.M9-wso2v1</apache.woden.version>
+        <wsdl4j.version>1.6.2.wso2v4</wsdl4j.version>
+        <xmlschema.version>1.4.7.wso2v2</xmlschema.version>
+
+        <ballerina.version>0.89</ballerina.version>
     </properties>
 </project>

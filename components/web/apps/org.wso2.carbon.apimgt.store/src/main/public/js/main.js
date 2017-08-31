@@ -47,7 +47,7 @@ var requestMetaData = function(data={}) {
     // promise
     var request_meta = {
         clientAuthorizations: {
-            api_key: new SwaggerClient.ApiKeyAuthorization("Authorization", access_key_header, "header")
+            OAuth2Security: new SwaggerClient.ApiKeyAuthorization("Authorization", access_key_header, "header")
         },
         responseContentType: data['Content-Type'] || "application/json"
     };
@@ -63,9 +63,9 @@ var getCookie = function(name) {
 var setAuthHeader = function(swaggerClient) {
     refreshTokenOnExpire();
     var bearerToken = "Bearer " + getCookie("WSO2_AM_TOKEN_1");
-    swaggerClient.clientAuthorizations.add("apiKey", new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header"));
+    swaggerClient.clientAuthorizations.add("OAuth2Security", 
+        new SwaggerClient.ApiKeyAuthorization("Authorization", bearerToken, "header"));
     swaggerClient.setHost(location.host);
-
 };
 
 var refreshTokenOnExpire = function(){

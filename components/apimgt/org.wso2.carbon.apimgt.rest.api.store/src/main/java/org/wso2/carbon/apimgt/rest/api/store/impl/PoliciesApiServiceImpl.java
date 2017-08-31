@@ -7,10 +7,8 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
@@ -23,8 +21,9 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.TierListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.mappings.TierMappingUtil;
 import org.wso2.msf4j.Request;
 
-@javax.annotation.Generated(value = "org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
-        "2017-02-09T12:36:56.084+05:30")
+/**
+ * Implementation of Policies resource
+ */
 public class PoliciesApiServiceImpl extends PoliciesApiService {
 
     private static final Logger log = LoggerFactory.getLogger(PoliciesApiServiceImpl.class);
@@ -35,17 +34,16 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      * @param tierLevel   Tier level
      * @param limit       maximum number of tiers to return
      * @param offset      starting position of the pagination
-     * @param accept      accept header value
      * @param ifNoneMatch If-Non-Match header value
      * @param request     msf4j request object
      * @return A list of qualifying tiers
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response policiesTierLevelGet(String tierLevel, Integer limit, Integer offset, String accept,
-                                         String ifNoneMatch, Request request) throws NotFoundException {
+    public Response policiesTierLevelGet(String tierLevel, Integer limit, Integer offset, String ifNoneMatch,
+            Request request) throws NotFoundException {
         TierListDTO tierListDTO = null;
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             List<Policy> tierList = apiStore.getPolicies(RestApiUtil.mapRestApiPolicyLevelToPolicyLevelEnum(tierLevel));
@@ -66,7 +64,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      *
      * @param tierName        Name of the tier
      * @param tierLevel       Level of the tier
-     * @param accept          accept header value
      * @param ifNoneMatch     If-Non-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @param request         msf4j request object
@@ -74,14 +71,14 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-    public Response policiesTierLevelTierNameGet(String tierName, String tierLevel, String accept, String ifNoneMatch,
-                                                 String ifModifiedSince, Request request) throws NotFoundException {
+    public Response policiesTierLevelTierNameGet(String tierName, String tierLevel, String ifNoneMatch,
+            String ifModifiedSince, Request request) throws NotFoundException {
         TierDTO tierDTO = null;
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
-            String existingFingerprint = policiesTierLevelTierNameGetFingerprint(tierName, tierLevel, accept,
-                    ifNoneMatch, ifModifiedSince, request);
+            String existingFingerprint = policiesTierLevelTierNameGetFingerprint(tierName, tierLevel, ifNoneMatch,
+                    ifModifiedSince, request);
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                     .contains(existingFingerprint)) {
                 return Response.notModified().build();
@@ -107,15 +104,14 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      *
      * @param policyName      name of the policy
      * @param policyLevel     level of the policy
-     * @param accept          accept header value
      * @param ifNoneMatch     If-Non-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @param request         msf4j request object
      * @return fingerprint of a throttling policy
      */
-    public String policiesTierLevelTierNameGetFingerprint(String policyName, String policyLevel, String accept,
-                                                          String ifNoneMatch, String ifModifiedSince, Request request) {
-        String username = RestApiUtil.getLoggedInUsername();
+    public String policiesTierLevelTierNameGetFingerprint(String policyName, String policyLevel, String ifNoneMatch,
+            String ifModifiedSince, Request request) {
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestApiUtil.getConsumer(username)
                     .getLastUpdatedTimeOfThrottlingPolicy(RestApiUtil.mapRestApiPolicyLevelToPolicyLevelEnum

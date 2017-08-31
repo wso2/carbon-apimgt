@@ -8,6 +8,8 @@ import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.gateway.holders as holders;
 import org.wso2.carbon.apimgt.gateway.constants;
 
+errors:TypeCastError err;
+
 function constructAccessTokenNotFoundPayload (message response) {
     json payload = {"code":900902, "message":"accessToken invalid"};
     messages:setJsonPayload(response, payload);
@@ -40,52 +42,52 @@ function constructAPIIsInMaintenance (message response) {
 
 function fromJsonToIntrospectDto (json introspectResponse) (dto:IntrospectDto) {
     dto:IntrospectDto introspectDto = {};
-    introspectDto.active = (boolean)introspectResponse.active;
+    introspectDto.active, err = (boolean)introspectResponse.active;
     if (introspectDto.active) {
         if (introspectResponse.exp != null) {
-            introspectDto.exp = (int)introspectResponse.exp;
+            introspectDto.exp, err = (int)introspectResponse.exp;
         } else {
             // https://github.com/ballerinalang/ballerina/issues/2396
             introspectDto.exp = -1;
         }
         if (introspectResponse.username != null) {
-            introspectDto.username = (string)introspectResponse.username;
+            introspectDto.username, err = (string)introspectResponse.username;
         }
         if (introspectResponse.scope != null) {
-            introspectDto.scope = (string)introspectResponse.scope;
+            introspectDto.scope, err = (string)introspectResponse.scope;
         }
         if (introspectResponse.token_type != null) {
-            introspectDto.token_type = (string)introspectResponse.token_type;
+            introspectDto.token_type, err = (string)introspectResponse.token_type;
         }
         if (introspectResponse.iat != null) {
-            introspectDto.iat = (int)introspectResponse.iat;
+            introspectDto.iat, err = (int)introspectResponse.iat;
         }
         if (introspectResponse.client_id != null) {
-            introspectDto.client_id = (string)introspectResponse.client_id;
+            introspectDto.client_id, err = (string)introspectResponse.client_id;
         }
     }
     return introspectDto;
 }
 function fromJsonToSubscriptionDto (json subscriptionResponse) (dto:SubscriptionDto) {
     dto:SubscriptionDto subscriptionDto = {};
-    subscriptionDto.apiName = (string)subscriptionResponse.apiName;
-    subscriptionDto.apiContext = (string)subscriptionResponse.apiContext;
-    subscriptionDto.apiVersion = (string)subscriptionResponse.apiVersion;
-    subscriptionDto.apiProvider = (string)subscriptionResponse.apiProvider;
-    subscriptionDto.consumerKey = (string)subscriptionResponse.consumerKey;
-    subscriptionDto.subscriptionPolicy = (string)subscriptionResponse.subscriptionPolicy;
-    subscriptionDto.keyEnvType = (string)subscriptionResponse.keyEnvType;
-    subscriptionDto.applicationId = (string)subscriptionResponse.applicationId;
-    subscriptionDto.status = (string)subscriptionResponse.status;
+    subscriptionDto.apiName, err = (string)subscriptionResponse.apiName;
+    subscriptionDto.apiContext, err = (string)subscriptionResponse.apiContext;
+    subscriptionDto.apiVersion, err = (string)subscriptionResponse.apiVersion;
+    subscriptionDto.apiProvider, err = (string)subscriptionResponse.apiProvider;
+    subscriptionDto.consumerKey, err = (string)subscriptionResponse.consumerKey;
+    subscriptionDto.subscriptionPolicy, err = (string)subscriptionResponse.subscriptionPolicy;
+    subscriptionDto.keyEnvType, err = (string)subscriptionResponse.keyEnvType;
+    subscriptionDto.applicationId, err = (string)subscriptionResponse.applicationId;
+    subscriptionDto.status, err = (string)subscriptionResponse.status;
     return subscriptionDto;
 }
 function fromJsonToResourceDto (json resourceResponse) (dto:ResourceDto) {
     dto:ResourceDto resourceDto = {};
-    resourceDto.uriTemplate = (string)resourceResponse.uriTemplate;
-    resourceDto.httpVerb = (string)resourceResponse.httpVerb;
-    resourceDto.authType = (string)resourceResponse.authType;
-    resourceDto.scope = (string)resourceResponse.scope;
-    resourceDto.policy = (string)resourceResponse.policy;
+    resourceDto.uriTemplate, err = (string)resourceResponse.uriTemplate;
+    resourceDto.httpVerb, err = (string)resourceResponse.httpVerb;
+    resourceDto.authType, err = (string)resourceResponse.authType;
+    resourceDto.scope, err = (string)resourceResponse.scope;
+    resourceDto.policy, err = (string)resourceResponse.policy;
     return resourceDto;
 }
 function retrieveSubscriptions () (boolean) {
@@ -164,7 +166,8 @@ function retrievePolicies () (boolean) {
     messages:setHeader(request, "Content-Type", "application/json");
     message response = http:ClientConnector.get(apiInfoConnector, query, request);
     json policies = messages:getJsonPayload(response);
-    int length = (int)policies.count;
+    int length;
+    length, err = (int)policies.count;
     int i = 0;
     if (length > 0) {
         while (i < length) {
@@ -178,21 +181,22 @@ function retrievePolicies () (boolean) {
 
 function putIntoApplicationCache (json application) {
     dto:ApplicationDto applicationDto = {};
-    applicationDto.applicationId = (string)application.applicationId;
-    applicationDto.applicationName = (string)application.name;
-    applicationDto.applicationOwner = (string)application.subscriber;
-    applicationDto.applicationPolicy = (string)application.throttlingTier;
+    applicationDto.applicationId, err = (string)application.applicationId;
+    applicationDto.applicationName, err = (string)application.name;
+    applicationDto.applicationOwner, err = (string)application.subscriber;
+    applicationDto.applicationPolicy, err = (string)application.throttlingTier;
     holders:putIntoApplicationCache(applicationDto);
 }
 function putIntoPolicyCache (json policy) {
     dto:PolicyDto policyDto = {};
-    policyDto.id = (string)policy.id;
-    policyDto.name = (string)policy.name;
-    policyDto.stopOnQuotaReach = (boolean)policy.stopOnQuotaReach;
+    policyDto.id, err = (string)policy.id;
+    policyDto.name, err = (string)policy.name;
+    policyDto.stopOnQuotaReach, err = (boolean)policy.stopOnQuotaReach;
     holders:putIntoPolicyCache(policyDto);
 }
 function removeFromApplicationCache (json application) {
-    string applicationId = (string)application.applicationId;
+    string applicationId;
+    applicationId, err = (string)application.applicationId;
     holders:removeApplicationFromCache(applicationId);
 }
 function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO) {
@@ -201,44 +205,51 @@ function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO) {
     //Extract key manager information and populate KeyManageInfoDTO to be cached
     json keyManagerInfo = conf.keyManagerInfo;
     dto:KeyManagerInfoDTO keyManagerInfoDTO = {};
-    keyManagerInfoDTO.dcrEndpoint = (string)keyManagerInfo.dcrEndpoint;
+    keyManagerInfoDTO.dcrEndpoint, err = (string)keyManagerInfo.dcrEndpoint;
 
-    keyManagerInfoDTO.tokenEndpoint = (string)keyManagerInfo.tokenEndpoint;
-    keyManagerInfoDTO.revokeEndpoint = (string)keyManagerInfo.revokeEndpoint;
-    keyManagerInfoDTO.introspectEndpoint = (string)keyManagerInfo.introspectEndpoint;
+    keyManagerInfoDTO.tokenEndpoint, err = (string)keyManagerInfo.tokenEndpoint;
+    keyManagerInfoDTO.revokeEndpoint, err = (string)keyManagerInfo.revokeEndpoint;
+    keyManagerInfoDTO.introspectEndpoint, err = (string)keyManagerInfo.introspectEndpoint;
 
     dto:CredentialsDTO keyManagerCredentialsDTO = {};
     json keyManagerCredentials = keyManagerInfo.credentials;
-    keyManagerCredentialsDTO.username = (string)keyManagerCredentials.username;
-    keyManagerCredentialsDTO.password = (string)keyManagerCredentials.password;
+    keyManagerCredentialsDTO.username, err = (string)keyManagerCredentials.username;
+    keyManagerCredentialsDTO.password, err = (string)keyManagerCredentials.password;
     gatewayConf.keyManagerInfo = keyManagerInfoDTO;
     keyManagerInfoDTO.credentials = keyManagerCredentialsDTO;
     //Extract JWT information and populate JWTInfoDTO to be cached
     json jwTInfo = conf.jwTInfo;
     dto:JWTInfoDTO jwtInfoDTO = {};
-    jwtInfoDTO.enableJWTGeneration = (boolean)jwTInfo.enableJWTGeneration;
-    jwtInfoDTO.jwtHeader = (string)jwTInfo.jwtHeader;
+    jwtInfoDTO.enableJWTGeneration, err = (boolean)jwTInfo.enableJWTGeneration;
+    jwtInfoDTO.jwtHeader, err = (string)jwTInfo.jwtHeader;
     gatewayConf.jwtInfo = jwtInfoDTO;
 
+    //todo: pass the missed attributes from APIM core
     //Extract Analytics Server information and populate AnalyticsInfoDTO to be cached
     json analyticsInfo = conf.analyticsInfo;
     dto:AnalyticsInfoDTO analyticsInfoDTO = {};
-    analyticsInfoDTO.serverURL = (string)analyticsInfo.serverURL;
+    analyticsInfoDTO.enabled, err = (boolean)analyticsInfo.enabled;
+    analyticsInfoDTO.type = "binary"; //(string)analyticsInfo.type;
+    analyticsInfoDTO.serverURL, err = (string)analyticsInfo.serverURL;
+    analyticsInfoDTO.authServerURL = "ssl://localhost:9712"; //(string)analyticsInfo.authServerURL;
     dto:CredentialsDTO analyticsServerCredentialsDTO = {};
     json analyticsServerCredentials = analyticsInfo.credentials;
-    analyticsServerCredentialsDTO.username = (string)analyticsServerCredentials.username;
-    analyticsServerCredentialsDTO.password = (string)analyticsServerCredentials.password;
+    analyticsServerCredentialsDTO.username, err = (string)analyticsServerCredentials.username;
+    analyticsServerCredentialsDTO.password, err = (string)analyticsServerCredentials.password;
     analyticsInfoDTO.credentials = analyticsServerCredentialsDTO;
     gatewayConf.analyticsInfo = analyticsInfoDTO;
 
     //Extract Throttling Server information and populate ThrottlingInfoDTO to be cached
     json throttlingInfo = conf.throttlingInfo;
     dto:ThrottlingInfoDTO throttlingInfoDTO = {};
-    throttlingInfoDTO.serverURL = (string)throttlingInfo.serverURL;
+    throttlingInfoDTO.enabled = true; //(boolean)throttlingInfo.enabled;
+    throttlingInfoDTO.type = "binary"; //(string)throttlingInfo.type;
+    throttlingInfoDTO.serverURL, err = (string)throttlingInfo.serverURL;
+    throttlingInfoDTO.authServerURL = "ssl://localhost:9712"; //(string)throttlingInfo.authServerURL;
     json throttlingServerCredentials = throttlingInfo.credentials;
     dto:CredentialsDTO throttlingServerCredentialsDTO = {};
-    throttlingServerCredentialsDTO.username = (string)throttlingServerCredentials.username;
-    throttlingServerCredentialsDTO.password = (string)throttlingServerCredentials.password;
+    throttlingServerCredentialsDTO.username, err = (string)throttlingServerCredentials.username;
+    throttlingServerCredentialsDTO.password, err = (string)throttlingServerCredentials.password;
     throttlingInfoDTO.credentials = throttlingServerCredentialsDTO;
     gatewayConf.throttlingInfo = throttlingInfoDTO;
 
@@ -247,11 +258,12 @@ function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO) {
 
 function fromJSONToAPIDTO (json api) (dto:APIDTO) {
     dto:APIDTO APIDTO = {};
-    APIDTO.id = (string)api.id;
-    APIDTO.name = (string)api.name;
-    APIDTO.version = (string)api.version;
-    APIDTO.context = (string)api.context;
-    APIDTO.lifeCycleStatus = (string)api.lifeCycleStatus;
+    APIDTO.id, err = (string)api.id;
+    APIDTO.name, err = (string)api.name;
+    APIDTO.version, err = (string)api.version;
+    APIDTO.context, err = (string)api.context;
+    APIDTO.lifeCycleStatus, err = (string)api.lifeCycleStatus;
+    APIDTO.securityScheme = jsons:getInt(api, "$.securityScheme");
     return APIDTO;
 
 }
@@ -284,29 +296,25 @@ function getStringProperty (message msg, string propertyKey) (string) {
 
 function getJsonString (json jsonObject, string jsonPath) (string) {
     string value = "";
-    try {
-        value = (string)jsonObject.jsonPath;
-    } catch (errors:Error e) {
-        return "";
-    }
+    value, err = (string)jsonObject.jsonPath;
     return value;
 }
 function fromJsonToBlockConditionDto (json event) (dto:BlockConditionDto) {
     string key = "";
     dto:BlockConditionDto blockConditionDto = {};
-    blockConditionDto.enabled = (boolean)event.enabled;
-    blockConditionDto.conditionType = (string)event.conditionType;
+    blockConditionDto.enabled, err = (boolean)event.enabled;
+    blockConditionDto.conditionType, err = (string)event.conditionType;
     key = key + blockConditionDto.conditionType;
-    blockConditionDto.uuid = (string)event.uuid;
+    blockConditionDto.uuid, err = (string)event.uuid;
     if (blockConditionDto.conditionType == constants:BLOCKING_CONDITION_IP_RANGE) {
-        blockConditionDto.startingIP = (int)event.startingIP;
-        blockConditionDto.endingIP = (int)event.endingIP;
+        blockConditionDto.startingIP, err = (int)event.startingIP;
+        blockConditionDto.endingIP, err = (int)event.endingIP;
         key = key + " : " + blockConditionDto.startingIP + " : " + blockConditionDto.endingIP;
     } else if (blockConditionDto.conditionType == constants:BLOCKING_CONDITIONS_IP) {
-        blockConditionDto.fixedIp = (int)event.fixedIp;
+        blockConditionDto.fixedIp, err = (int)event.fixedIp;
         key = key + " : " + blockConditionDto.fixedIp;
     } else {
-        blockConditionDto.conditionValue = (string)event.conditionValue;
+        blockConditionDto.conditionValue, err = (string)event.conditionValue;
     }
     blockConditionDto.key = key;
     return blockConditionDto;

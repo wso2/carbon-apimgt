@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.api.APIManager;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
+import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
@@ -70,6 +71,7 @@ public abstract class AbstractAPIManager implements APIManager {
     private PolicyDAO policyDAO;
     private String username;
     private IdentityProvider identityProvider;
+    private KeyManager keyManager;
     private APILifecycleManager apiLifecycleManager;
     private LabelDAO labelDAO;
     private WorkflowDAO workflowDAO;
@@ -79,7 +81,7 @@ public abstract class AbstractAPIManager implements APIManager {
     protected APIDefinition apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
     protected APIMConfigurations config;
 
-    public AbstractAPIManager(String username, IdentityProvider idp, ApiDAO apiDAO,
+    public AbstractAPIManager(String username, IdentityProvider idp, KeyManager keyManager, ApiDAO apiDAO,
                               ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
                               APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
                               TagDAO tagDAO, GatewaySourceGenerator gatewaySourceGenerator,
@@ -87,6 +89,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
         this.username = username;
         this.identityProvider = idp;
+        this.keyManager = keyManager;
         this.apiDAO = apiDAO;
         this.applicationDAO = applicationDAO;
         this.apiSubscriptionDAO = apiSubscriptionDAO;
@@ -100,12 +103,12 @@ public abstract class AbstractAPIManager implements APIManager {
         this.config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
     }
 
-    public AbstractAPIManager(String username, IdentityProvider idp, ApiDAO apiDAO,
+    public AbstractAPIManager(String username, IdentityProvider idp, KeyManager keyManager, ApiDAO apiDAO,
                               ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
                               APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
                               TagDAO tagDAO) {
 
-        this(username, idp, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager,
+        this(username, idp, keyManager, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager,
                 labelDAO, workflowDAO, tagDAO, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
@@ -243,7 +246,8 @@ public abstract class AbstractAPIManager implements APIManager {
      * @return swagger string
      * @throws APIManagementException   If failed to retrieve swagger definition.
      */
-    @Override public String getApiSwaggerDefinition(String api) throws APIManagementException {
+    @Override
+    public String getApiSwaggerDefinition(String api) throws APIManagementException {
         try {
             return getApiDAO().getApiSwaggerDefinition(api);
 
@@ -253,6 +257,16 @@ public abstract class AbstractAPIManager implements APIManager {
             throw new APIManagementException(errorMsg + api, e, e.getErrorHandler());
         }
 
+    }
+
+    @Override
+    public boolean isWSDLArchiveExists(String apiId) throws APIMgtDAOException {
+        return getApiDAO().isWSDLArchiveExists(apiId);
+    }
+
+    @Override
+    public boolean isWSDLExists(String apiId) throws APIMgtDAOException {
+        return getApiDAO().isWSDLExists(apiId);
     }
 
     /**
@@ -671,6 +685,10 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public IdentityProvider getIdentityProvider() {
         return identityProvider;
+    }
+
+    public KeyManager getKeyManager() {
+        return keyManager;
     }
 
     public APIMConfigurations getConfig() {

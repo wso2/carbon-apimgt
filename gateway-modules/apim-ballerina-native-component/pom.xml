@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-gateway-modules</artifactId>
-        <version>7.0.34-SNAPSHOT</version>
+        <version>7.0.41-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -57,6 +57,12 @@
             <artifactId>commons-io</artifactId>
             <version>${commons-io.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.jacoco</groupId>
+            <artifactId>org.jacoco.agent</artifactId>
+            <classifier>runtime</classifier>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <resources>
@@ -72,6 +78,10 @@
             </resource>
         </resources>
         <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
             <!-- For creating the ballerina structure from connector structure -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -159,7 +169,8 @@
                         <phase>validate</phase>
                         <configuration>
                             <!--Exclude generated sources-->
-                            <excludes>**/${native.constructs.provider.class}.java</excludes>
+                            <excludes>**/${native.constructs.provider.class}.java,
+                                **/generated-sources/**/BuiltinConnectorPackageRepository.java</excludes>
                         </configuration>
                         <goals>
                             <goal>check</goal>
@@ -167,17 +178,14 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
     <properties>
-        <ballerina.version>0.88</ballerina.version>
         <mvn.exec.plugin.version>1.5.0</mvn.exec.plugin.version>
         <mvn.processor.plugin.version>2.2.4</mvn.processor.plugin.version>
         <mvn.resource.plugins.version>3.0.2</mvn.resource.plugins.version>
-        <native.constructs.provider.package>org.wso2.carbon.apimgt.ballerina.caching
-        </native.constructs.provider.package>
-        <native.constructs.provider.class>BallerinaConnectorsProvider</native.constructs.provider.class>
+        <native.constructs.provider.package>org.wso2.carbon.apimgt.ballerina.caching</native.constructs.provider.package>
+        <native.constructs.provider.class>BallerinaNativeConstructsProvider</native.constructs.provider.class>
         <package.repository.provider.class>org.wso2.carbon.apimgt.ballerina.caching.service.BuiltinConnectorPackageRepository
         </package.repository.provider.class>
         <generated.connectors.source.directory>${connectors.source.temp.dir}

@@ -1,10 +1,11 @@
 package $package;
 import ballerina.net.http;
 import ballerina.lang.messages;
-import org.wso2.carbon.apimgt.gateway.constants;
+import ballerina.lang.errors;
+import ballerina.lang.system;
 
-@http:BasePath{value:"$apiContext"}
-service $serviceName {
+@http:config {basePath:"$apiContext"}
+service<http> $serviceName {
 #foreach( $endpointEntry in $apiEndpoint.entrySet() )
 	#if($endpointEntry.key == "production")
 		#if($endpointEntry.value.applicableLevel == "API")
@@ -21,6 +22,7 @@ service $serviceName {
 		#end
 	#end
 #end
+	string KEY_TYPE = "KEY_TYPE";
 #foreach($apiResource in $apiResources)
 		#set( $productionEndpoint = $apiEndpoint.get("production"))
 		#set( $sandboxEndpoint = $apiEndpoint.get("sandbox"))
@@ -56,12 +58,9 @@ service $serviceName {
 		#end
 		#end
         message response;
-        boolean status;
-        status,response = authenticate(m);
-        if(status){
-		boolean isThrottled = isrequestThrottled(m);
-		if(!isThrottled){
-		string endpointType = messages:getProperty(m,constants:KEY_TYPE);
+		string endpointType = messages:getProperty(m,KEY_TYPE);
+
+	try{
 		if (endpointType == "PRODUCTION") {
 		#if($productionEndpoint.applicableLevel == "API")
 		response = http:ClientConnector.execute(${apiResource.templateId}ProductionEndpoint, "$apiResource.httpVerb.toLowerCase()", "", m);
@@ -74,10 +73,16 @@ service $serviceName {
 		#else
 		response = execute_endpoint("${sandboxEndpoint.name}","$apiResource.httpVerb.toLowerCase()", "", m);
 		#end
+		}
+	} catch (errors:Error e) {
+			system:println(e.msg);
+			//fault:mediate(m, e);
+			response = {};
+		    messages:setStringPayload(response, "Internal error occurred");
+			http:setStatusCode (response, 500);
+		    reply response;
+	}
 
-		}
-		}
-		}
 		reply response;
 }
 #end

@@ -3,7 +3,7 @@
 	<parent>
 		<artifactId>apimgt-feature</artifactId>
 		<groupId>org.wso2.carbon.apimgt</groupId>
-		<version>7.0.34-SNAPSHOT</version>
+		<version>7.0.41-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
@@ -17,10 +17,6 @@
 			<groupId>org.wso2.carbon.apimgt</groupId>
 			<artifactId>org.wso2.carbon.apimgt.rest.api.commons</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.keymanager</artifactId>
-        </dependency>
 	</dependencies>
 
 	<build>
@@ -54,11 +50,6 @@
 									<symbolicName>org.wso2.carbon.apimgt.rest.api.commons</symbolicName>
 									<version>${carbon.apimgt.version}</version>
 								</bundle>
-                                <!-- Remove following bundle ones keymanager mock interface is removed-->
-                                <bundle>
-                                    <symbolicName>org.wso2.carbon.apimgt.keymanager</symbolicName>
-                                    <version>${carbon.apimgt.version}</version>
-                                </bundle>
 							</bundles>
 							<importFeatures>
 								<feature>

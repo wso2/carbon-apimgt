@@ -24,11 +24,14 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.workflow.Workflow;
 
 import java.time.LocalDateTime;
+import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -84,7 +87,7 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
         Assert.assertEquals(retrieveWorflow.getStatus(), WorkflowStatus.APPROVED);
     }
     
-    @Test 
+    @Test
     public void testUpdateWorkflowStatusWithoutAddingEntry() throws Exception {
         WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
         String workflowRefId = UUID.randomUUID().toString();
@@ -92,9 +95,17 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
         workflow.setStatus(WorkflowStatus.APPROVED);
         workflow.setUpdatedTime(LocalDateTime.now());
         workflowDAO.updateWorkflowStatus(workflow);
-        Workflow retrieveWorflow = workflowDAO.retrieveWorkflow(workflow.getExternalWorkflowReference());
 
-        Assert.assertNull(retrieveWorflow, "workflow entry is in the database");
+        // Workflow entry should not be in the db. so exception should be thrown
+        try {
+            workflowDAO.retrieveWorkflow(workflow.getExternalWorkflowReference());
+            // should throw exception.
+            Assert.fail("Expected exception is not thrown when entry is not in the DB");
+        } catch (APIMgtDAOException e) {
+            String msg = "Workflow not found for : " + workflowRefId;
+            Assert.assertEquals(e.getMessage(), msg);
+            Assert.assertEquals(e.getErrorHandler().getErrorCode(), 900551);
+        }
     }
 
     @Test
@@ -169,9 +180,84 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
         Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowRefId);
         workflowDAO.addWorkflowEntry(workflow);
         workflowDAO.deleteWorkflowEntryforExternalReference(workflow.getExternalWorkflowReference());
-        
-        Workflow retrieveWorflow = workflowDAO.retrieveWorkflow(workflow.getExternalWorkflowReference());
-        Assert.assertNull(retrieveWorflow, "Workflow entry still exists");
 
+        // Workflow entry should not be in the db. so exception should be thrown
+        try {
+            workflowDAO.retrieveWorkflow(workflow.getExternalWorkflowReference());
+            // should throw exception.
+            Assert.fail("Expected exception is not thrown when entry is not in the DB");
+        } catch (APIMgtDAOException e) {
+            String msg = "Workflow not found for : " + workflowRefId;
+            Assert.assertEquals(e.getMessage(), msg);
+            Assert.assertEquals(e.getErrorHandler().getErrorCode(), 900551);
+        }
+    }
+    
+    @Test
+    public void testGetWorkflowsList() throws Exception {
+        WorkflowDAO workflowDAO = DAOFactory.getWorkflowDAO();
+        
+        //pending application 1
+        String workflowExtRefId1 = UUID.randomUUID().toString();        
+        String applicationId1 = UUID.randomUUID().toString();
+        Workflow workflow1 = SampleTestObjectCreator.createWorkflow(workflowExtRefId1);
+        workflow1.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+        workflow1.setWorkflowReference(applicationId1);
+        workflow1.setStatus(WorkflowStatus.CREATED);
+        workflowDAO.addWorkflowEntry(workflow1);
+        
+        //pending application 2
+        String workflowExtRefId2 = UUID.randomUUID().toString();        
+        String applicationId2 = UUID.randomUUID().toString();
+        Workflow workflow2 = SampleTestObjectCreator.createWorkflow(workflowExtRefId2);
+        workflow2.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+        workflow2.setWorkflowReference(applicationId2);
+        workflow2.setStatus(WorkflowStatus.CREATED);
+        workflowDAO.addWorkflowEntry(workflow2);
+        
+        //completed application 1
+        String workflowExtRefId3 = UUID.randomUUID().toString();        
+        String applicationId3 = UUID.randomUUID().toString();
+        Workflow workflow3 = SampleTestObjectCreator.createWorkflow(workflowExtRefId3);
+        workflow3.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+        workflow3.setWorkflowReference(applicationId3);
+        workflow3.setStatus(WorkflowStatus.APPROVED);
+        workflowDAO.addWorkflowEntry(workflow3);
+        
+        //pending subscription 1
+        String workflowExtRefId4 = UUID.randomUUID().toString();        
+        String applicationId4 = UUID.randomUUID().toString();
+        Workflow workflow4 = SampleTestObjectCreator.createWorkflow(workflowExtRefId4);
+        workflow4.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+        workflow4.setWorkflowReference(applicationId4);
+        workflow4.setStatus(WorkflowStatus.CREATED);
+        workflowDAO.addWorkflowEntry(workflow4);
+        
+        //completed subscription 1
+        String workflowExtRefId5 = UUID.randomUUID().toString();        
+        String applicationId5 = UUID.randomUUID().toString();
+        Workflow workflow5 = SampleTestObjectCreator.createWorkflow(workflowExtRefId5);
+        workflow5.setWorkflowType(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+        workflow5.setWorkflowReference(applicationId5);
+        workflow5.setStatus(WorkflowStatus.APPROVED);
+        workflowDAO.addWorkflowEntry(workflow5);
+        
+        List<Workflow> list = workflowDAO
+                .retrieveUncompleteWorkflows(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION); 
+        
+        for (Iterator iterator = list.iterator(); iterator.hasNext();) {
+            Workflow workflow = (Workflow) iterator.next();    
+            //check whether there are any completed workflows 
+            Assert.assertFalse(WorkflowStatus.APPROVED == workflow.getStatus(),
+                    "Retrieved list contains approved workflows");
+            //check whether it has subscription workflow entry
+            Assert.assertFalse(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION.equals(workflow.getWorkflowType()),
+                    "Application workflow list contains subscription workflow entry");
+        }  
+        
+        //get all the pending workflows
+        List<Workflow> fullList = workflowDAO.retrieveUncompleteWorkflows();
+        Assert.assertEquals(fullList.size(), 3, "Retrived workflow list does not contain valid entires");        
+        
     }
 }

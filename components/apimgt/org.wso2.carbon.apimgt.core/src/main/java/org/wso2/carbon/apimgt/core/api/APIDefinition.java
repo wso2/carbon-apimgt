@@ -55,6 +55,16 @@ public interface APIDefinition {
     Map<String, Scope> getScopes(String resourceConfigsJSON) throws APIManagementException;
 
     /**
+     * Get Scopes Extracts from the API definition
+     *
+     * @param resourceConfigJSON resource json
+     * @return Map of the scopes
+     * @throws APIManagementException If error occurs while parsing swagger resources.
+     */
+    //todo: keep only single getScopes method after .yamls in same format
+    Map<String, String> getScope(String resourceConfigJSON) throws APIManagementException;
+
+    /**
      * This method extracts the scope from the API definition matching to a resource path
      *
      * @param resourceConfigsJSON resource json

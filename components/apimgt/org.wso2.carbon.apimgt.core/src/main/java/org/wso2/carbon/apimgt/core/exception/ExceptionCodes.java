@@ -63,10 +63,18 @@ public enum ExceptionCodes implements ErrorHandler {
     COMMENT_LENGTH_EXCEEDED(900326, "Comment length exceeds max limit", 400, "Comment length exceeds allowed maximum "
             + "number of characters"),
     API_TYPE_INVALID(900327, "API Type specified is invalid.", 400, "API Type specified is invalid"),
+    APPLICATION_KEY_MAPPING_NOT_FOUND(900328, "Application Key mapping not found", 404, "Application Key mapping not " +
+            "found"),
+    NO_UPDATE_PERMISSIONS(900329, "No permissions to update API.", 403, "No permissions to update API."),
+    NO_DELETE_PERMISSIONS(900330, "No permissions to delete API.", 403, "No permissions to delete API."),
+    UNSUPPORTED_API_DEFINITION_TYPE(900331, "Unsupported Definition Type", 400,
+            "Unsupported Definition Type. Only SWAGGER and WSDL are allowed."),
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),
-
+    RESOURCE_NOT_FOUND(900401, "Resource not found", 404, "Requested resource not found"),
+    RESOURCE_RETRIEVAL_FAILED(900402, "Resource retrieval failed", 400, "Resource retrieval failed"),
+    MALFORMED_URL(900403, "Malformed URL", 400, "Malformed URL"),
 
     // Endpoint related codes
     ENDPOINT_NOT_FOUND(900450, "Endpoint Not Found", 404, "Endpoint Not Found"),
@@ -102,6 +110,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "request received by publisher"),
     INCOMPATIBLE_WORKFLOW_REQUEST_FOR_STORE(900560, "Incompatible workflow request", 400, "Incompatible workflow " +
             "request received by store"),
+    WORKFLOW_RETRIEVE_EXCEPTION(900561, "Workflow retrieval error", 400, "Provided parameter is not valid"),
 
     // Auth related codes
     ROLES_CANNOT_BE_EMPTY(900600, "Role list cannot be empty", 400, "Role list cannot be empty"),
@@ -115,17 +124,23 @@ public enum ExceptionCodes implements ErrorHandler {
     KEY_MANAGER_INITIALIZATION_FAILED(900606, "Key Manager initialization failed", 500,
             "Key Manager initialization failed"),
     ROLE_DOES_NOT_EXIST(900607, "Role does not exist in the system", 404, "Role does not exist in the system"),
-    MULTIPLE_ROLES_EXIST(900608, "Multiple roles with the same display name exist in the system", 500, "Multiple " +
-            "roles with the same display name exist in the system"),
-    MULTIPLE_USERS_EXIST(900609, "Multiple users with the same username exist in the system", 500, "Multiple " +
-            "users with the same username exist in the system"),
 
 
     // Labels related codes
     LABEL_INFORMATION_CANNOT_BE_NULL(900650, "Label information cannot be null", 400, "Label information cannot be " +
             "null"),
     LABEL_EXCEPTION(900651, "Label Error", 500, "Error occurred while retrieving label information"),
+    LABEL_NOT_FOUND(900652, "Label Not Found", 404, "Label with specified name cannot be found."),
+    LABEL_NOT_FOUND_IN_API(900653, "Label Not Found In API", 404, "Label with specified name" 
+            + " cannot be found in the API."),
 
+    //WSDL related codes
+    INVALID_WSDL_URL_EXCEPTION(900675, "Invalid WSDL", 400, "Invalid WSDL URL"),
+    CANNOT_PROCESS_WSDL_CONTENT(900676, "Invalid WSDL", 400, "Provided WSDL content cannot be processed"),
+    INTERNAL_WSDL_EXCEPTION(900677, "Internal WSDL error", 500, "Internal error while processing WSDL"),
+    UNSUPPORTED_WSDL_EXTENSIBILITY_ELEMENT(900678, "Invalid WSDL", 400, "WSDL extensibility element not supported"),
+    ERROR_WHILE_INITIALIZING_WSDL_FACTORY(900679, "Internal WSDL error", 500, "Error while initiallizing WSDL factory"),
+    ERROR_WHILE_CREATING_WSDL_ARCHIVE(900680, "Internal WSDL error", 500, "Error while creating WSDL archive"),
 
     // REST API related codes
     PARAMETER_NOT_PROVIDED(900700, "Parameter value missing", 400,
@@ -172,7 +187,9 @@ public enum ExceptionCodes implements ErrorHandler {
     ENDPOINT_CONFIG_NOT_FOUND(90070, "Endpoint Config Not found", 404, "Error while retrieving Endpoint " +
             "Configuration"),
     UNSUPPORTED_THROTTLE_CONDITION_TYPE(900975, "Throttle Condition Error", 400, "Throttle Condition type is not "
-            + "supported");
+            + "supported"),
+    INVALID_DOCUMENT_CONTENT_DATA(900976, "Invalid document content data provided", 400, "Mismatch between provided " +
+            "document content data and Document Source Type given");
 
     private final long errorCode;
     private final String errorMessage;

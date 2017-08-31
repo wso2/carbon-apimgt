@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>7.0.34-SNAPSHOT</version>
+        <version>7.0.41-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -79,20 +79,38 @@
             <artifactId>org.wso2.carbon.apimgt.rest.api.core</artifactId>
         </dependency>
         <dependency>
+<<<<<<< HEAD
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
         </dependency>
+=======
+            <groupId>org.jacoco</groupId>
+            <artifactId>org.jacoco.agent</artifactId>
+            <classifier>runtime</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>org.wso2.carbon.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+>>>>>>> master
     </dependencies>
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.wso2.maven.plugins</groupId>
-                <artifactId>swagger2msf4j-maven-plugin</artifactId>
-                <version>1.0-SNAPSHOT</version>
-                <configuration>
-                    <inputSpec>${project.basedir}/src/main/resources/webserver-api.yaml</inputSpec>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -141,6 +159,10 @@
                     </execution>
                 </executions>
             </plugin>
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
             <plugin>
                 <groupId>org.wso2.carbon</groupId>
                 <artifactId>org.wso2.carbon.extensions.configuration.maven.plugin</artifactId>
@@ -154,6 +176,7 @@
                 </executions>
             </plugin>
             <plugin>
+<<<<<<< HEAD
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
@@ -178,6 +201,10 @@
                         </configuration>
                     </execution>
                 </executions>
+=======
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+>>>>>>> master
             </plugin>
         </plugins>
         <resources>
@@ -201,6 +228,7 @@
             javax.ws.rs.*; version="${javax.ws.rs.import.version.range}",
             com.google.gson.*; version="${google.code.gson.import.version.range}",
             org.wso2.carbon.messaging.*;version="${carbon.messaging.package.import.version.range}",
+            org.wso2.carbon.kernel.*;version="${carbon.kernel.package.import.version.range}"
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.rest.api.authenticator.internal,

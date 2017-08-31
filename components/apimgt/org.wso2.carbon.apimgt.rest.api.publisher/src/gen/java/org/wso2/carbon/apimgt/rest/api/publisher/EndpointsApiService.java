@@ -21,32 +21,25 @@ import javax.ws.rs.core.SecurityContext;
 
 public abstract class EndpointsApiService {
     public abstract Response endpointsEndpointIdDelete(String endpointId
- ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
     public abstract Response endpointsEndpointIdGet(String endpointId
- ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
     public abstract Response endpointsEndpointIdPut(String endpointId
  ,EndPointDTO body
- ,String contentType
  ,String ifMatch
  ,String ifUnmodifiedSince
  , Request request) throws NotFoundException;
-    public abstract Response endpointsGet(String accept
- ,String ifNoneMatch
+    public abstract Response endpointsGet(String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
     public abstract Response endpointsHead(String name
- ,String accept
  ,String ifNoneMatch
  , Request request) throws NotFoundException;
     public abstract Response endpointsPost(EndPointDTO body
- ,String contentType
- ,String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;

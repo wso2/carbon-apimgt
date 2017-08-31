@@ -25,6 +25,8 @@ package org.wso2.carbon.apimgt.core.util;
  */
 public class APIMgtConstants {
 
+    public static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
+    public static final String ENCODING_UTF_8 = "UTF-8";
     public static final String DEPRECATE_PREVIOUS_VERSIONS = "Deprecate old versions after publish the API";
     public static final String REQUIRE_RE_SUBSCRIPTIONS = "Require re-subscription when publish the API";
     public static final String CHECK_LIST_ITEM_CHANGE_EVENT = "CheckListItemChange";
@@ -62,6 +64,11 @@ public class APIMgtConstants {
     public static final String API_SPECIFIC_ENDPOINT = "API";
     public static final String RESOURCE_SPECIFIC_ENDPOINT = "RESOURCE";
     public static final String PRODUCTION_ENDPOINT = "production";
+    public static final String OAUTH2SECURITY = "OAuth2Security";
+    public static final String SCOPES = "scopes";
+
+    public static final String DEFAULT_LABEL_NAME = "Default";
+    public static final String DEFAULT_LABEL_ACCESS_URL = "https://localhost:9092";
 
     //workflow executor default executors
     public static final String WF_DEFAULT_APPCREATION_EXEC =
@@ -173,6 +180,19 @@ public class APIMgtConstants {
         public static final String THUMBNAIL_FILE_NAME = "thumbnail";
         public static final String ENDPOINTS_ROOT_DIRECTORY = "Endpoints";
     }
+
+
+    /**
+     * WSDL Constants
+     */
+    public static class WSDLConstants {
+        public static final String WSDL_ARCHIVES_FOLDERNAME = "WSDL-archives";
+        public static final String WSDL_ARCHIVE_FILENAME = "wsdl-archive.zip";
+        public static final String EXTRACTED_WSDL_ARCHIVE_FOLDERNAME = "extracted";
+        public static final String WSDL_VERSION_11 = "1.1";
+        public static final String WSDL_VERSION_20 = "2.0";
+    }
+
 
     /**
      * Throttle policy related constants
@@ -288,6 +308,9 @@ public class APIMgtConstants {
         public static final String APPLICATION_NAME = "APPLICATION_NAME";
         public static final String CONSUMER_KEY = "CONSUMER_KEY";
         public static final String APPLICATION_ID = "APPLICATION_ID";
+        public static final String KEY_TYPE = "KEY_TYPE";
+        public static final String GRANT_TYPES = "GRANT_TYPES";
+        public static final String CALLBACK_URL = "CALLBACK_URL";
         public static final String APPLICATION_QUERY = "APPLICATION_QUERY";
         public static final String API_ID = "API_ID";
         public static final String TIER = "TIER";
@@ -307,10 +330,11 @@ public class APIMgtConstants {
      * Permission related constants
      */
     public static class Permission {
-        public static final int SUBSCRIBE_PERMISSION = 8;
-        public static final int READ_PERMISSION = 4;
+        public static final int MANAGE_SUBSCRIPTION_PERMISSION = 8; //Publisher side API permission
+        public static final int SUBSCRIBE_PERMISSION = 8; //Store side permission
+        public static final int READ_PERMISSION = 1;
         public static final int UPDATE_PERMISSION = 2;
-        public static final int DELETE_PERMISSION = 1;
+        public static final int DELETE_PERMISSION = 4;
         public static final String EVERYONE_GROUP = "EVERYONE";
         public static final String GROUP_ID = "groupId";
         public static final String PERMISSION = "permission";
@@ -318,7 +342,7 @@ public class APIMgtConstants {
         public static final String UPDATE = "UPDATE";
         public static final String DELETE = "DELETE";
         public static final String SUBSCRIPTION = "SUBSCRIPTION";
-
+        public static final String MANAGE_SUBSCRIPTION = "MANAGE_SUBSCRIPTION";
     }
 
     /**
@@ -474,4 +498,12 @@ public class APIMgtConstants {
         public static final String STORE = "store";
         public static final String ADMIN = "admin";
     }
+
+    /**
+     * Label related constants
+     */
+    public static class LabelConstants {
+        public static final String DEFAULT = "Default";
+    }
+    
 }
