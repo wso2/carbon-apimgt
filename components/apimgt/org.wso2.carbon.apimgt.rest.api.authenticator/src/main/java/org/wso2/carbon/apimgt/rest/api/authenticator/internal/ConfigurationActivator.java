@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
 /**
- * Class used to activate store/publisher application configuration loading.
+ * Class used to activate store configuration loading.
  */
 @Component(
         name = "org.wso2.carbon.apimgt.rest.api.authenticator",
