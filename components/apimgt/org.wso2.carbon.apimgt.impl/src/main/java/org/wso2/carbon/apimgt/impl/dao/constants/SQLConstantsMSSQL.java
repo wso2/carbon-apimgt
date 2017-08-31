@@ -51,7 +51,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " And " +
             "    NAME like ?" +
             " ) a WHERE a.row > ? and a.row <= a.row + ?"+
-            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.name)"+
+            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)"+
             " ORDER BY $1 $2 ";
 
 
@@ -82,7 +82,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " And "+
             "    NAME like ?"+
             " ) a WHERE a.row > ? and a.row <= a.row + ?"+
-            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.name)"+
+            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)"+
             " ORDER BY $1 $2 ";
 
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE =
@@ -110,7 +110,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " And "+
             "    NAME like ?"+
             " ) a WHERE a.row > ? and a.row <= a.row + ?"+
-            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.name)"+
+            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)"+
             " ORDER BY $1 $2 ";
 
 
@@ -139,7 +139,7 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " And "+
             "    NAME like ?"+
             " ) a WHERE a.row > ? and a.row <= a.row + ?"+
-            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.name)"+
+            " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)"+
             " ORDER BY $1 $2 ";
 
 
