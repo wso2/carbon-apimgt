@@ -124,7 +124,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             if(selectedApi != null){
                 Resource[] allAPIResources = selectedApi.getResources();
 
-				Set<Resource> acceptableResources = new HashSet<Resource>();
+				Set<Resource> acceptableResources = new LinkedHashSet<Resource>();
 
 				for(Resource resource : allAPIResources){
 					//If the requesting method is OPTIONS or if the Resource contains the requesting method
