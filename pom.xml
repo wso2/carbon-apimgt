@@ -524,11 +524,6 @@
                 <version>${slf4j.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-module-junit4</artifactId>
-                <version>${powermock.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.apache.woden.wso2</groupId>
                 <artifactId>woden</artifactId>
                 <version>${apache.woden.version}</version>
