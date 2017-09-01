@@ -64,6 +64,9 @@ public abstract class ApisApiService {
  ,Integer offset
  ,String ifNoneMatch
  , Request request) throws NotFoundException;
+    public abstract Response apisApiIdGenerateSdkLanguagePost(String apiId
+ ,String language
+ , Request request) throws NotFoundException;
     public abstract Response apisApiIdGet(String apiId
  ,String ifNoneMatch
  ,String ifModifiedSince

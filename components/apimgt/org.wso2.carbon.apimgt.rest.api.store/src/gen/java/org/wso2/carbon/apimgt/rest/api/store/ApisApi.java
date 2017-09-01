@@ -220,6 +220,25 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdDocumentsGet(apiId,limit,offset,ifNoneMatch, request);
     }
+    @POST
+    @Path("/{apiId}/generate-sdk/{language}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/zip" })
+    @io.swagger.annotations.ApiOperation(value = "Generate SDK for an API for the requested language ", notes = "This operation can be used to generate SDKs (System Development Kits), for the APIs available in the API Store, for a requested development language. ", response = void.class, tags={ "API (individual)", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. SDK generated successfully. ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Requested SDK Language is not supported. ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not found. Requested API does not exist. ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 500, message = "Internal Server Error. Error while generating SDK. ", response = void.class) })
+    public Response apisApiIdGenerateSdkLanguagePost(@ApiParam(value = "ID of the specific API for which the SDK is required. ",required=true) @PathParam("apiId") String apiId
+,@ApiParam(value = "Programming language of the SDK that is required. ",required=true) @PathParam("language") String language
+, @Context Request request)
+    throws NotFoundException {
+        return delegate.apisApiIdGenerateSdkLanguagePost(apiId,language, request);
+    }
     @GET
     @Path("/{apiId}")
     @Consumes({ "application/json" })

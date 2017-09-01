@@ -240,6 +240,62 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+
+  /apis/{apiId}/generate-sdk/{language}:
+#-----------------------------------------------------
+# Generate an SDK (System Development Kit) for an API in a requested language
+#-----------------------------------------------------
+    post:
+      produces:
+        - application/zip
+      x-scope: apim:subscribe
+      summary: |
+        Generate SDK for an API for the requested language
+      description: |
+        This operation can be used to generate SDKs (System Development Kits), for the APIs available in the API Store, for a requested development language.
+      parameters:
+        - in : path
+          name: apiId
+          type: string
+          required: true
+          description: |
+            ID of the specific API for which the SDK is required.
+        - in: path
+          name: language
+          type : string
+          required : true
+          description: |
+            Programming language of the SDK that is required.
+      tags:
+        - API (individual)
+      responses:
+        200:
+          description: |
+            OK.
+            SDK generated successfully.
+          headers:
+            Content-type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Requested SDK Language is not supported.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description:  |
+            Internal Server Error.
+            Error while generating SDK.
+          schema:
+            $ref: '#/definitions/Error'
 ################################################################
 # The WSDL resource of "Individual API" resource APIs
 ################################################################

@@ -501,6 +501,11 @@ public class ApisApiServiceImpl extends ApisApiService {
         return Response.ok().entity(documentListDTO).build();
     }
 
+    @Override
+    public Response apisApiIdGenerateSdkLanguagePost(String apiId, String language, Request request) throws NotFoundException {
+        return Response.ok().build();
+    }
+
     /**
      * Get API of given ID
      *
