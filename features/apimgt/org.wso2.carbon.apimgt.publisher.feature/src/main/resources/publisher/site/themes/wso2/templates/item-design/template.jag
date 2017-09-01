@@ -3,7 +3,7 @@
     var site = require("/site/conf/site.json");
     var enableRestrictByRoles = site.enableRestrictByRoles;
     var isWSAPI = api && api.type.toUpperCase() == "WS";
-    var ws_session = null;
+    var ws_session = "HTTP";
     
     if(api){
         var apiUrlId = "name="+encode.forHtml(api.name)+"&version="+encode.forHtml(api.version)+"&provider="+encode.forHtml(api.provider);
@@ -307,7 +307,7 @@
 								</div>
 							</div>
 						</div>
-                        <%if(!ws_session && !isWSAPI){%>
+                        <%if(ws_session == "HTTP" && !isWSAPI){%>
 							<div class="panel panel-default">
 								<div class="panel-heading">
 									<h4 class="panel-title">
