@@ -16,57 +16,55 @@
     %>
 
     <div class="col-md-12" style="margin-top :10px">
-    <div class="row">
-        <div class="form-group col-sm-12">
-            <div class=" col-sm-1"></div>
-            <div class=" col-sm-2">
-                <label class="control-label" style="margin-right :10px"><%=i18n.localize("API")%></label>
-            </div>
-            <div class=" col-sm-2" id="version-label">
-                <label class="control-label" style="margin-right :10px"><%=i18n.localize("Version")%></label>
-            </div>
-            <div class=" col-sm-1" id="compare-btn-label">
-            </div>
-            <div id="compare-selection-label" style="display:none">
-             <div class=" col-sm-1" id="compare-label">
-                <label class="control-label" style="margin-right :10px"><%=i18n.localize("Compare")%></label>
-            </div>
-            <div class=" col-sm-3" id="mediation-label">
-                <label class="control-label" style="margin-right :10px"><%=i18n.localize("Mediation")%></label>
-            </div>
-            <div class=" col-sm-3"></div>
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="form-group col-sm-1">
-                <select class="select form-control" id="apiFilter" name="apiFilter">
-                    <option value="allAPIs"><%=i18n.localize("All APIs")%></option>
-                    <option value="myAPIs"><%=i18n.localize("My APIs")%></option>
-                </select>
-            </div>
-            <div class="col-sm-2">   
-                <select id="apiSelect" class="selectpicker" data-live-search="true" style="margin-left :10px"></select>
-            </div>  
-            <div class="col-sm-2" id="select-version-btn">
-                <select id="versionSelect" class="selectpicker" data-live-search="true" style="margin-left :10px"></select>
-            </div>
-            <div class="form-group col-sm-1">
-                    <div class="col-sm-1" id="compare-version-btn">
+        <div class="row">
+            <div class="form-group col-sm-12">
+                <div class=" col-sm-1"></div>
+                <div class=" col-sm-2">
+                    <label class="control-label" style="margin-right :10px"><%=i18n.localize("API")%></label>
+                </div>
+                <div class=" col-sm-2" id="version-label">
+                    <label class="control-label" style="margin-right :10px"><%=i18n.localize("Version")%></label>
+                </div>
+                <div id="compare-selection-label" style="display:none">
+                     <div class=" col-sm-1" id="compare-label">
+                        <label class="control-label" style="margin-right :10px"><%=i18n.localize("Compare to")%></label>
+                    </div>
+                    <div class=" col-sm-1" id="mediation-label">
+                        <label class="control-label" style="margin-right :10px"><%=i18n.localize("Mediation")%></label>
+                    </div>
+                </div>
+                <div class="col-sm-1" id="compare-version-btn">
                       <button id="compare-btn" type="button" class="btn btn-default date-range"><%=i18n.localize("Compare")%></button>        
-                   </div>
-                   <div id="compare-selection" style="display:none">
-                        <div class="col-sm-1">
-                          <select id="compareVersion" name="compareVersion" multiple="multiple"></select>
-                        </div>  
-                         <div class="col-sm-1" id="compare-version-select">
-                            <select id="mediationType" class="selectpicker" data-live-search="true" style="margin-left :10px;"></select>      
-                        </div>
-                        <div class="col-sm-1">
-                            <button id="clear-btn" type="button" class="btn btn-default"><%=i18n.localize("Clear")%></button>
-                        </div>   
-                    </div>           
+                </div>
+                <div class="col-sm-1" id="clear-btn-wrapper" style="display:none">
+                      <button id="clear-btn" type="button" class="btn btn-default"><%=i18n.localize("Clear")%></button>
+                </div>  
             </div>
-            <div id="rangeSliderWrapper" class="col-sm-6">
+            <div class="form-group">
+                <div class="form-group col-sm-1">
+                    <select class="select form-control" id="apiFilter" name="apiFilter">
+                        <option value="allAPIs"><%=i18n.localize("All APIs")%></option>
+                        <option value="myAPIs"><%=i18n.localize("My APIs")%></option>
+                    </select>
+                </div>
+                <div class="col-sm-2">   
+                    <select id="apiSelect" class="selectpicker" data-live-search="true" style="margin-left :10px"></select>
+                </div>  
+                <div class="col-sm-2" id="select-version-btn">
+                    <select id="versionSelect" class="selectpicker" data-live-search="true" style="margin-left :10px"></select>
+                </div>
+                <div class="form-group col-sm-2">
+                  <div id="compare-selection" style="display:none">
+                    <div class="col-sm-6 pull-left">
+                      <select id="compareVersion" name="compareVersion" multiple="multiple"></select>
+                    </div>  
+                     <div class="col-sm-6 pull-left" id="compare-version-select">
+                        <select id="mediationType" class="selectpicker" data-live-search="true" style="margin-left :10px;"></select>      
+                    </div> 
+                  </div>           
+                </div>
+            </div>
+            <div id="rangeSliderWrapper" class="col-sm-5">
                <div id="dateRangePickerContainer" style="text-align:right">
                    <div class="btn-group" role="group">
                        <button id="today-btn" type="button" class="btn btn-default date-range active"><%=i18n.localize("Day")%></button>
@@ -80,15 +78,12 @@
                </div>
             </div>
         </div>
-        
-    </div>
-    </div>
 
-    <div id="noData"></div>
-    <br/>
-    <div id="chartContainer"  class="col-sm-12" style="margin-bottom :5px;height: 100%"></div>
-    <div id="apiLatencyTimeNote" class="pull-right"  style="margin-bottom :10px;"><%=i18n.localize("Note: The total time represents the complete time taken to process the request, including the time spent in between the other recorded layers. It is not the aggregate sum of the rest of the recorded matrices.")%></div>
-    <div id="displayMsg" style="height:30px;margin-bottom:20px"></div>
+        <div id="noData"></div>
+        <br/>
+        <div id="chartContainer"  class="col-sm-12" style="margin-bottom :5px;height: 100%"></div>
+        <div id="apiLatencyTimeNote" class="pull-right"  style="margin-bottom :10px;"><%=i18n.localize("Note: The total time represents the complete time taken to process the request, including the time spent in between the other recorded layers. It is not the aggregate sum of the rest of the recorded matrices.")%></div>
+        <div id="displayMsg" style="height:30px;margin-bottom:20px"></div>
     </div>
     <%
         }

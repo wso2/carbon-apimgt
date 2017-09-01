@@ -69,7 +69,7 @@ $( document ).ready(function() {
          $('#compare-selection').css("display", "none");
          $('#compare-selection-label').css("display", "none");
          $('#compare-version-btn').css("display", "inline");
-         $('#compare-btn-label').css("display", "inline");
+         $('#clear-btn-wrapper').css("display", "none");
          });
        $('#week-btn').on('click', function () {
         from = currentDay - 604800000;
@@ -95,7 +95,7 @@ $( document ).ready(function() {
                $('#compare-selection').css("display", "inline");
                $('#compare-selection-label').css("display", "inline");
                $('#compare-version-btn').css("display", "none");
-               $('#compare-btn-label').css("display", "none");
+               $('#clear-btn-wrapper').css("display", "inline");
         });
                    //date picker
         $('#date-range').daterangepicker({
