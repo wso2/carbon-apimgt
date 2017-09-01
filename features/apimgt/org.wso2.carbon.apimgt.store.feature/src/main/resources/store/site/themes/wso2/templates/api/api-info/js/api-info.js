@@ -14,7 +14,11 @@ function triggerSubscribe() {
     }
     var api = jagg.api;
     var tier = $("#tiers-list").val();
-    $(this).html(i18n.t('Please wait...')).attr('disabled', 'disabled');
+    var subscribeButtonIconHtml = '<span class="icon fw-stack"><i class="fw fw-subscribe fw-stack-1x"></i><i class="fw fw-circle-outline fw-stack-2x"></i></span>';
+    $("#subscribe-button").html(
+        subscribeButtonIconHtml + i18n.t('Subscribing...') 
+        + '<span class="spinner"><i class="fw fw-loader5" title="button-loader"></i></span>'
+    ).attr('disabled', 'disabled');
 
     jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
         action:"addSubscription",
@@ -25,7 +29,7 @@ function triggerSubscribe() {
         tier:tier,
         tenant: jagg.site.tenant
     }, function (result) {
-        $("#subscribe-button").html('Subscribe');
+        $("#subscribe-button").html(subscribeButtonIconHtml + i18n.t('Subscribe'));
         $("#subscribe-button").removeAttr('disabled');
         if (result.error == false) {
             if(result.status.subscriptionStatus == 'REJECTED')    {
