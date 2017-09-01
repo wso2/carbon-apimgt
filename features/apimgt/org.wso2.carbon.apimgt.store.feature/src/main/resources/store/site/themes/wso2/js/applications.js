@@ -29,6 +29,7 @@ var GrantTypes = function (available) {
         "iwa:ntlm":"IWA-NTLM", 
         "client_credentials":"Client Credential", 
         "urn:ietf:params:oauth:grant-type:saml2-bearer":"SAML2",
+        "kerberos":"Kerberos"
     }
 
     this.available = {};
