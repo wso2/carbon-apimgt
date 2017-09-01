@@ -2561,6 +2561,41 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
+# The "SDK Generation Languages" list resource APIs
+######################################################
+  /sdk-gen-languages:
+#-----------------------------------------------------
+# Provide a list of supported languages for SDK (System Development Kit) generation
+#-----------------------------------------------------
+    get:
+      produces:
+        - application/json
+      x-scope:  apim:subscribe
+      summary:  |
+        Provide a list of supported languages for generating SDKs for existing APIs.
+      description:  |
+        This operation will provide a list of programming languages that are supported by the swagger codegen library for generating System Development Kits (SDKs) for APIs available in the API Manager Store
+      tags:
+        - API Collection
+        - Retrieve
+      responses:
+        200:
+          description:  |
+            OK.
+            List of supported languages for generating SDKs.
+        404:
+          description:  |
+            Not Found.
+            The list of languages is not found.
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description:  |
+            Internal Server Error.
+            Error while retrieving the list.
+          schema:
+            $ref: '#/definitions/Error'
+######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
