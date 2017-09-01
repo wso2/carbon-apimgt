@@ -55,7 +55,7 @@
 		                               </a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
-                                    <h4 class="apiNameWraps"><a href="<%=path%>" title="<%=i18n.localize("Version")%>"><%=api.name%>-<%=api.version%></a></h4>
+                                    <h4 class="truncate"><a href="<%=path%>" title="<%=i18n.localize("Version")%>"><%=api.name%>-<%=api.version%></a></h4>
                                     <input type="hidden" class="rating recent_rating" disabled="disabled" value="<%=encode.forHtmlAttribute(api.rating)%>" />
                                 </div>
                             </div>
