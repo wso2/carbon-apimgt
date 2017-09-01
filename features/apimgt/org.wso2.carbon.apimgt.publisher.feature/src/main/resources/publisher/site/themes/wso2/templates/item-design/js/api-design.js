@@ -1044,13 +1044,13 @@ $(document).ready(function(){
             var tagName = $(this).val();
             $tag = $(this);
 
-            if(/([~!@#;%^&*+=\|\\<>\"\',])/.test(tagName)){
+            if(/([~!@#;%^&*+=\|\\<>\"\'\/,])/.test(tagName)){
                 $tag.val( $tag.val().replace(/[^a-zA-Z0-9_ -]/g, function(str) {
                 		$('.tags-error').show();
                 		$('.add-tags-error').hide();
                         $('.add-tags-error').html('');
                         // @todo: param_string
-                        $('.tags-error').html('The tag "' + tagName + '" contains one or more illegal characters  (~ ! @ #  ; % ^ & * + = { } | &lt; &gt;, \' " \\ ) .');
+                        $('.tags-error').html('The tag "' + tagName + '" contains one or more illegal characters  (~ ! @ #  ; % ^ & * + = { } | &lt; &gt;, \' " \\ \/ ) .');
                         return '';
                 }));
             }
