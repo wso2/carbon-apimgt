@@ -1222,9 +1222,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String newAPIVersionId = apiPublisher.createNewAPIVersion(apiId, newVersion);
             newVersionedApi = MappingUtil.toAPIDto(apiPublisher.getAPIbyUUID(newAPIVersionId));
-            apiName = newVersionedApi.getName();
-            newApiVersion = newVersionedApi.getVersion();
-            apiPublisher.sendMailNotification(apiPublisher, apiId, newApiVersion, apiName);
             return Response.status(Response.Status.CREATED).entity(newVersionedApi).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while create new API version " + apiId;

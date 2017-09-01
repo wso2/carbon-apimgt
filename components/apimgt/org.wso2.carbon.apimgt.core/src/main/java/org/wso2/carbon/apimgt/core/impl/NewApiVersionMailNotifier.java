@@ -66,31 +66,30 @@ public class NewApiVersionMailNotifier extends Notifier {
         //get Notifier email List
         Set<String> sendTo = getEmailNotifierList(notificationDTO);
 
-        if (!sendTo.isEmpty()) {
-            for (String mail : sendTo) {
-                try {
-                    Authenticator auth = new SMTPAuthenticator();
-                    Session mailSession = Session.getDefaultInstance(props, auth);
-                    MimeMessage message = new MimeMessage(mailSession);
-                    notificationDTO.setTitle((String) notificationDTO.getProperty(NotifierConstants.TITLE_KEY));
-                    notificationDTO.setMessage((String) notificationDTO.getProperty(NotifierConstants.TEMPLATE_KEY));
-                    notificationDTO = loadMailTemplate(notificationDTO);
-                    message.setSubject(notificationDTO.getTitle());
-                    message.setContent(notificationDTO.getMessage(), NotifierConstants.TEXT_TYPE);
-                    message.setFrom(new InternetAddress(mailConfigurations.getFromUser()));
+        if (sendTo.isEmpty()) {
+            log.debug("Email Notifier Set is Empty");
+            return;
+        }
+        for (String mail : sendTo) {
+            try {
+                Authenticator auth = new SMTPAuthenticator();
+                Session mailSession = Session.getDefaultInstance(props, auth);
+                MimeMessage message = new MimeMessage(mailSession);
+                notificationDTO.setTitle((String) notificationDTO.getProperty(NotifierConstants.TITLE_KEY));
+                notificationDTO.setMessage((String) notificationDTO.getProperty(NotifierConstants.TEMPLATE_KEY));
+                notificationDTO = loadMailTemplate(notificationDTO);
+                message.setSubject(notificationDTO.getTitle());
+                message.setContent(notificationDTO.getMessage(), NotifierConstants.TEXT_TYPE);
+                message.setFrom(new InternetAddress(mailConfigurations.getFromUser()));
 
-                    message.addRecipient(Message.RecipientType.TO, new InternetAddress(mail));
+                message.addRecipient(Message.RecipientType.TO, new InternetAddress(mail));
 
-                    Transport.send(message);
+                Transport.send(message);
 
-                } catch (MessagingException e) {
-                    log.error("Exception Occurred during Email notification Sending", e);
-                }
+            } catch (MessagingException e) {
+                log.error("Exception Occurred during Email notification Sending", e);
             }
-        } else {
-            if (log.isDebugEnabled()) {
-                log.debug("Email Notifier Set is Empty");
-            }
+
         }
     }
 

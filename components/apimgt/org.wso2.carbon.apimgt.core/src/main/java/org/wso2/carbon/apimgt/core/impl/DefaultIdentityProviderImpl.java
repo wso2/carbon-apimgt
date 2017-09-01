@@ -133,7 +133,6 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
             String errorMessage =
                     "Error occurred while retrieving Id of user " + userId + ". Error : " + getErrorMessage(
                             userResponse);
-            log.error(errorMessage);
             throw new IdentityProviderException(errorMessage, ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
         }
         return userEmail;

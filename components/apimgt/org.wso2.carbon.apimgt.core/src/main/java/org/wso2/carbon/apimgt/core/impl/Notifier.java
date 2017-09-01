@@ -45,7 +45,7 @@ public abstract class Notifier implements Runnable {
     public void run() {
         try {
             sendNotifications(notificationDTO);
-        } catch (Exception e) {
+        } catch (APIManagementException e) {
             log.error("Exception Occurred during notification Sending ", e);
         }
     }

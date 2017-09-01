@@ -19,17 +19,16 @@ package org.wso2.carbon.apimgt.core.executors;
 
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
+import org.wso2.carbon.apimgt.core.configuration.models.NotifierConfigurations;
 import org.wso2.carbon.apimgt.core.exception.NotificationException;
 import org.wso2.carbon.apimgt.core.impl.Notifier;
 import org.wso2.carbon.apimgt.core.impl.NotifierConstants;
 import org.wso2.carbon.apimgt.core.template.dto.NotificationDTO;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -51,32 +50,23 @@ public class NotificationExecutor {
      */
     public void sendAsyncNotifications(NotificationDTO notificationDTO) throws NotificationException {
 
-        String notificationTemplate = new APIMConfigurations().
-                getNotificationConfigurations().getNewVersionNotifierConfiguration().getNotifierTemplate();
+        List<NotifierConfigurations> notifierConfigurations = new APIMConfigurations().
+                getNotificationConfigurations().getNewVersionNotifierConfiguration().getNotifierConfigurations();
+
         if (notificationDTO.getType().equalsIgnoreCase(NotifierConstants.NOTIFICATION_TYPE_NEW_VERSION)) {
-            JSONParser parser = new JSONParser();
-            JSONObject notificationConfig;
-            try {
-                notificationConfig = (JSONObject) parser.parse(notificationTemplate);
-            } catch (ParseException e) {
-                throw new NotificationException("Error while Parsing Object", e);
-            }
-            JSONArray notifierArray = (JSONArray) notificationConfig.get(NotifierConstants.NOTIFIER);
-
-            for (Object notifierObject : notifierArray) {
-                JSONObject notifierJson = (JSONObject) notifierObject;
-                String notifierClass = (String) notifierJson.get(NotifierConstants.CLASS);
-
+            for (NotifierConfigurations listItem : notifierConfigurations) {
+                String executorClass = listItem.getExecutorClass();
+                Map property = listItem.getPropertyList();
                 Properties prop = notificationDTO.getProperties();
-                prop.putAll(notifierJson);
+                prop.putAll(property);
                 notificationDTO.setProperties(prop);
 
                 //starting Notifier threads
-                if (notifierClass != null && !notifierClass.isEmpty()) {
+                if (executorClass != null && !executorClass.isEmpty()) {
 
                     Notifier notifier;
                     try {
-                        notifier = (Notifier) APIUtils.getClassForName(notifierClass).newInstance();
+                        notifier = (Notifier) APIUtils.getClassForName(executorClass).newInstance();
                     } catch (InstantiationException e) {
                         throw new NotificationException("Instantiation Error while Initializing the notifier class", e);
                     } catch (IllegalAccessException e) {
@@ -85,22 +75,38 @@ public class NotificationExecutor {
                         throw new NotificationException("ClassNotFound Error while Initializing the notifier class", e);
                     }
                     notifier.setNotificationDTO(notificationDTO);
-                    Runnable notificationThread = notifier;
-                    executor.execute(notificationThread);
+                    executor.execute(notifier);
                 } else {
                     if (log.isDebugEnabled()) {
-                        log.debug("Class" + notifierClass + "Empty Or Null");
+                        log.debug("Class " + executorClass + " Empty Or Null");
                     }
                 }
             }
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("Notification Type Does Not match with" + NotifierConstants.NOTIFICATION_TYPE_NEW_VERSION);
+                log.debug("Notification Type Does Not match with " + NotifierConstants.NOTIFICATION_TYPE_NEW_VERSION);
             }
         }
         executor.shutdown();
         while (!executor.isTerminated()) {
         }
     }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

@@ -26,13 +26,13 @@ import org.wso2.carbon.kernel.annotations.Element;
 @Configuration(description = "Notification Configurations")
 public class NotificationConfigurations {
     @Element(description = "NotificationEnable")
-    private Boolean notificationEnable = true;
+    private Boolean notificationEnable = false;
 
     @Element(description = "Notification Configurations")
     private MailConfigurations mailConfigurations = new MailConfigurations();
 
     @Element(description = "Notification Configurations")
-    private NewVersionNotifierConfiguration newVersionNotifierConfiguration = new NewVersionNotifierConfiguration();
+    private NewVersionNotifierConfigurations newVersionNotifierConfigurations = new NewVersionNotifierConfigurations();
 
     public Boolean getNotificationEnable() {
         return notificationEnable;
@@ -50,11 +50,11 @@ public class NotificationConfigurations {
         this.mailConfigurations = mailConfigurations;
     }
 
-    public NewVersionNotifierConfiguration getNewVersionNotifierConfiguration() {
-        return newVersionNotifierConfiguration;
+    public NewVersionNotifierConfigurations getNewVersionNotifierConfiguration() {
+        return newVersionNotifierConfigurations;
     }
 
-    public void setNewVersionNotifierConfiguration(NewVersionNotifierConfiguration newVersionNotifierConfiguration) {
-        this.newVersionNotifierConfiguration = newVersionNotifierConfiguration;
+    public void setNewVersionNotifierConfiguration(NewVersionNotifierConfigurations newVersionNotifierConfiguration) {
+        this.newVersionNotifierConfigurations = newVersionNotifierConfiguration;
     }
 }

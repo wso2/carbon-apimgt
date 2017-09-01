@@ -969,6 +969,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 }
                 getApiDAO().addAPI(apiBuilder.build());
                 newVersionedId = apiBuilder.getId();
+                sendEmailNotification(apiId, apiBuilder.getName(), newVersion);
+
             } else {
                 throw new APIMgtResourceNotFoundException("Requested API on UUID " + apiId + "Couldn't be found");
             }
@@ -2018,37 +2020,16 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     @Override
-    public void sendMailNotification(APIPublisher apiPublisher, String apiId, String apiVersion, String apiName)
-            throws APIManagementException {
-        NotificationConfigurations notificationConfigurations = new NotificationConfigurations();
+    public Set<String> getSubscribersByAPIId(String apiId) throws APIManagementException {
         List<Subscription> subscriptionList = new ArrayList();
         Set<String> subscriberList = new HashSet<>();
-        //Sending Notifications to existing subscribers
-        //get subscriber Username list
-        // check notification Enabled
-        if (notificationConfigurations.getNotificationEnable()) {
-            if (StringUtils.isNotEmpty(apiId)) {
-                subscriptionList = apiPublisher.getSubscriptionsByAPI(apiId);
-            }
-            for (Subscription listItem : subscriptionList) {
-                subscriberList.add(listItem.getApplication().getCreatedUser());
-            }
-            //Notifications are sent only if there are subscribers
-            if (subscriberList.size() > 0) {
-                try {
-                    Properties prop = new Properties();
-                    prop.put(NotifierConstants.NEW_API_VERSION, apiVersion);
-                    prop.put(NotifierConstants.API_NAME, apiName);
-                    prop.put(NotifierConstants.SUBSCRIBERS_PER_API, subscriberList);
-                    NotificationDTO notificationDTO = new NotificationDTO(prop, NotifierConstants
-                            .NOTIFICATION_TYPE_NEW_VERSION);
-                    new NotificationExecutor().sendAsyncNotifications(notificationDTO);
-                } catch (NotificationException e) {
-                    log.error(e.getMessage(), e);
-                }
-            }
+        if (StringUtils.isNotEmpty(apiId)) {
+            subscriptionList = getSubscriptionsByAPI(apiId);
         }
-
+        for (Subscription listItem : subscriptionList) {
+            subscriberList.add(listItem.getApplication().getCreatedUser());
+        }
+        return  subscriberList;
     }
 
     private void cleanupPendingTaskForAPIStateChange(String apiId) throws APIManagementException {
@@ -2068,4 +2049,29 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
+    private void sendEmailNotification(String apiId, String apiName, String newVersion)
+            throws APIManagementException {
+        Set<String> subscriberList;
+        NotificationConfigurations notificationConfigurations = new NotificationConfigurations();
+
+        // check notification Enabled
+        if (notificationConfigurations.getNotificationEnable()) {
+            subscriberList = getSubscribersByAPIId(apiId);
+            //Notifications are sent only if there are subscribers
+            if (subscriberList.size() > 0) {
+                try {
+                    Properties prop = new Properties();
+                    prop.put(NotifierConstants.NEW_API_VERSION, newVersion);
+                    prop.put(NotifierConstants.API_NAME, apiName);
+                    prop.put(NotifierConstants.SUBSCRIBERS_PER_API, subscriberList);
+                    NotificationDTO notificationDTO = new NotificationDTO(prop, NotifierConstants
+                            .NOTIFICATION_TYPE_NEW_VERSION);
+                    new NotificationExecutor().sendAsyncNotifications(notificationDTO);
+                } catch (NotificationException e) {
+                   log.error(e.getMessage());
+                }
+            }
+        }
+
+    }
 }
