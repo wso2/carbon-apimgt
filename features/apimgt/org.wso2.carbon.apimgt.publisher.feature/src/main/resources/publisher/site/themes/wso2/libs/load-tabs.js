@@ -428,8 +428,9 @@ var loadLC = function () {
                             var event = obj.event;
                             var target = obj.target;
                             // Set up the edges
-
-                            g.setEdge(key.toUpperCase(), target.toUpperCase(), { label: event.toUpperCase(), labelStyle: "fill: white", lineInterpolate: 'cardinal' });
+                            var eventLabel = event.toUpperCase().replace(" ", "\n");
+                            eventLabel = eventLabel.trim().replace(/(\S(.{0,78}\S)?)\s+/g, '$1\n');
+                            g.setEdge(key.toUpperCase(), target.toUpperCase(), { label: eventLabel, labelStyle: "fill: white", lineInterpolate: 'cardinal' });
                         }
                     }
                 }
