@@ -101,7 +101,7 @@
                                     </a>
                                 </div>
                                 <div class="add-padding-2x app-data ">
-                                    <h4 class="apiNameWrap"><a href="<%=path%>" title="<%=i18n.localize("Name")%>"><%=api.name%></a></h4>
+                                    <h4 class="truncate"><a href="<%=path%>" title="<%=i18n.localize("Name")%>"><%=api.name%></a></h4>
                                     <h5><a href="<%=path%>" title="<%=i18n.localize("Version")%>"><%=api.version%></a></h5>
                                     <%if(api.isAdvertiseOnly) {%>
                                     	<p class="truncate"><%=encode.forHtml(api.apiOwner)%></p>
