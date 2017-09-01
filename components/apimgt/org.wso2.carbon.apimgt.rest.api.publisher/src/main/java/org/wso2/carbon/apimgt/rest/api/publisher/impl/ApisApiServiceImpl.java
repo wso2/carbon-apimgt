@@ -1276,6 +1276,20 @@ public class ApisApiServiceImpl extends ApisApiService {
             String thumbnailUrl = apiProvider.addResourceFile(thumbPath, apiImage);
             api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
             APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
+
+            //Creating URI templates due to available uri templates in returned api object only kept single template
+            //for multiple http methods
+            String apiSwaggerDefinition = apiProvider.getSwagger20Definition(api.getId());
+            if (!StringUtils.isEmpty(apiSwaggerDefinition)) {
+                APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
+                Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, apiSwaggerDefinition);
+                api.setUriTemplates(uriTemplates);
+
+                // scopes
+                Set<Scope> scopes = definitionFromSwagger20.getScopes(apiSwaggerDefinition);
+                api.setScopes(scopes);
+            }
+
             apiProvider.updateAPI(api);
 
             String uriString = RestApiConstants.RESOURCE_PATH_THUMBNAIL
