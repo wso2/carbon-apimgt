@@ -272,7 +272,7 @@ var drawAPIUsageByResourcePath = function (from, to, apiFilter) {
                                    time = parsedResponse[i][1][j][1][k][1][m][1][l][1];
                                }
                                rowId++;
-                               $dataTable.append($('<tr id='+rowId+'><td>' + appName + '</td><td>' + version + '</td><td>' +'<a id="'+rowId+'" class="link" href="#" title="resource_path" >'+contextName+' </a>'+ '</td><td>' + method + '</td><td class="tdNumberCell" style="text-align:right">' + hitCount+ '</td></tr>'));
+                               $dataTable.append($('<tr id='+rowId+'><td>' + appName + '</td><td>' + version + '</td><td>' +'<span id="'+rowId+'"title="resource_path" >'+contextName+' </span>'+ '</td><td>' + method + '</td><td class="tdNumberCell" style="text-align:right">' + hitCount+ '</td></tr>'));
                                hitCount =0;
                             }
                         }
