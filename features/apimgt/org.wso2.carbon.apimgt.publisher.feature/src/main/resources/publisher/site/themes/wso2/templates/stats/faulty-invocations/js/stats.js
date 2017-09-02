@@ -182,17 +182,17 @@ var drawAPIResponseFaultCountChart = function(from,to){
                     }
 
 
-                    var dataStructure = [{
-                            "key": "Fault",
-                            "values": faultData
-                        },
+                    var dataStructure = [
                         {
                             "key": "Success",
                             "values": data
+                        },{
+                            "key": "Fault",
+                            "values": faultData
                         }];
 
                     (function (data) {
-                    var colorRangeArray=["#e74c3c","#4aa3df"];
+                    var colorRangeArray=["#4aa3df","#e74c3c"];
                         var colors = d3.scale.ordinal()
                            .range(colorRangeArray);
                         keyColor = function (d, i) {
