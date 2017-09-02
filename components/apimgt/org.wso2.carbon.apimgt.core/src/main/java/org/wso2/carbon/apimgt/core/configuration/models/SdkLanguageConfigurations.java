@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.store.configuration;
+package org.wso2.carbon.apimgt.core.configuration.models;
 
 import org.wso2.carbon.kernel.annotations.Configuration;
 import org.wso2.carbon.kernel.annotations.Element;
@@ -6,18 +6,20 @@ import org.wso2.carbon.kernel.annotations.Element;
 import java.util.HashMap;
 import java.util.Map;
 
-@Configuration(namespace = "wso2.carbon.apimgt.rest.api.store.sdklanguageconfig"
-            ,description = "SDK generation language configuration")
+/**
+ * Class to hold SDK Language configurations
+ */
+@Configuration(description = "SDK Generation Language Configuration")
 public class SdkLanguageConfigurations {
 
-    public SdkLanguageConfigurations(){
+    public SdkLanguageConfigurations() {
         sdkGenLanguages.put("java", "io.swagger.codegen.languages.JavaClientCodegen");
         sdkGenLanguages.put("android", "io.swagger.codegen.languages.AndroidClientCodegen");
         sdkGenLanguages.put("python", "io.swagger.codegen.languages.PythonClientCodegen");
     }
 
-    @Element(description = "SDK generation supported languages")
-    private Map<String,String> sdkGenLanguages = new HashMap<>();
+    @Element(description = "SDK Generation Supported Languages")
+    private Map<String, String> sdkGenLanguages = new HashMap<>();
 
     public Map<String, String> getSdkGenLanguages() {
         return sdkGenLanguages;
