@@ -80,6 +80,7 @@ jagg.block("api/api-info", {
             if (tenantDomain == "carbon.super" || tenantDomain == null) {
                 if (showConsole) {
                     if(api == null || !("type" in api) || api.type.toUpperCase() != "WS") {
+                        //api is null or (if not null api doesn't have type) or (if it has a type it can't be WS)
                         var result = {
                             "api": api,
                             "deniedTiers": deniedTiers,
@@ -128,7 +129,25 @@ jagg.block("api/api-info", {
                                 ]
                             }
                         };
+
+                        if(supportedLangs.langs != null) {
+                            result.tabs.tabs.push(
+                                {
+                                    "title": i18n.localize("SDKs"),
+                                    "body": [
+                                        {
+                                            "name": "sdk",
+                                            "inputs": {
+                                                "api": api,
+                                                "supportedLangs": supportedLangs
+                                            }
+                                        }
+                                    ]
+                                }
+                            );
+                        }
                     } else {
+                        //api is a WS API
                         var result = {
                             "api": api,
                             "deniedTiers": deniedTiers,
@@ -167,6 +186,7 @@ jagg.block("api/api-info", {
                         };
                     }
 
+                    // common for both WS and non WS APIs
                     if(isForumEnabled) {
                         result.tabs.tabs.push(
                             {
@@ -183,26 +203,8 @@ jagg.block("api/api-info", {
                             }
                         );
                     }
-
-                    if(supportedLangs.langs != null) {
-                        result.tabs.tabs.push(
-                                {
-                                    "title": i18n.localize("SDKs"),
-                                    "body": [
-                                        {
-                                            "name": "sdk",
-                                            "inputs": {
-                                                "api": api,
-                                                "supportedLangs": supportedLangs
-                                            }
-                                        }
-                                    ]
-                                }
-                        );
-                    }
                     return result;
-                }
-                else {
+                } else { // super tenant, advertise but no console
                     var result = {
                         "api": api,
                         "deniedTiers": deniedTiers,
@@ -259,10 +261,11 @@ jagg.block("api/api-info", {
                     return result;
 
                 }
-            } else {
+            } else { //advertise, tenant mode
                 if (showConsole) {
                     var result;
                     if(api == null || !("type" in api) || api.type.toUpperCase() != "WS") {
+                        //api is null or (if not null api doesn't have type) or (if it has a type it can't be WS)
                         result = {
                             "api": api,
                             "deniedTiers": deniedTiers,
@@ -311,7 +314,24 @@ jagg.block("api/api-info", {
                                 ]
                             }
                         };
+                        if(supportedLangs.langs != null) {
+                            result.tabs.tabs.push(
+                                {
+                                    "title": i18n.localize("SDKs"),
+                                    "body": [
+                                        {
+                                            "name": "sdk",
+                                            "inputs": {
+                                                "api": api,
+                                                "supportedLangs": supportedLangs
+                                            }
+                                        }
+                                    ]
+                                }
+                            );
+                        }
                     } else {
+                        //api is a WS API
                         result = {
                             "api": api,
                             "deniedTiers": deniedTiers,
@@ -348,22 +368,6 @@ jagg.block("api/api-info", {
                                 ]
                             }
                         };
-                    }
-                    if(supportedLangs.langs != null) {
-                        result.tabs.tabs.push(
-                                {
-                                    "title": i18n.localize("SDKs"),
-                                    "body": [
-                                        {
-                                            "name": "sdk",
-                                            "inputs": {
-                                                "api": api,
-                                                "supportedLangs": supportedLangs
-                                            }
-                                        }
-                                    ]
-                                }
-                        );
                     }
                     return result;
                 }
