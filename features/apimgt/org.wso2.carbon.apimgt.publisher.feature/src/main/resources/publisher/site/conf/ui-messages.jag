@@ -1,4 +1,7 @@
 <%
+var encode = require('encode');
+encode = new encode.Encode();
+
 var error = {
         loginRequired:function (action) {
 
@@ -19,7 +22,7 @@ var error = {
     },
 
     invalidAction:function(action) {
-        return action + " is not supported";
+        return encode.forHtml(action) + " is not supported";
     },
     pageNotFoundAction:function() {
         return {title:"The page cannot be found.",

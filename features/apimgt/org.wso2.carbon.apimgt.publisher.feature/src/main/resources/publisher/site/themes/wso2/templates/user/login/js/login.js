@@ -22,10 +22,11 @@ var login = function () {
                       }
 
                   } else {
+                      var text = jQuery('<div />').text( result.message );
                       $('#loginErrorMsg').show();
                       //@todo: param_string
                       $('#loginErrorMsg').html('<i class="icon fw fw-error"></i><strong>'  + i18n.t("Error! ") +
-                      '</strong>' + result.message + '<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden="true"><i class="fw fw-cancel"></i></span></button>');
+                      '</strong>' + text.html() + '<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden="true"><i class="fw fw-cancel"></i></span></button>');
                       
                   }
               }, "json");

@@ -21,7 +21,7 @@ var error = {
     },
 
     invalidAction:function(action) {
-        return action + " is not supported";
+        return "action is not supported";
     },
    pageNotFoundAction:function() {
         return {title:"The page cannot be found.",

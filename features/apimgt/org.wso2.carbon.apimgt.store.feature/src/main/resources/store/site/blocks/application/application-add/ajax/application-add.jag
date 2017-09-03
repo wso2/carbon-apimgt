@@ -70,7 +70,7 @@ include("/jagg/jagg.jag");
             }
         } else {
             var log = new Log();
-            var errorMessage = "Specified application tier " + tier + " does not exist.";
+            var errorMessage = "Specified application tier does not exist.";
             log.error(errorMessage);
             obj = {
                 error: true,

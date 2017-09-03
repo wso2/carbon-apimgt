@@ -17,7 +17,8 @@ var login = login || {};
                          $('#loginErrorMsg').show();
                          $('#password').val('');
                          //$('#loginErrorMsg').html(result.message).prepend('<strong>'+i18n.t("errorMsgs.login")+'</strong><br />');
-                         $('#loginErrorMsg').html('<i class="icon fw fw-error"></i><strong> '+i18n.t("Error!")+' </strong>' + result.message + '<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden="true"><i class="fw fw-cancel"></i></span></button>');
+                         var text = jQuery('<div />').text( result.message );
+                         $('#loginErrorMsg').html('<i class="icon fw fw-error"></i><strong> '+i18n.t("Error!")+' </strong>' + text.html() + '<button type="button" class="close" aria-label="close" data-dismiss="alert"><span aria-hidden="true"><i class="fw fw-cancel"></i></span></button>');
                      }
                  }, "json");
     };
@@ -177,6 +178,12 @@ function getAPIPublisherURL(){
 
 function login() {
 	var goto_url = $.cookie("goto_url");
+    var url_prefix = window.location.origin + siteContext;
+    // checking whether the redirection url starts with the hostname
+    if (goto_url.indexOf(url_prefix) != 0) {
+      goto_url = siteContext
+    }
+
     login.loginbox.login($("#username").val(), $("#password").val(), goto_url,$("#tenant").val());
 }
 

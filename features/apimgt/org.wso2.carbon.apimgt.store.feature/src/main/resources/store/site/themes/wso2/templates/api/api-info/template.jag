@@ -362,7 +362,7 @@ $(window).load(function(){
             var select = document.getElementById('application-list');
             if (select != null) {
                 var selectedApplication = select.options[select.selectedIndex];
-                var application, defaultAppId, applicationsList = <%=outputs.applications%>;
+                var application, defaultAppId, applicationsList = jQuery.parseJSON('<%= encode.forJavaScript(stringify(outputs.applications))%>');
                 for (var i = 0; i < applicationsList.length; i++) {
                     application = applicationsList[i];
                     if (application.name == "DefaultApplication") {

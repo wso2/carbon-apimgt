@@ -3,7 +3,7 @@ include("/jagg/jagg.jag");
 var site = require("/site/conf/site.json");
 
 	function openRedirectValidation(url){
-		var storecontext = new RegExp(jagg.getSiteContext(), 'g');
+		var storecontext = new RegExp('^' + jagg.getSiteContext());
 		if(url.match(storecontext)){
 			return url;
 		}else{
