@@ -563,6 +563,16 @@
                 <artifactId>javax.mail</artifactId>
                 <version>${java-mail.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.io.swagger</groupId>
+                <artifactId>swagger-codegen</artifactId>
+                <version>${swagger.codegen.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.samskivert</groupId>
+                <artifactId>jmustache</artifactId>
+                <version>${samskivert.mustache.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -935,5 +945,8 @@
 
         <ballerina.version>0.89</ballerina.version>
         <java-mail.version>1.5.2</java-mail.version>
+
+        <swagger.codegen.version>2.2.3.wso2v4</swagger.codegen.version>
+        <samskivert.mustache.version>1.13</samskivert.mustache.version>
     </properties>
 </project>

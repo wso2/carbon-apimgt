@@ -224,6 +224,19 @@
             <artifactId>powermock-module-junit4</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.swagger</groupId>
+            <artifactId>swagger-codegen</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.samskivert</groupId>
+            <artifactId>jmustache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.config</groupId>
+            <artifactId>org.wso2.carbon.config</artifactId>
+            <version>2.0.0</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -867,6 +880,7 @@
             javax.jms.*,;version="${geronimo-jms.import.version.range}",
             javax.ws.rs.*;version="${javax.ws.rs-api.import.version}",
             org.apache.activemq.*;resolution:=optional,
+            io.swagger.codegen.*;version="${swagger.codegen.version}",
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.core.internal,
