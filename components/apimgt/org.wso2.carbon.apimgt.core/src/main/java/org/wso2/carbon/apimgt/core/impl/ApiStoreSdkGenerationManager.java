@@ -25,7 +25,7 @@ import io.swagger.codegen.config.CodegenConfigurator;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
-//import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
@@ -74,9 +74,9 @@ public class ApiStoreSdkGenerationManager {
     public String generateSdkForApi(String apiId, String language, String userName)
             throws ApiStoreSdkGenerationException
             , APIManagementException, RuntimeException {
-        /*if (StringUtils.isBlank(apiId) || StringUtils.isBlank(language)) {
+        if (StringUtils.isBlank(apiId) || StringUtils.isBlank(language)) {
             handleSdkGenException("API ID or SDK Language should not be null!");
-        }*/
+        }
 
         APIStore apiStore = APIManagerFactory.getInstance().getAPIConsumer(userName);
         API api = apiStore.getAPIbyUUID(apiId);
