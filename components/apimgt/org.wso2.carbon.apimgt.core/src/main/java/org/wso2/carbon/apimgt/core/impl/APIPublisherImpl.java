@@ -332,7 +332,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
                 APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
                         "successfully.", log);
-
                 // 'API_M Functions' related code
                 //Create a payload with event specific details
                 Map<String, String> eventPayload = new HashMap<>();
@@ -920,6 +919,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
+
     /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>
      *
@@ -978,6 +978,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
         return newVersionedId;
     }
+
 
     /**
      * Attach Documentation (without content) to an API
@@ -1961,7 +1962,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 log.error(msg);
                 throw new APIManagementException(msg, ExceptionCodes.WORKFLOW_NO_PENDING_TASK);
             }
-         } catch (APIMgtDAOException e) {
+        } catch (APIMgtDAOException e) {
                 String msg = "Error occurred while changing api lifecycle workflow status";
                 log.error(msg, e);
                 throw new APIManagementException(msg, e.getErrorHandler());
@@ -2055,6 +2056,5 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 }
             }
         }
-
     }
 }

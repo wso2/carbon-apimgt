@@ -42,7 +42,6 @@ import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
-import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
@@ -90,6 +89,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -534,7 +534,7 @@ public class APIPublisherImplTestCase {
         String externalRef = UUID.randomUUID().toString();
         Mockito.when(
                 workflowDAO.getExternalWorkflowReferenceForPendingTask(uuid, WorkflowConstants.WF_TYPE_AM_API_STATE))
-                .thenReturn(externalRef);
+                .thenReturn(Optional.of(externalRef));
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
                 .thenReturn(DEVELOPER_ROLE);
@@ -1346,7 +1346,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         Mockito.when(
                 workflowDAO.getExternalWorkflowReferenceForPendingTask(uuid, WorkflowConstants.WF_TYPE_AM_API_STATE))
-                .thenReturn(externalRef);
+                .thenReturn(Optional.of(externalRef));
 
         apiPublisher.removePendingLifecycleWorkflowTaskForAPI(uuid);
         Mockito.verify(apiDAO, Mockito.times(1)).updateAPIWorkflowStatus(uuid, APILCWorkflowStatus.APPROVED);
@@ -1406,9 +1406,9 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiLifecycleManager, apiDAO, workflowDAO, gateway);
-        API api = null;
         String uuid = UUID.randomUUID().toString();
-        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        Mockito.when(apiDAO.getAPI(uuid)).thenThrow(
+                new APIMgtDAOException("API with ID " + uuid + " does not exist", ExceptionCodes.API_NOT_FOUND));
         apiPublisher.removePendingLifecycleWorkflowTaskForAPI(uuid);
 
     }
@@ -1544,16 +1544,16 @@ public class APIPublisherImplTestCase {
     public void testCheckIfAPIExistForValidUuid() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
-        Mockito.when(apiDAO.getAPISummary("zzzzz")).thenReturn(SampleTestObjectCreator.getMockApiSummaryObject());
-        Assert.assertTrue(apiPublisher.checkIfAPIExists("zzzzz"));
+        Mockito.when(apiDAO.isAPIExists("zzzzz")).thenReturn(true);
+        Assert.assertTrue(apiPublisher.isAPIExists("zzzzz"));
     }
 
     @Test(description = "Check if api exist with invalid uuid")
     public void testCheckIfAPIExistForInValidUuid() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
-        Mockito.when(apiDAO.getAPISummary("aaaaa")).thenReturn(null);
-        Assert.assertFalse(apiPublisher.checkIfAPIExists("aaaaa"));
+        Mockito.when(apiDAO.isAPIExists("aaaaa")).thenReturn(false);
+        Assert.assertFalse(apiPublisher.isAPIExists("aaaaa"));
     }
 
     @Test(description = "Check if api exist with invalid uuid",
@@ -1561,8 +1561,8 @@ public class APIPublisherImplTestCase {
     public void testCheckIfAPIExistWhileGettingJDBCConnectionFailure() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
-        Mockito.when(apiDAO.getAPISummary("bbbbb")).thenThrow(new APIMgtDAOException(""));
-        apiPublisher.checkIfAPIExists("bbbbb");
+        Mockito.when(apiDAO.isAPIExists("bbbbb")).thenThrow(new APIMgtDAOException(""));
+        apiPublisher.isAPIExists("bbbbb");
     }
 
     @Test(description = "Add Documentation Info")
@@ -1803,11 +1803,12 @@ public class APIPublisherImplTestCase {
     }
 
     @Test(description = "Get api lifecycle data for a null api",
-            expectedExceptions = APIMgtResourceNotFoundException.class)
+            expectedExceptions = APIManagementException.class)
     public void testGetAPILifeCycleDataForNullAPI() throws APIManagementException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
-        Mockito.when(apiDAO.getAPISummary(API_ID)).thenReturn(null);
+        Mockito.when(apiDAO.getAPISummary(API_ID)).thenThrow(
+                new APIMgtDAOException("API with ID " + API_ID + " does not exist", ExceptionCodes.API_NOT_FOUND));
         apiPublisher.getAPILifeCycleData(API_ID);
     }
 
@@ -3181,12 +3182,6 @@ public class APIPublisherImplTestCase {
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO) {
         return new APIPublisherImpl(USER, null, null, apiDAO, null, apiSubscriptionDAO, null, null, null, null, null,
                 new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
-    }
-
-    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, ApplicationDAO applicationDAO, APISubscriptionDAO
-            apiSubscriptionDAO, APILifecycleManager apiLifecycleManager) {
-        return new APIPublisherImpl(USER, null, apiDAO, applicationDAO, apiSubscriptionDAO, null, apiLifecycleManager,
-                null, null, null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
     private APIPublisherImpl getApiPublisherImpl(LabelDAO labelDAO) {

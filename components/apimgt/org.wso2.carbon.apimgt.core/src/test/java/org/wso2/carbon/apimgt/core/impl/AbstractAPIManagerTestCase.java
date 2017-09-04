@@ -246,7 +246,7 @@ public class AbstractAPIManagerTestCase {
     }
 
     @Test(description = "Exception when retrieving documentation summary given the id",
-            expectedExceptions = APIMgtDAOException.class)
+            expectedExceptions = APIManagementException.class)
     public void testGetDocumentationSummaryException() throws APIManagementException {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiStore = getAPIStoreImpl(apiDAO);

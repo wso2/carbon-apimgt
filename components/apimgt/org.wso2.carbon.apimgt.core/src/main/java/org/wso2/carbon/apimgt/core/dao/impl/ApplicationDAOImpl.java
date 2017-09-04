@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
-import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -157,21 +156,6 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     }
 
     /**
-     * Retrieves summary data of all available Applications. This method supports result pagination and
-     * ensures results returned are those that belong to the specified Group ID
-     *
-     * @param offset  The number of results from the beginning that is to be ignored
-     * @param limit   The maximum number of results to be returned after the offset
-     * @param groupID The Group ID to filter results by
-     * @return {@code Application[]} matching results
-     * @throws APIMgtDAOException   If failed to retrieve applications.
-     */
-    @Override
-    public Application[] getApplicationsForGroup(int offset, int limit, String groupID) throws APIMgtDAOException {
-        return new Application[0];
-    }
-
-    /**
      * Retrieves summary data of all available Applications that match the given search criteria. This method supports
      * result pagination and ensuring results returned are for Apps belonging to the specified username
      *
@@ -182,21 +166,6 @@ public class ApplicationDAOImpl implements ApplicationDAO {
     @Override
     public Application[] searchApplicationsForUser(String searchString, String userId)
             throws APIMgtDAOException {
-        //TODO
-        return new Application[0];
-    }
-
-    /**
-     * Retrieves summary data of all available Applications that match the given search criteria. This method supports
-     * result pagination and ensuring results returned are for Apps belonging to the specified Group ID
-     *
-     * @param searchString The search string provided
-     * @param groupID      The Group ID to filter results by
-     * @return An array of matching {@link Application} objects
-     * @throws APIMgtDAOException   If failed to retrieve applications.
-     */
-    @Override
-    public Application[] searchApplicationsForGroup(String searchString, String groupID) throws APIMgtDAOException {
         //TODO
         return new Application[0];
     }
@@ -442,7 +411,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 }
             }
         } catch (SQLException ex) {
-            throw new APIMgtDAOException(ex);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    String.format("getting application keys(appId: %s)", appId), ex);
         }
         return keyList;
     }
@@ -467,7 +437,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 }
             }
         } catch (SQLException ex) {
-            throw new APIMgtDAOException(ex);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    String.format("getting application keys(appId: %s, keyType: %s)", appId, keyType), ex);
         }
     }
 
@@ -493,7 +464,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 }
             }
         } catch (SQLException ex) {
-            throw new APIMgtDAOException(ex);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting all applications", ex);
         }
         return applicationList;
     }

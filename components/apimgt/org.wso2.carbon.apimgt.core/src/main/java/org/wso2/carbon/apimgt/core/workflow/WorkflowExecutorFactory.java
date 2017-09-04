@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
@@ -96,6 +97,9 @@ public class WorkflowExecutorFactory {
             workflow = new ApplicationUpdateWorkflow(DAOFactory.getApplicationDAO(), DAOFactory.getWorkflowDAO(),
                     APIManagerFactory.getInstance().getApiGateway());
             workflow.setWorkflowType(workflowType);
+        } else {
+            throw new APIMgtDAOException("Invalid workflow type: " + workflowType + " specified",
+                    ExceptionCodes.WORKFLOW_INVALID_WFTYPE);
         }
         return workflow;
     }

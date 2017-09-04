@@ -118,7 +118,7 @@ public class LabelDAOImpl implements LabelDAO {
                 insertAccessUrlMappings(label.getId(), label.getAccessUrls());
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "adding label", e);
         }
     }
 
@@ -421,7 +421,7 @@ public class LabelDAOImpl implements LabelDAO {
                 return true;
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "checking if labels exist", e);
         }
         return false;
     }

@@ -58,7 +58,6 @@ import org.wso2.carbon.apimgt.core.exception.APINotFoundException;
 import org.wso2.carbon.apimgt.core.exception.APIRatingException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
-import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -91,7 +90,6 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
-import org.wso2.carbon.apimgt.core.util.ApplicationUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationWorkflow;
@@ -266,7 +264,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                         .getUuid());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_DESCRIPTION,
                         application.getDescription());
-                workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_GROUPID, application.getGroupId());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_PERMISSION,
                         application.getPermissionString());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_APPLICATION_EXISTIN_APP_STATUS,
@@ -1118,8 +1115,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             dto.setTemplateId(uriTemplate.getTemplateId());
             dto.setUriTemplate(uriTemplate.getUriTemplate());
             dto.setHttpVerb(uriTemplate.getHttpVerb());
-            dto.setAuthType(uriTemplate.getAuthType());
-            dto.setPolicy(uriTemplate.getPolicy());
             resourceList.add(dto);
         }
         GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();

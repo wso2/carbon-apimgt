@@ -29,7 +29,6 @@ import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.core.exception.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
@@ -516,7 +515,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         policyDAO.addBlockConditions(blockConditionIPRange);
         try {
             policyDAO.addBlockConditions(blockConditionIPRange);
-        } catch (BlockConditionAlreadyExistsException ex) {
+        } catch (APIMgtDAOException ex) {
             Assert.assertEquals(ex.getMessage(),
                     "Condition with type: " + blockConditionIPRange.getConditionType() + ", value: "
                             + blockConditionIPRange.getConditionValue() + " already exists");

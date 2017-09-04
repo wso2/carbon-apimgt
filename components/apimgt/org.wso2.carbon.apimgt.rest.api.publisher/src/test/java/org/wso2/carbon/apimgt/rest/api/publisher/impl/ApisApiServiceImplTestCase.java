@@ -781,7 +781,7 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
         Mockito.doReturn(false).doThrow(new IllegalArgumentException())
-                .when(apiPublisher).checkIfAPIExists(apiId);
+                .when(apiPublisher).isAPIExists(apiId);
         Response response = apisApiService.apisApiIdGet(apiId, null,
                 null, getRequest());
         assertEquals(response.getStatus(), 404);
@@ -799,7 +799,7 @@ public class ApisApiServiceImplTestCase {
         String apiId = UUID.randomUUID().toString();
         API api = SampleTestObjectCreator.createDefaultAPI().id(apiId).build();
         Mockito.doReturn(true).doThrow(new IllegalArgumentException())
-                .when(apiPublisher).checkIfAPIExists(apiId);
+                .when(apiPublisher).isAPIExists(apiId);
         Mockito.doReturn(api).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getAPIbyUUID(apiId);
         Response response = apisApiService.apisApiIdGet(apiId, null,
@@ -819,7 +819,7 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
-                .when(apiPublisher).checkIfAPIExists(apiId);
+                .when(apiPublisher).isAPIExists(apiId);
         Response response = apisApiService.apisApiIdGet(apiId, null,
                 null, getRequest());
         assertEquals(response.getStatus(), 400);
@@ -876,7 +876,7 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
         Mockito.doReturn(false).doThrow(new IllegalArgumentException())
-                .when(apiPublisher).checkIfAPIExists(apiId);
+                .when(apiPublisher).isAPIExists(apiId);
         Response response = apisApiService.apisApiIdLifecycleHistoryGet(apiId, null,
                 null, getRequest());
         assertEquals(response.getStatus(), 404);
@@ -894,7 +894,7 @@ public class ApisApiServiceImplTestCase {
         String apiId = UUID.randomUUID().toString();
         API api = SampleTestObjectCreator.createDefaultAPI().id(apiId).build();
         Mockito.doReturn(true).doThrow(new IllegalArgumentException())
-                .when(apiPublisher).checkIfAPIExists(apiId);
+                .when(apiPublisher).isAPIExists(apiId);
         Mockito.doReturn(api).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getAPIbyUUID(apiId);
         Response response = apisApiService.apisApiIdLifecycleHistoryGet(apiId, null,
@@ -912,7 +912,7 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
-                .when(apiPublisher).checkIfAPIExists(apiId);
+                .when(apiPublisher).isAPIExists(apiId);
         Response response = apisApiService.apisApiIdLifecycleHistoryGet(apiId, null,
                 null, getRequest());
         assertEquals(response.getStatus(), 400);
