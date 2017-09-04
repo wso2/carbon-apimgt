@@ -29,7 +29,7 @@ class AuthManager {
     constructor() {
         /* TODO: Move this to configuration ~tmkb*/
         this.host = window.location.protocol + "//" + window.location.host;
-        //TODO context: publisher ???
+        //TODO context: store ???
         this.token = "/login/token/" + context;
         this.isLogged = false;
         this.username = null;

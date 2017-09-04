@@ -18,10 +18,10 @@
 
 import React, {Component} from 'react'
 import Base from './Base/index'
+import Landing from './Landing/Landing'
 import Apis from './Apis/Apis'
-import Applications from './Applications/Applications'
 import Login from './Login/Login'
 import Logout from './Logout'
-import Layout from './Layout/index'
+import Applications from './Applications/Applications'
 
-export {Base, Apis, Applications, Login, Logout, Layout}
+export {Base, Landing, Apis, Login, Logout, Applications}

@@ -51,7 +51,6 @@ class API {
     getAllAPIs(callback = null) {
         var promise_get_all = this.client.then(
             (client) => {
-                //debugger;
                 console.info("this._requestMetaData()" , this._requestMetaData());
                 return client.apis["API Collection"].get_apis({}, this._requestMetaData());
             }
@@ -72,7 +71,6 @@ class API {
     getAPIById(id, callback = null) {
         var promise_get = this.client.then(
             (client) => {
-                //debugger;
                 return client.apis["API (individual)"].get_apis__apiId_(
                     {apiId: id}, this._requestMetaData());
             }
@@ -80,6 +78,7 @@ class API {
         if (callback) {
             return promise_get.then(callback);
         } else {
+            console.info("returninng promise");
             return promise_get;
         }
     }

@@ -19,16 +19,17 @@
 import React, {Component} from 'react'
 
 import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom'
-import {Apis, Applications, Base, Login, Logout, Endpoints,Layout} from './app/components'
+import {Apis, Applications, Base, Login, Logout } from './app/components'
 import {PageNotFound} from './app/components/Base/Errors'
 import AuthManager from './app/data/AuthManager'
 import qs from 'qs'
-import Listing2 from './app/components/Listing2'
-import ApplicationCreate from './app/components/Applications/Create/ApplicationCreate'
+import Axios from 'axios';
+import LoadingAnimation from './app/components/Base/Loading/Loading.js';
 
-import './fonts/index.css';
+import 'antd/dist/antd.css'
+import {message} from 'antd'
 import './App.css'
-
+// import './materialize.css'
 
 /**
  * Render protected application paths
@@ -36,9 +37,22 @@ import './App.css'
 class Protected extends Component {
     constructor(props) {
         super(props);
+        this.state = {showLeftMenu: false, authConfigs: null};
+        message.config({top: '48px'}); // .custom-header height + some offset
+        /* TODO: need to fix the header to avoid conflicting with messages ~tmkb*/
+        this.handleResponse = this.handleResponse.bind(this);
+        /* TODO: Get apim base url from config*/
+        Axios.get("https://localhost:9292/login/login/store").then(this.handleResponse);
     }
 
+    handleResponse = (response) => {
+        this.setState({ authConfigs: response.data});
+    }
 
+    /**
+     * Change the visibility state of left side navigation menu bar
+     * @param {boolean} status : Whether or not to show or hide left side navigation menu
+     */
 
     render() {
         // Note: AuthManager.getUser() method is a passive check, which simply check the user availability in browser storage,
@@ -47,60 +61,49 @@ class Protected extends Component {
             return (
                 <Base>
                     <Switch>
+                        <Redirect exact from="/" to="/apis"/>
+                        <Route path={"/apis"} component={Apis} />
+                        <Route path={"/applications"} component={Applications} />
                         <Route component={PageNotFound}/>
                     </Switch>
                 </Base>
             );
         }
         let params = qs.stringify({referrer: this.props.location.pathname});
-        return (
-            <Redirect to={{pathname: '/login', search: params}}/>
-        );
+        if (this.state.authConfigs) {
+            if (this.state.authConfigs.is_sso_enabled) {
+                var authorizationEndpoint = this.state.authConfigs.authorizationEndpoint;
+                var client_id = this.state.authConfigs.client_id;
+                var callback_URL = this.state.authConfigs.callback_url;
+                var scopes = this.state.authConfigs.scopes;
+                window.location = authorizationEndpoint+"?response_type=code&client_id="+client_id+"&redirect_uri="+callback_URL+"&scope="+scopes;
+            } else {
+                return (
+                            <Redirect to={{pathname: '/login', search: params}}/>
+                        );
+            }
+        } else {
+            return <LoadingAnimation/>;
+        }
     }
-
 }
 
 /**
  * Define base routes for the application
  */
-class Store extends Component {
-    constructor(props){
-        super(props);
-        this.authManager = new AuthManager();
-        this.state = {showLeftMenu: false};
-        this.setLeftMenu = this.setLeftMenu.bind(this);
-    }
-    /**
-     * Change the visibility state of left side navigation menu bar
-     * @param {boolean} status : Whether or not to show or hide left side navigation menu
-     */
-    componentWillMount(){
-        console.info("component did mount ... ");
-    }
-
-    setLeftMenu(status) {
-        this.setState({
-            showLeftMenu: status
-        });
-    }
+class Publisher extends Component {
 
     render() {
         return (
             <Router basename="/store">
-                <Layout>
-                    <Switch>
-                        <Redirect exact from="/" to="/apis"/>
-                        <Route path={"/login"} component={Login}/>
-                        <Route path={"/logout"} component={Logout}/>
-                        <Route path={"/application/create"} render={ props => (<ApplicationCreate setLeftMenu={this.setLeftMenu}/>)}/>
-                        <Route path={"/applications"} render={ props => (<Applications setLeftMenu={this.setLeftMenu}/>)}/>
-                        <Route path={"/apis"} showLeftMenu={this.state.showLeftMenu} render={ props => (<Apis setLeftMenu={this.setLeftMenu}/>)}/>
-                        <Route component={Protected}/>
-                    </Switch>
-                </Layout>
+                <Switch>
+                    <Route path={"/login"} component={Login}/>
+                    <Route path={"/logout"} component={Logout}/>
+                    <Route component={Protected}/>
+                </Switch>
             </Router>
         );
     }
 }
 
-export default Store;
+export default Publisher;

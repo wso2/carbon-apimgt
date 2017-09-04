@@ -22,7 +22,6 @@ import Button from 'material-ui/Button';
 import API from '../../../data/api.js'
 
 import PropTypes from 'prop-types';
-import { withStyles, createStyleSheet } from 'material-ui/styles';
 import Table, {
     TableBody,
     TableCell,
@@ -79,38 +78,6 @@ class ApplicationTableHead extends Component {
     }
 }
 
-const toolbarStyleSheet = createStyleSheet(theme => ({
-    root: {
-        paddingRight: 2,
-    },
-    highlight:
-        theme.palette.type === 'light'
-            ? {
-            color: theme.palette.accent.A700,
-            backgroundColor: theme.palette.accent.A100,
-        }
-            : {
-            color: theme.palette.accent.A100,
-            backgroundColor: theme.palette.accent.A700,
-        },
-    spacer: {
-        flex: '1 1 100%',
-    },
-    actions: {
-        color: theme.palette.text.secondary,
-    },
-    title: {
-        flex: '0 0 auto',
-    },
-}));
-
-const styleSheet = createStyleSheet(theme => ({
-    paper: {
-        width: '100%',
-        marginTop: theme.spacing.unit * 3,
-        overflowX: 'auto',
-    },
-}));
 
 class Listing extends Component {
 
@@ -160,7 +127,6 @@ class Listing extends Component {
     };
 
     render() {
-        const classes = this.props.classes;
         const { data, order, orderBy, selected } = this.state;
 
         return (
@@ -182,7 +148,7 @@ class Listing extends Component {
                        The DefaultApplication is pre-created and allows unlimited access by default.
                     </p>
                 </div>
-                <Paper className={classes.paper}>
+                <Paper>
                     <Table>
                         <ApplicationTableHead order={order} orderBy={orderBy} onRequestSort={this.handleRequestSort}/>
                         <TableBody>
@@ -217,8 +183,5 @@ class Listing extends Component {
     }
 }
 
-Listing.propTypes = {
-    classes: PropTypes.object.isRequired,
-};
 
-export default withStyles(styleSheet)(Listing);
+export default Listing;

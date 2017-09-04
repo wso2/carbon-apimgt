@@ -15,61 +15,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import React from 'react';
 
-import React, {Component} from 'react'
+import Header from './Header/Header'
 
-import  NavBar  from '../Apis/Details/NavBar';
-import {Layout, Breadcrumb, Icon, Menu} from 'antd';
-import ComposeHeader from './Header/ComposeHeader'
-import Footer from './Footer/Footer'
-const {Content, Sider} = Layout;
+import Grid from 'material-ui/Grid';
 
 
-class Base extends Component {
-    constructor(props) {
+
+class Layout extends React.Component {
+    constructor(props){
         super(props);
-        this.state = {
-            collapsed: false,
-            mode: 'inline'
-        }
-    }
-
-    onCollapse = (collapsed) => {
-        console.log(collapsed);
-        this.setState({
-            collapsed,
-            mode: collapsed ? 'vertical' : 'inline',
-        });
     }
 
 
 
-    render() {
+    render(props){
         return (
-            <Layout style={{height:'100vh'}}>
-                <ComposeHeader />
-                <Content>
-                    <div className="custom-page-heading">
-                        <h1 className="api-heading">APIs</h1>
-                        <span>subheading</span>
-                    </div>
-                    <Layout className="custom-content-wrapper">
-                        {this.props.showLeftMenu ?
-                            <Sider
-                                collapsed={this.state.collapsed}
-                                onCollapse={this.onCollapse}
-                                width={200} style={{padding: '20px 0'}}>
-                                <NavBar/>
-                            </Sider> : <div/>}
-                        <Content >
-                            {this.props.children}
-                        </Content>
-                    </Layout>
-                </Content>
-                <Footer />
-            </Layout>
+            <div>
+                <Header />
+
+                <Grid container spacing={0} >
+                    <Grid item xs={12} >
+                        {this.props.children}
+                    </Grid>
+                </Grid>
+
+
+            </div>
         );
     }
+
 }
 
-export default Base;
+export default Layout;
