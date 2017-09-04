@@ -26,7 +26,7 @@ import org.wso2.carbon.kernel.annotations.Element;
 @Configuration(description = "Mail Configurations")
 public class MailConfigurations {
 
-    @Element(description = "HostName")
+    @Element(description = "Hostname")
     private String smtpHostName = "smtp.gmail.com";
 
     @Element(description = "AuthUser")
