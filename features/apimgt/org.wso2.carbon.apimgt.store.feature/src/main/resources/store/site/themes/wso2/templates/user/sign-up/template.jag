@@ -37,7 +37,7 @@
                                     <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
                                         <label class="control-label"><%=i18n.localize("Username")%> *</label>
                                         <div class="input-group input-wrap">
-                                            <input id="newUsername" name="newUsername" title="<%=i18n.localize("Please enter at lease 5 characters")%>" minlength="5" maxlength="30" type="text" class="required validName noSpace form-control" placeholder="e.g JohnDoe">
+                                            <input id="newUsername" name="newUsername" minlength="5" maxlength="30" type="text" class="required validName noSpace form-control" placeholder="e.g JohnDoe">
                                         </div>
 
             							<input id="hiddenTenantDomain" type="hidden" value="<%=request_tenant%>"> 
@@ -50,7 +50,7 @@
                                     <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
                                         <label class="control-label"><%=i18n.localize("Password")%> *</label>
                                         <div class="input-group input-wrap">
-                                            <input id="newPassword" name="newPassword" title="<%=i18n.localize("Enter a more secure password")%>" type="password"  autocomplete="off" class="form-control password validPassword" placeholder="Password">
+                                            <input id="newPassword" name="newPassword" type="password"  autocomplete="off" class="form-control password validPassword" placeholder="Password">
                                         </div>
                                         <div class="help-block" id="password-help" style="display:none">
 							              <%=i18n.localize("For a more secure password:")%>
@@ -67,7 +67,7 @@
                                     <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
                                         <label class="control-label"><%=i18n.localize("Re-type Password")%> *</label>
                                         <div class="input-group input-wrap">
-                                            <input id="newPasswordConfirm" title="<%=i18n.localize("Confirm Password")%>" type="password" class="form-control matchPasswords" placeholder="Password" autocomplete="off" >
+                                            <input id="newPasswordConfirm" type="password" class="form-control matchPasswords" placeholder="Password" autocomplete="off" >
                                         </div>
                                     </div>
                                 </div>

@@ -1,6 +1,6 @@
 $(document).ready(function() {
    $.validator.addMethod('validName', function(value, element) {
-        var illegalChars = /([~!#$;%^&*+={}\|\\<>\"\'\/,])/;
+        var illegalChars = /([~!@#$;%^&*+={}\|\\<>\"\'\/,])/;
         return !illegalChars.test(value);
     }, i18n.t('The Name contains one or more illegal characters')+' (~ ! @ # $ ; % ^ & * + = { } | &lt; &gt;, \' / " \\ ) .');
 
