@@ -17,190 +17,27 @@
  */
 
 import React, {Component} from 'react'
-import {Link, withRouter, Redirect} from 'react-router-dom'
-import Paper from 'material-ui/Paper';
-import Grid from 'material-ui/Grid';
-import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
-import AppBar from 'material-ui/AppBar';
-import Tabs, { Tab } from 'material-ui/Tabs';
-import Button from 'material-ui/Button';
-
-import Loading from '../../Base/Loading/Loading'
-import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
-import Api from '../../../data/api'
+import {Link, withRouter} from 'react-router-dom'
+import { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
+import { Description, DonutLarge, Games,FilterNone,
+    LockOutline, InsertDriveFile, Tune, Code, Subscriptions, ChromeReaderMode  } from 'material-ui-icons';
+import Divider from 'material-ui/Divider';
 
 class NavBar extends Component {
-
-    constructor(props) {
-        super(props);
-        this.state = {
-            api: null,
-            notFound: false,
-            redirect: false,
-            selectedApp: "",
-            selectedPolicy: "",
-            applications: [],
-            dropDownApplications: [],
-            dropDownPolicies: [],
-            policies: [],
-            index: 0
-        };
-        this.handleAppChange = this.handleAppChange.bind(this);
-        this.handlePolicyChange = this.handlePolicyChange.bind(this);
-        this.subscribe = this.subscribe.bind(this);
-        this.api_uuid = this.props.match.params.api_uuid;
-    }
 
     static get CONST() {
         return {
             OVERVIEW: "overview",
-            DOCUMENTATION: "documentation",
-            APICONSOLE: "apiConsole",
-            FORUM: "forum"
+            LIFECYCLE: "lifecycle",
+            ENDPOINTS: "endpoints",
+            RESOURCES: "resources",
+            PERMISSION: "permission",
+            DOCUMENTS: "documents",
+            MEDIATION: "mediation",
+            SCRIPTING: "scripting",
+            SUBSCRIPTIONS: "subscriptions"
         }
     }
-
-    componentDidMount() {
-        const api = new Api();
-        let retrievedAPI = null;
-        let retrievedApps = null;
-        let applications = [];
-        let promised_api = api.getAPIById(this.api_uuid);
-        promised_api.then(
-            response => {
-            retrievedAPI = response.obj;
-                this.setState({api: response.obj});
-        let promised_applications = api.getAllApplications();
-        promised_applications.then(
-            response => {
-            retrievedApps = response.obj.list;
-
-        let promised_subscriptions = api.getSubscriptions(this.api_uuid, null);
-        promised_subscriptions.then(
-            response => {
-        var subscription = {};
-        var subscriptions = response.obj.list;
-        var application = {};
-        var subscribedApp = false;
-        for (var i = 0; i < retrievedApps.length; i++) {
-            subscribedApp = false;
-            application = retrievedApps[i];
-            if (application.lifeCycleStatus != "APPROVED") {
-                continue;
-            }
-            for (var j = 0; j < subscriptions.length; j++) {
-                subscription = subscriptions[j];
-                if (subscription.applicationId === application.applicationId) {
-                    subscribedApp = true;
-                    continue;
-                }
-            }
-            if(!subscribedApp) {
-                applications.push(retrievedApps[i]);
-            }
-        }
-        this.setState({applications: response.obj.list});
-        this.setState({policies: retrievedAPI.policies});
-        if (retrievedAPI.policies.length > 0) {
-            this.setState({selectedPolicy: retrievedAPI.policies[0]});
-        }
-    }).catch(
-            error => {
-            if (process.env.NODE_ENV !== "production") {
-            console.log(error);
-        }
-        let status = error.status;
-        if (status === 404) {
-            this.setState({notFound: true});
-        }
-    });
-
-        }).catch(
-                error => {
-                if (process.env.NODE_ENV !== "production") {
-                console.log(error);
-            }
-            let status = error.status;
-            if (status === 404) {
-                this.setState({notFound: true});
-            }});
-            }
-        ).catch(
-            error => {
-                if (process.env.NODE_ENV !== "production") {
-                    console.log(error);
-                }
-                let status = error.status;
-                if (status === 404) {
-                    this.setState({notFound: true});
-                }
-            }
-        );
-        //debugger;
-    };
-
-    handleAppChange = (event, index) => {
-        let selectedApp = event.target.value;
-        if (selectedApp == "newApp") {
-            this.setState({redirect: true});
-        } else if(selectedApp != "") {
-            this.setState({selectedApp: selectedPolicy});
-        }
-    };
-
-    handlePolicyChange = (event, index) => {
-        let selectedPolicy = event.target.value;
-        this.setState({selectedPolicy: selectedPolicy});
-    };
-
-    subscribe () {
-        const api = new Api();
-        let apiId = this.state.api.id;
-        let applicationId = this.state.selectedApp;
-        let policy = this.state.selectedPolicy;
-        let applications = this.state.applications;
-        let newApplications = []
-        for(let i = 0; i < applications.length; i++) {
-            if(applications[i].id != applicationId ) {
-                newApplications.push(applications[i]);
-            }
-        }
-        let promised_subscription = api.subscribe(apiId, applicationId, policy);
-        promised_subscription.then(
-            response => {
-                noty({
-                    text: "Successfully subscribe to the API",
-                    type: 'success',
-                    dismissQueue: true,
-                    modal: true,
-                    progressBar: true,
-                    timeout: 5000,
-                    layout: 'top',
-                    theme: 'relax',
-                    maxVisible: 10
-                });
-            this.setState({applications: newApplications});
-            this.setState({selectedApp: ""});
-        }).catch((error) => {
-                noty({
-                    text: "Error while subscribing to the API",
-                    type: 'error',
-                    dismissQueue: true,
-                    modal: true,
-                    progressBar: true,
-                    timeout: 5000,
-                    layout: 'top',
-                    theme: 'relax',
-                    maxVisible: 10,
-                    callback: {
-                        afterClose: function () {
-                            window.location = loginPageUri;
-                        },
-                    }
-                });
-            }
-        );
-    };
 
     render() {
         /* TODO: This could have been done easily with match object containing api_uuid value , But
@@ -210,88 +47,73 @@ class NavBar extends Component {
         const pathSegments = this.props.location.pathname.split('/');
         // This assume that last segment and segment before it contains detail page action and API UUID
         const [active_tab, api_uuid] = pathSegments.reverse();
-        const api = this.state.api;
-        const { redirect } = this.state;
-
-        if (redirect) {
-            return <Redirect to='/application   /create'/>;
+        function showActiveTab(tab){
+            return (tab === active_tab) ?  "detail-menu selected-item" : "detail-menu" ;
         }
-
-        if (this.state.notFound) {
-            return <ResourceNotFound/>
-        }
-
-        if (!this.state.api) {
-            return <Loading/>
-        }
-        const TabContainer = props =>
-            <div style={{ padding: 20 }}>
-                {props.children}
-            </div>;
         return (
             <div>
-                <Grid container>
-                    <Grid item xs={12} sm={2}>
-                        <Paper><img alt="API thumb" width="100%" src="/store/public/images/api/api-default.png"/></Paper>
-                    </Grid>
-                    <Grid item xs={12} sm={5}>
-                        <Paper>
-                            <List>
-                                <ListItem button>
-                                    <ListItemText primary={api.name} />
-                                </ListItem>
-                                <ListItem button>
-                                    <ListItemText primary={api.version} />
-                                </ListItem>
-                                <ListItem button>
-                                    <ListItemText primary={api.context} />
-                                </ListItem>
-                                <ListItem button>
-                                    <ListItemText primary={api.createdTime} />
-                                </ListItem>
-                            </List>
-                        </Paper>
-                    </Grid>
-                </Grid>
-                <select onChange={this.handleAppChange}>
-                     {this.state.applications.map( app => <option value='{app.id}'>{app.name}</option>)}
-                    <option value=""></option>
-                    <option value="newApp">New Application</option>
-                </select>
-                <select onChange={this.handlePolicyChange}>
-                    {this.state.policies.map( policy => <option value={policy}>{policy}</option>)}
-                </select>
-                <Button color="primary" onClick={this.subscribe}>Subscribe</Button>
-                <AppBar position="static">
-                    <Tabs index={this.state.index} onChange={this.handleChange}>
-                        {Object.entries(NavBar.CONST).map(
-                            ([key, val]) => {
-                                return (
-                                    <Tab label={key} to={"/apis/" + api_uuid + "/" + val} />
-                                );
-                            }
-                        )}
-
-                    </Tabs>
-                </AppBar>
-
-                {this.state.index === 0 &&
-                <TabContainer>
-                    {'Item One'}
-                </TabContainer>}
-                {this.state.index === 1 &&
-                <TabContainer>
-                    {'Item Two'}
-                </TabContainer>}
-                {this.state.index === 2 &&
-                <TabContainer>
-                    {'Item Three'}
-                </TabContainer>}
-
-
-            <div id={active_tab} >
-
-            </div>
+                <ListItem style={{width:"250px"}}>
+                    <ListItemIcon>
+                        <ChromeReaderMode />
+                    </ListItemIcon>
+                    <Link name="listing" className="api-details-title" to={"/"} >API Details</Link>
+                </ListItem>
+                <Divider />
+                <ListItem className={showActiveTab("overview")}>
+                    <ListItemIcon>
+                        <Description />
+                    </ListItemIcon>
+                    <Link name="overview" to={"/apis/" + api_uuid + "/overview"} >
+                        <ListItemText primary="overview"  /></Link>
+                </ListItem>
+                <ListItem className={showActiveTab("lifecycle")}>
+                    <ListItemIcon>
+                        <DonutLarge />
+                    </ListItemIcon>
+                    <Link name="lifecycle" to={"/apis/" + api_uuid + "/lifecycle"}><ListItemText primary="lifecycle" /></Link>
+                </ListItem>
+                <ListItem className={showActiveTab("endpoints")}>
+                    <ListItemIcon>
+                        <Games />
+                    </ListItemIcon>
+                    <Link name="endpoints" to={"/apis/" + api_uuid + "/endpoints"}><ListItemText primary="endpoints" /></Link>
+                </ListItem>
+                <ListItem className={showActiveTab("resources")}>
+                    <ListItemIcon>
+                        <FilterNone />
+                    </ListItemIcon>
+                    <Link name="resources" to={"/apis/" + api_uuid + "/resources"}><ListItemText primary="resources" /></Link>
+                </ListItem>
+                <ListItem className={showActiveTab("permission")}>
+                    <ListItemIcon>
+                        <LockOutline />
+                    </ListItemIcon>
+                    <Link name="permission" to={"/apis/" + api_uuid + "/permission"}><ListItemText primary="permission" /></Link>
+                </ListItem>
+                <ListItem className={showActiveTab("documents")}>
+                    <ListItemIcon>
+                        <InsertDriveFile />
+                    </ListItemIcon>
+                    <Link name="documents" to={"/apis/" + api_uuid + "/documents"}><ListItemText primary="documents" /></Link>
+                </ListItem>
+                <ListItem className={showActiveTab("mediation")}>
+                    <ListItemIcon>
+                        <Tune />
+                    </ListItemIcon>
+                    <Link name="mediation" to={"/apis/" + api_uuid + "/mediation"}><ListItemText primary="mediation" /></Link>
+                </ListItem>
+                <ListItem className={showActiveTab("scripting")}>
+                    <ListItemIcon>
+                        <Code />
+                    </ListItemIcon>
+                    <Link name="scripting" to={"/apis/" + api_uuid + "/scripting"}><ListItemText primary="scripting" /></Link>
+                </ListItem>
+                <ListItem className={showActiveTab("subscriptions")}>
+                    <ListItemIcon>
+                        <Subscriptions />
+                    </ListItemIcon>
+                    <Link name="subscriptions" to={"/apis/" + api_uuid + "/subscriptions"}><ListItemText primary="subscriptions" /></Link>
+                </ListItem>
             </div>
         )
     }

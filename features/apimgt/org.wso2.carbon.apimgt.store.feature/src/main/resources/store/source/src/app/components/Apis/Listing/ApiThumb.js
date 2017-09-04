@@ -18,45 +18,102 @@
 
 import React from 'react'
 import {Link} from 'react-router-dom'
-import Grid from 'material-ui/Grid';
+import API from '../../../data/api'
+
 import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
 import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
+import Dialog, {
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+} from 'material-ui/Dialog';
+import Slide from 'material-ui/transitions/Slide';
+import Grid from 'material-ui/Grid';
+import DeleteIcon from 'material-ui-icons/Delete';
 
 
 class ApiThumb extends React.Component {
     constructor(props) {
         super(props);
-        console.info(JSON.stringify(props.api));
+        this.state = {active: true, loading: false, open: false};
+        this.handleApiDelete = this.handleApiDelete.bind(this);
     }
 
+    handleRequestClose = () => {
+        this.setState({ openUserMenu: false });
+    };
+
+    handleApiDelete(e) {
+        this.setState({loading: true});
+        const api = new API();
+        const api_uuid = this.props.api.id;
+        const name = this.props.api.name;
+        let promised_delete = api.deleteAPI(api_uuid);
+        promised_delete.then(
+            response => {
+                if (response.status !== 200) {
+                    console.log(response);
+                    message.error("Something went wrong while deleting the " + name + " API!");
+                    this.setState({open: false});
+                    return;
+                }
+                message.success(name + " API deleted successfully!");
+                this.setState({active: false, loading: false});
+            }
+        );
+    }
 
     render() {
         let details_link = "/apis/" + this.props.api.id;
+        const {name, version, context} = this.props.api;
+        if (!this.state.active) { // Controls the delete state, We set the state to inactive on delete success call
+            return null;
+        }
         return (
-          <Grid item xl={1} lg={2} md={3} sm={4} xs={6}>
-              <Card>
-                  <CardMedia>
-                      <img alt="default-img" width="100%" src="/store/public/images/api/api-default.png"/>
-                      <Typography type="headline" component="h2" style={{position:'absolute', bottom:'30px', left:'15px'}}>{this.props.api.name}</Typography>
-                      <Typography component="p" style={{position:'absolute', bottom:'15px', left:'15px'}}>{this.props.api.version}</Typography>
-                  </CardMedia>
-                  <CardContent>
-                      <Typography component="p">
-                          {this.props.api.provider}
-                      </Typography>
-                      <Typography component="p">
-                          {this.props.api.context}
-                      </Typography>
-                      <Typography component="p">
-                          {this.props.api.description}
-                      </Typography>
-                  </CardContent>
-                  <CardActions>
-                    <Link to={details_link}>Details</Link>
-                  </CardActions>
-              </Card>
-          </Grid>
+            <Grid item xs={12} sm={6} md={3} lg={2} xl={2}>
+                <Card>
+                    <CardMedia image="/store/public/images/api/api-default.png">
+                        <img src="/store/public/images/api/api-default.png" style={{width:"100%"}}/>
+                    </CardMedia>
+                    <CardContent>
+                        <Typography type="headline" component="h2">
+                            {name}
+                        </Typography>
+                        <Typography component="div">
+                            <p>{version}</p>
+                            <p>{context}</p>
+                            <p className="description">{this.props.api.description}</p>
+                        </Typography>
+                    </CardContent>
+                    <CardActions>
+                        <Link to={details_link}>
+                            <Button dense color="primary">
+                                More...
+                            </Button>
+                        </Link>
+                        <Dialog open={this.state.openUserMenu} transition={Slide} onRequestClose={this.handleRequestClose}>
+                            <DialogTitle>
+                                {"Use Google's location service?"}
+                            </DialogTitle>
+                            <DialogContent>
+                                <DialogContentText>
+                                    Are you sure you want to delete the API ({name} - {version})?
+                                </DialogContentText>
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={this.handleRequestClose} color="primary">
+                                    Cancel
+                                </Button>
+                                //todo:Delete button should be enabled after M6 based on permission model
+                            </DialogActions>
+                        </Dialog>
+
+
+                    </CardActions>
+                </Card>
+            </Grid>
         );
     }
 }

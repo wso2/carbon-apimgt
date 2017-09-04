@@ -46,11 +46,7 @@ export default class Details extends Component {
         );
     }
 
-    componentWillUnmount() {
-        /* Hide the left side nav bar when detail page is unmount ,
-         since the left nav bar is currently only associated with details page*/
-        this.props.setLeftMenu(false);
-    }
+
 
     render() {
         return (
