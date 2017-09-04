@@ -52,7 +52,7 @@ public class AuthenticatorServiceTestCase {
         oAuthData.addProperty(KeyManagerConstants.OAUTH_CALLBACK_URIS, oAuthApplicationInfo.getCallBackURL());
         oAuthData.addProperty(KeyManagerConstants.TOKEN_SCOPES , scopes);
         oAuthData.addProperty(KeyManagerConstants.AUTHORIZATION_ENDPOINT, "https://localhost:9443/oauth2/authorize");
-        oAuthData.addProperty(AuthenticatorConstants.SSO_ENABLED, ServiceReferenceHolder.getInstance().getAPIMStoreConfiguration().isSsoEnabled());
+        oAuthData.addProperty(AuthenticatorConstants.SSO_ENABLED, ServiceReferenceHolder.getInstance().getAPIMAppConfiguration().isSsoEnabled());
 
         KeyManager keyManager = Mockito.mock(KeyManager.class);
         AuthenticatorService authenticatorService = new AuthenticatorService(keyManager);
@@ -74,6 +74,48 @@ public class AuthenticatorServiceTestCase {
             authenticatorService.getAuthenticationConfigurations("store");
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "Error while creating the keys for OAuth application : store");
+        }
+    }
+
+    @Test(description = "Provide DCR application information to the SSO-IS login")
+    public void testGetAuthenticationConfigurationsForPublisher() throws Exception {
+        // Happy Path - 200
+        //// Mocked response object from DCR api
+        OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
+        oAuthApplicationInfo.setClientId("xxx-client-id-xxx");
+        oAuthApplicationInfo.setCallBackURL("https://localhost/9292/login/callback/publisher");
+
+        //// Expected data object to be passed to the front-end
+        JsonObject oAuthData = new JsonObject();
+        String scopes = "apim:api_view apim:api_create apim:api_update apim:api_delete apim:apidef_update "
+                + "apim:api_publish apim:subscription_view apim:subscription_block openid";
+        oAuthData.addProperty(KeyManagerConstants.OAUTH_CLIENT_ID, oAuthApplicationInfo.getClientId());
+        oAuthData.addProperty(KeyManagerConstants.OAUTH_CALLBACK_URIS, oAuthApplicationInfo.getCallBackURL());
+        oAuthData.addProperty(KeyManagerConstants.TOKEN_SCOPES, scopes);
+        oAuthData.addProperty(KeyManagerConstants.AUTHORIZATION_ENDPOINT, "https://localhost:9443/oauth2/authorize");
+        oAuthData.addProperty(AuthenticatorConstants.SSO_ENABLED,
+                ServiceReferenceHolder.getInstance().getAPIMAppConfiguration().isSsoEnabled());
+
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager);
+
+        //// Get data object to be passed to the front-end
+        Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(oAuthApplicationInfo);
+        JsonObject responseOAuthDataObj = authenticatorService.getAuthenticationConfigurations("publisher");
+        Assert.assertEquals(responseOAuthDataObj, oAuthData);
+
+        // Error Path - 500 - When OAuthApplicationInfo is null
+        JsonObject emptyOAuthDataObj = new JsonObject();
+        Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(null);
+        JsonObject responseEmptyOAuthDataObj = authenticatorService.getAuthenticationConfigurations("publisher");
+        Assert.assertEquals(responseEmptyOAuthDataObj, emptyOAuthDataObj);
+
+        // Error Path - When DCR application creation fails and throws an APIManagementException
+        Mockito.when(keyManager.createApplication(Mockito.any())).thenThrow(KeyManagementException.class);
+        try {
+            authenticatorService.getAuthenticationConfigurations("publisher");
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Error while creating the keys for OAuth application : publisher");
         }
     }
 

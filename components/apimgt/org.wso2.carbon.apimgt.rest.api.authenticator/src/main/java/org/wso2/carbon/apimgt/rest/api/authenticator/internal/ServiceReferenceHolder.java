@@ -20,20 +20,20 @@ package org.wso2.carbon.apimgt.rest.api.authenticator.internal;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMStoreConfigurations;
+import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMAppConfigurations;
 import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
 import java.util.Map;
 
 /**
- * Class used to hold the APIM store configurations.
+ * Class used to hold the APIM store/publisher configurations.
  */
 public class ServiceReferenceHolder {
     private static final Logger log = LoggerFactory.getLogger(ServiceReferenceHolder.class);
     private static ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private ConfigProvider configProvider;
-    private APIMStoreConfigurations config = null;
+    private APIMAppConfigurations config = null;
 
     private ServiceReferenceHolder() {
 
@@ -47,19 +47,19 @@ public class ServiceReferenceHolder {
         this.configProvider = configProvider;
     }
 
-    public APIMStoreConfigurations getAPIMStoreConfiguration() {
+    public APIMAppConfigurations getAPIMAppConfiguration() {
         try {
             if (configProvider != null) {
-                config = configProvider.getConfigurationObject(APIMStoreConfigurations.class);
+                config = configProvider.getConfigurationObject(APIMAppConfigurations.class);
             } else {
                 log.error("Configuration provider is null");
             }
         } catch (CarbonConfigurationException e) {
-            log.error("error getting config : org.wso2.carbon.apimgt.authenticator.internal.APIMStoreConfiguration", e);
+            log.error("Error getting config : org.wso2.carbon.apimgt.rest.api.authenticator.internal.APIMAppConfiguration", e);
         }
 
         if (config == null) {
-            config = new APIMStoreConfigurations();
+            config = new APIMAppConfigurations();
             log.info("Setting default configurations...");
         }
 
@@ -80,7 +80,7 @@ public class ServiceReferenceHolder {
             }
         } catch (CarbonConfigurationException e) {
             log.error("Error while reading the configurations map of namespace : " +
-                    "org.wso2.carbon.apimgt.authenticator.internal.APIMStoreConfiguration", e);
+                    "org.wso2.carbon.apimgt.rest.api.authenticator.internal.APIMAppConfiguration", e);
         }
         return null;
     }

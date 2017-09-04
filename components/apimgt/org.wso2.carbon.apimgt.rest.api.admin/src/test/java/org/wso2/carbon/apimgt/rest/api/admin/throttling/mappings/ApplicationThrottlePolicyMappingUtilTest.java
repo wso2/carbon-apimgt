@@ -59,7 +59,7 @@ public class ApplicationThrottlePolicyMappingUtilTest {
         Assert.assertNotNull(dto);
         Assert.assertEquals(dto.getDisplayName(), displayName);
         Assert.assertNotNull(dto.getPolicyName(), policyName);
-        Assert.assertEquals(dto.getPolicyId(), uuid);
+        Assert.assertEquals(dto.getId(), uuid);
         Assert.assertEquals(dto.getDefaultLimit().getRequestCountLimit().getRequestCount().intValue(),
                             requestCountLimit.getRequestCount());
         Assert.assertEquals(dto.getDisplayName(), displayName);
@@ -70,7 +70,7 @@ public class ApplicationThrottlePolicyMappingUtilTest {
         ApplicationThrottlePolicyDTO dto = new ApplicationThrottlePolicyDTO();
         dto.setDisplayName(displayName);
         dto.setPolicyName(policyName);
-        dto.setPolicyId(uuid);
+        dto.setId(uuid);
         ThrottleLimitDTO throttleLimitDTO = new ThrottleLimitDTO();
         throttleLimitDTO.setType("RequestCountLimit");
         throttleLimitDTO.setTimeUnit("s");
@@ -104,14 +104,14 @@ public class ApplicationThrottlePolicyMappingUtilTest {
 
         Assert.assertEquals(listDTO.getCount(), (Integer) appPolicies.size());
         Assert.assertNotNull(listDTO.getList().get(0).getPolicyName(), policy1.getPolicyName());
-        Assert.assertEquals(listDTO.getList().get(0).getPolicyId(), policy1.getUuid());
+        Assert.assertEquals(listDTO.getList().get(0).getId(), policy1.getUuid());
         Assert.assertEquals(listDTO.getList().get(0).getDefaultLimit().getRequestCountLimit()
                                                                         .getRequestCount().intValue(),
                                     ((RequestCountLimit) policy1.getDefaultQuotaPolicy().getLimit()).getRequestCount());
         Assert.assertEquals(listDTO.getList().get(0).getDisplayName(), policy1.getDisplayName());
 
         Assert.assertNotNull(listDTO.getList().get(1).getPolicyName(), policy2.getPolicyName());
-        Assert.assertEquals(listDTO.getList().get(1).getPolicyId(), policy2.getUuid());
+        Assert.assertEquals(listDTO.getList().get(1).getId(), policy2.getUuid());
         Assert.assertEquals(listDTO.getList().get(1).getDefaultLimit().getRequestCountLimit()
                         .getRequestCount().intValue(),
                 ((RequestCountLimit) policy2.getDefaultQuotaPolicy().getLimit()).getRequestCount());

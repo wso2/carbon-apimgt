@@ -44,7 +44,7 @@ public class CustomPolicyMappingUtilTest {
         CustomRuleDTO dto = CustomPolicyMappingUtil.fromCustomPolicyToDTO(policy);
         Assert.assertNotNull(dto);
         Assert.assertEquals(dto.getPolicyName(), name);
-        Assert.assertEquals(dto.getPolicyId(), uuid);
+        Assert.assertEquals(dto.getId(), uuid);
     }
 
     @Test(description = "Convert DTO to Model")

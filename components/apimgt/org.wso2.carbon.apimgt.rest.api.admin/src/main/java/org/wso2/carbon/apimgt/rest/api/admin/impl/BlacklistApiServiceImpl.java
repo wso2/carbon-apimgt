@@ -106,7 +106,6 @@ public class BlacklistApiServiceImpl extends BlacklistApiService {
      *
      * @param conditionId       uuid of the blacklist condition
      * @param body              body of the blacklist status to be updated
-     * @param contentType       Content-Type header value
      * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
      * @param request           msf4j request object
@@ -114,8 +113,8 @@ public class BlacklistApiServiceImpl extends BlacklistApiService {
      * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override
-    public Response blacklistConditionIdPut(String conditionId, BlockingConditionDTO body, String contentType,
-            String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
+    public Response blacklistConditionIdPut(String conditionId, BlockingConditionDTO body, String ifMatch,
+            String ifUnmodifiedSince, Request request) throws NotFoundException {
         if (log.isDebugEnabled()) {
             log.debug("Received BlockCondition GET request with id: " + conditionId);
         }
@@ -140,7 +139,6 @@ public class BlacklistApiServiceImpl extends BlacklistApiService {
     /**
      * Get blacklist conditions.
      *
-     * @param accept          Accept header value
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @param request         msf4j request object
@@ -148,8 +146,7 @@ public class BlacklistApiServiceImpl extends BlacklistApiService {
      * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override
-    public Response blacklistGet(String accept, String ifNoneMatch, String ifModifiedSince, Request request)
-            throws NotFoundException {
+    public Response blacklistGet(String ifNoneMatch, String ifModifiedSince, Request request) throws NotFoundException {
         if (log.isDebugEnabled()) {
             log.debug("Received BlockCondition GET request");
         }
@@ -171,14 +168,12 @@ public class BlacklistApiServiceImpl extends BlacklistApiService {
      * Add a blacklist condition.
      *
      * @param body        DTO object including the blacklist condition data
-     * @param contentType Content-Type header value
      * @param request     msf4j request object
      * @return Response object
      * @throws NotFoundException if an error occurred when particular resource does not exits in the system.
      */
     @Override
-    public Response blacklistPost(BlockingConditionDTO body, String contentType, Request request)
-            throws NotFoundException {
+    public Response blacklistPost(BlockingConditionDTO body, Request request) throws NotFoundException {
         if (log.isDebugEnabled()) {
             log.debug("Received BlockCondition POST request with body: " + body);
         }
