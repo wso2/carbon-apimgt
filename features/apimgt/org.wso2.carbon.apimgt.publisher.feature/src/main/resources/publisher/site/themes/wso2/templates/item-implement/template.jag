@@ -620,9 +620,9 @@
 								                <hr />
 								                <div class="form-actions" id="saveButtons">
 
-								                    <input type="hidden" name="name" id="name" value="<%= encode.forHtml(api.name) %>" />
-								                    <input type="hidden" name="version" id="version" value="<%= encode.forHtml(api.version) %>" />
-								                    <input type="hidden" name="provider" id="provider" value="<%= encode.forHtml(api.provider) %>" />
+								                    <input type="hidden" name="name" id="apiName" value="<%= encode.forHtml(api.name) %>" />
+								                    <input type="hidden" name="version" id="apiVersion" value="<%= encode.forHtml(api.version) %>" />
+								                    <input type="hidden" name="provider" id="apiProvider" value="<%= encode.forHtml(api.provider) %>" />
 								                    <input type="hidden" name="action" value="implement" />
 								                    <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
 								                    <button type="submit" class="btn btn-secondary manageSaveButton has-spinner" id="savePrototypeBtn" >Save</button>

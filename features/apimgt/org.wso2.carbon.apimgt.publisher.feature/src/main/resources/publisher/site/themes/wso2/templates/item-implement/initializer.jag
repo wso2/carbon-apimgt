@@ -14,7 +14,6 @@ jagg.initializer("item-implement", {
         jagg.addHeaderJS("codemirror6", "jagg", "libs/codemirror/addon/lint/lint.js");
         jagg.addHeaderJS("codemirror7", "jagg", "libs/codemirror/addon/lint/javascript-lint.js");
 
-
         jagg.addFooterJS("ace", "jagg", "libs/src-noconflict/ace.js");
         jagg.addFooterJS("ace-theme", "jagg", "libs/src-noconflict/theme-textmate.js");
         jagg.addFooterJS("ace-mode", "jagg", "libs/src-noconflict/mode-json.js");
