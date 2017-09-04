@@ -22,7 +22,6 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -976,7 +975,8 @@ public class ApiDAOImpl implements ApiDAO {
             return ApiResourceDAO
                     .isResourceExistsForCategory(connection, apiId, ResourceCategory.WSDL_ZIP);
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "checking if WSDL archive exists for API(api: " + apiId + ")", e);
         }
     }
 
@@ -986,7 +986,8 @@ public class ApiDAOImpl implements ApiDAO {
             return ApiResourceDAO.isResourceExistsForCategory(connection, apiId, ResourceCategory.WSDL_ZIP)
                     || ApiResourceDAO.isResourceExistsForCategory(connection, apiId, ResourceCategory.WSDL_TEXT);
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "checking if WSDL exists for API(api: " + apiId + ")", e);
         }
     }
     
@@ -1001,7 +1002,7 @@ public class ApiDAOImpl implements ApiDAO {
                 return IOUtils.toString(wsdlContent, StandardCharsets.UTF_8);
             }
         } catch (SQLException | IOException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting WSDL for API(api: " + apiId + ")", e);
         }
         return null;
     }
@@ -1012,7 +1013,8 @@ public class ApiDAOImpl implements ApiDAO {
             return ApiResourceDAO.getBinaryValueForCategory(connection, apiId, ResourceCategory.WSDL_ZIP,
                     ApiType.STANDARD);
         } catch (SQLException | IOException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "getting WSDL archive for API(api: " + apiId + ")", e);
         }
     }
 
@@ -1037,12 +1039,14 @@ public class ApiDAOImpl implements ApiDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                throw new APIMgtDAOException(e);
+                throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                        "adding or updating WSDL for API(api: " + apiId + ")", e);
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "adding or updating WSDL for API(api: " + apiId + ")", e);
         }
     }
 
@@ -1067,12 +1071,14 @@ public class ApiDAOImpl implements ApiDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                throw new APIMgtDAOException(e);
+                throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                        "adding or updating WSDL archive for API(api: " + apiID + ")", e);
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "adding or updating WSDL archive for API(api: " + apiID + ")", e);
         }
     }
 
@@ -1081,7 +1087,7 @@ public class ApiDAOImpl implements ApiDAO {
         try (Connection connection = DAOUtil.getConnection()) {
             ApiResourceDAO.deleteUniqueResourceForCategory(connection, apiId, ResourceCategory.WSDL_TEXT);
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "removing WSDL for API(api: " + apiId + ")", e);
         }
     }
 
@@ -1090,7 +1096,8 @@ public class ApiDAOImpl implements ApiDAO {
         try (Connection connection = DAOUtil.getConnection()) {
             ApiResourceDAO.deleteUniqueResourceForCategory(connection, apiId, ResourceCategory.WSDL_ZIP);
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "removing WSDL archive for API(api: " + apiId + ")", e);
         }
     }
 
@@ -1638,7 +1645,7 @@ public class ApiDAOImpl implements ApiDAO {
                     uriTemplates.add(uriTemplate);
                 }
             }
-        } catch (SQLException | IOException e) {
+        } catch (SQLException e) {
             String msg = "getting API resources for Context: " + apiContext + ", Version: " + apiVersion;
             throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + msg, e);
         }
@@ -1772,7 +1779,7 @@ public class ApiDAOImpl implements ApiDAO {
     public InputStream getDocumentFileContent(String resourceID) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
             return ApiResourceDAO.getBinaryResource(connection, resourceID);
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             String msg = "getting Document File Content for Resource: " + resourceID;
             throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + msg, e);
         }
@@ -2257,23 +2264,6 @@ public class ApiDAOImpl implements ApiDAO {
                     new ByteArrayInputStream(gatewayConfig.getBytes(StandardCharsets.UTF_8)), updatedBy);
         }
     }
-
-    private String getAPIThrottlePolicyID(Connection connection, String policyName) throws SQLException {
-        final String query = "SELECT UUID FROM AM_API_POLICY WHERE NAME = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, policyName);
-            statement.execute();
-
-            try (ResultSet rs = statement.getResultSet()) {
-                if (rs.next()) {
-                    return rs.getString("UUID");
-                }
-            }
-        }
-
-        throw new SQLException("API Policy " + policyName + ", does not exist");
-    }
-
 
     private void addTransports(Connection connection, String apiID, Set<String> transports) throws SQLException {
         final String query = "INSERT INTO AM_API_TRANSPORTS (API_ID, TRANSPORT) VALUES (?,?)";
@@ -2893,7 +2883,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @return permission string
      * @throws SQLException - if error occurred while getting permissionMap of API from DB
      */
-    private StringBuilder getPermissionsStringForApi(Connection connection, String apiId) throws SQLException {
+    private String getPermissionsStringForApi(Connection connection, String apiId) throws SQLException {
         JSONArray permissionArray = new JSONArray();
         Map<String, Integer> permissionMap = getPermissionMapForApi(connection, apiId);
         for (Map.Entry<String, Integer> entry : permissionMap.entrySet()) {
@@ -3172,23 +3162,6 @@ public class ApiDAOImpl implements ApiDAO {
 
             statement.executeBatch();
         }
-    }
-
-
-    private String getAPIThrottlePolicyName(Connection connection, String policyID) throws SQLException {
-        final String query = "SELECT NAME FROM AM_API_POLICY WHERE UUID = ?";
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, policyID);
-            statement.execute();
-
-            try (ResultSet rs = statement.getResultSet()) {
-                if (rs.next()) {
-                    return rs.getString("NAME");
-                }
-            }
-        }
-
-        throw new SQLException("API Policy ID " + policyID + ", does not exist");
     }
 
     /**

@@ -89,6 +89,7 @@ import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -97,6 +98,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -390,12 +392,6 @@ public class APIStoreImplTestCase {
         Mockito.verify(applicationDAO, Mockito.times(1)).addApplication(application);
     }
 
-    private APIStore getApiStoreImpl(ApplicationDAO applicationDAO, PolicyDAO policyDAO, WorkflowDAO workflowDAO,
-                                     APIGateway apiGateway) {
-        return new APIStoreImpl(USER_NAME, null, null, applicationDAO, null, policyDAO, null, null, workflowDAO,
-                null, apiGateway);
-    }
-
     @Test(description = "Add an application with null permission String")
     public void testAddApplicationPermissionStringNull() throws APIManagementException {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
@@ -578,7 +574,7 @@ public class APIStoreImplTestCase {
 
         String externalRef = java.util.UUID.randomUUID().toString();
         Mockito.when(workflowDAO.getExternalWorkflowReferenceForPendingTask(subscription.getId(),
-                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION)).thenReturn(externalRef);
+                WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION)).thenReturn(Optional.of(externalRef));
 
         Mockito.when(apiSubscriptionDAO.getAPISubscription(UUID)).thenReturn(subscription);
         apiStore.deleteAPISubscription(UUID);
@@ -646,6 +642,9 @@ public class APIStoreImplTestCase {
         Application application = SampleTestObjectCreator.createDefaultApplication();
         application.setId(UUID);
         Mockito.when(applicationDAO.getApplication(UUID)).thenReturn(application);
+        String externalRef = java.util.UUID.randomUUID().toString();
+        Mockito.when(workflowDAO.getExternalWorkflowReferenceForPendingTask(application.getId(),
+                WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE)).thenReturn(Optional.of(externalRef));
         apiStore.deleteApplication(UUID);
         Mockito.verify(applicationDAO, Mockito.times(1)).deleteApplication(UUID);
     }
@@ -663,11 +662,15 @@ public class APIStoreImplTestCase {
         String externalRef = java.util.UUID.randomUUID().toString();
         Mockito.when(applicationDAO.getApplication(UUID)).thenReturn(application);
         Mockito.when(workflowDAO.getExternalWorkflowReferenceForPendingTask(application.getId(),
-                WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION)).thenReturn(externalRef);
+                WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION)).thenReturn(Optional.of(externalRef));
+        Mockito.when(workflowDAO.getExternalWorkflowReferenceForPendingTask(application.getId(),
+                WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE)).thenReturn(Optional.of(externalRef));
         apiStore.deleteApplication(UUID);
         Mockito.verify(applicationDAO, Mockito.times(1)).deleteApplication(UUID);
         Mockito.verify(workflowDAO, Mockito.times(1)).getExternalWorkflowReferenceForPendingTask(application.getId(),
                 WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+        Mockito.verify(workflowDAO, Mockito.times(1)).getExternalWorkflowReferenceForPendingTask(application.getId(),
+                WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
     }
 
     @Test(description = "Update an application")
@@ -1199,9 +1202,9 @@ public class APIStoreImplTestCase {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         APIStore apiStore = getApiStoreImpl(applicationDAO);
         Mockito.when(applicationDAO.getApplicationByName(APP_NAME, USER_ID)).thenThrow(new APIMgtDAOException(
-                "Error occurred while fetching application for the given applicationName - " + APP_NAME
-                        + " with groupId - " + GROUP_ID, new SQLException()));
-        apiStore.getApplicationByName(APP_NAME, USER_ID, GROUP_ID);
+                "Error occurred while fetching application for the given applicationName - " + APP_NAME,
+                new SQLException()));
+        apiStore.getApplicationByName(APP_NAME, USER_ID);
     }
 
     @Test(description = "Exception when retrieving applications", expectedExceptions = APIManagementException.class)
@@ -1209,9 +1212,9 @@ public class APIStoreImplTestCase {
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         APIStore apiStore = getApiStoreImpl(applicationDAO);
         Mockito.when(applicationDAO.getApplications(USER_ID)).thenThrow(new APIMgtDAOException(
-                "Error occurred while fetching applications for the given subscriber - " + USER_ID + " with groupId - "
-                        + GROUP_ID, new SQLException()));
-        apiStore.getApplications(USER_ID, GROUP_ID);
+                "Error occurred while fetching applications for the given subscriber - " + USER_ID ,
+                new SQLException()));
+        apiStore.getApplications(USER_ID);
     }
 
     @Test(description = "Exception when updating an application", expectedExceptions = APIManagementException.class)
