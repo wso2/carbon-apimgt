@@ -10,8 +10,7 @@ public class ServiceDiscoveryConfiurations {
 
     private String masterUrl = "https://192.168.99.100:8443/";
 
-    private String caCertLocation = System.getProperty("user.dir") + "/components/apimgt" +
-            "/org.wso2.carbon.apimgt.core/src/test/ca.crt";
+    private String caCertLocation = System.getProperty("user.dir") + "/resources/security/ca.crt";
 
     private String serviceAccountToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJl" +
             "cm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2" +
