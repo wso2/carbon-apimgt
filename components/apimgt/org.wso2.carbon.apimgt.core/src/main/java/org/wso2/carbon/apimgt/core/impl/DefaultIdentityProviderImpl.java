@@ -114,7 +114,6 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
         if (userResponse == null) {
             String errorMessage =
                     "Error occurred while retrieving Id of user " + userId + ". Error : Response is null.";
-            log.error(errorMessage);
             throw new IdentityProviderException(errorMessage, ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
         }
         if (userResponse.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {

@@ -28,7 +28,5 @@ public class NotifierConstants {
     public static final String TITLE_KEY = "Title";
     public static final String TEMPLATE_KEY = "Template";
     public static final String NOTIFICATION_TYPE_NEW_VERSION = "ApiNewVersion";
-    public static final String  NOTIFIER = "Notifier";
-    public static final String  CLASS = "Class";
     public static final String TEXT_TYPE = "text/html";
 }
