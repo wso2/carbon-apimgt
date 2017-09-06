@@ -25,9 +25,8 @@ import io.swagger.codegen.config.CodegenConfigurator;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
+
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.configuration.APIMConfigurationService;
 import org.wso2.carbon.apimgt.core.configuration.models.SdkLanguageConfigurations;
@@ -54,7 +53,6 @@ import java.util.Map;
  */
 public class ApiStoreSdkGenerationManager {
 
-    private static final Logger log = LoggerFactory.getLogger(ApiStoreSdkGenerationManager.class);
     private Map<String, String> sdkGenLanguages = new HashMap<>();
 
     public ApiStoreSdkGenerationManager() {
@@ -67,16 +65,20 @@ public class ApiStoreSdkGenerationManager {
         sdkGenLanguages = sdkLanguageConfigurations.getSdkGenLanguages();
     }
 
+    public Map<String, String> getSdkGenLanguages() {
+        return sdkGenLanguages;
+    }
+
     /*
-    * This method generates the client side SDK for the API with API ID (apiID) and SDK language (language)
-    *
-    * @param apiId ID for the specific API
-    * @param language preferred language to generate the SDK
-    * @throws ApiStoreSdkGenerationException if failed to generate the SDK
-    * */
+        * This method generates the client side SDK for the API with API ID (apiID) and SDK language (language)
+        *
+        * @param apiId ID for the specific API
+        * @param language preferred language to generate the SDK
+        * @throws ApiStoreSdkGenerationException if failed to generate the SDK
+        * */
     public String generateSdkForApi(String apiId, String language, String userName)
             throws ApiStoreSdkGenerationException
-            , APIManagementException, RuntimeException {
+            , APIManagementException {
         if (StringUtils.isBlank(apiId) || StringUtils.isBlank(language)) {
             handleSdkGenException("API ID or SDK Language should not be null!");
         }
@@ -154,8 +156,7 @@ public class ApiStoreSdkGenerationManager {
     * @param swaggerDefLocation Location of the swagger definition file
     * @param tempOutputDirectory Output directory for the generated SDK files
     * */
-    private void generateSdkForSwaggerDef(String language, String swaggerDefLocation, String tempOutputDirectory)
-            throws RuntimeException {
+    private void generateSdkForSwaggerDef(String language, String swaggerDefLocation, String tempOutputDirectory) {
         CodegenConfigurator codegenConfigurator = new CodegenConfigurator();
         codegenConfigurator.setInputSpec(swaggerDefLocation);
         codegenConfigurator.setOutputDir(tempOutputDirectory);
