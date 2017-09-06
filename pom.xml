@@ -558,6 +558,11 @@
                 <artifactId>org.wso2.carbon.apimgt.ballerina.publisher</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.sun.mail</groupId>
+                <artifactId>javax.mail</artifactId>
+                <version>${java-mail.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -929,5 +934,6 @@
         <xmlschema.version>1.4.7.wso2v2</xmlschema.version>
 
         <ballerina.version>0.89</ballerina.version>
+        <java-mail.version>1.5.2</java-mail.version>
     </properties>
 </project>

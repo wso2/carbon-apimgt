@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.core.configuration.models.NotificationConfigurations;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
@@ -55,7 +56,9 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
+import org.wso2.carbon.apimgt.core.exception.NotificationException;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
+import org.wso2.carbon.apimgt.core.executors.NotificationExecutor;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
@@ -73,6 +76,7 @@ import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.template.APIConfigContext;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
+import org.wso2.carbon.apimgt.core.template.dto.NotificationDTO;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMWSDLUtils;
@@ -101,6 +105,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 
@@ -964,6 +969,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 }
                 getApiDAO().addAPI(apiBuilder.build());
                 newVersionedId = apiBuilder.getId();
+                sendEmailNotification(apiId, apiBuilder.getName(), newVersion);
+
             } else {
                 throw new APIMgtResourceNotFoundException("Requested API on UUID " + apiId + "Couldn't be found");
             }
@@ -2012,6 +2019,19 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         return archiveInfo;
     }
 
+    @Override
+    public Set<String> getSubscribersByAPIId(String apiId) throws APIManagementException {
+        List<Subscription> subscriptionList = new ArrayList();
+        Set<String> subscriberList = new HashSet<>();
+        if (StringUtils.isNotEmpty(apiId)) {
+            subscriptionList = getSubscriptionsByAPI(apiId);
+        }
+        for (Subscription listItem : subscriptionList) {
+            subscriberList.add(listItem.getApplication().getCreatedUser());
+        }
+        return  subscriberList;
+    }
+
     private void cleanupPendingTaskForAPIStateChange(String apiId) throws APIManagementException {
         String workflowExtRef = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(apiId,
                 WorkflowConstants.WF_TYPE_AM_API_STATE);
@@ -2029,4 +2049,29 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
+    private void sendEmailNotification(String apiId, String apiName, String newVersion)
+            throws APIManagementException {
+        Set<String> subscriberList;
+        NotificationConfigurations notificationConfigurations = new NotificationConfigurations();
+
+        // check notification Enabled
+        if (notificationConfigurations.getNotificationEnable()) {
+            subscriberList = getSubscribersByAPIId(apiId);
+            //Notifications are sent only if there are subscribers
+            if (subscriberList.size() > 0) {
+                try {
+                    Properties prop = new Properties();
+                    prop.put(NotifierConstants.NEW_API_VERSION, newVersion);
+                    prop.put(NotifierConstants.API_NAME, apiName);
+                    prop.put(NotifierConstants.SUBSCRIBERS_PER_API, subscriberList);
+                    NotificationDTO notificationDTO = new NotificationDTO(prop, NotifierConstants
+                            .NOTIFICATION_TYPE_NEW_VERSION);
+                    new NotificationExecutor().sendAsyncNotifications(notificationDTO);
+                } catch (NotificationException e) {
+                   log.error(e.getMessage());
+                }
+            }
+        }
+
+    }
 }

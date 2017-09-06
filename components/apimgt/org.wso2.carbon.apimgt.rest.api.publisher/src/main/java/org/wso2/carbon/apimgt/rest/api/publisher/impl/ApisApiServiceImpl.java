@@ -1216,6 +1216,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisCopyApiPost(String newVersion, String apiId, Request request) throws NotFoundException {
         APIDTO newVersionedApi;
+        String apiName, newApiVersion;
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
