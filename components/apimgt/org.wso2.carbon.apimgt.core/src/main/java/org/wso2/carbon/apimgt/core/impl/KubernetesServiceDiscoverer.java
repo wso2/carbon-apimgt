@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.ServiceDiscoverer;
 import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryConfiurations;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -59,11 +60,12 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
     private Boolean endpointsAvailable; //when false, will not look for NodePort urls for the remaining ports.
     private int kubeEndpointIndex;
 
+    private static final KubernetesServiceDiscoverer instance = new KubernetesServiceDiscoverer();
 
-    public KubernetesServiceDiscoverer() {
+    private KubernetesServiceDiscoverer() {
         serviceDiscoveryConfiurations = new ServiceDiscoveryConfiurations();
         try {
-            //this.client = new DefaultOpenShiftClient(buildConfig(serviceDiscoveryConfiurations.masterUrl));
+            //this.client = new DefaultOpenShiftClient(buildConfig(serviceDiscoveryConfiurations.getMasterUrl()));
             this.client = new DefaultKubernetesClient(buildConfig(serviceDiscoveryConfiurations.getMasterUrl()));
         } catch (KubernetesClientException e) {
             log.error("Authentication error or config for Kubernetes client not properly built");
@@ -74,6 +76,9 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
     }
 
 
+    public static KubernetesServiceDiscoverer getInstance() {
+        return instance;
+    }
 
     private Config buildConfig(String masterUrl) {
         System.setProperty("kubernetes.auth.tryKubeConfig", "false");
@@ -250,9 +255,11 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
         if (url == null) {
             return null;
         }
-        String endpointConfig = String.format("{url: %s, urlType: %s}", url.toString(), urlType);
-        return constructEndPoint(String.format("kube-%d", kubeEndpointIndex), serviceName, endpointConfig,
-                (long) 1000, portType, "", "GLOBAL");
+        String endpointConfig = String.format("{'url': '%s', 'urlType': '%s'}", url.toString(), urlType);
+        String endpointIndex = String.format("kube-%d", kubeEndpointIndex);
+
+        return constructEndPoint(endpointIndex, serviceName, endpointConfig,
+                1000L, portType, "{'enabled': false}", APIMgtConstants.GLOBAL_ENDPOINT);
     }
 
     private Endpoint constructEndPoint(String id, String name, String endpointConfig,
