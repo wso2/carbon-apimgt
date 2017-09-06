@@ -272,6 +272,11 @@
                 <version>${com.fasterxml.jackson.core.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>${com.fasterxml.jackson.dataformat.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>javax.ws.rs</groupId>
                 <artifactId>javax.ws.rs-api</artifactId>
                 <version>${javax.ws.rs-api.version}</version>
@@ -975,6 +980,8 @@
         <org.wso2.carbon.security.caas.import.version.range>[1.0.0,2.0.0)</org.wso2.carbon.security.caas.import.version.range>
         <google.code.gson.import.version.range>[2.7,3.0)</google.code.gson.import.version.range>
 
+
+        <com.fasterxml.jackson.dataformat.version>2.8.4</com.fasterxml.jackson.dataformat.version>
         <com.fasterxml.jackson.datatype.version>2.7.4</com.fasterxml.jackson.datatype.version>
         <com.fasterxml.jackson.datatbind.version>2.7.4</com.fasterxml.jackson.datatbind.version>
         <javax.ws.rs-api.version>2.0</javax.ws.rs-api.version>
