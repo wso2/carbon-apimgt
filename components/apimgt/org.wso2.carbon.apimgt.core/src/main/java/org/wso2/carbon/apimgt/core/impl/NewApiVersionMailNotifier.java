@@ -48,7 +48,7 @@ public class NewApiVersionMailNotifier extends Notifier {
     private static final Log log = LogFactory.getLog(NewApiVersionMailNotifier.class);
     static MailConfigurations mailConfigurations = new APIMConfigurations().
             getNotificationConfigurations().getMailConfigurations();
-    private static final String SMTP_HOST_NAME = mailConfigurations.getSmtpHostName();
+    private static final String SMTP_HOST_NAME = mailConfigurations.getSmtpHostname();
     private static final String SMTP_AUTH_USER = mailConfigurations.getSmtpAuthUser();
     private static final String SMTP_AUTH_PWD = mailConfigurations.getSmtpAuthPwd();
 

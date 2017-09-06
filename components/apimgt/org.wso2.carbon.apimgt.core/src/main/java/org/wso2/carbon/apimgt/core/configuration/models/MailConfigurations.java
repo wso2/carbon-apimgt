@@ -27,7 +27,7 @@ import org.wso2.carbon.kernel.annotations.Element;
 public class MailConfigurations {
 
     @Element(description = "Hostname")
-    private String smtpHostName = "smtp.gmail.com";
+    private String smtpHostname = "smtp.gmail.com";
 
     @Element(description = "AuthUser")
     private String smtpAuthUser = "user@gmail.com";
@@ -41,12 +41,12 @@ public class MailConfigurations {
     @Element(description = "StartTSL")
     private Boolean startTsl = true;
 
-    public String getSmtpHostName() {
-        return smtpHostName;
+    public String getSmtpHostname() {
+        return smtpHostname;
     }
 
-    public void setSmtpHostName(String smtpHostName) {
-        this.smtpHostName = smtpHostName;
+    public void setSmtpHostname(String smtpHostname) {
+        this.smtpHostname = smtpHostname;
     }
 
     public String getSmtpAuthUser() {
