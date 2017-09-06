@@ -44,8 +44,11 @@ GrantTypes.prototype.getMap = function(selected){
         grants = selected.split(" ");
     var map = [];
     for(var grant in this.available){
+        var disabled = false;
+        if(grant == "authorization_code" || grant == "implicit")
+            disabled = true;
         var selected = grants.indexOf(grant) > -1;
-        map.push({ key: grant , name:this.available[grant], "selected" : selected});
+        map.push({ key: grant , name:this.available[grant], "selected" : selected, "disabled" : disabled});
     }
 
     return map;
