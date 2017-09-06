@@ -76,6 +76,7 @@ import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.template.APIConfigContext;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
+import org.wso2.carbon.apimgt.core.template.dto.NotificationDTO;
 import org.wso2.carbon.apimgt.core.template.dto.TemplateBuilderDTO;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMWSDLUtils;
@@ -105,6 +106,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 
@@ -1207,7 +1209,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             if (getAPISubscriptionCountByAPI(identifier) == 0) {
                 API api = getAPIbyUUID(identifier);
 
-				//Checks whether the user has required permissions to delete the API
+                //Checks whether the user has required permissions to delete the API
                 verifyUserPermissionsToDeleteAPI(getUsername(), api);
                 String apiWfStatus = api.getWorkflowStatus();
                 API.APIBuilder apiBuilder = new API.APIBuilder(api);
