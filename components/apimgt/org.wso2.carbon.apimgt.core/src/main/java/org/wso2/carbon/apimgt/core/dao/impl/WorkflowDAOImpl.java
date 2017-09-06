@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.WorkflowUtils;
 import org.wso2.carbon.apimgt.core.workflow.Workflow;
@@ -75,6 +76,7 @@ public class WorkflowDAOImpl implements WorkflowDAO {
                 prepStmt.setTimestamp(4, Timestamp.valueOf(workflow.getCreatedTime()));
                 prepStmt.setString(5, workflow.getExternalWorkflowReference());
                 prepStmt.setString(6, WorkflowUtils.mapTojsonString(workflow.getAttributes()));
+                prepStmt.setString(7, workflow.getWorkflowDescription());
 
                 prepStmt.execute();
                 connection.commit();
@@ -138,7 +140,14 @@ public class WorkflowDAOImpl implements WorkflowDAO {
      */
     public Workflow retrieveWorkflow(String workflowReference) throws APIMgtDAOException {
             try {
-                return retrieveWorkflowFromDB(workflowReference);
+                Workflow workflow = retrieveWorkflowFromDB(workflowReference);
+
+                if (workflow != null) {
+                    return workflow;
+                } else {
+                    throw new APIMgtDAOException("workflow with reference: " + workflowReference + " does not exist",
+                            ExceptionCodes.WORKFLOW_NOT_FOUND);
+                }
             } catch (ParseException | SQLException e) {
                 throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
                         "updating workflow status(workflowRef: " + workflowReference + ")", e);
