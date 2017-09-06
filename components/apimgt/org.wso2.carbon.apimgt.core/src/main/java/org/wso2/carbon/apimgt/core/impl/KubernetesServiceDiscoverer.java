@@ -60,7 +60,6 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
     private Boolean endpointsAvailable; //when false, will not look for NodePort urls for the remaining ports.
     private int kubeEndpointIndex;
 
-    private static final KubernetesServiceDiscoverer instance = new KubernetesServiceDiscoverer();
 
     private KubernetesServiceDiscoverer() {
         serviceDiscoveryConfiurations = new ServiceDiscoveryConfiurations();
@@ -77,7 +76,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
 
 
     public static KubernetesServiceDiscoverer getInstance() {
-        return instance;
+        return new KubernetesServiceDiscoverer();
     }
 
     private Config buildConfig(String masterUrl) {
@@ -255,11 +254,11 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
         if (url == null) {
             return null;
         }
-        String endpointConfig = String.format("{'url': '%s', 'urlType': '%s'}", url.toString(), urlType);
+        String endpointConfig = String.format("{\"url\": \"%s\", \"urlType\": \"%s\"}", url.toString(), urlType);
         String endpointIndex = String.format("kube-%d", kubeEndpointIndex);
 
         return constructEndPoint(endpointIndex, serviceName, endpointConfig,
-                1000L, portType, "{'enabled': false}", APIMgtConstants.GLOBAL_ENDPOINT);
+                1000L, portType, "{\"enabled\": false}", APIMgtConstants.GLOBAL_ENDPOINT);
     }
 
     private Endpoint constructEndPoint(String id, String name, String endpointConfig,
