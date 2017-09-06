@@ -171,7 +171,6 @@ public class ApiStoreSdkGenerationManager {
      * @throws ApiStoreSdkGenerationException
      */
     private void handleSdkGenException(String errorMessage) throws ApiStoreSdkGenerationException {
-        log.error(errorMessage);
         throw new ApiStoreSdkGenerationException(errorMessage);
     }
 
@@ -183,7 +182,6 @@ public class ApiStoreSdkGenerationManager {
      * @throws ApiStoreSdkGenerationException
      */
     private void handleSdkGenException(String errorMessage, Throwable throwable) throws ApiStoreSdkGenerationException {
-        log.error(errorMessage, throwable);
         throw new ApiStoreSdkGenerationException(errorMessage, throwable);
     }
 

@@ -515,7 +515,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             log.error(errorMessage,e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving documentation for given apiId " + apiId;
+            String errorMessage = "Error while generating SDK for requested language " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
@@ -523,6 +523,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
         File sdkZipFile = new File(tempZipFilePath);
+
         return Response.ok()
                 .entity(sdkZipFile)
                 .header("Content-Disposition", "attachment; filename=\"" + sdkZipFile.getName() + "\"")
