@@ -1420,8 +1420,10 @@ public class APIPublisherImplTestCase {
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gateway);
+        APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiSubscriptionDAO, apiLifecycleManager, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        Mockito.when(apiSubscriptionDAO.getAPISubscriptionsByAPI(api.getId())).thenReturn(new ArrayList<>());
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
                 .thenReturn(new LifecycleState());
         String newUUid = apiPublisher.createNewAPIVersion(uuid, "2.0.0");
@@ -1437,8 +1439,10 @@ public class APIPublisherImplTestCase {
         API api = SampleTestObjectCreator.createDefaultAPI().apiDefinition("").build();
         String uuid = api.getId();
         APIGateway gateway = Mockito.mock(APIGateway.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gateway);
+        APISubscriptionDAO apiSubscriptionDAO = Mockito.mock(APISubscriptionDAO.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiSubscriptionDAO, apiLifecycleManager, gateway);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        Mockito.when(apiSubscriptionDAO.getAPISubscriptionsByAPI(api.getId())).thenReturn(new ArrayList<>());
         Mockito.when(apiLifecycleManager.addLifecycle(APIMgtConstants.API_LIFECYCLE, USER))
                 .thenReturn(new LifecycleState());
         String newUUid = apiPublisher.createNewAPIVersion(uuid, "2.0.0");

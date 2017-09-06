@@ -599,11 +599,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             workflow.setSubscription(subscription);
             workflow.setSubscriber(getUsername());
 
-            String workflowDescription = "Subscription creation workflow for the subscription to api "
-                    + subscription.getApi().getName() + ":" + subscription.getApi().getVersion() + ":"
-                    + subscription.getApi().getProvider() + " using application "
-                    + subscription.getApplication().getName() + " with tier " + subscription.getPolicy()
-                    + " by " + getUsername();
+            String workflowDescription = "API [ " + subscription.getApi().getName() + " - "
+                    + subscription.getApi().getVersion() + " ] subscription creation request from subscriber - "
+                    + getUsername() + "  for the application - " + subscription.getApplication().getName() + "";
             workflow.setWorkflowDescription(workflowDescription);
 
             WorkflowResponse response = addSubscriptionWFExecutor.execute(workflow);
@@ -662,12 +660,10 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 workflow.setCreatedTime(LocalDateTime.now());
                 workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
                 workflow.setSubscriber(getUsername());
-
-                String workflowDescription = "Subscription deletion workflow for the subscription to api "
-                        + subscription.getApi().getName() + ":" + subscription.getApi().getVersion() + ":"
-                        + subscription.getApi().getProvider() + " using application "
-                        + subscription.getApplication().getName() + " with tier " + subscription.getPolicy()
-                        + " by " + getUsername();
+                
+                String workflowDescription = "API [ " + subscription.getApi().getName() + " - "
+                        + subscription.getApi().getVersion() + " ] subscription deletion request from subscriber - "
+                        + getUsername() + "  for the application - " + subscription.getApplication().getName() + "";
                 workflow.setWorkflowDescription(workflowDescription);
 
                 WorkflowResponse response = removeSubscriptionWFExecutor.execute(workflow);
@@ -1567,8 +1563,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             workflow.setWorkflowReference(application.getId());
             workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
             workflow.setCreatedTime(LocalDateTime.now());
-            String workflowDescription = "Application deletion workflow for " + application.getName() + " by "
-                    + getUsername();
+            String workflowDescription = "Application [ " + application.getName() + " ] deletion request from  - "
+                    + application.getName();
+
             workflow.setWorkflowDescription(workflowDescription);
             WorkflowResponse response = removeApplicationWFExecutor.execute(workflow);
             workflow.setStatus(response.getWorkflowStatus());
@@ -1686,8 +1683,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             workflow.setExternalWorkflowReference(UUID.randomUUID().toString());
             workflow.setCreatedTime(LocalDateTime.now());
 
-            String workflowDescription = "Application creation workflow for " + application.getName() + " with tier "
-                    + tier.getPolicyName() + " by " + getUsername();
+            String workflowDescription = "Application [ " + application.getName()
+                    + " ] creation request from application creator - " + getUsername() + " with throttling tier - "
+                    + tier.getPolicyName() + "";
             workflow.setWorkflowDescription(workflowDescription);
             WorkflowResponse response = appCreationWFExecutor.execute(workflow);
             workflow.setStatus(response.getWorkflowStatus());
