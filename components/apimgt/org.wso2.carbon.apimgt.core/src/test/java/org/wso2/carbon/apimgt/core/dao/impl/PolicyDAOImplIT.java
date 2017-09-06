@@ -66,15 +66,6 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotEquals(fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy, "Policy "
                 + "fingerprint expected to be different before and after updating for policy: "
                 + policy.getPolicyName());
-        updatedAPIPolicy.setUuid(null);
-        //test for exception
-        try {
-            policyDAO.updateApiPolicy(updatedAPIPolicy);
-            Assert.fail("Exception expected, but not thrown.");
-        } catch (APIMgtDAOException ex) {
-            Assert.assertEquals(ex.getMessage(),
-                    "Policy uuid is not found, unable to update policy: " + updatedAPIPolicy.getPolicyName());
-        }
     }
 
     @Test
@@ -96,15 +87,6 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotEquals(fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy, "Policy "
                 + "fingerprint expected to be different before and after updating for policy: "
                 + policy.getPolicyName());
-        //Test for exception uuid null
-        updatedPolicy.setUuid(null);
-        try {
-            policyDAO.updateApplicationPolicy(updatedPolicy);
-            Assert.fail("Exception expected, but not thrown.");
-        } catch (APIMgtDAOException ex) {
-            Assert.assertEquals(ex.getMessage(),
-                    "Policy uuid is not found, unable to update policy: " + updatedPolicy.getPolicyName());
-        }
     }
 
     @Test
@@ -125,15 +107,6 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotNull(fingerprintAfterUpdatingPolicy);
         Assert.assertNotEquals(fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy, TestUtil.printDiff
                 (fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy));
-
-        updatedPolicy.setUuid(null);
-        try {
-            policyDAO.updateSubscriptionPolicy(updatedPolicy);
-            Assert.fail("Exception expected, but not thrown.");
-        } catch (APIMgtDAOException ex) {
-            Assert.assertEquals(ex.getMessage(),
-                    "Policy uuid is not found, unable to update policy: " + updatedPolicy.getPolicyName());
-        }
     }
 
     @Test (description = "Add, Get and Delete an API policy")

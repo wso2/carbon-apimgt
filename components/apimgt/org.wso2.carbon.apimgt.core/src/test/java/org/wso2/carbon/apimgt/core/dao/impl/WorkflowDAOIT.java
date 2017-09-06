@@ -25,6 +25,7 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.workflow.Workflow;
@@ -103,9 +104,7 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
             // should throw exception.
             Assert.fail("Expected exception is not thrown when entry is not in the DB");
         } catch (APIMgtDAOException e) {
-            String msg = "Workflow not found for : " + workflowRefId;
-            Assert.assertEquals(e.getMessage(), msg);
-            Assert.assertEquals(e.getErrorHandler().getErrorCode(), 900551);
+            Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.WORKFLOW_NOT_FOUND);
         }
     }
 
@@ -200,9 +199,7 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
             // should throw exception.
             Assert.fail("Expected exception is not thrown when entry is not in the DB");
         } catch (APIMgtDAOException e) {
-            String msg = "Workflow not found for : " + workflowRefId;
-            Assert.assertEquals(e.getMessage(), msg);
-            Assert.assertEquals(e.getErrorHandler().getErrorCode(), 900551);
+            Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.WORKFLOW_NOT_FOUND);
         }
     }
     

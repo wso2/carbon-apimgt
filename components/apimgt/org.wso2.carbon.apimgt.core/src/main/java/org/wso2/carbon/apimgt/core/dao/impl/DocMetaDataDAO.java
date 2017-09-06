@@ -190,7 +190,7 @@ class DocMetaDataDAO {
     }
 
     private static void deleteDOCPermission(Connection connection, String docID) throws SQLException {
-        final String query = "DELETE FROM AM_DOC_GROUP_PERMbit.ly/2wW8KwWISSION WHERE DOC_ID = ?";
+        final String query = "DELETE FROM AM_DOC_GROUP_PERMISSION WHERE DOC_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, docID);
             statement.execute();
