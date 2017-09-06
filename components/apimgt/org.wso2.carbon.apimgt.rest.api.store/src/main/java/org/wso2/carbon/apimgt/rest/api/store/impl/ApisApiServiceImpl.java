@@ -15,8 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ApiStoreSdkGenerationException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.impl.ApiStoreSdkGenerationManager;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
@@ -503,7 +505,28 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisApiIdGenerateSdkLanguagePost(String apiId, String language, Request request) throws NotFoundException {
-        return Response.ok().build();
+        String username = RestApiUtil.getLoggedInUsername(request);
+        ApiStoreSdkGenerationManager sdkGenerationManager = new ApiStoreSdkGenerationManager();
+        String tempZipFilePath = "";
+        try {
+            tempZipFilePath = sdkGenerationManager.generateSdkForApi(apiId,language, username);
+        } catch (ApiStoreSdkGenerationException e) {
+            String errorMessage = "Error while generating SDK for requested language";
+            log.error(errorMessage,e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving documentation for given apiId " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+        File sdkZipFile = new File(tempZipFilePath);
+        return Response.ok()
+                .entity(sdkZipFile)
+                .header("Content-Disposition", "attachment; filename=\"" + sdkZipFile.getName() + "\"")
+                .build();
     }
 
     /**

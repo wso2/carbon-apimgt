@@ -156,7 +156,7 @@
             org.apache.commons.io.*;
             com.google.gson.*,
             io.swagger.parser.*,
-            io.swagger.models.*,
+            io.swagger.models.*;version="${io.swagger.import.version.range}",
             io.swagger.util.*,
         </import.package>
         <export.package>
