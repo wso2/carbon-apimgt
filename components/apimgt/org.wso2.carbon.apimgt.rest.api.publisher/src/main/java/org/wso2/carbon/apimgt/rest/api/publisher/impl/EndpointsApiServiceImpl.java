@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.ServiceDiscoverer;
-import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryConfiurations;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.KubernetesServiceDiscoverer;
@@ -218,16 +217,16 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
             List<Endpoint> endpointList = apiPublisher.getAllEndpoints();
             EndPointListDTO endPointListDTO = new EndPointListDTO();
 
-            ServiceDiscoverer serviceDiscoverer = new KubernetesServiceDiscoverer();
+            for (Endpoint endpoint : endpointList) {
+                endPointListDTO.addListItem(MappingUtil.toEndPointDTO(endpoint));
+            }
+
+            ServiceDiscoverer serviceDiscoverer = KubernetesServiceDiscoverer.getInstance();
             if (serviceDiscoverer.isEnabled()) {
                 List<Endpoint> discoveredEndpointList = serviceDiscoverer.listServices();
                 for (Endpoint endpoint : discoveredEndpointList) {
                     endPointListDTO.addListItem(MappingUtil.toEndPointDTO(endpoint));
                 }
-            }
-            
-            for (Endpoint endpoint : endpointList) {
-                endPointListDTO.addListItem(MappingUtil.toEndPointDTO(endpoint));
             }
 
             endPointListDTO.setCount(endPointListDTO.getList().size());
