@@ -231,7 +231,8 @@ public class SampleTestObjectCreator {
                 lastUpdatedTime(LocalDateTime.now()).
                 apiPermission(permissionJson).
                 uriTemplates(getMockUriTemplates()).
-                apiDefinition(apiDefinition);
+                apiDefinition(apiDefinition).
+                securityScheme(3);
         Map map = new HashMap();
         map.put(DEVELOPER_ROLE_ID, 6);
         map.put(ADMIN_ROLE_ID, 15);
@@ -245,7 +246,8 @@ public class SampleTestObjectCreator {
                 context(api.getContext()).
                 description(api.getDescription()).
                 lifeCycleStatus(api.getLifeCycleStatus()).
-                lifecycleInstanceId(api.getLifecycleInstanceId()).build();
+                lifecycleInstanceId(api.getLifecycleInstanceId()).
+                securityScheme(api.getSecurityScheme()).build();
     }
 
     public static API copyAPIIgnoringNonEditableFields(API fromAPI, API toAPI) {
@@ -333,7 +335,8 @@ public class SampleTestObjectCreator {
                 createdTime(LocalDateTime.now()).
                 createdBy(API_CREATOR).
                 apiDefinition(apiDefinition).
-                lastUpdatedTime(LocalDateTime.now());
+                lastUpdatedTime(LocalDateTime.now()).
+                securityScheme(3);
 
         return apiBuilder;
     }
@@ -397,7 +400,8 @@ public class SampleTestObjectCreator {
                 createdBy(API_CREATOR).
                 uriTemplates(Collections.emptyMap()).
                 apiDefinition(apiDefinition).
-                lastUpdatedTime(LocalDateTime.now());
+                lastUpdatedTime(LocalDateTime.now()).
+                securityScheme(3);
 
         return apiBuilder;
     }
@@ -455,7 +459,8 @@ public class SampleTestObjectCreator {
                 context(api.getContext()).
                 description(api.getDescription()).
                 lifeCycleStatus(api.getLifeCycleStatus()).
-                lifecycleInstanceId(api.getLifecycleInstanceId()).build();
+                lifecycleInstanceId(api.getLifecycleInstanceId()).
+                securityScheme(api.getSecurityScheme()).build();
     }
 
     public static String createAlternativeSwaggerDefinition() throws IOException {

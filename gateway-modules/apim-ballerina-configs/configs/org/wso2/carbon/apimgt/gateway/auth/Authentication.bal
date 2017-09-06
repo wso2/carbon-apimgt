@@ -159,7 +159,7 @@ function authenticate (message m) (boolean, message) {
         }
 
     } else if (apikeyErr == null && ((apiDto.securityScheme == 2) || (apiDto.securityScheme == 3))) {
-        system:println("Api key check..");
+        system:println("Api key check...");
         string apiKey = apikeyHeader;
         subscriptionDto = holder:getFromSubscriptionCache(apiContext, version, apiKey);
         if (subscriptionDto != null) {
@@ -180,6 +180,11 @@ function authenticate (message m) (boolean, message) {
             gatewayUtil:constructSubscriptionNotFound(response);
             return false, response;
         }
+    } else {
+        messages:setHeader(response, "Content-Type", "application/json");
+        http:setStatusCode(response, 401);
+        gatewayUtil:constructIncorrectAuthorization (response);
+        return false, response;
     }
 
     return state, response;

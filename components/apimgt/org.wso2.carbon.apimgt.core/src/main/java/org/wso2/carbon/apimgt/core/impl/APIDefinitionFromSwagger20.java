@@ -30,6 +30,8 @@ import io.swagger.models.Operation;
 import io.swagger.models.Path;
 import io.swagger.models.Response;
 import io.swagger.models.Swagger;
+import io.swagger.models.auth.ApiKeyAuthDefinition;
+import io.swagger.models.auth.In;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.models.parameters.BodyParameter;
@@ -383,6 +385,17 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         info.setContact(contact);
         info.setVersion(api.getVersion());
         swagger.setInfo(info);
+
+        if ((api.getSecurityScheme() & 2) == 2) { //apikey
+            log.debug("API security scheme : API Key Scheme");
+            swagger.securityDefinition(APIMgtConstants.SWAGGER_APIKEY, new ApiKeyAuthDefinition(
+                    APIMgtConstants.SWAGGER_APIKEY, In.HEADER));
+        }
+        if ((api.getSecurityScheme() & 1) == 1) {
+            log.debug("API security Scheme : Oauth");
+            swagger.securityDefinition(APIMgtConstants.SWAGGER_OAUTH2, new OAuth2Definition());
+        }
+
         Map<String, Path> stringPathMap = new HashMap();
         for (UriTemplate uriTemplate : api.getUriTemplates().values()) {
             String uriTemplateString = uriTemplate.getUriTemplate();
@@ -412,6 +425,18 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 operation.setConsumes(consumesList);
             }
             operation.addResponse("200", getDefaultResponse());
+            if (!APIMgtConstants.AUTH_NO_AUTHENTICATION.equals(uriTemplate.getAuthType()) &&
+                    ((api.getSecurityScheme() & 2) == 2)) {
+                log.debug("API security scheme : API Key Scheme ---- Resource Auth Type : Not None");
+                operation.addSecurity(APIMgtConstants.SWAGGER_APIKEY, null);
+            }
+
+            if (!APIMgtConstants.AUTH_NO_AUTHENTICATION.equals(uriTemplate.getAuthType()) &&
+                    ((api.getSecurityScheme() & 1) == 1)) {
+                log.debug("API security scheme : Oauth Scheme ---- Resource Auth Type : Not None");
+                operation.addSecurity(APIMgtConstants.SWAGGER_OAUTH2, null);
+            }
+
             if (stringPathMap.containsKey(uriTemplateString)) {
                 Path path = stringPathMap.get(uriTemplateString);
                 path.set(uriTemplate.getHttpVerb().toLowerCase(), operation);
