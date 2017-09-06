@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -1957,12 +1958,14 @@ public class ApiDAOImpl implements ApiDAO {
     public boolean isDocumentExist(String apiId, DocumentInfo documentInfo) throws APIMgtDAOException {
         final String query = "SELECT 1 FROM AM_API_DOC_META_DATA INNER JOIN AM_API_RESOURCES " +
                 "ON AM_API_DOC_META_DATA.UUID=AM_API_RESOURCES.UUID WHERE AM_API_RESOURCES.API_ID = ? AND " +
-                "AM_API_DOC_META_DATA.NAME=?";
+                "AM_API_DOC_META_DATA.NAME=? AND AM_API_DOC_META_DATA.TYPE= ? AND AM_API_DOC_META_DATA.SOURCE_TYPE= ?";
         boolean exist = false;
         try (Connection connection = DAOUtil.getConnection(); PreparedStatement preparedStatement = connection
                 .prepareStatement(query)) {
             preparedStatement.setString(1, apiId);
             preparedStatement.setString(2, documentInfo.getName());
+            preparedStatement.setString(3, documentInfo.getType().toString());
+            preparedStatement.setString(4, documentInfo.getSourceType().toString());
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 return resultSet.next();
             }
@@ -2264,6 +2267,23 @@ public class ApiDAOImpl implements ApiDAO {
                     new ByteArrayInputStream(gatewayConfig.getBytes(StandardCharsets.UTF_8)), updatedBy);
         }
     }
+
+    private String getAPIThrottlePolicyID(Connection connection, String policyName) throws SQLException {
+        final String query = "SELECT UUID FROM AM_API_POLICY WHERE NAME = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, policyName);
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    return rs.getString("UUID");
+                }
+            }
+        }
+
+        throw new SQLException("API Policy " + policyName + ", does not exist");
+    }
+
 
     private void addTransports(Connection connection, String apiID, Set<String> transports) throws SQLException {
         final String query = "INSERT INTO AM_API_TRANSPORTS (API_ID, TRANSPORT) VALUES (?,?)";
@@ -2656,7 +2676,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @see org.wso2.carbon.apimgt.core.dao.ApiDAO#isEndpointAssociated(String)
      */
     @Override
-    public boolean isEndpointAssociated(String endpointId) throws APIMgtDAOException {
+    public boolean isEndpointAssociated(String endpointId) throws APIMgtDAOException {      
         try (Connection connection = DAOUtil.getConnection()) {
             return isEndpointAssociated(connection, endpointId);
         } catch (SQLException e) {
@@ -3162,6 +3182,23 @@ public class ApiDAOImpl implements ApiDAO {
 
             statement.executeBatch();
         }
+    }
+
+
+    private String getAPIThrottlePolicyName(Connection connection, String policyID) throws SQLException {
+        final String query = "SELECT NAME FROM AM_API_POLICY WHERE UUID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, policyID);
+            statement.execute();
+
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    return rs.getString("NAME");
+                }
+            }
+        }
+
+        throw new SQLException("API Policy ID " + policyID + ", does not exist");
     }
 
     /**
