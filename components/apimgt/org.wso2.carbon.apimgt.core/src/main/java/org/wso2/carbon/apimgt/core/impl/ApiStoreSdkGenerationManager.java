@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ApiStoreSdkGenerationException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.io.BufferedWriter;
@@ -43,6 +44,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -89,35 +92,25 @@ public class ApiStoreSdkGenerationManager {
         String swaggerDefinitionForApi = null;
         try {
             swaggerDefinitionForApi = apiStore.getApiSwaggerDefinition(apiId);
-        } catch (APIManagementException ex) {
-            handleSdkGenException("Error retrieving swagger definition for API " + apiId + " from database.", ex);
+        } catch (APIManagementException e) {
+            handleSdkGenException("Error retrieving swagger definition for API " + apiId + " from database.", e);
         }
         Swagger swaggerDoc = new SwaggerParser().parse(swaggerDefinitionForApi);
 
         //Format the swagger definition as a string before writing to the file.
         String formattedSwaggerDefinitionForSdk = Json.pretty(swaggerDoc);
-        File tempSdkGenDir = null;
+        Path tempSdkGenDir = null;
         File swaggerDefJsonFile = null;
         try {
             //Create a temporary directory to store the API files
-            //tempSdkGenDir = File.createTempFile(apiId+"_"+language,"DIR");
-            tempSdkGenDir = File.createTempFile(apiName + "_" + language + "_", "_" + apiVersion);
-            boolean delFile = tempSdkGenDir.delete();
-            boolean makeDir = tempSdkGenDir.mkdir();
+            tempSdkGenDir = Files.createTempDirectory(apiName + "_" + language + "_" + apiVersion);
 
-            if (!delFile || !makeDir) {
-                throw new IOException();
-            }
-        } catch (IOException e) {
-            handleSdkGenException("Error creating temporary directory for SDK generation!", e);
-        }
-        try {
             //Create a temporary file to store the swagger definition
-            swaggerDefJsonFile = File.createTempFile(apiId + "_" + language,
-                    APIMgtConstants.APIFileUtilConstants.JSON_EXTENSION,
-                    tempSdkGenDir.getAbsoluteFile());
+            swaggerDefJsonFile = Files.createTempFile(tempSdkGenDir,
+                    apiId + "_" + language,
+                    APIMgtConstants.APIFileUtilConstants.JSON_EXTENSION).toFile();
         } catch (IOException e) {
-            handleSdkGenException("Error creating temporary json file for swagger definition!", e);
+            handleSdkGenException("Error creating temporary directory or json file for swagger definition!", e);
         }
 
 
@@ -134,26 +127,23 @@ public class ApiStoreSdkGenerationManager {
                 swaggerFileWriter.write(formattedSwaggerDefinitionForSdk);
             } catch (IOException e) {
                 handleSdkGenException("Error writing swagger definition to file in " +
-                        tempSdkGenDir.getAbsolutePath(), e);
+                        tempSdkGenDir, e);
             }
 
             //Generate the SDK for the specified language and save it as a zip file
-            generateSdkForSwaggerDef(language, swaggerDefJsonFile.getAbsolutePath(), tempSdkGenDir.getAbsolutePath());
-            tempZipFilePath = tempSdkGenDir.getAbsolutePath() + ".zip";
+            generateSdkForSwaggerDef(language, swaggerDefJsonFile.getAbsolutePath(), tempSdkGenDir.toString());
 
-            /*try {
-                ZIPUtils ziputils = new ZIPUtils();
-                ziputils.zipDir(tempSdkGenDir.getAbsolutePath(), tempZipFilePath);
-            } catch (IOException e) {
-                handleSdkGenException("Error while generating .zip archive for the generated SDK.", e);
-            }*/
+            String archiveName = apiName + "_" + language + "_" + apiVersion;
+            tempZipFilePath = tempSdkGenDir + "/" + archiveName + ".zip";
+            APIFileUtils.archiveDirectory(tempSdkGenDir.toString(),
+                    tempSdkGenDir.toString(),
+                    archiveName);
         } else {
             handleSdkGenException("Swagger definition file not found!");
         }
 
 
         return tempZipFilePath;
-
 
     }
 
