@@ -251,7 +251,8 @@ public class ApiDAOImpl implements ApiDAO {
             query = API_SUMMARY_SELECT + " LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON UUID = API_ID WHERE" +
                     " API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = '" + ApiType.STANDARD.toString()
                     + "') AND (((PERMISSION.GROUP_ID IN (" + DAOUtil.getParameterString(roles.size()) + "))" +
-                    " AND PERMISSION.PERMISSION >= 4) OR (PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))";
+                    " AND PERMISSION.PERMISSION >= " + APIMgtConstants.Permission.READ_PERMISSION + ") OR " +
+                    "(PROVIDER = ?) OR (PERMISSION.GROUP_ID IS NULL))";
         } else {
             query = API_SUMMARY_SELECT + " LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON UUID = API_ID WHERE" +
                     " API_TYPE_ID = (SELECT TYPE_ID FROM AM_API_TYPES WHERE TYPE_NAME = '" + ApiType.STANDARD.toString()
