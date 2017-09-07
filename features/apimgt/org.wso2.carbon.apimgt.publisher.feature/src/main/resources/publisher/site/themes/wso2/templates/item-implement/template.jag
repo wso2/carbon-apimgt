@@ -39,14 +39,14 @@
 <%
     var design_w_link = jagg.url('/design?'+apiUrlId);
     var implement_w_link = jagg.url('/implement?'+apiUrlId);
-    var manage_w_link = jagg.url('/manage?'+apiUrlId);    
+    var manage_w_link = jagg.url('/manage?'+apiUrlId);
 
     var manage_wlabel = "";
     if(api && (api.availableTiers !="" || api.availableSubscriptionPolicy !="")){
-        manage_wlabel = "completed";      
+        manage_wlabel = "completed";
     }else{
-        var manage_w_link = '#';        
-    } 
+        var manage_w_link = '#';
+    }
 %>
 
 
@@ -55,7 +55,7 @@
 		</h2>
 	</div>
     <div class="content-section shadow-up">
-    <div class="content-data">   
+    <div class="content-data">
     <div class="alert alert-block alert-danger" id="addAPIError" style="display:none">
         <span id="addErrorSpan"></span>
     </div>
@@ -67,7 +67,7 @@
 	        active subscriptions.</p>
             </div>
   <%  }%>
-  
+
   			  <div id="apiSaved" class="alert alert-success" role="alert" style="display:none">
    		<i class="icon fw fw-success fade out"></i><strong><%=i18n.localize("Success!")%></strong>
                     <%=i18n.localize("You have successfully saved the API.")%>
@@ -108,7 +108,7 @@
 							                    <form class="form-horizontal apim-form" method="POST" id="implement_form" enctype="multipart/form-data"
 							                                    action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
                                                     <input type="hidden" id="type" name="type" value="<%=api.type%>"/>
-													<div id="endpoint-ui">													
+													<div id="endpoint-ui">
 
 													</div>
 
@@ -129,7 +129,7 @@
 
 														{{#*inline "endpoint"}}
 								                        <div class="form-group">
-								                            <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="endpoint_type">{{#if name}}{{#if @first}}{{ name }} :<span class="requiredAstrix">*</span>
+								                            <label class="control-label col-xs-6 col-sm-2 col-md-2 col-lg-2" for="endpoint_type">{{#if name}}{{#if @first}}{{ name }} :
 								                            	{{#if type}}<a class="help_popup" help_data="{{type}}_help" data-trigger="hover" data-placement="bottom" title="endpoint_help">
 								                            		<span class="icon fw-stack fw-lg" style="font-size:6px">
 													                   <i class="fw fw-circle fw-stack-2x"></i>
@@ -151,7 +151,7 @@
 																{{#if invalid }}
 																{{#if invalid.endpoint}}
 																<label class="error" for="name"><%=i18n.localize("Please specify a production or sandbox endpoint.")%></label>
-																{{/if}}																
+																{{/if}}
 																{{/if}}
 																{{#if template_not_supported }}
 																<label class="error" for="name"><%=i18n.localize("Address endpoint does not support URI templates.")%></label>
@@ -190,29 +190,35 @@
 														</div>
 							                            {{else}}
                                                           <%if(api.type.toUpperCase() != "WS"){%>
-							                            <div class="form-group">    
+							                            <div class="form-group">
 								                            <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3">
 								                            </label>
 							                                <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
 																<label class="checkbox">
 																  <input type="checkbox" id="load_balance" name="load_balance" {{#if load_balance }}checked="checked"{{/if}}>
 																  <span class="helper">Load Balanced</span>
-																</label>							                                							                                    
+																</label>
 							                                    <label class="checkbox">
 																  <input type="checkbox" id="failover" name="failover" {{#if failover }}checked="checked"{{/if}} {{#if failOver }}checked="checked"{{/if}}>
 																  <span class="helper"><%=i18n.localize("Failover")%></span>
-																</label>																
+																</label>
 							                                </div>
 								                        </div>
                                                                   <%}%>
-								                        <br />
+                                                        <br />
+                                                        <div class="form-group">
+                                                            <label class="control-label col-xs-12 col-sm-3 col-md-4 col-lg-3">  Endpoint: <span class="requiredAstrix">*</span> <span class="text-muted"> (specify at least one) </span> </label>
+                                                        </div>
+                                                        <label class="control-label col-xs-12 col-sm-3 col-md-4 col-lg-3" />
+
+							                            <div class=" form-group col-xs-12 col-sm-7 col-md-7 col-lg-7" style="border: 1px solid #e2e2e2">
 								                        {{#each production_endpoints}}
 								                        	{{#if ../load_balance}}
-								                        		{{> endpoint this name="Production Endpoints" type="production_endpoints" label=(inc @index) invalid=../invalid}}
+								                        		{{> endpoint this name="Production " type="production_endpoints" label=(inc @index) invalid=../invalid}}
 								                        	{{else if ../failover}}
-								                        		{{> endpoint this name="Production Endpoints" type="production_endpoints" label="Primary" invalid=../invalid}}
+								                        		{{> endpoint this name="Production " type="production_endpoints" label="Primary" invalid=../invalid}}
 								                        	{{else}}
-								                        		{{> endpoint this name="Production Endpoint" type="production_endpoints" invalid=../invalid}}
+								                        		{{> endpoint this name="Production " type="production_endpoints" invalid=../invalid}}
 								                        	{{/if}}
 							                            {{/each}}
 
@@ -227,16 +233,16 @@
 							                            {{/if}}
 							                            {{#if failover }}
 							                            	{{> add_remove_ep ep_type="production_failovers" }}
-							                            {{/if}}		
+							                            {{/if}}
 
 								                        {{#each sandbox_endpoints}}
 								                        	{{#if ../load_balance}}
-								                        		{{> endpoint this name="Sandbox Endpoints" type="sandbox_endpoints" label=(inc @index)}}
+								                        		{{> endpoint this name="Sandbox " type="sandbox_endpoints" label=(inc @index)}}
 								                        	{{else if ../failover}}
-								                        		{{> endpoint this name="Sandbox Endpoints" type="sandbox_endpoints" label="Primary"}}
+								                        		{{> endpoint this name="Sandbox " type="sandbox_endpoints" label="Primary"}}
 								                        	{{else}}
-								                        		{{> endpoint this name="Sandbox Endpoint" type="sandbox_endpoints"}}
-								                        	{{/if}}								                        
+								                        		{{> endpoint this name="Sandbox " type="sandbox_endpoints"}}
+								                        	{{/if}}
 							                            {{/each}}
 
 							                       		{{#if load_balance }}
@@ -250,11 +256,13 @@
 							                            {{/if}}
 							                            {{#if failover }}
 							                            	{{> add_remove_ep ep_type="sandbox_failovers" }}
-							                            {{/if}}	
-							                            {{/if}}	
+							                            {{/if}}
+							                            {{/if}}
+                                                        </div>
+					                            {{#if load_balance}}
 
-							                            {{#if load_balance}}
-															<div class="form-group">
+														<div class="form-group">
+
 															    <label class="control-label col-xs-12 col-sm-3
 															    col-md-3 col-lg-3" for="algoCombo"> <%= i18n.localize("Algorithm")%>
 															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title="">
@@ -305,7 +313,7 @@
 															        <input class="form-control load_balance_property" type="text" name="sessionTimeOut" value="{{sessionTimeOut}}" id="sessionTimeOut">
 															    </div>
 															</div>
-							                            {{/if}}	
+							                            {{/if}}
 							                            <div  id="advance_endpoint_config" class="modal fade">
 														    <div class="modal-dialog">
 														    <div class="modal-content">
@@ -323,11 +331,11 @@
 														        </div>
 														    </div>
 														    </div>
-														</div>				                            
+														</div>
 													</script>
-							
+
 							                        <input type="hidden" id="endpoint_config" name="endpoint_config" value="<%= encode.forHtmlAttribute(api.endpointConfig) %>"/>
-							
+
 							                        <div id="endpoint_help" class="hide">
 								                         <strong>HTTP/REST Endpoint </strong><p><%= i18n.localize("A REST API endpoint based on a URI template")%></p>
 								                         <strong>HTTP/SOAP Endpoint</strong><p><%= i18n.localize("The direct URL of the service")%></p>
@@ -349,14 +357,14 @@
 							                         </div>
 							                        <div id="more-options-endpoints"  style="display:none">
 
-							
+
 							                        <div class="form-group">
 							                            <label class="control-label col-sm-3" for="endpointType"><%=i18n.localize("Endpoint Security Scheme")%>:<span class="requiredAstrix">*</span>
 							                      			<a class="help_popup" help_data="endpointSec_help" data-trigger="hover"  data-placement="bottom" title="endpointSec_help">
 							                      				<span class="icon fw-stack fw-lg" style="font-size:6px">
 												                   <i class="fw fw-circle fw-stack-2x"></i>
 												                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-												                </span>							                      				
+												                </span>
 							                      			</a>
 							                            	<p id="endpointSec_help" class="hide"><%=i18n.localize("To connect to secured endpoints, you need to pass the credentials of the backend service.")%></p>
 							                            </label>
@@ -367,7 +375,7 @@
 							                            </select>
 							                            </div>
 							                        </div>
-							
+
 							                        <div class="form-group" id="endpointAuthType" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
 							                            <label class="control-label col-sm-3" for="endpointAuthType"><%=i18n.localize("Endpoint Auth Type")%>:<span class="requiredAstrix">*</span>
 							                            	<a class="help_popup" help_data="endpointAuth_help" data-trigger="hover" title="<%=i18n.localize("Endpoint Auth Type")%>" data-placement="bottom">
@@ -382,10 +390,10 @@
 							                            <select class="select required form-control" id="endpointAuthType" name="endpointAuthType" >
 							                                <option value="basicAuth" <%if( api.endpointAuthTypeDigest=="false"){%> selected="selected" <%}%>><%=i18n.localize("Basic Auth")%></option>
 							                                <option value="digestAuth" <%if(api.endpointAuthTypeDigest=="true"){%> selected="selected" <%}%>><%=i18n.localize("Digest Auth")%></option>
-							                            </select>							                            
+							                            </select>
 							                            </div>
 							                        </div>
-							
+
 							                        <div class="form-group" id="credentials" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
 							                            <label class="control-label col-sm-3" for="credentials"><%=i18n.localize("Credentials")%>:<span class="requiredAstrix">*</span></label>
 							                            <div class="col-sm-2">
@@ -410,10 +418,10 @@
 							                                            <% if((api.inSequence && (!"none".equals(api.inSequence))) || (api.outSequence && (!"none".equals(api.outSequence)))
 							                                            || ( api.faultSequence && (!"none".equals(api.faultSequence)))) { %> checked="checked" <%}%>>
 							                                            <span class="helper"><%=i18n.localize("Check to select a message mediation policy to be executed in the message flow")%></span>
-							                                    </label>							                                    
+							                                    </label>
 							                                </div>
 							                            </div>
-                                                             <%}%>           
+                                                             <%}%>
 							                            <span id="seqTable"
 							                                        <% if(!api.inSequence && !api.outSequence && !api.faultSequence){ %>style="display:none"<%}%>>
 														<div class="form-group">
@@ -435,7 +443,7 @@
                                                                 </div>
 
 															</div>
-														</div>							                                        
+														</div>
 							                            <div class="form-group">
 															<label class="control-label col-sm-3" for="corsConfigurationManaged"><%=i18n.localize("Out Flow")%></label>
 															<div class="headerContainer tagContainer col-sm-6">
@@ -448,7 +456,7 @@
                                                                         <optgroup label="Added by you" id="outSequenceUserAddedOptGroup">
                                                                             <option value="none" selected="selected"><%=i18n.localize("None")%></option>
                                                                         </optgroup>
-							                                    	</select>																
+							                                    	</select>
 																    <span class="input-group-btn">
                                                                         <a href="#sequenceUpload" role="button" class="btn btn-secondary btn-sequenceUpload" data-id="out" data-name="Out Flow" data-toggle="modal" title="Mediation Policy Upload" ><i class="fw fw-upload"></i> Upload Out Flow</a>
                                                                     </span>
@@ -503,7 +511,7 @@
 							                    <input type="hidden" name="version" value="<%= encode.forHtml(api.version) %>" />
 							                    <input type="hidden" name="provider" value="<%= encode.forHtml(api.provider) %>" />
 							                    <input type="hidden" name="action" value="implement" />
-							                    <input type="hidden" name="wsdl" value="<%= encode.forHtml(api.wsdl) %>" />                                        
+							                    <input type="hidden" name="wsdl" value="<%= encode.forHtml(api.wsdl) %>" />
 							                    <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
 							                    <input type="hidden" value="endpoint" name="implementation_methods" >
 							                    <div class="form-actions" id="saveButtons">
@@ -527,9 +535,9 @@
 						                            </div>
 						                            <div class="clearfix"></div>
 												</h4>
-											</div>							
+											</div>
 							            <div id="accordion1-collapse2" class="panel-collapse collapse <% if( apiStatus=="PROTOTYPED" ){%> in <%}%>" role="tabpanel" aria-labelledby="headingTwo">
-								            <div class="panel-body">								
+								            <div class="panel-body">
 								            <div class="">
 								            <form class="form-horizontal apim-form" method="POST" id="prototype_form" enctype="multipart/form-data"
 								                action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag?action=implement&"+apiUrlId ) %>">
@@ -544,29 +552,29 @@
 								                                var endpoint_impl = "checked='checked'";
 								                                var hide_impl="hide";
 								                            } %>
-								
+
 								                            <label class="radio add-margin-right-5x">
 								                            	<input class="implementation_methods" type="radio" value="inline" name="implementation_methods" <%= inline_impl%> >
 								                            	<span class="helper">Inline</span>
 								                            </label>
-								
+
 								                            <label class="radio">
 								                            	<input class="implementation_methods" type="radio" value="endpoint" name="implementation_methods" <%= endpoint_impl%> >
 								                            	<span class="helper">Endpoint</span>
 								                            </label>
-								
+
 								                    </div>
 								                </div>
 								                </fieldset>
-								
+
 								                <div id="api_designer">
 								                    <div id ="apidoc_details"></div><br/><br/>
 								                    <div id ="resource_details"></div>
 								                </div>
-								
+
 								                <div class="clear"></div>
-								
-								
+
+
 								                <fieldset class="implementation_method_endpoint implementation_method <%= hide_endpoint %>">
 								                    <input type="hidden" class="prototype_config form-control" name="endpoint_config" value="<%= encode.forHtmlAttribute(api.endpointConfig) %>"/>
 								                    <div class="form-group">
@@ -610,7 +618,7 @@
 															<div class="form-group form-inline">
 																<div class="col-sm-3"></div>
 																<div class="col-sm-9">
-																	
+
 																</div>
 															</div>
 
@@ -633,9 +641,9 @@
 								                            </form>
 								                </div>
 								            </div>
-							
+
 							            </div>
-							
+
 							            <div id="prototype-success" class="modal fade">
 							            <div class="modal-dialog">
 							                <div class="modal-content">
@@ -667,7 +675,7 @@
 							            </div>
                     </div>
                 </div>
-            </div>	
+            </div>
     </div>
     </div>
     </div>
@@ -680,16 +688,16 @@
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="fw fw-cancel"></i></button>
         <h3 class="modal-title" id="sequenceUploadLabel"><%=i18n.localize("Upload Mediation Policy - ")%><span id="flowName"></span></h3>
       </div>
-      <div class="">      
+      <div class="">
                             <div class="modal-body add-margin-top-2x add-margin-bottom-2x">
                             	<div id="sequence_file_help" class="alert alert-danger hide" role="alert">
-					                 
+
 					                 <button type="button" class="close" id="errorMsgClose"><span aria-hidden="true">&times;</span></button>
 					            </div>
                                 	<div class="form-group">
 										<div class="controls col-sm-12">
 											<div class="input-group input-wrap file-upload-control">
-												<input type="text" id="sequence_file_value" class="form-control" readonly> 
+												<input type="text" id="sequence_file_value" class="form-control" readonly>
 												<input id="sequence_file" name="sequence_file" type="file" class="form-control" multiple>
 												<input id="flow_id" name="flow_id" type="hidden" value="">
 												<div class="input-group-btn">
@@ -709,7 +717,7 @@
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal"><%=i18n.localize("Close")%></button>
                             </div>
                         </div>
-        
+
 
     </div>
   </div>
@@ -764,7 +772,7 @@
 		/*Uncomment the above comment block to send a sample response.*/{{/if}}
 		</textarea>
 	</div>
-</div>  
+</div>
 </script>
 
 <div  id="environmentsRetry-modal" class="modal fade">
@@ -817,7 +825,7 @@
 <script id="designer-resources-template" type="text/x-handlebars-template">
 <fieldset class="<%= hide_impl %> implementation_method_inline implementation_method">
 <legend><%=i18n.localize("Resources")%></legend>
-<table style="width:100%">                       
+<table style="width:100%">
 {{#each doc.paths}}
     {{# each this}}
         <tr class="resource_container" data-path="$.paths.{{ path }}.{{@key}}">
@@ -831,7 +839,7 @@
     {{/each}}
 {{/each}}
 </table>
-</fieldset>                       
+</fieldset>
 </script>
 
 <script>
