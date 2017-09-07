@@ -76,11 +76,11 @@ paths:
 
   /application/count-over-time:
     get:
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/analytics/v1.0/application/applications_created_over_time?from=2017-05-30%2012:32:41.972&to=2017-07-30%202:32:41.972&created_by=admin&subscribed_to=TestAPI"
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8 \" https://localhost:9292/api/am/analytics/v1.0/application/count-over-time?startTime=2017-05-30%2012:32:41.972&endTime=2017-07-30%202:32:41.972"
       x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/swagger
+        GET https://localhost:9292/api/am/analytics/v1.0/application/count-over-time
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
+      x-wso2-response: ""
       summary: Get application count over time
       security:
         - OAuth2Security:
@@ -113,9 +113,9 @@ paths:
 #  Retrieve APIs created over time details
 #-----------------------------------------------------
 
-  /api/apis_created_over_time:
+  /api/count-over-time:
     get:
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/analytics/v1.0/api/apis_created_over_time?from=2017-05-30%2012:32:41.972&to=2017-07-30%202:32:41.972&created_by=admin&subscribed_to=TestAPI"
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/analytics/v1.0/api/count-over-time?from=2017-05-30%2012:32:41.972&to=2017-07-30%202:32:41.972&created_by=admin&subscribed_to=TestAPI"
       x-wso2-request: |
         GET https://127.0.0.1:9443/api/am/analytics/v1.0/api/apis_created_over_time
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -123,15 +123,15 @@ paths:
       summary: Get APIs created over time
       security:
         - OAuth2Security:
-           - apim:api_view
+           - apim:api_graphs
       summary: |
         Retrieve APIs created over time details
       description: |
         Get application created over time details from summarized data.
       parameters:
-        - $ref: '#/parameters/from'
-        - $ref: '#/parameters/to'
-        - $ref: '#/parameters/created_by'
+        - $ref: '#/parameters/startTime'
+        - $ref: '#/parameters/endTime'
+        - $ref: '#/parameters/createdBy'
       responses:
         200:
           description: |
@@ -153,7 +153,7 @@ paths:
 #  Retrieve API subscriber count details
 #-----------------------------------------------------
 
-  /api/subscriber_count_by_apis:
+  /api/subscriber-count-by-api:
     get:
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/analytics/v1.0/api/apis_created_over_time?from=2017-05-30%2012:32:41.972&to=2017-07-30%202:32:41.972&created_by=admin&subscribed_to=TestAPI"
       x-wso2-request: |
@@ -163,13 +163,13 @@ paths:
       summary: Get subscriber count by APIs
       security:
         - OAuth2Security:
-           - apim:api_view
+           - apim:api_graphs
       summary: |
         Retrieve Subscriber count by APIs
       description: |
         Get subscriber count by APIs from summarized data.
       parameters:
-        - $ref: '#/parameters/created_by'
+        - $ref: '#/parameters/createdBy'
       responses:
         200:
           description: |
@@ -181,7 +181,7 @@ paths:
                 The content type of the body.
               type: string
           schema:
-            $ref: '#/definitions/APISubscriptionList'
+            $ref: '#/definitions/APISubscriptionCountList'
         406:
           description: |
             Not Acceptable.
@@ -191,7 +191,7 @@ paths:
 #  Retrieve APIs details
 #-----------------------------------------------------
 
-  /api/api_info:
+  /api/api-info:
     get:
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/analytics/v1.0/api/apis_created_over_time?from=2017-05-30%2012:32:41.972&to=2017-07-30%202:32:41.972&created_by=admin&subscribed_to=TestAPI"
       x-wso2-request: |
@@ -201,16 +201,15 @@ paths:
       summary: Get APIs created over time
       security:
         - OAuth2Security:
-           - apim:api_view
+           - apim:api_graphs
       summary: |
         Retrieve APIs created over time details
       description: |
         Get application created over time details from summarized data.
       parameters:
-        - $ref: '#/parameters/from'
-        - $ref: '#/parameters/to'
-        - $ref: '#/parameters/created_by'
-        - $ref: '#/parameters/api_filter'
+        - $ref: '#/parameters/startTime'
+        - $ref: '#/parameters/endTime'
+        - $ref: '#/parameters/createdBy'
       responses:
         200:
           description: |
@@ -232,11 +231,11 @@ paths:
 #  Retrieve Subscriptions created over time details
 #-----------------------------------------------------
 
-  /subscription/subscriptions_created_over_time:
+  /subscription/count-over-time:
     get:
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/analytics/v1.0/subscription/subscriptions_created_over_time?from=2017-05-30%2012:32:41.972&to=2017-07-30%202:32:41.972&created_by=admin&subscribed_to=TestAPI"
       x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/analytics/v1.0/api/apis_created_over_time
+        GET https://127.0.0.1:9443/api/am/analytics/v1.0/subscription/count-over-time:
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
       summary: Get APIs created over time
@@ -248,14 +247,13 @@ paths:
       description: |
         Get application created over time details from summarized data.
       parameters:
-        - $ref: '#/parameters/from'
-        - $ref: '#/parameters/to'
-        - $ref: '#/parameters/api_filter'
+        - $ref: '#/parameters/startTime'
+        - $ref: '#/parameters/endTime'
       responses:
         200:
           description: |
             OK.
-            Requested APIs created over time information is returned
+            Requested subscription count created over time information is returned
           headers:
             Content-Type:
               description: |
@@ -272,11 +270,11 @@ paths:
 #  Retrieve Subscriptions information
 #-----------------------------------------------------
 
-  /subscription/subscription_info:
+  /subscription/subscription-info:
     get:
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/analytics/v1.0/subscription/subscription_info?from=2017-05-30%2012:32:41.972&to=2017-07-30%202:32:41.972&created_by=admin&subscribed_to=TestAPI"
       x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/analytics/v1.0/api/apis_created_over_time
+        GET https://127.0.0.1:9443/api/am/analytics/v1.0/subscription/subscription-info
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
       summary: Get Subscription information
@@ -288,14 +286,13 @@ paths:
       description: |
         Get Subscription details from summarized data.
       parameters:
-        - $ref: '#/parameters/from'
-        - $ref: '#/parameters/to'
-        - $ref: '#/parameters/api_filter'
+        - $ref: '#/parameters/startTime'
+        - $ref: '#/parameters/endTime'
       responses:
         200:
           description: |
             OK.
-            Requested APIs created over time information is returned
+            Requested Subscription Information is returned for the given time period
           headers:
             Content-Type:
               description: |
@@ -329,45 +326,23 @@ parameters:
       Defines the ending timestamp of the interval
     required: true
     type: string
-  from:
-    name: from
-    in: query
-    description: |
-      Defines the ending timestamp of the interval
-    required: true
-    type: string
 
-  to:
-    name: to
-    in: query
-    description: |
-      Defines the ending timestamp of the interval
-    required: true
-    type: string
-
-  created_by:
-    name: created_by
+  createdBy:
+    name: createdBy
     in: query
     description: |
      application creator name. In case of any creator, the value shold be equal to 'all'
     required: true
     type: string
 
-  subscribed_to:
-    name: subscribed_to
+  subscribedTo:
+    name: subscribedTo
     in: query
     description: |
       api name. In case of any api the value should be equal to 'all'
     required: true
     type: string
 
-  api_filter:
-    name: api_filter
-    in: query
-    description: |
-      api_filter could take two possible values. 'All' or 'My'. In case of 'My', only the current user's Apis will be filtered.
-    required: true
-    type: string
 
 ######################################################
 # The resources used by some of the APIs above within the message body
@@ -547,7 +522,7 @@ definitions:
         example: 4
 
 #-----------------------------------------------------
-# The APISubscriptionList resource
+# The APISubscriptionCountList resource
 #-----------------------------------------------------
   APISubscriptionCountList:
     title: APISubscriptionCountList List

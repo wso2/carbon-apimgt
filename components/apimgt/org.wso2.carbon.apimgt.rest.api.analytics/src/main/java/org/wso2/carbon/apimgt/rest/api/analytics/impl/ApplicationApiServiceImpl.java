@@ -21,7 +21,8 @@ public class ApplicationApiServiceImpl extends ApplicationApiService {
     private static final Logger log = LoggerFactory.getLogger(ApplicationApiServiceImpl.class);
 
     @Override
-    public Response applicationApplicationsCreatedOverTimeGet(String from, String to,Request request) throws NotFoundException {
+    public Response applicationCountOverTimeGet(String from, String to, Request request) throws
+            NotFoundException {
 
         String username = RestApiUtil.getLoggedInUsername(request);
         try {

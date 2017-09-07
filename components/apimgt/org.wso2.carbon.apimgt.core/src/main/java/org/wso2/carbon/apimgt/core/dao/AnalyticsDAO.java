@@ -33,14 +33,12 @@ public interface AnalyticsDAO {
     /**
      * Retrieves applications created overtime information.
      *
-     * @param createdBy     Filter for create user
-     * @param subscribedTo  Filter for subscribed APIs
      * @param fromTimestamp Filter for from timestamp
      * @param toTimestamp   Filter for to timestamp
      * @return valid {@link ApplicationCount} List or null
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    List<ApplicationCount> getApplicationCount(String createdBy, String subscribedTo, String fromTimestamp,
+    List<ApplicationCount> getApplicationCount(String fromTimestamp,
                                                String toTimestamp) throws APIMgtDAOException;
 
     /**
@@ -56,13 +54,12 @@ public interface AnalyticsDAO {
     /**
      * Retrieves APIs created overtime information.
      *
-     * @param createdBy     Filter for create user
      * @param fromTimestamp Filter for from timestamp
      * @param toTimestamp   Filter for to timestamp
      * @return valid {@link APIInfo} List or null
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    List<APICount> getAPICount(String createdBy, String fromTimestamp,
+    List<APICount> getAPICount(String fromTimestamp,
                                String toTimestamp) throws APIMgtDAOException;
 
     /**
@@ -77,24 +74,21 @@ public interface AnalyticsDAO {
     /**
      * Retrieves Subscriptions count created over time.
      *
-     * @param createdBy     Filter for api createdBy
      * @param fromTimestamp Filter for from timestamp
      * @param toTimestamp   Filter for to timestamp
      * @return valid {@link SubscriptionCount} List or null
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    List<SubscriptionCount> getSubscriptionCount(String createdBy, String fromTimestamp,
+    List<SubscriptionCount> getSubscriptionCount(String fromTimestamp,
                                                  String toTimestamp) throws APIMgtDAOException;
 
     /**
      * Retrieves Subscriptions info created over time.
      *
-     * @param createdBy     Filter for api createdBy
      * @param fromTimestamp Filter for from timestamp
      * @param toTimestamp   Filter for to timestamp
      * @return valid {@link SubscriptionInfo} List or null
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    List<SubscriptionInfo> getSubscriptionInfo(String createdBy, String fromTimestamp,
-                                               String toTimestamp) throws APIMgtDAOException;
+    List<SubscriptionInfo> getSubscriptionInfo(String fromTimestamp, String toTimestamp) throws APIMgtDAOException;
 }

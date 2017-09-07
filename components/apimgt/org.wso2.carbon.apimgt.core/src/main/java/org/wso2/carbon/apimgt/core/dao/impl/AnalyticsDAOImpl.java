@@ -50,19 +50,11 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
 
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<ApplicationCount> getApplicationCount(String createdBy, String subscribedTo, String fromTimestamp,
+    public List<ApplicationCount> getApplicationCount(String fromTimestamp,
                                                       String toTimestamp) throws APIMgtDAOException {
 
-        final String query;
-        if (("all").equals(createdBy)) {
-            query = "SELECT COUNT(UUID) AS count, CREATED_TIME AS time FROM AM_APPLICATION WHERE "
-                    + "CREATED_TIME BETWEEN ? AND ? GROUP BY CREATED_TIME ORDER BY CREATED_TIME ASC";
-        } else {
-            query = "SELECT COUNT(UUID) AS count, CREATED_TIME AS time FROM AM_APPLICATION WHERE "
-                    + "(CREATED_TIME BETWEEN ? AND ?) AND CREATED_BY = ? GROUP BY CREATED_TIME ORDER BY "
-                    + "CREATED_TIME ASC";
-        }
-
+        final String query = "SELECT COUNT(UUID) AS count, CREATED_TIME AS time FROM AM_APPLICATION WHERE "
+                + "CREATED_TIME BETWEEN ? AND ? GROUP BY CREATED_TIME ORDER BY CREATED_TIME ASC";
         List<ApplicationCount> applicationCountList = new ArrayList<>();
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -72,10 +64,7 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                 Timestamp toTime = new Timestamp(dateFormat.parse(toTimestamp).getTime());
                 statement.setTimestamp(1, fromTime);
                 statement.setTimestamp(2, toTime);
-                if (!("all").equals(createdBy)) {
-                    log.debug("Setting created by to query:" + createdBy);
-                    statement.setString(3, createdBy);
-                }
+
                 if (log.isDebugEnabled()) {
                     log.debug("Executing query " + query);
                 }
@@ -108,9 +97,7 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
     public List<APICount> getAPICount(String fromTimestamp, String toTimestamp)
             throws APIMgtDAOException {
-        final String query;
-
-        query = "SELECT COUNT(UUID) AS count, CREATED_TIME AS time FROM AM_API WHERE "
+        final String query = "SELECT COUNT(UUID) AS count, CREATED_TIME AS time FROM AM_API WHERE "
                 + "(CREATED_TIME BETWEEN ? AND ?) AND CREATED_BY = ? GROUP BY CREATED_TIME ORDER BY "
                 + "CREATED_TIME ASC";
 
@@ -212,29 +199,22 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
     /**
      * Retrieves Subscription count information.
      *
-     * @param subscriptionFilter Filter for api subscriptionFilter
-     * @param fromTimestamp      Filter for from timestamp
-     * @param toTimestamp        @return valid {@link SubscriptionCount} List or null
+     * @param fromTimestamp Filter for from timestamp
+     * @param toTimestamp   @return valid {@link SubscriptionCount} List or null
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<SubscriptionCount> getSubscriptionCount(String subscriptionFilter, String fromTimestamp, String
+    public List<SubscriptionCount> getSubscriptionCount(String fromTimestamp, String
             toTimestamp) throws APIMgtDAOException {
         final String query;
-        if (("all").equals(subscriptionFilter)) {
-            query = "SELECT COUNT(UUID) AS COUNT, CREATED_TIME AS TIME " +
-                    "FROM AM_SUBSCRIPTION  " +
-                    "WHERE (CREATED_TIME BETWEEN ? AND ?) " +
-                    "GROUP BY CREATED_TIME ORDER BY CREATED_TIME ASC;";
-        } else {
-            query = "SELECT COUNT(subs.UUID) AS COUNT, CREATED_TIME AS time " +
-                    "FROM AM_SUBSCRIPTION subs, AM_API  api  " +
-                    "WHERE (CREATED_TIME BETWEEN ? AND ?) " +
-                    "AND  subs.api_id=api.uuid " +
-                    "AND api.created_by=? " +
-                    "GROUP BY CREATED_TIME ORDER BY CREATED_TIME ASC;";
-        }
+
+        query = "SELECT COUNT(subs.UUID) AS COUNT, CREATED_TIME AS time " +
+                "FROM AM_SUBSCRIPTION subs, AM_API  api  " +
+                "WHERE (CREATED_TIME BETWEEN ? AND ?) " +
+                "AND  subs.api_id=api.uuid " +
+                "AND api.created_by=? " +
+                "GROUP BY CREATED_TIME ORDER BY CREATED_TIME ASC;";
 
         List<SubscriptionCount> subscriptionCountList = new ArrayList<>();
         try (Connection connection = DAOUtil.getConnection();
@@ -245,10 +225,6 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                 Timestamp toTime = new java.sql.Timestamp(dateFormat.parse(toTimestamp).getTime());
                 statement.setTimestamp(1, fromTime);
                 statement.setTimestamp(2, toTime);
-                if (!("all").equals(subscriptionFilter)) {
-                    log.debug("Setting created by:" + subscriptionFilter);
-                    statement.setString(3, subscriptionFilter);
-                }
                 if (log.isDebugEnabled()) {
                     log.debug("Executing query " + query);
                 }
@@ -280,7 +256,6 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
     /**
      * Retrieves Subscriptions info created over time.
      *
-     * @param createdBy     Filter for api createdBy
      * @param fromTimestamp Filter for from timestamp
      * @param toTimestamp   Filter for to timestamp
      * @return valid {@link SubscriptionInfo} List or null
@@ -288,27 +263,16 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<SubscriptionInfo> getSubscriptionInfo(String createdBy, String fromTimestamp, String toTimestamp) throws
+    public List<SubscriptionInfo> getSubscriptionInfo(String fromTimestamp, String toTimestamp) throws
             APIMgtDAOException {
-        final String query;
-        if (("all").equals(createdBy)) {
-            query = "SELECT sub.UUID, api.NAME as API_NAME, api.VERSION as API_VERSION, app.NAME as APP_NAME, " +
-                    "app.DESCRIPTION, sub.CREATED_TIME , policy.DISPLAY_NAME , sub.SUB_STATUS " +
-                    "FROM AM_API api, AM_SUBSCRIPTION sub, AM_APPLICATION app, AM_SUBSCRIPTION_POLICY policy " +
-                    "WHERE api.UUID = sub.API_ID " +
-                    "AND (sub.CREATED_TIME BETWEEN ? AND ?) " +
-                    "AND sub.APPLICATION_ID = app.UUID " +
-                    "AND sub.TIER_ID = policy.UUID ";
-        } else {
-            query = "SELECT sub.UUID, api.NAME as API_NAME, api.VERSION as API_VERSION, app.NAME as APP_NAME, " +
-                    "app.DESCRIPTION, sub.CREATED_TIME , policy.DISPLAY_NAME , sub.SUB_STATUS " +
-                    "FROM AM_API api, AM_SUBSCRIPTION sub, AM_APPLICATION app, AM_SUBSCRIPTION_POLICY policy " +
-                    "WHERE (sub.CREATED_TIME BETWEEN ? AND ?) " +
-                    "AND api.UUID = sub.API_ID " +
-                    "AND sub.APPLICATION_ID = app.UUID " +
-                    "AND sub.TIER_ID = policy.UUID " +
-                    "AND sub.CREATED_BY = ?";
-        }
+        final String query = "SELECT sub.UUID, api.NAME as API_NAME, api.VERSION as API_VERSION, app.NAME " +
+                "as APP_NAME, app.DESCRIPTION, sub.CREATED_TIME , policy.DISPLAY_NAME , sub.SUB_STATUS " +
+                "FROM AM_API api, AM_SUBSCRIPTION sub, AM_APPLICATION app, AM_SUBSCRIPTION_POLICY policy " +
+                "WHERE (sub.CREATED_TIME BETWEEN ? AND ?) " +
+                "AND api.UUID = sub.API_ID " +
+                "AND sub.APPLICATION_ID = app.UUID " +
+                "AND sub.TIER_ID = policy.UUID " +
+                "AND sub.CREATED_BY = ?";
 
         List<SubscriptionInfo> subscriptionInfoList = new ArrayList<>();
         try (Connection connection = DAOUtil.getConnection();
@@ -319,10 +283,6 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                 Timestamp toTime = new java.sql.Timestamp(dateFormat.parse(toTimestamp).getTime());
                 statement.setTimestamp(1, fromTime);
                 statement.setTimestamp(2, toTime);
-                if (!("all").equals(createdBy)) {
-                    log.debug("Setting created by to query:" + createdBy);
-                    statement.setString(3, createdBy);
-                }
                 if (log.isDebugEnabled()) {
                     log.debug("Executing query " + query);
                 }
@@ -350,7 +310,6 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
             }
         } catch (SQLException e) {
             String errorMsg = "Error while creating database connection/prepared-statement";
-            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
         return subscriptionInfoList;
@@ -358,21 +317,12 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
 
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<APIInfo> getAPIInfo(String createdBy, String fromTimestamp, String toTimestamp)
+    public List<APIInfo> getAPIInfo(String fromTimestamp, String toTimestamp)
             throws APIMgtDAOException {
-        final String query;
-        if (("all").equals(createdBy)) {
-            query = "SELECT UUID,PROVIDER,NAME,CONTEXT,VERSION,CREATED_TIME,CURRENT_LC_STATUS," +
-                    "LC_WORKFLOW_STATUS  " +
-                    "FROM AM_API " +
-                    "WHERE CREATED_TIME BETWEEN ? AND ? GROUP BY CREATED_TIME ORDER BY CREATED_TIME ASC";
-        } else {
-            query = "SELECT UUID,PROVIDER,NAME,CONTEXT,VERSION,CREATED_BY,CREATED_TIME,CURRENT_LC_STATUS," +
-                    "LC_WORKFLOW_STATUS  " +
-                    "FROM AM_API " +
-                    "WHERE (CREATED_TIME BETWEEN ? AND ?) AND CREATED_BY = ? GROUP BY CREATED_TIME ORDER BY " +
-                    "CREATED_TIME ASC";
-        }
+        final String query = "SELECT UUID,PROVIDER,NAME,CONTEXT,VERSION,CREATED_TIME,CURRENT_LC_STATUS," +
+                "LC_WORKFLOW_STATUS  " +
+                "FROM AM_API " +
+                "WHERE CREATED_TIME BETWEEN ? AND ? GROUP BY CREATED_TIME ORDER BY CREATED_TIME ASC";
 
         List<APIInfo> apiInfoList = new ArrayList<>();
         try (Connection connection = DAOUtil.getConnection();
@@ -383,10 +333,6 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                 Timestamp toTime = new java.sql.Timestamp(dateFormat.parse(toTimestamp).getTime());
                 statement.setTimestamp(1, fromTime);
                 statement.setTimestamp(2, toTime);
-                if (!("all").equals(createdBy)) {
-                    log.debug("Setting created by to query:" + createdBy);
-                    statement.setString(3, createdBy);
-                }
                 if (log.isDebugEnabled()) {
                     log.debug("Executing query " + query);
                 }

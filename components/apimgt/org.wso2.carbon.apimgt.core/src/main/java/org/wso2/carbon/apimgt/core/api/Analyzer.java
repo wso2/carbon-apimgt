@@ -33,8 +33,8 @@ public interface Analyzer {
     /**
      * Retrieves application counts created overtime information.
      *
-     * @param fromTime     Filter for from timestamp
-     * @param toTime       Filter for to timestamp
+     * @param fromTime Filter for from timestamp
+     * @param toTime   Filter for to timestamp
      * @return valid {@link ApplicationCount} List or null
      * @throws APIManagementException if error occurs while accessing data
      */
@@ -44,24 +44,22 @@ public interface Analyzer {
     /**
      * Retrieves APIs information.
      *
-     * @param createdBy Filter for create user
-     * @param fromTime  Filter for from timestamp
-     * @param toTime    Filter for to timestamp
+     * @param fromTime Filter for from timestamp
+     * @param toTime   Filter for to timestamp
      * @return valid {@link APIInfo} List or null
      * @throws APIManagementException if error occurs while accessing data layer
      */
-    List<APIInfo> getAPIInfo(String createdBy, String fromTime, String toTime) throws APIManagementException;
+    List<APIInfo> getAPIInfo(String fromTime, String toTime) throws APIManagementException;
 
     /**
      * Retrieves API counts created overtime information.
      *
-     * @param createdBy Filter for create user
-     * @param fromTime  Filter for from timestamp
-     * @param toTime    Filter for to timestamp
+     * @param fromTime Filter for from timestamp
+     * @param toTime   Filter for to timestamp
      * @return valid {@link APICount} List or null
      * @throws APIManagementException if error occurs while accessing data layer
      */
-    List<APICount> getAPICount(String createdBy, String fromTime, String toTime) throws APIManagementException;
+    List<APICount> getAPICount(String fromTime, String toTime) throws APIManagementException;
 
     /**
      * Retrieves subscription count information against an API.
@@ -75,25 +73,23 @@ public interface Analyzer {
     /**
      * Retrieves Subscriptions count created over time.
      *
-     * @param createdBy Filter for api createdBy
      * @param fromTime  Filter for from timestamp
      * @param toTime    Filter for to timestamp
      * @return valid {@link SubscriptionCount} List or null
      * @throws APIManagementException if error occurs while accessing data layer
      */
-    List<SubscriptionCount> getSubscriptionCount(String createdBy, String fromTime, String toTime)
+    List<SubscriptionCount> getSubscriptionCount(String fromTime, String toTime)
             throws APIManagementException;
 
     /**
      * Retrieves Subscriptions info details.
      *
-     * @param createdBy Filter for api createdBy
      * @param fromTime  Filter for from timestamp
      * @param toTime    Filter for to timestamp
      * @return valid {@link SubscriptionCount} List or null
      * @throws APIManagementException if error occurs while accessing data layer
      */
-    List<SubscriptionInfo> getSubscriptionInfo(String createdBy, String fromTime, String toTime)
+    List<SubscriptionInfo> getSubscriptionInfo(String fromTime, String toTime)
             throws APIManagementException;
 
 }

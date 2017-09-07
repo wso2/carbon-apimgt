@@ -25,16 +25,39 @@ public class ApiApiServiceImpl extends ApiApiService {
     private static final Logger log = LoggerFactory.getLogger(ApplicationApiServiceImpl.class);
 
     @Override
-    public Response apiApisCreatedOverTimeGet(String from, String to, String createdBy, Request request)
-            throws NotFoundException {
+    public Response apiApiInfoGet(String startTime, String endTime, String createdBy, Request request) throws
+            NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             if (log.isDebugEnabled()) {
-                log.debug("Retrieving APIs created over time. [From: " + from + " to: " + to + " " +
+                log.debug("Retrieving API information. [From: " + startTime + " to: " + endTime + " created by: " +
+                        "" + createdBy + "]");
+            }
+            Analyzer analyzer = RestApiUtil.getAnalyzer(username);
+            List<APIInfo> apiInfoList = analyzer.getAPIInfo(startTime, endTime);
+            APIInfoListDTO apiInfoListDTO = AnalyticsMappingUtil
+                    .fromAPIInfoListToDTO(apiInfoList);
+            return Response.ok().entity(apiInfoListDTO).build();
+
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving API information";
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    @Override
+    public Response apiCountOverTimeGet(String startTime, String endTime, String createdBy, Request request) throws
+            NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
+        try {
+            if (log.isDebugEnabled()) {
+                log.debug("Retrieving APIs created over time. [From: " + startTime + " to: " + endTime + " " +
                         "created by: " + createdBy + "]");
             }
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
-            List<APICount> apiCountList = analyzer.getAPICount(createdBy, from, to);
+            List<APICount> apiCountList = analyzer.getAPICount(startTime, endTime);
             APICountListDTO apiCountListDTO = AnalyticsMappingUtil
                     .fromAPICountToListDTO(apiCountList);
             return Response.ok().entity(apiCountListDTO).build();
@@ -48,7 +71,7 @@ public class ApiApiServiceImpl extends ApiApiService {
     }
 
     @Override
-    public Response apiSubscriberCountByApisGet(String createdBy, Request request) throws NotFoundException {
+    public Response apiSubscriberCountByApiGet(String createdBy, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             if (log.isDebugEnabled()) {
@@ -68,26 +91,4 @@ public class ApiApiServiceImpl extends ApiApiService {
         }
     }
 
-    @Override
-    public Response apiApiInfoGet(String from, String to, String createdBy, String apiFilter, Request request)
-            throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername(request);
-        try {
-            if (log.isDebugEnabled()) {
-                log.debug("Retrieving API information. [From: " + from + " to: " + to + " created by: " +
-                        "" + createdBy + "]");
-            }
-            Analyzer analyzer = RestApiUtil.getAnalyzer(username);
-            List<APIInfo> apiInfoList = analyzer.getAPIInfo(createdBy, from, to);
-            APIInfoListDTO apiInfoListDTO = AnalyticsMappingUtil
-                    .fromAPIInfoListToDTO(apiInfoList);
-            return Response.ok().entity(apiInfoListDTO).build();
-
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving API information";
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
-            log.error(errorMessage, e);
-            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-        }
-    }
 }

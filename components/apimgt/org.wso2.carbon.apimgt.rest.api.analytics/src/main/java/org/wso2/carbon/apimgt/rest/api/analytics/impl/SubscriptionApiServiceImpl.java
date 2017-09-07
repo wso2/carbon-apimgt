@@ -27,22 +27,21 @@ public class SubscriptionApiServiceImpl extends SubscriptionApiService {
     private static final Logger log = LoggerFactory.getLogger(SubscriptionApiServiceImpl.class);
 
     @Override
-    public Response subscriptionSubscriptionInfoGet(String from, String to, String apiFilter, Request request)
-            throws NotFoundException {
+    public Response subscriptionCountOverTimeGet(String startTime, String endTime, Request request) throws
+            NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             if (log.isDebugEnabled()) {
-                log.debug("Retrieving subscriptions info. [created by: " + apiFilter +
-                        " From: " + from + " To: " + to + "]");
+                log.debug("Retrieving subscriptions created over time. [ From: " + startTime + " To: " + endTime + "]");
             }
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
-            List<SubscriptionInfo> subscriptionInfoList = analyzer.getSubscriptionInfo(apiFilter, from, to);
-            SubscriptionInfoListDTO subscriptionInfoListDTO = AnalyticsMappingUtil
-                    .fromSubscriptionInfoListToDTO(subscriptionInfoList);
-            return Response.ok().entity(subscriptionInfoListDTO).build();
+            List<SubscriptionCount> subscriptionCount = analyzer.getSubscriptionCount(startTime, endTime);
+            SubscriptionCountListDTO subscriptionListDTO = AnalyticsMappingUtil
+                    .fromSubscriptionCountListToDTO(subscriptionCount);
+            return Response.ok().entity(subscriptionListDTO).build();
 
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving subscription information";
+            String errorMessage = "Error while retrieving Subscription Count";
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
@@ -50,22 +49,21 @@ public class SubscriptionApiServiceImpl extends SubscriptionApiService {
     }
 
     @Override
-    public Response subscriptionSubscriptionsCreatedOverTimeGet(String from, String to, String apiFilter,
-                                                                Request request) throws NotFoundException {
+    public Response subscriptionSubscriptionInfoGet(String startTime, String endTime, Request request) throws
+            NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             if (log.isDebugEnabled()) {
-                log.debug("Retrieving subscriptions created over time. [created by: " + apiFilter +
-                        " From: " + from + " To: " + to + "]");
+                log.debug("Retrieving subscriptions info. [From: " + startTime + " To: " + endTime + "]");
             }
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
-            List<SubscriptionCount> subscriptionCount = analyzer.getSubscriptionCount(apiFilter, from, to);
-            SubscriptionCountListDTO subscriptionListDTO = AnalyticsMappingUtil
-                    .fromSubscriptionCountListToDTO(subscriptionCount);
-            return Response.ok().entity(subscriptionListDTO).build();
+            List<SubscriptionInfo> subscriptionInfoList = analyzer.getSubscriptionInfo(startTime, endTime);
+            SubscriptionInfoListDTO subscriptionInfoListDTO = AnalyticsMappingUtil
+                    .fromSubscriptionInfoListToDTO(subscriptionInfoList);
+            return Response.ok().entity(subscriptionInfoListDTO).build();
 
         } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving Subscription Count";
+            String errorMessage = "Error while retrieving subscription information";
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();

@@ -19,12 +19,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 public abstract class SubscriptionApiService {
-    public abstract Response subscriptionSubscriptionInfoGet(String from
- ,String to
- ,String apiFilter
+    public abstract Response subscriptionCountOverTimeGet(String startTime
+ ,String endTime
  , Request request) throws NotFoundException;
-    public abstract Response subscriptionSubscriptionsCreatedOverTimeGet(String from
- ,String to
- ,String apiFilter
+    public abstract Response subscriptionSubscriptionInfoGet(String startTime
+ ,String endTime
  , Request request) throws NotFoundException;
 }

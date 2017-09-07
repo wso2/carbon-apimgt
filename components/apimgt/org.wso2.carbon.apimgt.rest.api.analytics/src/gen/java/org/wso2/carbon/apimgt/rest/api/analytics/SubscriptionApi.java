@@ -44,27 +44,7 @@ public class SubscriptionApi implements Microservice  {
    private final SubscriptionApiService delegate = SubscriptionApiServiceFactory.getSubscriptionApi();
 
     @GET
-    @Path("/subscription_info")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Retrieve Subscription details ", notes = "Get Subscription details from summarized data. ", response = SubscriptionInfoListDTO.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
-            
-        })
-    }, tags={  })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested APIs created over time information is returned ", response = SubscriptionInfoListDTO.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = SubscriptionInfoListDTO.class) })
-    public Response subscriptionSubscriptionInfoGet(@ApiParam(value = "Defines the ending timestamp of the interval ",required=true) @QueryParam("from") String from
-,@ApiParam(value = "Defines the ending timestamp of the interval ",required=true) @QueryParam("to") String to
-,@ApiParam(value = "api_filter could take two possible values. 'All' or 'My'. In case of 'My', only the current user's Apis will be filtered. ",required=true) @QueryParam("api_filter") String apiFilter
-, @Context Request request)
-    throws NotFoundException {
-        return delegate.subscriptionSubscriptionInfoGet(from,to,apiFilter, request);
-    }
-    @GET
-    @Path("/subscriptions_created_over_time")
+    @Path("/count-over-time")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve APIs created over time details ", notes = "Get application created over time details from summarized data. ", response = SubscriptionCountListDTO.class, authorizations = {
@@ -73,14 +53,32 @@ public class SubscriptionApi implements Microservice  {
         })
     }, tags={  })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested APIs created over time information is returned ", response = SubscriptionCountListDTO.class),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested subscription count created over time information is returned ", response = SubscriptionCountListDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = SubscriptionCountListDTO.class) })
-    public Response subscriptionSubscriptionsCreatedOverTimeGet(@ApiParam(value = "Defines the ending timestamp of the interval ",required=true) @QueryParam("from") String from
-,@ApiParam(value = "Defines the ending timestamp of the interval ",required=true) @QueryParam("to") String to
-,@ApiParam(value = "api_filter could take two possible values. 'All' or 'My'. In case of 'My', only the current user's Apis will be filtered. ",required=true) @QueryParam("api_filter") String apiFilter
+    public Response subscriptionCountOverTimeGet(@ApiParam(value = "Defines the starting timestamp of the interval ",required=true) @QueryParam("startTime") String startTime
+,@ApiParam(value = "Defines the ending timestamp of the interval ",required=true) @QueryParam("endTime") String endTime
 , @Context Request request)
     throws NotFoundException {
-        return delegate.subscriptionSubscriptionsCreatedOverTimeGet(from,to,apiFilter, request);
+        return delegate.subscriptionCountOverTimeGet(startTime,endTime, request);
+    }
+    @GET
+    @Path("/subscription-info")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Retrieve Subscription details ", notes = "Get Subscription details from summarized data. ", response = SubscriptionInfoListDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={  })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested Subscription Information is returned for the given time period ", response = SubscriptionInfoListDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = SubscriptionInfoListDTO.class) })
+    public Response subscriptionSubscriptionInfoGet(@ApiParam(value = "Defines the starting timestamp of the interval ",required=true) @QueryParam("startTime") String startTime
+,@ApiParam(value = "Defines the ending timestamp of the interval ",required=true) @QueryParam("endTime") String endTime
+, @Context Request request)
+    throws NotFoundException {
+        return delegate.subscriptionSubscriptionInfoGet(startTime,endTime, request);
     }
 }
