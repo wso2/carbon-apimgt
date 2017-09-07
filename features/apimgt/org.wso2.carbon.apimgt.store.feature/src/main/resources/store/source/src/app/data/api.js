@@ -110,7 +110,7 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getApplication(id, callback = null) {
-        var promise_get = this.client.then(
+        let promise_get = this.client.then(
                 (client) => {
                 return client.apis["Application (individual)"].get_applications__applicationId_(
                     {applicationId: id}, this._requestMetaData());
@@ -130,8 +130,7 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getAllApplications(callback = null) {
-        //debugger;
-        var promise_get = this.client.then(
+        let promise_get = this.client.then(
                 (client) => {
                 return client.apis["Application Collection"].get_applications(
                     {}, this._requestMetaData());
@@ -141,6 +140,26 @@ class API {
             return promise_get.then(callback);
         } else {
             return promise_get;
+        }
+    }
+    /**
+     * Get application by id
+     * @param tierLevel
+     * @param callback {function} Function which needs to be called upon success
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getAllTiers(tierLevel, callback = null) {
+        let promise_get_all = this.client.then(
+            (client) => {
+                let req = {authorization :  "Bearer e74a576e-cab9-36ff", requestContentType :"application/json"};
+                return client.apis["Tier Collection"].get_policies__tierLevel_(
+                    {tierLevel:tierLevel}, req);
+            }
+        );
+        if (callback) {
+            return promise_get_all.then(callback);
+        } else {
+            return promise_get_all;
         }
     }
 

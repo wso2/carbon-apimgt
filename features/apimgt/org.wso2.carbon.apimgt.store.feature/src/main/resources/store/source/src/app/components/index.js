@@ -23,5 +23,6 @@ import Apis from './Apis/Apis'
 import Login from './Login/Login'
 import Logout from './Logout'
 import Applications from './Applications/Applications'
+import ApplicationCreate from './Applications/Create/ApplicationCreate'
 
-export {Base, Landing, Apis, Login, Logout, Applications}
+export {Base, Landing, Apis, Login, Logout, Applications, ApplicationCreate}

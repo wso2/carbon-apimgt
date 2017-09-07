@@ -182,7 +182,7 @@ class Header extends React.Component {
                                         <Link to="/" style={{color: "#000", textDecoration: 'none'}}>List API</Link>
                                     </MenuItem>
                                     <MenuItem onClick={this.handleRequestCloseMainMenu}>
-                                        <Link to="/applications" style={{color: "#000", textDecoration: 'none'}}>Endpoints</Link>
+                                        <Link to="/applications" style={{color: "#000", textDecoration: 'none'}}>Applications</Link>
                                     </MenuItem>
                                 </Menu>
                                 {/* User menu */}
