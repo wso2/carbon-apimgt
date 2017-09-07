@@ -118,9 +118,6 @@ public class ApiStoreSdkGenerationManager {
             handleSdkGenException("Error creating temporary directory or json file for swagger definition!", e);
         }
 
-
-        //FileOutputStream swaggerFileOutputStream=null;
-        //OutputStreamWriter swaggerOutputStreamWriter=null;
         String tempZipFilePath = "";
         if (swaggerDefJsonFile.exists()) {
 
@@ -128,7 +125,6 @@ public class ApiStoreSdkGenerationManager {
                     new OutputStreamWriter(
                             new FileOutputStream(swaggerDefJsonFile.getAbsoluteFile()), "UTF-8"))) {
 
-                //swaggerFileWriter.write(formattedSwaggerDefinitionForSdk);
                 swaggerFileWriter.write(formattedSwaggerDefinitionForSdk);
             } catch (IOException e) {
                 handleSdkGenException("Error writing swagger definition to file in " +
