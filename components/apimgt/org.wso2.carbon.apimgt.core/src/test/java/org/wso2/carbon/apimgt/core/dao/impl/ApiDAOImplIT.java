@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.Comment;
@@ -124,6 +125,9 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
                 "EmployeeAPI", "NonAdminAPI"};
         Assert.assertTrue(resultAPINameList.containsAll(Arrays.asList(expectedAPINames)) &&
                 Arrays.asList(expectedAPINames).containsAll(resultAPINameList));
+        userRoles.clear();
+        apiResults.clear();
+        resultAPINameList.clear();
 
     }
 
@@ -191,6 +195,11 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         userRoles.clear();
         attributeMap.clear();
 
+        //cleanup added APIs
+        ApiDAO apiDAO = DAOFactory.getApiDAO();
+        for (String apiID : apiIDList) {
+            apiDAO.deleteAPI(apiID);
+        }
     }
 
     /**
@@ -419,7 +428,12 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         API apiFromDB = apiDAO.getAPI(api.getId());
 
-        Assert.assertNull(apiDAO.getAPI(duplicateAPI.getId()));
+        try {
+            apiDAO.getAPI(duplicateAPI.getId());
+        } catch (APIMgtDAOException e) {
+            Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.API_NOT_FOUND);
+        }
+
         Assert.assertEquals(apiDAO.getAPIs(new HashSet<String>(), api.getProvider()).size(), 1);
         Assert.assertEquals(apiFromDB, api, TestUtil.printDiff(apiFromDB, api));
     }
@@ -467,8 +481,13 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         API apiFromDB = apiDAO.getAPI(api.getId());
 
-        Assert.assertNull(apiDAO.getAPI(duplicateAPI.getId()));
-        Assert.assertEquals(apiDAO.getAPIs(new HashSet<String>(), api.getProvider()).size(), 1);
+        try {
+            apiDAO.getAPI(duplicateAPI.getId());
+        } catch (APIMgtDAOException e) {
+            Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.API_NOT_FOUND);
+        }
+
+         Assert.assertEquals(apiDAO.getAPIs(new HashSet<String>(), api.getProvider()).size(), 1);
         Assert.assertEquals(apiFromDB, api, TestUtil.printDiff(apiFromDB, api));
     }
 
@@ -1147,8 +1166,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         apiDAO.deleteAPI(api.getId());
 
-        API deletedAPI = apiDAO.getAPI(api.getId());
-        Assert.assertNull(deletedAPI);
+        Assert.assertFalse(apiDAO.isAPIExists(api.getId()));
     }
 
     @Test
@@ -1159,7 +1177,9 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         testAddGetEndpoint();
         apiDAO.addAPI(api);
 
-        builder = SampleTestObjectCreator.createAlternativeAPI();
+        HashMap permissionMap = new HashMap();
+        permissionMap.put(APIMgtConstants.Permission.UPDATE, APIMgtConstants.Permission.UPDATE_PERMISSION);
+        builder = SampleTestObjectCreator.createAlternativeAPI().permissionMap(permissionMap);
         API substituteAPI = builder.build();
 
         apiDAO.updateAPI(api.getId(), substituteAPI);
@@ -1319,8 +1339,13 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
         apiDAO.addEndpoint(endpoint);
         apiDAO.deleteEndpoint(endpoint.getId());
-        Endpoint retrieved = apiDAO.getEndpoint(endpoint.getId());
-        Assert.assertNull(retrieved);
+
+        try {
+            apiDAO.getEndpoint(endpoint.getId());
+            Assert.fail("Exception not thrown when getting non existing endpoint");
+        } catch (APIMgtDAOException e) {
+            Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.ENDPOINT_NOT_FOUND);
+        }
     }
 
     @Test
@@ -1413,8 +1438,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
             // Just catch the exception so that we can continue execution
         }
 
-        API apiFromDB = apiDAO.getAPI(api.getId());
-        Assert.assertNull(apiFromDB);
+        Assert.assertFalse(apiDAO.isAPIExists(api.getId()));
     }
 
     @Test
@@ -1680,6 +1704,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotNull(lastUpdatedTimeAfterUpdating);
         Assert.assertNotEquals(lastUpdatedTime1, lastUpdatedTimeAfterUpdating);
         Assert.assertEquals(newCommentText, commentFromDB.getCommentText());
+
     }
 
     @Test
@@ -1844,7 +1869,9 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         API api = builder.build();
         testAddGetEndpoint();
         apiDAO.addAPI(api);
-        builder = SampleTestObjectCreator.createAlternativeAPI().wsdlUri(null);
+        Map permissionMap = new HashMap();
+        permissionMap.put(APIMgtConstants.Permission.UPDATE, APIMgtConstants.Permission.UPDATE_PERMISSION);
+        builder = SampleTestObjectCreator.createAlternativeAPI().permissionMap(permissionMap).wsdlUri(null);
         API substituteAPI = builder.build();
         apiDAO.updateAPI(api.getId(), substituteAPI);
         API apiFromDB = apiDAO.getAPI(api.getId());
@@ -2039,6 +2066,6 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
 
         //Delete Composite API
         apiDAO.deleteCompositeApi(compositeAPI.getId());
-        Assert.assertNull(apiDAO.getCompositeAPI(compositeAPI.getId()));
+        Assert.assertFalse(apiDAO.isAPIExists(compositeAPI.getId()));
     }
 }

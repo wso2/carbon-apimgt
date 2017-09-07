@@ -29,7 +29,6 @@ import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.core.exception.BlockConditionAlreadyExistsException;
 import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
@@ -67,15 +66,6 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotEquals(fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy, "Policy "
                 + "fingerprint expected to be different before and after updating for policy: "
                 + policy.getPolicyName());
-        updatedAPIPolicy.setUuid(null);
-        //test for exception
-        try {
-            policyDAO.updateApiPolicy(updatedAPIPolicy);
-            Assert.fail("Exception expected, but not thrown.");
-        } catch (APIMgtDAOException ex) {
-            Assert.assertEquals(ex.getMessage(),
-                    "Policy uuid is not found, unable to update policy: " + updatedAPIPolicy.getPolicyName());
-        }
     }
 
     @Test
@@ -97,15 +87,6 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotEquals(fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy, "Policy "
                 + "fingerprint expected to be different before and after updating for policy: "
                 + policy.getPolicyName());
-        //Test for exception uuid null
-        updatedPolicy.setUuid(null);
-        try {
-            policyDAO.updateApplicationPolicy(updatedPolicy);
-            Assert.fail("Exception expected, but not thrown.");
-        } catch (APIMgtDAOException ex) {
-            Assert.assertEquals(ex.getMessage(),
-                    "Policy uuid is not found, unable to update policy: " + updatedPolicy.getPolicyName());
-        }
     }
 
     @Test
@@ -126,15 +107,6 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         Assert.assertNotNull(fingerprintAfterUpdatingPolicy);
         Assert.assertNotEquals(fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy, TestUtil.printDiff
                 (fingerprintBeforeUpdatingPolicy, fingerprintAfterUpdatingPolicy));
-
-        updatedPolicy.setUuid(null);
-        try {
-            policyDAO.updateSubscriptionPolicy(updatedPolicy);
-            Assert.fail("Exception expected, but not thrown.");
-        } catch (APIMgtDAOException ex) {
-            Assert.assertEquals(ex.getMessage(),
-                    "Policy uuid is not found, unable to update policy: " + updatedPolicy.getPolicyName());
-        }
     }
 
     @Test (description = "Add, Get and Delete an API policy")
@@ -516,7 +488,7 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
         policyDAO.addBlockConditions(blockConditionIPRange);
         try {
             policyDAO.addBlockConditions(blockConditionIPRange);
-        } catch (BlockConditionAlreadyExistsException ex) {
+        } catch (APIMgtDAOException ex) {
             Assert.assertEquals(ex.getMessage(),
                     "Condition with type: " + blockConditionIPRange.getConditionType() + ", value: "
                             + blockConditionIPRange.getConditionValue() + " already exists");

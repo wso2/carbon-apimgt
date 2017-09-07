@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.core.exception;
 /**
  * This class is handling exception if a block condition already exists.
  */
-public class BlockConditionAlreadyExistsException extends APIMgtDAOException {
+public class BlockConditionAlreadyExistsException extends APIManagementException {
 
     public BlockConditionAlreadyExistsException(String msg) {
         super(msg);

@@ -56,9 +56,8 @@ public class LabelDAOImpl implements LabelDAO {
                 }
             }
         } catch (SQLException e) {
-            String message = "Error while retrieving labels";
-            log.error(message, e);
-            throw new APIMgtDAOException(e);
+            String message = DAOUtil.DAO_ERROR_PREFIX + "retrieving labels";
+            throw new APIMgtDAOException(message, e);
         }
 
         return labels;
@@ -92,9 +91,8 @@ public class LabelDAOImpl implements LabelDAO {
                     }
                 }
             } catch (SQLException e) {
-                String message = "Error while adding label data";
-                log.error(message, e);
-                throw new APIMgtDAOException(e);
+                String message = DAOUtil.DAO_ERROR_PREFIX + "adding label data";
+                throw new APIMgtDAOException(message, e);
             }
         }
     }
@@ -120,7 +118,7 @@ public class LabelDAOImpl implements LabelDAO {
                 insertAccessUrlMappings(label.getId(), label.getAccessUrls());
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "adding label", e);
         }
     }
 
@@ -153,9 +151,8 @@ public class LabelDAOImpl implements LabelDAO {
                 }
                 statement.executeBatch();
             } catch (SQLException e) {
-                String message = "Error while adding access url mappings for [label id] " + labelId;
-                log.error(message, e);
-                throw new APIMgtDAOException(e);
+                String message = DAOUtil.DAO_ERROR_PREFIX + "adding access url mappings for [label id] " + labelId;
+                throw new APIMgtDAOException(message, e);
             }
         }
     }
@@ -182,9 +179,8 @@ public class LabelDAOImpl implements LabelDAO {
                 }
             }
         } catch (SQLException e) {
-            String message = "Error while retrieving access url for [label id] " + labelId;
-            log.error(message, e);
-            throw new APIMgtDAOException(e);
+            String message = DAOUtil.DAO_ERROR_PREFIX + "retrieving access url for [label id] " + labelId;
+            throw new APIMgtDAOException(message, e);
         }
 
         return accessUrls;
@@ -212,9 +208,8 @@ public class LabelDAOImpl implements LabelDAO {
                 }
             }
         } catch (SQLException e) {
-            String message = "Error while retrieving label [label name] " + labelName;
-            log.error(message, e);
-            throw new APIMgtDAOException(e);
+            String message = DAOUtil.DAO_ERROR_PREFIX + "retrieving label [label name] " + labelName;
+            throw new APIMgtDAOException(message, e);
         }
 
     }
@@ -250,9 +245,8 @@ public class LabelDAOImpl implements LabelDAO {
                     }
                 }
             } catch (SQLException e) {
-                String message = "Error while retrieving labels";
-                log.error(message, e);
-                throw new APIMgtDAOException(e);
+                String message = DAOUtil.DAO_ERROR_PREFIX + "retrieving labels";
+                throw new APIMgtDAOException(message, e);
             }
         }
 
@@ -333,14 +327,14 @@ public class LabelDAOImpl implements LabelDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                String message = "Error while deleting the label [label id] " + labelId;
-                log.error(message, e);
-                throw new APIMgtDAOException(e);
+                String message = DAOUtil.DAO_ERROR_PREFIX + "deleting the label [label id] " + labelId;
+                throw new APIMgtDAOException(message, e);
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            String message = DAOUtil.DAO_ERROR_PREFIX + "deleting the label [label id] " + labelId;
+            throw new APIMgtDAOException(message, e);
         }
 
     }
@@ -356,9 +350,8 @@ public class LabelDAOImpl implements LabelDAO {
             deleteLabelAccessUrlMappings(labelId);
             insertAccessUrlMappings(labelId, updatedLabel.getAccessUrls());
         } catch (SQLException e) {
-            String message = "Error while updating the label [label name] " + updatedLabel.getName();
-            log.error(message, e);
-            throw new APIMgtDAOException(e);
+            String message = DAOUtil.DAO_ERROR_PREFIX + "updating the label [label name] " + updatedLabel.getName();
+            throw new APIMgtDAOException(message, e);
         }
 
     }
@@ -382,14 +375,15 @@ public class LabelDAOImpl implements LabelDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                String message = "Error while deleting the label access url mappings [label id] " + labelId;
-                log.error(message, e);
-                throw new APIMgtDAOException(e);
+                String message = DAOUtil.DAO_ERROR_PREFIX + "deleting the label access url mappings [label id] "
+                        + labelId;
+                throw new APIMgtDAOException(message, e);
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            String message = DAOUtil.DAO_ERROR_PREFIX + "deleting the label access url mappings [label id] " + labelId;
+            throw new APIMgtDAOException(message, e);
         }
 
     }
@@ -427,7 +421,7 @@ public class LabelDAOImpl implements LabelDAO {
                 return true;
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "checking if labels exist", e);
         }
         return false;
     }

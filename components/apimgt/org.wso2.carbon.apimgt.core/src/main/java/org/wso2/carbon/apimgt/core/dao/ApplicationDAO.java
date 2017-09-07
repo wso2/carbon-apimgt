@@ -37,10 +37,9 @@ public interface ApplicationDAO {
      * Retrieve a given instance of an Application
      *
      * @param appId   The UUID that uniquely identifies an Application
-     * @return valid {@link Application} object or null
+     * @return valid {@link Application} object
      * @throws APIMgtDAOException   If failed to get application.
      */
-    @CheckForNull
     Application getApplication(String appId) throws APIMgtDAOException;
 
     /**

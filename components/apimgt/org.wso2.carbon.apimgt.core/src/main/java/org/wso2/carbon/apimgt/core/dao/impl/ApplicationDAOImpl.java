@@ -83,7 +83,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 application.setApplicationKeys(getApplicationKeys(appId));
             }
         } catch (SQLException ex) {
-            throw new APIMgtDAOException(ex);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting application: " + appId, ex);
         }
         return application;
     }
@@ -113,7 +113,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                         ExceptionCodes.APPLICATION_NOT_FOUND);
             }
         } catch (SQLException ex) {
-            throw new APIMgtDAOException(ex);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting application(name: " + appName + ", " +
+                    "ownerId: " + ownerId + ")", ex);
         }
         return application;
     }
@@ -135,7 +136,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 return this.createApplicationsFromResultSet(rs);
             }
         } catch (SQLException ex) {
-            throw new APIMgtDAOException(ex);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting applications for user " + ownerId, ex);
         }
     }
 
@@ -203,12 +204,13 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 conn.commit();
             } catch (SQLException ex) {
                 conn.rollback();
-                throw new APIMgtDAOException(ex);
+                throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "adding application: " + application.getId(),
+                        ex);
             } finally {
                 conn.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException ex) {
-            throw new APIMgtDAOException(ex);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "adding application: " + application.getId(), ex);
         }
     }
 
@@ -305,12 +307,12 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 conn.commit();
             } catch (SQLException ex) {
                 conn.rollback();
-                throw new APIMgtDAOException(ex);
+                throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "updating application: " + appID, ex);
             } finally {
                 conn.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException ex) {
-            throw new APIMgtDAOException(ex);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "updating application: " + appID, ex);
         }
     }
 
@@ -332,12 +334,12 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 conn.commit();
             } catch (SQLException ex) {
                 conn.rollback();
-                throw new APIMgtDAOException(ex);
+                throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "deleting application: " + appID, ex);
             } finally {
                 conn.setAutoCommit(originalAutoCommitState);
             }
         } catch (SQLException ex) {
-            throw new APIMgtDAOException(ex);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "deleting application: " + appID, ex);
         }
     }
 
@@ -350,7 +352,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
      */
     @Override
     public boolean isApplicationNameExists(String appName) throws APIMgtDAOException {
-        final String query = "SELECT UUID FROM AM_APPLICATION WHERE NAME = ?";
+        final String query = "SELECT 1 FROM AM_APPLICATION WHERE NAME = ?";
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, appName);
@@ -361,7 +363,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 }
             }
         } catch (SQLException ex) {
-            throw new APIMgtDAOException(ex);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "checking if application: " + appName + " exists",
+                    ex);
         }
         return false;
     }
@@ -381,12 +384,14 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 conn.commit();
             } catch (SQLException ex) {
                 conn.rollback();
-                throw new APIMgtDAOException(ex);
+                throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "adding application keys(appId: " + appId + ")",
+                        ex);
             } finally {
                 conn.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException ex) {
-            throw new APIMgtDAOException(ex);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "adding application keys(appId: " +
+                    appId + ")", ex);
         }
     }
 
@@ -406,7 +411,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 }
             }
         } catch (SQLException ex) {
-            throw new APIMgtDAOException(ex);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    String.format("getting application keys(appId: %s)", appId), ex);
         }
         return keyList;
     }
@@ -431,7 +437,8 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 }
             }
         } catch (SQLException ex) {
-            throw new APIMgtDAOException(ex);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    String.format("getting application keys(appId: %s, keyType: %s)", appId, keyType), ex);
         }
     }
 
@@ -457,7 +464,7 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 }
             }
         } catch (SQLException ex) {
-            throw new APIMgtDAOException(ex);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting all applications", ex);
         }
         return applicationList;
     }
@@ -501,12 +508,14 @@ public class ApplicationDAOImpl implements ApplicationDAO {
                 conn.commit();
             } catch (SQLException ex) {
                 conn.rollback();
-                throw new APIMgtDAOException(ex);
+                throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "updating application state(appId: " +
+                        appID + ", state: " + state + ")", ex);
             } finally {
                 conn.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException ex) {
-            throw new APIMgtDAOException(ex);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "updating application state(appId: " +
+                    appID + ", state: " + state + ")", ex);
         }
         
     }

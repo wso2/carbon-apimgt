@@ -58,6 +58,7 @@ public class APIMgtAdminServiceImplTestCase {
     private static final String API_VERSION = "1.0.0";
     private static final String API_ID = "erbde56e-4512-498d-b6dc-85a6f1f8b058";
     private static final String API_CONTEXT = "/testContext";
+    private static final String POLICY_LEVEL = "policyLevel";
     private static final String POLICY_NAME = "policyName";
     private static final String POLICY_ID = "drbde46a-4512-498e-b6dr-85a5f1f8b055";
     private static final String BLOCK_CONDITION_TYPE = "Test_condition_type";

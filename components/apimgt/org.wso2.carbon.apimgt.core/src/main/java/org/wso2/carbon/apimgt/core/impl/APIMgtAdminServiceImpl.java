@@ -417,7 +417,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         } catch (APIMgtDAOException e) {
             String errorMessage = "Couldn't retrieve gateway configuration for apiId " + apiId;
             log.error(errorMessage, e);
-            throw new APIConfigRetrievalException(errorMessage, ExceptionCodes.APIMGT_DAO_EXCEPTION);
+            throw new APIConfigRetrievalException(errorMessage, e.getErrorHandler());
         }
     }
 

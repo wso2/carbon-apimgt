@@ -37,8 +37,10 @@ import java.util.Locale;
  */
 public class DAOUtil {
     private static final Logger log = LoggerFactory.getLogger(DAOUtil.class);
-    protected static final String DB_NAME_POSTGRESQL = "PostgreSQL";
+    private static final String DB_NAME_POSTGRESQL = "PostgreSQL";
     private static DataSource dataSource;
+
+    static final String DAO_ERROR_PREFIX = "Error occurred in DAO layer while ";
 
     public static synchronized void initialize(DataSource dataSource) {
         if (DAOUtil.dataSource != null) {
