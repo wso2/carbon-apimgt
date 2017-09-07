@@ -18,6 +18,8 @@ import org.wso2.carbon.apimgt.core.exception.ApiStoreSdkGenerationException;
 import org.wso2.carbon.apimgt.core.models.API;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @RunWith(PowerMockRunner.class)
@@ -57,8 +59,69 @@ public class ApiStoreSdkGenerationManagerTestCase {
         Assert.assertTrue(sdkZipFile.exists() && sdkZipFile.length() > MIN_SDK_SIZE);
     }
 
-    private static void printTestMethodName() {
-        log.info("------------------ Test method: " + Thread.currentThread().getStackTrace()[2].getMethodName() +
-                " ------------------");
+    @Test
+    public void testGetSdkGenLanguages() {
+        ApiStoreSdkGenerationManager sdkGenerationManager = new ApiStoreSdkGenerationManager();
+        Map<String, String> map = new HashMap<String, String>() { {
+            put("python", "io.swagger.codegen.languages.PythonClientCodegen");
+            put("java", "io.swagger.codegen.languages.JavaClientCodegen");
+            put("android", "io.swagger.codegen.languages.AndroidClientCodegen");
+        } };
+        Assert.assertEquals(map, sdkGenerationManager.getSdkGenLanguages());
     }
+
+    @Test(expected = ApiStoreSdkGenerationException.class)
+    public void testGenerateSdkForApiBlankApiId() throws APIManagementException, ApiStoreSdkGenerationException {
+
+        ApiStoreSdkGenerationManager sdkGenerationManager = new ApiStoreSdkGenerationManager();
+        sdkGenerationManager.generateSdkForApi("", LANGUAGE, USER);
+    }
+
+    @Test(expected = ApiStoreSdkGenerationException.class)
+    public void testGenerateSdkForApiBlankLanguage() throws APIManagementException, ApiStoreSdkGenerationException {
+
+        String apiId = UUID.randomUUID().toString();
+        ApiStoreSdkGenerationManager sdkGenerationManager = new ApiStoreSdkGenerationManager();
+        sdkGenerationManager.generateSdkForApi(apiId, "", USER);
+    }
+
+    @Test(expected = APIManagementException.class)
+    public void testGenerateSdkForApiNullApi() throws APIManagementException, ApiStoreSdkGenerationException {
+        String apiId = UUID.randomUUID().toString();
+
+        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
+        PowerMockito.mockStatic(APIManagerFactory.class);
+        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        Mockito.when(instance.getAPIConsumer(USER)).thenReturn(apiStore);
+
+        Mockito.when(apiStore.getAPIbyUUID(apiId)).thenReturn(null);
+
+        ApiStoreSdkGenerationManager sdkGenerationManager = new ApiStoreSdkGenerationManager();
+        sdkGenerationManager.generateSdkForApi(apiId, LANGUAGE, USER);
+
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testGenerateSdkForApiIncorrectSwagger() throws APIManagementException, ApiStoreSdkGenerationException {
+        String apiId = UUID.randomUUID().toString();
+
+        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
+        PowerMockito.mockStatic(APIManagerFactory.class);
+        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        Mockito.when(instance.getAPIConsumer(USER)).thenReturn(apiStore);
+
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        Mockito.when(apiStore.getAPIbyUUID(apiId)).thenReturn(api);
+        Mockito.when(apiStore.getApiSwaggerDefinition(apiId)).thenReturn(null);
+
+        ApiStoreSdkGenerationManager sdkGenerationManager = new ApiStoreSdkGenerationManager();
+        sdkGenerationManager.generateSdkForApi(apiId, LANGUAGE, USER);
+
+    }
+
+
 }

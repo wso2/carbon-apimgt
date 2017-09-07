@@ -43,8 +43,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -144,7 +147,12 @@ public class ApiStoreSdkGenerationManager {
             handleSdkGenException("Swagger definition file not found!");
         }
 
-
+        try {
+            recursiveDeleteOnExit(tempSdkGenDir);
+        } catch (IOException e) {
+            handleSdkGenException("Error while deleting temporary directory " +
+                    tempSdkGenDir, e);
+        }
         return tempZipFilePath;
 
     }
@@ -187,9 +195,22 @@ public class ApiStoreSdkGenerationManager {
     }
 
 
-    /*public static ApiStoreSdkGenerationManager getSdkGenerationManager(){
-        return new ApiStoreSdkGenerationManager();
-    }*/
+    public static void recursiveDeleteOnExit(Path path) throws IOException {
+        Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+
+            public FileVisitResult visitFile(Path file,
+                                             @SuppressWarnings("unused") BasicFileAttributes attrs) {
+                file.toFile().deleteOnExit();
+                return FileVisitResult.CONTINUE;
+            }
+
+            public FileVisitResult preVisitDirectory(Path dir,
+                                                     @SuppressWarnings("unused") BasicFileAttributes attrs) {
+                dir.toFile().deleteOnExit();
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
 
 
 }
