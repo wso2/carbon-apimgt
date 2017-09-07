@@ -577,6 +577,7 @@
                 <groupId>org.codehaus.plexus</groupId>
                 <artifactId>plexus-utils</artifactId>
                 <version>1.5.7</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
