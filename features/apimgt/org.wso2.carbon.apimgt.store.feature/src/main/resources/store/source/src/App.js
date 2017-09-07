@@ -19,7 +19,7 @@
 import React, {Component} from 'react'
 
 import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom'
-import {Apis, Applications, Base, Login, Logout } from './app/components'
+import {Apis, Applications, ApplicationCreate, Base, Login, Logout } from './app/components'
 import {PageNotFound} from './app/components/Base/Errors'
 import AuthManager from './app/data/AuthManager'
 import qs from 'qs'
@@ -64,6 +64,7 @@ class Protected extends Component {
                         <Redirect exact from="/" to="/apis"/>
                         <Route path={"/apis"} component={Apis} />
                         <Route path={"/applications"} component={Applications} />
+                        <Route path={"/application/create"} component={ApplicationCreate} />
                         <Route component={PageNotFound}/>
                     </Switch>
                 </Base>

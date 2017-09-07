@@ -21,6 +21,9 @@ import { Link } from 'react-router-dom';
 import Button from 'material-ui/Button';
 import API from '../../../data/api.js'
 
+import Grid from 'material-ui/Grid';
+import Typography from 'material-ui/Typography';
+import { Delete, Edit, CreateNewFolder, Description  }from 'material-ui-icons';
 import PropTypes from 'prop-types';
 import Table, {
     TableBody,
@@ -130,25 +133,27 @@ class Listing extends Component {
         const { data, order, orderBy, selected } = this.state;
 
         return (
-            <div>
-                <div className="page-header" id="Message">
-                    <h2>Applications</h2>
-                </div>
 
-                <Link to={"/application/create"}>
-                    <Button raised>
-                            Add Application
-                    </Button>
-                </Link>
-                <div>
-                    <p>An application is a logical collection of APIs. Applications allow you to use a single access
-                       token
-                       to invoke a collection of APIs and to subscribe to one API multiple times with different SLA
-                       levels.
-                       The DefaultApplication is pre-created and allows unlimited access by default.
+        <Grid container style={{paddingLeft:"40px"}}>
+            <Grid item xs={12}>
+                <Paper style={{display:"flex"}}>
+                    <Typography type="display2" gutterBottom className="page-title">
+                        Applications
+                    </Typography>
+                    <Link to={"/application/create"}>
+                        <Button aria-owns="simple-menu" aria-haspopup="true" >
+                            <CreateNewFolder /> Add Application
+                         </Button>
+                    </Link>
+                </Paper>
+            </Grid>
+            <Grid item xs={12} sm={6} md={9} lg={9} xl={10} >
+                <Paper style={{paddingLeft:"40px"}}>
+                    <p>
+                        An application is a logical collection of APIs. Applications allow you to use a single access
+                        token to invoke a collection of APIs and to subscribe to one API multiple times with different
+                        SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.
                     </p>
-                </div>
-                <Paper>
                     <Table>
                         <ApplicationTableHead order={order} orderBy={orderBy} onRequestSort={this.handleRequestSort}/>
                         <TableBody>
@@ -160,6 +165,7 @@ class Listing extends Component {
                                                 {n.name}
                                             </Link>
                                         </TableCell>
+
                                         <TableCell disablePadding>
                                             {n.throttlingTier}
                                         </TableCell>
@@ -178,7 +184,8 @@ class Listing extends Component {
                         </TableBody>
                     </Table>
                 </Paper>
-            </div>
+            </Grid>
+        </Grid>
         );
     }
 }
