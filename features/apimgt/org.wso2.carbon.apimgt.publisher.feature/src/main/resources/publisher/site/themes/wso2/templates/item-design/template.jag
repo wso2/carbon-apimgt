@@ -137,7 +137,7 @@
 													<p id="name_help" class="hide"><%=i18n.localize("Display name to be shown in the API Store.")%></p>
 												</label>
 												<div class="col-sm-9">
-													<input type="text" class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="name" name="name" autofocus="autofocus" value=""/>
+													<input type="text" class="form-control required validAPIName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="name" name="name" autofocus="autofocus" value=""/>
 												</div>
 											</div>
 
