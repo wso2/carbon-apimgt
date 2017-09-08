@@ -61,7 +61,7 @@ public interface APIDefinition {
      * @return Map of the scopes
      * @throws APIManagementException If error occurs while parsing swagger resources.
      */
-    Map<String, Scope> getScope(String resourceConfigJSON) throws APIManagementException;
+    Map<String, Scope> getScopesFromSecurityDefinition(String resourceConfigJSON) throws APIManagementException;
 
     /**
      * This method extracts the scope from the API definition matching to a resource path

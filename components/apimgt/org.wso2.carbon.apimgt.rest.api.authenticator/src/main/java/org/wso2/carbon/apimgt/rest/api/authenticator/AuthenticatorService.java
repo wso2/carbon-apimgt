@@ -271,7 +271,8 @@ public class AuthenticatorService {
                 //Todo: when all swaggers modified with no vendor extension, following swagger parser should be modified.
                 //todo: for now only publisher swagger have been modified for no vendor extensions
                 if (AuthenticatorConstants.PUBLISHER_APPLICATION.equals(appName)) {
-                    applicationScopesMap = apiDefinitionFromSwagger20.getScope(applicationRestAPI);
+                    applicationScopesMap = apiDefinitionFromSwagger20
+                            .getScopesFromSecurityDefinition(applicationRestAPI);
                 } else {
                     applicationScopesMap = apiDefinitionFromSwagger20.getScopes(applicationRestAPI);
                 }

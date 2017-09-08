@@ -210,7 +210,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         //todo:remove vendor extensions scope retraction (remove else part)
         //retrieve scopes depending on OAuth2Security definitions availability
         if (swagger.getSecurityDefinitions() != null) {
-            scopeMap = getScope(resourceConfigsJSON.toString());
+            scopeMap = getScopesFromSecurityDefinition(resourceConfigsJSON.toString());
             for (Map.Entry<String, Path> resourceEntry : resourceList.entrySet()) {
                 Path resource = resourceEntry.getValue();
                 UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
@@ -290,7 +290,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     }
 
     @Override
-    public Map<String, Scope> getScope(String resourceConfigJSON) throws APIManagementException {
+    public Map<String, Scope> getScopesFromSecurityDefinition(String resourceConfigJSON) throws APIManagementException {
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigJSON);
         String basePath = swagger.getBasePath();
