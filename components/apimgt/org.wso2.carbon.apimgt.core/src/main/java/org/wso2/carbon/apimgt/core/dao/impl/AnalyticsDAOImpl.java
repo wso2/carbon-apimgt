@@ -98,7 +98,7 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
     public List<APICount> getAPICount(String fromTimestamp, String toTimestamp)
             throws APIMgtDAOException {
         final String query = "SELECT COUNT(UUID) AS count, CREATED_TIME AS time FROM AM_API WHERE "
-                + "(CREATED_TIME BETWEEN ? AND ?) AND CREATED_BY = ? GROUP BY CREATED_TIME ORDER BY "
+                + "(CREATED_TIME BETWEEN ? AND ?) GROUP BY CREATED_TIME ORDER BY "
                 + "CREATED_TIME ASC";
 
         List<APICount> apiInfoList = new ArrayList<>();
@@ -209,12 +209,11 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
             toTimestamp) throws APIMgtDAOException {
         final String query;
 
-        query = "SELECT COUNT(subs.UUID) AS COUNT, CREATED_TIME AS time " +
+        query = "SELECT COUNT(subs.UUID) AS COUNT, subs.CREATED_TIME AS time " +
                 "FROM AM_SUBSCRIPTION subs, AM_API  api  " +
-                "WHERE (CREATED_TIME BETWEEN ? AND ?) " +
+                "WHERE (subs.CREATED_TIME BETWEEN ? AND ?) " +
                 "AND  subs.api_id=api.uuid " +
-                "AND api.created_by=? " +
-                "GROUP BY CREATED_TIME ORDER BY CREATED_TIME ASC;";
+                "GROUP BY subs.CREATED_TIME ORDER BY subs.CREATED_TIME ASC;";
 
         List<SubscriptionCount> subscriptionCountList = new ArrayList<>();
         try (Connection connection = DAOUtil.getConnection();
@@ -271,8 +270,7 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                 "WHERE (sub.CREATED_TIME BETWEEN ? AND ?) " +
                 "AND api.UUID = sub.API_ID " +
                 "AND sub.APPLICATION_ID = app.UUID " +
-                "AND sub.TIER_ID = policy.UUID " +
-                "AND sub.CREATED_BY = ?";
+                "AND sub.TIER_ID = policy.UUID ";
 
         List<SubscriptionInfo> subscriptionInfoList = new ArrayList<>();
         try (Connection connection = DAOUtil.getConnection();

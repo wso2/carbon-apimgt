@@ -241,7 +241,7 @@ paths:
       summary: Get APIs created over time
       security:
         - OAuth2Security:
-           - apim:api_view
+           - apim:subscription_graph
       summary: |
         Retrieve APIs created over time details
       description: |
@@ -280,7 +280,7 @@ paths:
       summary: Get Subscription information
       security:
         - OAuth2Security:
-           - apim:api_view
+           - apim:subscription_graph
       summary: |
         Retrieve Subscription details
       description: |
@@ -618,8 +618,7 @@ definitions:
           Application desciprtion
         example: A calculator Application that supports basic operations
       createdTime:
-        type: integer
-        format: int64
+        type: string
         description: |
           Timestamp
       subscriptionTier:

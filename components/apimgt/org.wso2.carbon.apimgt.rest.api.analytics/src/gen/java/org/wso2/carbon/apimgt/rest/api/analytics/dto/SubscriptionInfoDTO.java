@@ -27,7 +27,7 @@ public class SubscriptionInfoDTO   {
   private String description = null;
 
   @JsonProperty("createdTime")
-  private Long createdTime = null;
+  private String createdTime = null;
 
   @JsonProperty("subscriptionTier")
   private String subscriptionTier = null;
@@ -125,7 +125,7 @@ public class SubscriptionInfoDTO   {
     this.description = description;
   }
 
-  public SubscriptionInfoDTO createdTime(Long createdTime) {
+  public SubscriptionInfoDTO createdTime(String createdTime) {
     this.createdTime = createdTime;
     return this;
   }
@@ -135,11 +135,11 @@ public class SubscriptionInfoDTO   {
    * @return createdTime
   **/
   @ApiModelProperty(value = "Timestamp ")
-  public Long getCreatedTime() {
+  public String getCreatedTime() {
     return createdTime;
   }
 
-  public void setCreatedTime(Long createdTime) {
+  public void setCreatedTime(String createdTime) {
     this.createdTime = createdTime;
   }
 

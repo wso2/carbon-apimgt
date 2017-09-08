@@ -32,8 +32,8 @@ import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
-import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -329,14 +329,14 @@ public class DAOFactory {
             try (Connection connection = DAOUtil.getAnalyticsConnection()) {
                 analyticsDAO = getAnalyticsDaoImplForVendor(connection);
             } catch (SQLException e) {
-                throw new APIMgtDAOException(e);
+                throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting FunctionDAO", e);
             }
         } else {
             // if analytics is not enabled create a normal AMDB data connection to check db driver
             try (Connection connection = DAOUtil.getConnection()) {
                 analyticsDAO = getAnalyticsDaoImplForVendor(connection);
             } catch (SQLException e) {
-                throw new APIMgtDAOException(e);
+                throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting FunctionDAO", e);
             }
         }
         return analyticsDAO;

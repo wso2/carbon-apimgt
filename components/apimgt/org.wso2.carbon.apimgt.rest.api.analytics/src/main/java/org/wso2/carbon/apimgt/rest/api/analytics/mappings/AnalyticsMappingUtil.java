@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionCountListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionInfoListDTO;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -152,7 +153,7 @@ public class AnalyticsMappingUtil {
             subscriptionInfoDTO.setVersion(subscriptionInfo.getVersion());
             subscriptionInfoDTO.setAppName(subscriptionInfo.getAppName());
             subscriptionInfoDTO.setDescription(subscriptionInfo.getDescription());
-            subscriptionInfoDTO.setCreatedTime(subscriptionInfo.getCreatedTime());
+            subscriptionInfoDTO.setCreatedTime(Instant.ofEpochMilli(subscriptionInfo.getCreatedTime()).toString());
             subscriptionInfoDTO.setSubscriptionStatus(subscriptionInfo.getSubscriptionStatus());
             subscriptionInfoDTO.setSubscriptionTier(subscriptionInfo.getSubscriptionTier());
             subscriptionInfoDTOList.add(subscriptionInfoDTO);

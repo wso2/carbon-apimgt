@@ -49,7 +49,7 @@ public class SubscriptionApi implements Microservice  {
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve APIs created over time details ", notes = "Get application created over time details from summarized data. ", response = SubscriptionCountListDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
-            
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:subscription_graph", description = "View Graphs Releated to subscriptions")
         })
     }, tags={  })
     @io.swagger.annotations.ApiResponses(value = { 
@@ -68,7 +68,7 @@ public class SubscriptionApi implements Microservice  {
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve Subscription details ", notes = "Get Subscription details from summarized data. ", response = SubscriptionInfoListDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
-            
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:subscription_graph", description = "View Graphs Releated to subscriptions")
         })
     }, tags={  })
     @io.swagger.annotations.ApiResponses(value = { 
