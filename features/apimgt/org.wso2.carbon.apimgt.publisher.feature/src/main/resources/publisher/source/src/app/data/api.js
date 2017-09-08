@@ -474,6 +474,19 @@ class API {
     }
 
     /**
+     * Get All Discovered Endpoints.
+     * @returns {Promise} Promised list of discovered endpoints
+     */
+    discoverEndpoints() {
+        return this.client.then(
+            (client) => {
+                return client.apis["Endpoint (Collection)"].get_endpoints_discover_services(
+                    {}, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
      * Get endpoint object by its UUID.
      * @param id {String} UUID of the endpoint
      * @returns {Promise.<TResult>}

@@ -23,48 +23,51 @@ import {Table, Popconfirm, Button, Dropdown, Menu, message} from 'antd';
 
 import API from '../../../data/api'
 
-export default class EndpointsListing extends Component {
+export default class EndpointsDiscover extends Component {
     constructor(props) {
         super(props);
         this.state = {
             endpoints: null,
-            selectedRowKeys: []
+            selectedRowKeys: [],
+            endpointBeingAdded: false,
         };
         this.onSelectChange = this.onSelectChange.bind(this);
-        this.handleEndpointDelete = this.handleEndpointDelete.bind(this);
+        this.handleEndpointsAddtoDB = this.handleEndpointsAddtoDB.bind(this);
     }
 
-    handleEndpointDelete(endpointUuid, name) {
-        const hideMessage = message.loading("Deleting the Endpoint ...", 0);
+    handleEndpointAddtoDB(endpointUuid, name, endpointType, endpointConfig, endpointSecurity, maxTps) {
+        //Todo check if exists in DB
+        const hideMessage = message.loading("Adding the Endpoint to the Database ...", 0);
+        let endpointDefinition = {
+            endpointConfig: endpointConfig,
+            endpointSecurity: endpointSecurity,
+            type: endpointType,
+            name: name,
+            maxTps: maxTPS
+        };
         const api = new API();
-        let promised_delete = api.deleteEndpoint(endpointUuid);
-        promised_delete.then(
+        const promised_addEndpoint = api.addEndpoint(endpointDefinition);
+        return promised_addEndpoint.then(
             response => {
-                if (response.status !== 200) {
-                    console.log(response);
-                    message.error("Something went wrong while deleting the " + name + " Endpoint!");
-                    hideMessage();
-                    return;
-                }
-                message.success(name + " Endpoint deleted successfully!");
-                let endpoints = this.state.endpoints;
-                for (let endpointIndex in endpoints) {
-                    if (endpoints.hasOwnProperty(endpointIndex) && endpoints[endpointIndex].id === endpointUuid) {
-                        endpoints.splice(endpointIndex, 1);
-                        break;
-                    }
-                }
-                this.setState({active: false, endpoints: endpoints});
-                hideMessage();
+                const {name, id} = response.obj;
+                message.success("New endpoint " + name + " created successfully");
+                let redirect_url = "/endpoints/" + id + "/";
+                this.props.history.push(redirect_url);
             }
-        );
+        ).catch(
+            error => {
+                console.error(error);
+                message.error("Error occurred while creating the endpoint!");
+                this.setState({loading: false});
+            }
+        )
     }
 
     componentDidMount() {
         const api = new API();
-        const promised_endpoints = api.getEndpoints();
-        /* TODO: Handle catch case , auth errors and ect ~tmkb*/
-        promised_endpoints.then(
+        const promised_discoveredEndpoints = api.discoverEndpoints();
+        /* TODO: Handle catch case , auth errors and ect ~tmkb ------copied from EndpointListing class*/
+        promised_discoveredEndpoints.then(
             response => {
                 this.setState({endpoints: response.obj.list});
             }
@@ -83,7 +86,6 @@ export default class EndpointsListing extends Component {
             key: 'age',
             sorter: (a, b) => a.name.length - b.name.length,
             render: (text, record) => <Link to={"/endpoints/" + record.id}>{text}</Link>
-            // sortOrder: sortedInfo.columnKey === 'age' && sortedInfo.order,
         }, {
             title: 'Type',
             dataIndex: 'type'
@@ -92,6 +94,10 @@ export default class EndpointsListing extends Component {
             dataIndex: 'endpointConfig',
             render: (text, record, index) => JSON.parse(text).url
         }, {
+            title: 'Service Type',
+            dataIndex: 'endpointConfig',
+            render: (text, record, index) => JSON.parse(text).urlType
+        }, {
             title: 'Max TPS',
             dataIndex: 'maxTps',
             sorter: (a, b) => a.maxTps - b.maxTps,
@@ -99,33 +105,39 @@ export default class EndpointsListing extends Component {
             title: 'Action',
             key: 'action',
             render: (text, record) => {
+                console.log("record");
+                console.log(record);
+                console.log("text");
+                console.log(text);
                 return (
-                    <Popconfirm title="Confirm delete?" onConfirm={() => this.handleEndpointDelete(text.id, text.name)}>
-                        <Button type="danger" icon="delete">Delete</Button>
-                    </Popconfirm>)
+                    <Button type="primary" loading={this.state.endpointBeingAdded}
+                        onClick={this.handleEndpointAddtoDB(text.id, text.name, text.type,
+                        text.endpointConfig, text.endpointSecurity, text.maxTps)}>
+                              Add Endpoint to DB
+                    </Button>)
             }
         }];
         const rowSelection = {
             selectedRowKeys,
             onChange: this.onSelectChange,
         };
-        // check apimgt.core.serviceDiscoveryConfigurations if enabled
+
         const endpointCreatMenu = (
             <Menu>
                 <Menu.Item key="0">
-                    <a target="_blank" rel="noopener noreferrer" href="/endpoints/create">Create new Endpoint</a>
+                    <a target="_blank" rel="noopener noreferrer" href="/endpoints">List</a>
                 </Menu.Item>
                 <Menu.Item key="1">
-                    <a target="_blank" rel="noopener noreferrer" href="/endpoints/discover">Discover Endpoints</a>
+                    <a target="_blank" rel="noopener noreferrer" href="/endpoints/create">Create Custom</a>
                 </Menu.Item>
             </Menu>
         );
         return (
             <div>
                 <div className="api-add-links">
-                    <Dropdown overlay={endpointCreatMenu} placement="topRight">
-                        <Button shape="circle" icon="plus"/>
-                    </Dropdown>
+                    <a className="ant-dropdown-link" href="#">
+                          Global Endpoints <Icon type="down" />
+                    </a>
                 </div>
                 <h3>Global Endpoints</h3>
                 <Table rowSelection={rowSelection} loading={endpoints === null} columns={columns}
