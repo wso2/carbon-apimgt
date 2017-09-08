@@ -2801,7 +2801,7 @@ public class ApiDAOImpl implements ApiDAO {
             }
         }
 
-        throw new APIMgtDAOException("Endpoint: " + endpointId + " does not exist", ExceptionCodes.ENDPOINT_NOT_FOUND);
+        return null;
     }
 
     private Endpoint constructEndPointDetails(ResultSet resultSet) throws SQLException, IOException {
