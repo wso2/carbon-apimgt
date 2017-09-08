@@ -1,5 +1,24 @@
+/*
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.core.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,6 +37,8 @@ import org.wso2.carbon.apimgt.core.exception.ApiStoreSdkGenerationException;
 import org.wso2.carbon.apimgt.core.models.API;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -28,9 +49,21 @@ public class ApiStoreSdkGenerationManagerTestCase {
     private static Logger log = LoggerFactory.getLogger(ApiStoreSdkGenerationManagerTestCase.class);
 
     private static final String USER = "admin";
-    private static final String LANGUAGE = PetStoreSwaggerTestCase.CORRECT_LANGUAGE;
+    private static final String LANGUAGE = "java";
     private static final int MIN_SDK_SIZE = 0;
-    private static final String SWAGGER_PET_STORE = PetStoreSwaggerTestCase.SWAGGER_PET_STORE_CORRECT;
+    private static String swaggerPetStore;
+    private static InputStream inputStream;
+
+    static {
+        try {
+            inputStream = Thread.currentThread()
+                    .getContextClassLoader()
+                    .getResourceAsStream("swaggerPetStoreCorrect.json");
+            swaggerPetStore = IOUtils.toString(inputStream);
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
 
     @Before
     public void init() {
@@ -50,7 +83,7 @@ public class ApiStoreSdkGenerationManagerTestCase {
 
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         Mockito.when(apiStore.getAPIbyUUID(apiId)).thenReturn(api);
-        Mockito.when(apiStore.getApiSwaggerDefinition(apiId)).thenReturn(SWAGGER_PET_STORE);
+        Mockito.when(apiStore.getApiSwaggerDefinition(apiId)).thenReturn(swaggerPetStore);
 
         ApiStoreSdkGenerationManager sdkGenerationManager = new ApiStoreSdkGenerationManager();
         String pathToZip = sdkGenerationManager.generateSdkForApi(apiId, LANGUAGE, USER);
@@ -62,22 +95,24 @@ public class ApiStoreSdkGenerationManagerTestCase {
     @Test
     public void testGetSdkGenLanguages() {
         ApiStoreSdkGenerationManager sdkGenerationManager = new ApiStoreSdkGenerationManager();
-        Map<String, String> map = new HashMap<String, String>() { {
-            put("python", "io.swagger.codegen.languages.PythonClientCodegen");
-            put("java", "io.swagger.codegen.languages.JavaClientCodegen");
-            put("android", "io.swagger.codegen.languages.AndroidClientCodegen");
-        } };
+        Map<String, String> map = new HashMap<String, String>() {
+            {
+                put("python", "io.swagger.codegen.languages.PythonClientCodegen");
+                put("java", "io.swagger.codegen.languages.JavaClientCodegen");
+                put("android", "io.swagger.codegen.languages.AndroidClientCodegen");
+            }
+        };
         Assert.assertEquals(map, sdkGenerationManager.getSdkGenLanguages());
     }
 
-    @Test(expected = ApiStoreSdkGenerationException.class)
+    @Test(expected = APIManagementException.class)
     public void testGenerateSdkForApiBlankApiId() throws APIManagementException, ApiStoreSdkGenerationException {
 
         ApiStoreSdkGenerationManager sdkGenerationManager = new ApiStoreSdkGenerationManager();
         sdkGenerationManager.generateSdkForApi("", LANGUAGE, USER);
     }
 
-    @Test(expected = ApiStoreSdkGenerationException.class)
+    @Test(expected = APIManagementException.class)
     public void testGenerateSdkForApiBlankLanguage() throws APIManagementException, ApiStoreSdkGenerationException {
 
         String apiId = UUID.randomUUID().toString();

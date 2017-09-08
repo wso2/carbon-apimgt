@@ -1,22 +1,21 @@
-/***********************************************************************************************************************
- * *
- * *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- * *
- * *   WSO2 Inc. licenses this file to you under the Apache License,
- * *   Version 2.0 (the "License"); you may not use this file except
- * *   in compliance with the License.
- * *   You may obtain a copy of the License at
- * *
- * *     http://www.apache.org/licenses/LICENSE-2.0
- * *
- * *  Unless required by applicable law or agreed to in writing,
- * *  software distributed under the License is distributed on an
- * *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * *  KIND, either express or implied.  See the License for the
- * *  specific language governing permissions and limitations
- * *  under the License.
- * *
+/*
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
+
 package org.wso2.carbon.apimgt.core.impl;
 
 import io.swagger.codegen.ClientOptInput;
@@ -26,7 +25,8 @@ import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
 
-import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.configuration.APIMConfigurationService;
 import org.wso2.carbon.apimgt.core.configuration.models.SdkLanguageConfigurations;
@@ -56,11 +56,11 @@ import java.util.Map;
  */
 public class ApiStoreSdkGenerationManager {
 
+    private static final Logger log = LoggerFactory.getLogger(ApiStoreSdkGenerationManager.class);
     private Map<String, String> sdkGenLanguages = new HashMap<>();
 
     public ApiStoreSdkGenerationManager() {
-        /*Populate the sdkGenLanguages Map with the supported language configurations from the deployment.yaml
-         or the default configurations.*/
+        //Populate the Map with language configurations from the deployment.yaml or the default configurations.
         SdkLanguageConfigurations sdkLanguageConfigurations = APIMConfigurationService
                 .getInstance()
                 .getApimConfigurations()
@@ -82,9 +82,6 @@ public class ApiStoreSdkGenerationManager {
     public String generateSdkForApi(String apiId, String language, String userName)
             throws ApiStoreSdkGenerationException
             , APIManagementException {
-        if (StringUtils.isBlank(apiId) || StringUtils.isBlank(language)) {
-            handleSdkGenException("API ID or SDK Language should not be null!");
-        }
 
         APIStore apiStore = APIManagerFactory.getInstance().getAPIConsumer(userName);
         API api = apiStore.getAPIbyUUID(apiId);
@@ -126,6 +123,11 @@ public class ApiStoreSdkGenerationManager {
                             new FileOutputStream(swaggerDefJsonFile.getAbsoluteFile()), "UTF-8"))) {
 
                 swaggerFileWriter.write(formattedSwaggerDefinitionForSdk);
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Writing the swagger definition was sucessful to file " +
+                            swaggerDefJsonFile.getAbsolutePath());
+                }
             } catch (IOException e) {
                 handleSdkGenException("Error writing swagger definition to file in " +
                         tempSdkGenDir, e);
@@ -139,11 +141,15 @@ public class ApiStoreSdkGenerationManager {
             APIFileUtils.archiveDirectory(tempSdkGenDir.toString(),
                     tempSdkGenDir.toString(),
                     archiveName);
+            if (log.isDebugEnabled()) {
+                log.debug("Generating the archive was successful for directory " + tempSdkGenDir.toString());
+            }
         } else {
             handleSdkGenException("Swagger definition file not found!");
         }
 
         try {
+            //Set deleteOnExit property to generated SDK directory, all sub directories and files.
             recursiveDeleteOnExit(tempSdkGenDir);
         } catch (IOException e) {
             handleSdkGenException("Error while deleting temporary directory " +
@@ -186,11 +192,17 @@ public class ApiStoreSdkGenerationManager {
      * @param throwable    throwable exception caught
      * @throws ApiStoreSdkGenerationException
      */
-    private void handleSdkGenException(String errorMessage, Throwable throwable) throws ApiStoreSdkGenerationException {
+    private void handleSdkGenException(String errorMessage, Throwable throwable)
+            throws ApiStoreSdkGenerationException {
         throw new ApiStoreSdkGenerationException(errorMessage, throwable);
     }
 
-
+    /**
+     * This method is to delete temporary directory created during SDK generation.
+     *
+     * @param path Path to the root directory which needs to be deleted on JVM exit.
+     * @throws IOException
+     */
     public static void recursiveDeleteOnExit(Path path) throws IOException {
         Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 

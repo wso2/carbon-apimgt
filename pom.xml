@@ -576,8 +576,13 @@
             <dependency>
                 <groupId>org.codehaus.plexus</groupId>
                 <artifactId>plexus-utils</artifactId>
-                <version>1.5.7</version>
+                <version>${plexus.utils.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.config</groupId>
+                <artifactId>org.wso2.carbon.config</artifactId>
+                <version>${wso2.carbon.config.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -954,5 +959,7 @@
 
         <swagger.codegen.version>2.2.3.wso2v4</swagger.codegen.version>
         <samskivert.mustache.version>1.13</samskivert.mustache.version>
+        <plexus.utils.version>1.5.7</plexus.utils.version>
+        <wso2.carbon.config.version>2.0.0</wso2.carbon.config.version>
     </properties>
 </project>

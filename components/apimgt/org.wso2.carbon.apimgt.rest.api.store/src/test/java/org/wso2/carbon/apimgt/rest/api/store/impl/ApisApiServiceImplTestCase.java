@@ -59,6 +59,8 @@ import org.wso2.msf4j.Request;
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,7 +81,21 @@ public class ApisApiServiceImplTestCase {
     private static final String WSDL_FILE_LOCATION = "wsdl" + File.separator + WSDL_FILE;
     private static final String WSDL_ZIP = "WSDLFiles.zip";
     private static final String WSDL_ZIP_LOCATION = "wsdl" + File.separator + WSDL_ZIP;
+    private static final String correctLanguage = "java";
+    private static final String incorrectLanguage = "java2";
+    private static InputStream inputStreamCorrect, inputStreamIncorrect;
+    private static String swaggerPetStoreCorrect, swaggerPetStoreIncorrect;
 
+    static {
+        try {
+            inputStreamCorrect = Thread.currentThread().getContextClassLoader().getResourceAsStream("swaggerPetStoreCorrect.json");
+            inputStreamIncorrect = Thread.currentThread().getContextClassLoader().getResourceAsStream("swaggerPetStoreIncorrect.json");
+            swaggerPetStoreCorrect = IOUtils.toString(inputStreamCorrect);
+            swaggerPetStoreIncorrect = IOUtils.toString(inputStreamIncorrect);
+        } catch (IOException e){
+            logger.error(e.getMessage());
+        }
+    }
     @Test
     public void testApisApiIdCommentsCommentIdDelete() throws NotFoundException, APIManagementException {
         printTestMethodName();
@@ -980,39 +996,19 @@ public class ApisApiServiceImplTestCase {
         API api = TestUtil.createApi("provider1", apiId, "testapi1", "1.0.0", "Test API 1 - version 1.0.0",
                 TestUtil.createEndpointTypeToIdMap(api1SandBoxEndpointId, api1ProdEndpointId)).build();
         Mockito.when(apiStore.getAPIbyUUID(apiId)).thenReturn(api);
-        Mockito.when(apiStore.getApiSwaggerDefinition(apiId)).thenReturn(PetStoreSwaggerTestCase.SWAGGER_PET_STORE_CORRECT);
-        Response response = apisApiService.apisApiIdGenerateSdkLanguagePost(apiId,PetStoreSwaggerTestCase.CORRECT_LANGUAGE,request);
+        Mockito.when(apiStore.getApiSwaggerDefinition(apiId)).thenReturn(swaggerPetStoreCorrect);
+        Response response = apisApiService.apisApiIdGenerateSdkLanguagePost(apiId,correctLanguage,request);
 
         Assert.assertEquals(200,response.getStatus());
     }
     @Test
     public void apisApiIdGenerateSdkLanguagePostNullApiId()
             throws APIManagementException, ApiStoreSdkGenerationException, NotFoundException {
-        String apiId = UUID.randomUUID().toString();
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
-        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
-
-        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
-        Mockito.when(instance.getAPIConsumer(USER)).thenReturn(apiStore);
-
-        PowerMockito.mockStatic(RestApiUtil.class);
         Request request = getRequest();
-        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
-        Endpoint api1SandBoxEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
-                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("abcd").build();
-        Endpoint api1ProdEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
-                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("cdef").build();
-        API api = TestUtil.createApi("provider1", apiId, "testapi1", "1.0.0", "Test API 1 - version 1.0.0",
-                TestUtil.createEndpointTypeToIdMap(api1SandBoxEndpointId, api1ProdEndpointId)).build();
-        Mockito.when(apiStore.getAPIbyUUID(apiId)).thenReturn(api);
-        String errorMessage = "Error while generating SDK for requested language";
-        ApiStoreSdkGenerationException sdkGenerationException = new ApiStoreSdkGenerationException(errorMessage);
-        Mockito.when(apiStore.getApiSwaggerDefinition(apiId)).thenReturn(PetStoreSwaggerTestCase.SWAGGER_PET_STORE_CORRECT);
-        Response response = apisApiService.apisApiIdGenerateSdkLanguagePost(null,PetStoreSwaggerTestCase.CORRECT_LANGUAGE,request);
+        Response response = apisApiService.apisApiIdGenerateSdkLanguagePost(null,correctLanguage,request);
 
-        Assert.assertEquals(500,response.getStatus());
+        Assert.assertEquals(400,response.getStatus());
     }
     @Test
     public void apisApiIdGenerateSdkLanguagePostIncorrectLanguage()
@@ -1020,7 +1016,7 @@ public class ApisApiServiceImplTestCase {
         String apiId = UUID.randomUUID().toString();
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         Request request =getRequest();
-        Response response = apisApiService.apisApiIdGenerateSdkLanguagePost(apiId,PetStoreSwaggerTestCase.INCORRECT_LANGUAGE,request);
+        Response response = apisApiService.apisApiIdGenerateSdkLanguagePost(apiId,incorrectLanguage,request);
         Assert.assertEquals(400,response.getStatus());
     }
 
@@ -1049,8 +1045,8 @@ public class ApisApiServiceImplTestCase {
         API api = TestUtil.createApi("provider1", apiId, "testapi1", "1.0.0", "Test API 1 - version 1.0.0",
                 TestUtil.createEndpointTypeToIdMap(api1SandBoxEndpointId, api1ProdEndpointId)).build();
         Mockito.when(apiStore.getAPIbyUUID(apiId)).thenReturn(api);
-        Mockito.when(apiStore.getApiSwaggerDefinition(apiId)).thenReturn(PetStoreSwaggerTestCase.SWAGGER_PET_STORE_INCORRECT);
-        Response response = apisApiService.apisApiIdGenerateSdkLanguagePost(apiId,PetStoreSwaggerTestCase.CORRECT_LANGUAGE,request);
+        Mockito.when(apiStore.getApiSwaggerDefinition(apiId)).thenReturn(swaggerPetStoreIncorrect);
+        Response response = apisApiService.apisApiIdGenerateSdkLanguagePost(apiId,correctLanguage,request);
     }
     @Test
     public void apisApiIdGenerateSdkLanguagePostIncorrectApiId()
@@ -1074,8 +1070,8 @@ public class ApisApiServiceImplTestCase {
         API api = TestUtil.createApi("provider1", apiId, "testapi1", "1.0.0", "Test API 1 - version 1.0.0",
                 TestUtil.createEndpointTypeToIdMap(api1SandBoxEndpointId, api1ProdEndpointId)).build();
         Mockito.when(apiStore.getAPIbyUUID(apiId)).thenReturn(api);
-        Mockito.when(apiStore.getApiSwaggerDefinition(apiId)).thenReturn(PetStoreSwaggerTestCase.SWAGGER_PET_STORE_CORRECT);
-        Response response = apisApiService.apisApiIdGenerateSdkLanguagePost(apiId+"Error-Part",PetStoreSwaggerTestCase.CORRECT_LANGUAGE,request);
+        Mockito.when(apiStore.getApiSwaggerDefinition(apiId)).thenReturn(swaggerPetStoreCorrect);
+        Response response = apisApiService.apisApiIdGenerateSdkLanguagePost(apiId+"Error-Part",correctLanguage,request);
 
         Assert.assertEquals(404,response.getStatus());
     }
