@@ -1440,7 +1440,7 @@ paths:
 # Update the Composite API implementation
 #-----------------------------------------------------
     put:
-      consumes:                                  
+      consumes:
         - multipart/form-data
       security:
         - OAuth2Security:
