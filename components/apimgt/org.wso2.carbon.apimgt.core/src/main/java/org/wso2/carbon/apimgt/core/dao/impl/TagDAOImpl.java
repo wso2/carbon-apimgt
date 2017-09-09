@@ -155,7 +155,7 @@ public class TagDAOImpl implements TagDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting tags", e);
         }
 
         return tags;

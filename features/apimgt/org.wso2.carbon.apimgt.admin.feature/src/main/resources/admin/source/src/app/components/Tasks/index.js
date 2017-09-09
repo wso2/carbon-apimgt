@@ -27,10 +27,6 @@ const Tasks = () => {
     return (
         <Switch>
             <Route path="/tasks/:workflow_type/" component={TasksListing}/>
-            //<Route path="/tasks/application_creation" component={TasksListing}/>
-            //<Route path="/tasks/application_update" component={TasksListing}/>
-            //<Route path="/tasks/subscription_creation" component={TasksListing}/>
-            //<Route path="/tasks/api_state" component={TasksListing}/>
             <Route component={PageNotFound}/>
         </Switch>
     );

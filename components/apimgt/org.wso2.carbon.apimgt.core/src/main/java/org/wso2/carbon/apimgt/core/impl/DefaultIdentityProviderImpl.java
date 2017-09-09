@@ -70,7 +70,7 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
     }
 
     DefaultIdentityProviderImpl(SCIMServiceStub scimServiceStub, DCRMServiceStub dcrmServiceStub,
-            OAuth2ServiceStubs oAuth2ServiceStubs) throws APIManagementException {
+                                       OAuth2ServiceStubs oAuth2ServiceStubs) throws APIManagementException {
         super(dcrmServiceStub, oAuth2ServiceStubs);
         this.scimServiceStub = scimServiceStub;
     }
@@ -105,6 +105,36 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
             throw new IdentityProviderException(errorMessage, ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
         }
         return userId;
+    }
+
+    @Override
+    public String getEmailOfUser(String userId) throws IdentityProviderException {
+      Response userResponse = scimServiceStub.getUser(userId);
+        String userEmail;
+        if (userResponse == null) {
+            String errorMessage =
+                    "Error occurred while retrieving Id of user " + userId + ". Error : Response is null.";
+            throw new IdentityProviderException(errorMessage, ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
+        }
+        if (userResponse.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
+            String responseBody = userResponse.body().toString();
+            JsonParser parser = new JsonParser();
+            JsonObject parsedResponseBody = (JsonObject) parser.parse(responseBody);
+            userEmail =  parsedResponseBody.get("emails").toString().replaceAll("[\\[\\]\"]", "");
+
+
+            String message = "Email " + userEmail + " of user " + parsedResponseBody.get(USERNAME).getAsString()
+                    + " is successfully retrieved from SCIM endpoint.";
+            if (log.isDebugEnabled()) {
+                log.debug(message);
+            }
+        } else {
+            String errorMessage =
+                    "Error occurred while retrieving Id of user " + userId + ". Error : " + getErrorMessage(
+                            userResponse);
+            throw new IdentityProviderException(errorMessage, ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
+        }
+        return userEmail;
     }
 
     @Override

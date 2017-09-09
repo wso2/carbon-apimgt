@@ -635,7 +635,7 @@ public class FileBasedApiImportExportManager extends ApiImportExportManager {
      */
     private API importApi(APIDetails apiDetails) throws APIManagementException {
         // if the API already exists, can't import again
-        if (apiPublisher.checkIfAPIExists(apiDetails.getApi().getId())) {
+        if (apiPublisher.isAPIExists(apiDetails.getApi().getId())) {
             updateAPIDetails(apiDetails);
         } else {
             addAPIDetails(apiDetails);

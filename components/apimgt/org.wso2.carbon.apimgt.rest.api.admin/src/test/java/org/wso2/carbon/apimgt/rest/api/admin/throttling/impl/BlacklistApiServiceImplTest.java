@@ -105,8 +105,7 @@ public class BlacklistApiServiceImplTest {
         list.add(conditions2);
         Mockito.doReturn(list).doThrow(new IllegalArgumentException()).when(adminService).getBlockConditions();
 
-        Response response = blacklistApiService.blacklistGet(null, null, null,
-                                                             getRequest());
+        Response response = blacklistApiService.blacklistGet(null, null, getRequest());
         Assert.assertEquals(response.getStatus(), 200);
 
     }
@@ -132,7 +131,7 @@ public class BlacklistApiServiceImplTest {
                 .getBlockConditionByUUID(uuid);
         PowerMockito.when(BlockingConditionMappingUtil.fromBlockingConditionDTOToBlockCondition(dto))
                 .thenReturn(conditions);
-        Response response = blacklistApiService.blacklistPost(dto, null, getRequest());
+        Response response = blacklistApiService.blacklistPost(dto, getRequest());
         Assert.assertEquals(201, response.getStatus());
     }
 
@@ -155,9 +154,7 @@ public class BlacklistApiServiceImplTest {
         Mockito.doReturn(conditions).doThrow(new IllegalArgumentException()).when(adminService)
                 .getBlockConditionByUUID(uuid);
 
-        Response response = blacklistApiService.blacklistConditionIdPut(uuid, dto,
-                                                                        null, null,
-                                                                        null, getRequest());
+        Response response = blacklistApiService.blacklistConditionIdPut(uuid, dto, null, null, getRequest());
         Assert.assertEquals(response.getStatus(), 200);
 
     }

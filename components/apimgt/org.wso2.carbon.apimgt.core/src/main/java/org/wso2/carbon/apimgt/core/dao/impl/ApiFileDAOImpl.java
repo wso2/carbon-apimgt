@@ -692,6 +692,13 @@ public class ApiFileDAOImpl implements ApiDAO {
         return false;
     }
 
+    @Override
+    public boolean isAPIExists(String apiID) throws APIMgtDAOException {
+        String apiFileName = APIMgtConstants.APIFileUtilConstants.API_DEFINITION_FILE_PREFIX + apiID + APIMgtConstants
+                .APIFileUtilConstants.JSON_EXTENSION;
+        return APIFileUtils.findInFileSystem(new File(storagePath), apiFileName) != null;
+    }
+
     /**
      * @see ApiDAO#getAPI(String apiID)
      */

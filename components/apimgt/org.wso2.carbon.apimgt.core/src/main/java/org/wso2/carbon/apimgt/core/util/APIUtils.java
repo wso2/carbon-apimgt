@@ -135,6 +135,21 @@ public class APIUtils {
     }
 
     /**
+     * Gets the  class given the class name.
+     *
+     * @param className the fully qualified name of the class.
+     * @return an instance of the class with the given name
+     * @throws ClassNotFoundException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     */
+
+    public static Class getClassForName(String className) throws ClassNotFoundException, IllegalAccessException,
+            InstantiationException {
+        return Class.forName(className);
+    }
+
+    /**
      * Checks String lists for equality independent of the order of elements in the lists.
      *
      * Note that order of the elements in the lists will be changed as a result of sorting,

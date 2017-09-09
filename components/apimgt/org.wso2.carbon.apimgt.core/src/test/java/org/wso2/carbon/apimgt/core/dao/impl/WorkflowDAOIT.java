@@ -25,6 +25,7 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.workflow.Workflow;
@@ -32,6 +33,7 @@ import org.wso2.carbon.apimgt.core.workflow.Workflow;
 import java.time.LocalDateTime;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -94,7 +96,7 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
         Workflow workflow = SampleTestObjectCreator.createWorkflow(workflowRefId);
         workflow.setStatus(WorkflowStatus.APPROVED);
         workflow.setUpdatedTime(LocalDateTime.now());
-        workflowDAO.updateWorkflowStatus(workflow);
+        workflowDAO.updateWorkflowStatus(workflow);        
 
         // Workflow entry should not be in the db. so exception should be thrown
         try {
@@ -102,9 +104,7 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
             // should throw exception.
             Assert.fail("Expected exception is not thrown when entry is not in the DB");
         } catch (APIMgtDAOException e) {
-            String msg = "Workflow not found for : " + workflowRefId;
-            Assert.assertEquals(e.getMessage(), msg);
-            Assert.assertEquals(e.getErrorHandler().getErrorCode(), 900551);
+            Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.WORKFLOW_NOT_FOUND);
         }
     }
 
@@ -118,10 +118,14 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
         workflow.setStatus(WorkflowStatus.CREATED);
         workflow.setWorkflowType(WorkflowConstants.WF_TYPE_AM_API_STATE);
         workflowDAO.addWorkflowEntry(workflow);
-        String externalRefFromDb = workflowDAO.getExternalWorkflowReferenceForPendingTask(apiId,
+        Optional<String> externalRefFromDb = workflowDAO.getExternalWorkflowReferenceForPendingTask(apiId,
                 WorkflowConstants.WF_TYPE_AM_API_STATE);
 
-        Assert.assertEquals(externalRefFromDb, workflowExtRefId);
+        if (externalRefFromDb.isPresent()) {
+            Assert.assertEquals(externalRefFromDb.get(), workflowExtRefId);
+        } else {
+            Assert.fail("External workflow reference does not exist");
+        }
     }
 
     @Test
@@ -134,10 +138,14 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
         workflow.setWorkflowReference(subscriptionId);
         workflow.setStatus(WorkflowStatus.CREATED);
         workflowDAO.addWorkflowEntry(workflow);
-        String externalRefFromDb = workflowDAO.getExternalWorkflowReferenceForPendingTask(subscriptionId,
+        Optional<String> externalRefFromDb = workflowDAO.getExternalWorkflowReferenceForPendingTask(subscriptionId,
                 WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
 
-        Assert.assertEquals(externalRefFromDb, workflowExtRefId);
+        if (externalRefFromDb.isPresent()) {
+            Assert.assertEquals(externalRefFromDb.get(), workflowExtRefId);
+        } else {
+            Assert.fail("External workflow reference does not exist");
+        }
     }
 
     @Test
@@ -150,10 +158,14 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
         workflow.setWorkflowReference(applicationId);
         workflow.setStatus(WorkflowStatus.CREATED);
         workflowDAO.addWorkflowEntry(workflow);
-        String externalRefFromDb = workflowDAO.getExternalWorkflowReferenceForPendingTask(applicationId,
+        Optional<String> externalRefFromDb = workflowDAO.getExternalWorkflowReferenceForPendingTask(applicationId,
                 WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
 
-        Assert.assertEquals(externalRefFromDb, workflowExtRefId);
+        if (externalRefFromDb.isPresent()) {
+            Assert.assertEquals(externalRefFromDb.get(), workflowExtRefId);
+        } else {
+            Assert.fail("External workflow reference does not exist");
+        }
     }
     
     @Test
@@ -166,10 +178,10 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
         workflow.setWorkflowReference(applicationId);
         workflow.setStatus(WorkflowStatus.APPROVED);
         workflowDAO.addWorkflowEntry(workflow);
-        String externalRefFromDb = workflowDAO.getExternalWorkflowReferenceForPendingTask(applicationId,
+        Optional<String> externalRefFromDb = workflowDAO.getExternalWorkflowReferenceForPendingTask(applicationId,
                 WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
 
-        Assert.assertNull(externalRefFromDb, "Should return only if the wf task is in CREATED state");
+        Assert.assertFalse(externalRefFromDb.isPresent(), "Should return only if the wf task is in CREATED state");
     }
 
     @Test
@@ -187,9 +199,7 @@ public class WorkflowDAOIT extends DAOIntegrationTestBase {
             // should throw exception.
             Assert.fail("Expected exception is not thrown when entry is not in the DB");
         } catch (APIMgtDAOException e) {
-            String msg = "Workflow not found for : " + workflowRefId;
-            Assert.assertEquals(e.getMessage(), msg);
-            Assert.assertEquals(e.getErrorHandler().getErrorCode(), 900551);
+            Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.WORKFLOW_NOT_FOUND);
         }
     }
     

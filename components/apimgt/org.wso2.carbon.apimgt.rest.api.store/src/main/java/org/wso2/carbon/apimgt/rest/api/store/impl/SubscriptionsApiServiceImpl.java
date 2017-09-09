@@ -153,8 +153,8 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
                 
             }
-            API api = apiStore.getAPIbyUUID(apiId);
-            if (application != null && api != null) {
+            
+            if (application != null) {
                 SubscriptionResponse addSubResponse = apiStore.addApiSubscription(apiId, applicationId, tier);
                 String subscriptionId = addSubResponse.getSubscriptionUUID();
                 Subscription subscription = apiStore.getSubscriptionByUUID(subscriptionId);
@@ -173,13 +173,10 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             } else {
                 String errorMessage = null;
                 ExceptionCodes exceptionCode = null;
-                if (application == null) {
-                    exceptionCode = ExceptionCodes.APPLICATION_NOT_FOUND;
-                    errorMessage = "Application not found";
-                } else if (api == null) {
-                    exceptionCode = ExceptionCodes.API_NOT_FOUND;
-                    errorMessage = "Api not found";
-                }
+
+                exceptionCode = ExceptionCodes.APPLICATION_NOT_FOUND;
+                errorMessage = "Application not found";
+
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
                         exceptionCode);
                 Map<String, String> paramList = new HashMap<>();

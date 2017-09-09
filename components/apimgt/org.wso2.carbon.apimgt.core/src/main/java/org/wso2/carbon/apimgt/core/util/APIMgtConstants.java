@@ -53,6 +53,8 @@ public class APIMgtConstants {
     public static final String SWAGGER_V2 = "2.0";
     public static final String SWAGGER_INFO = "info";
     public static final String SWAGGER_RESPONSE_200 = "200";
+    public static final String SWAGGER_APIKEY = "apikey";
+    public static final String SWAGGER_OAUTH2 = "oauth2";
     public static final String API = "API";
     public static final String API_LIFECYCLE = "API_LIFECYCLE";
     public static final String AUTH_NO_AUTHENTICATION = "None";

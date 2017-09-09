@@ -56,6 +56,7 @@ import org.wso2.carbon.apimgt.core.workflow.Workflow;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -122,15 +123,13 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     @Override
     public API getAPIbyUUID(String uuid) throws APIManagementException {
-        API api = null;
         try {
-            api = apiDAO.getAPI(uuid);
+            return apiDAO.getAPI(uuid);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while retrieving API with id " + uuid;
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         }
-        return api;
     }
 
     /**
@@ -174,16 +173,14 @@ public abstract class AbstractAPIManager implements APIManager {
      * {@inheritDoc}
      */
     @Override
-    public boolean checkIfAPIExists(String apiId) throws APIManagementException {
-        boolean status;
+    public boolean isAPIExists(String apiId) throws APIManagementException {
         try {
-            status = getApiDAO().getAPISummary(apiId) != null;
+            return getApiDAO().isAPIExists(apiId);
         } catch (APIMgtDAOException e) {
-            String errorMsg = "Couldn't get APISummary for " + apiId;
+            String errorMsg = "Error while checking if API " + apiId + " exists";
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         }
-        return status;
     }
 
     /**
@@ -254,7 +251,7 @@ public abstract class AbstractAPIManager implements APIManager {
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't retrieve swagger definition for apiId " + api;
             log.error(errorMsg + api, e);
-            throw new APIManagementException(errorMsg + api, e, e.getErrorHandler());
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         }
 
     }
@@ -650,17 +647,17 @@ public abstract class AbstractAPIManager implements APIManager {
     
     protected void cleanupPendingTask(WorkflowExecutor executor, String internalWFReference, String workflowType)
             throws APIMgtDAOException {
-        String externalWfReferenceId = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(internalWFReference,
-                workflowType);
-        if (externalWfReferenceId != null) {
+        Optional<String> externalWfReferenceId = getWorkflowDAO().
+                getExternalWorkflowReferenceForPendingTask(internalWFReference, workflowType);
+        if (externalWfReferenceId.isPresent()) {
             try {
-                executor.cleanUpPendingTask(externalWfReferenceId);
+                executor.cleanUpPendingTask(externalWfReferenceId.get());
             } catch (WorkflowException e) {
                 String warn = "Failed to clean pending task for " + internalWFReference + " of " + workflowType;
                 // failed cleanup processes are ignored to prevent failing the deletion process
                 log.warn(warn, e.getLocalizedMessage());
             }
-            getWorkflowDAO().deleteWorkflowEntryforExternalReference(externalWfReferenceId);
+            getWorkflowDAO().deleteWorkflowEntryforExternalReference(externalWfReferenceId.get());
         }
     }
     

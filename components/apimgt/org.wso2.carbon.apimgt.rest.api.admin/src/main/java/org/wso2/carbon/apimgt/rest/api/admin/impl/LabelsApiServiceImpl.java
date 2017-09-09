@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.rest.api.admin.LabelsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.NotFoundException;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.msf4j.Request;
@@ -74,5 +75,31 @@ public class LabelsApiServiceImpl extends LabelsApiService {
         }
 
         return Response.ok().build();
+    }
+
+    @Override
+    public Response labelsGet(String ifNoneMatch, String ifModifiedSince, Request request) throws NotFoundException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Response labelsLabelIdGet(String labelId, String ifNoneMatch, String ifModifiedSince, Request request)
+            throws NotFoundException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Response labelsLabelIdPut(String labelId, LabelDTO body, String ifMatch, String ifUnmodifiedSince,
+            Request request) throws NotFoundException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public Response labelsPost(LabelDTO body, Request request) throws NotFoundException {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

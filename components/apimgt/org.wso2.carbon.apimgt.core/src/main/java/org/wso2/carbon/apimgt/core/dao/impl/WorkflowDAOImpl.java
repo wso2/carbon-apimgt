@@ -37,6 +37,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Default implementation of the WorkflowDAO interface. Uses SQL syntax that is common to H2 and MySQL DBs.
@@ -53,7 +54,15 @@ public class WorkflowDAOImpl implements WorkflowDAO {
      * @throws APIMgtDAOException if API Manager core level exception occurred
      */
     public void addWorkflowEntry(Workflow workflow) throws APIMgtDAOException {
+            try {
+                addWorkFlowEntryToDB(workflow);
+            } catch (SQLException ex) {
+                throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                        "adding workflow entry(workflowRef: " + workflow.getWorkflowReference() + ")", ex);
+            }
+    }
 
+    private void addWorkFlowEntryToDB(Workflow workflow) throws SQLException {
         final String query = " INSERT INTO AM_WORKFLOWS (WF_REFERENCE,WF_TYPE,WF_STATUS,WF_CREATED_TIME,"
                 + "WF_EXTERNAL_REFERENCE, WF_ATTRIBUTES, WF_STATUS_DESC) VALUES (?,?,?,?,?,?,?)";
 
@@ -74,13 +83,10 @@ public class WorkflowDAOImpl implements WorkflowDAO {
             } catch (SQLException ex) {
                 log.error("Error while executing sql query", ex);
                 connection.rollback();
-                throw new APIMgtDAOException(ex);           
+                throw ex;
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
-        } catch (SQLException ex) {
-            log.error("Error while executing sql query", ex);
-            throw new APIMgtDAOException(ex);
         }
     }
 
@@ -92,7 +98,15 @@ public class WorkflowDAOImpl implements WorkflowDAO {
      */
 
     public void updateWorkflowStatus(Workflow workflow) throws APIMgtDAOException {
+        try {
+            updateWorkflowStatusInDB(workflow);
+        } catch (SQLException ex) {
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "updating workflow status(workflowRef: " + workflow.getWorkflowReference() + ")", ex);
+        }
+    }
 
+    private void updateWorkflowStatusInDB(Workflow workflow) throws SQLException {
         final String query = "UPDATE AM_WORKFLOWS SET WF_STATUS = ?, WF_STATUS_DESC = ?, "
                 + "WF_UPDATED_TIME = ? WHERE WF_EXTERNAL_REFERENCE = ?";
 
@@ -108,15 +122,11 @@ public class WorkflowDAOImpl implements WorkflowDAO {
                 prepStmt.execute();
                 connection.commit();
             } catch (SQLException ex) {
-                log.error("Error while executing sql query", ex);
                 connection.rollback();
-                throw new APIMgtDAOException(ex);
+                throw ex;
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
-        } catch (SQLException ex) {
-            log.error("Error while executing sql query", ex);
-            throw new APIMgtDAOException(ex);
         }
     }
     
@@ -129,85 +139,109 @@ public class WorkflowDAOImpl implements WorkflowDAO {
      * @throws APIMgtDAOException if API Manager core level exception occurred
      */
     public Workflow retrieveWorkflow(String workflowReference) throws APIMgtDAOException {
-        
-        final String getworkflowQuery = "SELECT * FROM AM_WORKFLOWS WHERE WF_EXTERNAL_REFERENCE=?";
-        Workflow workflow = null;
-        try (Connection conn = DAOUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(getworkflowQuery)) {
-            ps.setString(1, workflowReference);
-            try (ResultSet rs = ps.executeQuery()) {
-                List<Workflow> list = this.createWorkflowFromResultSet(rs);
-                if (!list.isEmpty()) {
-                    // workflowReference is a unique value.
-                    //there is only one entry for that value. Hence get the first      
-                    workflow = list.get(0);
-                } else {
-                    // not found
-                    String msg = "Workflow not found for : " + workflowReference;
-                    log.warn(msg);
-                    throw new APIMgtDAOException(msg, ExceptionCodes.WORKFLOW_NOT_FOUND);
-                }
+            try {
+                Workflow workflow = retrieveWorkflowFromDB(workflowReference);
 
-            } catch (ParseException e) {
-                log.error("Error while parsing json string", e);
-                throw new APIMgtDAOException(e);
+                if (workflow != null) {
+                    return workflow;
+                } else {
+                    throw new APIMgtDAOException("workflow with reference: " + workflowReference + " does not exist",
+                            ExceptionCodes.WORKFLOW_NOT_FOUND);
+                }
+            } catch (ParseException | SQLException e) {
+                throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                        "updating workflow status(workflowRef: " + workflowReference + ")", e);
             }
-        } catch (SQLException ex) {
-            log.error("Error while executing sql query", ex);
-            throw new APIMgtDAOException(ex);
-        }
-        return workflow;  
     }
 
-    private List<Workflow> createWorkflowFromResultSet(ResultSet rs)
-            throws SQLException, APIMgtDAOException, ParseException {
-        Workflow workflow = null;
-        List<Workflow> workflowList = new ArrayList<>();
-        while (rs.next()) {
-            workflow = WorkflowExecutorFactory.getInstance().createWorkflow(rs.getString("WF_TYPE"));
-            if (workflow != null) {
-                workflow.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
-                workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
-                workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
-                workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toLocalDateTime());
-                workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toLocalDateTime());
-                workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
-                workflow.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
-                workflow.setAttributes(WorkflowUtils.jsonStringToMap(rs.getString("WF_ATTRIBUTES")));
-                workflowList.add(workflow);
-            } else {
-                throw new APIMgtDAOException("Invalid workflow type");
-            }
+    private Workflow retrieveWorkflowFromDB(String workflowReference)
+            throws ParseException, SQLException, APIMgtDAOException {
+        final String getworkflowQuery = "SELECT * FROM AM_WORKFLOWS WHERE WF_EXTERNAL_REFERENCE=?";
 
+        try (Connection conn = DAOUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(getworkflowQuery)) {
+            ps.setString(1, workflowReference);
+            try (ResultSet rs = ps.executeQuery()) {
+                return createWorkflowFromResultSet(rs);
+            }
         }
-        return workflowList;
+    }
+
+    private List<Workflow> createWorkflowsFromResultSet(ResultSet rs) throws
+            SQLException, APIMgtDAOException, ParseException {
+        List<Workflow> workflows = new ArrayList<>();
+
+        while (rs.next()) {
+            String wfType = rs.getString("WF_TYPE");
+            Workflow workflow = WorkflowExecutorFactory.getInstance().createWorkflow(wfType);
+
+            workflow.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
+            workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
+            workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
+            workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toLocalDateTime());
+            workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toLocalDateTime());
+            workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
+            workflow.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
+            workflow.setAttributes(WorkflowUtils.jsonStringToMap(rs.getString("WF_ATTRIBUTES")));
+
+            workflows.add(workflow);
+        }
+
+        return workflows;
+    }
+
+    private Workflow createWorkflowFromResultSet(ResultSet rs) throws SQLException, APIMgtDAOException, ParseException {
+        Workflow workflow = null;
+
+        if (rs.next()) {
+            String wfType = rs.getString("WF_TYPE");
+            workflow = WorkflowExecutorFactory.getInstance().createWorkflow(wfType);
+
+            workflow.setStatus(WorkflowStatus.valueOf(rs.getString("WF_STATUS")));
+            workflow.setExternalWorkflowReference(rs.getString("WF_EXTERNAL_REFERENCE"));
+            workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
+            workflow.setCreatedTime(rs.getTimestamp("WF_CREATED_TIME").toLocalDateTime());
+            workflow.setUpdatedTime(rs.getTimestamp("WF_UPDATED_TIME").toLocalDateTime());
+            workflow.setWorkflowReference(rs.getString("WF_REFERENCE"));
+            workflow.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
+            workflow.setAttributes(WorkflowUtils.jsonStringToMap(rs.getString("WF_ATTRIBUTES")));
+        }
+        return workflow;
     }
 
     /**
      * @see WorkflowDAO#getExternalWorkflowReferenceForPendingTask(String, String)
      */
     @Override
-    public String getExternalWorkflowReferenceForPendingTask(String wfReference, String workflowType)
+    public Optional<String> getExternalWorkflowReferenceForPendingTask(String wfReference, String workflowType)
             throws APIMgtDAOException {
+        try {
+            return getPendingTaskExternalWFRefFromDB(wfReference, workflowType);
+        } catch (SQLException ex) {
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "getting external workflow reference for pending task(wfReference : " + wfReference + ", " +
+                    "workflowType: " + workflowType + ")", ex);
+        }
+    }
+
+    private Optional<String> getPendingTaskExternalWFRefFromDB(String wfReference, String workflowType)
+            throws SQLException {
         final String getworkflowQuery = "SELECT WF_EXTERNAL_REFERENCE FROM AM_WORKFLOWS WHERE "
                 + "WF_REFERENCE=? AND WF_TYPE=? AND WF_STATUS=?";
- 
-        String externalReferenceId = null;
+
         try (Connection conn = DAOUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(getworkflowQuery)) {
+             PreparedStatement ps = conn.prepareStatement(getworkflowQuery)) {
             ps.setString(1, wfReference);
             ps.setString(2, workflowType);
             ps.setString(3, WorkflowStatus.CREATED.toString());
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    externalReferenceId = rs.getString("WF_EXTERNAL_REFERENCE");         
+                    return Optional.of(rs.getString("WF_EXTERNAL_REFERENCE"));
                 }
-            } 
-        } catch (SQLException ex) {
-            log.error("Error while executing sql query", ex);
-            throw new APIMgtDAOException(ex);
+            }
         }
-        return externalReferenceId;  
+
+        return Optional.empty();
     }
     
     /**
@@ -215,6 +249,16 @@ public class WorkflowDAOImpl implements WorkflowDAO {
      */
     @Override
     public void deleteWorkflowEntryforExternalReference(String externalReferenceId) throws APIMgtDAOException {
+        try {
+            deleteWFEntryWithExternalReferenceFromDB(externalReferenceId);
+        } catch (SQLException e) {
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    "deleting workflow entry for external reference(externalReferenceId: " +
+                    externalReferenceId + ")", e);
+        }
+    }
+
+    private void deleteWFEntryWithExternalReferenceFromDB(String externalReferenceId) throws SQLException {
         final String query = "DELETE FROM AM_WORKFLOWS WHERE WF_EXTERNAL_REFERENCE = ?";
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -225,55 +269,55 @@ public class WorkflowDAOImpl implements WorkflowDAO {
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                log.error("Error while executing sql query", e);
-                throw new APIMgtDAOException(e);
+                throw e;
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
-        } catch (SQLException e) {
-            log.error("Error while executing sql query", e);
-            throw new APIMgtDAOException(e);
         }
     }
 
     @Override
     public List<Workflow> retrieveUncompleteWorkflows(String type) throws APIMgtDAOException {
+        try {
+            return retrieveUncompleteWorkflowsFromDB(type);
+        } catch (SQLException | ParseException e) {
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX +
+                    String.format("getting incomplete workflows(type: %s)", type), e);
+        }
+    }
+
+    private List<Workflow> retrieveUncompleteWorkflowsFromDB(String type)
+            throws APIMgtDAOException, SQLException, ParseException {
         final String getworkflowQuery = "SELECT * FROM AM_WORKFLOWS WHERE WF_TYPE = ? AND WF_STATUS=?";
-        List<Workflow> workflow;
         try (Connection conn = DAOUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(getworkflowQuery)) {
+             PreparedStatement ps = conn.prepareStatement(getworkflowQuery)) {
             ps.setString(1, type);
             ps.setString(2, WorkflowStatus.CREATED.toString());
             try (ResultSet rs = ps.executeQuery()) {
-                workflow = this.createWorkflowFromResultSet(rs);
-            } catch (ParseException e) {
-                log.error("Error while parsing json string", e);
-                throw new APIMgtDAOException(e);
+                return this.createWorkflowsFromResultSet(rs);
             }
-        } catch (SQLException ex) {
-            log.error("Error while executing sql query", ex);
-            throw new APIMgtDAOException(ex);
         }
-        return workflow;  
     }
 
     @Override
     public List<Workflow> retrieveUncompleteWorkflows() throws APIMgtDAOException {
+        try {
+            return retrieveUncompleteWorkflowsFromDB();
+        } catch (SQLException | ParseException e) {
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + "getting incomplete workflows", e);
+        }
+    }
+
+    private List<Workflow> retrieveUncompleteWorkflowsFromDB() throws APIMgtDAOException, SQLException, ParseException {
         final String getworkflowQuery = "SELECT * FROM AM_WORKFLOWS WHERE WF_STATUS=?";
         List<Workflow> workflow;
         try (Connection conn = DAOUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(getworkflowQuery)) {  
+             PreparedStatement ps = conn.prepareStatement(getworkflowQuery)) {
             ps.setString(1, WorkflowStatus.CREATED.toString());
             try (ResultSet rs = ps.executeQuery()) {
-                workflow = this.createWorkflowFromResultSet(rs);
-            } catch (ParseException e) {
-                log.error("Error while parsing json string", e);
-                throw new APIMgtDAOException(e);
+                workflow = this.createWorkflowsFromResultSet(rs);
             }
-        } catch (SQLException ex) {
-            log.error("Error while executing sql query", ex);
-            throw new APIMgtDAOException(ex);
         }
-        return workflow;  
-    }   
+        return workflow;
+    }
 }

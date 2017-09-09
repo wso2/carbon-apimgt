@@ -194,7 +194,7 @@ public class WorkflowsApiServiceImplTestCase {
         Mockito.doReturn(workflowList).doThrow(new IllegalArgumentException()).when(adminService)
                 .retrieveUncompletedWorkflows();
 
-        Response response = workflowsApiService.workflowsGet(null, null, null, null, getRequest());
+        Response response = workflowsApiService.workflowsGet(null, null, null, getRequest());
         assertEquals(200, response.getStatus());
     }   
     
@@ -209,7 +209,7 @@ public class WorkflowsApiServiceImplTestCase {
         Mockito.doReturn(workflowList).doThrow(new IllegalArgumentException()).when(adminService)
                 .retrieveUncompletedWorkflowsByType(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
 
-        Response response = workflowsApiService.workflowsGet(null, null, null,
+        Response response = workflowsApiService.workflowsGet(null, null,
                 WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION, getRequest());
         assertEquals(200, response.getStatus());
     }  
@@ -225,7 +225,7 @@ public class WorkflowsApiServiceImplTestCase {
         Mockito.doThrow(new APIManagementException(message, ExceptionCodes.APIMGT_DAO_EXCEPTION)).when(adminService)
                 .retrieveUncompletedWorkflows();
 
-        Response response = workflowsApiService.workflowsGet(null, null, null, null, getRequest());
+        Response response = workflowsApiService.workflowsGet(null, null, null, getRequest());
         assertEquals(500, response.getStatus());
     }
     
