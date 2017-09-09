@@ -20,8 +20,8 @@ package org.wso2.carbon.apimgt.core.internal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
-import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
-import org.wso2.carbon.kernel.configprovider.ConfigProvider;
+import org.wso2.carbon.config.ConfigurationException;
+import org.wso2.carbon.config.provider.ConfigProvider;
 
 import java.util.Map;
 
@@ -53,7 +53,7 @@ public class ServiceReferenceHolder {
             } else {
                 log.error("Configuration provider is null");
             }
-        } catch (CarbonConfigurationException e) {
+        } catch (ConfigurationException e) {
             log.error("error getting config : org.wso2.carbon.apimgt.core.internal.APIMConfiguration", e);
         }
 
@@ -73,11 +73,11 @@ public class ServiceReferenceHolder {
     public Map<String, String> getRestAPIConfigurationMap(String namespace) {
         try {
             if (configProvider != null) {
-                return configProvider.getConfigurationMap(namespace);
+                return (Map) configProvider.getConfigurationObject(namespace);
             } else {
                 log.error("Configuration provider is null");
             }
-        } catch (CarbonConfigurationException e) {
+        } catch (ConfigurationException e) {
             log.error("Error while reading the configurations map of namespace : " +
                     "org.wso2.carbon.apimgt.core.internal.APIMConfiguration", e);
         }

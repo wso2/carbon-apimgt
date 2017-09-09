@@ -28,11 +28,10 @@ import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.WorkflowConfig;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExtensionsConfigBuilder;
-import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
-import org.wso2.carbon.kernel.configprovider.ConfigProvider;
+import org.wso2.carbon.config.ConfigurationException;
+import org.wso2.carbon.config.provider.ConfigProvider;
 
 import java.io.File;
-import java.util.Map;
 
 public class APIGatewayPublisherImplTestCaseIT {
 
@@ -46,15 +45,16 @@ public class APIGatewayPublisherImplTestCaseIT {
 
         WorkflowExtensionsConfigBuilder.build(new ConfigProvider() {
             @Override
-            public <T> T getConfigurationObject(Class<T> configClass) throws CarbonConfigurationException {
+            public <T> T getConfigurationObject(Class<T> configClass) throws ConfigurationException {
                 T workflowConfig = (T) new WorkflowConfig();
                 return workflowConfig;
             }
 
             @Override
-            public Map getConfigurationMap(String namespace) throws CarbonConfigurationException {
+            public Object getConfigurationObject(String s) throws ConfigurationException {
                 return null;
             }
+
         });
         ConfigProvider configProvider = Mockito.mock(ConfigProvider.class);
         ServiceReferenceHolder.getInstance().setConfigProvider(configProvider);
