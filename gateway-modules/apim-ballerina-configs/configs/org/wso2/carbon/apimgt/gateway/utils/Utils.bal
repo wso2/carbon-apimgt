@@ -189,7 +189,6 @@ function putIntoSubscriptionCache (json subscriptions) {
         system:println(subscriptionDto);
         i = i + 1;
     }
-
 }
 
 function removeFromSubscriptionCache (json subscriptions) {
