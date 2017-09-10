@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.gateway.services;
 
 import ballerina.lang.system;
 import ballerina.lang.errors;
-import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
+import org.wso2.carbon.apimgt.gateway.micro as micro;
 import org.wso2.carbon.apimgt.gateway.holders as holder;
 import ballerina.net.http;
 
@@ -11,12 +11,9 @@ service<http> gatewayInitService {
     boolean isCacheInitialized = holder:initializeCache();
     boolean isMapsAdded = holder:addThrottleMaps();
     boolean isReady = initGateway();
-    
-    boolean offlineSubsInitialized = gatewayUtil:retrieveOfflineSubscriptions();
 
-    boolean offlineAppssInitialized = gatewayUtil:retrieveOfflineApplications();
-
-    boolean policiesInitialized = gatewayUtil:retrievePolicies();
+    boolean offlineSubsInitialized = micro:retrieveOfflineSubscriptions();
+    boolean offlineAppssInitialized = micro:retrieveOfflineApplications();
 
 }
 
@@ -24,11 +21,11 @@ function initGateway () (boolean) {
     system:println("initGateway() in gatewayInit");
     try {
         //Register gateway in API Core
-        gatewayUtil:registerGateway();
+        //gatewayUtil:registerGateway();
         //Retrieve APIs from API Core and deploy
         system:println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
         //gatewayUtil:loadAPIs();
-        gatewayUtil:loadOfflineAPIs();
+        micro:loadOfflineAPIs();
         system:println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
         //gatewayUtil:loadGlobalEndpoints();
         system:println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");

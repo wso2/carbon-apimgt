@@ -43,9 +43,16 @@ function getFromSubscriptionCache (string apiContext, string version, string con
         return null;
     }
 }
+
 function putIntoSubscriptionCache (dto:SubscriptionDto subscriptionDto) {
     system:println("putIntoSubscriptionCache() in CacheHolder");
     string key = subscriptionDto.apiContext + ":" + subscriptionDto.apiVersion + ":" + subscriptionDto.consumerKey;
+
+    system:println("key :");
+    system:println(key);
+    system:println("subscriptionDto :");
+    system:println(subscriptionDto);
+
     caching:putCacheEntry(constants:SUBSCRIPTION_CACHE, key, subscriptionDto);
 }
 function getFromResourceCache (string apiContext, string apiVersion, string resourceUri, string httpVerb) (dto:ResourceDto) {
