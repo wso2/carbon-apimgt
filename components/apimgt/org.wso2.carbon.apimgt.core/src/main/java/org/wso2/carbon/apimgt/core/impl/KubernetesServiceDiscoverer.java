@@ -15,6 +15,7 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.apache.commons.io.IOUtils;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.ServiceDiscoverer;
@@ -35,16 +36,6 @@ import java.util.List;
 * for a service to be discovred
 * port name must be : http/https
 * Todo -- if 443 then https
-*
-*-----------------------------------------------------------------
-* viewing only service,endpoints,pods so to avoid viewing nodes
-*
-* ----------------------------------------------------------------
-* Endpoint applicable level- always GLOBAL. Api specific not used.
-*
-* ----------------------------------------------------------------
-* Endpoint security not assinged
-*
 * ----------------------------------------------------------------
 * Todo -- filter by service type
 *
@@ -56,6 +47,11 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
     private ServiceDiscoveryConfiurations serviceDiscoveryConfiurations;
     private final Logger log  = LoggerFactory.getLogger(KubernetesServiceDiscoverer.class);
 
+
+    private String serviceAccountToken;
+    private String caCertLocation;
+    private Boolean insidePod;
+
     private List<Endpoint> servicesList;
     private Boolean endpointsAvailable; //when false, will not look for NodePort urls for the remaining ports.
     private int kubeEndpointIndex;
@@ -63,6 +59,11 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
 
     private KubernetesServiceDiscoverer() {
         serviceDiscoveryConfiurations = new ServiceDiscoveryConfiurations();
+        JSONObject security = new JSONObject(serviceDiscoveryConfiurations.getSecurity());
+        JSONObject cmsProperties = new JSONObject(serviceDiscoveryConfiurations.getProperties());
+        serviceAccountToken = security.getString("serviceAccountToken");
+        caCertLocation = security.getString("caCertLocation");
+        insidePod = cmsProperties.getBoolean("insidePod");
         try {
             //this.client = new DefaultOpenShiftClient(buildConfig(serviceDiscoveryConfiurations.getMasterUrl()));
             this.client = new DefaultKubernetesClient(buildConfig(serviceDiscoveryConfiurations.getMasterUrl()));
@@ -83,9 +84,9 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
         System.setProperty("kubernetes.auth.tryKubeConfig", "false");
         System.setProperty("kubernetes.auth.tryServiceAccount", "true");
         ConfigBuilder configBuilder = new ConfigBuilder().withMasterUrl(masterUrl)
-                .withCaCertFile(serviceDiscoveryConfiurations.getCaCertLocation());
+                .withCaCertFile(caCertLocation);
         Config config;
-        if (serviceDiscoveryConfiurations.isInsidePod()) {
+        if (insidePod) {
             log.debug("Using mounted service account token");
             try {
                 String saMountedToken = IOUtils.toString(KubernetesServiceDiscoverer.class
@@ -99,8 +100,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
             }
         } else {
             log.debug("Using externally stored service account token");
-            config = configBuilder.withOauthToken(serviceDiscoveryConfiurations
-                    .getServiceAccountToken()).build();
+            config = configBuilder.withOauthToken(serviceAccountToken).build();
         }
         return config;
     }
@@ -179,7 +179,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
                 String protocol = servicePort.getName();
                 if (protocol != null && (protocol.equals("http") || protocol.equals("https"))) {
                     int port = servicePort.getPort();
-                    if (serviceDiscoveryConfiurations.isInsidePod()) {
+                    if (insidePod) {
                         //ClusterIP Service
                         URL clusterIPServiceURL = new URL(protocol, serviceSpec.getClusterIP(), port, "");
                         Endpoint clusterIPEndpoint = constructDiscoveredEndpoint(serviceName, protocol,
@@ -254,22 +254,23 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
         if (url == null) {
             return null;
         }
-        String endpointConfig = String.format("{\"url\": \"%s\", \"urlType\": \"%s\"}", url.toString(), urlType);
-        String endpointIndex = String.format("kube-%d", kubeEndpointIndex);
+        String endpointConfig = String.format("{\"serviceUrl\": \"%s\", \"serviceType\": \"%s\"}",
+                                                url.toString(), urlType);
+        String endpointIndex = String.format("ds-%d", kubeEndpointIndex);
 
         return constructEndPoint(endpointIndex, serviceName, endpointConfig,
                 1000L, portType, "{\"enabled\": false}", APIMgtConstants.GLOBAL_ENDPOINT);
     }
 
     private Endpoint constructEndPoint(String id, String name, String endpointConfig,
-                                       Long maxTps, String type, String security, String applicableLevel) {
+                                       Long maxTps, String type, String endpointSecurity, String applicableLevel) {
         Endpoint.Builder endpointBuilder = new Endpoint.Builder();
         endpointBuilder.id(id);
         endpointBuilder.name(name);
         endpointBuilder.endpointConfig(endpointConfig);
         endpointBuilder.maxTps(maxTps);
         endpointBuilder.type(type);
-        endpointBuilder.security(security);
+        endpointBuilder.security(endpointSecurity);
         endpointBuilder.applicableLevel(applicableLevel);
 
         kubeEndpointIndex++;
