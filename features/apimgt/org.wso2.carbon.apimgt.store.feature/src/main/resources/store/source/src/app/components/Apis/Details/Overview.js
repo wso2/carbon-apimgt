@@ -18,13 +18,23 @@
 
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
-import {Col, Row, Card, Form, Select, Dropdown, Tag, Menu, Button, Badge} from 'antd';
+import {Col, Popconfirm, Row, Form, Select, Dropdown, Tag, Menu, Badge, message} from 'antd';
 
 const FormItem = Form.Item;
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import Api from '../../../data/api'
-import { Redirect } from 'react-router-dom';
+
+import Paper from 'material-ui/Paper';
+import Grid from 'material-ui/Grid';
+import Typography from 'material-ui/Typography';
+import Button from 'material-ui/Button';
+import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
+import Table, { TableBody, TableCell, TableRow } from 'material-ui/Table';
+import { Delete, Edit, CreateNewFolder, Description  }from 'material-ui-icons';
+import Tabs, { Tab } from 'material-ui/Tabs';
+import AppBar from 'material-ui/AppBar';
+import AddIcon from 'material-ui-icons/';
 
 class Overview extends Component {
     constructor(props) {
@@ -35,9 +45,11 @@ class Overview extends Component {
             policies: null,
             dropDownApplications: null,
             dropDownPolicies: null,
-            notFound: false
+            notFound: false,
+            tabValue: "Social Sites"
         };
         this.api_uuid = this.props.match.params.api_uuid;
+        this.handleTabChange = this.handleTabChange.bind(this);
     }
 
     componentDidMount() {
@@ -45,6 +57,7 @@ class Overview extends Component {
         let promised_api = api.getAPIById(this.api_uuid);
         promised_api.then(
             response => {
+                console.info(response.obj)
                 this.setState({api: response.obj});
             }
         ).catch(
@@ -62,61 +75,62 @@ class Overview extends Component {
         let promised_applications = api.getAllApplications();
         promised_applications.then(
             response => {
-            this.setState({applications: response.obj.list});
-        }
+                this.setState({applications: response.obj.list});
+            }
         ).catch(
-                error => {
+            error => {
                 if (process.env.NODE_ENV !== "production") {
-                console.log(error);
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
             }
-            let status = error.status;
-            if (status === 404) {
-                this.setState({notFound: true});
-            }
-        }
         );
 
         let promised_subscriptions = api.getSubscriptions(this.api_uuid, null);
         promised_subscriptions.then(
             response => {
-            this.dropDownApplications = [<Option key="custom" onClick={this.handleClick} >New Application</Option>];
+                this.dropDownApplications = [<Option key="custom" onClick={this.handleClick} >New Application</Option>];
 
-            for (var i = 0; i < this.api.policies.length; i++) {
-                this.dropDownPolicies.push(<Option key={this.api.policies[i]}>{this.api.policies[i]}</Option>);
-            }
-            var subscription = {};
-            var subscriptions = response.obj.list;
-            var application = {};
-            var subscribedApp = false;
-            for (var i = 0; i < this.applications.length; i++) {
-                subscribedApp = false;
-                application = applications[i];
-                if (application.lifeCycleStatus != "APPROVED") {
-                    continue;
+                for (let i = 0; i < this.api.policies.length; i++) {
+                    this.dropDownPolicies.push(<Option key={this.api.policies[i]}>{this.api.policies[i]}</Option>);
                 }
-                for (var j = 0; j < subscriptions.length; j++) {
-                    subscription = subscriptions[j];
-                    if (subscription.applicationId === application.applicationId) {
-                        subscribedApp = true;
+                let subscription = {};
+                let subscriptions = response.obj.list;
+                let application = {};
+                let subscribedApp = false;
+                for (let i = 0; i < this.applications.length; i++) {
+                    subscribedApp = false;
+                    application = applications[i];
+                    if (application.lifeCycleStatus != "APPROVED") {
                         continue;
                     }
+                    for (let j = 0; j < subscriptions.length; j++) {
+                        subscription = subscriptions[j];
+                        if (subscription.applicationId === application.applicationId) {
+                            subscribedApp = true;
+                            continue;
+                        }
+                    }
+                    if(!subscribedApp) {
+                        this.dropDownApplications.push(<Option key={application.id}>{application.name}</Option>);
+                    }
                 }
-                if(!subscribedApp) {
-                    this.dropDownApplications.push(<Option key={application.id}>{application.name}</Option>);
-                }
+                this.policies = this.api.policies;
+                console.info(this.api.policies)
             }
-            this.policies = this.api.policies;
-        }
         ).catch(
-                error => {
+            error => {
                 if (process.env.NODE_ENV !== "production") {
-                console.log(error);
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
             }
-            let status = error.status;
-            if (status === 404) {
-                this.setState({notFound: true});
-            }
-        }
         );
     }
 
@@ -131,94 +145,96 @@ class Overview extends Component {
     handleClick(){
         this.setState({redirect: true});
     }
-
+    handleTabChange = (event, tabValue) => {
+        this.setState({ tabValue : tabValue });
+    };
     render() {
         const formItemLayout = {
             labelCol: {span: 6},
             wrapperCol: {span: 18}
         };
-        const api = this.state.api;
         if (this.state.notFound) {
             return <ResourceNotFound/>
         }
-        if (!this.state.api) {
-            return <Loading/>
-        }
+
         if (this.state.redirect) {
             return <Redirect push to="/application-create" />;
         }
-        return (
-            <div>
-                <Row type="flex" justify="center">
-                    <Col span={4}>
+        const api = this.state.api;
 
-                        <Card bodyStyle={{padding: 10}}>
-                            <div className="custom-image">
-                                <img alt="API thumb" width="100%" src="/store/public/images/api/api-default.png"/>
-                            </div>
-                            <div className="custom-card">
-                                <Badge status="processing" text={api.lifeCycleStatus}/>
-                                <p>11 Apps</p>
-                                <a href={"/store/apis/" + this.api_uuid} target="_blank" title="Store">View in store</a>
-                            </div>
-                        </Card>
-                    </Col>
-                    <Col span={10}>
-                        <Select>
-                             {this.populateApplicationDropdown()}
-                        </Select>
-                        <Select>
-                             {this.populatePolicyDropdown()}
-                        </Select>
-                    </Col>
-                    <Col span={15} offset={1}>
-                        <Form layout="vertical">
-                            <FormItem {...formItemLayout} label="API Name">
-                                <span className="ant-form-text">{api.name}</span>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Version">
-                                <span className="ant-form-text">{api.version}</span>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Context">
-                                <span className="ant-form-text">{api.context}</span>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Last Updated">
-                                <span className="ant-form-text">{api.createdTime}</span>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Business Plans">
-                                <span className="ant-form-text">{api.policies.map(policy => policy + ", ")}</span>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Tags">
-                                <span className="ant-form-text">
-                                    <Tag><a href="#somelink">Social</a></Tag>
-                                    <Tag><a href="#somelink">Facebook</a></Tag>
-                                </span>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Labels">
-                                <span className="ant-form-text">
-                                      <Tag color="pink">pink</Tag>
-                                      <Tag color="red">red</Tag>
-                                      <Tag color="orange">orange</Tag>
-                                      <Tag color="green">green</Tag>
-                                </span>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Business Owner">
-                                <span className="ant-form-text">{"WSO2"}</span>
-                                <a className="ant-form-text" href="#email">{"(bizdev@wso2.com)"}</a>
-                            </FormItem>
-                            <FormItem {...formItemLayout} label="Tech Owner">
-                                <span className="ant-form-text">{"WSO2 Support"}</span>
-                                <a className="ant-form-text" href="#email">{"(support@wso2.com)"}</a>
-                            </FormItem>
-                        </Form>
-                    </Col>
-                </Row>
-                <div className="api-add-links">
-                    <Dropdown overlay={menu} placement="topCenter">
-                        <Button shape="circle" icon="edit"/>
-                    </Dropdown>
-                </div>
-            </div>
+        return (
+            this.state.api ?
+                <Grid container style={{paddingLeft:"40px"}}>
+
+                    <Grid item xs={12} sm={6} md={9} lg={9} xl={10} >
+                        <Paper style={{paddingLeft:"40px"}}>
+                            <Typography type="headline" gutterBottom>
+                                Production and Sandbox Endpoints
+                            </Typography>
+                            <Typography type="title" gutterBottom>
+                                Production and Sandbox URLs:
+                            </Typography>
+
+                            { api.endpoint ?
+                                api.endpoint.map( ep => <div>
+                                    <span>{ep.type}</span>
+                                    <span>{ep.inline ? ep.inline.endpointConfig.serviceUrl : ''}</span>
+                                </div>)
+                                : <span>....</span>
+                            }
+
+                            <Typography type="headline" gutterBottom>
+                                Share
+                            </Typography>
+                            <AppBar position="static">
+                                <Tabs
+                                    value={this.state.tabValue}
+                                    indicatorColor="primary"
+                                    textColor="primary"
+                                    onChange={this.handleTabChange}
+                                >
+                                    <Tab  value="Social Sites"  label="Social Sites" color="contrast" />
+                                    <Tab value="Embed" label="Embed" color="contrast"  />
+                                    <Tab value="Email" label="Email" color="contrast" />
+                                </Tabs>
+                            </AppBar>
+                            {this.state.tabValue === 'Social Sites' && <div className="tab-container">
+
+                                <div id="share_div_social" className="share_dives">
+                                    {/* Facebook */}
+                                    <a className="social_links" id="facebook"
+                                       href="http://www.facebook.com/sharer.php?u=https%3A%2F%2F172.17.0.1%3A9444%2Fstore%2Fapis%2Finfo%3Fname%3Dfoo%26version%3D1.0.0%26provider%3Dadmin"
+                                       target="_blank" title="facebook">
+                                        <img src="/store/public/images/social/facebook.png" alt="Facebook" />
+                                    </a>
+                                    {/* Twitter */}
+                                    <a className="social_links" id="twitter"
+                                       href="http://twitter.com/share?url=https%3A%2F%2F172.17.0.1%3A9444%2Fstore%2Fapis%2Finfo%3Fname%3Dfoo%26version%3D1.0.0%26provider%3Dadmin&text=API%20Store%20-%20foo%20%3A%20try%20this%20API%20at%20https%3A%2F%2F172.17.0.1%3A9444%2Fstore%2Fapis%2Finfo%3Fname%3Dfoo%26version%3D1.0.0%26provider%3Dadmin"
+                                       target="_blank" title="twitter">
+                                        <img src="/store/public/images/social/twitter.png" alt="Twitter" /></a>
+                                    {/* Google+ */}
+                                    <a className="social_links" id="googleplus"
+                                       href="https://plus.google.com/share?url=https%3A%2F%2F172.17.0.1%3A9444%2Fstore%2Fapis%2Finfo%3Fname%3Dfoo%26version%3D1.0.0%26provider%3Dadmin"
+                                       target="_blank" title="googleplus">
+                                        <img src="/store/public/images/social/google.png" alt="Google" /></a>
+                                    {/* Digg */}
+                                    <a className="social_links" id="digg"
+                                       href="http://www.digg.com/submit?url=https%3A%2F%2F172.17.0.1%3A9444%2Fstore%2Fapis%2Finfo%3Fname%3Dfoo%26version%3D1.0.0%26provider%3Dadmin"
+                                       target="_blank" title="digg">
+                                        <img src="/store/public/images/social/diggit.png" alt="Digg" /></a>
+                                    <div className="clearfix">
+                                    </div>
+                                </div>
+                            </div>}
+                            {this.state.tabValue === 'Embed' && <div>{'Item Two'}</div>}
+                            {this.state.tabValue === 'Email' && <div>{'Item Three'}</div>}
+
+
+                        </Paper>
+
+                    </Grid>
+                </Grid>
+                : <Loading/>
         );
     }
 }

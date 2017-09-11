@@ -29,7 +29,7 @@ class AuthManager {
     constructor() {
         /* TODO: Move this to configuration ~tmkb*/
         this.host = window.location.protocol + "//" + window.location.host;
-        //TODO context: publisher ???
+        //TODO context: store ???
         this.token = "/login/token/" + context;
         this.isLogged = false;
         this.username = null;
@@ -181,7 +181,7 @@ class AuthManager {
     logout() {
         let authHeader = this.bearer + AuthManager.getUser().getPartialToken();
         //TODO Will have to change the logout end point url to contain the app context(i.e. publisher/store, etc.)
-        let url = this.host + "/login/logout";
+        let url = this.host + "/logout";
         let headers = {
             'Accept': 'application/json',
             'Authorization': authHeader
