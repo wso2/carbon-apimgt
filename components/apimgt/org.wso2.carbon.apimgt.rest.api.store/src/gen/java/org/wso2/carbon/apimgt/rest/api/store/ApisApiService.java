@@ -1,29 +1,10 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
-import org.wso2.carbon.apimgt.rest.api.store.*;
-import org.wso2.carbon.apimgt.rest.api.store.dto.*;
-
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
+import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.RatingDTO;
 import org.wso2.msf4j.Request;
 
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.CommentListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.RatingDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.RatingListDTO;
-
-import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
-
-import java.io.InputStream;
-
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 public abstract class ApisApiService {
     public abstract Response apisApiIdCommentsCommentIdDelete(String commentId
@@ -91,6 +72,7 @@ public abstract class ApisApiService {
  , Request request) throws NotFoundException;
     public abstract Response apisGet(Integer limit
  ,Integer offset
+ ,String labels
  ,String query
  ,String ifNoneMatch
  , Request request) throws NotFoundException;

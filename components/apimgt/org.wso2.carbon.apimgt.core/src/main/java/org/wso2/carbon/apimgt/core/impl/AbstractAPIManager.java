@@ -665,11 +665,11 @@ public abstract class AbstractAPIManager implements APIManager {
     }
     
     @Override
-    public Label getLabelByName(String labelName) throws APIManagementException {
+    public Label getLabelByID(String labelID) throws APIManagementException {
         try {
-            return labelDAO.getLabelByName(labelName);
+            return labelDAO.getLabelByID(labelID);
         } catch (APIMgtDAOException e) {
-            String message = "Error occured while retrieving Label information for " + labelName;
+            String message = "Error occured while retrieving Label information for " + labelID;
             log.error(message);
             throw new APIManagementException(message, e, e.getErrorHandler());
         }

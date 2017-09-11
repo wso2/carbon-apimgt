@@ -24,11 +24,7 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 /**
  * SQL Statements that are specific to sub-context search in MSSQL Database.
  */
-class MssqlSubcontextSearchImpl implements StoreApiAttributeSearch {
-
-    private static final String API_SUMMARY_SELECT_STORE = "SELECT UUID, PROVIDER, NAME, CONTEXT, " +
-            "VERSION, DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS, SECURITY_SCHEME " +
-            "FROM AM_API ";
+class MssqlSubcontextSearchImpl extends StoreApiAttributeSubContextSearch {
 
     @Override
     public String getStoreAttributeSearchQuery(StringBuilder roleListBuilder,
@@ -49,8 +45,7 @@ class MssqlSubcontextSearchImpl implements StoreApiAttributeSearch {
                 "UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE ROLE IN (" +
                 roleListBuilder.toString() + ")) AND " +
                 "UUID IN (SELECT API_ID FROM AM_API_OPERATION_MAPPING WHERE " +
-                searchQuery.toString() + ") " +
-                "ORDER BY NAME OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+                searchQuery.toString() + ") ";
 
         return subcontextSearchQuery;
 

@@ -2,9 +2,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -18,6 +17,9 @@ public class LabelDTO   {
 
   @JsonProperty("name")
   private String name = null;
+
+  @JsonProperty("type")
+  private String type = null;
 
   @JsonProperty("access_urls")
   private List<String> accessUrls = new ArrayList<String>();
@@ -58,6 +60,24 @@ public class LabelDTO   {
     this.name = name;
   }
 
+  public LabelDTO type(String type) {
+    this.type = type;
+    return this;
+  }
+
+   /**
+   * Get type
+   * @return type
+  **/
+  @ApiModelProperty(required = true, value = "")
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
+  }
+
   public LabelDTO accessUrls(List<String> accessUrls) {
     this.accessUrls = accessUrls;
     return this;
@@ -93,12 +113,13 @@ public class LabelDTO   {
     LabelDTO label = (LabelDTO) o;
     return Objects.equals(this.labelId, label.labelId) &&
         Objects.equals(this.name, label.name) &&
+        Objects.equals(this.type, label.type) &&
         Objects.equals(this.accessUrls, label.accessUrls);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(labelId, name, accessUrls);
+    return Objects.hash(labelId, name, type, accessUrls);
   }
 
   @Override
@@ -108,6 +129,7 @@ public class LabelDTO   {
     
     sb.append("    labelId: ").append(toIndentedString(labelId)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    accessUrls: ").append(toIndentedString(accessUrls)).append("\n");
     sb.append("}");
     return sb.toString();

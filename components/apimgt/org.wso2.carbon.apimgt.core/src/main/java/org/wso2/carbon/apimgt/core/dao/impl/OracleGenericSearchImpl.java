@@ -24,18 +24,14 @@ import org.wso2.carbon.apimgt.core.models.APIStatus;
 /**
  * SQL Statements that are specific to attribute search in MySQL Database.
  */
-class OracleGenericSearchImpl implements StoreApiAttributeSearch {
-
-    private static final String API_SUMMARY_SELECT_STORE = "SELECT UUID, PROVIDER, NAME, " +
-            "CONTEXT, VERSION, DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, " +
-            "LC_WORKFLOW_STATUS, SECURITY_SCHEME FROM AM_API ";
+class OracleGenericSearchImpl extends StoreApiAttributeGenericSearch {
 
     @Override
     public String getStoreAttributeSearchQuery(StringBuilder roleListBuilder,
                                                StringBuilder searchQuery, int offset, int limit) {
 
         //for any other attribute search, need to check AM_API table
-        String genericSearchQuery = "SELECT * FROM (SELECT A.*, rownum rnum FROM (" + API_SUMMARY_SELECT_STORE +
+        String genericSearchQuery = API_SUMMARY_SELECT_STORE +
                 "WHERE CURRENT_LC_STATUS  IN ('" +
                 APIStatus.PUBLISHED.getStatus() + "','" +
                 APIStatus.PROTOTYPED.getStatus() + "') AND " +
@@ -48,8 +44,7 @@ class OracleGenericSearchImpl implements StoreApiAttributeSearch {
                 "VISIBILITY = '" + API.Visibility.RESTRICTED + "' AND " +
                 "UUID IN (SELECT API_ID FROM AM_API_VISIBLE_ROLES WHERE ROLE IN (" +
                 roleListBuilder.toString() + ")) AND " +
-                searchQuery.toString() +
-                " ORDER BY NAME) A WHERE rownum <= ?) WHERE rnum >= ?";
+                searchQuery.toString();
 
         return genericSearchQuery;
     }

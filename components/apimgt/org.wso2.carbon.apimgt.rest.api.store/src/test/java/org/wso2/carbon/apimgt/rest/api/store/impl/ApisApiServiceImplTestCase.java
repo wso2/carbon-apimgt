@@ -31,9 +31,9 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APICommentException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.core.exception.APIRatingException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.core.impl.APIStoreImpl;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Comment;
@@ -53,13 +53,13 @@ import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.carbon.transport.http.netty.message.HTTPCarbonMessage;
 import org.wso2.msf4j.Request;
 
-import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileInputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import javax.ws.rs.core.Response;
 
 import static junit.framework.TestCase.assertEquals;
 
@@ -927,9 +927,9 @@ public class ApisApiServiceImplTestCase {
         List<API> apiList = new ArrayList<>();
         apiList.add(api);
 
-        Mockito.when(apiStore.searchAPIs("", 0, 1)).thenReturn(apiList);
+        Mockito.when(apiStore.searchAPIsByStoreLabels("", 0, 1, new ArrayList<>())).thenReturn(apiList);
 
-        Response response = apisApiService.apisGet(10, 0, "", null, request);
+        Response response = apisApiService.apisGet(10, 0, "", null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -948,9 +948,9 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.API_NOT_FOUND))
-                .when(apiStore).searchAPIs("", 0, 10);
+                .when(apiStore).searchAPIsByStoreLabels("", 0, 10,  new ArrayList<>());
 
-        Response response = apisApiService.apisGet(10, 0, "", null, request);
+        Response response = apisApiService.apisGet(10, 0, null, "",  null, request);
 
         Assert.assertEquals(404, response.getStatus());
     }

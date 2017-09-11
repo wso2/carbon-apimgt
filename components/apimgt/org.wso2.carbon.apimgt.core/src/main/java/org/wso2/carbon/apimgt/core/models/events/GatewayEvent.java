@@ -18,14 +18,14 @@
 
 package org.wso2.carbon.apimgt.core.models.events;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * Holds the data transferred to gateway
  */
 public class GatewayEvent {
     private String eventType;
-    private Set<String> labels;
+    private List<String> labels;
 
     public GatewayEvent(String eventType) {
         this.eventType = eventType;
@@ -39,11 +39,11 @@ public class GatewayEvent {
         this.eventType = eventType;
     }
 
-    public Set<String> getLabels() {
+    public List<String> getLabels() {
         return labels;
     }
 
-    public void setLabels(Set<String> labels) {
+    public void setLabels(List<String> labels) {
         this.labels = labels;
     }
 }

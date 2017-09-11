@@ -518,6 +518,14 @@ public interface APIPublisher extends APIManager {
     List<Label> getAllLabels() throws LabelException;
 
     /**
+     * Returns the list of Labels by label type.
+     * @param type The type of the label
+     * @return List of labels
+     * @throws LabelException if failed to get labels
+     */
+    List<Label> getLabelsByType(String type) throws LabelException;
+
+    /**
      * Retrieves the last updated time of the endpoint given its endpointId
      * 
      * @param endpointId Id of the endpoint
@@ -541,6 +549,16 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException if API Manager core level exception occurred
      */
     boolean isEndpointExist(String name) throws APIManagementException;
+
+    /**
+     * Gets the label Id of the label given the label name and type
+     *
+     * @param name name of the label
+     * @param type type of the label
+     * @return the label Id
+     * @throws APIManagementException if API Manager core level exception occurred
+     */
+    String getLabelIdByNameAndType (String name, String type) throws APIManagementException;
 
     /**
      * Extract the WSDL archive and validate

@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
-import org.wso2.carbon.apimgt.core.api.LabelExtractor;
 import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
@@ -726,33 +725,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return policy;
     }
 
-    @Override
-    public List<Label> getLabelInfo(List<String> labels, String username) throws LabelException {
-
-        List<Label> filteredLabels;
-        String labelExtractorClassName = getConfig().getLabelExtractorImplClass();
-        try {
-            List<Label> availableLabels = getLabelDAO().getLabelsByName(labels);
-            LabelExtractor labelExtractor = (LabelExtractor) Class.forName(labelExtractorClassName).newInstance();
-            filteredLabels = labelExtractor.filterLabels(username, availableLabels);
-        } catch (APIMgtDAOException e) {
-            String errorMsg = "Error occurred while retrieving label information";
-            log.error(errorMsg, e);
-            throw new LabelException(errorMsg, e, ExceptionCodes.LABEL_EXCEPTION);
-        } catch (ClassNotFoundException e) {
-            String errorMsg = "Error occurred while loading the class [class name] " + labelExtractorClassName;
-            log.error(errorMsg, e);
-            throw new LabelException(errorMsg, e, ExceptionCodes.LABEL_EXCEPTION);
-        } catch (IllegalAccessException | InstantiationException e) {
-            String errorMsg = "Error occurred while creating an instance of the class [class name] " +
-                    labelExtractorClassName;
-            log.error(errorMsg, e);
-            throw new LabelException(errorMsg, e, ExceptionCodes.LABEL_EXCEPTION);
-        }
-        return filteredLabels;
-    }
-
-
     /**
      * Check if api exists
      *
@@ -1418,7 +1390,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
      * {@inheritDoc}
      */
     @Override
-    public List<API> searchAPIs(String query, int offset, int limit) throws APIManagementException {
+    public List<API> searchAPIsByStoreLabels(String query, int offset, int limit, List<String> labels) throws
+            APIManagementException {
 
         List<API> apiResults = null;
 
@@ -1444,16 +1417,17 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 }
 
                 if (isFullTextSearch) {
-                    apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
+                    apiResults = getApiDAO().searchAPIsByStoreLabel(roles, user, query, offset, limit, labels);
                 } else {
-                    apiResults = getApiDAO().searchAPIsByAttributeInStore(new ArrayList<>(roles),
-                            attributeMap, offset, limit);
+                    apiResults = getApiDAO().searchAPIsByAttributeInStore(new ArrayList<>(roles), labels,
+                            attributeMap,
+                            offset, limit);
                 }
             } else {
                 List<String> statuses = new ArrayList<>();
                 statuses.add(APIStatus.PUBLISHED.getStatus());
                 statuses.add(APIStatus.PROTOTYPED.getStatus());
-                apiResults = getApiDAO().getAPIsByStatus(roles, statuses);
+                apiResults = getApiDAO().getAPIsByStatus(roles, statuses, labels);
             }
 
         } catch (APIMgtDAOException e) {
@@ -1809,5 +1783,25 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         return eventObservers;
     }
 
+    @Override
+    public List<Label> getAllLabels() throws LabelException {
+
+        try {
+            return getLabelDAO().getLabels();
+        } catch (APIMgtDAOException e) {
+            String msg = "Error occurred while retrieving labels";
+            throw new LabelException(msg, ExceptionCodes.LABEL_EXCEPTION);
+        }
+    }
+
+    @Override
+    public List<Label> getLabelsByType (String type) throws LabelException {
+        try {
+            return getLabelDAO().getLabelsByType(type);
+        } catch (APIMgtDAOException e) {
+            String msg = "Error occurred while retrieving labels";
+            throw new LabelException(msg, ExceptionCodes.LABEL_EXCEPTION);
+        }
+    }
 
 }

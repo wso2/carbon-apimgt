@@ -87,6 +87,7 @@ paths:
       parameters:
         - $ref : '#/parameters/limit'
         - $ref : '#/parameters/offset'
+        - $ref : '#/parameters/labels'
         - name : query
           in: query
           description: |
@@ -2397,7 +2398,7 @@ paths:
 ######################################################
 # The "Label Collection" resource API
 ######################################################
-  /label-info:
+  /labels:
 
 #-----------------------------------------------------
 # Retrieve the label information
@@ -2407,7 +2408,12 @@ paths:
       description: |
         This operation can be used to retrieve the information of the labels
       parameters:
-        - $ref: '#/parameters/labels-Q'
+        - name: labelType
+          description: |
+              type of the label.
+          in: query
+          type: string
+        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -2702,15 +2708,23 @@ parameters:
     required: true
     type: string
 
-# List of labels
-# Specified as part of the query string
-  labelName-Q:
-    name: labelName
+# Store Labels
+  label:
+    name: label
     in: query
     description: |
-      Name of the label
+      store label
+    required: true
     type: string
 
+# Store Labels
+  labels:
+    name: labels
+    in: query
+    description: |
+      Comma seperated store labels
+    required: false
+    type: string
 ######################################################
 # The resources used by some of the APIs above within the message body
 ######################################################
@@ -3626,7 +3640,8 @@ definitions:
         type: string
       email:
         type: string
-       
+
+
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

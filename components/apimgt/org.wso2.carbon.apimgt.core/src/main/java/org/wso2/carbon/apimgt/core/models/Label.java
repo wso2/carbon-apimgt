@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.core.models;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -12,12 +13,18 @@ import java.util.Objects;
 public final class Label {
     private final String id;
     private final String name;
+
+    private final String description;
     private final List<String> accessUrls;
+    private final String type;
+
 
     private Label(Builder builder) {
         id = builder.id;
         name = builder.name;
+        description = builder.description;
         accessUrls = builder.accessUrls;
+        type = builder.type;
     }
 
     public String getId() {
@@ -32,6 +39,15 @@ public final class Label {
         return accessUrls;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -45,12 +61,13 @@ public final class Label {
         Label label = (Label) o;
         return Objects.equals(id, label.id) &&
                 Objects.equals(name, label.name) &&
+                Objects.equals(type, label.type) &&
                 APIUtils.isListsEqualIgnoreOrder(accessUrls, label.accessUrls);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, accessUrls);
+        return Objects.hash(id, name, type, accessUrls);
     }
 
     @Override
@@ -59,8 +76,10 @@ public final class Label {
                 .append("id", id)
                 .append("name", name)
                 .append("accessUrls", accessUrls)
+                .append("type", type)
                 .toString();
     }
+
 
     /**
      * {@code Label} builder static inner class.
@@ -68,7 +87,9 @@ public final class Label {
     public static final class Builder {
         private String id;
         private String name;
+        private String description;
         private List<String> accessUrls;
+        private String type;
 
         public Builder() {
         }
@@ -77,6 +98,7 @@ public final class Label {
             this.id = label.id;
             this.name = label.name;
             this.accessUrls = label.accessUrls;
+            this.type = label.type;
         }
 
         /**
@@ -87,6 +109,18 @@ public final class Label {
          */
         public Builder id(String id) {
             this.id = id;
+            return this;
+        }
+
+        /**
+         * Sets the {@code description} and returns a reference to this Builder so that the methods can be chained
+         * together.
+         *
+         * @param description the {@code name} to set
+         * @return a reference to this Builder
+         */
+        public Builder description(String description) {
+            this.description = description;
             return this;
         }
 
@@ -110,6 +144,18 @@ public final class Label {
          */
         public Builder accessUrls(List<String> accessUrls) {
             this.accessUrls = accessUrls;
+            return this;
+        }
+
+        /**
+         * Sets the {@code type} and returns a reference to this Builder so that the methods can be chained
+         * together.
+         *
+         * @param type the {@code type} to set
+         * @return a reference to this Builder
+         */
+        public Builder type (String type) {
+            this.type = type;
             return this;
         }
 

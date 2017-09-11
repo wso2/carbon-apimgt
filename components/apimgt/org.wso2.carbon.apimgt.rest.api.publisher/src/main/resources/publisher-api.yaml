@@ -2891,6 +2891,12 @@ paths:
       description: |
         This operation can be used to retrieve the list of labels available.
       parameters:
+        - name: labelType
+          description: |
+             type of the label.
+          in: query
+          type: string
+        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -3857,11 +3863,14 @@ definitions:
     required:
       - labelId
       - name
+      - type
       - access_urls
     properties:
       labelId:
         type: string
       name:
+        type: string
+      type:
         type: string
       access_urls:
         type: array

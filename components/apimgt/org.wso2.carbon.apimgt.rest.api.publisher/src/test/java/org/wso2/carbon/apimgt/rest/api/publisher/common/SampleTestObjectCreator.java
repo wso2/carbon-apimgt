@@ -177,7 +177,7 @@ public class SampleTestObjectCreator {
         Set<String> visibleRoles = new HashSet<>();
         visibleRoles.add("testRple");
 
-        Set<String> labels = new HashSet<>();
+        List<String> labels = new ArrayList<>();
         labels.add("testLabel");
 
         CorsConfiguration corsConfiguration = new CorsConfiguration();

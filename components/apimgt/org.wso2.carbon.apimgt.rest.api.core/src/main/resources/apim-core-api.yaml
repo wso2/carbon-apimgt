@@ -215,59 +215,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-
-
-#-----------------------------------------------------
-#  Register a Gateway
-#-----------------------------------------------------
-
-  /gateways/register:
-    post:
-      x-wso2-curl: "curl -k -H \"Content-Type: application/json\" -X POST -d @data.json \"https://localhost:9292/api/am/core/v1/gateway/register\""
-      x-wso2-request: |
-        GET https://localhost:9292/api/am/core/v1/gateway/register
-        {\r\n\"labelInfo\":{\r\n  \"overwriteLabels\":false,\r\n  \"labelList\":[\r\n     {\r\n        \"name\":\"Private\",\r\n        \"accessUrls\":[\r\n           \"https:\/\/local.privatfdsafe\"\r\n        ]\r\n     },\r\n     {\r\n        \"name\":\"Public\",\r\n        \"accessUrls\":[\r\n           \"http:\/\/local.private\",\r\n           \"https:\/\/local.public\"\r\n        ]\r\n     }\r\n  ]\r\n}}
-      x-wso2-response: ""
-      summary: Register a Gateway
-      description: |
-        This operation can be used to register a gateway.
-      parameters:
-        - in: body
-          name: body
-          description: |
-            Register object that needs to be added
-          required: true
-          schema:
-            $ref: '#/definitions/Registration'
-        - $ref: '#/parameters/Content-Type'
-      tags:
-        - Register Gateway
-      responses:
-        201:
-          description: |
-            Created.
-            Successful response with Registration Summary details in the body.
-          schema:
-            $ref: '#/definitions/RegistrationSummary'
-          headers:
-            Content-Type:
-              description: |
-                The content type of the body.
-              type: string
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error.
-          schema:
-            $ref: '#/definitions/Error'
-        415:
-          description: |
-            Unsupported Media Type.
-            The entity of the request was in a not supported format.
-          schema:
-            $ref: '#/definitions/Error'
-
-
 ################################################################
 # The gateway config resource of "Individual API" resource APIs
 ################################################################

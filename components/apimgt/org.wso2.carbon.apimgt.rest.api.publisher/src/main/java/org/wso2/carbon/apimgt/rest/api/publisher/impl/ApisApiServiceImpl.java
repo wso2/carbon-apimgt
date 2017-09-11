@@ -41,9 +41,6 @@ import org.wso2.carbon.lcm.core.impl.LifecycleState;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FileInfo;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -54,6 +51,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
         "2016-11-01T13:47:43.416+05:30")
@@ -1249,10 +1249,12 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return a list of qualifying APIs
      * @throws NotFoundException When the particular resource does not exist in the system
      */
+
     @Override
-    public Response apisGet(Integer limit, Integer offset, String query, String ifNoneMatch, Request request)
-            throws NotFoundException {
+    public Response apisGet(Integer limit, Integer offset, String query, String
+            ifNoneMatch, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
+
         APIListDTO apiListDTO = null;
         try {
             apiListDTO = MappingUtil

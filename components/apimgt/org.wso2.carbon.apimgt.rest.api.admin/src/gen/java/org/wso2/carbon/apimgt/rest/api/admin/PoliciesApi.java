@@ -69,7 +69,7 @@ public class PoliciesApi implements Microservice  {
         return delegate.policiesThrottlingAdvancedGet(accept,ifNoneMatch,ifModifiedSince, request);
     }
     @DELETE
-    @Path("/throttling/advanced/{policyId}")
+    @Path("/throttling/advanced/{id}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Delete an Advanced level throttle policy", notes = "Delete an Advanced level throttle policy ", response = void.class, tags={ "Advanced Policies", })
@@ -79,15 +79,15 @@ public class PoliciesApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Resource to be deleted does not exist. ", response = void.class),
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = void.class) })
-    public Response policiesThrottlingAdvancedPolicyIdDelete(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("policyId") String policyId
+    public Response policiesThrottlingAdvancedIdDelete(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("id") String id
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingAdvancedPolicyIdDelete(policyId,ifMatch,ifUnmodifiedSince, request);
+        return delegate.policiesThrottlingAdvancedIdDelete(id,ifMatch,ifUnmodifiedSince, request);
     }
     @GET
-    @Path("/throttling/advanced/{policyId}")
+    @Path("/throttling/advanced/{id}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve an Advanced Policy", notes = "Retrieve a Advanced Policy providing the policy name. ", response = AdvancedThrottlePolicyDTO.class, tags={ "Advanced Policies", })
@@ -99,15 +99,15 @@ public class PoliciesApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested Policy does not exist. ", response = AdvancedThrottlePolicyDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = AdvancedThrottlePolicyDTO.class) })
-    public Response policiesThrottlingAdvancedPolicyIdGet(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("policyId") String policyId
+    public Response policiesThrottlingAdvancedIdGet(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("id") String id
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingAdvancedPolicyIdGet(policyId,ifNoneMatch,ifModifiedSince, request);
+        return delegate.policiesThrottlingAdvancedIdGet(id,ifNoneMatch,ifModifiedSince, request);
     }
     @PUT
-    @Path("/throttling/advanced/{policyId}")
+    @Path("/throttling/advanced/{id}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Update an Advanced level throttle policy", notes = "Update an Advanced level throttle policy ", response = AdvancedThrottlePolicyDTO.class, tags={ "Advanced Policies", })
@@ -119,14 +119,14 @@ public class PoliciesApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = AdvancedThrottlePolicyDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = AdvancedThrottlePolicyDTO.class) })
-    public Response policiesThrottlingAdvancedPolicyIdPut(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("policyId") String policyId
+    public Response policiesThrottlingAdvancedIdPut(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("id") String id
 ,@ApiParam(value = "Policy object that needs to be modified " ,required=true) AdvancedThrottlePolicyDTO body
 ,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingAdvancedPolicyIdPut(policyId,body,contentType,ifMatch,ifUnmodifiedSince, request);
+        return delegate.policiesThrottlingAdvancedIdPut(id,body,contentType,ifMatch,ifUnmodifiedSince, request);
     }
     @POST
     @Path("/throttling/advanced")
@@ -164,7 +164,7 @@ public class PoliciesApi implements Microservice  {
         return delegate.policiesThrottlingApplicationGet(accept,ifNoneMatch,ifModifiedSince, request);
     }
     @DELETE
-    @Path("/throttling/application/{policyId}")
+    @Path("/throttling/application/{id}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Delete an Application level throttle policy", notes = "Delete an Application level throttle policy ", response = void.class, tags={ "Application Policies", })
@@ -174,15 +174,15 @@ public class PoliciesApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Resource to be deleted does not exist. ", response = void.class),
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = void.class) })
-    public Response policiesThrottlingApplicationPolicyIdDelete(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("policyId") String policyId
+    public Response policiesThrottlingApplicationIdDelete(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("id") String id
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingApplicationPolicyIdDelete(policyId,ifMatch,ifUnmodifiedSince, request);
+        return delegate.policiesThrottlingApplicationIdDelete(id,ifMatch,ifUnmodifiedSince, request);
     }
     @GET
-    @Path("/throttling/application/{policyId}")
+    @Path("/throttling/application/{id}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve an Application Policy", notes = "Retrieve an Application Policy providing the policy name. ", response = ApplicationThrottlePolicyDTO.class, tags={ "Application Policies", })
@@ -194,15 +194,15 @@ public class PoliciesApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested Tier does not exist. ", response = ApplicationThrottlePolicyDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = ApplicationThrottlePolicyDTO.class) })
-    public Response policiesThrottlingApplicationPolicyIdGet(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("policyId") String policyId
+    public Response policiesThrottlingApplicationIdGet(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("id") String id
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingApplicationPolicyIdGet(policyId,ifNoneMatch,ifModifiedSince, request);
+        return delegate.policiesThrottlingApplicationIdGet(id,ifNoneMatch,ifModifiedSince, request);
     }
     @PUT
-    @Path("/throttling/application/{policyId}")
+    @Path("/throttling/application/{id}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Update an Application level throttle policy", notes = "Update an Application level throttle policy ", response = ApplicationThrottlePolicyDTO.class, tags={ "Application Policies", })
@@ -214,14 +214,14 @@ public class PoliciesApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = ApplicationThrottlePolicyDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ApplicationThrottlePolicyDTO.class) })
-    public Response policiesThrottlingApplicationPolicyIdPut(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("policyId") String policyId
+    public Response policiesThrottlingApplicationIdPut(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("id") String id
 ,@ApiParam(value = "Policy object that needs to be modified " ,required=true) ApplicationThrottlePolicyDTO body
 ,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingApplicationPolicyIdPut(policyId,body,contentType,ifMatch,ifUnmodifiedSince, request);
+        return delegate.policiesThrottlingApplicationIdPut(id,body,contentType,ifMatch,ifUnmodifiedSince, request);
     }
     @POST
     @Path("/throttling/application")
@@ -354,7 +354,7 @@ public class PoliciesApi implements Microservice  {
         return delegate.policiesThrottlingSubscriptionGet(accept,ifNoneMatch,ifModifiedSince, request);
     }
     @DELETE
-    @Path("/throttling/subscription/{policyId}")
+    @Path("/throttling/subscription/{id}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Delete a Subscription level throttle policy", notes = "Delete a Subscription level throttle policy ", response = void.class, tags={ "Subscription Policies", })
@@ -364,15 +364,15 @@ public class PoliciesApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Resource to be deleted does not exist. ", response = void.class),
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = void.class) })
-    public Response policiesThrottlingSubscriptionPolicyIdDelete(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("policyId") String policyId
+    public Response policiesThrottlingSubscriptionIdDelete(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("id") String id
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingSubscriptionPolicyIdDelete(policyId,ifMatch,ifUnmodifiedSince, request);
+        return delegate.policiesThrottlingSubscriptionIdDelete(id,ifMatch,ifUnmodifiedSince, request);
     }
     @GET
-    @Path("/throttling/subscription/{policyId}")
+    @Path("/throttling/subscription/{id}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve a Subscription Policy", notes = "Retrieve a Subscription Policy providing the policy name. ", response = SubscriptionThrottlePolicyDTO.class, tags={ "Subscription Policies", })
@@ -384,15 +384,15 @@ public class PoliciesApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested Policy does not exist. ", response = SubscriptionThrottlePolicyDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = SubscriptionThrottlePolicyDTO.class) })
-    public Response policiesThrottlingSubscriptionPolicyIdGet(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("policyId") String policyId
+    public Response policiesThrottlingSubscriptionIdGet(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("id") String id
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingSubscriptionPolicyIdGet(policyId,ifNoneMatch,ifModifiedSince, request);
+        return delegate.policiesThrottlingSubscriptionIdGet(id,ifNoneMatch,ifModifiedSince, request);
     }
     @PUT
-    @Path("/throttling/subscription/{policyId}")
+    @Path("/throttling/subscription/{id}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Update a Subscription level throttle policy", notes = "Update a Subscription level throttle policy ", response = SubscriptionThrottlePolicyDTO.class, tags={ "Subscription Policies", })
@@ -404,14 +404,14 @@ public class PoliciesApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. The resource to be updated does not exist. ", response = SubscriptionThrottlePolicyDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = SubscriptionThrottlePolicyDTO.class) })
-    public Response policiesThrottlingSubscriptionPolicyIdPut(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("policyId") String policyId
+    public Response policiesThrottlingSubscriptionIdPut(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("id") String id
 ,@ApiParam(value = "Policy object that needs to be modified " ,required=true) SubscriptionThrottlePolicyDTO body
 ,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
 , @Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingSubscriptionPolicyIdPut(policyId,body,contentType,ifMatch,ifUnmodifiedSince, request);
+        return delegate.policiesThrottlingSubscriptionIdPut(id,body,contentType,ifMatch,ifUnmodifiedSince, request);
     }
     @POST
     @Path("/throttling/subscription")

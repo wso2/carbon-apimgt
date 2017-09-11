@@ -36,7 +36,9 @@ import java.util.Set;
  */
 public interface ApiDAOVendorSpecificStatements {
 
-    String EVERYONE_ROLE = "EVERYONE";
+    String API_SUMMARY_SELECT_STORE = "SELECT UUID, PROVIDER, NAME, CONTEXT, " +
+            "VERSION, DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS " +
+            "FROM AM_API ";
 
     /**
      * Returns the query string to be used for the search query. This is required to construct the PreparedStatement
@@ -45,6 +47,7 @@ public interface ApiDAOVendorSpecificStatements {
      * @return String
      */
     String getApiSearchQuery(int roleCount);
+
 
     /**
      * Returns the query string to be used for the attribute search query. This is required to construct the
@@ -67,7 +70,8 @@ public interface ApiDAOVendorSpecificStatements {
      * @throws SQLException if DB error occurs
      */
     void setApiSearchStatement(PreparedStatement statement, Set<String> roles, String user,
-                           String searchString, ApiType apiType, int offset, int limit) throws SQLException;
+                           String searchString, ApiType apiType, int offset, int limit, List<String> labels)
+            throws SQLException;
 
     /**
      * Set parameters of the PreparedStatement created for the attribute search query
@@ -95,7 +99,21 @@ public interface ApiDAOVendorSpecificStatements {
      * @return statement build for specific database type.
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    PreparedStatement prepareAttributeSearchStatementForStore(Connection connection, List<String> roles, Map<String,
-            String> attributeMap, int offset, int limit) throws APIMgtDAOException;
+    PreparedStatement prepareAttributeSearchStatementForStore(Connection connection, List<String> roles,
+                                                              List<String> labels, Map<String, String> attributeMap,
+                                                              int offset, int limit) throws APIMgtDAOException;
+
+
+    default String getStoreAPIsByLabelJoinQuery(List<String> labels) {
+
+        if (labels.size() > 0) {
+            return " INNER JOIN AM_API_LABEL_MAPPING LM ON UUID=LM.API_ID" +
+                    " WHERE LM.LABEL_ID IN ( SELECT LABEL_ID FROM AM_LABELS WHERE LABEL_NAME IN (" +
+                    DAOUtil.getParameterString(labels.size()) +  "AND TYPE_NAME ='STORE')";
+        } else {
+            return " INNER JOIN AM_API_LABEL_MAPPING LM ON UUID=LM.API_ID" +
+                    " WHERE LM.LABEL_ID IN ( SELECT LABEL_ID FROM AM_LABELS WHERE TYPE_NAME ='STORE')";
+        }
+    }
 
 }

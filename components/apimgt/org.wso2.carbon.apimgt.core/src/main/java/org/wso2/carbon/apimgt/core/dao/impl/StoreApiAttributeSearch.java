@@ -21,18 +21,22 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 /**
  * This interface produces search queries for API store.
  */
-interface StoreApiAttributeSearch {
+interface  StoreApiAttributeSearch {
 
+   public static final String API_SUMMARY_SELECT_STORE = "SELECT UUID, PROVIDER, NAME, CONTEXT, " +
+            "VERSION, DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS " +
+            "FROM AM_API ";
     /**
      * This method will return the query query to be executed, for each search type
      * (i.e - tag, subcontext or general search)
      *
      * @param roleListBuilder a parameterized string builder with question marks constructed based on user roles
-     * @param searchQuery a sub string containing only the attributes
-     * @param offset the starting point of the search results.
-     * @param limit number of search results that will be returned.
+     * @param searchQuery     a sub string containing only the attributes
+     * @param offset          the starting point of the search results.
+     * @param limit           number of search results that will be returned.
      * @return the query to be executed, as a string
      */
     String getStoreAttributeSearchQuery(StringBuilder roleListBuilder,
-                                        StringBuilder searchQuery, int offset, int limit);
+                                               StringBuilder searchQuery, int offset, int limit);
+
 }

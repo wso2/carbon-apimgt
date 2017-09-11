@@ -49,7 +49,7 @@ public class FileApi {
     private boolean isDefaultVersion;
     private Set<String> transport;
     private Set<String> tags;
-    private Set<String> labels;
+    private List<String> labels;
     private Set<String> policies;
     private API.Visibility visibility;
     private Set<String> visibleRoles;
@@ -248,11 +248,11 @@ public class FileApi {
         }
     }
 
-    public Set<String> getLabels() {
+    public List<String> getLabels() {
         return labels;
     }
 
-    public void setLabels(Set<String> labels) {
+    public void setLabels(List<String> labels) {
         this.labels = labels;
     }
 

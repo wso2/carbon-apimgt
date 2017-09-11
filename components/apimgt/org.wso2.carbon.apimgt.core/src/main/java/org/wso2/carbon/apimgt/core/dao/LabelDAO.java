@@ -39,12 +39,13 @@ public interface LabelDAO {
     List<Label> getLabels() throws APIMgtDAOException;
 
     /**
-     * Add labels if not exist
+     * Returns matched label
      *
-     * @param labels The {@code List<Label>}List of labels
+     * @param labelID The {@link String} ID of the label
+     * @return {@link Label} Label
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void addLabels(List<Label> labels) throws APIMgtDAOException;
+    Label getLabelByID(String labelID) throws APIMgtDAOException;
 
     /**
      * Returns matched label
@@ -56,21 +57,12 @@ public interface LabelDAO {
     Label getLabelByName(String labelName) throws APIMgtDAOException;
 
     /**
-     * Returns matched labels
-     *
-     * @param labelNames The {@code List<String>} Label names
-     * @return {@code List<Label>} List of labels
-     * @throws APIMgtDAOException if error occurs while accessing data layer
-     */
-    List<Label> getLabelsByName(List<String> labelNames) throws APIMgtDAOException;
-
-    /**
      * Remove label
      *
-     * @param labelName The {@link String} Name of the label
+     * @param labelID The {@link String} ID of the label
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void deleteLabel(String labelName) throws APIMgtDAOException;
+    void deleteLabel(String labelID) throws APIMgtDAOException;
 
     /**
      * Update the label
@@ -78,6 +70,24 @@ public interface LabelDAO {
      * @param updatedLabel Updated Label
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    void updateLabel(Label updatedLabel) throws APIMgtDAOException;
+    Label updateLabel(Label updatedLabel) throws APIMgtDAOException;
+
+    /**
+     * Retrieve all label types
+     *
+     * @return list of label types
+     * @throws APIMgtDAOException if error occurs while retrieving access urls
+     */
+     List<Label> getLabelsByType(String type) throws APIMgtDAOException;
+
+    /**
+     * Retrieve the label given the label name and label type
+     *
+     * @param  name label name
+     * @param type  type of the label
+     * @return the label Id
+     * @throws APIMgtDAOException if error occurs while retrieving access urls
+     */
+    String getLabelIdByNameAndType(String name, String type) throws APIMgtDAOException;
 
 }

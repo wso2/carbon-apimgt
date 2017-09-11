@@ -133,6 +133,10 @@ public enum ExceptionCodes implements ErrorHandler {
     LABEL_NOT_FOUND(900652, "Label Not Found", 404, "Label with specified name cannot be found."),
     LABEL_NOT_FOUND_IN_API(900653, "Label Not Found In API", 404, "Label with specified name" 
             + " cannot be found in the API."),
+    LABEL_ADDING_FAILED(900654, "Label Error", 500, "Error occurred while trying to add label"),
+    LABEL_UPDATE_FAILED(900655, "Label Error", 500, "Error occurred while trying to update label"),
+    LABEL_DELETION_FAILED(900656, "Label Error", 500, "Error occurred while trying to delete label"),
+
 
     //WSDL related codes
     INVALID_WSDL_URL_EXCEPTION(900675, "Invalid WSDL", 400, "Invalid WSDL URL"),

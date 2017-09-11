@@ -269,13 +269,36 @@ public interface APIMgtAdminService {
     void deleteLabel(String labelId) throws APIManagementException;
 
     /**
-     * Register gateway labels in the system
+     * Returns all the available labels
      *
-     * @param labels List of labels
-     * @param overwriteLabels Flag to overwrite gateway labels
      * @throws APIManagementException If failed to register labels.
      */
-    void registerGatewayLabels(List<Label> labels, String overwriteLabels) throws APIManagementException;
+    List<Label> getLabels() throws APIManagementException;
+
+    /**
+     * Returns matched label
+     *
+     * @param labelID The {@link String} ID of the label
+     * @return {@link Label} Label
+     * @throws APIManagementException if error occurs while accessing data layer
+     */
+    Label getLabelByID(String labelID) throws APIManagementException;
+
+    /**
+     * Add labels if not exist
+     *
+     * @param label The {@code List<Label>} label to be added
+     * @throws APIManagementException if error occurs while trying to add labels
+     */
+    Label addLabel(Label label) throws APIManagementException;
+
+    /**
+     * Update the label
+     *
+     * @param updatedLabel Updated Label
+     * @throws APIManagementException if error occurs while accessing data layer
+     */
+    Label updateLabel(Label updatedLabel) throws APIManagementException;
 
     /**
      * Retrieve API's gateway configuration
@@ -423,7 +446,7 @@ public interface APIMgtAdminService {
      * @throws APIManagementException if failed getting custom policy
      */
     CustomPolicy getCustomRuleByUUID(String uuid) throws APIManagementException;
-    
+
     /**
      * Retrieve workflow for the given workflow reference ID
      * @param workflowRefId External workflow reference Id
@@ -457,5 +480,4 @@ public interface APIMgtAdminService {
      * @throws APIManagementException if API Manager core level exception occurred
      */
     List<Workflow> retrieveUncompletedWorkflows() throws APIManagementException;
-
 }

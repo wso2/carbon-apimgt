@@ -28,7 +28,6 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -47,19 +46,9 @@ public class MysqlSQLStatements implements ApiDAOVendorSpecificStatements {
                     + "API.SECURITY_SCHEME FROM AM_API API LEFT JOIN AM_API_GROUP_PERMISSION PERMISSION ON "
                     + "`UUID` = `API_ID`";
 
-    private Map<String, StoreApiAttributeSearch> searchMap;
 
     public MysqlSQLStatements() {
-        searchMap = new HashMap<>();
-        //for tag search, need to check AM_API_TAG_MAPPING and AM_TAGS tables
-        searchMap.put(APIMgtConstants.TAG_SEARCH_TYPE_PREFIX, new MysqlTagSearchImpl());
-        //for subcontext search, need to check AM_API_OPERATION_MAPPING table
-        searchMap.put(APIMgtConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX, new MysqlSubcontextSearchImpl());
-        //for any other attribute search, need to check AM_API table
-        searchMap.put(APIMgtConstants.PROVIDER_SEARCH_TYPE_PREFIX, new MysqlGenericSearchImpl());
-        searchMap.put(APIMgtConstants.VERSION_SEARCH_TYPE_PREFIX, new MysqlGenericSearchImpl());
-        searchMap.put(APIMgtConstants.CONTEXT_SEARCH_TYPE_PREFIX, new MysqlGenericSearchImpl());
-        searchMap.put(APIMgtConstants.DESCRIPTION_SEARCH_TYPE_PREFIX, new MysqlGenericSearchImpl());
+
     }
 
     /**
@@ -89,15 +78,18 @@ public class MysqlSQLStatements implements ApiDAOVendorSpecificStatements {
 
     /**
      * @see ApiDAOVendorSpecificStatements#setApiSearchStatement(PreparedStatement, Set, String, String, ApiType,
-     * int, int)
+     * int, int, List)
      */
     @Override
     @SuppressFBWarnings({"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
             "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
     public void setApiSearchStatement(PreparedStatement statement, Set<String> roles, String user,
-                                 String searchString, ApiType apiType,
-                                 int offset, int limit) throws SQLException {
+                                      String searchString, ApiType apiType,
+                                      int offset, int limit, List<String> labels) throws SQLException {
         int index = 0;
+        for (String label : labels) {
+            statement.setString(++index, label);
+        }
         statement.setString(++index, '*' + searchString.toLowerCase(Locale.ENGLISH) + '*');
         statement.setString(++index, apiType.toString());
 
@@ -171,15 +163,16 @@ public class MysqlSQLStatements implements ApiDAOVendorSpecificStatements {
     }
 
     /**
-     * @see ApiDAOVendorSpecificStatements#prepareAttributeSearchStatementForStore(Connection connection, List,
+     * @see ApiDAOVendorSpecificStatements#prepareAttributeSearchStatementForStore(Connection connection, List, List,
      * Map, int, int)
      */
     @Override
     @SuppressFBWarnings({"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
             "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
     public PreparedStatement prepareAttributeSearchStatementForStore(Connection connection, List<String> roles,
-                                                                     Map<String, String> attributeMap, int offset,
-                                                                     int limit) throws APIMgtDAOException {
+                                                                     List<String> labels, Map<String, String>
+                                                                                 attributeMap, int offset, int limit)
+            throws APIMgtDAOException {
 
         StringBuilder roleListBuilder = new StringBuilder();
         roleListBuilder.append("?");
@@ -209,8 +202,9 @@ public class MysqlSQLStatements implements ApiDAOVendorSpecificStatements {
         //retrieve the attribute applicable for the search
         String searchAttribute = attributeMap.entrySet().iterator().next().getKey();
         //get the corresponding implementation based on the attribute to be searched
-        String query = searchMap.get(searchAttribute).
+        String query = DAOFactory.getStoreApiAttributeSearchQuery(searchAttribute).
                 getStoreAttributeSearchQuery(roleListBuilder, searchQuery, offset, limit);
+        query = "Select * from ( " + query + " ) " + getStoreAPIsByLabelJoinQuery(labels) + " OFFSET ? LIMIT ?";
 
         try {
             int queryIndex = 1;
@@ -232,6 +226,12 @@ public class MysqlSQLStatements implements ApiDAOVendorSpecificStatements {
                         toLowerCase(Locale.ENGLISH) + '%');
                 queryIndex++;
             }
+
+            for (String label : labels) {
+                statement.setString(queryIndex, label);
+                queryIndex++;
+            }
+
             //setting 0 as the default offset based on store-api.yaml and MySQL specifications
             statement.setInt(queryIndex, (offset < 0) ? 0 : offset);
             statement.setInt(++queryIndex, limit);

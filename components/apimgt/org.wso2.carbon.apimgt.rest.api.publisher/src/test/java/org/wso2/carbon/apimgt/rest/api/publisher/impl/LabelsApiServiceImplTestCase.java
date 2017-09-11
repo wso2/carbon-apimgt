@@ -28,7 +28,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
-import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.impl.APIPublisherImpl;
@@ -39,9 +38,9 @@ import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.carbon.transport.http.netty.message.HTTPCarbonMessage;
 import org.wso2.msf4j.Request;
 
-import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+import javax.ws.rs.core.Response;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -69,7 +68,7 @@ public class LabelsApiServiceImplTestCase {
         Mockito.doReturn(labels).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getAllLabels();
         Response response = labelsApiService.
-                labelsGet(null, null, getRequest());
+                labelsGet(null, null, null, null,getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains("Label1"));
         assertTrue(response.getEntity().toString().contains("Label2"));
@@ -86,7 +85,7 @@ public class LabelsApiServiceImplTestCase {
         Mockito.doThrow(new LabelException("Error occurred", ExceptionCodes.LABEL_EXCEPTION))
                 .when(apiPublisher).getAllLabels();
         Response response = labelsApiService.
-                labelsGet(null, null, getRequest());
+                labelsGet(null, null, null, null, getRequest());
         assertEquals(response.getStatus(), 500);
         assertTrue(response.getEntity().toString().contains("Label Error"));
     }

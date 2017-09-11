@@ -2,25 +2,19 @@ package org.wso2.carbon.apimgt.rest.api.store;
 
 
 import io.swagger.annotations.ApiParam;
-
+import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CommentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.RatingListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.factories.ApisApiServiceFactory;
-
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
-import org.wso2.msf4j.formparam.FileInfo;
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.osgi.service.component.annotations.Component;
 
-import java.io.InputStream;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -354,10 +348,11 @@ public class ApisApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = APIListDTO.class) })
     public Response apisGet(@ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
 ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
+,@ApiParam(value = "Comma seperated store labels ") @QueryParam("labels") String labels
 ,@ApiParam(value = "**Search condition**.  You can search in attributes by using an **\"attribute:\"** modifier.  Eg. \"provider:wso2\" will match an API if the provider of the API is exactly \"wso2\".  Additionally you can use wildcards.  Eg. \"provider:wso2*\" will match an API if the provider of the API starts with \"wso2\".  Supported attribute modifiers are [**version, context, lifeCycleStatus, description, subcontext, doc, provider, tag **]  If no advanced attribute modifier has been specified, search will match the given query string against API Name. ") @QueryParam("query") String query
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 , @Context Request request)
     throws NotFoundException {
-        return delegate.apisGet(limit,offset,query,ifNoneMatch, request);
+        return delegate.apisGet(limit,offset,labels,query,ifNoneMatch, request);
     }
 }

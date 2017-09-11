@@ -26,9 +26,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIListDTO;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static org.testng.Assert.assertEquals;
 
@@ -38,7 +36,7 @@ public class CompositeAPIMappingUtilTestCase {
 
     @Test
     public void testToCompositeAPIDTOAndViceVersa() {
-        Set<String> labels = new HashSet<>();
+        List<String> labels = new ArrayList<>();
         labels.add("label1");
         //Test compositeAPI to CompositeAPIDTO
         CompositeAPI compositeAPI = SampleTestObjectCreator.createCompositeAPIModelBuilder().labels(labels).build();

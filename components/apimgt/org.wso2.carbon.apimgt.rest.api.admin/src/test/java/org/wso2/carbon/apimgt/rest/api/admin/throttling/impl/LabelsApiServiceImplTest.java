@@ -41,6 +41,7 @@ import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.msf4j.Request;
 
 import java.util.UUID;
+import javax.ws.rs.core.Response;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(RestApiUtil.class)
@@ -57,10 +58,10 @@ public class LabelsApiServiceImplTest {
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(adminService).deleteLabel(labelId);
-        javax.ws.rs.core.Response response =
-                labelsApiService.labelsLabelIdDelete(labelId, null, null, getRequest());
+        Response response =
+                labelsApiService.labelsLabelIdDelete(labelId, getRequest());
 
-        Assert.assertEquals(response.getStatus(),200);
+        Assert.assertEquals(204, response.getStatus());
     }
 
     @Test
@@ -75,7 +76,7 @@ public class LabelsApiServiceImplTest {
 
         Mockito.doThrow(new APIManagementException("Error", ExceptionCodes.APIMGT_DAO_EXCEPTION)).when(adminService).deleteLabel(labelId);
         javax.ws.rs.core.Response response =
-                labelsApiService.labelsLabelIdDelete(labelId, null, null, getRequest());
+                labelsApiService.labelsLabelIdDelete(labelId, getRequest());
 
         Assert.assertEquals(500, response.getStatus());
     }
@@ -89,7 +90,7 @@ public class LabelsApiServiceImplTest {
         PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
 
         javax.ws.rs.core.Response response =
-                labelsApiService.labelsLabelIdDelete(null, null, null, getRequest());
+                labelsApiService.labelsLabelIdDelete(null, getRequest());
 
         Assert.assertEquals(400, response.getStatus());
     }
