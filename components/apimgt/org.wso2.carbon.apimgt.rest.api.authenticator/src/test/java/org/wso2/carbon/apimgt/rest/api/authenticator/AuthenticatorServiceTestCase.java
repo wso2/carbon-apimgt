@@ -102,7 +102,9 @@ public class AuthenticatorServiceTestCase {
         //// Get data object to be passed to the front-end
         Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(oAuthApplicationInfo);
         JsonObject responseOAuthDataObj = authenticatorService.getAuthenticationConfigurations("publisher");
-        Assert.assertEquals(responseOAuthDataObj, oAuthData);
+        String[] scopesActual = responseOAuthDataObj.get(KeyManagerConstants.TOKEN_SCOPES).toString().split(" ");
+        String[] scopesExpected = oAuthData.get(KeyManagerConstants.TOKEN_SCOPES).toString().split(" ");
+        Assert.assertEquals(scopesActual.length, scopesExpected.length);
 
         // Error Path - 500 - When OAuthApplicationInfo is null
         JsonObject emptyOAuthDataObj = new JsonObject();

@@ -262,20 +262,19 @@ public class AuthenticatorService {
         } else if (AuthenticatorConstants.ADMIN_APPLICATION.equals(appName)) {
             applicationRestAPI = RestApiUtil.getAdminRestAPIResource();
         }
-        //Todo: when all swaggers modified with no vendor extension, following swagger parser should be modified.
-        //todo: for now only publisher swagger have been modified for no vendor extensions
         try {
             if (applicationRestAPI != null) {
                 APIDefinition apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
+                Map<String, Scope> applicationScopesMap;
+                //Todo: when all swaggers modified with no vendor extension, following swagger parser should be modified.
+                //todo: for now only publisher swagger have been modified for no vendor extensions
                 if (AuthenticatorConstants.PUBLISHER_APPLICATION.equals(appName)) {
-                    apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
-                    Map<String, String> scopesPub = apiDefinitionFromSwagger20.getScope(applicationRestAPI);
-                    scopes = String.join(" ", scopesPub.keySet());
+                    applicationScopesMap = apiDefinitionFromSwagger20
+                            .getScopesFromSecurityDefinition(applicationRestAPI);
                 } else {
-                    Map<String, Scope> applicationScopesMap = null;
                     applicationScopesMap = apiDefinitionFromSwagger20.getScopes(applicationRestAPI);
-                    scopes = String.join(" ", applicationScopesMap.keySet());
                 }
+                scopes = String.join(" ", applicationScopesMap.keySet());
                 // Set openid scope
                 if (StringUtils.isEmpty(scopes)) {
                     scopes = KeyManagerConstants.OPEN_ID_CONNECT_SCOPE;
