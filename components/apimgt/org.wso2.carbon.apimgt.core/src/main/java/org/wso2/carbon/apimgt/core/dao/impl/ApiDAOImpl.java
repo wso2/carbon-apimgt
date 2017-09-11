@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.ResourceCategory;
 import org.wso2.carbon.apimgt.core.models.Subscription;
@@ -520,10 +521,10 @@ public class ApiDAOImpl implements ApiDAO {
             Iterator<Map.Entry<String, String>> entries = attributeMap.entrySet().iterator();
             while (entries.hasNext()) {
                 Map.Entry<String, String> entry = entries.next();
-                String tableName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
+                String tableName = connection.getMetaData().getDriverName().contains(DAOUtil.DB_NAME_POSTGRESQL) ?
                         AM_API_TABLE_NAME.toLowerCase(Locale.ENGLISH) :
                         AM_API_TABLE_NAME;
-                String columnName = connection.getMetaData().getDriverName().contains("PostgreSQL") ?
+                String columnName = connection.getMetaData().getDriverName().contains(DAOUtil.DB_NAME_POSTGRESQL) ?
                         entry.getKey().toLowerCase(Locale.ENGLISH) :
                         entry.getKey().toUpperCase(Locale.ENGLISH);
                 if (!checkTableColumnExists(md, tableName, columnName)) {
@@ -3191,25 +3192,23 @@ public class ApiDAOImpl implements ApiDAO {
 
     private List<String> getLabelNames(Connection connection, String apiID) throws SQLException, APIMgtDAOException {
         List<String> labelNames = new ArrayList<>();
-
         final String query = "SELECT LABEL_ID FROM AM_API_LABEL_MAPPING WHERE API_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiID);
             statement.execute();
-
             try (ResultSet rs = statement.getResultSet()) {
                 List<String> labelIDs = new ArrayList<>();
-
                 while (rs.next()) {
                     labelIDs.add(rs.getString("LABEL_ID"));
                 }
-
                 for (String labelId: labelIDs) {
-                    labelNames.add(DAOFactory.getLabelDAO().getLabelByID(labelId).getName());
+                    Label label = DAOFactory.getLabelDAO().getLabelByID(labelId);
+                    if (label != null) {
+                        labelNames.add(label.getName());
+                    }
                 }
             }
         }
-
         return labelNames;
     }
 }

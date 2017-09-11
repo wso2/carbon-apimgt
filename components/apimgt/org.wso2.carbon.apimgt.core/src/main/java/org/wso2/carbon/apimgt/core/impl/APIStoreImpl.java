@@ -1790,7 +1790,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             return getLabelDAO().getLabels();
         } catch (APIMgtDAOException e) {
             String msg = "Error occurred while retrieving labels";
-            log.error(msg, e);
             throw new LabelException(msg, ExceptionCodes.LABEL_EXCEPTION);
         }
     }
@@ -1801,7 +1800,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             return getLabelDAO().getLabelsByType(type);
         } catch (APIMgtDAOException e) {
             String msg = "Error occurred while retrieving labels";
-            log.error(msg, e);
             throw new LabelException(msg, ExceptionCodes.LABEL_EXCEPTION);
         }
     }

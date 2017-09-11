@@ -365,7 +365,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
              return labelDAO.getLabels();
         } catch (APIMgtDAOException e) {
             String msg = "Error occurred while Getting all  labels";
-            log.error(msg, e);
             throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
@@ -377,7 +376,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             label = labelDAO.getLabelByID(labelID);
         } catch (APIMgtDAOException e) {
             String msg = "Error occurred while getting the label by ID";
-            log.error(msg, e);
             throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
         return label;
@@ -389,7 +387,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
          return LabelDAOImpl.addLabel(label);
         } catch (APIMgtDAOException e) {
             String msg = "Error occurred while adding the labels";
-            log.error(msg, e);
             throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
@@ -399,7 +396,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             return labelDAO.updateLabel(updatedLabel);
         } catch (APIMgtDAOException e) {
             String msg = "Error occurred while updating the label -" + updatedLabel.getId();
-            log.error(msg, e);
             throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }
@@ -411,7 +407,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             labelDAO.deleteLabel(labelId);
         } catch (APIMgtDAOException e) {
             String msg = "Error occurred while deleting label [labelId] " + labelId;
-            log.error(msg, e);
             throw new APIManagementException(msg, ExceptionCodes.APIMGT_DAO_EXCEPTION);
         }
     }

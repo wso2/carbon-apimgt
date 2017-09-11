@@ -637,7 +637,7 @@ public class ApiFileDAOImpl implements ApiDAO {
     @Override
     public List<API> getAPIsByStatus(Set<String> roles, List<String> statuses, List<String> labels)
             throws APIMgtDAOException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -652,7 +652,7 @@ public class ApiFileDAOImpl implements ApiDAO {
     @Override
     public List<API> searchAPIsByStoreLabel(Set<String> roles, String user, String searchString, int offset, int limit,
                                             List<String> labels) throws APIMgtDAOException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

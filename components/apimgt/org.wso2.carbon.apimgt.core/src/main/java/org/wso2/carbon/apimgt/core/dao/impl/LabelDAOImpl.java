@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
@@ -34,7 +35,7 @@ public class LabelDAOImpl implements LabelDAO {
     @Override
     public List<Label> getLabels() throws APIMgtDAOException {
 
-        final String query = "SELECT * FROM AM_LABELS";
+        final String query = "SELECT LABEL_ID, NAME, TYPE_NAME FROM AM_LABELS";
 
         List<Label> labels = new ArrayList<>();
 
@@ -54,8 +55,7 @@ public class LabelDAOImpl implements LabelDAO {
             }
         } catch (SQLException e) {
             String message = "Error while retrieving labels";
-            log.error(message, e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(message, e, ExceptionCodes.LABEL_EXCEPTION);
         }
 
         return labels;
@@ -84,8 +84,7 @@ public class LabelDAOImpl implements LabelDAO {
             }
         } catch (SQLException e) {
             String message = "Error while retrieving access url for [label id] " + labelId;
-            log.error(message, e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(message, e, ExceptionCodes.LABEL_EXCEPTION);
         }
 
         return accessUrls;
@@ -115,8 +114,7 @@ public class LabelDAOImpl implements LabelDAO {
             }
         } catch (SQLException e) {
             String message = "Error while retrieving label [label ID] " + labelID;
-            log.error(message, e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(message, e, ExceptionCodes.LABEL_NOT_FOUND);
         }
 
     }
@@ -142,8 +140,7 @@ public class LabelDAOImpl implements LabelDAO {
             }
         } catch (SQLException e) {
             String message = "Error while retrieving label ID of label [label Name] " + name;
-            log.error(message, e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(message, e, ExceptionCodes.LABEL_NOT_FOUND);
         }
 
     }
@@ -157,11 +154,12 @@ public class LabelDAOImpl implements LabelDAO {
      */
     public static Label addLabel(Label label) throws APIMgtDAOException {
         final String query = "INSERT INTO AM_LABELS (LABEL_ID, NAME, TYPE_NAME) VALUES (?,?,?)";
+        String labelId = null;
 
         try (Connection connection = DAOUtil.getConnection();
                 PreparedStatement statement = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
-            String labelId = UUID.randomUUID().toString();
+            labelId = UUID.randomUUID().toString();
             statement.setString(1, labelId);
             statement.setString(2, label.getName());
             statement.setString(3, label.getType().toUpperCase(Locale.ENGLISH));
@@ -174,7 +172,8 @@ public class LabelDAOImpl implements LabelDAO {
             return new Label.Builder().id(labelId).name(label.getName()).description(label.getDescription()).
                     accessUrls(label.getAccessUrls()).type(label.getType()).build();
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            String message = "Error occured while trying to add label " + labelId;
+            throw new APIMgtDAOException(message, e, ExceptionCodes.LABEL_ADDING_FAILED);
         }
     }
 
@@ -208,8 +207,7 @@ public class LabelDAOImpl implements LabelDAO {
                 statement.executeBatch();
             } catch (SQLException e) {
                 String message = "Error while adding access url mappings for [label id] " + labelId;
-                log.error(message, e);
-                throw new APIMgtDAOException(e);
+                throw new APIMgtDAOException(message, e);
             }
         }
     }
@@ -237,7 +235,7 @@ public class LabelDAOImpl implements LabelDAO {
                  statement.executeUpdate();
                  connection.commit();
                  deleteLabelAccessUrlMappings(labelId);
-                if ("GATEWAY".equalsIgnoreCase(updatedLabel.getType())) {
+                if (APIMgtConstants.LABEL_TYPE_GATEWAY.equalsIgnoreCase(updatedLabel.getType())) {
                    insertAccessUrlMappings(labelId, accessURLs);
                 } else {
                     accessURLs = new ArrayList<>();
@@ -246,8 +244,7 @@ public class LabelDAOImpl implements LabelDAO {
                 connection.rollback();
                 String message = "Error while updating the label" +
                         " [label id] " + labelId;
-                log.error(message, e);
-                throw new APIMgtDAOException(e);
+                throw new APIMgtDAOException(message, e, ExceptionCodes.LABEL_UPDATE_FAILED);
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
@@ -256,8 +253,7 @@ public class LabelDAOImpl implements LabelDAO {
                     type(updatedLabel.getType()).build();
         } catch (SQLException e) {
             String message = "Error while updating the label [label ID] " + labelId;
-            log.error(message, e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(message, e, ExceptionCodes.LABEL_UPDATE_FAILED);
         }
 
     }
@@ -281,13 +277,14 @@ public class LabelDAOImpl implements LabelDAO {
                 connection.rollback();
                 String message = "Error while deleting the label" +
                         " [label id] " + labelId;
-                log.error(message, e);
-                throw new APIMgtDAOException(e);
+                throw new APIMgtDAOException(message, e, ExceptionCodes.LABEL_DELETION_FAILED);
             } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            String message = "Error while deleting the label" +
+                    " [label id] " + labelId;
+            throw new APIMgtDAOException(message, e, ExceptionCodes.LABEL_DELETION_FAILED);
         }
 
     }
@@ -395,8 +392,7 @@ public class LabelDAOImpl implements LabelDAO {
             return  labels;
         } catch (SQLException e) {
             String message = "Error while retrieving label [label type] " + type;
-            log.error(message, e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(message, e, ExceptionCodes.LABEL_NOT_FOUND);
         }
     }
 
@@ -424,8 +420,7 @@ public class LabelDAOImpl implements LabelDAO {
             }
         } catch (SQLException e) {
             String message = "Error while retrieving label [label name] " + labelName;
-            log.error(message, e);
-            throw new APIMgtDAOException(e);
+            throw new APIMgtDAOException(message, e, ExceptionCodes.LABEL_NOT_FOUND);
         }
 
     }

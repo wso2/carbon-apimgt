@@ -305,6 +305,12 @@ public class DAOFactory {
         return functionDAO;
     }
 
+    /**
+     * Returns a query for the store to search based on API Attribute.
+     * @param attributeType the type of the attribute to search on
+     * @return StoreApiAttributeSearch Returns the query implementation based on the type.
+     * @throws APIMgtDAOException In case of unhandled DB type or SQLException
+     */
     public static StoreApiAttributeSearch getStoreApiAttributeSearchQuery(String attributeType)
             throws APIMgtDAOException {
         StoreApiAttributeSearch storeApiAttributeSearch;

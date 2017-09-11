@@ -68,7 +68,7 @@ public class LabelsApiServiceImpl extends LabelsApiService {
             String errorMessage = "Error occurred while retrieving all labels";
             ErrorHandler errorHandler = ExceptionCodes.LABEL_EXCEPTION;
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler);
-            log.error(errorMessage);
+            log.error(errorMessage, e);
             return Response.status(errorHandler.getHttpStatusCode()).entity(errorDTO).build();
         }
         return Response.status(Response.Status.OK).entity(LabelMappingUtil.fromLabelArrayToListDTO(labels)).build();

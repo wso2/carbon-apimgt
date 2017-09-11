@@ -519,7 +519,7 @@ public interface APIPublisher extends APIManager {
 
     /**
      * Returns the list of Labels by label type.
-     *
+     * @param type The type of the label
      * @return List of labels
      * @throws LabelException if failed to get labels
      */
