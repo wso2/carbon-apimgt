@@ -957,7 +957,7 @@
         <ballerina.version>0.89</ballerina.version>
         <java-mail.version>1.5.2</java-mail.version>
 
-        <swagger.codegen.version>2.2.3.wso2v4</swagger.codegen.version>
+        <swagger.codegen.version>2.2.3.wso2v1</swagger.codegen.version>
         <samskivert.mustache.version>1.13</samskivert.mustache.version>
         <plexus.utils.version>1.5.7</plexus.utils.version>
         <wso2.carbon.config.version>2.0.0</wso2.carbon.config.version>
