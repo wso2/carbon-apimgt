@@ -29,7 +29,7 @@ const LoginBase = (props) => {
                                 src="/store/public/images/logo.svg"
 
                                 className="logo"/>
-                            <h1>API Store</h1>
+                              <h1>API Store</h1>
                         </a>
                     </div>
                 </div>
