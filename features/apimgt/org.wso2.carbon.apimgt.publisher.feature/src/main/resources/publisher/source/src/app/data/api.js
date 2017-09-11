@@ -478,9 +478,12 @@ class API {
      * @returns {Promise} Promised list of discovered endpoints
      */
     discoverEndpoints() {
+
+        console.log("DISCOVER");
         return this.client.then(
             (client) => {
-                return client.apis["Endpoint (Collection)"].get_endpoints_discover_services(
+            debugger;
+                return client.apis["Endpoint (Collection)"].get_endpoints_services_discover(
                     {}, this._requestMetaData());
             }
         );

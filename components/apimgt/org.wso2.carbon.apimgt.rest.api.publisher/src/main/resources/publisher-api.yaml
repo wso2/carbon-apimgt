@@ -3238,7 +3238,7 @@ paths:
         GET https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints
 >>>>>>> upstream/master
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n  \"list\": [\n    {\n      \"id\": \"01234567-0123-0123-0123-012345678901\",\n      \"name\": \"Endpoint 1\",\n      \"endpointConfig\": {\n        \"url\": \"http://192.168.56.1:8281\",\n        \"timeout\": 1000\n      },\n      \"endpointSecurity\": {\n        \"enabled\": false\n      },\n      \"maxTps\": 1000,\n      \"type\": \"http\"\n    }\n  ],\n  \"count\": 1\n}"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n  \"list\": [\n    {\n      \"id\": \"01234567-0123-0123-0123-012345678901\",\n      \"name\": \"Endpoint 1\",\n      \"endpointConfig\": {\n        \"serviceUrl\": \"http://192.168.56.1:8281\",\n        \"timeout\": 1000\n      },\n      \"endpointSecurity\": {\n        \"enabled\": false\n      },\n      \"maxTps\": 1000,\n      \"type\": \"http\"\n    }\n  ],\n  \"count\": 1\n}"
       security:
         - OAuth2Security:
           - apim:api_view
@@ -3590,17 +3590,17 @@ paths:
 ######################################################
 # The "Service Discovery" utility API
 ######################################################
-  /endpoints/discover-services:
+  /endpoints/services/discover:
 
 #-------------------------------------------------------------------
 # Retrieve the list of service endpoints after service discovery
 #-------------------------------------------------------------------
     get:
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints/discovered-services\""
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9292/api/am/publisher/v1.0/endpoints/services/discover\""
       x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints/discovered-services
+        GET https://127.0.0.1:9292/api/am/publisher/v1.0/endpoints/services/discover
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n  \"list\": [\n    {\n      \"id\": \"kube-0\",\n      \"name\": \"kubernetes-service-1\",\n      \"endpointConfig\": {\n        \"url\": \"http://192.168.56.1:8281\",\n        \"urlType\": \"NodePort\"\n      },\n      \"endpointSecurity\": {\n        \"enabled\": false\n      },\n      \"maxTps\": 1000,\n      \"type\": \"http\"\n    }\n  ],\n  \"count\": 1\n}"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n  \"list\": [\n    {\n      \"id\": \"ds-0\",\n      \"name\": \"service-1\",\n      \"endpointConfig\": {\n        \"serviceUrl\": \"http://192.168.56.1:8281\",\n        \"serviceType\": \"NodePort\"\n      },\n      \"endpointSecurity\": {\n        \"enabled\": false\n      },\n      \"maxTps\": 1000,\n      \"type\": \"http\"\n    }\n  ],\n  \"count\": 1\n}"
       security:
         - OAuth2Security:
           - apim:api_view

@@ -34,37 +34,6 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
     private static final Logger log = LoggerFactory.getLogger(EndpointsApiServiceImpl.class);
 
     /**
-     * Retrieve all service endpoints via service discovery
-     *
-     * @param ifNoneMatch     If-None-Match header value
-     * @param ifModifiedSince If-Modified-Since header
-     * @param request         msf4j request object
-     * @return A list of service endpoints avaliable in the cluster
-     * @throws NotFoundException When the particular resource does not exist in the system
-     */
-    @Override
-    public Response endpointsDiscoverServicesGet(String ifNoneMatch, String ifModifiedSince,
-                                                 Request request) throws NotFoundException {
-        try{
-            EndPointListDTO endPointListDTO = new EndPointListDTO();
-            ServiceDiscoverer serviceDiscoverer = KubernetesServiceDiscoverer.getInstance();
-            if (serviceDiscoverer.isEnabled()) {
-                List<Endpoint> discoveredEndpointList = serviceDiscoverer.listServices();
-                for (Endpoint endpoint : discoveredEndpointList) {
-                    endPointListDTO.addListItem(MappingUtil.toEndPointDTO(endpoint));
-                }
-            }
-            endPointListDTO.setCount(endPointListDTO.getList().size());
-            return Response.ok().entity(endPointListDTO).build();
-        } catch (IOException e) {
-            String errorMessage = "Error while Converting Endpoint Security Details in Endpoint";
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
-            log.error(errorMessage, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
-        }
-    }
-
-    /**
      * Delete an endpoint by providing its ID
      *
      * @param endpointId        ID of the endpoint
@@ -247,19 +216,9 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             List<Endpoint> endpointList = apiPublisher.getAllEndpoints();
             EndPointListDTO endPointListDTO = new EndPointListDTO();
-
             for (Endpoint endpoint : endpointList) {
                 endPointListDTO.addListItem(MappingUtil.toEndPointDTO(endpoint));
             }
-
-            ServiceDiscoverer serviceDiscoverer = KubernetesServiceDiscoverer.getInstance();
-            if (serviceDiscoverer.isEnabled()) {
-                List<Endpoint> discoveredEndpointList = serviceDiscoverer.listServices();
-                for (Endpoint endpoint : discoveredEndpointList) {
-                    endPointListDTO.addListItem(MappingUtil.toEndPointDTO(endpoint));
-                }
-            }
-
             endPointListDTO.setCount(endPointListDTO.getList().size());
             return Response.ok().entity(endPointListDTO).build();
         } catch (APIManagementException e) {
@@ -328,6 +287,36 @@ public class EndpointsApiServiceImpl extends EndpointsApiService {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         } catch (IOException e) {
             String errorMessage = "Error while Converting Endpoint Security Details in Endpoint ";
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
+        }
+    }
+
+    /**
+     * Retrieve all service endpoints via service discovery
+     *
+     * @param ifNoneMatch     If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header
+     * @param request         msf4j request object
+     * @return A list of service endpoints avaliable in the cluster
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
+    @Override
+    public Response endpointsServicesDiscoverGet(String ifNoneMatch, String ifModifiedSince, Request request) throws NotFoundException {
+        try{
+            EndPointListDTO endPointListDTO = new EndPointListDTO();
+            ServiceDiscoverer serviceDiscoverer = KubernetesServiceDiscoverer.getInstance();
+            if (serviceDiscoverer.isEnabled()) {
+                List<Endpoint> discoveredEndpointList = serviceDiscoverer.listServices();
+                for (Endpoint endpoint : discoveredEndpointList) {
+                    endPointListDTO.addListItem(MappingUtil.toEndPointDTO(endpoint));
+                }
+            }
+            endPointListDTO.setCount(endPointListDTO.getList().size());
+            return Response.ok().entity(endPointListDTO).build();
+        } catch (IOException e) {
+            String errorMessage = "Error while Converting Endpoint Security Details in Endpoint";
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
             log.error(errorMessage, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();

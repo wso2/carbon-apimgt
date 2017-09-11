@@ -48,7 +48,7 @@ const resourcePath = {
     POLICY : "'/policies/{tierLevel}/{tierName}'",
     ENDPOINTS : "/endpoints",
     ENDPOINT : "/endpoints/{endpointId}",
-    DISC_ENDPOINTS : "/endpoints/discover-services",
+    ENDPOINTS_DISCOVER : "/endpoints/services/discover",
     LABLES : "/labels",
     WORKFLOW : "/workflows/{workflowReferenceId}"
 };
