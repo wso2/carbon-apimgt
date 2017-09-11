@@ -163,6 +163,7 @@ class SwaggerForm extends React.Component {
                     )}
                 </FormItem>
                 <FormItem >
+                  {/* Allowing to create an API from swagger definition, based on scopes */}
                     <ScopeValidation resourceMethod={resourceMethod.POST} resourcePath={resourcePath.APIS}>
                         <Button type="primary" htmlType="submit">
                             Create

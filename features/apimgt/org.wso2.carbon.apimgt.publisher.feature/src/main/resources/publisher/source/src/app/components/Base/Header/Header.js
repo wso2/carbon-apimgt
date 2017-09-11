@@ -19,6 +19,7 @@
 import React from 'react'
 import {Link, withRouter} from "react-router-dom";
 import AuthManager from '../../../data/AuthManager.js';
+import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation';
 import qs from 'qs'
 
 import AppBar from 'material-ui/AppBar';
@@ -166,10 +167,13 @@ class Header extends React.Component {
                                     <SearchIcon />
                                 </IconButton>
                                 {/* API add menu */}
-                                <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClickAddMenu}
-                                        color="contrast">
-                                    <PlaylistAddIcon />
-                                </Button>
+                                {/* enable "create API" menu depending on user scopes */}
+                                <ScopeValidation resourcePath={resourcePath.APIS} resourceMethod={resourceMethod.POST}>
+                                  <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClickAddMenu}
+                                          color="contrast">
+                                      <PlaylistAddIcon />
+                                  </Button>
+                              </ScopeValidation>
                                 <Menu
                                     id="simple-menu"
                                     anchorEl={this.state.anchorElAddMenu}
