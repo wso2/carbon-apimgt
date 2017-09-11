@@ -169,7 +169,9 @@ paths:
       description: |
         Get subscriber count by APIs from summarized data.
       parameters:
-        - $ref: '#/parameters/createdBy'
+        - $ref: '#/parameters/startTime'
+        - $ref: '#/parameters/endTime'
+        - $ref: '#/parameters/apiId'
       responses:
         200:
           description: |
@@ -331,16 +333,16 @@ parameters:
     name: createdBy
     in: query
     description: |
-     application creator name. In case of any creator, the value shold be equal to 'all'
+     application/api creator name. In case of any creator, the value shold be equal to 'all'
     required: true
     type: string
 
-  subscribedTo:
-    name: subscribedTo
+  apiId:
+    name: apiId
     in: query
     description: |
-      api name. In case of any api the value should be equal to 'all'
-    required: true
+     UUID of the API.
+    required: false
     type: string
 
 
@@ -504,6 +506,7 @@ definitions:
       id:
         type: string
         example: 01234567-0123-0123-0123-012345678901
+        description: Subscription UUID
       name:
         type: string
         example: CalculatorAPI

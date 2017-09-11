@@ -63,13 +63,16 @@ public interface AnalyticsDAO {
                                String toTimestamp) throws APIMgtDAOException;
 
     /**
-     * Retrieves subscription count information against an API.
+     * Retrieves API subscription count information.
      *
-     * @param provider Filter for api provider
+     * @param fromTime Filter for from timestamp
+     * @param toTime   Filter for to timestamp
+     * @param apiId    Filter for api provider
      * @return valid {@link APISubscriptionCount} List or null
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    List<APISubscriptionCount> getAPISubscriptionCount(String provider) throws APIMgtDAOException;
+    List<APISubscriptionCount> getAPISubscriptionCount(String fromTime, String toTime, String apiId) throws
+    APIMgtDAOException;
 
     /**
      * Retrieves Subscriptions count created over time.

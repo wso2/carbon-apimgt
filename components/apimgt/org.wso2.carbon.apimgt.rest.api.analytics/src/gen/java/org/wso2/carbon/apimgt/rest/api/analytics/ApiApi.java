@@ -59,7 +59,7 @@ public class ApiApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = APIInfoListDTO.class) })
     public Response apiApiInfoGet(@ApiParam(value = "Defines the starting timestamp of the interval ",required=true) @QueryParam("startTime") String startTime
 ,@ApiParam(value = "Defines the ending timestamp of the interval ",required=true) @QueryParam("endTime") String endTime
-,@ApiParam(value = "application creator name. In case of any creator, the value shold be equal to 'all' ",required=true) @QueryParam("createdBy") String createdBy
+,@ApiParam(value = "application/api creator name. In case of any creator, the value shold be equal to 'all' ",required=true) @QueryParam("createdBy") String createdBy
 , @Context Request request)
     throws NotFoundException {
         return delegate.apiApiInfoGet(startTime,endTime,createdBy, request);
@@ -79,7 +79,7 @@ public class ApiApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = APICountListDTO.class) })
     public Response apiCountOverTimeGet(@ApiParam(value = "Defines the starting timestamp of the interval ",required=true) @QueryParam("startTime") String startTime
 ,@ApiParam(value = "Defines the ending timestamp of the interval ",required=true) @QueryParam("endTime") String endTime
-,@ApiParam(value = "application creator name. In case of any creator, the value shold be equal to 'all' ",required=true) @QueryParam("createdBy") String createdBy
+,@ApiParam(value = "application/api creator name. In case of any creator, the value shold be equal to 'all' ",required=true) @QueryParam("createdBy") String createdBy
 , @Context Request request)
     throws NotFoundException {
         return delegate.apiCountOverTimeGet(startTime,endTime,createdBy, request);
@@ -97,9 +97,11 @@ public class ApiApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested subscriber count by API information is returned ", response = APISubscriptionCountListDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = APISubscriptionCountListDTO.class) })
-    public Response apiSubscriberCountByApiGet(@ApiParam(value = "application creator name. In case of any creator, the value shold be equal to 'all' ",required=true) @QueryParam("createdBy") String createdBy
+    public Response apiSubscriberCountByApiGet(@ApiParam(value = "Defines the starting timestamp of the interval ",required=true) @QueryParam("startTime") String startTime
+,@ApiParam(value = "Defines the ending timestamp of the interval ",required=true) @QueryParam("endTime") String endTime
+,@ApiParam(value = "UUID of the API. ") @QueryParam("apiId") String apiId
 , @Context Request request)
     throws NotFoundException {
-        return delegate.apiSubscriberCountByApiGet(createdBy, request);
+        return delegate.apiSubscriberCountByApiGet(startTime,endTime,apiId, request);
     }
 }

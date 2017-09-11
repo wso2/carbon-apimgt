@@ -38,8 +38,7 @@ public interface Analyzer {
      * @return valid {@link ApplicationCount} List or null
      * @throws APIManagementException if error occurs while accessing data
      */
-    List<ApplicationCount> getApplicationCount(String fromTime, String toTime)
-            throws APIManagementException;
+    List<ApplicationCount> getApplicationCount(String fromTime, String toTime) throws APIManagementException;
 
     /**
      * Retrieves APIs information.
@@ -64,17 +63,20 @@ public interface Analyzer {
     /**
      * Retrieves subscription count information against an API.
      *
-     * @param createdBy Filter for created user
+     * @param fromTime Filter for from timestamp
+     * @param toTime   Filter for to timestamp
+     * @param apiId    Filter for API ID
      * @return valid {@link APISubscriptionCount} List or null
      * @throws APIManagementException if error occurs while accessing data layer
      */
-    List<APISubscriptionCount> getAPISubscriptionCount(String createdBy) throws APIManagementException;
+    List<APISubscriptionCount> getAPISubscriptionCount(String fromTime, String toTime, String apiId) throws
+            APIManagementException;
 
     /**
      * Retrieves Subscriptions count created over time.
      *
-     * @param fromTime  Filter for from timestamp
-     * @param toTime    Filter for to timestamp
+     * @param fromTime Filter for from timestamp
+     * @param toTime   Filter for to timestamp
      * @return valid {@link SubscriptionCount} List or null
      * @throws APIManagementException if error occurs while accessing data layer
      */
@@ -84,12 +86,11 @@ public interface Analyzer {
     /**
      * Retrieves Subscriptions info details.
      *
-     * @param fromTime  Filter for from timestamp
-     * @param toTime    Filter for to timestamp
+     * @param fromTime Filter for from timestamp
+     * @param toTime   Filter for to timestamp
      * @return valid {@link SubscriptionCount} List or null
      * @throws APIManagementException if error occurs while accessing data layer
      */
-    List<SubscriptionInfo> getSubscriptionInfo(String fromTime, String toTime)
-            throws APIManagementException;
+    List<SubscriptionInfo> getSubscriptionInfo(String fromTime, String toTime) throws APIManagementException;
 
 }

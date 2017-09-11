@@ -32,10 +32,10 @@ public class APISubscriptionCountDTO   {
   }
 
    /**
-   * Get id
+   * Subscription UUID
    * @return id
   **/
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "")
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "Subscription UUID")
   public String getId() {
     return id;
   }

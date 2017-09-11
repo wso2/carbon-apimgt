@@ -29,6 +29,7 @@ public class SubscriptionApiServiceImpl extends SubscriptionApiService {
     @Override
     public Response subscriptionCountOverTimeGet(String startTime, String endTime, Request request) throws
             NotFoundException {
+
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             if (log.isDebugEnabled()) {

@@ -16,6 +16,7 @@
 package org.wso2.carbon.apimgt.core.dao.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.dao.AnalyticsDAO;
@@ -125,50 +126,47 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                     }
                 }
             } catch (SQLException e) {
-                String errorMsg = "Error while retrieving API count information from db";
-                throw new APIMgtDAOException(errorMsg, e);
+                throw new APIMgtDAOException("Error while retrieving API count information from db", e);
             } catch (ParseException e) {
-                String errorMsg = "Error while parsing timestamp while retrieving API count information from db";
-                throw new APIMgtDAOException(errorMsg, e);
+                throw new APIMgtDAOException("Error while parsing timestamp while retrieving API count information " +
+                        "from db", e);
             }
         } catch (SQLException e) {
-            String errorMsg = "Error while creating database connection/prepared-statement";
-            throw new APIMgtDAOException(errorMsg, e);
+            throw new APIMgtDAOException("Error while creating database connection/prepared-statement", e);
         }
         return apiInfoList;
     }
 
-    /**
-     * Retrieves API subscription count information.
-     *
-     * @param provider Filter for api provider
-     * @return valid {@link APISubscriptionCount} List or null
-     * @throws APIMgtDAOException if error occurs while accessing data layer
-     */
+
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<APISubscriptionCount> getAPISubscriptionCount(String provider) throws APIMgtDAOException {
+    public List<APISubscriptionCount> getAPISubscriptionCount(String fromTime, String toTime, String apiId)
+            throws APIMgtDAOException {
         final String query;
-        if (("all").equals(provider)) {
+        if (StringUtils.isNotEmpty(apiId)) {
             query = "SELECT api.UUID,api.NAME,api.VERSION,api.PROVIDER,count(subs.UUID) as COUNT " +
                     "FROM AM_SUBSCRIPTION subs,AM_API api " +
                     "WHERE api.UUID=subs.API_ID " +
+                    "AND (sub.CREATED_TIME BETWEEN ? AND ?) +" +
                     "AND subs.SUB_STATUS = 'ACTIVE' " +
+                    "AND api.UUID=?" +
                     "GROUP BY subs.API_ID;";
         } else {
             query = "SELECT api.UUID,api.NAME,api.VERSION,api.PROVIDER,count(subs.UUID) as COUNT " +
                     "FROM AM_SUBSCRIPTION subs,AM_API api " +
                     "WHERE api.UUID=subs.API_ID " +
+                    "AND (sub.CREATED_TIME BETWEEN ? AND ?) +" +
                     "AND subs.SUB_STATUS = 'ACTIVE' " +
-                    "AND api.PROVIDER = ? " +
                     "GROUP BY subs.API_ID;";
         }
         List<APISubscriptionCount> apiSubscriptionCountList = new ArrayList<>();
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, fromTime);
+            statement.setString(2, toTime);
             try {
-                if (!("all").equals(provider)) {
-                    statement.setString(1, provider);
+                if (StringUtils.isNotEmpty(apiId)) {
+                    statement.setString(3, apiId);
                 }
                 if (log.isDebugEnabled()) {
                     log.debug("Executing query " + query);
@@ -186,12 +184,10 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                     }
                 }
             } catch (SQLException e) {
-                String errorMsg = "Error while retrieving API subscription count information from db";
-                throw new APIMgtDAOException(errorMsg, e);
+                throw new APIMgtDAOException("Error while retrieving API subscription count information from db", e);
             }
         } catch (SQLException e) {
-            String errorMsg = "Error while creating database connection/prepared-statement";
-            throw new APIMgtDAOException(errorMsg, e);
+            throw new APIMgtDAOException("Error while creating database connection/prepared-statement", e);
         }
         return apiSubscriptionCountList;
     }
@@ -237,12 +233,10 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                     }
                 }
             } catch (SQLException e) {
-                String errorMsg = "Error while retrieving subscription count information from db";
-                throw new APIMgtDAOException(errorMsg, e);
+                throw new APIMgtDAOException("Error while retrieving subscription count information from db", e);
             } catch (ParseException e) {
-                String errorMsg = "Error while parsing timestamp while retrieving subscription count information " +
-                        "from db";
-                throw new APIMgtDAOException(errorMsg, e);
+                throw new APIMgtDAOException("Error while parsing timestamp when retrieving subscription count " +
+                        "information from db", e);
             }
         } catch (SQLException e) {
             String errorMsg = "Error while creating database connection/prepared-statement";
@@ -300,11 +294,10 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                     }
                 }
             } catch (SQLException e) {
-                String errorMsg = "Error while retrieving subscription information from db";
-                throw new APIMgtDAOException(errorMsg, e);
+                throw new APIMgtDAOException("Error while retrieving subscription information from db", e);
             } catch (ParseException e) {
-                String errorMsg = "Error while parsing timestamp while retrieving subscription information from db";
-                throw new APIMgtDAOException(errorMsg, e);
+                throw new APIMgtDAOException("Error while parsing timestamp while retrieving subscription " +
+                        "information from db", e);
             }
         } catch (SQLException e) {
             String errorMsg = "Error while creating database connection/prepared-statement";
@@ -350,15 +343,13 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                     }
                 }
             } catch (SQLException e) {
-                String errorMsg = "Error while retrieving API count information from db";
-                throw new APIMgtDAOException(errorMsg, e);
+                throw new APIMgtDAOException("Error while retrieving API count information from db", e);
             } catch (ParseException e) {
-                String errorMsg = "Error while parsing timestamp while retrieving API count information from db";
-                throw new APIMgtDAOException(errorMsg, e);
+                throw new APIMgtDAOException("Error while parsing timestamp while retrieving API count information " +
+                        "from db", e);
             }
         } catch (SQLException e) {
-            String errorMsg = "Error while creating database connection/prepared-statement";
-            throw new APIMgtDAOException(errorMsg, e);
+            throw new APIMgtDAOException("Error while creating database connection/prepared-statement", e);
         }
         return apiInfoList;
     }

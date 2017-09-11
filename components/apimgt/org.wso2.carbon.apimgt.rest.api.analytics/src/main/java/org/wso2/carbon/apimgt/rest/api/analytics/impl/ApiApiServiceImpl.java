@@ -28,6 +28,8 @@ public class ApiApiServiceImpl extends ApiApiService {
     public Response apiApiInfoGet(String startTime, String endTime, String createdBy, Request request) throws
             NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
+        startTime = RestApiUtil.fromISO8601ToUTC(startTime);
+        endTime = RestApiUtil.fromISO8601ToUTC(endTime);
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Retrieving API information. [From: " + startTime + " to: " + endTime + " created by: " +
@@ -51,6 +53,8 @@ public class ApiApiServiceImpl extends ApiApiService {
     public Response apiCountOverTimeGet(String startTime, String endTime, String createdBy, Request request) throws
             NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
+        startTime = RestApiUtil.fromISO8601ToUTC(startTime);
+        endTime = RestApiUtil.fromISO8601ToUTC(endTime);
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Retrieving APIs created over time. [From: " + startTime + " to: " + endTime + " " +
@@ -71,14 +75,19 @@ public class ApiApiServiceImpl extends ApiApiService {
     }
 
     @Override
-    public Response apiSubscriberCountByApiGet(String createdBy, Request request) throws NotFoundException {
+    public Response apiSubscriberCountByApiGet(String startTime, String endTime, String apiId, Request request) throws
+            NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             if (log.isDebugEnabled()) {
-                log.debug("Retrieving APIs created over time. [created by: " + createdBy + "]");
+                log.debug("Retrieving APIs created over time. [From: " + startTime + " to: " + endTime + " " +
+                        "API Id: " + apiId + "]");
             }
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
-            List<APISubscriptionCount> apiSubscriptionCountList = analyzer.getAPISubscriptionCount(createdBy);
+            startTime = RestApiUtil.fromISO8601ToUTC(startTime);
+            endTime = RestApiUtil.fromISO8601ToUTC(endTime);
+            List<APISubscriptionCount> apiSubscriptionCountList = analyzer.getAPISubscriptionCount(startTime, endTime,
+                    apiId);
             APISubscriptionCountListDTO apiSubscriptionListDTO = AnalyticsMappingUtil
                     .fromAPISubscriptionCountListToDTO(apiSubscriptionCountList);
             return Response.ok().entity(apiSubscriptionListDTO).build();

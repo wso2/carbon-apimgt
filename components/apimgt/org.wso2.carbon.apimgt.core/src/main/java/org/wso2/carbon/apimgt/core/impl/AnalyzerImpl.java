@@ -48,8 +48,7 @@ public class AnalyzerImpl implements Analyzer {
     }
 
     @Override
-    public List<ApplicationCount> getApplicationCount(String fromTime,
-                                                      String toTime) throws APIManagementException {
+    public List<ApplicationCount> getApplicationCount(String fromTime, String toTime) throws APIManagementException {
         List<ApplicationCount> applicationCountList;
         try {
             applicationCountList = getAnalyticsDAO().getApplicationCount(fromTime, toTime);
@@ -85,10 +84,11 @@ public class AnalyzerImpl implements Analyzer {
     }
 
     @Override
-    public List<APISubscriptionCount> getAPISubscriptionCount(String createdBy) throws APIManagementException {
+    public List<APISubscriptionCount> getAPISubscriptionCount(String fromTime, String toTime, String apiId) throws
+            APIManagementException {
         List<APISubscriptionCount> apiSubscriptionCountList;
         try {
-            apiSubscriptionCountList = getAnalyticsDAO().getAPISubscriptionCount(createdBy);
+            apiSubscriptionCountList = getAnalyticsDAO().getAPISubscriptionCount(fromTime, toTime, apiId);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while fetching API subscription count information";
             throw new AnalyticsException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
@@ -112,8 +112,8 @@ public class AnalyzerImpl implements Analyzer {
     /**
      * Retrieves Subscriptions info details.
      *
-     * @param fromTime  Filter for from timestamp
-     * @param toTime    Filter for to timestamp
+     * @param fromTime Filter for from timestamp
+     * @param toTime   Filter for to timestamp
      * @return valid {@link SubscriptionInfo} List or null
      * @throws APIManagementException if error occurs while accessing data layer
      */

@@ -28,6 +28,8 @@ public abstract class ApiApiService {
  ,String endTime
  ,String createdBy
  , Request request) throws NotFoundException;
-    public abstract Response apiSubscriberCountByApiGet(String createdBy
+    public abstract Response apiSubscriberCountByApiGet(String startTime
+ ,String endTime
+ ,String apiId
  , Request request) throws NotFoundException;
 }
