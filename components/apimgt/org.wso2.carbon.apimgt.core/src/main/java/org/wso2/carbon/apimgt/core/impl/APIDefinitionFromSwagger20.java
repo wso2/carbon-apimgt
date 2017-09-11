@@ -315,6 +315,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
             //populate Scope object map using oAuth2securityDefinitions
             Map<String, Scope> scopeMap = populateScopeMap(scopes);
             localConfigMap.get(nameSpace).put(APIMgtConstants.SCOPES, scopeMap);
+            log.debug("Scopes of extracted from Swagger: {}", scopeMap);
             return scopeMap;
         }
         return new HashMap<>();
@@ -405,6 +406,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 log.debug("Unable to extract scopes from provided json as it is null.");
             }
         }
+        log.debug("Scopes of extracted from Swagger: {}", scopeMap);
         return scopeMap;
     }
 
