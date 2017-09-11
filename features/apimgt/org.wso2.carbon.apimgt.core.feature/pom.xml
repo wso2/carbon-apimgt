@@ -149,6 +149,10 @@
             <groupId>org.wso2.orbit.io.swagger</groupId>
             <artifactId>swagger-codegen</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-models</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -390,6 +394,10 @@
                                 <bundle>
                                     <symbolicName>XmlSchema</symbolicName>
                                     <version>${xmlschema.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>io.swagger.models</symbolicName>
+                                    <version>${io.swagger.models.version}</version>
                                 </bundle>
                             </bundles>
                         </configuration>

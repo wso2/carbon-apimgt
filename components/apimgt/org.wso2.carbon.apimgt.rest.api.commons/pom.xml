@@ -157,7 +157,7 @@
             com.google.gson.*,
             io.swagger.parser.*,
             io.swagger.models.*;version="${io.swagger.import.version.range}",
-            io.swagger.util.*,
+            io.swagger.util.*;version="${io.swagger.import.version.range}"
         </import.package>
         <export.package>
             org.wso2.carbon.apimgt.rest.api.common.*; version="${carbon.apimgt.version}",

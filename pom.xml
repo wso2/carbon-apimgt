@@ -594,6 +594,11 @@
                 <artifactId>snakeyaml</artifactId>
                 <version>${snakeyaml.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-models</artifactId>
+                <version>${io.swagger.models.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -972,5 +977,6 @@
         <plexus.utils.version>1.5.7</plexus.utils.version>
         <wso2.carbon.config.version>2.0.0</wso2.carbon.config.version>
         <com.fasterxml.jackson.dataformat.version>2.9.1</com.fasterxml.jackson.dataformat.version>
+        <io.swagger.models.version>1.5.16</io.swagger.models.version>
     </properties>
 </project>
