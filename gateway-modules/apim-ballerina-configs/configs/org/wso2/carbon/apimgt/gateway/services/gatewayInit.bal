@@ -13,24 +13,15 @@ service<http> gatewayInitService {
     boolean isReady = initGateway();
 
     boolean offlineSubsInitialized = micro:retrieveOfflineSubscriptions();
-    boolean offlineAppssInitialized = micro:retrieveOfflineApplications();
 
 }
 
 function initGateway () (boolean) {
     system:println("initGateway() in gatewayInit");
     try {
-        //Register gateway in API Core
-        //gatewayUtil:registerGateway();
-        //Retrieve APIs from API Core and deploy
-        system:println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-        //gatewayUtil:loadAPIs();
+
         micro:loadOfflineAPIs();
-        system:println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-        //gatewayUtil:loadGlobalEndpoints();
-        system:println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-        //gatewayUtil:loadBlockConditions();
-        system:println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+
     } catch (errors:Error e) {
         system:println("Error while initilazing API gateway. " + e.msg);
     }

@@ -232,6 +232,7 @@ function getEndpoints () (json) {
         system:println("Error occurred while retrieving gateway APIs from API Core. " + e.msg);
         throw e;
     }
+    system:println(endpointList);
     return endpointList;
 }
 

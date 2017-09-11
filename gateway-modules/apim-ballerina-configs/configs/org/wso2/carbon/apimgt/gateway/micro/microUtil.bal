@@ -37,27 +37,29 @@ function returnAPI(int i,string[] array)(dto:APIDTO){
 }
 function loadOfflineAPIs () {
     system:println("start loadOfflineAPIs() in APICoreUtil");
-    json apiList={};
 
-    files:File t = {path:"/home/sabeena/Desktop/API Repo/getOfflineAPIs.txt"};
+
+    files:File t = {path:"/home/sabeena/Desktop/API Repo/getOfflineAPIs.json"};
     files:open(t, "r");         //opens the file in the read mode
     var content, n = files:read(t, 100000000);
     //so there's a limit! only 100000000 can be read
 
     string strAPIList = blobs:toString(content, "utf-8");
-    string[] array = strings:split(strAPIList, "\n");
+
+    json apis = util:parse(strAPIList);
 
     //system:println("array okay");
     //system:println(array);
 
-    var count,_ = <int>array[0];
-    apiList.count = count;
-    //system:println(apiList);
-    //dto:APIDTO list = [];
-    int index=0;
+    int index = 0;
+    errors:TypeCastError err;
+    int count;
+    count, err = (int)apis.count;
+    json apiList = apis.list;
+
 
     while(index<count){
-        dto:APIDTO api = returnAPI(6*index,array);
+        dto:APIDTO api = fromJSONToAPIDTO(apiList[index]);
         //list[index] = api;
 
         string apiConfig;
@@ -89,7 +91,7 @@ function loadOfflineAPIs () {
 
         system:println("putIntoAPICache(api) okay!! :D");
 
-        retrieveOfflineResources(api.context, api.version);
+        //retrieveOfflineResources(api.context, api.version);
 
         index = index+1;
 

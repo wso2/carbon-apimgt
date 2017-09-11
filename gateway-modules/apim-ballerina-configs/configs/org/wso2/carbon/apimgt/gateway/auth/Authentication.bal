@@ -9,7 +9,7 @@ import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
 import org.wso2.carbon.apimgt.gateway.holders as holder;
 import org.wso2.carbon.apimgt.gateway.constants;
-import org.wso2.carbon.apimgt.ballerina.util;
+
 
 function main(string[] args) {
     system:println("Hello, World!");
@@ -63,17 +63,17 @@ function authenticate (message m) (boolean, message) {
         return false, response;
     }
 
-    resourceDto = validateResource(apiContext, version, uriTemplate, httpVerb);
+    //resourceDto = validateResource(apiContext, version, uriTemplate, httpVerb);
 
-    if (resourceDto == null) {
-        http:setStatusCode(response, 404);
-        return false, response;
-    }
+    //if (resourceDto == null) {
+        //http:setStatusCode(response, 404);
+        //return false, response;
+    //}
 
-    if (resourceDto.authType == constants:AUTHENTICATION_TYPE_NONE) {
+    //if (resourceDto.authType == constants:AUTHENTICATION_TYPE_NONE) {
     // set user as anonymous
     // set throttling tier as unauthenticated
-    }
+    //}
 
     if (apiDto.securityScheme == 0) {
     //pass request without authentication
@@ -88,77 +88,7 @@ function authenticate (message m) (boolean, message) {
         return false, response;
     }
 
-    if (authErr == null && ((apiDto.securityScheme == 1) || (apiDto.securityScheme == 3))) {
-        string authToken = strings:replace(authHeader, constants:BEARER, ""); //use split method instead
-
-        if (strings:length(authToken) == 0) {
-        // token incorrect
-            gatewayUtil:constructAccessTokenNotFoundPayload(response);
-            http:setStatusCode(response, 401);
-            return false, response;
-        }
-
-        dto:IntrospectDto introspectDto = holder:getFromTokenCache(authToken);
-        if (introspectDto == null) {
-            introspectCacheHit = false;
-            // if not exist
-            introspectDto = doIntrospect(authToken);
-        }
-
-        if (!introspectDto.active) {
-        // access token expired
-            gatewayUtil:constructAccessTokenExpiredPayload(response);
-            return false, response;
-        }
-
-        // if token had exp
-        if (introspectDto.exp != -1) {
-        //put into cache
-            holder:putIntoTokenCache(authToken, introspectDto);
-        }
-        if (introspectDto.username != "") {
-            userInfo = holder:getFromUserInfoCache(introspectDto.username);
-            if ((userInfo == null) && (introspectDto.scope != "")
-                && (strings:contains(introspectDto.scope, "openid"))) {
-                userInfo = retrieveUserInfo(authToken);
-                holder:putIntoUserInfoCache(introspectDto.username, userInfo);
-            }
-        }
-        // if token come from cache hit
-        if (introspectCacheHit) {
-
-            if (introspectDto.exp < system:currentTimeMillis() / 1000) {
-                holder:removeFromTokenCache(authToken);
-                gatewayUtil:constructAccessTokenExpiredPayload(response);
-                return false, response;
-            }
-        }
-        // validating subscription
-        subscriptionDto = validateSubscription(apiContext, version, introspectDto);
-
-        if (subscriptionDto != null) {
-            boolean subscriptionBlocked = false;
-            subscriptionBlocked, response = isSubscriptionBlocked(subscriptionDto, response, apiDto);
-            if (subscriptionBlocked) {
-                state = false;
-                return state, response;
-            }
-
-            if (validateScopes(resourceDto, introspectDto)) {
-                dto:KeyValidationDto keyValidationInfo =
-                constructKeyValidationDto(authToken, introspectDto, subscriptionDto, resourceDto);
-                util:setProperty(m, "KEY_VALIDATION_INFO", keyValidationInfo);
-                messages:setProperty(m, constants:KEY_TYPE, subscriptionDto.keyEnvType);
-                state = true;
-                response = m;
-            }
-        } else {
-        //subscription missing
-            gatewayUtil:constructSubscriptionNotFound(response);
-            return false, response;
-        }
-
-    } else if (apikeyErr == null && ((apiDto.securityScheme == 2) || (apiDto.securityScheme == 3))) {
+    if (apikeyErr == null && ((apiDto.securityScheme == 2) || (apiDto.securityScheme == 3))) {
         system:println("Api key check...");
         string apiKey = apikeyHeader;
         subscriptionDto = holder:getFromSubscriptionCache(apiContext, version, apiKey);
@@ -170,10 +100,11 @@ function authenticate (message m) (boolean, message) {
                 return state, response;
             }
             //scope validation does not apply for apikey
-            dto:KeyValidationDto keyValidationInfo =
-            constructAPIKeyValidationDto(subscriptionDto, resourceDto);
-            util:setProperty(m, "KEY_VALIDATION_INFO", keyValidationInfo);
-            messages:setProperty(m, constants:KEY_TYPE, subscriptionDto.keyEnvType);
+            //dto:KeyValidationDto keyValidationInfo = constructAPIKeyValidationDto(subscriptionDto, resourceDto);
+            //util:setProperty(m, "KEY_VALIDATION_INFO", keyValidationInfo);
+
+            //messages:setProperty(m, constants:KEY_TYPE, "PRODUCTION");
+            //messages:setProperty(m, constants:KEY_TYPE, subscriptionDto.keyEnvType);
             state = true;
             response = m;
         } else {
@@ -228,8 +159,8 @@ function validateScopes (dto:ResourceDto resourceDto, dto:IntrospectDto introspe
 
 function constructAPIKeyValidationDto (dto:SubscriptionDto subscriptionDto, dto:ResourceDto resourceDto) (dto:KeyValidationDto ) {
     dto:KeyValidationDto keyValidationInfoDTO = {};
-    dto:ApplicationDto applicationDto = holder:getFromApplicationCache(subscriptionDto.applicationId);
-    keyValidationInfoDTO.username = applicationDto.applicationOwner;
+    //dto:ApplicationDto applicationDto = holder:getFromApplicationCache(subscriptionDto.applicationId);
+    //keyValidationInfoDTO.username = applicationDto.applicationOwner;
     //dto:PolicyDto applicationPolicy = holder:getFromPolicyCache(applicationDto.applicationPolicy);
     //keyValidationInfoDTO.applicationPolicy = applicationPolicy.name;
     //dto:PolicyDto subscriptionPolicy = holder:getFromPolicyCache(subscriptionDto.subscriptionPolicy);
@@ -245,9 +176,9 @@ function constructAPIKeyValidationDto (dto:SubscriptionDto subscriptionDto, dto:
     keyValidationInfoDTO.apiContext = subscriptionDto.apiContext;
     keyValidationInfoDTO.apiVersion = subscriptionDto.apiVersion;
     keyValidationInfoDTO.applicationId = subscriptionDto.applicationId;
-    keyValidationInfoDTO.applicationName = applicationDto.applicationName;
+   // keyValidationInfoDTO.applicationName = applicationDto.applicationName;
     keyValidationInfoDTO.keyType = subscriptionDto.keyEnvType;
-    keyValidationInfoDTO.subscriber = applicationDto.applicationOwner;
+    //keyValidationInfoDTO.subscriber = applicationDto.applicationOwner;
     keyValidationInfoDTO.resourcePath = resourceDto.uriTemplate;
 
     system:println("keyValidationInfoDTO");
