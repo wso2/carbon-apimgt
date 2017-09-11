@@ -18,17 +18,35 @@
 
 import React, {Component} from 'react'
 import BasicTabs from './NavTab.js'
+import API from '../../../data/api.js'
 
 export default class Details extends Component {
-    componentDidMount() {
-        this.props.setLeftMenu(true);
+
+    constructor(props){
+        super(props);
     }
 
-    componentWillUnmount() {
-        /* Hide the left side nav bar when detail page is unmount ,
-         since the left nav bar is currently only associated with details page*/
-        this.props.setLeftMenu(false);
+    componentDidMount() {
+        const application = new API();
+        let promised_application = application.getApplication(this.applicationId);
+        promised_api.then(
+            response => {
+                this.setState({api: response.obj});
+            }
+        ).catch(
+            error => {
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
+            }
+        );
     }
+
+
 
     render() {
         return (
