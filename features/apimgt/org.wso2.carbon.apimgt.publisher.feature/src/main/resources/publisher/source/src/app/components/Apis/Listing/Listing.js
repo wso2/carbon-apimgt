@@ -132,9 +132,7 @@ class Listing extends React.Component {
                 <Grid container>
                     <Grid item xs={12}>
                         <Paper>
-                            <Typography type="display2" gutterBottom
-                                        style={{fontWeight:"300",padding:"10px 0 0 30px",margin:"0px"
-                                            ,position:"relative"}}>
+                            <Typography className="page-title" type="display2" gutterBottom>
                                 All Apis
                                 <div style={{alignSelf:"flex-end", fontSize:"11px", margin:"auto", width: "200px",
                                     display:"block", float:"right"}}>

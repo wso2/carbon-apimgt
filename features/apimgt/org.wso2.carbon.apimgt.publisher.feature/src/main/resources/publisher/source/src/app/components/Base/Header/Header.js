@@ -155,7 +155,7 @@ class Header extends React.Component {
                         <Typography type="title" color="inherit" style={{flex: 1}}>
                             <Link to="/" style={{textDecoration: 'none'}}>
                                 <Button color="primary">
-                                    <img className="brand" src="/store_new/public/images/logo.svg" alt="wso2-logo"/>
+                                    <img className="brand" src="/publisher/public/images/logo.svg" alt="wso2-logo"/>
                                     <span color="contrast" style={{fontSize: "15px", color:"#fff"}}>APIM Publisher</span>
                                 </Button>
 
