@@ -46,7 +46,6 @@ public class AuthenticatorConstants {
     public static final String APPLICATION_KEY_TYPE = "Application";
     public static final String REQUEST_URL = "REQUEST_URL";
     public static final String STORE_APPLICATION = "store";
-    public static final String STORE_NEW_APPLICATION = "store_new";
     public static final String PUBLISHER_APPLICATION = "publisher";
     public static final String ADMIN_APPLICATION = "admin";
     public static final String EDITOR_APPLICATION = "editor";

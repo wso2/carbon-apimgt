@@ -34,7 +34,7 @@ public class PublisherApiServiceImpl extends PublisherApiService {
             log.error(errorMessage, e);
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        String[] apps = {"publisher","store_new", "admin"};
+        String[] apps = {"publisher","store", "admin"};
         String[] parts = path.split("/");
         // folder name ex: publisher or store or admin
         String context = parts[1];

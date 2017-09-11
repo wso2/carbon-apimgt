@@ -105,6 +105,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
@@ -333,7 +334,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
                 APIUtils.logDebug("API " + createdAPI.getName() + "-" + createdAPI.getVersion() + " was created " +
                         "successfully.", log);
-
                 // 'API_M Functions' related code
                 //Create a payload with event specific details
                 Map<String, String> eventPayload = new HashMap<>();
@@ -902,19 +902,17 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public void updateCheckListItem(String apiId, String status, Map<String, Boolean> checkListItemMap)
             throws APIManagementException {
         API api = getApiDAO().getAPI(apiId);
-        try {
-            if (api != null) {
-                API.APIBuilder apiBuilder = new API.APIBuilder(api);
-                apiBuilder.lastUpdatedTime(LocalDateTime.now());
-                apiBuilder.updatedBy(getUsername());
-                apiBuilder.lifecycleState(getApiLifecycleManager()
-                        .getLifecycleDataForState(apiBuilder.getLifecycleInstanceId(),
-                                apiBuilder.getLifeCycleStatus()));
-                for (Map.Entry<String, Boolean> checkListItem : checkListItemMap.entrySet()) {
-                    getApiLifecycleManager().checkListItemEvent(api.getLifecycleInstanceId
-                                    (), api.getLifeCycleStatus(),
-                            checkListItem.getKey(), checkListItem.getValue());
-                }
+        try {            
+            API.APIBuilder apiBuilder = new API.APIBuilder(api);
+            apiBuilder.lastUpdatedTime(LocalDateTime.now());
+            apiBuilder.updatedBy(getUsername());
+            apiBuilder.lifecycleState(getApiLifecycleManager()
+                    .getLifecycleDataForState(apiBuilder.getLifecycleInstanceId(),
+                            apiBuilder.getLifeCycleStatus()));
+            for (Map.Entry<String, Boolean> checkListItem : checkListItemMap.entrySet()) {
+                getApiLifecycleManager().checkListItemEvent(api.getLifecycleInstanceId
+                                (), api.getLifeCycleStatus(),
+                        checkListItem.getKey(), checkListItem.getValue());
             }
         } catch (LifecycleException e) {
             String errorMsg = "Couldn't get the lifecycle status of api ID " + apiId;
@@ -922,6 +920,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             throw new APIManagementException(errorMsg, e, ExceptionCodes.APIMGT_LIFECYCLE_EXCEPTION);
         }
     }
+
 
     /**
      * Create a new version of the <code>api</code>, with version <code>newVersion</code>
@@ -950,30 +949,26 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
         try {
             API api = getApiDAO().getAPI(apiId);
-            if (api != null) {
-                if (api.getVersion().equals(newVersion)) {
-                    String errMsg = "New API version " + newVersion + " cannot be same as the previous version for " +
-                            "API " + api.getName();
-                    log.error(errMsg);
-                    throw new APIManagementException(errMsg, ExceptionCodes.API_ALREADY_EXISTS);
-                }
-                API.APIBuilder apiBuilder = new API.APIBuilder(api);
-                apiBuilder.id(UUID.randomUUID().toString());
-                apiBuilder.version(newVersion);
-                apiBuilder.context(api.getContext().replace(api.getVersion(), newVersion));
-                lifecycleState = getApiLifecycleManager().addLifecycle(APIMgtConstants.API_LIFECYCLE, getUsername());
-                apiBuilder.associateLifecycle(lifecycleState);
-                apiBuilder.copiedFromApiId(api.getId());
-                if (StringUtils.isEmpty(apiBuilder.getApiDefinition())) {
-                    apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
-                }
-                getApiDAO().addAPI(apiBuilder.build());
-                newVersionedId = apiBuilder.getId();
-                sendEmailNotification(apiId, apiBuilder.getName(), newVersion);
 
-            } else {
-                throw new APIMgtResourceNotFoundException("Requested API on UUID " + apiId + "Couldn't be found");
+            if (api.getVersion().equals(newVersion)) {
+                String errMsg = "New API version " + newVersion + " cannot be same as the previous version for " +
+                        "API " + api.getName();
+                log.error(errMsg);
+                throw new APIManagementException(errMsg, ExceptionCodes.API_ALREADY_EXISTS);
             }
+            API.APIBuilder apiBuilder = new API.APIBuilder(api);
+            apiBuilder.id(UUID.randomUUID().toString());
+            apiBuilder.version(newVersion);
+            apiBuilder.context(api.getContext().replace(api.getVersion(), newVersion));
+            lifecycleState = getApiLifecycleManager().addLifecycle(APIMgtConstants.API_LIFECYCLE, getUsername());
+            apiBuilder.associateLifecycle(lifecycleState);
+            apiBuilder.copiedFromApiId(api.getId());
+            if (StringUtils.isEmpty(apiBuilder.getApiDefinition())) {
+                apiBuilder.apiDefinition(apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder));
+            }
+            getApiDAO().addAPI(apiBuilder.build());
+            newVersionedId = apiBuilder.getId();
+            sendEmailNotification(apiId, apiBuilder.getName(), newVersion);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't create new API version from " + apiId;
             log.error(errorMsg, e);
@@ -985,6 +980,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
         return newVersionedId;
     }
+
 
     /**
      * Attach Documentation (without content) to an API
@@ -1212,39 +1208,38 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             if (getAPISubscriptionCountByAPI(identifier) == 0) {
                 API api = getAPIbyUUID(identifier);
-                if (api != null) {
-                    //Checks whether the user has required permissions to delete the API
-                    verifyUserPermissionsToDeleteAPI(getUsername(), api);
-                    String apiWfStatus = api.getWorkflowStatus();
-                    API.APIBuilder apiBuilder = new API.APIBuilder(api);
 
-                    //Delete API in gateway
+                //Checks whether the user has required permissions to delete the API
+                verifyUserPermissionsToDeleteAPI(getUsername(), api);
+                String apiWfStatus = api.getWorkflowStatus();
+                API.APIBuilder apiBuilder = new API.APIBuilder(api);
 
-                    gateway.deleteAPI(api);
-                    if (log.isDebugEnabled()) {
-                        log.debug("API : " + api.getName() + " has been successfully removed from the gateway");
-                    }
+                //Delete API in gateway
 
-                    getApiDAO().deleteAPI(identifier);
-                    getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
-                    APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
-
-                    if (APILCWorkflowStatus.PENDING.toString().equals(apiWfStatus)) {
-                        cleanupPendingTaskForAPIStateChange(identifier);
-                    }
-                    // 'API_M Functions' related code
-                    //Create a payload with event specific details
-                    Map<String, String> eventPayload = new HashMap<>();
-                    eventPayload.put(APIMgtConstants.FunctionsConstants.API_ID, api.getId());
-                    eventPayload.put(APIMgtConstants.FunctionsConstants.API_NAME, api.getName());
-                    eventPayload.put(APIMgtConstants.FunctionsConstants.API_VERSION, api.getVersion());
-                    eventPayload.put(APIMgtConstants.FunctionsConstants.API_PROVIDER, api.getProvider());
-                    eventPayload.put(APIMgtConstants.FunctionsConstants.API_DESCRIPTION, api.getDescription());
-                    // This will notify all the EventObservers(Asynchronous)
-                    ObserverNotifier observerNotifier = new ObserverNotifier(Event.API_DELETION, getUsername(),
-                            ZonedDateTime.now(ZoneOffset.UTC), eventPayload, this);
-                    ObserverNotifierThreadPool.getInstance().executeTask(observerNotifier);
+                gateway.deleteAPI(api);
+                if (log.isDebugEnabled()) {
+                    log.debug("API : " + api.getName() + " has been successfully removed from the gateway");
                 }
+
+                getApiDAO().deleteAPI(identifier);
+                getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
+                APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
+
+                if (APILCWorkflowStatus.PENDING.toString().equals(apiWfStatus)) {
+                    cleanupPendingTaskForAPIStateChange(identifier);
+                }
+                // 'API_M Functions' related code
+                //Create a payload with event specific details
+                Map<String, String> eventPayload = new HashMap<>();
+                eventPayload.put(APIMgtConstants.FunctionsConstants.API_ID, api.getId());
+                eventPayload.put(APIMgtConstants.FunctionsConstants.API_NAME, api.getName());
+                eventPayload.put(APIMgtConstants.FunctionsConstants.API_VERSION, api.getVersion());
+                eventPayload.put(APIMgtConstants.FunctionsConstants.API_PROVIDER, api.getProvider());
+                eventPayload.put(APIMgtConstants.FunctionsConstants.API_DESCRIPTION, api.getDescription());
+                // This will notify all the EventObservers(Asynchronous)
+                ObserverNotifier observerNotifier = new ObserverNotifier(Event.API_DELETION, getUsername(),
+                        ZonedDateTime.now(ZoneOffset.UTC), eventPayload, this);
+                ObserverNotifierThreadPool.getInstance().executeTask(observerNotifier);
             } else {
                 throw new ApiDeleteFailureException("API with " + identifier + " already have subscriptions");
             }
@@ -1351,12 +1346,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public LifecycleState getAPILifeCycleData(String apiId) throws APIManagementException {
         try {
             API api = getApiDAO().getAPISummary(apiId);
-            if (api != null) {
-                return getApiLifecycleManager()
+            return getApiLifecycleManager()
                         .getLifecycleDataForState(api.getLifecycleInstanceId(), api.getLifeCycleStatus());
-            } else {
-                throw new APIMgtResourceNotFoundException("Couldn't retrieve API Summary for " + apiId);
-            }
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't retrieve API Summary for " + apiId;
             log.error(errorMsg, e);
@@ -1957,31 +1948,26 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public void removePendingLifecycleWorkflowTaskForAPI(String apiId) throws APIManagementException {
-
-        API api = getApiDAO().getAPI(apiId);
-        if (api != null) {
+        try {
+            API api = getApiDAO().getAPI(apiId);
             if (APILCWorkflowStatus.PENDING.toString().equals(api.getWorkflowStatus())) {
-                try {
+
                     //change the state back
                     getApiDAO().updateAPIWorkflowStatus(apiId, APILCWorkflowStatus.APPROVED);
 
                     // call executor's cleanup task
                     cleanupPendingTaskForAPIStateChange(apiId);
 
-                } catch (APIMgtDAOException e) {
-                    String msg = "Error occurred while changing api lifecycle workflow status";
-                    log.error(msg, e);
-                    throw new APIManagementException(msg, e.getErrorHandler());
-                }
+
             } else {
                 String msg = "API does not have a pending lifecycle state change.";
                 log.error(msg);
                 throw new APIManagementException(msg, ExceptionCodes.WORKFLOW_NO_PENDING_TASK);
             }
-        } else {
-            String msg = "Couldn't found API with ID " + apiId;
-            log.error(msg);
-            throw new APIManagementException(msg, ExceptionCodes.API_NOT_FOUND);
+        } catch (APIMgtDAOException e) {
+                String msg = "Error occurred while changing api lifecycle workflow status";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e.getErrorHandler());
         }
     }
 
@@ -2033,19 +2019,19 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     private void cleanupPendingTaskForAPIStateChange(String apiId) throws APIManagementException {
-        String workflowExtRef = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(apiId,
+        Optional<String> workflowExtRef = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(apiId,
                 WorkflowConstants.WF_TYPE_AM_API_STATE);
-        if (workflowExtRef != null) {
+        if (workflowExtRef.isPresent()) {
             WorkflowExecutor executor = WorkflowExecutorFactory.getInstance()
                     .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_API_STATE);
             try {
-                executor.cleanUpPendingTask(workflowExtRef);
+                executor.cleanUpPendingTask(workflowExtRef.get());
             } catch (WorkflowException e) {
                 String warn = "Failed to clean pending api state change task for " + apiId;
                 // failed cleanup processes are ignored to prevent failing the deletion process
                 log.warn(warn, e.getLocalizedMessage());
             }
-            getWorkflowDAO().deleteWorkflowEntryforExternalReference(workflowExtRef);
+            getWorkflowDAO().deleteWorkflowEntryforExternalReference(workflowExtRef.get());
         }
     }
 
@@ -2072,6 +2058,5 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 }
             }
         }
-
     }
 }

@@ -80,6 +80,8 @@ paths:
 # Retrieving the list of all APIs qualifying under a given search condition
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       summary: |
         Retrieving APIs
       description: |
@@ -144,6 +146,8 @@ paths:
 # Retrieve the details of an API definition
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       description: |
         Get details of an API
       parameters:
@@ -193,6 +197,8 @@ paths:
 # Retrieve the API swagger definition
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       description: |
         Get the swagger of an API
       parameters:
@@ -243,6 +249,8 @@ paths:
 # Retrieve the API WSDL definition
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       produces:
         - application/octet-stream
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9292/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/wsdl"
@@ -301,6 +309,8 @@ paths:
 # Retrieve the documents associated with an API that qualify under a search condition
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       description: |
         Get a list of documents belonging to an API.
       parameters:
@@ -349,6 +359,8 @@ paths:
 # Retrieve a particular document of a certain API
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       description: |
         Get a particular document associated with an API.
       parameters:
@@ -405,6 +417,8 @@ paths:
   # Downloads a FILE type document/get the inline content or source url of a certain document
   #-------------------------------------------------------------------------------------------------
       get:
+        security:
+          - OAuth2Security:
         description: |
           Downloads a FILE type document/get the inline content or source url of a certain document.
         parameters:
@@ -466,6 +480,8 @@ paths:
 # Retrieve the Ratings of a certain API
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       description: |
         Get the rating of an API.
       parameters:
@@ -505,6 +521,8 @@ paths:
   # Retrieve a specific rating of an API
   #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       description: |
             Get a specific rating of an API.
       parameters:
@@ -616,6 +634,8 @@ paths:
 # Retrieve a list of all comments of a certain API
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       description: |
         Get a list of Comments that are already added to APIs
       parameters:
@@ -699,6 +719,8 @@ paths:
 # Retrieve an individual Comment for a certain API
 #-----------------------------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       description: |
         Get the individual comment given by a username for a certain API.
       parameters:

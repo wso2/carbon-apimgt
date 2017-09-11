@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.core.models.Subscription;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -250,7 +251,7 @@ public class AbstractAPIManagerTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiStore = getAPIStoreImpl(apiDAO);
         when(apiDAO.getDocumentInfo(UUID))
-                .thenThrow(new APIMgtDAOException("Error occurred while retrieving documents"));
+                .thenThrow(new APIMgtDAOException("Error occurred while retrieving documents", new SQLException()));
         apiStore.getDocumentationSummary(UUID);
     }
 
@@ -260,7 +261,7 @@ public class AbstractAPIManagerTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiStore = getAPIStoreImpl(apiDAO);
         when(apiDAO.getDocumentsInfoList(UUID))
-                .thenThrow(new APIMgtDAOException("Error occurred while retrieving documents"));
+                .thenThrow(new APIMgtDAOException("Error occurred while retrieving documents", new SQLException()));
         apiStore.getAllDocumentation(UUID, 1, 10);
     }
 
@@ -269,7 +270,8 @@ public class AbstractAPIManagerTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiStore = getAPIStoreImpl(apiDAO);
         when(apiDAO.getAPI(UUID))
-                .thenThrow(new APIMgtDAOException("Error occurred while retrieving API with id " + UUID));
+                .thenThrow(new APIMgtDAOException("Error occurred while retrieving API with id " + UUID,
+                        new SQLException()));
         apiStore.getAPIbyUUID(UUID);
     }
 
@@ -279,7 +281,8 @@ public class AbstractAPIManagerTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiPublisher = getApiPublisherImpl(apiDAO);
         when(apiDAO.getLastUpdatedTimeOfAPI(UUID)).thenThrow(
-                new APIMgtDAOException("Error occurred while retrieving the last update time of API with id " + UUID));
+                new APIMgtDAOException("Error occurred while retrieving the last update time of API with id " + UUID,
+                        new SQLException()));
         apiPublisher.getLastUpdatedTimeOfAPI(UUID);
         verify(apiDAO, times(0)).getLastUpdatedTimeOfAPI(UUID);
     }
@@ -290,8 +293,8 @@ public class AbstractAPIManagerTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiPublisher = getApiPublisherImpl(apiDAO);
         when(apiDAO.getLastUpdatedTimeOfSwaggerDefinition(UUID)).thenThrow(new APIMgtDAOException(
-                "Error occurred while retrieving the last update time of the swagger definition of API with id "
-                        + UUID));
+                "Error occurred while retrieving the last update time of the swagger definition of API with id " + UUID,
+                new SQLException()));
         apiPublisher.getLastUpdatedTimeOfSwaggerDefinition(UUID);
         verify(apiDAO, times(0)).getLastUpdatedTimeOfSwaggerDefinition(UUID);
     }
@@ -301,7 +304,8 @@ public class AbstractAPIManagerTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiPublisher = getApiPublisherImpl(apiDAO);
         when(apiDAO.isAPIContextExists(API_CONTEXT))
-                .thenThrow(new APIMgtDAOException("Couldn't check API Context " + API_CONTEXT + " Exists."));
+                .thenThrow(new APIMgtDAOException("Couldn't check API Context " + API_CONTEXT + " Exists.",
+                        new SQLException()));
         apiPublisher.isContextExist(API_CONTEXT);
     }
 
@@ -311,7 +315,8 @@ public class AbstractAPIManagerTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiPublisher = getApiPublisherImpl(apiDAO);
         when(apiDAO.isAPINameExists(API_NAME, USER_NAME))
-                .thenThrow(new APIMgtDAOException("Couldn't check API Name " + API_NAME + " Exists."));
+                .thenThrow(new APIMgtDAOException("Couldn't check API Name " + API_NAME + " Exists.",
+                        new SQLException()));
         apiPublisher.isApiNameExist(API_NAME);
     }
 
@@ -321,7 +326,8 @@ public class AbstractAPIManagerTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiPublisher = getApiPublisherImpl(apiDAO);
         when(apiDAO.getApiSwaggerDefinition(UUID))
-                .thenThrow(new APIMgtDAOException("Couldn't retrieve swagger definition for apiId " + UUID));
+                .thenThrow(new APIMgtDAOException("Couldn't retrieve swagger definition for apiId " + UUID,
+                        new SQLException()));
         apiPublisher.getApiSwaggerDefinition(UUID);
         verify(apiDAO, times(0)).getApiSwaggerDefinition(UUID);
     }
@@ -332,7 +338,7 @@ public class AbstractAPIManagerTestCase {
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
         AbstractAPIManager apiStore = getAPIStoreImpl(apiSubscriptionDAO);
         when(apiSubscriptionDAO.getAPISubscription(UUID))
-                .thenThrow(new APIMgtDAOException("Couldn't retrieve subscription for id " + UUID));
+                .thenThrow(new APIMgtDAOException("Couldn't retrieve subscription for id " + UUID, new SQLException()));
         apiStore.getSubscriptionByUUID(UUID);
         verify(apiSubscriptionDAO, times(0)).getAPISubscription(UUID);
     }
@@ -343,7 +349,8 @@ public class AbstractAPIManagerTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiPublisher = getApiPublisherImpl(apiDAO);
         when(apiDAO.getLastUpdatedTimeOfDocument(DOC_ID)).thenThrow(
-                new APIMgtDAOException("Error occurred while retrieving the last updated time of document " + DOC_ID));
+                new APIMgtDAOException("Error occurred while retrieving the last updated time of document " + DOC_ID,
+                        new SQLException()));
         apiPublisher.getLastUpdatedTimeOfDocument(DOC_ID);
         verify(apiDAO, times(0)).getLastUpdatedTimeOfDocument(DOC_ID);
     }
@@ -354,7 +361,8 @@ public class AbstractAPIManagerTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiPublisher = getApiPublisherImpl(apiDAO);
         when(apiDAO.getLastUpdatedTimeOfDocumentContent(UUID, DOC_ID)).thenThrow(new APIMgtDAOException(
-                "Error occurred while retrieving the last updated time of the document's content " + DOC_ID));
+                "Error occurred while retrieving the last updated time of the document's content " + DOC_ID,
+                new SQLException()));
         apiPublisher.getLastUpdatedTimeOfDocumentContent(UUID, DOC_ID);
         verify(apiDAO, times(0)).getLastUpdatedTimeOfDocumentContent(UUID, DOC_ID);
     }
@@ -365,7 +373,8 @@ public class AbstractAPIManagerTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiPublisher = getApiPublisherImpl(apiDAO);
         when(apiDAO.getLastUpdatedTimeOfAPIThumbnailImage(UUID)).thenThrow(new APIMgtDAOException(
-                "Error occurred while retrieving the last updated time of the thumbnail image of the API " + UUID));
+                "Error occurred while retrieving the last updated time of the thumbnail image of the API " + UUID,
+                new SQLException()));
         apiPublisher.getLastUpdatedTimeOfAPIThumbnailImage(UUID);
         verify(apiDAO, times(0)).getLastUpdatedTimeOfAPIThumbnailImage(UUID);
     }
@@ -376,7 +385,8 @@ public class AbstractAPIManagerTestCase {
         ApplicationDAO applicationDAO = mock(ApplicationDAO.class);
         AbstractAPIManager apiStore = getAPIStoreImpl(applicationDAO);
         when(applicationDAO.getLastUpdatedTimeOfApplication(UUID)).thenThrow(new APIMgtDAOException(
-                "Error occurred while retrieving the last updated time of the application " + UUID));
+                "Error occurred while retrieving the last updated time of the application " + UUID,
+                new SQLException()));
         apiStore.getLastUpdatedTimeOfApplication(UUID);
         verify(applicationDAO, times(0)).getLastUpdatedTimeOfApplication(UUID);
     }
@@ -387,7 +397,8 @@ public class AbstractAPIManagerTestCase {
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
         AbstractAPIManager apiStore = getAPIStoreImpl(apiSubscriptionDAO);
         when(apiSubscriptionDAO.getLastUpdatedTimeOfSubscription(UUID)).thenThrow(new APIMgtDAOException(
-                "Error occurred while retrieving the last updated time of the subscription " + UUID));
+                "Error occurred while retrieving the last updated time of the subscription " + UUID,
+                new SQLException()));
         apiStore.getLastUpdatedTimeOfSubscription(UUID);
         verify(apiSubscriptionDAO, times(0)).getLastUpdatedTimeOfSubscription(UUID);
     }
@@ -398,7 +409,8 @@ public class AbstractAPIManagerTestCase {
         APISubscriptionDAO apiSubscriptionDAO = mock(APISubscriptionDAO.class);
         AbstractAPIManager apiStore = getAPIStoreImpl(apiSubscriptionDAO);
         when(apiSubscriptionDAO.getAPISubscriptionsByAPI(UUID))
-                .thenThrow(new APIMgtDAOException("Couldn't find subscriptions for apiId " + UUID));
+                .thenThrow(new APIMgtDAOException("Couldn't find subscriptions for apiId " + UUID,
+                        new SQLException()));
         apiStore.getSubscriptionsByAPI(UUID);
         verify(apiSubscriptionDAO, times(0)).getAPISubscriptionsByAPI(UUID);
     }
@@ -447,7 +459,8 @@ public class AbstractAPIManagerTestCase {
         ApiDAO apiDAO = mock(ApiDAO.class);
         AbstractAPIManager apiPublisher = getApiPublisherImpl(apiDAO);
         when(apiDAO.getDocumentInfo(DOC_ID))
-                .thenThrow(new APIMgtDAOException("Error occurred while retrieving document content"));
+                .thenThrow(new APIMgtDAOException("Error occurred while retrieving document content",
+                        new SQLException()));
         apiPublisher.getDocumentationContent(DOC_ID);
         verify(apiDAO, times(0)).getDocumentFileContent(DOC_ID);
         verify(apiDAO, times(0)).getDocumentInlineContent(DOC_ID);

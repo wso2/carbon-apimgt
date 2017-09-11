@@ -25,11 +25,11 @@ package org.wso2.carbon.apimgt.core.exception;
  */
 public class APIConfigRetrievalException extends APIManagementException {
 
-    public APIConfigRetrievalException(String msg, ExceptionCodes code) {
+    public APIConfigRetrievalException(String msg, ErrorHandler code) {
         super(msg, code);
     }
 
-    public APIConfigRetrievalException(String msg, Throwable e, ExceptionCodes code) {
+    public APIConfigRetrievalException(String msg, Throwable e, ErrorHandler code) {
         super(msg, e, code);
     }
 

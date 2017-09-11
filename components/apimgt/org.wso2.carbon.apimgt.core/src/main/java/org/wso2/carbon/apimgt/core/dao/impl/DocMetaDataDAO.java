@@ -79,11 +79,8 @@ class DocMetaDataDAO {
      * @param documentInfo document info
      * @param updatedBy    user who performs the action
      * @throws SQLException
-     * @throws APIMgtDAOException
      */
-    static void updateDocInfo(Connection connection, DocumentInfo documentInfo, String updatedBy) throws SQLException,
-            APIMgtDAOException {
-
+    static void updateDocInfo(Connection connection, DocumentInfo documentInfo, String updatedBy) throws SQLException {
         deleteDOCPermission(connection, documentInfo.getId());
         addDOCPermission(connection, documentInfo.getPermissionMap(), documentInfo.getId());
         final String query = "UPDATE AM_API_DOC_META_DATA SET NAME = ?, SUMMARY = ?, TYPE = ?, "
@@ -91,24 +88,18 @@ class DocMetaDataDAO {
                 + "UPDATED_BY = ?, LAST_UPDATED_TIME = ? WHERE UUID = ?";
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            try {
-                statement.setString(1, documentInfo.getName());
-                statement.setString(2, documentInfo.getSummary());
-                statement.setString(3, documentInfo.getType().toString());
-                statement.setString(4, documentInfo.getOtherType());
-                statement.setString(5, documentInfo.getSourceURL());
-                statement.setString(6, documentInfo.getFileName());
-                statement.setString(7, documentInfo.getSourceType().toString());
-                statement.setString(8, documentInfo.getVisibility().toString());
-                statement.setString(9, updatedBy);
-                statement.setTimestamp(10, Timestamp.valueOf(LocalDateTime.now()));
-                statement.setString(11, documentInfo.getId());
-                statement.execute();
-            } catch (SQLException e) {
-                throw new APIMgtDAOException(e);
-            }
-        } catch (SQLException e) {
-            throw new APIMgtDAOException(e);
+            statement.setString(1, documentInfo.getName());
+            statement.setString(2, documentInfo.getSummary());
+            statement.setString(3, documentInfo.getType().toString());
+            statement.setString(4, documentInfo.getOtherType());
+            statement.setString(5, documentInfo.getSourceURL());
+            statement.setString(6, documentInfo.getFileName());
+            statement.setString(7, documentInfo.getSourceType().toString());
+            statement.setString(8, documentInfo.getVisibility().toString());
+            statement.setString(9, updatedBy);
+            statement.setTimestamp(10, Timestamp.valueOf(LocalDateTime.now()));
+            statement.setString(11, documentInfo.getId());
+            statement.execute();
         }
     }
 
