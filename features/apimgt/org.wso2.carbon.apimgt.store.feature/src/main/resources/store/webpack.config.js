@@ -42,7 +42,7 @@ const config = {
             },
             {
                 test: /\.(woff|woff2|eot|ttf|svg)$/,
-                loader: 'file-loader?name=fonts/[name].[ext]'
+                loader: 'url-loader?limit=100000'
             }
         ]
     }

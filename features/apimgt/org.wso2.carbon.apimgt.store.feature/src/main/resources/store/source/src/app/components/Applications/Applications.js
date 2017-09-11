@@ -29,7 +29,7 @@ class Applications extends Component {
                 <Switch>
                     <Route exact path={"/applications"} component={Listing}/>
                     <Route path={"/applications/:application_uuid/"} render={ props => (
-                        <Details {...props} setLeftMenu={this.props.setLeftMenu}/>)}/>
+                        <Details {...props} />)}/>
                     <Route component={PageNotFound}/>
                 </Switch>
 

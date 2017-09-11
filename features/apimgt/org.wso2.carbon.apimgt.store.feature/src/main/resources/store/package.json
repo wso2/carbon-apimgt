@@ -1,7 +1,7 @@
 {
-  "name": "wso2_apim_store",
+  "name": "wso2_apim_publisher",
   "version": "1.0.0",
-  "description": "WSO2 API Manager Web Apps Store",
+  "description": "WSO2 API Manager Web Apps Publisher",
   "main": "app.js",
   "scripts": {
     "test": "NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED='0' mocha --recursive --require babel-register  -r mock-local-storage \"./source/test/**/*.test.js\"",
@@ -18,10 +18,9 @@
     "antd": "^2.11.2",
     "axios": "^0.16.1",
     "caniuse-api": "^1.6.1",
-    "classnames": "^2.2.5",
     "file-loader": "^0.11.2",
     "material-design-icons": "^3.0.1",
-    "material-ui": "^1.0.0-beta.3",
+    "material-ui": "^1.0.0-beta.4",
     "material-ui-icons": "^1.0.0-alpha.19",
     "prop-types": "^15.5.10",
     "qs": "^6.4.0",
@@ -32,10 +31,12 @@
     "react-quill": "1.0.0",
     "react-router": "^4.1.1",
     "react-router-dom": "^4.1.1",
+    "react-select": "^1.0.0-rc.5",
     "react-tap-event-plugin": "^2.0.1",
     "react-toastify": "^1.7.0",
     "swagger-client": "3.0.19",
-    "typeface-roboto": "0.0.31"
+    "typeface-roboto": "0.0.35",
+    "url-loader": "^0.5.9"
   },
   "devDependencies": {
     "babel-core": "^6.24.1",

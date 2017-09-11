@@ -51,7 +51,6 @@ class API {
     getAllAPIs(callback = null) {
         var promise_get_all = this.client.then(
             (client) => {
-                debugger;
                 console.info("this._requestMetaData()" , this._requestMetaData());
                 return client.apis["API Collection"].get_apis({}, this._requestMetaData());
             }
@@ -72,7 +71,6 @@ class API {
     getAPIById(id, callback = null) {
         var promise_get = this.client.then(
             (client) => {
-                debugger;
                 return client.apis["API (individual)"].get_apis__apiId_(
                     {apiId: id}, this._requestMetaData());
             }
@@ -80,6 +78,7 @@ class API {
         if (callback) {
             return promise_get.then(callback);
         } else {
+            console.info("returninng promise");
             return promise_get;
         }
     }
@@ -111,7 +110,7 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getApplication(id, callback = null) {
-        var promise_get = this.client.then(
+        let promise_get = this.client.then(
                 (client) => {
                 return client.apis["Application (individual)"].get_applications__applicationId_(
                     {applicationId: id}, this._requestMetaData());
@@ -131,8 +130,7 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getAllApplications(callback = null) {
-        debugger;
-        var promise_get = this.client.then(
+        let promise_get = this.client.then(
                 (client) => {
                 return client.apis["Application Collection"].get_applications(
                     {}, this._requestMetaData());
@@ -144,6 +142,26 @@ class API {
             return promise_get;
         }
     }
+    /**
+     * Get application by id
+     * @param tierLevel
+     * @param callback {function} Function which needs to be called upon success
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getAllTiers(tierLevel, callback = null) {
+        let promise_get_all = this.client.then(
+            (client) => {
+                let req = {authorization :  "Bearer e74a576e-cab9-36ff", requestContentType :"application/json"};
+                return client.apis["Tier Collection"].get_policies__tierLevel_(
+                    {tierLevel:tierLevel}, req);
+            }
+        );
+        if (callback) {
+            return promise_get_all.then(callback);
+        } else {
+            return promise_get_all;
+        }
+    }
 
     /**
      * Create application
@@ -152,12 +170,12 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     createApplication(application, callback = null) {
-        debugger;
-        var promise_create = this.client.then(
+        //debugger;
+        var promise_get = this.client.then(
                 (client) => {
-                let payload = {body: application};
-                return client.apis["Create"].post_applications(
-                    {payload}, this._requestMetaData());
+                    let payload = {body: application};
+                    return client.apis["Create"].post_applications(
+                        {payload}, this._requestMetaData());
         }
         );
         if (callback) {
@@ -174,7 +192,7 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     updateApplication(application, callback = null) {
-        debugger;
+        //debugger;
         var promise_get = this.client.then(
                 (client) => {
                 let payload = {applicationId: application.id, body: application};
@@ -197,7 +215,7 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     generateKeys(applicationId, request_content, callback = null) {
-        debugger;
+        //debugger;
         var promise_get = this.client.then(
                 (client) => {
                 let payload = {applicationId: applicationId, body: request_content};
@@ -220,7 +238,7 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     generateToken(applicationId, request_content, callback = null) {
-        debugger;
+        //debugger;
         var promise_get = this.client.then(
                 (client) => {
                 let payload = {applicationId: applicationId, body: request_content};
@@ -242,7 +260,7 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getKeys(applicationId, callback = null) {
-        debugger;
+        //debugger;
         var promise_get = this.client.then(
                 (client) => {
                 return client.apis["Application (individual)"].get_applications__applicationId__keys(
@@ -263,7 +281,7 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getSubscriptions(apiId, applicationId, callback = null) {
-        debugger;
+        //debugger;
         var promise_get = this.client.then(
                 (client) => {
                 return client.apis["Subscription Collection"].get_subscriptions(

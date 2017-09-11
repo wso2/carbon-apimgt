@@ -1,3 +1,22 @@
+.resource-head{
+    background: #cfcfcf;
+    padding: 5px;
+    margin-top:10px;
+}
+.resource-body{
+    background: #efefef;
+    padding: 5px;
+}
+.parameter-table{
+    border-left:solid 1px #ccc;
+    border-top:solid 1px #ccc;
+    border-collapse: collapse;
+}
+.parameter-table td,.parameter-table th{
+    border-right:solid 1px #ccc;
+    border-bottom:solid 1px #ccc;
+    text-align: left;
+}
 .components-table-demo-nested .ant-table-expanded-row > td:last-child {
     padding: 0 48px 0 8px;
 }
