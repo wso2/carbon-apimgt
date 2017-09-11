@@ -41,6 +41,7 @@ import Api from '../../../data/api'
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import ApiPermissionValidation from '../../../data/ApiPermissionValidation'
+import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation'
 import {Input} from 'antd';
 import {Checkbox} from 'antd';
 import {Table, Icon} from 'antd';
@@ -516,10 +517,13 @@ class Permission extends Component {
                                     </Row>
                                 </Card>) : <p/>
                             }
-                            <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
-                                <Button loading={this.state.creating} type="primary"
-                                        onClick={this.handleSubmit}>Update</Button>
-                            </ApiPermissionValidation>
+                            {/* Allowing update API with scopes */}
+                            <ScopeValidation resourcePath={resourcePath.SINGLE_API} resourceMethod={resourceMethod.PUT}>
+                              <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
+                                  <Button loading={this.state.creating} type="primary"
+                                          onClick={this.handleSubmit}>Update</Button>
+                              </ApiPermissionValidation>
+                          </ScopeValidation>
                         </form>
                     </Col>
                 </Row>

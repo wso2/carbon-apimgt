@@ -23,6 +23,7 @@ import DocumentsTable from './DocumentsTable';
 import NewDocDiv from './NewDocDiv';
 import Loading from '../../../Base/Loading/Loading'
 import ApiPermissionValidation from '../../../../data/ApiPermissionValidation'
+import {ScopeValidation, resourcePath, resourceMethod} from '../../../../data/ScopeValidation'
 
 /*
  Documents tab related React components.
@@ -400,10 +401,13 @@ class Documents extends Component {
         }
         return (
             <div>
-                <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
-                    <Button style={{marginBottom: 30}} onClick={this.addNewDocBtnListener}
-                         type="primary">Add New Document</Button>
-                </ApiPermissionValidation>
+              {/* Allowing adding doc to an API based on scopes */}
+                <ScopeValidation resourcePath={resourcePath.API_DOCS} resourceMethod={resourceMethod.POST}>
+                  <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
+                      <Button style={{marginBottom: 30}} onClick={this.addNewDocBtnListener}
+                           type="primary">Add New Document</Button>
+                  </ApiPermissionValidation>
+              </ScopeValidation>
                 <div>
                     {(this.state.addingNewDoc || this.state.updatingDoc) &&
                     <NewDocDiv
