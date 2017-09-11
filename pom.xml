@@ -584,6 +584,16 @@
                 <artifactId>org.wso2.carbon.config</artifactId>
                 <version>${wso2.carbon.config.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>${com.fasterxml.jackson.dataformat.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${snakeyaml.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -911,7 +921,7 @@
         <javax.ws.rs-api.version>2.0</javax.ws.rs-api.version>
         <javax.ws.rs-api.import.version>2.0</javax.ws.rs-api.import.version>
 
-        <snakeyaml.version>1.16.0.wso2v1</snakeyaml.version>
+        <snakeyaml.version>1.18.0.wso2v1</snakeyaml.version>
         <snakeyaml.version.range>[1.16, 2.0.0)</snakeyaml.version.range>
         <carbon.uuf.version>1.0.0-m14</carbon.uuf.version>
         <carbon-uuf-maven-plugin.version>1.0.0-m13</carbon-uuf-maven-plugin.version>
@@ -934,7 +944,7 @@
         <!-- Jacoco for code coverage -->
         <jacoco.version>0.7.9</jacoco.version>
         <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
-        <google.guava.version>18.0</google.guava.version>
+        <google.guava.version>20.0</google.guava.version>
         <andes.version>3.0.5</andes.version>
         <securevault.version>1.0.0-wso2v2</securevault.version>
         <slf4j.version>1.7.22</slf4j.version>
@@ -961,5 +971,6 @@
         <samskivert.mustache.version>1.13</samskivert.mustache.version>
         <plexus.utils.version>1.5.7</plexus.utils.version>
         <wso2.carbon.config.version>2.0.0</wso2.carbon.config.version>
+        <com.fasterxml.jackson.dataformat.version>2.9.1</com.fasterxml.jackson.dataformat.version>
     </properties>
 </project>
