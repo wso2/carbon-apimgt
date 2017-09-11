@@ -23,7 +23,7 @@ header.MuiAppBar-colorPrimary-6{
     font-weight: 300
 }
 .page-title{
-    font-weight: 300 ;
+    font-weight: 200 ;
     padding: 10px 0 0 30px;
     margin: 0;
     position: relative;
@@ -43,4 +43,31 @@ header.MuiAppBar-colorPrimary-6{
 }
 .title-toolbar{
     margin-left: 0;
+}
+div#react-root div.page-content{
+    padding: 20px 20px 0 40px;
+}
+.toggle-section-title{
+    padding:10px 0;
+    font-size: 12px;
+    justify-content: center;
+}
+.toggle-section-title button{
+    width:100%;
+}
+.toggle-section-content{
+    border: solid 1px #ccc;
+    border-radius: 10px;
+    padding:0 20px 20px 20px;
+    margin-bottom: 20px;
+}
+.more-arrow-shift{
+    margin-top:-10px;
+}
+.policies-select{
+    width:100%;
+}
+.help-text{
+    padding: 20px 0;
+    line-height: 150%;
 }
