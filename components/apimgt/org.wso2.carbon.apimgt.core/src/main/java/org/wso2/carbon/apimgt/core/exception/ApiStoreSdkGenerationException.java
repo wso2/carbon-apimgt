@@ -23,8 +23,19 @@ package org.wso2.carbon.apimgt.core.exception;
  */
 public class ApiStoreSdkGenerationException extends Exception {
 
+    private ErrorHandler errorHandler;
+
+    /**
+     * Get error handler object.
+     * @return ErrorHandler
+     */
+    public ErrorHandler getErrorHandler() {
+        return errorHandler;
+    }
+
     public ApiStoreSdkGenerationException(String message) {
         super(message);
+        this.errorHandler = ExceptionCodes.SDK_NOT_GENERATED;
     }
 
     public ApiStoreSdkGenerationException(String message, Throwable cause) {

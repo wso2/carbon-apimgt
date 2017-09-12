@@ -17,6 +17,6 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-public abstract class SdkGenLanguagesApiService {
-    public abstract Response sdkGenLanguagesGet(Request request) throws NotFoundException;
+public abstract class SdkGenApiService {
+    public abstract Response sdkGenLanguagesGet( Request request) throws NotFoundException;
 }

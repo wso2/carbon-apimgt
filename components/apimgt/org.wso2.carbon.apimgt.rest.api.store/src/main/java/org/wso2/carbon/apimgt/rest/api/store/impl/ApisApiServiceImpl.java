@@ -503,44 +503,6 @@ public class ApisApiServiceImpl extends ApisApiService {
         return Response.ok().entity(documentListDTO).build();
     }
 
-    @Override
-    public Response apisApiIdGenerateSdkLanguagePost(String apiId, String language, Request request)
-            throws NotFoundException {
-        if (StringUtils.isBlank(apiId) || StringUtils.isBlank(language)) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("API ID or language is not valid")
-                    .build();
-        }
-        String userName = RestApiUtil.getLoggedInUsername(request);
-        ApiStoreSdkGenerationManager sdkGenerationManager = new ApiStoreSdkGenerationManager();
-        if (!sdkGenerationManager.getSdkGenLanguages().containsKey(language)) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Specified language parameter doesn't exist")
-                    .build();
-        }
-        String tempZipFilePath;
-        try {
-            tempZipFilePath = sdkGenerationManager.generateSdkForApi(apiId, language, userName);
-        } catch (ApiStoreSdkGenerationException e) {
-            String errorMessage = "Error while generating SDK for requested language";
-            log.error(errorMessage, e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving API for SDK generation " + apiId;
-            HashMap<String, String> paramList = new HashMap<String, String>();
-            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-            log.error(errorMessage, e);
-            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-        }
-        File sdkZipFile = new File(tempZipFilePath);
-
-        return Response.ok()
-                .entity(sdkZipFile)
-                .header("Content-Disposition", "attachment; filename=\"" + sdkZipFile.getName() + "\"")
-                .build();
-    }
-
     /**
      * Get API of given ID
      *
@@ -642,6 +604,60 @@ public class ApisApiServiceImpl extends ApisApiService {
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
+    }
+    /**
+     * Generates an SDK for a API with provided ID and language
+     *
+     * @param apiId   API ID
+     * @param language   SDK language
+     * @param request msf4j request object
+     * @return ZIP file for the generated SDK
+     * @throws NotFoundException if failed to find method implementation
+     */
+    @Override
+    public Response apisApiIdSdksLanguageGet(String apiId, String language, Request request) throws NotFoundException {
+        if (StringUtils.isBlank(apiId) || StringUtils.isBlank(language)) {
+            String errorMessage = "API ID or language is not valid";
+            log.error(errorMessage);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 400L,errorMessage);
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(errorDTO)
+                    .build();
+        }
+        String userName = RestApiUtil.getLoggedInUsername(request);
+        ApiStoreSdkGenerationManager sdkGenerationManager = new ApiStoreSdkGenerationManager();
+        if (!sdkGenerationManager.getSdkGenLanguages().containsKey(language)) {
+            String errorMessage = "Specified language parameter doesn't exist";
+            log.error(errorMessage);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 400L, errorMessage);
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(errorDTO)
+                    .build();
+        }
+        String tempZipFilePath;
+        try {
+            tempZipFilePath = sdkGenerationManager.generateSdkForApi(apiId, language, userName);
+        } catch (ApiStoreSdkGenerationException e) {
+            String errorMessage = "Error while generating SDK for requested language";
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving API for SDK generation " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+        File sdkZipFile = new File(tempZipFilePath);
+
+        return Response.ok()
+                .entity(sdkZipFile)
+                .header("Content-Disposition", "attachment; filename=\"" + sdkZipFile.getName() + "\"")
+                .build();
     }
 
     /**

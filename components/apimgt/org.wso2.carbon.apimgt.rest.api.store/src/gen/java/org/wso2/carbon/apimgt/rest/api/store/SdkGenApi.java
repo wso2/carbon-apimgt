@@ -4,7 +4,7 @@ package org.wso2.carbon.apimgt.rest.api.store;
 import io.swagger.annotations.ApiParam;
 
 import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.store.factories.SdkGenLanguagesApiServiceFactory;
+import org.wso2.carbon.apimgt.rest.api.store.factories.SdkGenApiServiceFactory;
 
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
@@ -30,23 +30,27 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 @Component(
-    name = "org.wso2.carbon.apimgt.rest.api.store.SdkGenLanguagesApi",
+    name = "org.wso2.carbon.apimgt.rest.api.store.SdkGenApi",
     service = Microservice.class,
     immediate = true
 )
-@Path("/api/am/store/v1.[\\d]+/sdk-gen-languages")
+@Path("/api/am/store/v1.[\\d]+/sdk-gen")
 @Consumes({ "application/json" })
 @Produces({ "application/json" })
-@ApplicationPath("/sdk-gen-languages")
-@io.swagger.annotations.Api(description = "the sdk-gen-languages API")
-public class SdkGenLanguagesApi implements Microservice  {
-   private final SdkGenLanguagesApiService delegate = SdkGenLanguagesApiServiceFactory.getSdkGenLanguagesApi();
+@ApplicationPath("/sdk-gen")
+@io.swagger.annotations.Api(description = "the sdk-gen API")
+public class SdkGenApi implements Microservice  {
+   private final SdkGenApiService delegate = SdkGenApiServiceFactory.getSdkGenApi();
 
     @GET
-    
+    @Path("/languages")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Provide a list of supported languages for generating SDKs for existing APIs. ", notes = "This operation will provide a list of programming languages that are supported by the swagger codegen library for generating System Development Kits (SDKs) for APIs available in the API Manager Store ", response = void.class, tags={ "Retrieve", })
+    @io.swagger.annotations.ApiOperation(value = "Provide a list of supported languages for generating SDKs for existing APIs. ", notes = "This operation will provide a list of programming languages that are supported by the swagger codegen library for generating System Development Kits (SDKs) for APIs available in the API Manager Store ", response = void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+        })
+    }, tags={ "SDK Language list.", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. List of supported languages for generating SDKs. ", response = void.class),
         
@@ -55,6 +59,6 @@ public class SdkGenLanguagesApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 500, message = "Internal Server Error. Error while retrieving the list. ", response = void.class) })
     public Response sdkGenLanguagesGet( @Context Request request)
     throws NotFoundException {
-        return delegate.sdkGenLanguagesGet(request);
+        return delegate.sdkGenLanguagesGet( request);
     }
 }

@@ -16,12 +16,12 @@ import org.wso2.msf4j.Request;
 import javax.ws.rs.core.Response;
 
 @RunWith(PowerMockRunner.class)
-public class SdkGenLanguagesApiServiceImplTestCase {
-    private final static Logger logger = LoggerFactory.getLogger(SdkGenLanguagesApiServiceImplTestCase.class);
+public class SdkGenApiServiceImplTestCase {
+    private final static Logger logger = LoggerFactory.getLogger(SdkGenApiServiceImplTestCase.class);
     private static final String USER = "admin";
     @Test
     public void sdkGenLanguagesGet() throws APIManagementException, NotFoundException {
-        SdkGenLanguagesApiServiceImpl sdkGenLanguagesApiService = new SdkGenLanguagesApiServiceImpl();
+        SdkGenApiServiceImpl sdkGenLanguagesApiService = new SdkGenApiServiceImpl();
         Request request = getRequest();
         Response response = sdkGenLanguagesApiService.sdkGenLanguagesGet(request);
 
