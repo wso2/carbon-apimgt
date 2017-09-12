@@ -17,6 +17,7 @@
  */
 
 import React from 'react'
+import Footer from '../Footer/Footer'
 
 const LoginBase = (props) => {
     return (
@@ -35,15 +36,7 @@ const LoginBase = (props) => {
                 </div>
             </header>
             {props.children}
-            <footer className="footer">
-                <div className="container-fluid">
-                    <p>
-                        WSO2 | © 2016
-                        <a href="http://wso2.com/" target="_blank"><i
-                            className="icon fw fw-wso2"/> Inc</a>.
-                    </p>
-                </div>
-            </footer>
+            <Footer/>
         </div>
 
     );
