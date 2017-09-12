@@ -37,7 +37,7 @@ public class AnalyzerDaoImplIT extends DAOIntegrationTestBase {
         String toTimeStamp = (new Timestamp(System.currentTimeMillis() + 10000)).toString();
         AnalyticsDAO analyticsDAO = DAOFactory.getAnalyticsDAO();
         List<ApplicationCount> applicationCountList = analyticsDAO
-                .getApplicationCount("john", null, fromTimeStamp, toTimeStamp);
+                .getApplicationCount(fromTimeStamp, toTimeStamp);
         Assert.assertEquals(applicationCountList.size(), 1);
     }
 

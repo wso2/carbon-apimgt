@@ -40,8 +40,11 @@ import org.wso2.msf4j.Request;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
+import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -484,18 +487,29 @@ public class RestApiUtil {
      * @return time in ISO 8601 format
      */
     public static String epochToISO8601DateTime(long epochMilliSeconds) {
-        // toString() returns ISO 8601 format, e.g. 2014-02-15T01:02:03Z
-        return Instant.ofEpochMilli(epochMilliSeconds).toString();
+        // returns ISO 8601 format, e.g. 2014-02-15T01:02:03Z
+        return Instant.ofEpochMilli(epochMilliSeconds).atZone(ZoneOffset.UTC).toString();
     }
 
     /**
      * Coverts given timestamp to ISO8601 timestamp in UTC
      *
      * @param timeStamp Timestamp in ISO8601 format
-     * @return ISO8601 Timestamp in UTC
+     * @return Instant  in UTC
      */
+    public static Instant fromISO8601ToInstant(String timeStamp) throws APIManagementException {
+        // returns ISO 8601 format, e.g. 2014-02-15T01:02:03Z
+        try {
+            return Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(timeStamp));
+        } catch (DateTimeParseException e) {
+            throw new APIManagementException(e.getMessage(), ExceptionCodes.INVALID_DATE_TIME_STAMP);
+        } catch (DateTimeException e) {
+            throw new APIManagementException(e.getMessage(), ExceptionCodes.INVALID_DATE_TIME_STAMP);
+        }
+    }
+
     public static String fromISO8601ToUTC(String timeStamp) {
         // returns ISO 8601 format, e.g. 2014-02-15T01:02:03Z
-        return Instant.parse(timeStamp).atZone(ZoneOffset.UTC).toString();
+        return Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(timeStamp)).toString();
     }
 }

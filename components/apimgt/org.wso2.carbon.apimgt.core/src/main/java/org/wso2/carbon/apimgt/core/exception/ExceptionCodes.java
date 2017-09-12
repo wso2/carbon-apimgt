@@ -159,6 +159,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Error occurred while obtaining URI for Location header"),
     LAST_UPDATED_TIME_RETRIEVAL_ERROR(900702, "Error while retrieving last access time for the resource", 500,
             "Error while retrieving last access time for the resource"),
+    INVALID_DATE_TIME_STAMP(900703, "Invalid timestamp value", 400, "Timestamp should be in ISO8601 format"),
 
 
     // Oauth related codes

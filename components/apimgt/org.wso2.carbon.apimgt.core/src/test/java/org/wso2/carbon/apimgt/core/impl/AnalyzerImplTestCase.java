@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.analytics.APICount;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,9 +37,8 @@ import static org.mockito.Mockito.when;
  */
 public class AnalyzerImplTestCase {
 
-    private static final String USER_NAME = "john";
-    private static final String FROM_TIMESTAMP = "2017-06-30 2:32:41.972";
-    private static final String TO_TIMESTAMP = "2017-07-30 2:32:41.972";
+    private static final String FROM_TIMESTAMP = "2011-12-03T10:15:30Z";
+    private static final String TO_TIMESTAMP = "2011-12-03T10:15:30Z";
 
     @Test(description = "get application count test")
     public void testGetApplicationCount() throws APIManagementException {
@@ -49,12 +49,12 @@ public class AnalyzerImplTestCase {
         dummyApplicationCountList.add(applicationCount1);
         dummyApplicationCountList.add(applicationCount2);
         Analyzer analyzer = getAnalyzerImpl(analyticsDAO);
-        when(analyticsDAO.getApplicationCount(USER_NAME, null, FROM_TIMESTAMP, TO_TIMESTAMP))
+        when(analyticsDAO.getApplicationCount(FROM_TIMESTAMP, TO_TIMESTAMP))
                 .thenReturn(dummyApplicationCountList);
         List<ApplicationCount> applicationCountListFromDB = analyzer
-                .getApplicationCount(USER_NAME, null, FROM_TIMESTAMP, TO_TIMESTAMP);
+                .getApplicationCount(FROM_TIMESTAMP, TO_TIMESTAMP);
         Assert.assertNotNull(applicationCountListFromDB);
-        verify(analyticsDAO, Mockito.times(1)).getApplicationCount(USER_NAME, null, FROM_TIMESTAMP, TO_TIMESTAMP);
+        verify(analyticsDAO, Mockito.times(1)).getApplicationCount(FROM_TIMESTAMP, TO_TIMESTAMP);
     }
 
     @Test(description = "get application count test")
@@ -63,7 +63,7 @@ public class AnalyzerImplTestCase {
         Analyzer analyzer = getAnalyzerImpl(analyticsDAO);
         try {
             List<ApplicationCount> applicationCountListFromDB = analyzer
-                    .getApplicationCount(USER_NAME, null, FROM_TIMESTAMP, TO_TIMESTAMP);
+                    .getApplicationCount(FROM_TIMESTAMP, TO_TIMESTAMP);
             Assert.assertFalse(true);
         } catch (APIMgtDAOException e) {
             Assert.assertTrue(true);
@@ -80,12 +80,13 @@ public class AnalyzerImplTestCase {
         apiCountList.add(apiCount1);
         apiCountList.add(apiCount2);
         Analyzer analyzer = getAnalyzerImpl(analyticsDAO);
-        when(analyticsDAO.getAPICount(USER_NAME, FROM_TIMESTAMP, TO_TIMESTAMP))
+        when(analyticsDAO.getAPICount(Instant.parse(FROM_TIMESTAMP), Instant.parse(TO_TIMESTAMP)))
                 .thenReturn(apiCountList);
         List<APICount> apiCountListFromDB = analyzer
-                .getAPICount(USER_NAME, FROM_TIMESTAMP, TO_TIMESTAMP);
+                .getAPICount(Instant.parse(FROM_TIMESTAMP), Instant.parse(TO_TIMESTAMP));
         Assert.assertNotNull(apiCountListFromDB);
-        verify(analyticsDAO, Mockito.times(1)).getAPICount(USER_NAME, FROM_TIMESTAMP, TO_TIMESTAMP);
+        verify(analyticsDAO, Mockito.times(1)).getAPICount(Instant.parse(FROM_TIMESTAMP),
+                Instant.parse(TO_TIMESTAMP));
     }
 
     private AnalyzerImpl getAnalyzerImpl(AnalyticsDAO analyticsDAO) {

@@ -401,10 +401,9 @@ definitions:
     title: APIs Created Over Time
     properties:
       time:
-        type: integer
-        format: int64
+        type: string
         description: |
-          Timestamp
+          Timestamps of created APIs
       count:
         type: integer
         format: int64

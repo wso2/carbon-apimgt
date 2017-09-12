@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionCount;
 import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionInfo;
 
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -72,7 +73,7 @@ public class AnalyzerImpl implements Analyzer {
     }
 
     @Override
-    public List<APICount> getAPICount(String fromTime, String toTime) throws APIManagementException {
+    public List<APICount> getAPICount(Instant fromTime, Instant toTime) throws APIManagementException {
         List<APICount> apiCountList;
         try {
             apiCountList = getAnalyticsDAO().getAPICount(fromTime, toTime);

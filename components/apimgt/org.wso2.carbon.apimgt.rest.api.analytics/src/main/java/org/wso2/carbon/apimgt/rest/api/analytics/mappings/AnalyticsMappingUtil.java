@@ -178,7 +178,7 @@ public class AnalyticsMappingUtil {
 
     private static APICountDTO fromAPICountToDTO(APICount apiCount) {
         APICountDTO apiCountDTO = new APICountDTO();
-        apiCountDTO.setTime(apiCount.getTimestamp());
+        apiCountDTO.setTime(RestApiUtil.epochToISO8601DateTime(apiCount.getTimestamp()));
         apiCountDTO.setCount(apiCount.getCount());
         return apiCountDTO;
     }

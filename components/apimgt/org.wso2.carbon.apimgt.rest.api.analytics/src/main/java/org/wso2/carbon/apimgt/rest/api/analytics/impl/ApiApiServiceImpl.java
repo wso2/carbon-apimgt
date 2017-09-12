@@ -20,6 +20,8 @@ import org.wso2.msf4j.Request;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
+import static org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil.fromISO8601ToInstant;
+
 public class ApiApiServiceImpl extends ApiApiService {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationApiServiceImpl.class);
@@ -53,17 +55,15 @@ public class ApiApiServiceImpl extends ApiApiService {
     public Response apiCountOverTimeGet(String startTime, String endTime, String createdBy, Request request) throws
             NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
-        startTime = RestApiUtil.fromISO8601ToUTC(startTime);
-        endTime = RestApiUtil.fromISO8601ToUTC(endTime);
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Retrieving APIs created over time. [From: " + startTime + " to: " + endTime + " " +
                         "created by: " + createdBy + "]");
             }
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
-            List<APICount> apiCountList = analyzer.getAPICount(startTime, endTime);
-            APICountListDTO apiCountListDTO = AnalyticsMappingUtil
-                    .fromAPICountToListDTO(apiCountList);
+            List<APICount> apiCountList = analyzer.getAPICount(fromISO8601ToInstant(startTime),
+                    fromISO8601ToInstant(endTime));
+            APICountListDTO apiCountListDTO = AnalyticsMappingUtil.fromAPICountToListDTO(apiCountList);
             return Response.ok().entity(apiCountListDTO).build();
 
         } catch (APIManagementException e) {

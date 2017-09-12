@@ -12,26 +12,26 @@ import java.util.Objects;
  */
 public class APICountDTO   {
   @JsonProperty("time")
-  private Long time = null;
+  private String time = null;
 
   @JsonProperty("count")
   private Long count = null;
 
-  public APICountDTO time(Long time) {
+  public APICountDTO time(String time) {
     this.time = time;
     return this;
   }
 
    /**
-   * Timestamp 
+   * Timestamps of created APIs 
    * @return time
   **/
-  @ApiModelProperty(value = "Timestamp ")
-  public Long getTime() {
+  @ApiModelProperty(value = "Timestamps of created APIs ")
+  public String getTime() {
     return time;
   }
 
-  public void setTime(Long time) {
+  public void setTime(String time) {
     this.time = time;
   }
 

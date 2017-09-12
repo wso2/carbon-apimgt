@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionCount;
 import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionInfo;
 
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -59,8 +60,7 @@ public interface AnalyticsDAO {
      * @return valid {@link APIInfo} List or null
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    List<APICount> getAPICount(String fromTimestamp,
-                               String toTimestamp) throws APIMgtDAOException;
+    List<APICount> getAPICount(Instant fromTimestamp, Instant toTimestamp) throws APIMgtDAOException;
 
     /**
      * Retrieves API subscription count information.
