@@ -98,7 +98,7 @@ public class ApiStoreSdkGenerationManager {
             handleSdkGenException("Error retrieving swagger definition for API " + apiId + " from database.", e);
         }
         Swagger swaggerDoc = new SwaggerParser().parse(swaggerDefinitionForApi);
-        if(swaggerDoc == null){
+        if (swaggerDoc == null) {
             handleSdkGenException("Error while parsing retrieved swagger definition");
         }
         //Format the swagger definition as a string before writing to the file.
@@ -135,7 +135,7 @@ public class ApiStoreSdkGenerationManager {
                         tempSdkGenDir, e);
             }
 
-            //Generate the SDK for the specified language and save it as a zip file
+            //Generate the SDK for the specified language
             generateSdkForSwaggerDef(language, swaggerDefJsonFile.getAbsolutePath(), tempSdkGenDir.toString());
 
             String archiveName = apiName + "_" + language + "_" + apiVersion;
