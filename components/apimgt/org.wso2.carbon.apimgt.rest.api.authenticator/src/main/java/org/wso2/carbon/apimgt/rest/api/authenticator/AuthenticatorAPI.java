@@ -75,7 +75,7 @@ public class AuthenticatorAPI implements Microservice {
     @Path("/token/{appName}")
     public Response auth(){
       return Response.ok()
-                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Origin", "https://localhost:9292")
                 .header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD")
                 .header("Access-Control-Allow-Headers", "Accept, Accept-Encoding, Accept-Language," +
                         " authorization, Cache-Control, Connection, Cookie, Host, Pragma, Referer, User-Agent, Set-Cookie")
@@ -117,7 +117,7 @@ public class AuthenticatorAPI implements Microservice {
                     ErrorDTO errorDTO = new ErrorDTO();
                     errorDTO.setCode(ExceptionCodes.INVALID_AUTHORIZATION_HEADER.getErrorCode());
                     errorDTO.setMessage(ExceptionCodes.INVALID_AUTHORIZATION_HEADER.getErrorMessage());
-                    return Response.status(Response.Status.UNAUTHORIZED).entity(errorDTO).header("Access-Control-Allow-Origin", "*").build();
+                    return Response.status(Response.Status.UNAUTHORIZED).entity(errorDTO).header("Access-Control-Allow-Origin", "https://localhost:9292").build();
                 }
             }
             AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appContext.substring(1),
@@ -157,7 +157,7 @@ public class AuthenticatorAPI implements Microservice {
                                 "");
                 return Response.ok(authResponseBean, MediaType.APPLICATION_JSON)
                         .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext, restAPIContextCookie,
-                                refreshTokenCookie, refreshTokenHttpOnlyCookie).header("Access-Control-Allow-Origin", "*").header(AuthenticatorConstants.
+                                refreshTokenCookie, refreshTokenHttpOnlyCookie).header("Access-Control-Allow-Origin", "https://localhost:9292").header(AuthenticatorConstants.
                                         REFERER_HEADER,
                                 (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
                                         .getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER)
@@ -168,7 +168,7 @@ public class AuthenticatorAPI implements Microservice {
                                                 "").build();
             } else {
                 return Response.ok(authResponseBean, MediaType.APPLICATION_JSON)
-                        .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext, restAPIContextCookie).header("Access-Control-Allow-Origin", "*")
+                        .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext, restAPIContextCookie).header("Access-Control-Allow-Origin", "https://localhost:9292")
                         .header(AuthenticatorConstants.
                                         REFERER_HEADER,
                                 (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
@@ -184,7 +184,7 @@ public class AuthenticatorAPI implements Microservice {
             ErrorDTO errorDTO = AuthUtil.getErrorDTO(e.getErrorHandler(), null);
 
             log.error(e.getMessage(), e);
-            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).header("Access-Control-Allow-Origin", "*").build();
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).header("Access-Control-Allow-Origin", "https://localhost:9292").build();
         }
     }
 
