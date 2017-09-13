@@ -19,11 +19,12 @@
 
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
-import {Table, Popconfirm, Button, Dropdown, Menu, message} from 'antd';
+import {Table, Icon, Button, Dropdown, Menu, message} from 'antd';
 
 import API from '../../../data/api'
 
 export default class EndpointsDiscover extends Component {
+
     constructor(props) {
         super(props);
         this.state = {
@@ -31,34 +32,33 @@ export default class EndpointsDiscover extends Component {
             selectedRowKeys: [],
             endpointBeingAdded: false,
         };
-        this.onSelectChange = this.onSelectChange.bind(this);
-        this.handleEndpointsAddtoDB = this.handleEndpointsAddtoDB.bind(this);
+        //this.onSelectChange = this.onSelectChange.bind(this);
     }
 
-    handleEndpointAddtoDB(endpointUuid, name, endpointType, endpointConfig, endpointSecurity, maxTps) {
+    handleAddEndpointToDB = (endpointUuid, serviceName, endpointType, config, security,
+        maximumTps) => {
         //Todo check if exists in DB
-        const hideMessage = message.loading("Adding the Endpoint to the Database ...", 0);
         let endpointDefinition = {
-            endpointConfig: endpointConfig,
-            endpointSecurity: endpointSecurity,
+            name: serviceName,
             type: endpointType,
-            name: name,
-            maxTps: maxTPS
+            endpointConfig: config,
+            endpointSecurity: security,
+            maxTps: maximumTps
         };
         const api = new API();
-        const promised_addEndpoint = api.addEndpoint(endpointDefinition);
-        return promised_addEndpoint.then(
+        const promisedEndpoint = api.addEndpoint(endpointDefinition);
+        return promisedEndpoint.then(
             response => {
                 const {name, id} = response.obj;
                 message.success("New endpoint " + name + " created successfully");
-                let redirect_url = "/endpoints/" + id + "/";
-                this.props.history.push(redirect_url);
+                //let redirect_url = "/endpoints/" + id + "/";
+                //this.props.history.push(redirect_url);
             }
         ).catch(
             error => {
                 console.error(error);
                 message.error("Error occurred while creating the endpoint!");
-                this.setState({loading: false});
+                this.setState({endpointBeingAdded: false});
             }
         )
     }
@@ -66,7 +66,7 @@ export default class EndpointsDiscover extends Component {
     componentDidMount() {
         const api = new API();
         const promised_discoveredEndpoints = api.discoverEndpoints();
-        /* TODO: Handle catch case , auth errors and ect ~tmkb ------copied from EndpointListing class*/
+        // TODO: Handle catch case , auth errors and ect ~tmkb ------copied from EndpointListing class
         promised_discoveredEndpoints.then(
             response => {
                 this.setState({endpoints: response.obj.list});
@@ -77,69 +77,69 @@ export default class EndpointsDiscover extends Component {
     onSelectChange(selectedRowKeys) {
         this.setState({selectedRowKeys: selectedRowKeys});
     }
-
     render() {
         const {selectedRowKeys, endpoints} = this.state;
         const columns = [{
             title: 'Name',
             dataIndex: 'name',
             key: 'age',
+            width: '30%',
             sorter: (a, b) => a.name.length - b.name.length,
             render: (text, record) => <Link to={"/endpoints/" + record.id}>{text}</Link>
         }, {
             title: 'Type',
-            dataIndex: 'type'
+            dataIndex: 'type',
+            width: '10%'
         }, {
             title: 'Service URL',
             dataIndex: 'endpointConfig',
-            render: (text, record, index) => JSON.parse(text).url
-        }, {
-            title: 'Service Type',
-            dataIndex: 'endpointConfig',
-            render: (text, record, index) => JSON.parse(text).urlType
+            width: '30%',
+            render: (text, record) => (
+            <span>
+                {JSON.parse(text).serviceUrl}
+                <span className="ant-divider" />
+                {JSON.parse(text).serviceType}
+            </span>
+            )
         }, {
             title: 'Max TPS',
             dataIndex: 'maxTps',
+            width: '10%',
             sorter: (a, b) => a.maxTps - b.maxTps,
         }, {
             title: 'Action',
             key: 'action',
-            render: (text, record) => {
-                console.log("record");
-                console.log(record);
-                console.log("text");
-                console.log(text);
-                return (
-                    <Button type="primary" loading={this.state.endpointBeingAdded}
-                        onClick={this.handleEndpointAddtoDB(text.id, text.name, text.type,
-                        text.endpointConfig, text.endpointSecurity, text.maxTps)}>
-                              Add Endpoint to DB
-                    </Button>)
-            }
+            dataIndex: 'id',
+            width: '20%',
+            render: (text, record) => (
+            <span>
+              <Button type="primary" onClick={() =>this.handleAddEndpointToDB(record.id,
+              record.name, record.type, record.endpointConfig, record.endpointSecurity,
+              record.maxTps)}>
+                Add to DB</Button>
+            </span>
+            )
         }];
         const rowSelection = {
             selectedRowKeys,
             onChange: this.onSelectChange,
         };
-
-        const endpointCreatMenu = (
+        const endpointListAndCreatMenu = (
             <Menu>
                 <Menu.Item key="0">
-                    <a target="_blank" rel="noopener noreferrer" href="/endpoints">List</a>
+                    <Link to="/endpoints">List Endpoints</Link>
                 </Menu.Item>
                 <Menu.Item key="1">
-                    <a target="_blank" rel="noopener noreferrer" href="/endpoints/create">Create Custom</a>
+                    <Link to="/endpoints/create">Create New Endpoint</Link>
                 </Menu.Item>
             </Menu>
         );
         return (
             <div>
-                <div className="api-add-links">
-                    <a className="ant-dropdown-link" href="#">
-                          Global Endpoints <Icon type="down" />
-                    </a>
-                </div>
-                <h3>Global Endpoints</h3>
+                <Dropdown overlay={endpointListAndCreatMenu}>
+                    <Button icon="left" />
+                </Dropdown>
+                <h3>Discovered Service Endpoints</h3>
                 <Table rowSelection={rowSelection} loading={endpoints === null} columns={columns}
                        dataSource={endpoints}
                        rowKey="id"

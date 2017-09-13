@@ -90,7 +90,7 @@ export default class EndpointsListing extends Component {
         }, {
             title: 'Service URL',
             dataIndex: 'endpointConfig',
-            render: (text, record, index) => JSON.parse(text).url
+            render: (text, record, index) => JSON.parse(text).serviceUrl
         }, {
             title: 'Max TPS',
             dataIndex: 'maxTps',
@@ -113,10 +113,10 @@ export default class EndpointsListing extends Component {
         const endpointCreatMenu = (
             <Menu>
                 <Menu.Item key="0">
-                    <a target="_blank" rel="noopener noreferrer" href="/endpoints/create">Create new Endpoint</a>
+                    <Link to="/endpoints/create">Create new Endpoint</Link>
                 </Menu.Item>
                 <Menu.Item key="1">
-                    <a target="_blank" rel="noopener noreferrer" href="/endpoints/discover">Discover Endpoints</a>
+                    <Link to="/endpoints/discover">Discover Endpoints</Link>
                 </Menu.Item>
             </Menu>
         );
