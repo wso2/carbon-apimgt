@@ -305,8 +305,7 @@ public class AuthenticatorAPI implements Microservice {
                             + authResponseBean.getValidityPeriod();
                     URI redirectURI = new URI(appConfigs.getApimBaseUrl() + appName + "/login?user_name="
                             + URLEncoder.encode(authResponseBeanData, "UTF-8")
-                            .replaceAll("\\+", "%20").replaceAll("%26", "&")
-                            .replaceAll("%3D", "="));
+                            .replaceAll("\\+", "%20").replaceAll("%26", "&").replaceAll("%3D", "="));
                     return Response.status(Response.Status.FOUND)
                             .header(HttpHeaders.LOCATION, redirectURI)
                             .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext, restAPIContextCookie)
