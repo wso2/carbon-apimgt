@@ -298,15 +298,14 @@ public class AuthenticatorAPI implements Microservice {
                 }
                 // Redirect to the store/apis page (redirect URL)
                 URI targetURIForRedirection = new URI(appConfigs.getApimBaseUrl() + appName);
-                if (AuthenticatorConstants.PUBLISHER_APPLICATION.equals(appName)) {
+                if (AuthenticatorConstants.PUBLISHER_APPLICATION.equals(appName) || AuthenticatorConstants.STORE_APPLICATION.equals(appName)) {
                     String authResponseBeanData = authResponseBean.getAuthUser() + "&id_token="
                             + authResponseBean.getIdToken() + "&partial_token=" + authResponseBean.getPartialToken()
                             + "&scopes=" + authResponseBean.getScopes() + "&validity_period="
                             + authResponseBean.getValidityPeriod();
-                    URI redirectURI = new URI(appConfigs.getApimBaseUrl() + "publisher/login?user_name="
+                    URI redirectURI = new URI(appConfigs.getApimBaseUrl() + appName + "/login?user_name="
                             + URLEncoder.encode(authResponseBeanData, "UTF-8")
-                            .replaceAll("\\+", "%20").replaceAll("%26", "&")
-                            .replaceAll("%3D", "="));
+                            .replaceAll("\\+", "%20").replaceAll("%26", "&").replaceAll("%3D", "="));
                     return Response.status(Response.Status.FOUND)
                             .header(HttpHeaders.LOCATION, redirectURI)
                             .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext, restAPIContextCookie)
