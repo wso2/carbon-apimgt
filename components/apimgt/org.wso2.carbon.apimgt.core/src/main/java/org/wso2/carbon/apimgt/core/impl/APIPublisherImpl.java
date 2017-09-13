@@ -232,6 +232,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         return api;
     }
 
+    /**
+     * @see APIPublisherImpl#updateDedicatedGateway(DedicatedGateway, String)
+     */
     @Override
     public void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId) throws APIManagementException {
         APIGateway gateway = getApiGateway();
@@ -272,6 +275,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
+    /**
+     * @see APIPublisherImpl#getDedicatedGateway(String)
+     */
     @Override
     public DedicatedGateway getDedicatedGateway(String apiId) throws APIManagementException {
        DedicatedGateway dedicatedGateway;

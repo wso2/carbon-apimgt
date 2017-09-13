@@ -192,6 +192,9 @@ public class OpenShiftGatewayImpl implements ContainerBasedGatewayGenerator {
 
     }
 
+    /**
+     * @see ContainerBasedGatewayGenerator#createContainerGateway(String, String)
+     */
     @Override
     public void createContainerGateway(String apiId, String label) throws GatewayException {
 
@@ -229,6 +232,9 @@ public class OpenShiftGatewayImpl implements ContainerBasedGatewayGenerator {
         // todo : Check whether we can do this at the creation stage of labels - After testing kube
     }
 
+    /**
+     * @see ContainerBasedGatewayGenerator#getServiceAccountAccessToken()
+     */
     @Override
     public String getServiceAccountAccessToken() throws GatewayException {
         //todo : get this read from the kube secret

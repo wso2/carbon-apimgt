@@ -205,6 +205,9 @@ public class KubernetesGatewayImpl implements ContainerBasedGatewayGenerator {
         }
     }
 
+    /**
+     * @see ContainerBasedGatewayGenerator#createContainerGateway(String, String)
+     */
     @Override
     public void createContainerGateway(String apiId, String label) throws GatewayException {
         Map<String , String> templateValues = new HashMap<>();
@@ -242,6 +245,9 @@ public class KubernetesGatewayImpl implements ContainerBasedGatewayGenerator {
         // todo : after configuring load balancer type for K8 and openshift service
     }
 
+    /**
+     * @see ContainerBasedGatewayGenerator#getServiceAccountAccessToken()
+     */
     @Override
     public String getServiceAccountAccessToken() throws GatewayException {
         //todo : get this read from the kube secret

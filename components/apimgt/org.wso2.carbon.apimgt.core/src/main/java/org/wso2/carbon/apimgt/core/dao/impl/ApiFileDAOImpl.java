@@ -591,6 +591,9 @@ public class ApiFileDAOImpl implements ApiDAO {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * @see ApiFileDAOImpl#updateDedicatedGateway(DedicatedGateway, String, Set)
+     */
     @Override
     public void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId, Set<String> label)
             throws APIMgtDAOException {
@@ -598,6 +601,9 @@ public class ApiFileDAOImpl implements ApiDAO {
 
     }
 
+    /**
+     * @see ApiFileDAOImpl#getDedicatedGateway(String)
+     */
     @Override
     public DedicatedGateway getDedicatedGateway(String apiId) throws APIMgtDAOException {
         throw new UnsupportedOperationException();

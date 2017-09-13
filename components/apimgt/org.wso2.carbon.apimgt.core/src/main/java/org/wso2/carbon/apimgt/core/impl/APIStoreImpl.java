@@ -1790,7 +1790,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
 
-    //todo : Implement these methods for composite API
+    /**
+     * @see APIStoreImpl#updateDedicatedGateway(DedicatedGateway, String)
+     */
     @Override
     public void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId) throws APIManagementException {
         APIGateway gateway = getApiGateway();
@@ -1830,6 +1832,9 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         }
     }
 
+    /**
+     * @see APIStoreImpl#updateDedicatedGateway(DedicatedGateway, String)
+     */
     @Override
     public DedicatedGateway getDedicatedGateway(String apiId) throws APIManagementException {
 
