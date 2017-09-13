@@ -140,7 +140,6 @@ paths:
       x-wso2-request: |
         GET /api/am/analytics/v1.0/api/count-over-time?startTime=2017-05-20T16%3A22%3A27.605Z&endTime=2017-10-27T16%3A22%3A27.605-05%3A30&createdBy=admin HTTP/1.1
         Host: localhost:9292
-        User-Agent: curl/7.50.2
         accept: application/json
         authorization: Bearer b6b8d5ab-1118-362d-a6a9-2233956d80a0
         cache-control: no-cache
@@ -189,11 +188,25 @@ paths:
 
   /api/subscriber-count-by-api:
     get:
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/analytics/v1.0/api/apis_created_over_time?from=2017-05-30%2012:32:41.972&to=2017-07-30%202:32:41.972&created_by=admin&subscribed_to=TestAPI"
+      x-wso2-curl: |
+        curl -X GET \
+        'https://localhost:9292/api/am/analytics/v1.0/api/subscriber-count-by-api?startTime=2017-05-20T16%3A22%3A27.605Z&endTime=2017-10-27T16%3A22%3A27.605-05%3A30' \
+        -H 'accept: application/json' \
+        -H 'authorization: Bearer 0289fdf8-e30e-3568-8b8b-154d6b42fcd6' \
+        -H 'content-type: application/json' \
       x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/analytics/v1.0/api/subscriber_count_by_apis
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
+        GET /api/am/analytics/v1.0/api/subscriber_count_by_apis
+        Host: localhost:9292
+        accept: application/json
+        authorization: Bearer b6b8d5ab-1118-362d-a6a9-2233956d80a0
+        cache-control: no-cache
+        content-type: application/json
+      x-wso2-response: |
+        HTTP/1.1 200 OK
+        Connection: keep-alive
+        Content-Length: 228
+        Content-Type: application/json
+        {"count":0,"list":[]}
       security:
         - OAuth2Security:
            - apim:api_graph
@@ -288,11 +301,24 @@ paths:
 
   /subscription/count-over-time:
     get:
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/analytics/v1.0/subscription/subscriptions_created_over_time?from=2017-05-30%2012:32:41.972&to=2017-07-30%202:32:41.972&created_by=admin&subscribed_to=TestAPI"
+      x-wso2-curl: |
+        curl -X GET \
+        'https://localhost:9292/api/am/analytics/v1.0/subscription/count-over-time?startTime=2017-05-20T16%3A22%3A27.605Z&endTime=2017-10-27T16%3A22%3A27.605-05%3A30' \
+        -H 'accept: application/json' \
+        -H 'authorization: Bearer 0289fdf8-e30e-3568-8b8b-154d6b42fcd6' \
+        -H 'content-type: application/json' \
       x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/analytics/v1.0/subscription/count-over-time:
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
+        GET /api/am/analytics/v1.0/subscription/count-over-time?startTime=2017-05-20T16%3A22%3A27.605Z&endTime=2017-10-27T16%3A22%3A27.605-05%3A30 HTTP/1.1
+        Host: localhost:9292
+        accept: application/json
+        authorization: Bearer 0289fdf8-e30e-3568-8b8b-154d6b42fcd6
+        content-type: application/json
+      x-wso2-response: |
+        HTTP/1.1 200 OK
+        Connection: keep-alive
+        Content-Length: 228
+        Content-Type: application/json
+        {"count":0,"list":[]}
       security:
         - OAuth2Security:
            - apim:subscription_graph
@@ -331,11 +357,24 @@ paths:
 
   /subscription/list:
     get:
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/analytics/v1.0/subscription/subscription_info?from=2017-05-30%2012:32:41.972&to=2017-07-30%202:32:41.972&created_by=admin&subscribed_to=TestAPI"
+      x-wso2-curl: |
+        curl -X GET \
+        'https://localhost:9292/api/am/analytics/v1.0/subscription/list?startTime=2017-05-20T16%3A22%3A27.605Z&endTime=2017-10-27T16%3A22%3A27.605-05%3A30' \
+        -H 'accept: application/json' \
+        -H 'authorization: Bearer 0289fdf8-e30e-3568-8b8b-154d6b42fcd6' \
+        -H 'content-type: application/json' \
       x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/analytics/v1.0/subscription/subscription-info
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
+        GET /api/am/analytics/v1.0/subscription/subscription/list?startTime=2017-05-20T16%3A22%3A27.605Z&endTime=2017-10-27T16%3A22%3A27.605-05%3A30 HTTP/1.1
+        Host: localhost:9292
+        accept: application/json
+        authorization: Bearer 0289fdf8-e30e-3568-8b8b-154d6b42fcd6
+        content-type: application/json
+      x-wso2-response: |
+        HTTP/1.1 200 OK
+        Connection: keep-alive
+        Content-Length: 228
+        Content-Type: application/json
+        {"count":0,"list":[]}
       security:
         - OAuth2Security:
            - apim:subscription_graph
