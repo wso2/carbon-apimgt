@@ -1600,6 +1600,9 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
+    /**
+     * @see ApiDAO#updateDedicatedGateway(DedicatedGateway, String, Set)
+     */
     @Override
     public void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId, Set<String> labels)
             throws APIMgtDAOException {
@@ -1644,6 +1647,9 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
+    /**
+     * @see ApiDAO#getDedicatedGateway(String)
+     */
     @Override
     public DedicatedGateway getDedicatedGateway(String apiId) throws APIMgtDAOException {
         final String query = "SELECT HAS_OWN_GATEWAY FROM AM_API WHERE API_ID = ?";
