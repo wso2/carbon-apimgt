@@ -36,21 +36,23 @@ public interface AnalyticsDAO {
      *
      * @param fromTimestamp Filter for from timestamp
      * @param toTimestamp   Filter for to timestamp
+     * @param createdBy     Filter for created by
      * @return valid {@link ApplicationCount} List or null
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    List<ApplicationCount> getApplicationCount(String fromTimestamp,
-                                               String toTimestamp) throws APIMgtDAOException;
+    List<ApplicationCount> getApplicationCount(Instant fromTimestamp, Instant toTimestamp, String createdBy) throws
+            APIMgtDAOException;
 
     /**
      * Retrieves APIs created overtime information.
      *
      * @param fromTimestamp Filter for from timestamp
      * @param toTimestamp   Filter for to timestamp
+     * @param createdBy     Filter for created by
      * @return valid {@link APIInfo} List or null
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    List<APIInfo> getAPIInfo(String fromTimestamp, String toTimestamp) throws APIMgtDAOException;
+    List<APIInfo> getAPIInfo(Instant fromTimestamp, Instant toTimestamp, String createdBy) throws APIMgtDAOException;
 
     /**
      * Retrieves APIs created overtime information.
@@ -68,7 +70,7 @@ public interface AnalyticsDAO {
      *
      * @param fromTime Filter for from timestamp
      * @param toTime   Filter for to timestamp
-     * @param apiId    Filter for api provider
+     * @param apiId    Filter for api Id
      * @return valid {@link APISubscriptionCount} List or null
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
@@ -80,19 +82,22 @@ public interface AnalyticsDAO {
      *
      * @param fromTimestamp Filter for from timestamp
      * @param toTimestamp   Filter for to timestamp
+     * @param createdBy     Filter for createdBy
      * @return valid {@link SubscriptionCount} List or null
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    List<SubscriptionCount> getSubscriptionCount(String fromTimestamp,
-                                                 String toTimestamp) throws APIMgtDAOException;
+    List<SubscriptionCount> getSubscriptionCount(Instant fromTimestamp,
+                                                 Instant toTimestamp, String createdBy) throws APIMgtDAOException;
 
     /**
      * Retrieves Subscriptions info created over time.
      *
      * @param fromTimestamp Filter for from timestamp
      * @param toTimestamp   Filter for to timestamp
+     * @param createdBy     Filter for createdBy
      * @return valid {@link SubscriptionInfo} List or null
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    List<SubscriptionInfo> getSubscriptionInfo(String fromTimestamp, String toTimestamp) throws APIMgtDAOException;
+    List<SubscriptionInfo> getSubscriptionInfo(Instant fromTimestamp, Instant toTimestamp, String createdBy) throws
+            APIMgtDAOException;
 }

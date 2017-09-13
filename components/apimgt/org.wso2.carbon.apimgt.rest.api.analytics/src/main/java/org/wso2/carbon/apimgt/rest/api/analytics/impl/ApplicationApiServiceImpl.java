@@ -16,17 +16,26 @@ import org.wso2.msf4j.Request;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
+import static org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil.fromISO8601ToInstant;
+
 public class ApplicationApiServiceImpl extends ApplicationApiService {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationApiServiceImpl.class);
 
+    /**
+     * Get list of Application count information
+     *
+     * @param startTime Filter for start time stamp
+     * @param endTime   Filter for end time stamp
+     * @param createdBy Filter for application creator
+     * @param request   MSF4J request
+     * @return Application count over time
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
-    public Response applicationCountOverTimeGet(String startTime, String endTime, Request request) throws
-            NotFoundException {
-
+    public Response applicationCountOverTimeGet(String startTime, String endTime, String createdBy, Request request)
+            throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
-        startTime = RestApiUtil.fromISO8601ToUTC(startTime);
-        endTime = RestApiUtil.fromISO8601ToUTC(endTime);
         try {
             if (log.isDebugEnabled()) {
                 log.debug("Retrieving applications created over time. " +
@@ -34,11 +43,10 @@ public class ApplicationApiServiceImpl extends ApplicationApiService {
             }
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
             List<ApplicationCount> applicationCountList = analyzer
-                    .getApplicationCount(startTime, endTime);
+                    .getApplicationCount(fromISO8601ToInstant(startTime), fromISO8601ToInstant(endTime), createdBy);
             ApplicationCountListDTO applicationCountListDTO = AnalyticsMappingUtil
                     .fromApplicationCountToListDTO(applicationCountList);
             return Response.ok().entity(applicationCountListDTO).build();
-
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving application created over time info";
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());

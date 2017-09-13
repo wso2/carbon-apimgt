@@ -21,7 +21,6 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.api.Analyzer;
 import org.wso2.carbon.apimgt.core.dao.AnalyticsDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.analytics.APICount;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 
@@ -49,26 +48,13 @@ public class AnalyzerImplTestCase {
         dummyApplicationCountList.add(applicationCount1);
         dummyApplicationCountList.add(applicationCount2);
         Analyzer analyzer = getAnalyzerImpl(analyticsDAO);
-        when(analyticsDAO.getApplicationCount(FROM_TIMESTAMP, TO_TIMESTAMP))
+        when(analyticsDAO.getApplicationCount(Instant.parse(FROM_TIMESTAMP), Instant.parse(TO_TIMESTAMP), null))
                 .thenReturn(dummyApplicationCountList);
         List<ApplicationCount> applicationCountListFromDB = analyzer
-                .getApplicationCount(FROM_TIMESTAMP, TO_TIMESTAMP);
+                .getApplicationCount(Instant.parse(FROM_TIMESTAMP), Instant.parse(TO_TIMESTAMP), null);
         Assert.assertNotNull(applicationCountListFromDB);
-        verify(analyticsDAO, Mockito.times(1)).getApplicationCount(FROM_TIMESTAMP, TO_TIMESTAMP);
-    }
-
-    @Test(description = "get application count test")
-    public void testGetApplicationCountFaulty() throws APIManagementException {
-        AnalyticsDAO analyticsDAO = Mockito.mock(AnalyticsDAO.class);
-        Analyzer analyzer = getAnalyzerImpl(analyticsDAO);
-        try {
-            List<ApplicationCount> applicationCountListFromDB = analyzer
-                    .getApplicationCount(FROM_TIMESTAMP, TO_TIMESTAMP);
-            Assert.assertFalse(true);
-        } catch (APIMgtDAOException e) {
-            Assert.assertTrue(true);
-        }
-
+        verify(analyticsDAO, Mockito.times(1)).getApplicationCount(Instant.parse(FROM_TIMESTAMP), Instant.parse(
+                TO_TIMESTAMP), null);
     }
 
     @Test(description = "get API count test")

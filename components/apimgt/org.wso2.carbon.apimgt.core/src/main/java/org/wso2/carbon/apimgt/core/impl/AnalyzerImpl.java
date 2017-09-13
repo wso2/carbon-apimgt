@@ -44,11 +44,15 @@ public class AnalyzerImpl implements Analyzer {
         this.analyticsDAO = analyticsDAO;
     }
 
+    /**
+     * @see Analyzer#getApplicationCount(Instant, Instant, String)
+     */
     @Override
-    public List<ApplicationCount> getApplicationCount(String fromTime, String toTime) throws APIManagementException {
+    public List<ApplicationCount> getApplicationCount(Instant fromTime, Instant toTime, String createdBy) throws
+            APIManagementException {
         List<ApplicationCount> applicationCountList;
         try {
-            applicationCountList = getAnalyticsDAO().getApplicationCount(fromTime, toTime);
+            applicationCountList = getAnalyticsDAO().getApplicationCount(fromTime, toTime, createdBy);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while fetching application count information";
             throw new AnalyticsException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
@@ -56,11 +60,14 @@ public class AnalyzerImpl implements Analyzer {
         return applicationCountList;
     }
 
+    /**
+     * @see Analyzer#getAPIInfo(Instant, Instant, String)
+     */
     @Override
-    public List<APIInfo> getAPIInfo(String fromTime, String toTime) throws APIManagementException {
+    public List<APIInfo> getAPIInfo(Instant fromTime, Instant toTime, String createdBy) throws APIManagementException {
         List<APIInfo> apiInfoList;
         try {
-            apiInfoList = getAnalyticsDAO().getAPIInfo(fromTime, toTime);
+            apiInfoList = getAnalyticsDAO().getAPIInfo(fromTime, toTime, createdBy);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while fetching API information";
             throw new AnalyticsException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
@@ -68,6 +75,9 @@ public class AnalyzerImpl implements Analyzer {
         return apiInfoList;
     }
 
+    /**
+     * @see Analyzer#getAPICount(Instant, Instant, String)
+     */
     @Override
     public List<APICount> getAPICount(Instant fromTime, Instant toTime, String createdBy) throws
             APIManagementException {
@@ -81,6 +91,9 @@ public class AnalyzerImpl implements Analyzer {
         return apiCountList;
     }
 
+    /**
+     * @see Analyzer#getAPISubscriptionCount(String, String, String)
+     */
     @Override
     public List<APISubscriptionCount> getAPISubscriptionCount(String fromTime, String toTime, String apiId) throws
             APIManagementException {
@@ -94,12 +107,15 @@ public class AnalyzerImpl implements Analyzer {
         return apiSubscriptionCountList;
     }
 
+    /**
+     * @see Analyzer#getSubscriptionCount(Instant, Instant, String)
+     */
     @Override
-    public List<SubscriptionCount> getSubscriptionCount(String fromTime, String toTime) throws
+    public List<SubscriptionCount> getSubscriptionCount(Instant fromTime, Instant toTime, String createdBy) throws
             APIManagementException {
         List<SubscriptionCount> subscriptionCountList;
         try {
-            subscriptionCountList = getAnalyticsDAO().getSubscriptionCount(fromTime, toTime);
+            subscriptionCountList = getAnalyticsDAO().getSubscriptionCount(fromTime, toTime, createdBy);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while fetching Subscription count information";
             throw new AnalyticsException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);
@@ -108,19 +124,14 @@ public class AnalyzerImpl implements Analyzer {
     }
 
     /**
-     * Retrieves Subscriptions info details.
-     *
-     * @param fromTime Filter for from timestamp
-     * @param toTime   Filter for to timestamp
-     * @return valid {@link SubscriptionInfo} List or null
-     * @throws APIManagementException if error occurs while accessing data layer
+     * @see Analyzer#getSubscriptionInfo(Instant, Instant, String)
      */
     @Override
-    public List<SubscriptionInfo> getSubscriptionInfo(String fromTime, String toTime) throws
+    public List<SubscriptionInfo> getSubscriptionInfo(Instant fromTime, Instant toTime, String createdBy) throws
             APIManagementException {
         List<SubscriptionInfo> subscriptionInfoList;
         try {
-            subscriptionInfoList = getAnalyticsDAO().getSubscriptionInfo(fromTime, toTime);
+            subscriptionInfoList = getAnalyticsDAO().getSubscriptionInfo(fromTime, toTime, createdBy);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while fetching Subscription information";
             throw new AnalyticsException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);

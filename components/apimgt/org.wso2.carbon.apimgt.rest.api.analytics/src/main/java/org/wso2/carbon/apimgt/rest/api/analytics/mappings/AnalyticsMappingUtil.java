@@ -33,10 +33,11 @@ import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionCountDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionCountListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionInfoListDTO;
-import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil.epochToISO8601DateTime;
 
 /**
  * Mapping Utils for Analytics REST API.
@@ -133,7 +134,7 @@ public class AnalyticsMappingUtil {
         subscriptionCountListDTO.setCount(subscriptionCountList.size());
         for (SubscriptionCount subscriptionCount : subscriptionCountList) {
             SubscriptionCountDTO subscriptionCountDTO = new SubscriptionCountDTO();
-            subscriptionCountDTO.setTime(subscriptionCount.getTimestamp());
+            subscriptionCountDTO.setTime(epochToISO8601DateTime(subscriptionCount.getTimestamp()));
             subscriptionCountDTO.setCount(subscriptionCount.getCount());
             subscriptionCountDTOList.add(subscriptionCountDTO);
         }
@@ -153,7 +154,7 @@ public class AnalyticsMappingUtil {
             subscriptionInfoDTO.setVersion(subscriptionInfo.getVersion());
             subscriptionInfoDTO.setAppName(subscriptionInfo.getAppName());
             subscriptionInfoDTO.setDescription(subscriptionInfo.getDescription());
-            subscriptionInfoDTO.setCreatedTime(RestApiUtil.epochToISO8601DateTime(subscriptionInfo.getCreatedTime()));
+            subscriptionInfoDTO.setCreatedTime(epochToISO8601DateTime(subscriptionInfo.getCreatedTime()));
             subscriptionInfoDTO.setSubscriptionStatus(subscriptionInfo.getSubscriptionStatus());
             subscriptionInfoDTO.setSubscriptionTier(subscriptionInfo.getSubscriptionTier());
             subscriptionInfoDTOList.add(subscriptionInfoDTO);
@@ -172,20 +173,20 @@ public class AnalyticsMappingUtil {
         apiInfoDTO.setLifeCycleStatus(apiInfo.getLifeCycleStatus());
         apiInfoDTO.setProvider(apiInfo.getProvider());
         apiInfoDTO.setWorkflowStatus(apiInfo.getWorkflowStatus());
-        apiInfoDTO.setTime(apiInfo.getCreatedTime());
+        apiInfoDTO.setTime(epochToISO8601DateTime(apiInfo.getCreatedTime()));
         return apiInfoDTO;
     }
 
     private static APICountDTO fromAPICountToDTO(APICount apiCount) {
         APICountDTO apiCountDTO = new APICountDTO();
-        apiCountDTO.setTime(RestApiUtil.epochToISO8601DateTime(apiCount.getTimestamp()));
+        apiCountDTO.setTime(epochToISO8601DateTime(apiCount.getTimestamp()));
         apiCountDTO.setCount(apiCount.getCount());
         return apiCountDTO;
     }
 
     private static ApplicationCountDTO fromApplicationCountToDTO(ApplicationCount applicationCount) {
         ApplicationCountDTO applicationCountDTO = new ApplicationCountDTO();
-        applicationCountDTO.setTime(applicationCount.getTimestamp());
+        applicationCountDTO.setTime(epochToISO8601DateTime(applicationCount.getTimestamp()));
         applicationCountDTO.setCount(applicationCount.getCount());
         return applicationCountDTO;
     }

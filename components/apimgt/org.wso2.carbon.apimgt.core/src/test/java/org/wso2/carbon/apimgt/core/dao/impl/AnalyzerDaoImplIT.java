@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.core.dao.AnalyticsDAO;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -37,7 +38,7 @@ public class AnalyzerDaoImplIT extends DAOIntegrationTestBase {
         String toTimeStamp = (new Timestamp(System.currentTimeMillis() + 10000)).toString();
         AnalyticsDAO analyticsDAO = DAOFactory.getAnalyticsDAO();
         List<ApplicationCount> applicationCountList = analyticsDAO
-                .getApplicationCount(fromTimeStamp, toTimeStamp);
+                .getApplicationCount(Instant.parse(fromTimeStamp), Instant.parse(toTimeStamp), null);
         Assert.assertEquals(applicationCountList.size(), 1);
     }
 

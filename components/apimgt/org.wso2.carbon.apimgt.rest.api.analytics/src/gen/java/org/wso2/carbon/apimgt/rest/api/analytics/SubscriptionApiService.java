@@ -21,8 +21,10 @@ import javax.ws.rs.core.SecurityContext;
 public abstract class SubscriptionApiService {
     public abstract Response subscriptionCountOverTimeGet(String startTime
  ,String endTime
+ ,String createdBy
  , Request request) throws NotFoundException;
-    public abstract Response subscriptionSubscriptionInfoGet(String startTime
+    public abstract Response subscriptionListGet(String startTime
  ,String endTime
+ ,String createdBy
  , Request request) throws NotFoundException;
 }

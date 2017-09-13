@@ -45,26 +45,6 @@ public class ApiApi implements Microservice  {
    private final ApiApiService delegate = ApiApiServiceFactory.getApiApi();
 
     @GET
-    @Path("/api-info")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Retrieve APIs created over time details ", notes = "Get application created over time details from summarized data. ", response = APIInfoListDTO.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
-            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_graph", description = "View Graphs Releated to APIs")
-        })
-    }, tags={  })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested APIs created over time information is returned ", response = APIInfoListDTO.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = APIInfoListDTO.class) })
-    public Response apiApiInfoGet(@ApiParam(value = "Defines the starting timestamp of the interval ",required=true) @QueryParam("startTime") String startTime
-,@ApiParam(value = "Defines the ending timestamp of the interval ",required=true) @QueryParam("endTime") String endTime
-,@ApiParam(value = "application/api creator name. In case of any creator is not provided all the details will be provided ") @QueryParam("createdBy") String createdBy
-, @Context Request request)
-    throws NotFoundException {
-        return delegate.apiApiInfoGet(startTime,endTime,createdBy, request);
-    }
-    @GET
     @Path("/count-over-time")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -87,6 +67,28 @@ public class ApiApi implements Microservice  {
         return delegate.apiCountOverTimeGet(startTime,endTime,createdBy, request);
     }
     @GET
+    @Path("/list")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Retrieve API information for a given time peroid ", notes = "Get application created over time details from summarized data. ", response = APIInfoListDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_graph", description = "View Graphs Releated to APIs")
+        })
+    }, tags={  })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested APIs created over time information is returned ", response = APIInfoListDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Request paramters attribute does not meet requiremnts. ", response = APIInfoListDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = APIInfoListDTO.class) })
+    public Response apiListGet(@ApiParam(value = "Defines the starting timestamp of the interval ",required=true) @QueryParam("startTime") String startTime
+,@ApiParam(value = "Defines the ending timestamp of the interval ",required=true) @QueryParam("endTime") String endTime
+,@ApiParam(value = "application/api creator name. In case of any creator is not provided all the details will be provided ") @QueryParam("createdBy") String createdBy
+, @Context Request request)
+    throws NotFoundException {
+        return delegate.apiListGet(startTime,endTime,createdBy, request);
+    }
+    @GET
     @Path("/subscriber-count-by-api")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -97,6 +99,8 @@ public class ApiApi implements Microservice  {
     }, tags={  })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested subscriber count by API information is returned ", response = APISubscriptionCountListDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Request paramters attribute does not meet requiremnts. ", response = APISubscriptionCountListDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = APISubscriptionCountListDTO.class) })
     public Response apiSubscriberCountByApiGet(@ApiParam(value = "Defines the starting timestamp of the interval ",required=true) @QueryParam("startTime") String startTime

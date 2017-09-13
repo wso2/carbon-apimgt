@@ -18,6 +18,8 @@ import org.wso2.msf4j.Request;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
+import static org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil.fromISO8601ToInstant;
+
 
 /**
  * Subscription API implementation.
@@ -26,9 +28,19 @@ public class SubscriptionApiServiceImpl extends SubscriptionApiService {
 
     private static final Logger log = LoggerFactory.getLogger(SubscriptionApiServiceImpl.class);
 
+    /**
+     * Get list of subscriptions created over time
+     *
+     * @param startTime Filter for start time stamp
+     * @param endTime   Filter for end time stamp
+     * @param createdBy Filter for createdBy
+     * @param request   MSF4J request
+     * @return Subscriptions count over time
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
-    public Response subscriptionCountOverTimeGet(String startTime, String endTime, Request request) throws
-            NotFoundException {
+    public Response subscriptionCountOverTimeGet(String startTime, String endTime, String createdBy, Request request)
+            throws NotFoundException {
 
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
@@ -36,7 +48,8 @@ public class SubscriptionApiServiceImpl extends SubscriptionApiService {
                 log.debug("Retrieving subscriptions created over time. [ From: " + startTime + " To: " + endTime + "]");
             }
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
-            List<SubscriptionCount> subscriptionCount = analyzer.getSubscriptionCount(startTime, endTime);
+            List<SubscriptionCount> subscriptionCount = analyzer.getSubscriptionCount(
+                    fromISO8601ToInstant(startTime), fromISO8601ToInstant(endTime), createdBy);
             SubscriptionCountListDTO subscriptionListDTO = AnalyticsMappingUtil
                     .fromSubscriptionCountListToDTO(subscriptionCount);
             return Response.ok().entity(subscriptionListDTO).build();
@@ -49,8 +62,18 @@ public class SubscriptionApiServiceImpl extends SubscriptionApiService {
         }
     }
 
+    /**
+     * Get list of subscriptions info over time
+     *
+     * @param startTime Filter for start time stamp
+     * @param endTime   Filter for end time stamp
+     * @param createdBy Filter for createdBy
+     * @param request   MSF4J request
+     * @return Subscriptions information over time
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
-    public Response subscriptionSubscriptionInfoGet(String startTime, String endTime, Request request) throws
+    public Response subscriptionListGet(String startTime, String endTime, String createdBy, Request request) throws
             NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
@@ -58,7 +81,8 @@ public class SubscriptionApiServiceImpl extends SubscriptionApiService {
                 log.debug("Retrieving subscriptions info. [From: " + startTime + " To: " + endTime + "]");
             }
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
-            List<SubscriptionInfo> subscriptionInfoList = analyzer.getSubscriptionInfo(startTime, endTime);
+            List<SubscriptionInfo> subscriptionInfoList = analyzer.getSubscriptionInfo(fromISO8601ToInstant
+                    (startTime), fromISO8601ToInstant(endTime), createdBy);
             SubscriptionInfoListDTO subscriptionInfoListDTO = AnalyticsMappingUtil
                     .fromSubscriptionInfoListToDTO(subscriptionInfoList);
             return Response.ok().entity(subscriptionInfoListDTO).build();

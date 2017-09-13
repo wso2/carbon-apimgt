@@ -76,11 +76,26 @@ paths:
 
   /application/count-over-time:
     get:
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8 \" https://localhost:9292/api/am/analytics/v1.0/application/count-over-time?startTime=2017-05-30%2012:32:41.972&endTime=2017-07-30%202:32:41.972"
+      x-wso2-curl: |
+        curl -X GET \
+        'https://localhost:9292/api/am/analytics/v1.0/application/count-over-time?startTime=2017-05-20T16%3A22%3A27.605Z&endTime=2017-10-27T16%3A22%3A27.605-05%3A30' \
+        -H 'accept: application/json' \
+        -H 'authorization: Bearer b35a145f-3ca0-39be-8234-7509e3d97198' \
+        -H 'cache-control: no-cache' \
+        -H 'content-type: application/json' \
       x-wso2-request: |
-        GET https://localhost:9292/api/am/analytics/v1.0/application/count-over-time
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: ""
+        GET /api/am/analytics/v1.0/application/count-over-time?startTime=2017-05-20T16%3A22%3A27.605Z&endTime=2017-10-27T16%3A22%3A27.605-05%3A30 HTTP/1.1
+        Host: localhost:9292
+        accept: application/json
+        authorization: Bearer b35a145f-3ca0-39be-8234-7509e3d97198
+        cache-control: no-cache
+        content-type: application/json
+      x-wso2-response: |
+        HTTP/1.1 200 OK
+        Connection: keep-alive
+        Content-Length: 21
+        Content-Type: application/json
+        {"count":1,"list":[{"time":"2017-09-13T11:59:44.367Z","count":1}]}
       security:
         - OAuth2Security:
            - apim:application_graph
@@ -91,6 +106,7 @@ paths:
       parameters:
         - $ref: '#/parameters/startTime'
         - $ref: '#/parameters/endTime'
+        - $ref: '#/parameters/createdBy'
       responses:
         200:
           description: |
@@ -103,6 +119,10 @@ paths:
               type: string
           schema:
             $ref: '#/definitions/ApplicationCountList'
+        400:
+          description: |
+            Bad Request.
+            Request paramters attribute does not meet requiremnts.
         406:
           description: |
             Not Acceptable.
@@ -197,6 +217,10 @@ paths:
               type: string
           schema:
             $ref: '#/definitions/APISubscriptionCountList'
+        400:
+          description: |
+            Bad Request.
+            Request paramters attribute does not meet requiremnts.
         406:
           description: |
             Not Acceptable.
@@ -206,18 +230,31 @@ paths:
 #  Retrieve APIs details
 #-----------------------------------------------------
 
-  /api/api-info:
+  /api/list:
     get:
-      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/analytics/v1.0/api/apis_created_over_time?from=2017-05-30%2012:32:41.972&to=2017-07-30%202:32:41.972&created_by=admin&subscribed_to=TestAPI"
+      x-wso2-curl: |
+        curl -X GET \
+        'https://localhost:9292/api/am/analytics/v1.0/api/list?startTime=2017-05-20T16%3A22%3A27.605Z&endTime=2017-10-27T16%3A22%3A27.605-05%3A30' \
+        -H 'accept: application/json' \
+        -H 'authorization: Bearer 0289fdf8-e30e-3568-8b8b-154d6b42fcd6' \
+        -H 'content-type: application/json' \
       x-wso2-request: |
-        GET https://127.0.0.1:9443/api/am/analytics/v1.0/api/apis_created_over_time
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
+        GET /api/am/analytics/v1.0/api/list?startTime=2017-05-20T16%3A22%3A27.605Z&endTime=2017-10-27T16%3A22%3A27.605-05%3A30 HTTP/1.1
+        Host: localhost:9292
+        accept: application/json
+        authorization: Bearer 0289fdf8-e30e-3568-8b8b-154d6b42fcd6
+        content-type: application/json
+      x-wso2-response: |
+        HTTP/1.1 200 OK
+        Connection: keep-alive
+        Content-Length: 228
+        Content-Type: application/json
+        {"count":1,"list":[{"id":"be36fd10-7b3d-4bec-a54b-4ea754654c19","name":"PetStore","context":"store","version":"v1","provider":"admin","lifeCycleStatus":"Published","workflowStatus":"APPROVED","time":"2017-09-13T09:02:40.230Z"}]}
       security:
         - OAuth2Security:
            - apim:api_graph
       summary: |
-        Retrieve APIs created over time details
+        Retrieve API information for a given time peroid
       description: |
         Get application created over time details from summarized data.
       parameters:
@@ -236,6 +273,10 @@ paths:
               type: string
           schema:
             $ref: '#/definitions/APIInfoList'
+        400:
+          description: |
+            Bad Request.
+            Request paramters attribute does not meet requiremnts.
         406:
           description: |
             Not Acceptable.
@@ -262,6 +303,7 @@ paths:
       parameters:
         - $ref: '#/parameters/startTime'
         - $ref: '#/parameters/endTime'
+        - $ref: '#/parameters/createdBy'
       responses:
         200:
           description: |
@@ -274,6 +316,10 @@ paths:
               type: string
           schema:
             $ref: '#/definitions/SubscriptionCountList'
+        400:
+           description: |
+             Bad Request.
+             Request paramters attribute does not meet requiremnts.
         406:
           description: |
             Not Acceptable.
@@ -283,7 +329,7 @@ paths:
 #  Retrieve Subscriptions information
 #-----------------------------------------------------
 
-  /subscription/subscription-info:
+  /subscription/list:
     get:
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/analytics/v1.0/subscription/subscription_info?from=2017-05-30%2012:32:41.972&to=2017-07-30%202:32:41.972&created_by=admin&subscribed_to=TestAPI"
       x-wso2-request: |
@@ -300,6 +346,7 @@ paths:
       parameters:
         - $ref: '#/parameters/startTime'
         - $ref: '#/parameters/endTime'
+        - $ref: '#/parameters/createdBy'
       responses:
         200:
           description: |
@@ -312,6 +359,10 @@ paths:
               type: string
           schema:
             $ref: '#/definitions/SubscriptionInfoList'
+        400:
+          description: |
+            Bad Request.
+            Request paramters attribute does not meet requiremnts.
         406:
           description: |
             Not Acceptable.
@@ -369,8 +420,8 @@ definitions:
     title: Applications Created Over Time
     properties:
       time:
-        type: integer
-        format: int64
+        type: string
+        format: string
         description: |
           Timestamp
       count:
@@ -477,10 +528,10 @@ definitions:
         type: string
         example: APPROVED
       time:
-        type: integer
-        format: int64
+        type: string
+        format: string
         description: |
-          Timestamp
+          Timestamp in UTC
 #-----------------------------------------------------
 # The APIInfoList resource
 #-----------------------------------------------------
@@ -565,10 +616,10 @@ definitions:
     title: Subscriptions Created Over Time
     properties:
       time:
-        type: integer
-        format: int64
+        type: string
+        format: string
         description: |
-          Timestamp
+          Timestamp in UTC
       count:
         type: integer
         format: int64

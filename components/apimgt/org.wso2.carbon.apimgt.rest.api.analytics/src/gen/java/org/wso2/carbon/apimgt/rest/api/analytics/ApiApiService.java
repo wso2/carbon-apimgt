@@ -20,11 +20,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 public abstract class ApiApiService {
-    public abstract Response apiApiInfoGet(String startTime
+    public abstract Response apiCountOverTimeGet(String startTime
  ,String endTime
  ,String createdBy
  , Request request) throws NotFoundException;
-    public abstract Response apiCountOverTimeGet(String startTime
+    public abstract Response apiListGet(String startTime
  ,String endTime
  ,String createdBy
  , Request request) throws NotFoundException;

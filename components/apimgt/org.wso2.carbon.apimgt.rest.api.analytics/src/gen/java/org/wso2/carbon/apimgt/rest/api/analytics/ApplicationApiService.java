@@ -20,5 +20,6 @@ import javax.ws.rs.core.SecurityContext;
 public abstract class ApplicationApiService {
     public abstract Response applicationCountOverTimeGet(String startTime
  ,String endTime
+ ,String createdBy
  , Request request) throws NotFoundException;
 }

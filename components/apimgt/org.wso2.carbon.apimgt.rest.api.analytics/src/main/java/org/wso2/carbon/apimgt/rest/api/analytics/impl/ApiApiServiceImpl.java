@@ -26,8 +26,18 @@ public class ApiApiServiceImpl extends ApiApiService {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationApiServiceImpl.class);
 
+    /**
+     * Get list of API Info
+     *
+     * @param startTime Filter for start time stamp
+     * @param endTime   Filter for end time stamp
+     * @param createdBy Filter for created user
+     * @param request   MSF4J request
+     * @return API List
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
-    public Response apiApiInfoGet(String startTime, String endTime, String createdBy, Request request) throws
+    public Response apiListGet(String startTime, String endTime, String createdBy, Request request) throws
             NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         startTime = RestApiUtil.fromISO8601ToUTC(startTime);
@@ -38,7 +48,8 @@ public class ApiApiServiceImpl extends ApiApiService {
                         "" + createdBy + "]");
             }
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
-            List<APIInfo> apiInfoList = analyzer.getAPIInfo(startTime, endTime);
+            List<APIInfo> apiInfoList = analyzer.getAPIInfo(fromISO8601ToInstant(startTime), fromISO8601ToInstant
+                    (endTime), createdBy);
             APIInfoListDTO apiInfoListDTO = AnalyticsMappingUtil
                     .fromAPIInfoListToDTO(apiInfoList);
             return Response.ok().entity(apiInfoListDTO).build();
@@ -51,6 +62,16 @@ public class ApiApiServiceImpl extends ApiApiService {
         }
     }
 
+    /**
+     * Get list of API count information
+     *
+     * @param startTime Filter for start time stamp
+     * @param endTime   Filter for end time stamp
+     * @param createdBy Filter for created user
+     * @param request   MSF4J request
+     * @return API Count information
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response apiCountOverTimeGet(String startTime, String endTime, String createdBy, Request request) throws
             NotFoundException {
@@ -74,6 +95,16 @@ public class ApiApiServiceImpl extends ApiApiService {
         }
     }
 
+    /**
+     * Get list of subscriptions for an API
+     *
+     * @param startTime Filter for start time stamp
+     * @param endTime   Filter for end time stamp
+     * @param apiId Filter for apiId
+     * @param request   MSF4J request
+     * @return API subscriptions count
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
     @Override
     public Response apiSubscriberCountByApiGet(String startTime, String endTime, String apiId, Request request) throws
             NotFoundException {

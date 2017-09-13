@@ -36,7 +36,7 @@ public class APIInfoDTO   {
   private String workflowStatus = null;
 
   @JsonProperty("time")
-  private Long time = null;
+  private String time = null;
 
   public APIInfoDTO id(String id) {
     this.id = id;
@@ -182,21 +182,21 @@ public class APIInfoDTO   {
     this.workflowStatus = workflowStatus;
   }
 
-  public APIInfoDTO time(Long time) {
+  public APIInfoDTO time(String time) {
     this.time = time;
     return this;
   }
 
    /**
-   * Timestamp 
+   * Timestamp in UTC 
    * @return time
   **/
-  @ApiModelProperty(value = "Timestamp ")
-  public Long getTime() {
+  @ApiModelProperty(value = "Timestamp in UTC ")
+  public String getTime() {
     return time;
   }
 
-  public void setTime(Long time) {
+  public void setTime(String time) {
     this.time = time;
   }
 

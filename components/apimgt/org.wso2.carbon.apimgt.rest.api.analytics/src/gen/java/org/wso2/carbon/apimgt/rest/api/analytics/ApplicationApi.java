@@ -54,11 +54,14 @@ public class ApplicationApi implements Microservice  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested applications count over time information is returned ", response = ApplicationCountListDTO.class),
         
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Request paramters attribute does not meet requiremnts. ", response = ApplicationCountListDTO.class),
+        
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ApplicationCountListDTO.class) })
     public Response applicationCountOverTimeGet(@ApiParam(value = "Defines the starting timestamp of the interval ",required=true) @QueryParam("startTime") String startTime
 ,@ApiParam(value = "Defines the ending timestamp of the interval ",required=true) @QueryParam("endTime") String endTime
+,@ApiParam(value = "application/api creator name. In case of any creator is not provided all the details will be provided ") @QueryParam("createdBy") String createdBy
 , @Context Request request)
     throws NotFoundException {
-        return delegate.applicationCountOverTimeGet(startTime,endTime, request);
+        return delegate.applicationCountOverTimeGet(startTime,endTime,createdBy, request);
     }
 }
