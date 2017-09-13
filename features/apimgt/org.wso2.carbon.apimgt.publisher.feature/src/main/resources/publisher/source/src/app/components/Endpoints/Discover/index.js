@@ -24,7 +24,6 @@ import {Table, Icon, Button, Dropdown, Menu, message} from 'antd';
 import API from '../../../data/api'
 
 export default class EndpointsDiscover extends Component {
-
     constructor(props) {
         super(props);
         this.state = {
@@ -39,7 +38,7 @@ export default class EndpointsDiscover extends Component {
         maximumTps) => {
         //Todo check if exists in DB
         let endpointDefinition = {
-            name: serviceName,
+            name: serviceName + "-" + endpointType + "-" + JSON.parse(config).serviceType,
             type: endpointType,
             endpointConfig: config,
             endpointSecurity: security,
@@ -51,8 +50,6 @@ export default class EndpointsDiscover extends Component {
             response => {
                 const {name, id} = response.obj;
                 message.success("New endpoint " + name + " created successfully");
-                //let redirect_url = "/endpoints/" + id + "/";
-                //this.props.history.push(redirect_url);
             }
         ).catch(
             error => {
@@ -77,8 +74,31 @@ export default class EndpointsDiscover extends Component {
     onSelectChange(selectedRowKeys) {
         this.setState({selectedRowKeys: selectedRowKeys});
     }
+
+    checkIfEndpointAlreadyAdded(record, api) {
+        let alreadyAdded = false;
+        debugger;
+        let endpointName = record.name+"-"+record.type+"-"+JSON.parse(record.endpointConfig).serviceType;
+        let promised_endpointAlreadyInDB = api.checkIfEndpointExists(endpointName);;
+        promised_endpointAlreadyInDB.then(
+            response => {
+                console.log("done");
+                alreadyAdded = true;
+            }
+        ).catch(
+            error => {
+                if(error.response.status==404){
+                    console.log(endpointName+" not in database")
+                }
+
+            }
+        )
+        return alreadyAdded;
+    }
+
     render() {
         const {selectedRowKeys, endpoints} = this.state;
+        const api = new API();
         const columns = [{
             title: 'Name',
             dataIndex: 'name',
@@ -111,14 +131,20 @@ export default class EndpointsDiscover extends Component {
             key: 'action',
             dataIndex: 'id',
             width: '20%',
-            render: (text, record) => (
-            <span>
-              <Button type="primary" onClick={() =>this.handleAddEndpointToDB(record.id,
-              record.name, record.type, record.endpointConfig, record.endpointSecurity,
-              record.maxTps)}>
-                Add to DB</Button>
-            </span>
-            )
+            render: (text, record) => {
+                let alreadyInDB = this.checkIfEndpointAlreadyAdded(record,api);
+                console.log(alreadyInDB);
+                if(alreadyInDB){
+                    return <Button> Update Database </Button>;
+                }else{
+                    return <span>
+                      <Button type="primary" onClick={() =>this.handleAddEndpointToDB(record.id,
+                      record.name, record.type, record.endpointConfig, record.endpointSecurity,
+                      record.maxTps)}>
+                        Add to Database</Button>
+                    </span>;
+                }
+            }
         }];
         const rowSelection = {
             selectedRowKeys,

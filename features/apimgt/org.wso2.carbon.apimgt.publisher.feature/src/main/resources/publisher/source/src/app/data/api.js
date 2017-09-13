@@ -520,6 +520,19 @@ class API {
             });
     }
 
+    /**
+     * Check if an endpoint name already exists.
+     * @param name {String} Name of the Endpoint
+     * @returns {Promise.<TResult>}
+     */
+    checkIfEndpointExists(endpointName) {
+        return this.client.then(
+            (client) => {
+                return client.apis["Endpoint (Collection)"].head_endpoints(
+                    {name: endpointName}, this._requestMetaData());
+            }
+        );
+    }
 
     addDocument(api_id, body) {
 
