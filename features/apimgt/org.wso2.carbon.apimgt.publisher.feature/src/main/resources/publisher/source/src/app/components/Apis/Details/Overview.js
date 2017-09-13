@@ -142,7 +142,7 @@ class Overview extends Component {
                     <Grid item xs={12}>
                         <Paper style={{display:"flex"}}>
                             <Typography type="display2" gutterBottom className="page-title">
-                                {api.name} - <span style={{fontSize:"50%"}}>Overview</span>
+                                {api.name} - <span>Overview</span>
                             </Typography>
                             {/* allowing edit based on scopes */}
                             <ScopeValidation resourceMethod={resourceMethod.PUT} resourcePath={resourcePath.SINGLE_API}>

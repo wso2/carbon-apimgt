@@ -29,6 +29,9 @@ header.MuiAppBar-colorPrimary-6{
     position: relative;
     flex: 1;
 }
+.page-title span{
+    font-size:50%;
+}
 .page-title-actions{
     align-self: flex-end;
     font-size: 11px;
@@ -40,6 +43,11 @@ header.MuiAppBar-colorPrimary-6{
 .page-title-actions button{
     margin: 0;
     padding: 0;
+}
+.page-title-help{
+    font-weight:300;
+    padding: 10px 0 10px 30px;
+    margin: 0;
 }
 .title-toolbar{
     margin-left: 0;
@@ -70,4 +78,20 @@ div#react-root div.page-content{
 .help-text{
     padding: 20px 0;
     line-height: 150%;
+}
+div.dropzone{
+    margin-right: 20px;
+}
+div.dropzone-wrapper{
+    width:100%;
+    margin:20px 20px 20px 0;
+}
+div.horizontal{
+    flex-direction: row;
+}
+.full-width{
+    width: 100%;
+}
+.button-left{
+    margin-right: 20px;
 }
