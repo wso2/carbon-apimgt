@@ -29,6 +29,34 @@ function putIntoTokenCache (string key, dto:IntrospectDto introspectDto) {
     system:println("putIntoTokenCache() in CacheHolder");
     caching:putCacheEntry(constants:TOKEN_CACHE, key, introspectDto);
 }
+function getFromAPIKeyCache (string context, string apikey) (dto:APIKeyDTO) {
+    system:println("getFromAPIKeyCache() in CacheHolder");
+    string key = context + ":" + apikey;
+    any apiKey = caching:getCacheEntry(constants:APIKEY_CACHE, key);
+    system:println("after caching--------------------");
+    system:println(apiKey);
+    if (apiKey != null) {
+        dto:APIKeyDTO dto;
+        errors:TypeCastError err;
+        dto, err = (dto:APIKeyDTO)apiKey;
+        system:println(dto);
+        return dto;
+    } else {
+        return null;
+    }
+}
+
+function putIntoAPIKeyCache (dto:APIKeyDTO apiKeyDTO) {
+    system:println("putIntoAPIKeyCache() in CacheHolder");
+    string key = apiKeyDTO.context + ":" + apiKeyDTO.apiKey;
+
+    system:println("key :");
+    system:println(key);
+    system:println("apiKeyDTO :");
+    system:println(apiKeyDTO);
+
+    caching:putCacheEntry("APIKEY_CACHE", key, apiKeyDTO);
+}
 function getFromSubscriptionCache (string apiContext, string version, string consumerKey) (dto:SubscriptionDto) {
     system:println("getFromSubscriptionCache() in CacheHolder");
     string key = apiContext + ":" + version + ":" + consumerKey;
@@ -186,9 +214,13 @@ function removeFromSubscriptionCache (string apiContext, string apiVersion, stri
 }
 
 function initializeCache () (boolean) {
+
     system:println("initializeCache() in CacheHolder");
     //cache for token introspect
     caching:createCache(constants:TOKEN_CACHE, "15");
+
+
+    caching:createCache(constants:APIKEY_CACHE, "15");
     //cache for subscription
     caching:createCache(constants:SUBSCRIPTION_CACHE, "15");
     //cache for resource

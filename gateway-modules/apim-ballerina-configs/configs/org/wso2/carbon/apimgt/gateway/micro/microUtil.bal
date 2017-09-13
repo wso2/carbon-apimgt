@@ -6,7 +6,7 @@ import ballerina.net.http;
 import ballerina.lang.jsons;
 import org.wso2.carbon.apimgt.gateway.constants as Constants;
 import org.wso2.carbon.apimgt.gateway.dto as dto;
-
+import org.wso2.carbon.apimgt.gateway.holders as holders;
 import org.wso2.carbon.apimgt.ballerina.util as apimgtUtil;
 import ballerina.lang.strings;
 import ballerina.lang.files;
@@ -35,18 +35,18 @@ function returnAPI(int i,string[] array)(dto:APIDTO){
     //system:println(api.securityScheme);
     return api;
 }
-function loadOfflineAPIs () {
-    system:println("start loadOfflineAPIs() in APICoreUtil");
+function loadAPIKeys () {
+    system:println("start loadAPIKeys() in APICoreUtil");
 
 
-    files:File t = {path:"/home/sabeena/Desktop/API Repo/getOfflineAPIs.json"};
+    files:File t = {path:"/home/sabeena/Desktop/API Repo/apiKeys.json"};
     files:open(t, "r");         //opens the file in the read mode
     var content, n = files:read(t, 100000000);
     //so there's a limit! only 100000000 can be read
 
-    string strAPIList = blobs:toString(content, "utf-8");
+    string strAPIKeyList = blobs:toString(content, "utf-8");
 
-    json apis = util:parse(strAPIList);
+    json apiKeys = util:parse(strAPIKeyList);
 
     //system:println("array okay");
     //system:println(array);
@@ -54,12 +54,11 @@ function loadOfflineAPIs () {
     int index = 0;
     errors:TypeCastError err;
     int count;
-    count, err = (int)apis.count;
-    json apiList = apis.list;
-
+    count, err = (int)apiKeys.count;
+    json apiList = apiKeys.list;
 
     while(index<count){
-        dto:APIDTO api = fromJSONToAPIDTO(apiList[index]);
+        dto:APIKeyDTO apiKey = fromJSONToAPIKeyDTO(apiList[index]);
         //list[index] = api;
 
         string apiConfig;
@@ -67,7 +66,7 @@ function loadOfflineAPIs () {
 
         // system:println(api);
 
-        status, apiConfig = getOfflineAPIServiceConfig(api.id);
+        status, apiConfig = getOfflineAPIServiceConfig(apiKey.name);
 
         system:println("status");
         system:println(status);
@@ -78,7 +77,7 @@ function loadOfflineAPIs () {
         int i = 0;
         while (status == Constants:NOT_FOUND) {
             apimgtUtil:wait(10000);
-            status, apiConfig = getOfflineAPIServiceConfig(api.id);
+            status, apiConfig = getOfflineAPIServiceConfig(apiKey.name);
             i = i + 1;
             if (i > maxRetries) {
                 break;
@@ -87,23 +86,25 @@ function loadOfflineAPIs () {
         //todo : tobe implement
         // deployService(api, apiConfig);
         //Update API cache
-        putIntoAPICache(api);
+        holders:putIntoAPIKeyCache(apiKey);
 
-        system:println("putIntoAPICache(api) okay!! :D");
+        system:println("api :");
+        system:println(apiKey);
+
+        system:println("putIntoAPIKeyCache(api) okay!! :D");
 
         //retrieveOfflineResources(api.context, api.version);
-
         index = index+1;
 
     }
-    system:println("end loadOfflineAPIs() in APICoreUtil");
+    system:println("end loadAPIKeys() in APICoreUtil");
 }
 
-function getOfflineAPIServiceConfig (string apiId) (int, string) {
+function getOfflineAPIServiceConfig (string apiName) (int, string) {
     system:println("start getOfflineAPIServiceConfig() in APICoreUtil");
     string apiConfig;
     int status;
-    files:File target = {path:"/home/sabeena/Desktop/API Repo/"+ apiId + ".bal"};
+    files:File target = {path:"/home/sabeena/Desktop/API Repo/"+ apiName + ".bal"};
     boolean b = files:exists(target);
     system:println(b);
     if(b){
@@ -146,7 +147,6 @@ function fromJsonToEndpointDto (json endpointConfig) (dto:EndpointDto) {
     }
     return endpointDto;
 }
-
 
 function returnVal(string pair)(string){
     string[] array = strings:split(pair,":");
@@ -194,7 +194,7 @@ function retrieveOfflineSubscriptions () (boolean) {
 
         while (index < count) {
             dto:SubscriptionDto subs = returnSubscription(9 * index, array);
-            putIntoSubscriptionCache(subs);
+            holders:putIntoSubscriptionCache(subs);
             system:println(subs);
             index = index + 1;
         }
@@ -237,7 +237,7 @@ function retrieveOfflineResources(string apiContext, string apiVersion){
 
     while(index<6){
         dto:ResourceDto res = returnResource(5*index,array);
-        putIntoResourceCache(apiContext, apiVersion, res);
+        holders:putIntoResourceCache(apiContext, apiVersion, res);
         //system:println(res);
         index = index + 1;
     }
@@ -278,7 +278,7 @@ function retrieveOfflineApplications () (boolean) {
 
         while (index < count) {
             dto:ApplicationDto app = returnApplication(4* index, array);
-            putIntoApplicationCache(app);
+            holders:putIntoApplicationCache(app);
             system:println(app);
             index = index + 1;
         }
@@ -292,7 +292,7 @@ function removeFromApplicationCache (json application) {
     system:println("removeFromApplicationCache() in Utils");
     string applicationId;
     applicationId, err = (string)application.applicationId;
-    removeApplicationFromCache(applicationId);
+    holders:removeApplicationFromCache(applicationId);
 }
 
 function fromJSONToAPIDTO (json api) (dto:APIDTO) {
@@ -305,5 +305,17 @@ function fromJSONToAPIDTO (json api) (dto:APIDTO) {
     APIDTO.lifeCycleStatus, err = (string)api.lifeCycleStatus;
     APIDTO.securityScheme = jsons:getInt(api, "$.securityScheme");
     return APIDTO;
+
+}
+
+function fromJSONToAPIKeyDTO (json apiKey) (dto:APIKeyDTO) {
+    system:println("fromJSONToAPIKeyDTO() in Utils");
+    dto:APIKeyDTO APIKeyDTO = {};
+
+    APIKeyDTO.name, err = (string)apiKey.name;
+    APIKeyDTO.context, err = (string)apiKey.context;
+    APIKeyDTO.apiKey, err = (string)apiKey.apiKey;
+    APIKeyDTO.securityScheme = jsons:getInt(apiKey, "$.securityScheme");
+    return APIKeyDTO;
 
 }

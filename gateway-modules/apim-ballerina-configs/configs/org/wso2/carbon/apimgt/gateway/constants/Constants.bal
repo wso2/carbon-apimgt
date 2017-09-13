@@ -40,6 +40,7 @@ const string POLICY_CACHE = "POLICY_CACHE";
 const string API_CACHE = "API_CACHE";
 const string BLOCK_CONDITION_MAP = "BLOCK_CONDITION_MAP";
 const string BLOCK_CONDITION_IP_RANGE_MAP = "BLOCK_CONDITION_IP_RANGE_MAP";
+const string APIKEY_CACHE = "APIKEY_CACHE";
 
 const string THROTTLE_KEY = "throttleKey";
 const string POLICY_TEMPLATE_KEY = "keyTemplateValue";

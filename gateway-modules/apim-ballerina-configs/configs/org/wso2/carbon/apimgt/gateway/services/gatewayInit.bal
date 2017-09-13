@@ -9,19 +9,14 @@ import ballerina.net.http;
 service<http> gatewayInitService {
 
     boolean isCacheInitialized = holder:initializeCache();
-    boolean isMapsAdded = holder:addThrottleMaps();
     boolean isReady = initGateway();
-
-    boolean offlineSubsInitialized = micro:retrieveOfflineSubscriptions();
 
 }
 
 function initGateway () (boolean) {
     system:println("initGateway() in gatewayInit");
     try {
-
-        micro:loadOfflineAPIs();
-
+        micro:loadAPIKeys();
     } catch (errors:Error e) {
         system:println("Error while initilazing API gateway. " + e.msg);
     }
