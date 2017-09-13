@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
+import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.FileApi;
@@ -587,6 +588,18 @@ public class ApiFileDAOImpl implements ApiDAO {
 
     @Override
     public String getEndpointConfig(String endpointId) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId, Set<String> label)
+            throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+
+    }
+
+    @Override
+    public DedicatedGateway getDedicatedGateway(String apiId) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }
 

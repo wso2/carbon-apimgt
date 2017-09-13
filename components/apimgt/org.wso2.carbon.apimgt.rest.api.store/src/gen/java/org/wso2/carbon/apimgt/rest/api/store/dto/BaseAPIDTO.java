@@ -43,6 +43,9 @@ public class BaseAPIDTO   {
   @JsonProperty("labels")
   private List<String> labels = new ArrayList<String>();
 
+  @JsonProperty("hasOwnGateway")
+  private Boolean hasOwnGateway = null;
+
   /**
    * Gets or Sets type
    */
@@ -249,6 +252,24 @@ public class BaseAPIDTO   {
     this.labels = labels;
   }
 
+  public BaseAPIDTO hasOwnGateway(Boolean hasOwnGateway) {
+    this.hasOwnGateway = hasOwnGateway;
+    return this;
+  }
+
+   /**
+   * Get hasOwnGateway
+   * @return hasOwnGateway
+  **/
+  @ApiModelProperty(value = "")
+  public Boolean getHasOwnGateway() {
+    return hasOwnGateway;
+  }
+
+  public void setHasOwnGateway(Boolean hasOwnGateway) {
+    this.hasOwnGateway = hasOwnGateway;
+  }
+
   public BaseAPIDTO type(TypeEnum type) {
     this.type = type;
     return this;
@@ -286,12 +307,13 @@ public class BaseAPIDTO   {
         Objects.equals(this.apiDefinition, baseAPI.apiDefinition) &&
         Objects.equals(this.transport, baseAPI.transport) &&
         Objects.equals(this.labels, baseAPI.labels) &&
+        Objects.equals(this.hasOwnGateway, baseAPI.hasOwnGateway) &&
         Objects.equals(this.type, baseAPI.type);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, transport, labels, type);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, transport, labels, hasOwnGateway, type);
   }
 
   @Override
@@ -308,6 +330,7 @@ public class BaseAPIDTO   {
     sb.append("    apiDefinition: ").append(toIndentedString(apiDefinition)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
+    sb.append("    hasOwnGateway: ").append(toIndentedString(hasOwnGateway)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("}");
     return sb.toString();
