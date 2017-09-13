@@ -67,16 +67,14 @@ class ApiThumb extends React.Component {
 
     render() {
         let details_link = "/apis/" + this.props.api.id;
-        const {name, version, context} = this.props.api;
+        const {name, version, context, description} = this.props.api;
         if (!this.state.active) { // Controls the delete state, We set the state to inactive on delete success call
             return null;
         }
         return (
             <Grid item xs={12} sm={6} md={3} lg={2} xl={2}>
                 <Card>
-                    <CardMedia image="/store/public/images/api/api-default.png">
-                        <img src="/store/public/images/api/api-default.png" style={{width:"100%"}}/>
-                    </CardMedia>
+                    <CardMedia image="/store/public/images/api/api-default.png" className="api-image"> </CardMedia>
                     <CardContent>
                         <Typography type="headline" component="h2">
                             {name}
@@ -84,7 +82,7 @@ class ApiThumb extends React.Component {
                         <Typography component="div">
                             <p>{version}</p>
                             <p>{context}</p>
-                            <p className="description">{this.props.api.description}</p>
+                            <p className="description">{description}</p>
                         </Typography>
                     </CardContent>
                     <CardActions>

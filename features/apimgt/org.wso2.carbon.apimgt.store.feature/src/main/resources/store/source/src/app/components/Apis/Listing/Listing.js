@@ -20,8 +20,10 @@ import React from 'react'
 import qs from 'qs'
 
 import ApiThumb from './ApiThumb'
+import APiTableRow from './ApiTableRow'
 import '../Apis.css'
 import API from '../../../data/api.js'
+import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import {Link} from 'react-router-dom'
 import Grid from 'material-ui/Grid';
@@ -120,7 +122,7 @@ class Listing extends React.Component {
             createData('API2', '1.0.0', "admin", 4),
             createData('API3', '1.0.0', "admin", 3),
             createData('API4', '1.0.0', "admin", 4),
-            createData('API5', '1.0.0', "admin", 2),
+            createData('API5', '1.0.0', "admin", 2)
         ];
 
         return (
@@ -132,47 +134,30 @@ class Listing extends React.Component {
                 {
                     this.state.apis ?
                         this.state.listType === "grid" ?
-                            <Grid container gutter={24} >
-                                    {this.state.apis.list.map((api, i) => {
+
+                            <Grid container >
+                                    {this.state.apis.list.map(api => {
                                         return <ApiThumb api={api}/>
                                     })}
                             </Grid>
                         :
-                            <Grid container gutter={24} >
 
+                            <Grid container >
                                 <Grid item xs>
                                     <Paper>
                                         <Table>
                                             <TableHead>
-                                                <TableRow>
-                                                    <TableCell>Name</TableCell>
-                                                    <TableCell>Version</TableCell>
-                                                    <TableCell>Author</TableCell>
-                                                    <TableCell>Rating</TableCell>
-                                                    <TableCell></TableCell>
+                                            <TableRow>
+                                                <TableCell>Name</TableCell>
+                                                <TableCell>Version</TableCell>
+                                                <TableCell>Context</TableCell>
+                                                <TableCell>Description</TableCell>
+                                                <TableCell></TableCell>
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
-                                                {data.map(n => {
-                                                    return (
-                                                        <TableRow key={n.id}>
-                                                            <TableCell>
-                                                                {n.name}
-                                                            </TableCell>
-                                                            <TableCell numeric>
-                                                                {n.version}
-                                                            </TableCell>
-                                                            <TableCell numeric>
-                                                                {n.author}
-                                                            </TableCell>
-                                                            <TableCell numeric>
-                                                                {n.rating}
-                                                            </TableCell>
-                                                            <TableCell numeric>
-                                                                <ListIcon />
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    );
+                                                {this.state.apis.list.map(api => {
+                                                    return <APiTableRow api={api}/>
                                                 })}
                                             </TableBody>
                                         </Table>
@@ -180,30 +165,7 @@ class Listing extends React.Component {
                                 </Grid>
                             </Grid>
                     :
-                        <div>
-                            <Grid item xl={2} lg={3} md={4} sm={6} xs={12}>
-                                <Card>
-                                    <CardMedia>
-                                        <img alt="example" width="50%" src="/store/public/images/api/api-default.png"/>
-                                    </CardMedia>
-                                    <CardContent>
-                                        <Typography component="p">
-                                            <Link to={create_app_link}>Create New Application</Link>
-                                        </Typography>
-                                    </CardContent>
-                                </Card>
-                                <Card>
-                                    <CardMedia>
-                                        <img alt="example" width="50%" src="/store/public/images/api/api-default.png"/>
-                                    </CardMedia>
-                                    <CardContent>
-                                        <Typography component="p">
-                                                <Link to={forum_link}>Visit our API Forum</Link>
-                                        </Typography>
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                        </div>
+                        <Loading />
                 }
             </div>
         );

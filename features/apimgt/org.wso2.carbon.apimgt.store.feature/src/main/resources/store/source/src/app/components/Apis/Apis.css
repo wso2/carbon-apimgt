@@ -90,3 +90,6 @@ h2 span{
     justify-content: space-between;
     align-items:center;
 }
+.api-image{
+    height: 200px;
+}

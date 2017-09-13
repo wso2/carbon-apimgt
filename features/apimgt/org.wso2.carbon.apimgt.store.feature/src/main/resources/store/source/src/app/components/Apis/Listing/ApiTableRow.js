@@ -24,7 +24,7 @@ import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Ta
 import Typography from 'material-ui/Typography';
 
 
-class ApiList extends React.Component {
+class APiTableRow extends React.Component {
     constructor(props) {
         super(props);
         this.state = {active: true, loading: false, open: false};
@@ -78,4 +78,4 @@ class ApiList extends React.Component {
         );
     }
 }
-export default ApiList
+export default APiTableRow
