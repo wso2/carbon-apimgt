@@ -64,6 +64,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdDelete(apiId,ifMatch,ifUnmodifiedSince, request);
     }
     @GET
+    @OPTIONS
     @Path("/{apiId}/documents/{documentId}/content")
     @Consumes({ "application/json" })
     @Produces({ "application/octet-stream" })
@@ -91,6 +92,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdDocumentsDocumentIdContentGet(apiId,documentId,ifNoneMatch,ifModifiedSince, request);
     }
     @POST
+    @OPTIONS
     @Path("/{apiId}/documents/{documentId}/content")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
@@ -143,6 +145,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdDocumentsDocumentIdDelete(apiId,documentId,ifMatch,ifUnmodifiedSince, request);
     }
     @GET
+    @OPTIONS
     @Path("/{apiId}/documents/{documentId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -194,6 +197,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdDocumentsDocumentIdPut(apiId,documentId,body,ifMatch,ifUnmodifiedSince, request);
     }
     @GET
+    @OPTIONS
     @Path("/{apiId}/documents")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -219,6 +223,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdDocumentsGet(apiId,limit,offset,ifNoneMatch, request);
     }
     @POST
+    @OPTIONS
     @Path("/{apiId}/documents")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -242,6 +247,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdDocumentsPost(apiId,body,ifMatch,ifUnmodifiedSince, request);
     }
     @GET
+    @OPTIONS
     @Path("/{apiId}/gateway-config")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -293,6 +299,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdGatewayConfigPut(apiId,gatewayConfig,ifMatch,ifUnmodifiedSince, request);
     }
     @GET
+    @OPTIONS
     @Path("/{apiId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -341,6 +348,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdLifecycleGet(apiId,ifNoneMatch,ifModifiedSince, request);
     }
     @GET
+    @OPTIONS
     @Path("/{apiId}/lifecycle-history")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -385,6 +393,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdLifecycleLifecyclePendingTaskDelete(apiId, request);
     }
     @PUT
+    @OPTIONS
     @Path("/{apiId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -412,6 +421,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdPut(apiId,body,ifMatch,ifUnmodifiedSince, request);
     }
     @GET
+    @OPTIONS
     @Path("/{apiId}/swagger")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -436,6 +446,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdSwaggerGet(apiId,ifNoneMatch,ifModifiedSince, request);
     }
     @PUT
+    @OPTIONS
     @Path("/{apiId}/swagger")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
@@ -463,6 +474,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdSwaggerPut(apiId,endpointId,ifMatch,ifUnmodifiedSince, request);
     }
     @GET
+    @OPTIONS
     @Path("/{apiId}/thumbnail")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -487,6 +499,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdThumbnailGet(apiId,ifNoneMatch,ifModifiedSince, request);
     }
     @POST
+    @OPTIONS
     @Path("/{apiId}/thumbnail")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
@@ -514,6 +527,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdThumbnailPost(apiId,fileInputStream, fileDetail,ifMatch,ifUnmodifiedSince, request);
     }
     @GET
+    @OPTIONS
     @Path("/{apiId}/wsdl")
     @Consumes({ "application/json" })
     @Produces({ "application/octet-stream" })
@@ -538,6 +552,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdWsdlGet(apiId,ifNoneMatch,ifModifiedSince, request);
     }
     @PUT
+    @OPTIONS
     @Path("/{apiId}/wsdl")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
@@ -567,6 +582,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdWsdlPut(apiId,fileInputStream, fileDetail,ifMatch,ifUnmodifiedSince, request);
     }
     @POST
+    @OPTIONS
     @Path("/change-lifecycle")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -597,6 +613,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisChangeLifecyclePost(action,apiId,lifecycleChecklist,ifMatch,ifUnmodifiedSince, request);
     }
     @POST
+    @OPTIONS
     @Path("/copy-api")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -664,6 +681,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisHead(query,ifNoneMatch, request);
     }
     @POST
+    @OPTIONS
     @Path("/import-definition")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
@@ -692,7 +710,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisImportDefinitionPost(type,fileInputStream, fileDetail,url,additionalProperties,implementationType,ifMatch,ifUnmodifiedSince, request);
     }
     @POST
-    
+    @OPTIONS
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Create a new API", notes = "This operation can be used to create a new API specifying the details of the API in the payload. The new API will be in `CREATED` state.  There is a special capability for a user who has `APIM Admin` permission such that he can create APIs on behalf of other users. For that he can to specify `\"provider\" : \"some_other_user\"` in the payload so that the API's creator will be shown as `some_other_user` in the UI. ", response = APIDTO.class, authorizations = {
@@ -712,6 +730,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisPost(body, request);
     }
     @POST
+    @OPTIONS
     @Path("/validate-definition")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })

@@ -183,9 +183,9 @@ class AuthManager {
             validity_period: 3600,
             scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage apim:subscription_view apim:subscription_block apim:subscribe'
         };
-        let promised_response = axios.post(tokenDetails, qs.stringify(data), {headers: headers});
+        let promised_response = axios.post(tokenDetails, qs.stringify(data), {headers: headers, withCredentials:true }); // enable with credeantials
         promised_response.then(response => {
-            console.log(response.headers.setH);
+             console.log("working");
             const validityPeriod = response.data.validityPeriod; // In seconds
             const WSO2_AM_TOKEN_1 = response.data.partialToken;
             const user = new User(response.data.authUser, response.data.idToken);
