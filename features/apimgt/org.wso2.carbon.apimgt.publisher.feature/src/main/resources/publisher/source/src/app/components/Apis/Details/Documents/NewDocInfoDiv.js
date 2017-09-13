@@ -32,7 +32,7 @@ class NewDocInfoDiv extends Component {
     render() {
         return (
             <div>
-                <Row gutter={45} type="flex" style={{paddingBottom: 5, paddingLeft: 10}}
+                <Row type="flex" style={{paddingBottom: 5, paddingLeft: 10}}
                      justify="space-around">
                     <Col>
                         <h4>Name*</h4>
@@ -47,7 +47,7 @@ class NewDocInfoDiv extends Component {
                         }
                     </Col>
                 </Row>
-                <Row gutter={45} type="flex" style={{paddingBottom: 20, paddingLeft: 10}}
+                <Row type="flex" style={{paddingBottom: 20, paddingLeft: 10}}
                      justify="space-around">
                     <Col>
                         <h4>Summary</h4>
