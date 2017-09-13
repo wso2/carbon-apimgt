@@ -73,6 +73,9 @@ public class APIDTO   {
   @JsonProperty("tags")
   private List<String> tags = new ArrayList<String>();
 
+  @JsonProperty("hasOwnGateway")
+  private Boolean hasOwnGateway = null;
+
   @JsonProperty("labels")
   private List<String> labels = new ArrayList<String>();
 
@@ -484,6 +487,24 @@ public class APIDTO   {
     this.tags = tags;
   }
 
+  public APIDTO hasOwnGateway(Boolean hasOwnGateway) {
+    this.hasOwnGateway = hasOwnGateway;
+    return this;
+  }
+
+   /**
+   * Get hasOwnGateway
+   * @return hasOwnGateway
+  **/
+  @ApiModelProperty(example = "false", value = "")
+  public Boolean getHasOwnGateway() {
+    return hasOwnGateway;
+  }
+
+  public void setHasOwnGateway(Boolean hasOwnGateway) {
+    this.hasOwnGateway = hasOwnGateway;
+  }
+
   public APIDTO labels(List<String> labels) {
     this.labels = labels;
     return this;
@@ -809,6 +830,7 @@ public class APIDTO   {
         Objects.equals(this.isDefaultVersion, API.isDefaultVersion) &&
         Objects.equals(this.transport, API.transport) &&
         Objects.equals(this.tags, API.tags) &&
+        Objects.equals(this.hasOwnGateway, API.hasOwnGateway) &&
         Objects.equals(this.labels, API.labels) &&
         Objects.equals(this.policies, API.policies) &&
         Objects.equals(this.visibility, API.visibility) &&
@@ -827,7 +849,7 @@ public class APIDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, workflowStatus, createdTime, apiPolicy, lastUpdatedTime, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, labels, policies, visibility, visibleRoles, permission, userPermissionsForApi, visibleTenants, gatewayEnvironments, sequences, businessInformation, corsConfiguration, endpoint, securityScheme, operations);
+    return Objects.hash(id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, workflowStatus, createdTime, apiPolicy, lastUpdatedTime, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, hasOwnGateway, labels, policies, visibility, visibleRoles, permission, userPermissionsForApi, visibleTenants, gatewayEnvironments, sequences, businessInformation, corsConfiguration, endpoint, securityScheme, operations);
   }
 
   @Override
@@ -853,6 +875,7 @@ public class APIDTO   {
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
+    sb.append("    hasOwnGateway: ").append(toIndentedString(hasOwnGateway)).append("\n");
     sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
     sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");

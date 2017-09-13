@@ -49,6 +49,7 @@ public class FileApi {
     private boolean isDefaultVersion;
     private Set<String> transport;
     private Set<String> tags;
+    private boolean hasOwnGateway;
     private Set<String> labels;
     private Set<String> policies;
     private API.Visibility visibility;
@@ -213,6 +214,7 @@ public class FileApi {
         wsdlUri = api.getWsdlUri();
         isResponseCachingEnabled = api.isResponseCachingEnabled();
         cacheTimeout = api.getCacheTimeout();
+        hasOwnGateway = api.hasOwnGateway();
         isDefaultVersion = api.isDefaultVersion();
         transport = api.getTransport();
         tags = api.getTags();
@@ -255,6 +257,10 @@ public class FileApi {
 
     public void setLabels(Set<String> labels) {
         this.labels = labels;
+    }
+
+    public void hasOwnGateway(boolean hasOwnGateway) {
+        this.hasOwnGateway = hasOwnGateway;
     }
 
     public Set<String> getPolicies() {
@@ -406,6 +412,7 @@ public class FileApi {
     }
 
     public void setUserSpecificApiPermissions(List<String> userSpecificApiPermissions) {
+
         this.userSpecificApiPermissions = userSpecificApiPermissions;
     }
 
@@ -420,6 +427,9 @@ public class FileApi {
     public FileApi() {
     }
 
+    public boolean hasOwnGateway() {
+        return hasOwnGateway;
+    }
     /**
      * Representation of Uritemplate for file system
      */

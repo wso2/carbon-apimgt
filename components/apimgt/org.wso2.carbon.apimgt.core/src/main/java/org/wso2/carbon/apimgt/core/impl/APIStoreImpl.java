@@ -68,6 +68,7 @@ import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.ApplicationToken;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
+import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
 import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
@@ -90,6 +91,7 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ApplicationStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.util.ContainerBasedGatewayConstants;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationResponse;
 import org.wso2.carbon.apimgt.core.workflow.ApplicationCreationWorkflow;
@@ -114,6 +116,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -1787,4 +1790,57 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
 
+    //todo : Implement these methods for composite API
+    @Override
+    public void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId) throws APIManagementException {
+        APIGateway gateway = getApiGateway();
+        API api = getAPIbyUUID(apiId);
+        try {
+            // label generation for the API
+            Set<String> labelSet = new HashSet<>();
+            String autoGenlabel = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId;
+            if (dedicatedGateway.isEnabled()) {
+
+                // create a label if not exist for container based gateway
+                if (!api.getLabels().contains(autoGenlabel)) {
+                    // create a label
+                    List<Label> labelList = new ArrayList<>();
+                    // todo : add the access URL of the gateway here itself
+                    Label autoGenLabel = new Label.Builder().id(UUID.randomUUID().toString()).
+                            name(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId).
+                            accessUrls(null).build();
+                    labelList.add(autoGenLabel);
+                    //Add to the db
+                    getLabelDAO().addLabels(labelList);
+                    //add to the API
+                    labelSet.add(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId);
+                }
+            } else {
+                labelSet = getAPIbyUUID(apiId).getLabels();
+            }
+
+            // create or remove dedicated Gateway
+            gateway.updateDedicatedGateway(api, labelSet, dedicatedGateway.isEnabled());
+
+            getApiDAO().updateDedicatedGateway(dedicatedGateway, apiId, labelSet);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while updating dedicatedGateway details of API with id " + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
+        }
+    }
+
+    @Override
+    public DedicatedGateway getDedicatedGateway(String apiId) throws APIManagementException {
+
+        DedicatedGateway dedicatedGateway;
+        try {
+            dedicatedGateway = getApiDAO().getDedicatedGateway(apiId);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error occurred while retrieving dedicated Gateway details of API with id " + apiId;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
+        }
+        return dedicatedGateway;
+    }
 }
