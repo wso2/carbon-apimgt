@@ -204,7 +204,26 @@ public enum ExceptionCodes implements ErrorHandler {
     BLOCK_CONDITION_UNSUPPORTED_API_CONTEXT(900977, "Block Condition Error", 400, "API Context does not exist"),
     BLOCK_CONDITION_UNSUPPORTED_APP_ID_NAME(900978, "Block Condition Error", 400, "Application ID or Name does not " +
             "exist"),
-    BLOCK_CONDITION_ALREADY_EXISTS(900979, "The Block Condition exists.", 409, " The Block Condition already exists");
+    BLOCK_CONDITION_ALREADY_EXISTS(900979, "The Block Condition exists.", 409, " The Block Condition already exists"),
+
+    //Container Based Gateway related Codes
+    NO_RESOURCE_LOADED_FROM_DEFINITION(900980, "Container based Resource Not Found", 404, "No Resource Loaded from " +
+            "definition provided"),
+    LOADED_RESOURCE_IS_NOT_VALID(900981, "Loaded Resource is not valid", 400, "The Resource loaded is not a valid " +
+            "resource definition"),
+    TEMPLATE_FILE_EXCEPTION(900982, "Error writing template to file", 500, " Error writing template to file"),
+    FILE_NOT_FOUND_IN_LOCATION(900983, "No File Found in the Given Location", 404, " File Not Found"),
+    TEMPLATE_LOAD_EXCEPTION(90084, "Error in loading the template file by client as an InputStream", 500, " Error in " +
+            "loading the FileInputStream by client"),
+    CONTENT_ENCODING_NOT_SUPPORTED(90085, "Content of the resource is not supporting UTF-8 Encoding", 500, "Content " +
+            "is not supported UTF-8 Encoding"),
+    CONTAINER_GATEWAY_REMOVAL_FAILED(90086, "Cannot complete removing Container Based Gateway", 404, "Error in " +
+            "deleting the Container based Gateway"),
+    CONTAINER_GATEWAY_CONFIG_NOT_FOUND(90087, "Container Based Gateway Configuration Not Found", 404, "Error while " +
+            "retrieving Container based Gateway Configuration."),
+    FILE_READING_EXCEPTION(900988, "Error reading token file", 500, " Error reading token file to String"),
+    DEDICATED_GATEWAY_DETAILS_NOT_FOUND(900989, "Dedicated Gateway Details not found.", 404, " Dedicated Gateway " +
+            "Details not found.");
 
     private final long errorCode;
     private final String errorMessage;
