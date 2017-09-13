@@ -48,10 +48,10 @@ public class OpenshiftGatewayConfigurations {
 
     @Element(description = "Client Secret of Service Account")
     private String saTokenFile =
-            "/home/chamalee/Git-APIM/C5/PerAPIGatewayFeature/new-test/wso2apim-3.0.0-SNAPSHOT/conf/saToken.cert";
+            "/home/../saToken.cert";
 
     @Element(description = "Location of ca.cert File of CMS")
-    private String certFile = "/home/chamalee/.minikube/ca.crt";
+    private String certFile = "../ca.crt";
 
     public void setMasterURL(String masterURL) {
         this.masterURL = masterURL;
