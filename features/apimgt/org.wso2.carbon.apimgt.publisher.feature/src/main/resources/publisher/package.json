@@ -26,7 +26,7 @@
     "qs": "^6.4.0",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
-    "react-dropzone": "^3.13.3",
+    "react-dropzone": "^3.13.4",
     "react-modal": "^2.2.2",
     "react-quill": "1.0.0",
     "react-router": "^4.1.1",
