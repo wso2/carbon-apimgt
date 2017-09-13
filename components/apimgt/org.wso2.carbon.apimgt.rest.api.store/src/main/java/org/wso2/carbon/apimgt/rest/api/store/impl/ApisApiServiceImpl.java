@@ -66,7 +66,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdCommentsCommentIdDelete(String commentId, String apiId, String ifMatch,
-                                                     String ifUnmodifiedSince, Request request) throws NotFoundException {
+                                                     String ifUnmodifiedSince, Request request)
+            throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
