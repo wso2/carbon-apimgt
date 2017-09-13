@@ -208,11 +208,7 @@ class BasicInfo extends Component {
                     <Grid item xs={12} sm={12} md={3} lg={3} xl={2} style={{paddingLeft:"40px"}}>
 
                         <Card>
-                            <CardMedia
-                                image="/store/public/images/api/api-default.png"
-                                title="Contemplative Reptile"
-                            >
-                                <img alt="API thumb" width="100%" src="/store/public/images/api/api-default.png"/>
+                            <CardMedia image="/store/public/images/api/api-default.png" >
                             </CardMedia>
                             <CardContent>
                                 <div className="custom-card">
