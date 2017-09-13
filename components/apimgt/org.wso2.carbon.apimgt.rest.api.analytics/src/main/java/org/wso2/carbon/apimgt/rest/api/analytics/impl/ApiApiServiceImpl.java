@@ -62,7 +62,7 @@ public class ApiApiServiceImpl extends ApiApiService {
             }
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
             List<APICount> apiCountList = analyzer.getAPICount(fromISO8601ToInstant(startTime),
-                    fromISO8601ToInstant(endTime));
+                    fromISO8601ToInstant(endTime), createdBy);
             APICountListDTO apiCountListDTO = AnalyticsMappingUtil.fromAPICountToListDTO(apiCountList);
             return Response.ok().entity(apiCountListDTO).build();
 

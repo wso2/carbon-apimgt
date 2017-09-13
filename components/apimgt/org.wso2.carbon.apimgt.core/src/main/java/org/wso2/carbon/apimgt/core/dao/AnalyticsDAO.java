@@ -57,10 +57,11 @@ public interface AnalyticsDAO {
      *
      * @param fromTimestamp Filter for from timestamp
      * @param toTimestamp   Filter for to timestamp
+     * @param createdBy     Filter for API creator
      * @return valid {@link APIInfo} List or null
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
-    List<APICount> getAPICount(Instant fromTimestamp, Instant toTimestamp) throws APIMgtDAOException;
+    List<APICount> getAPICount(Instant fromTimestamp, Instant toTimestamp, String createdBy) throws APIMgtDAOException;
 
     /**
      * Retrieves API subscription count information.
@@ -72,7 +73,7 @@ public interface AnalyticsDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     List<APISubscriptionCount> getAPISubscriptionCount(String fromTime, String toTime, String apiId) throws
-    APIMgtDAOException;
+            APIMgtDAOException;
 
     /**
      * Retrieves Subscriptions count created over time.

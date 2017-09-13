@@ -50,7 +50,7 @@ public class ApiApi implements Microservice  {
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve APIs created over time details ", notes = "Get application created over time details from summarized data. ", response = APIInfoListDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
-            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_graphs", description = "View Graphs Releated to APIs")
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_graph", description = "View Graphs Releated to APIs")
         })
     }, tags={  })
     @io.swagger.annotations.ApiResponses(value = { 
@@ -59,7 +59,7 @@ public class ApiApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = APIInfoListDTO.class) })
     public Response apiApiInfoGet(@ApiParam(value = "Defines the starting timestamp of the interval ",required=true) @QueryParam("startTime") String startTime
 ,@ApiParam(value = "Defines the ending timestamp of the interval ",required=true) @QueryParam("endTime") String endTime
-,@ApiParam(value = "application/api creator name. In case of any creator, the value shold be equal to 'all' ",required=true) @QueryParam("createdBy") String createdBy
+,@ApiParam(value = "application/api creator name. In case of any creator is not provided all the details will be provided ") @QueryParam("createdBy") String createdBy
 , @Context Request request)
     throws NotFoundException {
         return delegate.apiApiInfoGet(startTime,endTime,createdBy, request);
@@ -70,16 +70,18 @@ public class ApiApi implements Microservice  {
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve APIs created over time details ", notes = "Get application created over time details from summarized data. ", response = APICountListDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
-            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_graphs", description = "View Graphs Releated to APIs")
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_graph", description = "View Graphs Releated to APIs")
         })
     }, tags={  })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested APIs created over time information is returned ", response = APICountListDTO.class),
         
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Request paramters attribute does not meet requiremnts. ", response = APICountListDTO.class),
+        
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = APICountListDTO.class) })
     public Response apiCountOverTimeGet(@ApiParam(value = "Defines the starting timestamp of the interval ",required=true) @QueryParam("startTime") String startTime
 ,@ApiParam(value = "Defines the ending timestamp of the interval ",required=true) @QueryParam("endTime") String endTime
-,@ApiParam(value = "application/api creator name. In case of any creator, the value shold be equal to 'all' ",required=true) @QueryParam("createdBy") String createdBy
+,@ApiParam(value = "application/api creator name. In case of any creator is not provided all the details will be provided ") @QueryParam("createdBy") String createdBy
 , @Context Request request)
     throws NotFoundException {
         return delegate.apiCountOverTimeGet(startTime,endTime,createdBy, request);
@@ -90,7 +92,7 @@ public class ApiApi implements Microservice  {
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Retrieve Subscriber count by APIs ", notes = "Get subscriber count by APIs from summarized data. ", response = APISubscriptionCountListDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
-            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_graphs", description = "View Graphs Releated to APIs")
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_graph", description = "View Graphs Releated to APIs")
         })
     }, tags={  })
     @io.swagger.annotations.ApiResponses(value = { 

@@ -15,8 +15,6 @@
 */
 package org.wso2.carbon.apimgt.core.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.Analyzer;
 import org.wso2.carbon.apimgt.core.dao.AnalyticsDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -37,8 +35,6 @@ import java.util.List;
  * Implementation class of Analyzer operations.
  */
 public class AnalyzerImpl implements Analyzer {
-
-    private static final Logger log = LoggerFactory.getLogger(AnalyzerImpl.class);
 
     private String username;
     private AnalyticsDAO analyticsDAO;
@@ -73,10 +69,11 @@ public class AnalyzerImpl implements Analyzer {
     }
 
     @Override
-    public List<APICount> getAPICount(Instant fromTime, Instant toTime) throws APIManagementException {
+    public List<APICount> getAPICount(Instant fromTime, Instant toTime, String createdBy) throws
+            APIManagementException {
         List<APICount> apiCountList;
         try {
-            apiCountList = getAnalyticsDAO().getAPICount(fromTime, toTime);
+            apiCountList = getAnalyticsDAO().getAPICount(fromTime, toTime, createdBy);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while fetching API count information";
             throw new AnalyticsException(errorMsg, e, ExceptionCodes.APIMGT_DAO_EXCEPTION);

@@ -56,10 +56,11 @@ public interface Analyzer {
      *
      * @param fromTime Filter for from timestamp
      * @param toTime   Filter for to timestamp
+     * @param createdBy Filter for API creator
      * @return valid {@link APICount} List or null
      * @throws APIManagementException if error occurs while accessing data layer
      */
-    List<APICount> getAPICount(Instant fromTime, Instant toTime) throws APIManagementException;
+    List<APICount> getAPICount(Instant fromTime, Instant toTime, String createdBy) throws APIManagementException;
 
     /**
      * Retrieves subscription count information against an API.

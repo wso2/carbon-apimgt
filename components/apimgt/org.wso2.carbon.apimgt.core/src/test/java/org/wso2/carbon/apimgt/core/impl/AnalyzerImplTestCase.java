@@ -80,13 +80,13 @@ public class AnalyzerImplTestCase {
         apiCountList.add(apiCount1);
         apiCountList.add(apiCount2);
         Analyzer analyzer = getAnalyzerImpl(analyticsDAO);
-        when(analyticsDAO.getAPICount(Instant.parse(FROM_TIMESTAMP), Instant.parse(TO_TIMESTAMP)))
+        when(analyticsDAO.getAPICount(Instant.parse(FROM_TIMESTAMP), Instant.parse(TO_TIMESTAMP), null))
                 .thenReturn(apiCountList);
         List<APICount> apiCountListFromDB = analyzer
-                .getAPICount(Instant.parse(FROM_TIMESTAMP), Instant.parse(TO_TIMESTAMP));
+                .getAPICount(Instant.parse(FROM_TIMESTAMP), Instant.parse(TO_TIMESTAMP), null);
         Assert.assertNotNull(apiCountListFromDB);
         verify(analyticsDAO, Mockito.times(1)).getAPICount(Instant.parse(FROM_TIMESTAMP),
-                Instant.parse(TO_TIMESTAMP));
+                Instant.parse(TO_TIMESTAMP), null);
     }
 
     private AnalyzerImpl getAnalyzerImpl(AnalyticsDAO analyticsDAO) {

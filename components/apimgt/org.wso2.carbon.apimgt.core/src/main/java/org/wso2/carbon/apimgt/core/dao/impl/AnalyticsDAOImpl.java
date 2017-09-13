@@ -97,18 +97,32 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
 
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<APICount> getAPICount(Instant fromTime, Instant toTime)
-            throws APIMgtDAOException {
-        final String query = "SELECT COUNT(UUID) AS count, CREATED_TIME AS time FROM AM_API WHERE "
-                + "(CREATED_TIME BETWEEN ? AND ?) GROUP BY CREATED_TIME ORDER BY "
-                + "CREATED_TIME ASC";
+    public List<APICount> getAPICount(Instant fromTime, Instant toTime, String createdBy) throws APIMgtDAOException {
 
+        final String query;
+        if (StringUtils.isNotEmpty(createdBy)) {
+            query = "SELECT COUNT(UUID) AS count, CREATED_TIME AS time " +
+                    "FROM AM_API " +
+                    "WHERE (CREATED_TIME BETWEEN ? AND ?) " +
+                    "AND CREATED_BY = ?" +
+                    "GROUP BY CREATED_TIME " +
+                    "ORDER BY CREATED_TIME ASC";
+        } else {
+            query = "SELECT COUNT(UUID) AS count, CREATED_TIME AS time " +
+                    "FROM AM_API " +
+                    "WHERE (CREATED_TIME BETWEEN ? AND ?) " +
+                    "GROUP BY CREATED_TIME " +
+                    "ORDER BY CREATED_TIME ASC";
+        }
         List<APICount> apiInfoList = new ArrayList<>();
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             try {
                 statement.setTimestamp(1, Timestamp.from(fromTime));
                 statement.setTimestamp(2, Timestamp.from(toTime));
+                if (StringUtils.isNotEmpty(createdBy)) {
+                    statement.setString(3, createdBy);
+                }
                 if (log.isDebugEnabled()) {
                     log.debug("Executing query " + query);
                 }
