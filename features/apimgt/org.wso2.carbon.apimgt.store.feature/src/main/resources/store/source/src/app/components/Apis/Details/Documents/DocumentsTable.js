@@ -18,10 +18,8 @@
 
 import React, {Component} from 'react'
 import {Table, Popconfirm} from 'antd';
-import InlineEditor from "./InlineEditor";
-import API from '../../../../data/api.js'
+import API from '../../../../data/api'
 import Loading from '../../../Base/Loading/Loading'
-import ApiPermissionValidation from '../../../../data/ApiPermissionValidation'
 
 class DocumentsTable extends Component {
     constructor(props) {
@@ -105,17 +103,6 @@ class DocumentsTable extends Component {
             dataIndex: 'actions',
             key: 'actions',
             render: (text1, record) => (<div>
-                <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
-                    <a href="#" onClick={() => this.props.onEditAPIDocument(record)}>Edit | </a>
-                </ApiPermissionValidation>
-                <a href="#" onClick={() => this.viewDocContentHandler(record)}>View | </a>
-                <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
-                    <Popconfirm title="Are you sure you want to delete this document?"
-                                onConfirm={() => this.props.deleteDocHandler(record.documentId)}
-                                okText="Yes" cancelText="No">
-                        <a href="#">Delete</a>
-                    </Popconfirm>
-                </ApiPermissionValidation>
             </div>)
         }
         ];
@@ -123,15 +110,7 @@ class DocumentsTable extends Component {
             <div style={{paddingTop: 20}}>
                 <h3 style={{paddingBottom: 15}}>Current Documents</h3>
                 <Table dataSource={ this.props.documentsList } columns={this.columns}/>
-                {this.state.showInlineEditor &&
-                <InlineEditor showInlineEditor={this.state.showInlineEditor}
-                              handleCloseModal={this.handleCloseModal}
-                              apiId={this.props.apiId}
-                              documentId={this.state.documentId}
-                              documentName={this.state.selectedDocName}
-                              client={this.props.client}
-                />
-                }
+                {this.state.showInlineEditor && <div>eeeee</div>                }
             </div>
         );
     }
