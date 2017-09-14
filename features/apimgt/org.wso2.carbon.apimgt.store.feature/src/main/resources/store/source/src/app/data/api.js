@@ -149,11 +149,10 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getAllTiers(tierLevel, callback = null) {
-        let promise_get_all = this.client.then(
+        var promise_get_all = this.client.then(
             (client) => {
-                let req = {authorization :  "Bearer e74a576e-cab9-36ff", requestContentType :"application/json"};
                 return client.apis["Tier Collection"].get_policies__tierLevel_(
-                    {tierLevel:tierLevel}, req);
+                    {tierLevel:tierLevel}, this._requestMetaData());
             }
         );
         if (callback) {
@@ -170,12 +169,11 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     createApplication(application, callback = null) {
-        //debugger;
-        var promise_get = this.client.then(
+        var promise_create = this.client.then(
                 (client) => {
                     let payload = {body: application};
-                    return client.apis["Create"].post_applications(
-                        {payload}, this._requestMetaData());
+                    return client.apis["Application (individual)"].post_applications(
+                        payload, {'Content-Type':'application/json'});
         }
         );
         if (callback) {
