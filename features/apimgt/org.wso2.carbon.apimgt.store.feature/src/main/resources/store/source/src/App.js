@@ -29,6 +29,7 @@ import LoadingAnimation from './app/components/Base/Loading/Loading.js';
 import 'antd/dist/antd.css'
 import {message} from 'antd'
 import './App.css'
+import 'typeface-roboto'
 // import './materialize.css'
 
 /**

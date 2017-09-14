@@ -76,7 +76,7 @@ class Layout extends React.Component {
                 <Drawer
                     open={this.state.drawerOpen && this.state.showLeftMenu}
                     onRequestClose={this.handleLeftClose}
-                    docked={true}
+                    type="persistent"
                 >
                     <NavBar />
                 </Drawer>

@@ -19,6 +19,7 @@
 import React from 'react'
 import {Link, withRouter} from "react-router-dom";
 import AuthManager from '../../../data/AuthManager.js';
+import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation';
 import qs from 'qs'
 
 import AppBar from 'material-ui/AppBar';
@@ -154,7 +155,7 @@ class Header extends React.Component {
                         <Typography type="title" color="inherit" style={{flex: 1}}>
                             <Link to="/" style={{textDecoration: 'none'}}>
                                 <Button color="primary">
-                                    <img className="brand" src="/store_new/public/images/logo.svg" alt="wso2-logo"/>
+                                    <img className="brand" src="/publisher/public/images/logo.svg" alt="wso2-logo"/>
                                     <span color="contrast" style={{fontSize: "15px", color:"#fff"}}>APIM Publisher</span>
                                 </Button>
 
@@ -166,10 +167,13 @@ class Header extends React.Component {
                                     <SearchIcon />
                                 </IconButton>
                                 {/* API add menu */}
-                                <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClickAddMenu}
-                                        color="contrast">
-                                    <PlaylistAddIcon />
-                                </Button>
+                                {/* enable "create API" menu depending on user scopes */}
+                                <ScopeValidation resourcePath={resourcePath.APIS} resourceMethod={resourceMethod.POST}>
+                                  <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClickAddMenu}
+                                          color="contrast">
+                                      <PlaylistAddIcon />
+                                  </Button>
+                              </ScopeValidation>
                                 <Menu
                                     id="simple-menu"
                                     anchorEl={this.state.anchorElAddMenu}

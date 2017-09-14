@@ -142,8 +142,9 @@ class Overview extends Component {
                     <Grid item xs={12}>
                         <Paper style={{display:"flex"}}>
                             <Typography type="display2" gutterBottom className="page-title">
-                                {api.name} - <span style={{fontSize:"50%"}}>Overview</span>
+                                {api.name} - <span>Overview</span>
                             </Typography>
+                            {/* allowing edit based on scopes */}
                             <ScopeValidation resourceMethod={resourceMethod.PUT} resourcePath={resourcePath.SINGLE_API}>
                                 <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
                                     <Button aria-owns="simple-menu" aria-haspopup="true" >
@@ -151,7 +152,7 @@ class Overview extends Component {
                                     </Button>
                                 </ApiPermissionValidation>
                             </ScopeValidation>
-
+                            {/* allowing delet based on scopes */}
                             <ScopeValidation resourceMethod={resourceMethod.DELETE} resourcePath={resourcePath.SINGLE_API}>
                                 <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.DELETE}
                                                          userPermissions={this.state.api.userPermissionsForApi}>
@@ -162,10 +163,12 @@ class Overview extends Component {
                                     </Popconfirm>
                                 </ApiPermissionValidation>
                             </ScopeValidation>
-
-                            <Button aria-owns="simple-menu" aria-haspopup="true" >
-                                <CreateNewFolder /> Create New Version
-                            </Button>
+                            {/* allowing to create new version based on scopes */}
+                            <ScopeValidation resourcePath={resourcePath.API_COPY} resourceMethod={resourceMethod.POST}>
+                              <Button aria-owns="simple-menu" aria-haspopup="true" >
+                                  <CreateNewFolder /> Create New Version
+                              </Button>
+                          </ScopeValidation>
                             <Button aria-owns="simple-menu" aria-haspopup="true" >
                                 <Description /> View Swagger
                             </Button>

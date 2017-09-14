@@ -18,6 +18,7 @@
 import React from 'react';
 
 import Header from './Header/Header'
+import Footer from './Footer/Footer'
 
 import Grid from 'material-ui/Grid';
 
@@ -40,7 +41,7 @@ class Layout extends React.Component {
                         {this.props.children}
                     </Grid>
                 </Grid>
-
+                <Footer />
 
             </div>
         );

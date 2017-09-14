@@ -27,6 +27,7 @@ import Button from 'material-ui/Button';
 import Typography from 'material-ui/Typography';
 import Snackbar from 'material-ui/Snackbar';
 import User from '../../data/User'
+import Footer from '../Base/Footer/Footer'
 
 class Login extends Component {
 
@@ -117,19 +118,19 @@ class Login extends Component {
                     message={<span id="message-id">{this.state.message}</span>}
                 />
                 <div className="login-main-content">
-                    <Paper className="login-paper">
-
+                    <Paper elevation={0} square={true} className="branding">
+                      <div>
+                          <img className="brand" src="/store/public/images/logo.svg" alt="wso2-logo"/>
+                          <Typography type="headline" align="right" gutterBottom>
+                              API STORE
+                          </Typography>
+                      </div>
+                    </Paper>
+                    <Paper elevation={1} square={true} className="login-paper">
                         <form onSubmit={this.handleSubmit} className="login-form">
-                            <div>
-                                <img className="brand" src="/store/public/images/logo.svg" alt="wso2-logo"/>
-                                <Typography type="subheading" gutterBottom>
-                                    API Store
-                                </Typography>
-                                <Typography type="caption" gutterBottom>
-                                    Login to continue
-                                </Typography>
-                            </div>
-
+                          <Typography type="body1" gutterBottom>
+                              Sign in to your account
+                          </Typography>
                             <TextField
                                 error={!this.state.username && this.state.validate}
                                 id="username"
@@ -151,18 +152,16 @@ class Login extends Component {
                                 onChange={this.handlePasswordChange}
                             />
 
-                            <Button type="submit" raised color="primary"  className="login-form-submit">
+                            <Button type="submit" raised color="primary" className="login-form-submit">
                                 Login
                             </Button>
-
+                            <Button type="button" className="login-form-back">
+                                Go Back
+                            </Button>
                         </form>
                     </Paper>
                 </div>
-                <div className="login-footer">
-                    WSO2 | © 2017
-                    <a href="http://wso2.com/" target="_blank"><i
-                        className="icon fw fw-wso2"/> Inc</a>.
-                </div>
+                <Footer/>
             </div>
 
             );

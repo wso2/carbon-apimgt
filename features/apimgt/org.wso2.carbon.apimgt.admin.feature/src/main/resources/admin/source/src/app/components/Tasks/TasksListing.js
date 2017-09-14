@@ -19,36 +19,38 @@
 
  import React, {Component} from 'react'
  import {Link} from 'react-router-dom'
- import {Table, Popconfirm, Button, Dropdown, Menu, message} from 'antd';
+ import { withStyles } from 'material-ui/styles';
+ import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table';
+ import Snackbar from 'material-ui/Snackbar';
+ import Button from 'material-ui/Button';
 
  import API from '../../data/api'
-
- //width of the table colum for the description section as a percentage
- const description_table_width = '60%';
 
  class TasksListing extends Component {
    constructor(props) {
        super(props);
        this.state = {
            workflows: null,
-           selectedRowKeys: []
+           selectedRowKeys: [],
+           open:false,
+           message: ''
        };
        this.state.workflow_type = props.match.params.workflow_type;
        this.onSelectChange = this.onSelectChange.bind(this);
        this.handleWorkflowComplete = this.handleWorkflowComplete.bind(this);
+       this.handleRequestClose = this.handleRequestClose.bind(this);
    }
 
 
    handleWorkflowComplete(referenceId, status) {
-       const hideMessage = message.loading("Completing worklow task ...", 0);
+       //const hideMessage = message.loading("Completing worklow task ...", 0);
        const api = new API();
 
        let promised_update = api.completeWorkflow(referenceId, status);
        promised_update.then(
            response => {
              if (response.status !== 200) {
-                 message.error("Something went wrong while updating the workflow task!");
-                 hideMessage();
+                 this.setState({open: true, message: "Something went wrong while updating the workflow task!"});
                  return;
              }
              let workflows = this.state.workflows;
@@ -58,14 +60,13 @@
                      break;
                  }
              }
-             this.setState({active: false, workflows: workflows});
-             message.success("Updated successfully!");
-
-             hideMessage();
+             this.setState({active: false, workflows: workflows, open: true, message: "Updated successfully!"});
            }
        );
    }
-
+   handleRequestClose() {
+       this.setState({ open: false });
+   }
    //Since Same component is used for all the tasks, this is implemented to reload the tables
    componentWillReceiveProps(nextProps){
 
@@ -107,40 +108,59 @@
 
    render() {
        const {selectedRowKeys, workflows} = this.state;
-       const columns = [{
-           title: 'Description',
-           dataIndex: 'description',
-            width: description_table_width
-       }, {
-           title: 'Created Time',
-           dataIndex: 'createdTime',
-           sorter: (a, b) => a.maxTps - b.maxTps,
-       }, {
-           title: 'Action',
-           key: 'action',
-           render: (text, record) => {
-               return (
-                 <span>
-                   <Button icon="check" onClick = {() => this.handleWorkflowComplete(text.referenceId, 'APPROVED')} >Approve</Button>
-                   <span className="ant-divider" />
-                   <Button type="danger" icon="close"
-                          onClick = {() => this.handleWorkflowComplete(text.referenceId, 'REJECTED')}>Reject</Button>
-                </span>
-                 )
-           }
-       }];
        const rowSelection = {
            selectedRowKeys,
            onChange: this.onSelectChange,
        };
 
+       let data = [];
+       if(workflows) {
+         data = workflows
+       }
 
        return (
            <div>
-               <Table rowSelection={rowSelection} loading={workflows === null} columns={columns}
-                      dataSource={workflows}
-                      rowKey="id"
-                      size="middle"/>
+
+             <Table>
+               <TableHead>
+                 <TableRow>
+                   <TableCell>Description</TableCell>
+                   <TableCell>Created Time</TableCell>
+                   <TableCell>Action</TableCell>
+                 </TableRow>
+               </TableHead>
+               <TableBody>
+                 {data.map(n => {
+                   return (
+                     <TableRow key={n.createdTime}>
+                       <TableCell>{n.description}</TableCell>
+                       <TableCell>{n.createdTime}</TableCell>
+                       <TableCell>
+                       <span>
+                          <Button color="primary" onClick = {
+                            () => this.handleWorkflowComplete(n.referenceId, 'APPROVED')}>Approve</Button>
+                          <Button color="accent" onClick = {
+                            () => this.handleWorkflowComplete(n.referenceId, 'REJECTED')}>Reject</Button>
+                       </span>
+                       </TableCell>
+                     </TableRow>
+                   );
+                 })}
+               </TableBody>
+             </Table>
+             <Snackbar
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'center',
+              }}
+              open={this.state.open}
+              autoHideDuration={6e3}
+              onRequestClose={this.handleRequestClose}
+              SnackbarContentProps={{
+                'aria-describedby': 'message-id',
+              }}
+              message={<span id="message-id">{this.state.message}</span>}
+            />
            </div>
        );
    }
