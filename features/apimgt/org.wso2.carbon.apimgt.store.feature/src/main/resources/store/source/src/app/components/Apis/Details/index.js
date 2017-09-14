@@ -22,6 +22,7 @@ import {Route, Switch, Redirect} from 'react-router-dom'
 import Overview from './Overview'
 import ApiConsole from './ApiConsole'
 import Documentation from './Documentation'
+import Documents from './Documents/Documents'
 import Forum from './Forum'
 import Sdk from './Sdk'
 import BasicInfo from './BasicInfo'
@@ -36,14 +37,21 @@ export default class Details extends Component {
     constructor(props){
         super(props);
         this.state = {
-            value: 0,
+            value: 'overview',
         };
     }
 
 
     handleChange = (event, value) => {
+    var tabs = [
+    "overview",
+    "console",
+    "documentation",
+    "forum",
+    "sdk"
+    ]; 
         this.setState({ value });
-        this.props.history.push({pathname: "/apis/" + this.props.match.params.api_uuid + "/" + value});
+        this.props.history.push({pathname: "/apis/" + this.props.match.params.api_uuid + "/" + tabs[value]});
     };
     componentDidMount() {
         this.props.setLeftMenu(true);
@@ -79,7 +87,7 @@ export default class Details extends Component {
                     <Redirect exact from="/apis/:api_uuid" to={redirect_url}/>
                     <Route path="/apis/:api_uuid/overview" component={Overview}/>
                     <Route path="/apis/:api_uuid/console" component={ApiConsole}/>
-                    <Route path="/apis/:api_uuid/documentation" component={Documentation}/>
+                    <Route path="/apis/:api_uuid/documentation" component={Documents}/>
                     <Route path="/apis/:api_uuid/forum" component={Forum}/>
                     <Route path="/apis/:api_uuid/sdk" component={Sdk}/>
                     <Route component={PageNotFound}/>
