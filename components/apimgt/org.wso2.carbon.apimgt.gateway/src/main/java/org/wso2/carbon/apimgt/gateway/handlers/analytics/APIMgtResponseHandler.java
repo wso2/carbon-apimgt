@@ -55,7 +55,7 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
         }
 
         try {
-            if (!enabled || skipEventReceiverConnection) {
+            if (!enabled) {
                 return true;
             }
             long responseSize = 0;
@@ -106,7 +106,6 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
                             responseSize = size.length;
                         }
                     }
-                    
                 }
             }
             //When start time not properly set

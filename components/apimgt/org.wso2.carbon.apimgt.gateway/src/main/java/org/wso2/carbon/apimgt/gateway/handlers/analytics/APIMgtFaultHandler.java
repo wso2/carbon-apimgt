@@ -27,7 +27,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
 
-
     public APIMgtFaultHandler() {
         super();
     }
@@ -38,12 +37,11 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
             this.initializeDataPublisher();
         }
         try {
-            if (!enabled || skipEventReceiverConnection) {
+            if (!enabled) {
                 return true;
             }
             long requestTime = Long.parseLong((String) messageContext.getProperty(APIMgtGatewayConstants.
                                                                          REQUEST_START_TIME));
-
             FaultPublisherDTO faultPublisherDTO = new FaultPublisherDTO();
             faultPublisherDTO.setConsumerKey((String) messageContext.getProperty(
                     APIMgtGatewayConstants.CONSUMER_KEY));
