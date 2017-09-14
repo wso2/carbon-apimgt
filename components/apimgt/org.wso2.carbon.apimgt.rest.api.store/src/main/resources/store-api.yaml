@@ -2280,6 +2280,8 @@ paths:
 # Retrieve the list of all available policies
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       description: |
         Get available policies
       parameters:
