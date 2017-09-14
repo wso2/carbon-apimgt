@@ -16,30 +16,49 @@
  * under the License.
  */
 import React from 'react';
-import SingleInput from '../FormComponents/SingleInput';
-import CheckboxOrRadioGroup from '../FormComponents/CheckboxOrRadioGroup';
 import API from '../../../../data/api.js'
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.min.css';
 import './ApiCreateSwagger.css'
-import Dropzone from 'react-dropzone'
 import {ScopeValidation, resourceMethod, resourcePath} from '../../../../data/ScopeValidation'
+import Dropzone from 'react-dropzone'
 
-import { Form, Icon, Input, Button, message, Upload, Radio } from 'antd';
-const FormItem = Form.Item;
-const RadioButton = Radio.Button;
-const RadioGroup = Radio.Group;
 
-class SwaggerForm extends React.Component {
+import Radio, { RadioGroup } from 'material-ui/Radio';
+import { FormLabel, FormControl, FormControlLabel } from 'material-ui/Form';
+import Button from 'material-ui/Button';
+import TextField from 'material-ui/TextField';
+import Paper from 'material-ui/Paper';
+import Typography from 'material-ui/Typography';
+import Grid from 'material-ui/Grid';
+import ArrowDropDown from 'material-ui-icons/ArrowDropDown';
+import ArrowDropUp from 'material-ui-icons/ArrowDropUp';
+import AppBar from 'material-ui/AppBar';
+import Toolbar from 'material-ui/Toolbar';
+import Snackbar from 'material-ui/Snackbar';
+import IconButton from 'material-ui/IconButton';
+import CloseIcon from 'material-ui-icons/Close';
+
+
+
+class ApiCreateSwagger extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {uploadMethod:'file',file:{}}
+        this.state = {
+            uploadMethod:'file',
+            files:[],swaggerUrl:'',
+            open:false,
+            message:''
+        };
+        this.onDrop = this.onDrop.bind(this);
+        this.swaggerUrlChange = this.swaggerUrlChange.bind(this);
     }
     createAPICallback = (response) => {
         let uuid = JSON.parse(response.data).id;
         let redirect_url = "/apis/" + uuid + "/overview";
         this.props.history.push(redirect_url);
     };
+    swaggerUrlChange(e){
+        this.setState({swaggerUrl:e.target.value});
+    }
     /**
      * Do create API from either swagger URL or swagger file upload.In case of URL pre fetch the swagger file and make a blob
      * and the send it over REST API.
@@ -47,146 +66,184 @@ class SwaggerForm extends React.Component {
      */
     handleSubmit = (e) => {
         e.preventDefault();
-        this.props.form.validateFields((err, values) => {
-            if (!err) {
-                console.log('Received values of form: ', values);
-                let input_type = this.state.uploadMethod;
-                if (input_type === "url") {
-                    let url = values.url;
-                    let data = {};
-                    data.url = url;
-                    data.type = 'swagger-url';
-                    let new_api = new API('');
-                    new_api.create(data)
-                        .then(this.createAPICallback)
-                        .catch(
-                            function (error_response) {
-                                let error_data = JSON.parse(error_response.data);
-                                let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
-                                message.error(messageTxt);
-                                console.debug(error_response);
-                            });
-                } else if (input_type === "file") {
-                    let swagger = this.state.file.originFileObj;
-                    let new_api = new API('');
-                    new_api.create(swagger)
-                        .then(this.createAPICallback)
-                        .catch(
-                            function (error_response) {
-                                let error_data;
-                                let messageTxt;
-                                if (error_response.obj) {
-                                    error_data = error_response.obj;
-                                    messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
-                                } else {
-                                    error_data = error_response.data;
-                                    messageTxt = "Error: " + error_data + ".";
-
-                                }
-                                message.error(messageTxt);
-                                console.debug(error_response);
-                            });
-                }
-            } else {
-
+        let input_type = this.state.uploadMethod;
+        if (input_type === "url") {
+            let url = this.state.swaggerUrl;
+            if(url === ""){
+                console.debug("Swagger Url is empty.");
+                this.setState({ message: "Swagger Url is empty." });
+                this.setState({ open: true });
+                return;
             }
+            let data = {};
+            data.url = url;
+            data.type = 'swagger-url';
+            let new_api = new API('');
+            new_api.create(data)
+                .then(this.createAPICallback)
+                .catch(
+                    function (error_response) {
+                        let error_data = JSON.parse(error_response.data);
+                        let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                        this.setState({ message: messageTxt });
+                        this.setState({ open: true });
+                        console.debug(error_response);
+                    });
+        } else if (input_type === "file") {
+            if(this.state.files.length === 0){
+                this.setState({ message: "Select a swagger file to upload." });
+                this.setState({ open: true });
+                console.log("Select a swagger file to upload.");
+                return;
+            }
+            let swagger = this.state.files[0];
+            let new_api = new API('');
+            new_api.create(swagger)
+                .then(this.createAPICallback)
+                .catch(
+                    error_response => {
+                        let error_data;
+                        let messageTxt;
+                        if (error_response.obj) {
+                            error_data = error_response.obj;
+                            messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
+                        } else {
+                            error_data = error_response.data;
+                            messageTxt = "Error: " + error_data + ".";
+
+                        }
+                        this.setState({ message: messageTxt });
+                        this.setState({ open: true });
+                        console.debug(error_response);
+                    });
+        }
+
+    };
+
+    handleUploadMethodChange = (e, value) => {
+        this.setState({uploadMethod:value});
+    };
+
+    onDrop(files) {
+        this.setState({
+            files
         });
-    };
-    normFile = (e) => {
-        console.log('Upload event:', e);
-        if (Array.isArray(e)) {
-            return e;
-        }
-        return e && e.fileList;
-    };
-    handleUploadMethodChange = (e) => {
-        this.setState({uploadMethod:e.target.value});
-    };
-    toggleSwaggerType = (containerType) =>  {
-        return this.state.uploadMethod === containerType ? '' : 'hidden';
-    };
-    handleUploadFile = (info) => {
-        const status = info.file.status;
-        if (status !== 'uploading') {
-            console.log(info.file, info.fileList);
-        }
-        if (status === 'done') {
-            message.success(`${info.file.name} file uploaded successfully.`);
-            this.setState({file:info.file})
-        } else if (status === 'error') {
-            message.error(`${info.file.name} file upload failed.`);
-        }
     }
+    handleRequestClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        this.setState({ open: false });
+    };
 
     render(){
-        const { getFieldDecorator } = this.props.form;
 
-        const props = {
-            name: 'file',
-            multiple: false,
-            showUploadList: true,
-            action: '//jsonplaceholder.typicode.com/posts/'
-        };
+
         return(
-            <Form onSubmit={this.handleSubmit} className="login-form">
+            <Grid container>
+                <Grid item xs={12}>
 
+                    <Paper>
+                        <Typography className="page-title" type="display2" gutterBottom>
+                            Create New API - { this.state.uploadMethod === "file" ? <span>Swagger file upload</span> :
+                                <span>By swagger url</span> }
+                        </Typography>
+                        <Typography type="caption" gutterBottom align="left" className="page-title-help">
+                            Fill the mandatory fields (Name, Version, Context) and create the API. Configure advanced
+                            configurations later.
+                        </Typography>
 
-                <FormItem>
-                    {getFieldDecorator('radio-button')(
-                        <RadioGroup initialValue="file" onChange={this.handleUploadMethodChange}>
-                            <RadioButton value="file">Swagger File</RadioButton>
-                            <RadioButton value="url">Swagger URL</RadioButton>
-                        </RadioGroup>
-                    )}
-                </FormItem>
-                <FormItem className={this.toggleSwaggerType("file")}>
-                    <div className="dropbox">
-                        {getFieldDecorator('dragger', {
-                            valuePropName: 'fileList',
-                            getValueFromEvent: this.normFile,
-                        })(
-                            <Upload.Dragger {...props} onChange={this.handleUploadFile}>
-                                <p className="ant-upload-drag-icon">
-                                    <Icon type="inbox" />
-                                </p>
-                                <p className="ant-upload-text">Click or drag file to this area to upload</p>
-                                <p className="ant-upload-hint">Support for a single or bulk upload. Strictly prohibit from uploading company data or other band files</p>
-                            </Upload.Dragger>
-                        )}
-                    </div>
-                </FormItem>
-                <FormItem className={this.toggleSwaggerType("url")}>
-                    {getFieldDecorator('userName', {
-                        rules: [{ required: false, message: 'Please input your username!' }],
-                    })(
-                        <Input name="url" prefix={<Icon type="user" style={{ fontSize: 13 }} />} placeholder="Username" />
-                    )}
-                </FormItem>
-                <FormItem >
-                    <ScopeValidation resourceMethod={resourceMethod.POST} resourcePath={resourcePath.APIS}>
-                        <Button type="primary" htmlType="submit">
-                            Create
-                        </Button>
-                    </ScopeValidation>
-                    <Button type="default" htmlType="button" onClick={() => this.props.history.push("/api/create/home")}>
-                        Cancel
-                    </Button>
+                    </Paper>
+                </Grid>
+                <Grid item xs={12}  className="page-content">
+                    <form onSubmit={this.handleSubmit} className="login-form">
+                        <AppBar position="static" color="default">
+                            <Toolbar>
+                                <RadioGroup
+                                    aria-label="inputType"
+                                    name="inputType"
+                                    value={this.state.uploadMethod}
+                                    onChange={this.handleUploadMethodChange}
+                                    className="horizontal"
+                                >
+                                    <FormControlLabel value="file" control={<Radio />} label="File" />
+                                    <FormControlLabel value="url" control={<Radio />} label="Url" />
+                                </RadioGroup>
+                            </Toolbar>
+                        </AppBar>
 
-                </FormItem>
+                        { this.state.uploadMethod === "file" &&
+                        <FormControl className="horizontal dropzone-wrapper">
+                            <div className="dropzone">
+                                <Dropzone onDrop={this.onDrop} multiple={false}>
+                                    <p>Try dropping some files here, or click to select files to upload.</p>
+                                </Dropzone>
+                            </div>
+                            <aside>
+                                <h2>Uploaded files</h2>
+                                <ul>
+                                    {
+                                        this.state.files.map(f => <li key={f.name}>{f.name} - {f.size} bytes</li>)
+                                    }
+                                </ul>
+                            </aside>
+                        </FormControl> }
+                        { this.state.uploadMethod === "url" &&
+                        <FormControl className="horizontal full-width">
+                            <TextField
+                                id="swaggerUrl"
+                                label="Swagger Url"
+                                type="text"
+                                name="swaggerUrl"
+                                margin="normal"
+                                style={{width:"100%"}}
+                                value={this.state.swaggerUrl}
+                                onChange={this.swaggerUrlChange}
+                            />
+                        </FormControl> }
+                        <FormControl className="horizontal">
+                          {/* Allowing to create an API from swagger definition, based on scopes */}
+                            <ScopeValidation resourceMethod={resourceMethod.POST} resourcePath={resourcePath.APIS}>
+                                <Button raised color="primary" type="submit" className="button-left">
+                                    Create
+                                </Button>
+                            </ScopeValidation>
+                            <Button raised onClick={() => this.props.history.push("/api/create/home")}>
+                                Cancel
+                            </Button>
 
-            </Form>
+                        </FormControl>
+
+                    </form>
+                    <Snackbar
+                        anchorOrigin={{
+                            vertical: 'top',
+                            horizontal: 'center',
+                        }}
+                        open={this.state.open}
+                        autoHideDuration={6e3}
+                        onRequestClose={this.handleRequestClose}
+                        SnackbarContentProps={{
+                            'aria-describedby': 'message-id',
+                        }}
+                        message={<span id="message-id">{this.state.message}</span>}
+                        action={[
+                            <IconButton
+                                key="close"
+                                aria-label="Close"
+                                color="inherit"
+                                onClick={this.handleRequestClose}
+                            >
+                                <CloseIcon />
+                            </IconButton>,
+                        ]}
+                    />
+                </Grid>
+            </Grid>
         );
     }
 }
 
-const SwaggerFormGenerated = Form.create()(SwaggerForm);
-
-class ApiCreateSwagger extends React.Component {
-    constructor(props) {
-        super(props);
-
-    }
-    render = () => {return  <SwaggerFormGenerated history={this.props.history} /> }
-}
 
 export default ApiCreateSwagger;

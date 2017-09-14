@@ -20,7 +20,12 @@
 import React, {Component} from 'react'
 import API from '../../../../data/api'
 
-import {Select, Button, message} from 'antd';
+import Input, { InputLabel } from 'material-ui/Input';
+import { MenuItem } from 'material-ui/Menu';
+import { FormControl } from 'material-ui/Form';
+import Select from 'material-ui/Select';
+import Button from 'material-ui/Button';
+
 const Option = Select.Option;
 
 export default class Policies extends Component {
@@ -32,10 +37,10 @@ export default class Policies extends Component {
         this.api = new API();
     }
 
-    handleChange(data) {
-        this.setState({selectedPolicies: data});
+    handleChange(e) {
+        this.setState({selectedPolicies: e.target.value});
         if(this.props.handlePolicies){
-            this.props.handlePolicies(data);
+            this.props.handlePolicies(e.target.value);
         }
     }
     changeTiers(event) {
@@ -55,8 +60,7 @@ export default class Policies extends Component {
 
     render() {
         let currentPolicies = this.props.api ? this.props.api.policies : this.props.selectedPolicies;
-        const policies = this.props.policies.map(
-            policy => <Option key={policy.policyName}>{policy.displayName}</Option>);
+        const policies = this.props.policies;
         const props = {
             mode: "multiple",
             style: {width: '100%'},
@@ -67,11 +71,37 @@ export default class Policies extends Component {
         return (
 
             <div>
-                <Select {...props}>
-                    {policies}
-                </Select>
-                {this.props.api && <Button style={{margin: "5px"}} type="primary" loading={this.state.loading}
-                        onClick={this.changeTiers}>Update</Button> }
+                <FormControl className="policies-select">
+                    <InputLabel htmlFor="name-multiple">Policies</InputLabel>
+                    <Select
+                        multiple
+                        value={this.state.selectedPolicies}
+                        onChange={this.handleChange}
+                        input={<Input id="name-multiple" />}
+                        MenuProps={{
+                            PaperProps: {
+                                style: {
+                                    width: 200,
+                                },
+                            },
+                        }}
+                    >
+                        {policies.map(policy => (
+                            <MenuItem
+                                key={policy.policyName}
+                                value={policy.policyName}
+                                style={{
+                                    fontWeight: policies.indexOf(policy.policyName) !== -1 ? '500' : '400',
+                                }}
+                            >
+                                {policy.displayName}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+
+
+
             </div>
 
         );
