@@ -181,7 +181,7 @@ class AuthManager {
     logout() {
         let authHeader = this.bearer + AuthManager.getUser().getPartialToken();
         //TODO Will have to change the logout end point url to contain the app context(i.e. publisher/store, etc.)
-        let url = this.host + "/logout";
+        let url = this.host + "/login/logout/store";
         let headers = {
             'Accept': 'application/json',
             'Authorization': authHeader
