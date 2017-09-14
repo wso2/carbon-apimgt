@@ -23,41 +23,15 @@ import {Table, Icon, Button, Dropdown, Menu, message} from 'antd';
 
 import API from '../../../data/api'
 
+
+
 export default class EndpointsDiscover extends Component {
     constructor(props) {
         super(props);
         this.state = {
             endpoints: null,
-            selectedRowKeys: [],
             endpointBeingAdded: false,
         };
-        //this.onSelectChange = this.onSelectChange.bind(this);
-    }
-
-    handleAddEndpointToDB = (endpointUuid, serviceName, endpointType, config, security,
-        maximumTps) => {
-        //Todo check if exists in DB
-        let endpointDefinition = {
-            name: serviceName + "-" + endpointType + "-" + JSON.parse(config).serviceType,
-            type: endpointType,
-            endpointConfig: config,
-            endpointSecurity: security,
-            maxTps: maximumTps
-        };
-        const api = new API();
-        const promisedEndpoint = api.addEndpoint(endpointDefinition);
-        return promisedEndpoint.then(
-            response => {
-                const {name, id} = response.obj;
-                message.success("New endpoint " + name + " created successfully");
-            }
-        ).catch(
-            error => {
-                console.error(error);
-                message.error("Error occurred while creating the endpoint!");
-                this.setState({endpointBeingAdded: false});
-            }
-        )
     }
 
     componentDidMount() {
@@ -69,31 +43,6 @@ export default class EndpointsDiscover extends Component {
                 this.setState({endpoints: response.obj.list});
             }
         );
-    }
-
-    onSelectChange(selectedRowKeys) {
-        this.setState({selectedRowKeys: selectedRowKeys});
-    }
-
-    checkIfEndpointAlreadyAdded(record, api) {
-        let alreadyAdded = false;
-        debugger;
-        let endpointName = record.name+"-"+record.type+"-"+JSON.parse(record.endpointConfig).serviceType;
-        let promised_endpointAlreadyInDB = api.checkIfEndpointExists(endpointName);;
-        promised_endpointAlreadyInDB.then(
-            response => {
-                console.log("done");
-                alreadyAdded = true;
-            }
-        ).catch(
-            error => {
-                if(error.response.status==404){
-                    console.log(endpointName+" not in database")
-                }
-
-            }
-        )
-        return alreadyAdded;
     }
 
     render() {
@@ -131,25 +80,8 @@ export default class EndpointsDiscover extends Component {
             key: 'action',
             dataIndex: 'id',
             width: '20%',
-            render: (text, record) => {
-                let alreadyInDB = this.checkIfEndpointAlreadyAdded(record,api);
-                console.log(alreadyInDB);
-                if(alreadyInDB){
-                    return <Button> Update Database </Button>;
-                }else{
-                    return <span>
-                      <Button type="primary" onClick={() =>this.handleAddEndpointToDB(record.id,
-                      record.name, record.type, record.endpointConfig, record.endpointSecurity,
-                      record.maxTps)}>
-                        Add to Database</Button>
-                    </span>;
-                }
-            }
+            render: (text, record) =><ButtonCell record={record} api={api}/>
         }];
-        const rowSelection = {
-            selectedRowKeys,
-            onChange: this.onSelectChange,
-        };
         const endpointListAndCreatMenu = (
             <Menu>
                 <Menu.Item key="0">
@@ -166,11 +98,90 @@ export default class EndpointsDiscover extends Component {
                     <Button icon="left" />
                 </Dropdown>
                 <h3>Discovered Service Endpoints</h3>
-                <Table rowSelection={rowSelection} loading={endpoints === null} columns={columns}
-                       dataSource={endpoints}
-                       rowKey="id"
-                       size="middle"/>
+                <Table loading={endpoints === null }
+                    columns={columns}
+                    dataSource={endpoints}
+                    rowKey="id"
+                    size="middle"/>
             </div>
         );
     }
 }
+
+class ButtonCell extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            record: this.props.record,
+            api: this.props.api,
+            actionButton: <Button type="primary" loading>Loading</Button>
+        };
+    }
+    getUpdateButton(){
+        return (
+            <Button> Update Database </Button>
+        );
+    }
+    getAddButton(){
+        let record = this.state.record;
+        return (
+            <Button type="primary" onClick={() =>this.handleAddEndpointToDB(record.id,
+            record.name, record.type, record.endpointConfig, record.endpointSecurity,
+            record.maxTps)}>
+            Add to Database</Button>
+        );
+    }
+    handleAddEndpointToDB = (endpointUuid, serviceName, endpointType, config, security,
+        maximumTps) => {
+        let endpointDefinition = {
+            name: serviceName + "-" + endpointType + "-" + JSON.parse(config).serviceType,
+            type: endpointType,
+            endpointConfig: config,
+            endpointSecurity: security,
+            maxTps: maximumTps
+        };
+        const api = new API();
+        const promisedEndpoint = api.addEndpoint(endpointDefinition);
+        return promisedEndpoint.then(
+            response => {
+                const {name, id} = response.obj;
+                message.success("New endpoint " + name + " created successfully");
+                this.setState({
+                    actionButton: this.getUpdateButton()
+                });
+            }
+        ).catch(
+            error => {
+                console.error(error);
+                message.error("Error occurred while creating the endpoint!");
+                this.setState({endpointBeingAdded: false});
+            }
+        )
+    }
+    componentDidMount() {
+        let record = this.state.record;
+        let api = this.state.api;
+        let endpointName = record.name+"-"+record.type+"-"+JSON.parse(record.endpointConfig).serviceType;
+        let promised_endpointAlreadyInDB = api.checkIfEndpointExists(endpointName);
+        promised_endpointAlreadyInDB.then(
+            response => {
+                this.setState({
+                    actionButton: this.getUpdateButton()
+                });
+            }
+        ).catch(
+            error => {
+                if(error.response.status==404){
+                     //console.log(endpointName+" not in database");
+                     this.setState({
+                         actionButton: this.getAddButton()
+                     });
+                }
+            }
+        )
+     }
+    render() {
+        return (this.state.actionButton);
+    }
+}
+
