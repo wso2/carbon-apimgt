@@ -44,7 +44,7 @@ import java.sql.SQLException;
 public class DAOFactory {
 
     private static final Logger log = LoggerFactory.getLogger(DAOFactory.class);
-    
+
     private static final String MYSQL = "MySQL";
     private static final String H2 = "H2";
     private static final String DB2 = "DB2";
@@ -249,7 +249,7 @@ public class DAOFactory {
 
         return labelDAO;
     }
-    
+
     public static WorkflowDAO getWorkflowDAO() throws APIMgtDAOException {
         WorkflowDAO workflowDAO = null;
 
@@ -324,7 +324,8 @@ public class DAOFactory {
      */
     public static AnalyticsDAO getAnalyticsDAO() throws APIMgtDAOException {
         AnalyticsDAO analyticsDAO;
-        boolean isAnalyticsEnabled = ServiceReferenceHolder.getInstance().getAPIMConfiguration().isAnalyticsEnabled();
+        boolean isAnalyticsEnabled = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
+                .getAnalyticsConfigurations().isEnabled();
         if (isAnalyticsEnabled) {
             try (Connection connection = DAOUtil.getAnalyticsConnection()) {
                 analyticsDAO = getAnalyticsDaoImplForVendor(connection);

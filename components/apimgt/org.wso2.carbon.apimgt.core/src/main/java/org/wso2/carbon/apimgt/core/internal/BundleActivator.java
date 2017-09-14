@@ -71,7 +71,7 @@ public class BundleActivator {
                     (HikariDataSource) ctx.lookup("java:comp/env/jdbc/WSO2AMDB"));
             DAOUtil.initialize(dataSourceAMDB);
             boolean isAnalyticsEnabled = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
-                    .isAnalyticsEnabled();
+                    .getAnalyticsConfigurations().isEnabled();
             if (isAnalyticsEnabled) {
                 DataSource dataSourceStatDB = new DataSourceImpl(
                         (HikariDataSource) ctx.lookup("java:comp/env/jdbc/WSO2AMSTATSDB"));
