@@ -507,9 +507,5 @@ public class RestApiUtil {
             throw new APIManagementException(e.getMessage(), ExceptionCodes.INVALID_DATE_TIME_STAMP);
         }
     }
-
-    public static String fromISO8601ToUTC(String timeStamp) {
-        // returns ISO 8601 format, e.g. 2014-02-15T01:02:03Z
-        return Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(timeStamp)).toString();
-    }
+    
 }

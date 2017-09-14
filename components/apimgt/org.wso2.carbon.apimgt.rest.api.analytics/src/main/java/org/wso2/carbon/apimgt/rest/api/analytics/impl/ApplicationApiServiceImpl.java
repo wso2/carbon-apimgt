@@ -18,6 +18,9 @@ import java.util.List;
 
 import static org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil.fromISO8601ToInstant;
 
+/**
+ * Application related analytics API implementation.
+ */
 public class ApplicationApiServiceImpl extends ApplicationApiService {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationApiServiceImpl.class);
@@ -37,10 +40,8 @@ public class ApplicationApiServiceImpl extends ApplicationApiService {
             throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
-            if (log.isDebugEnabled()) {
-                log.debug("Retrieving applications created over time. " +
-                        "From: " + startTime + " to: " + endTime);
-            }
+            log.debug("Retrieving applications created over time. [From: {} to: {} Created By: {}]", startTime,
+                    endTime, createdBy);
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
             List<ApplicationCount> applicationCountList = analyzer
                     .getApplicationCount(fromISO8601ToInstant(startTime), fromISO8601ToInstant(endTime), createdBy);

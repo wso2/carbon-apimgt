@@ -40,13 +40,8 @@ public class ApiApiServiceImpl extends ApiApiService {
     public Response apiListGet(String startTime, String endTime, String createdBy, Request request) throws
             NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
-        startTime = RestApiUtil.fromISO8601ToUTC(startTime);
-        endTime = RestApiUtil.fromISO8601ToUTC(endTime);
         try {
-            if (log.isDebugEnabled()) {
-                log.debug("Retrieving API information. [From: " + startTime + " to: " + endTime + " created by: " +
-                        "" + createdBy + "]");
-            }
+            log.debug("Retrieving API information. [From: {} To: {} Created By:{} ]", startTime, endTime, createdBy);
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
             List<APIInfo> apiInfoList = analyzer.getAPIInfo(fromISO8601ToInstant(startTime), fromISO8601ToInstant
                     (endTime), createdBy);
@@ -77,16 +72,13 @@ public class ApiApiServiceImpl extends ApiApiService {
             NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
-            if (log.isDebugEnabled()) {
-                log.debug("Retrieving APIs created over time. [From: " + startTime + " to: " + endTime + " " +
-                        "created by: " + createdBy + "]");
-            }
+            log.debug("Retrieving APIs created over time. [From: {}  To: {} Created By: {}]", startTime, endTime,
+                    createdBy);
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
             List<APICount> apiCountList = analyzer.getAPICount(fromISO8601ToInstant(startTime),
                     fromISO8601ToInstant(endTime), createdBy);
             APICountListDTO apiCountListDTO = AnalyticsMappingUtil.fromAPICountToListDTO(apiCountList);
             return Response.ok().entity(apiCountListDTO).build();
-
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving API created over time info";
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
@@ -100,7 +92,7 @@ public class ApiApiServiceImpl extends ApiApiService {
      *
      * @param startTime Filter for start time stamp
      * @param endTime   Filter for end time stamp
-     * @param apiId Filter for apiId
+     * @param apiId     Filter for apiId
      * @param request   MSF4J request
      * @return API subscriptions count
      * @throws NotFoundException When the particular resource does not exist in the system
@@ -110,13 +102,8 @@ public class ApiApiServiceImpl extends ApiApiService {
             NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
-            if (log.isDebugEnabled()) {
-                log.debug("Retrieving APIs created over time. [From: " + startTime + " to: " + endTime + " " +
-                        "API Id: " + apiId + "]");
-            }
+            log.debug("Retrieving APIs created over time. [From: {} To: {} API Id: {}]");
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
-            startTime = RestApiUtil.fromISO8601ToUTC(startTime);
-            endTime = RestApiUtil.fromISO8601ToUTC(endTime);
             List<APISubscriptionCount> apiSubscriptionCountList = analyzer.getAPISubscriptionCount(startTime, endTime,
                     apiId);
             APISubscriptionCountListDTO apiSubscriptionListDTO = AnalyticsMappingUtil

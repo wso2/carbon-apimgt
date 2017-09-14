@@ -44,9 +44,8 @@ public class SubscriptionApiServiceImpl extends SubscriptionApiService {
 
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
-            if (log.isDebugEnabled()) {
-                log.debug("Retrieving subscriptions created over time. [ From: " + startTime + " To: " + endTime + "]");
-            }
+            log.debug("Retrieving subscriptions created over time. [From: {} To: {} Created By: {}]", startTime,
+                    endTime, createdBy);
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
             List<SubscriptionCount> subscriptionCount = analyzer.getSubscriptionCount(
                     fromISO8601ToInstant(startTime), fromISO8601ToInstant(endTime), createdBy);
@@ -77,9 +76,8 @@ public class SubscriptionApiServiceImpl extends SubscriptionApiService {
             NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
-            if (log.isDebugEnabled()) {
-                log.debug("Retrieving subscriptions info. [From: " + startTime + " To: " + endTime + "]");
-            }
+            log.debug("Retrieving subscriptions info. [From: {}  To: {} Created By: {}]", startTime, endTime,
+                    createdBy);
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
             List<SubscriptionInfo> subscriptionInfoList = analyzer.getSubscriptionInfo(fromISO8601ToInstant
                     (startTime), fromISO8601ToInstant(endTime), createdBy);

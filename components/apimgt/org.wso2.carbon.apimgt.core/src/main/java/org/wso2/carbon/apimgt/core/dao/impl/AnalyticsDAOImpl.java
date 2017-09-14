@@ -78,9 +78,7 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
             if (StringUtils.isNotEmpty(createdBy)) {
                 statement.setString(3, createdBy);
             }
-            if (log.isDebugEnabled()) {
-                log.debug("Executing query " + query);
-            }
+            log.debug("Executing query: {} ", query);
             statement.execute();
             try (ResultSet rs = statement.getResultSet()) {
                 long count = 0;
@@ -130,9 +128,7 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
             if (StringUtils.isNotEmpty(createdBy)) {
                 statement.setString(3, createdBy);
             }
-            if (log.isDebugEnabled()) {
-                log.debug("Executing query " + query);
-            }
+            log.debug("Executing query: {} ", query);
             statement.execute();
             try (ResultSet rs = statement.getResultSet()) {
                 long count = 0;
@@ -185,9 +181,7 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
             if (StringUtils.isNotEmpty(apiId)) {
                 statement.setString(3, apiId);
             }
-            if (log.isDebugEnabled()) {
-                log.debug("Executing query " + query);
-            }
+            log.debug("Executing query: {} ", query);
             statement.execute();
             try (ResultSet rs = statement.getResultSet()) {
                 while (rs.next()) {
@@ -237,9 +231,7 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
             if (StringUtils.isNotEmpty(createdBy)) {
                 statement.setString(3, createdBy);
             }
-            if (log.isDebugEnabled()) {
-                log.debug("Executing query " + query);
-            }
+            log.debug("Executing query: {} ", query);
             statement.execute();
             try (ResultSet rs = statement.getResultSet()) {
                 while (rs.next()) {
@@ -291,9 +283,7 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
             if (StringUtils.isNotEmpty(createdBy)) {
                 statement.setString(3, createdBy);
             }
-            if (log.isDebugEnabled()) {
-                log.debug("Executing query " + query);
-            }
+            log.debug("Executing query: {} ", query);
             statement.execute();
             try (ResultSet rs = statement.getResultSet()) {
                 while (rs.next()) {
@@ -344,9 +334,7 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
             if (StringUtils.isNotEmpty(createdBy)) {
                 statement.setString(3, createdBy);
             }
-            if (log.isDebugEnabled()) {
-                log.debug("Executing query " + query);
-            }
+            log.debug("Executing query: {} ", query);
             statement.execute();
             try (ResultSet rs = statement.getResultSet()) {
                 while (rs.next()) {

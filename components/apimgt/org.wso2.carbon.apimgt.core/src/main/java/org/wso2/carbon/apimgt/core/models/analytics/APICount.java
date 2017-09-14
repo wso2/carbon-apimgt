@@ -16,7 +16,7 @@
 package org.wso2.carbon.apimgt.core.models.analytics;
 
 /**
- *
+ * API Count model.
  */
 public class APICount {
 
