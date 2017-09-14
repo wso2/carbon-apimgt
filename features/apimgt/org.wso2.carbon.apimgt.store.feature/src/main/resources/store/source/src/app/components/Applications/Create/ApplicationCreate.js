@@ -88,7 +88,7 @@ class ApplicationCreate extends Component {
             console.log("Application created successfully.");
         }).catch(
             function (error_response) {
-                console.log("ERROR App NOT Created 22222");
+                console.log("Error while creating the application");
             });
     };
 
