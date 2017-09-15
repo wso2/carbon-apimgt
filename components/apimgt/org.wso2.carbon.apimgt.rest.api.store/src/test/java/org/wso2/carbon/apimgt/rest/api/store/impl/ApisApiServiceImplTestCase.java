@@ -82,7 +82,7 @@ public class ApisApiServiceImplTestCase {
     private static final String WSDL_ZIP = "WSDLFiles.zip";
     private static final String WSDL_ZIP_LOCATION = "wsdl" + File.separator + WSDL_ZIP;
     private static final String correctLanguage = "java";
-    private static final String incorrectLanguage = "java2";
+    private static final String incorrectLanguage = "javaIncorrect";
     private static InputStream inputStreamCorrect, inputStreamIncorrect;
     private static String swaggerPetStoreCorrect, swaggerPetStoreIncorrect;
 
@@ -93,7 +93,7 @@ public class ApisApiServiceImplTestCase {
             swaggerPetStoreCorrect = IOUtils.toString(inputStreamCorrect);
             swaggerPetStoreIncorrect = IOUtils.toString(inputStreamIncorrect);
         } catch (IOException e){
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(), e);
         }
     }
     @Test

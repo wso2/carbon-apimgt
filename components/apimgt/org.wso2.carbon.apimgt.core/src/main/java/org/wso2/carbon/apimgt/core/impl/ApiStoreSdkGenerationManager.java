@@ -126,10 +126,8 @@ public class ApiStoreSdkGenerationManager {
 
                 swaggerFileWriter.write(formattedSwaggerDefinitionForSdk);
 
-                if (log.isDebugEnabled()) {
-                    log.debug("Writing the swagger definition was sucessful to file " +
-                            swaggerDefJsonFile.getAbsolutePath());
-                }
+                log.debug("Writing the swagger definition was sucessful to file {}",
+                        swaggerDefJsonFile.getAbsolutePath());
             } catch (IOException e) {
                 handleSdkGenException("Error writing swagger definition to file in " +
                         tempSdkGenDir, e);
@@ -137,15 +135,14 @@ public class ApiStoreSdkGenerationManager {
 
             //Generate the SDK for the specified language
             generateSdkForSwaggerDef(language, swaggerDefJsonFile.getAbsolutePath(), tempSdkGenDir.toString());
-
+            log.debug("Generating SDK for the swagger definition {} was successful.",
+                    swaggerDefJsonFile.getAbsolutePath());
             String archiveName = apiName + "_" + language + "_" + apiVersion;
             tempZipFilePath = tempSdkGenDir + "/" + archiveName + ".zip";
             APIFileUtils.archiveDirectory(tempSdkGenDir.toString(),
                     tempSdkGenDir.toString(),
                     archiveName);
-            if (log.isDebugEnabled()) {
-                log.debug("Generating the archive was successful for directory " + tempSdkGenDir.toString());
-            }
+                log.debug("Generating the archive was successful for directory {}.",tempSdkGenDir.toString());
         } else {
             handleSdkGenException("Swagger definition file not found!");
         }
