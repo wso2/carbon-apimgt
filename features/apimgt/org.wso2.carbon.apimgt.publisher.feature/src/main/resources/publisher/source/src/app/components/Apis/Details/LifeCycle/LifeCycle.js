@@ -21,8 +21,11 @@ import Api from '../../../../data/api'
 import LifeCycleUpdate from './LifeCycleUpdate'
 import Loading from "../../../Base/Loading/Loading"
 import LifeCycleHistory from "./LifeCycleHistory"
-import Policies from "./Policies"
-import {Card, Col, Row} from 'antd'
+
+import Card, {  CardContent } from 'material-ui/Card';
+import Typography from 'material-ui/Typography';
+import Grid from 'material-ui/Grid';
+import Paper from 'material-ui/Paper';
 
 class LifeCycle extends Component {
     constructor(props) {
@@ -53,22 +56,45 @@ class LifeCycle extends Component {
     render() {
         if (this.state.api) {
             return (
-                <div style={{padding: '30px'}}>
-                    <Row gutter={16}>
-                        <Col span={12}>
-                            <Card title="Change Lifecycle" bordered={false} style={{margin: '5px'}}>
-                                <LifeCycleUpdate handleUpdate={this.updateData} lcState={this.state.lcState}
-                                                 api={this.state.api}/>
+                    <Grid container>
+                        <Grid item xs={12}>
+
+                            <Paper>
+                                <Typography className="page-title" type="display2">
+                                    {this.state.api.name} - <span>Change Lifecycle</span>
+                                </Typography>
+                                <Typography type="caption" gutterBottom align="left" className="page-title-help">
+                                    Manage API lifecycle from cradle to grave: create, publish,
+                                    block, deprecate, and retire
+                                </Typography>
+
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={12}  className="page-content">
+                            <Typography type="headline" className="title-gap">
+                                Change Lifecycle
+                            </Typography>
+                            <Card>
+                                <CardContent>
+                                    <LifeCycleUpdate handleUpdate={this.updateData} lcState={this.state.lcState}
+                                                     api={this.state.api}/>
+                                </CardContent>
                             </Card>
-                        </Col>
-                    </Row>
-                    <Row gutter={16}>
-                        <Col span={12}>
-                            <Card title="History" bordered={false} style={{margin: '5px'}}><LifeCycleHistory
-                                lcHistory={this.state.lcHistory}/></Card>
-                        </Col>
-                    </Row>
-                </div>
+                            {this.state.lcHistory.length > 1 &&
+                                <div>
+                                    <Typography type="headline" className="title-gap">
+                                        History
+                                    </Typography>
+                                    <Card>
+                                        <CardContent>
+                                            <LifeCycleHistory
+                                                lcHistory={this.state.lcHistory}/>
+                                        </CardContent>
+                                    </Card>
+                                </div> }
+                        </Grid>
+                    </Grid>
+
             );
         } else {
             return <Loading/>

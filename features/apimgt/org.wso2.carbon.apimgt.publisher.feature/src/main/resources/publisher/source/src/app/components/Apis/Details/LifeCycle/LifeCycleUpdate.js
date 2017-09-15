@@ -18,104 +18,159 @@
 'use strict';
 
 import React, {Component} from 'react'
-import TransitionStateButton from "./TransitionStateButton";
-import {Radio, Checkbox, message, Alert} from 'antd'
-const ButtonGroup = Radio.Group;
-const CheckboxGroup = Checkbox.Group;
 
 import API from '../../../../data/api'
 import {ScopeValidation , resourceMethod, resourcePath} from '../../../../data/ScopeValidation'
 import ApiPermissionValidation from '../../../../data/ApiPermissionValidation'
+import Message from '../../../Shared/Message'
+
+import Button from 'material-ui/Button';
+import Typography from 'material-ui/Typography';
+import Grid from 'material-ui/Grid'
+import { FormGroup, FormControlLabel } from 'material-ui/Form';
+import Checkbox from 'material-ui/Checkbox';
 
 export default class LifeCycleUpdate extends Component {
     constructor() {
         super();
         this.updateLifeCycleState = this.updateLifeCycleState.bind(this);
-        this.handleCheckItem = this.handleCheckItem.bind(this);
         this.api = new API();
         this.state = {
-            checkedItems: []
+            checkList: []
+        };
+    }
+    componentDidMount(){
+        const {lcState} = this.props;
+        const checkList = [];
+        let index = 0;
+        for (let item of lcState.checkItemBeanList) {
+            checkList.push({index: index, label: item.name, value: item.name, checked: false});
+            index++;
+        }
+        this.setState({checkList});
+    }
+    componentWillReceiveProps(nextProps){
+        if(this.props.api.lifeCycleStatus !== nextProps.api.lifeCycleStatus){
+            const checkList = [];
+            let index = 0;
+            for (let item of nextProps.lcState.checkItemBeanList) {
+                checkList.push({index: index, label: item.name, value: item.name, checked: false});
+                index++;
+            }
+            this.setState({checkList});
         }
     }
-
     updateLifeCycleState(event) {
         event.preventDefault();
         let promisedUpdate;
-        const newState = event.target.value;
+        const newState = event.currentTarget.getAttribute("data-value");
         const apiUUID = this.props.api.id;
-        const lifecycleChecklist = this.state.checkedItems.map(item => (item + ":true"));
-        if (this.state.checkedItems.length > 0) {
+        const lifecycleChecklist = this.state.checkList.map(item => {
+                return item.checked && (item.value + ":true")
+            }
+        );
+        if (lifecycleChecklist.length > 0) {
             promisedUpdate = this.api.updateLcState(apiUUID, newState, lifecycleChecklist);
         } else {
             promisedUpdate = this.api.updateLcState(apiUUID, newState);
         }
         promisedUpdate.then(response => { /*TODO: Handle IO erros ~tmkb*/
             this.props.handleUpdate(true);
-            message.info("Lifecycle state updated successfully");
+            this.msg.info("Lifecycle state updated successfully");
             /*TODO: add i18n ~tmkb*/
-        })
+        }).catch(
+            error_response => {
+                console.log(error_response);
+                this.msg.error(JSON.stringify(error_response));
+            });
     }
 
-    handleCheckItem(checkedItems) {
-        this.setState({checkedItems: checkedItems});
-    }
+
+    handleChange = index => (event, checked) => {
+        let checkList = this.state.checkList;
+        checkList[index].checked = checked;
+        this.setState({ checkList });
+    };
 
     render() {
-        const {lcState, api} = this.props;
+        const {api,lcState} = this.props;
         const is_workflow_pending = api.workflowStatus.toLowerCase() === "pending";
-        const checkList = [];
-        const checkedItems = [];
-        for (let item of lcState.checkItemBeanList) {
-            checkList.push({label: item.name, value: item.name});
-            item.value && checkedItems.push(item.name);
-        }
         return (
-            <div>
+                <Grid container>
+                    <Message ref={a => this.msg = a}/>
+
                 {
                     is_workflow_pending ?
                         (
-                            <Alert
-                                message="Warning"
-                                description="Pending lifecycle state change."
-                                type="warning"
-                                showIcon
-                            />
+                            <Grid item xs={3}>
+                                    <Typography type="headline" component="h2">
+                                        Pending lifecycle state change.
+                                    </Typography>
+                                    <Typography type="body1">
+                                        adjective
+                                    </Typography>
+                            </Grid>
+
                         ) :
                         (
-                            <Alert
-                                message={api.lifeCycleStatus}
-                                description="Current Life Cycle State"
-                                type="info"
-                                showIcon
-                            />
+                            <Grid item xs={6}>
+                                <div className="lifecycle-box">
+                                    <Typography type="headline" component="h2" className="lifecycle-box-state">
+                                        {api.lifeCycleStatus}
+                                    </Typography>
+                                    <Typography type="body1" className="lifecycle-box-state-tip">
+                                        Current State
+                                    </Typography>
+                                </div>
+
+                            </Grid>
+
                         )
                 }
+                    <Grid item xs={9}>
                 {
                     !is_workflow_pending &&
-                    <CheckboxGroup options={checkList} defaultValue={checkedItems} onChange={this.handleCheckItem}/>
+                    <FormGroup row>
+                        {this.state.checkList.map( (checkItem, index)  => <FormControlLabel
+                            key={index}
+                            control={
+                                <Checkbox
+                                    checked={this.state.checkList[index].checked}
+                                    onChange={this.handleChange(index)}
+                                    value={this.state.checkList[index].value}
+                                />
+                            }
+                            label={this.state.checkList[index].label}
+                        />)}
+
+                    </FormGroup>
                 }
-                <ScopeValidation resourcePath={resourcePath.API_CHANGE_LC} resourceMethod={resourceMethod.POST}>
-                <ApiPermissionValidation userPermissions={api.userPermissionsForApi}>
-                    <ButtonGroup style={{margin: "5px"}} onChange={this.updateLifeCycleState}>
-                        {
-                            is_workflow_pending ?
-                                (
-                                    <div className="btn-group" role="group">
-                                        <input type="button" className="btn btn-primary wf-cleanup-btn"
-                                               defaultValue="Delete pending lifecycle state change request"/>
-                                    </div>
-                                ) :
-                                (
-                                    lcState.availableTransitionBeanList.map(
-                                        transition_state => lcState.state !== transition_state.targetState &&
-                                        <TransitionStateButton key={transition_state.event} state={transition_state}/>
-                                    ) /* Skip when transitions available for current state , this occurs in states where have allowed re-publishing in prototype and published sates*/
-                                )
-                        }
-                    </ButtonGroup>
-                 </ApiPermissionValidation>
-                </ScopeValidation>
-            </div>
+                        <ScopeValidation resourcePath={resourcePath.API_CHANGE_LC} resourceMethod={resourceMethod.POST}>
+                        <ApiPermissionValidation userPermissions={api.userPermissionsForApi}>
+                            <div>
+                                {
+                                    is_workflow_pending ?
+                                        (
+                                            <div className="btn-group" role="group">
+                                                <input type="button" className="btn btn-primary wf-cleanup-btn"
+                                                       defaultValue="Delete pending lifecycle state change request"/>
+                                            </div>
+                                        ) :
+                                        (
+                                            lcState.availableTransitionBeanList.map(
+                                                transition_state => lcState.state !== transition_state.targetState &&
+                                                <Button key={transition_state.targetState} raised data-value={transition_state.targetState}
+                                                        onClick={this.updateLifeCycleState}>
+                                                    {transition_state.event}
+                                                </Button>
+                                            ) /* Skip when transitions available for current state , this occurs in states where have allowed re-publishing in prototype and published sates*/
+                                        )
+                                }
+                            </div>
+                         </ApiPermissionValidation>
+                        </ScopeValidation>
+                    </Grid>
+                </Grid>
         );
     }
 }
