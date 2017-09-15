@@ -1339,13 +1339,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
         apiDAO.addEndpoint(endpoint);
         apiDAO.deleteEndpoint(endpoint.getId());
-
-        try {
-            apiDAO.getEndpoint(endpoint.getId());
-            Assert.fail("Exception not thrown when getting non existing endpoint");
-        } catch (APIMgtDAOException e) {
-            Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.ENDPOINT_NOT_FOUND);
-        }
+        Endpoint retrieved = apiDAO.getEndpoint(endpoint.getId());
+        Assert.assertNull(retrieved);
     }
 
     @Test
