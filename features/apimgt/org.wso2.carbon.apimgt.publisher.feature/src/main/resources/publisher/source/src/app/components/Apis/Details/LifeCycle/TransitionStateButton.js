@@ -1,10 +1,9 @@
 import React from 'react'
-import {Radio} from 'antd'
-const Button = Radio.Button;
+import Button from 'material-ui/Button';
 
 const TransitionStateButton = (props) => {
     return (
-        <Button value={props.state.targetState}>{props.state.event}</Button>
+        <Button raised value={props.state.targetState}>{props.state.event}</Button>
     );
 };
 
