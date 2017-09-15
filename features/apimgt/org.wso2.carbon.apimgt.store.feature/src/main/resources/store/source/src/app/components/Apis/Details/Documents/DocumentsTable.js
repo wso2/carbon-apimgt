@@ -20,24 +20,25 @@ import React, {Component} from 'react'
 import {Table, Popconfirm} from 'antd';
 import API from '../../../../data/api'
 import Loading from '../../../Base/Loading/Loading'
+import Grid from 'material-ui/Grid';
+import Paper from 'material-ui/Paper';
 
 class DocumentsTable extends Component {
     constructor(props) {
         super(props);
         this.api_id = this.props.apiId;
-        this.viewDocContentHandler=this.viewDocContentHandler.bind(this);
-        this.handleCloseModal = this.handleCloseModal.bind(this);
         this.state = {
             showInlineEditor: false,
             documentId: null,
             selectedDocName: null
         }
-        //TODO: Add permission/valid scope checks for document Edit/Delete actions
+        this.viewDocContentHandler=this.viewDocContentHandler.bind(this);
+        this.handleCloseModal = this.handleCloseModal.bind(this);
     }
 
     componentDidMount() {
         const api = new API();
-        let promised_api = api.get(this.api_id);
+        let promised_api = api.getAPIById(this.api_id);
         promised_api.then(
             response => {
                 this.setState({api: response.obj});
@@ -62,6 +63,7 @@ class DocumentsTable extends Component {
      3- If the document type is 'FILE' download the file
      */
     viewDocContentHandler(document) {
+
         if (document.sourceType === "URL") {
             window.open(document.sourceUrl, '_blank');
         } else if (document.sourceType === "INLINE") {
@@ -71,7 +73,8 @@ class DocumentsTable extends Component {
                     selectedDocName:document.name
                 });
         } else if (document.sourceType === "FILE") {
-            let promised_get_content = this.props.client.getFileForDocument(this.props.apiId, document.documentId);
+	    const apiclient = new API();
+            let promised_get_content = this.props.client.getFileForDocument(this.api_id , document.documentId);
             promised_get_content.then((done) => {
                 this.props.downloadFile(done);
             }).catch((error_response) => {
@@ -90,6 +93,7 @@ class DocumentsTable extends Component {
         if (!this.state.api) {
             return <Loading/>
         }
+
         this.columns = [{
             title: 'Name',
             dataIndex: 'name',
@@ -103,15 +107,22 @@ class DocumentsTable extends Component {
             dataIndex: 'actions',
             key: 'actions',
             render: (text1, record) => (<div>
+                <a href="#" onClick={() => this.viewDocContentHandler(record)}>View Document </a>
             </div>)
         }
         ];
         return (
+                <Grid container style={{paddingLeft:"40px"}}>
+                    <Grid item xs={12} sm={6} md={9} lg={9} xl={10} >
+                        <Paper style={{paddingLeft:"40px"}}>
             <div style={{paddingTop: 20}}>
                 <h3 style={{paddingBottom: 15}}>Current Documents</h3>
                 <Table dataSource={ this.props.documentsList } columns={this.columns}/>
                 {this.state.showInlineEditor && <div>eeeee</div>                }
             </div>
+                        </Paper>
+                    </Grid>
+                </Grid>
         );
     }
 }

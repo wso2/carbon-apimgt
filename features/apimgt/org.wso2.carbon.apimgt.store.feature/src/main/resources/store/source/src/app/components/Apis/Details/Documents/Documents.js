@@ -23,44 +23,26 @@ import DocumentsTable from './DocumentsTable';
 import Loading from '../../../Base/Loading/Loading'
 
 
-/*
- Documents tab related React components.
- # Component hierarchy
- -Documents
-    -DocumentsTable
-        -InlineEditor
-    -NewDocDiv
-        -NewDocInfoDiv
-        -NewDocSourceDiv
- */
+
 class Documents extends Component {
     constructor(props) {
         super(props);
-        this.client = new API();
-        this.api_id = this.props.match.params.api_uuid;
-        //New or editing documents' information are maintained in state
-        // (docName, documentId, docSourceType, docSourceURL, docFilePath, docSummary, docFile)
+	this.client = new API();
         this.state = {
-            docName: "",
-            documentId: "",
-            docSourceType: "INLINE",
-            docSourceURL: "",
-            docFilePath: null,
-            docSummary: "",
-            docFile: null,
-            addingNewDoc: false,
+	    api: null,
             documentsList: null,
-            updatingDoc: false
         };
+        this.api_id = this.props.match.params.api_uuid;
         this.initialDocSourceType = null;
     }
 
     componentDidMount() {
         const api = new API();
-        let promised_api = api.get(this.api_id);
+        let promised_api = api.getDocumentsByAPIId(this.api_id);
         promised_api.then(
             response => {
-                this.setState({api: response.obj});
+		console.info(response.obj)
+                this.setState({documentsList: response.obj.list});
             }
         ).catch(
             error => {
@@ -73,28 +55,8 @@ class Documents extends Component {
                 }
             }
         );
-        this.getDocumentsList();
     }
 
-    /*
-     Get the document list attached to current API and set it to the state
-     */
-    getDocumentsList() {
-        let docs = client.getAPIById(this.api_uuid).getDocuments();
-        docs.then(response => {
-            this.setState({documentsList: response.obj.list});
-        }).catch(error_response => {
-            let error_data = JSON.parse(error_response.message);
-            let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
-            console.error(messageTxt);
-            message.error("Error in fetching documents list of the API");
-        });
-    }
-
-
-    /*
-     Download the document related file
-     */
     downloadFile(response) {
         let fileName = "";
         const contentDisposition = response.headers["content-disposition"];
@@ -135,16 +97,11 @@ class Documents extends Component {
     }
 
     render() {
-        if (!this.state.api) {
+        if (!this.state.documentsList) {
             return <Loading/>
         }
         return (
             <div>
-              {/* Allowing adding doc to an API based on scopes */}
-                <div>
-                    {(this.state.addingNewDoc || this.state.updatingDoc) && <div>test</div>}
-
-                </div>
                 <hr color="#f2f2f2"/>
                 {
                     (this.state.documentsList && (this.state.documentsList.length > 0) ) ? (
