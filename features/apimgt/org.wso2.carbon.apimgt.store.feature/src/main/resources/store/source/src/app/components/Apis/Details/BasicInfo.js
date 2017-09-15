@@ -55,6 +55,8 @@ class BasicInfo extends Component {
             tiers: [],
             applicationId: null,
             policyName: null
+            previousRating:0,
+            probableNextRating:0
         };
         this.api_uuid = this.props.uuid;
         this.logChange = this.logChange.bind(this);
@@ -235,6 +237,10 @@ class BasicInfo extends Component {
         console.log("Selected: " + JSON.stringify(val));
     }
 
+    mouseHoverOnRater() {
+
+    }
+    
     render() {
         const formItemLayout = {
             labelCol: {span: 6},
@@ -322,6 +328,13 @@ class BasicInfo extends Component {
                                  <TableRow>
                                     <TableCell>Default API Version</TableCell><TableCell>{api.lifeCycleStatus}</TableCell>
                                 </TableRow>
+                                <TableRow>
+                                    <TableCell>Rating</TableCell>
+                                    <TableCell>
+                                        <StarRatingBar ratingProp = {this.state.previousRating}></StarRatingBar>
+                                        
+                                    </TableCell>
+                                </TableRow>
 
 
                             </TableBody>
@@ -372,6 +385,67 @@ class BasicInfo extends Component {
                 </Grid>
                 : <Loading/>
         );
+    }
+}
+
+class Star extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.handleHoveringOver = this.handleHoveringOver.bind(this);
+    }
+
+    handleHoveringOver(event) {
+        this.props.passToRatingBar(this.props.name);
+    }
+
+    handleMouseClick(event) {
+
+    }
+
+    render() {
+        //alert('rerendering star ' + (this.state.isRated));
+        return this.props.isRated ?
+            <span onMouseOver = {this.handleHoveringOver} style={{color: 'gold'}}>
+                ★
+            </span> :
+            <span onMouseOver = {this.handleHoveringOver} style={{color: 'gold'}}>
+                ☆
+            </span>;
+    }
+}
+
+class StarRatingBar extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+                        previousRating : this.props.ratingProp,
+                        rating : this.props.ratingProps
+
+                     };
+
+        this.handleMouseOver = this.handleMouseOver.bind(this);
+
+    }
+
+    handleMouseOver(index) {
+        this.setState({rating : index});
+    }
+
+    handleMouseClick(index) {
+        //todo : update rating on mouse click
+    }
+
+    render() {
+        //alert('rerendering rater ' + (this.state.rating >= 3));
+        return (<div>
+                <Star name = {1} isRated = {this.state.rating >= 1} passToRatingBar = {this.handleMouseOver}> </Star>
+                <Star name = {2} isRated = {this.state.rating >= 2} passToRatingBar = {this.handleMouseOver}> </Star>
+                <Star name = {3} isRated = {this.state.rating >= 3} passToRatingBar = {this.handleMouseOver}> </Star>
+                <Star name = {4} isRated = {this.state.rating >= 4} passToRatingBar = {this.handleMouseOver}> </Star>
+                <Star name = {5} isRated = {this.state.rating >= 5} passToRatingBar = {this.handleMouseOver}> </Star>
+               </div>);
     }
 }
 

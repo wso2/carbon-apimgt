@@ -248,6 +248,49 @@ class API {
     }
 
     /**
+    * Add new comment to an existing API
+    * @param api_id apiId of the api to which the comment is added
+    * @param commentInfo comment text
+    */
+    addComment(api_id, commentInfo, callback = null) {
+        var promise = this.client.then(
+            (client) => {
+                //console.log(client.apis["API (individual)"]);
+                return client.apis["API (individual)"].post_apis__apiId__comments(
+                    {apiId: api_id, body: commentInfo}, this._requestMetaData());
+            }
+        ).catch(
+             error => {
+                 alert(error);
+             }
+         );
+        if (callback) {
+            return promise.then(callback);
+        } else {
+            return promise;
+        }
+    }
+
+    getAllComments(api_id, callback = null) {
+        var promise_get = this.client.then(
+            (client) => {
+                return client.apis["Comments Collection"].get_apis__apiId__comments(
+                    {apiId: api_id}, this._requestMetaData());
+            }
+        ).catch(
+             error => {
+                 alert(error);
+             }
+        );
+        if (callback) {
+            return promise_get.then(callback);
+        } else {
+            return promise_get;
+        }
+
+    }
+
+    /**
      * Generate application keys
      * @param applicationId id of the application that needs to generate the keys
      * @param request_content payload of generate key request

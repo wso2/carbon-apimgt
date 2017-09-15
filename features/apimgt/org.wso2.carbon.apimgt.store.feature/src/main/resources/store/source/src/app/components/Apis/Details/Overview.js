@@ -46,10 +46,15 @@ class Overview extends Component {
             dropDownApplications: null,
             dropDownPolicies: null,
             notFound: false,
-            tabValue: "Social Sites"
+            tabValue: "Social Sites",
+            comment: '',
+            commentList:[]
         };
         this.api_uuid = this.props.match.params.api_uuid;
         this.handleTabChange = this.handleTabChange.bind(this);
+        this.updateCommentString = this.updateCommentString.bind(this);
+        this.handleAddComment = this.handleAddComment.bind(this);
+        this.handleGetAllComments = this.handleGetAllComments.bind(this);
     }
 
     componentDidMount() {
@@ -132,6 +137,8 @@ class Overview extends Component {
                 }
             }
         );
+
+        this.handleGetAllComments();
     }
 
     populateApplicationDropdown(){
@@ -148,6 +155,61 @@ class Overview extends Component {
     handleTabChange = (event, tabValue) => {
         this.setState({ tabValue : tabValue });
     };
+
+    updateCommentString(event) {
+        this.setState({comment : event.target.value});
+    }
+
+    handleAddComment() {
+        var api = new Api();
+        let commentInfo = {"commentText" : this.state.comment};
+        let promise = api.addComment(this.api_uuid, commentInfo);
+        promise.then(
+            response => {
+                this.state.commentList.push(this.state.comment);
+                this.setState({comment : ''});
+                message.success("Comment added successfully");
+            }).catch (
+                 error => {
+                     alert(error); //todo : remove this
+                     message.error("Error occurred while adding comments!");
+                 }
+             );
+    }
+
+   /* validateComment(event) {
+        let newComment = event.target.value;
+        if(newComment.length > 450) {
+            let trimmedComment = newComment.substring(0,450);
+            this.setState({comment : trimmedComment});
+        } else {
+            this.setState({comment : event.target.value});
+        }
+    }*/
+
+    handleGetAllComments() {
+        var api = new Api();
+        let promise_get = api.getAllComments(this.api_uuid);
+        promise_get.then(
+            response => {
+                var index = 0;
+                var comments = [];
+                while(response.obj.list[index]){
+                    comments.push(response.obj.list[index].commentText);
+                    index = index + 1;
+                }
+                this.setState({commentList : comments});
+                console.log(comments);
+            }).catch (
+                 error => {
+                     alert(error);
+                     message.error("Error occurred while retrieving comments!");
+                 }
+            );
+    }
+
+
+
     render() {
         const formItemLayout = {
             labelCol: {span: 6},
@@ -229,7 +291,21 @@ class Overview extends Component {
                             {this.state.tabValue === 'Embed' && <div>{'Item Two'}</div>}
                             {this.state.tabValue === 'Email' && <div>{'Item Three'}</div>}
 
-
+                            <div>
+                                <p>Comments</p>
+                                <Row>
+                                    <textarea cols="180" rows="4" value={this.state.comment} onChange={this.updateCommentString}> </textarea>
+                                </Row>
+                                <Row>
+                                    <Button onClick={this.handleAddComment}>Add</Button>
+                                </Row>
+                            </div>
+                            <div>
+                                {this.state.commentList ? this.state.commentList.map((comment) => {
+                                    return <Row><p>{comment}</p></Row>
+                                    }) : <br></br>
+                                }
+                            </div>
                         </Paper>
 
                     </Grid>
