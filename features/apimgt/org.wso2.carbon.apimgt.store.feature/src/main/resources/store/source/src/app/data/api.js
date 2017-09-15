@@ -84,12 +84,56 @@ class API {
     }
 
     /**
+     * Get the Documents of an API
+     * @param id {String} UUID of the API in which the documents needed
+     * @param callback {function} Function which needs to be called upon success of getting documents
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getDocumentsByAPIId(id, callback = null) {
+
+        var promise_get = this.client.then(
+            (client) => {
+                return client.apis["API (individual)"].get_apis__apiId__documents(
+                    {apiId: id}, this._requestMetaData());
+            }
+        );
+        if (callback) {
+            return promise_get.then(callback);
+        } else {
+            console.info("returninng promise");
+            return promise_get;
+        }
+    }
+
+    /**
+     * Get the Document content of an API by document Id
+     * @param api_id {String} UUID of the API in which the document needed
+     * @param docId {String} UUID of the Document need to view
+     * @param callback {function} Function which needs to be called upon success of of getting document.
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getFileForDocument(api_id, docId, callback = null) {
+        var promise_get = this.client.then(
+            (client) => {
+		debugger;
+                client.apis["API (individual)"].get_apis__apiId__documents__documentId__content({
+                        apiId: api_id,
+                        documentId: docId
+                    },
+                    this._requestMetaData());
+            }
+        );
+        return promise_get;
+    }
+
+    /**
      * Get the swagger of an API
      * @param id {String} UUID of the API in which the swagger is needed
      * @param callback {function} Function which needs to be called upon success of the API deletion
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getSwaggerByAPIId(id, callback = null) {
+
         var promise_get = this.client.then(
             (client) => {
                 return client.apis["API (Individual)"].get_apis__apiId__swagger(
