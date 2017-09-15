@@ -42,7 +42,9 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.IOException;
 import java.time.DateTimeException;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Collection;
@@ -486,26 +488,36 @@ public class RestApiUtil {
      * @param epochMilliSeconds time in milli seconds
      * @return time in ISO 8601 format
      */
-    public static String epochToISO8601DateTime(long epochMilliSeconds) {
+    public static String epochToISO8601DateTime(long epochMilliSeconds, ZoneId zoneId) {
         // returns ISO 8601 format, e.g. 2014-02-15T01:02:03Z
-        return Instant.ofEpochMilli(epochMilliSeconds).atZone(ZoneOffset.UTC).toString();
+        return Instant.ofEpochMilli(epochMilliSeconds).atZone(zoneId).toString();
     }
 
     /**
-     * Coverts given timestamp to ISO8601 timestamp in UTC
+     * Coverts given ISO8601 timestamp to in UTC time instant
      *
-     * @param timeStamp Timestamp in ISO8601 format
+     * @param timestamp Timestamp in ISO8601 format
      * @return Instant  in UTC
      */
-    public static Instant fromISO8601ToInstant(String timeStamp) throws APIManagementException {
+    public static Instant fromISO8601ToInstant(String timestamp) throws APIManagementException {
         // returns ISO 8601 format, e.g. 2014-02-15T01:02:03Z
         try {
-            return Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(timeStamp));
+            return Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(timestamp)).atZone(ZoneOffset.UTC).toInstant();
         } catch (DateTimeParseException e) {
             throw new APIManagementException(e.getMessage(), ExceptionCodes.INVALID_DATE_TIME_STAMP);
         } catch (DateTimeException e) {
             throw new APIManagementException(e.getMessage(), ExceptionCodes.INVALID_DATE_TIME_STAMP);
         }
     }
-    
+
+    /**
+     * Return the ZoneId of given ISO8601 timestamp
+     *
+     * @param timestamp Timestamp in ISO format
+     * @return Zone ID extracted from timestamp
+     */
+    public static ZoneId getRequestTimeZone(String timestamp) {
+        return ZonedDateTime.parse(timestamp).getZone();
+    }
+
 }

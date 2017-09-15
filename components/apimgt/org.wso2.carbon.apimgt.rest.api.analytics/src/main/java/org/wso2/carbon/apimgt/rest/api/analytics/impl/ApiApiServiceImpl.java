@@ -18,6 +18,7 @@ import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.msf4j.Request;
 
 import javax.ws.rs.core.Response;
+import java.time.ZoneId;
 import java.util.List;
 
 import static org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil.fromISO8601ToInstant;
@@ -43,10 +44,11 @@ public class ApiApiServiceImpl extends ApiApiService {
         try {
             log.debug("Retrieving API information. [From: {} To: {} Created By:{} ]", startTime, endTime, createdBy);
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
+            ZoneId requestTimezone = RestApiUtil.getRequestTimeZone(startTime);
             List<APIInfo> apiInfoList = analyzer.getAPIInfo(fromISO8601ToInstant(startTime), fromISO8601ToInstant
                     (endTime), createdBy);
             APIInfoListDTO apiInfoListDTO = AnalyticsMappingUtil
-                    .fromAPIInfoListToDTO(apiInfoList);
+                    .fromAPIInfoListToDTO(apiInfoList, requestTimezone);
             return Response.ok().entity(apiInfoListDTO).build();
 
         } catch (APIManagementException e) {
@@ -75,9 +77,10 @@ public class ApiApiServiceImpl extends ApiApiService {
             log.debug("Retrieving APIs created over time. [From: {}  To: {} Created By: {}]", startTime, endTime,
                     createdBy);
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
+            ZoneId requestTimezone = RestApiUtil.getRequestTimeZone(startTime);
             List<APICount> apiCountList = analyzer.getAPICount(fromISO8601ToInstant(startTime),
                     fromISO8601ToInstant(endTime), createdBy);
-            APICountListDTO apiCountListDTO = AnalyticsMappingUtil.fromAPICountToListDTO(apiCountList);
+            APICountListDTO apiCountListDTO = AnalyticsMappingUtil.fromAPICountToListDTO(apiCountList, requestTimezone);
             return Response.ok().entity(apiCountListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving API created over time info";

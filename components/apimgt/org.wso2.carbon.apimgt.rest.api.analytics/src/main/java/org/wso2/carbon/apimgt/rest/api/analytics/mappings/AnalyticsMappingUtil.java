@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionCountListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionInfoListDTO;
 
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,12 +51,13 @@ public class AnalyticsMappingUtil {
      * @param applicationCountList list of ApplicationCount objects
      * @return corresponding ApplicationCountListDTO object
      */
-    public static ApplicationCountListDTO fromApplicationCountToListDTO(List<ApplicationCount> applicationCountList) {
+    public static ApplicationCountListDTO fromApplicationCountToListDTO(List<ApplicationCount> applicationCountList,
+                                                                        ZoneId zoneId) {
         ApplicationCountListDTO applicationCountListDTO = new ApplicationCountListDTO();
         List<ApplicationCountDTO> applicationCountDTOList = new ArrayList<>();
         applicationCountListDTO.setCount(applicationCountList.size());
         for (ApplicationCount applicationCount : applicationCountList) {
-            applicationCountDTOList.add(fromApplicationCountToDTO(applicationCount));
+            applicationCountDTOList.add(fromApplicationCountToDTO(applicationCount, zoneId));
         }
 
         applicationCountListDTO.setList(applicationCountDTOList);
@@ -69,12 +71,12 @@ public class AnalyticsMappingUtil {
      * @param apiCountList list of APICount objects
      * @return corresponding APICountListDTO object
      */
-    public static APICountListDTO fromAPICountToListDTO(List<APICount> apiCountList) {
+    public static APICountListDTO fromAPICountToListDTO(List<APICount> apiCountList, ZoneId zoneId) {
         APICountListDTO apiCountListDTO = new APICountListDTO();
         List<APICountDTO> apiCountDTOList = new ArrayList<>();
         apiCountListDTO.setCount(apiCountList.size());
         for (APICount apiInfo : apiCountList) {
-            apiCountDTOList.add(fromAPICountToDTO(apiInfo));
+            apiCountDTOList.add(fromAPICountToDTO(apiInfo, zoneId));
         }
         apiCountListDTO.setList(apiCountDTOList);
         return apiCountListDTO;
@@ -86,12 +88,12 @@ public class AnalyticsMappingUtil {
      * @param apiInfoList list of ApiInfo objects
      * @return corresponding APIInfoListDTO object
      */
-    public static APIInfoListDTO fromAPIInfoListToDTO(List<APIInfo> apiInfoList) {
+    public static APIInfoListDTO fromAPIInfoListToDTO(List<APIInfo> apiInfoList, ZoneId zoneId) {
         APIInfoListDTO apiInfoListDTO = new APIInfoListDTO();
         List<APIInfoDTO> apiInfoDTOList = new ArrayList<>();
         apiInfoListDTO.setCount(apiInfoList.size());
         for (APIInfo apiInfo : apiInfoList) {
-            apiInfoDTOList.add(fromAPIInfoToDTO(apiInfo));
+            apiInfoDTOList.add(fromAPIInfoToDTO(apiInfo, zoneId));
         }
         apiInfoListDTO.setList(apiInfoDTOList);
         return apiInfoListDTO;
@@ -128,13 +130,13 @@ public class AnalyticsMappingUtil {
      * @return corresponding APIInfoListDTO object
      */
     public static SubscriptionCountListDTO fromSubscriptionCountListToDTO(List<SubscriptionCount>
-                                                                                  subscriptionCountList) {
+                                                                                  subscriptionCountList, ZoneId zoneId) {
         SubscriptionCountListDTO subscriptionCountListDTO = new SubscriptionCountListDTO();
         List<SubscriptionCountDTO> subscriptionCountDTOList = new ArrayList<>();
         subscriptionCountListDTO.setCount(subscriptionCountList.size());
         for (SubscriptionCount subscriptionCount : subscriptionCountList) {
             SubscriptionCountDTO subscriptionCountDTO = new SubscriptionCountDTO();
-            subscriptionCountDTO.setTime(epochToISO8601DateTime(subscriptionCount.getTimestamp()));
+            subscriptionCountDTO.setTime(epochToISO8601DateTime(subscriptionCount.getTimestamp(), zoneId));
             subscriptionCountDTO.setCount(subscriptionCount.getCount());
             subscriptionCountDTOList.add(subscriptionCountDTO);
         }
@@ -143,7 +145,7 @@ public class AnalyticsMappingUtil {
     }
 
     public static SubscriptionInfoListDTO fromSubscriptionInfoListToDTO(List<SubscriptionInfo>
-                                                                                subscriptionInfoList) {
+                                                                                subscriptionInfoList, ZoneId zoneId) {
         SubscriptionInfoListDTO subscriptionCountListDTO = new SubscriptionInfoListDTO();
         List<SubscriptionInfoDTO> subscriptionInfoDTOList = new ArrayList<>();
         subscriptionCountListDTO.setCount(subscriptionInfoList.size());
@@ -154,7 +156,7 @@ public class AnalyticsMappingUtil {
             subscriptionInfoDTO.setVersion(subscriptionInfo.getVersion());
             subscriptionInfoDTO.setAppName(subscriptionInfo.getAppName());
             subscriptionInfoDTO.setDescription(subscriptionInfo.getDescription());
-            subscriptionInfoDTO.setCreatedTime(epochToISO8601DateTime(subscriptionInfo.getCreatedTime()));
+            subscriptionInfoDTO.setCreatedTime(epochToISO8601DateTime(subscriptionInfo.getCreatedTime(), zoneId));
             subscriptionInfoDTO.setSubscriptionStatus(subscriptionInfo.getSubscriptionStatus());
             subscriptionInfoDTO.setSubscriptionTier(subscriptionInfo.getSubscriptionTier());
             subscriptionInfoDTOList.add(subscriptionInfoDTO);
@@ -163,7 +165,7 @@ public class AnalyticsMappingUtil {
         return subscriptionCountListDTO;
     }
 
-    private static APIInfoDTO fromAPIInfoToDTO(APIInfo apiInfo) {
+    private static APIInfoDTO fromAPIInfoToDTO(APIInfo apiInfo, ZoneId zoneId) {
         APIInfoDTO apiInfoDTO = new APIInfoDTO();
         apiInfoDTO.setId(apiInfo.getId());
         apiInfoDTO.setName(apiInfo.getName());
@@ -173,20 +175,20 @@ public class AnalyticsMappingUtil {
         apiInfoDTO.setLifeCycleStatus(apiInfo.getLifeCycleStatus());
         apiInfoDTO.setProvider(apiInfo.getProvider());
         apiInfoDTO.setWorkflowStatus(apiInfo.getWorkflowStatus());
-        apiInfoDTO.setTime(epochToISO8601DateTime(apiInfo.getCreatedTime()));
+        apiInfoDTO.setTime(epochToISO8601DateTime(apiInfo.getCreatedTime(), zoneId));
         return apiInfoDTO;
     }
 
-    private static APICountDTO fromAPICountToDTO(APICount apiCount) {
+    private static APICountDTO fromAPICountToDTO(APICount apiCount, ZoneId zoneId) {
         APICountDTO apiCountDTO = new APICountDTO();
-        apiCountDTO.setTime(epochToISO8601DateTime(apiCount.getTimestamp()));
+        apiCountDTO.setTime(epochToISO8601DateTime(apiCount.getTimestamp(), zoneId));
         apiCountDTO.setCount(apiCount.getCount());
         return apiCountDTO;
     }
 
-    private static ApplicationCountDTO fromApplicationCountToDTO(ApplicationCount applicationCount) {
+    private static ApplicationCountDTO fromApplicationCountToDTO(ApplicationCount applicationCount, ZoneId zoneId) {
         ApplicationCountDTO applicationCountDTO = new ApplicationCountDTO();
-        applicationCountDTO.setTime(epochToISO8601DateTime(applicationCount.getTimestamp()));
+        applicationCountDTO.setTime(epochToISO8601DateTime(applicationCount.getTimestamp(), zoneId));
         applicationCountDTO.setCount(applicationCount.getCount());
         return applicationCountDTO;
     }

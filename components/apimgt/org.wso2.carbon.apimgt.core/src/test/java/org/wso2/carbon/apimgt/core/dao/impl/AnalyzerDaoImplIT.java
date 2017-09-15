@@ -19,9 +19,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.dao.AnalyticsDAO;
+import org.wso2.carbon.apimgt.core.models.analytics.APICount;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 
@@ -32,13 +32,23 @@ public class AnalyzerDaoImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testGetApplicationCount() throws Exception {
-
-        String fromTimeStamp = (new Timestamp(System.currentTimeMillis() - 10000)).toString();
+        Instant fromTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis());
         TestUtil.addCustomApplication("app1", "john");
-        String toTimeStamp = (new Timestamp(System.currentTimeMillis() + 10000)).toString();
+        Instant toTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis());
         AnalyticsDAO analyticsDAO = DAOFactory.getAnalyticsDAO();
         List<ApplicationCount> applicationCountList = analyticsDAO
-                .getApplicationCount(Instant.parse(fromTimeStamp), Instant.parse(toTimeStamp), null);
+                .getApplicationCount(fromTimeStamp, toTimeStamp, null);
+        Assert.assertEquals(applicationCountList.size(), 1);
+    }
+
+    @Test
+    public void testGetAPICount() throws Exception {
+        Instant fromTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis());
+        TestUtil.addTestAPI();
+        Instant toTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis());
+        AnalyticsDAO analyticsDAO = DAOFactory.getAnalyticsDAO();
+        List<APICount> applicationCountList = analyticsDAO
+                .getAPICount(fromTimeStamp, toTimeStamp, null);
         Assert.assertEquals(applicationCountList.size(), 1);
     }
 

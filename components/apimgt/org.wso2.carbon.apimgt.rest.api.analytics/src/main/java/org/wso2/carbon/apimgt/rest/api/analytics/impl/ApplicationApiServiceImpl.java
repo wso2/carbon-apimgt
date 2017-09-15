@@ -14,6 +14,7 @@ import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.msf4j.Request;
 
 import javax.ws.rs.core.Response;
+import java.time.ZoneId;
 import java.util.List;
 
 import static org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil.fromISO8601ToInstant;
@@ -43,10 +44,11 @@ public class ApplicationApiServiceImpl extends ApplicationApiService {
             log.debug("Retrieving applications created over time. [From: {} to: {} Created By: {}]", startTime,
                     endTime, createdBy);
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
+            ZoneId requestTimezone = RestApiUtil.getRequestTimeZone(startTime);
             List<ApplicationCount> applicationCountList = analyzer
                     .getApplicationCount(fromISO8601ToInstant(startTime), fromISO8601ToInstant(endTime), createdBy);
             ApplicationCountListDTO applicationCountListDTO = AnalyticsMappingUtil
-                    .fromApplicationCountToListDTO(applicationCountList);
+                    .fromApplicationCountToListDTO(applicationCountList, requestTimezone);
             return Response.ok().entity(applicationCountListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving application created over time info";

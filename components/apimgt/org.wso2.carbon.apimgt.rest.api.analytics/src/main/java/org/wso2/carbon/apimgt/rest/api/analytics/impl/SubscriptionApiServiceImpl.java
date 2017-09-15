@@ -16,6 +16,7 @@ import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.msf4j.Request;
 
 import javax.ws.rs.core.Response;
+import java.time.ZoneId;
 import java.util.List;
 
 import static org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil.fromISO8601ToInstant;
@@ -47,10 +48,11 @@ public class SubscriptionApiServiceImpl extends SubscriptionApiService {
             log.debug("Retrieving subscriptions created over time. [From: {} To: {} Created By: {}]", startTime,
                     endTime, createdBy);
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
+            ZoneId requestTimezone = RestApiUtil.getRequestTimeZone(startTime);
             List<SubscriptionCount> subscriptionCount = analyzer.getSubscriptionCount(
                     fromISO8601ToInstant(startTime), fromISO8601ToInstant(endTime), createdBy);
             SubscriptionCountListDTO subscriptionListDTO = AnalyticsMappingUtil
-                    .fromSubscriptionCountListToDTO(subscriptionCount);
+                    .fromSubscriptionCountListToDTO(subscriptionCount, requestTimezone);
             return Response.ok().entity(subscriptionListDTO).build();
 
         } catch (APIManagementException e) {
@@ -79,10 +81,11 @@ public class SubscriptionApiServiceImpl extends SubscriptionApiService {
             log.debug("Retrieving subscriptions info. [From: {}  To: {} Created By: {}]", startTime, endTime,
                     createdBy);
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
+            ZoneId requestTimezone = RestApiUtil.getRequestTimeZone(startTime);
             List<SubscriptionInfo> subscriptionInfoList = analyzer.getSubscriptionInfo(fromISO8601ToInstant
                     (startTime), fromISO8601ToInstant(endTime), createdBy);
             SubscriptionInfoListDTO subscriptionInfoListDTO = AnalyticsMappingUtil
-                    .fromSubscriptionInfoListToDTO(subscriptionInfoList);
+                    .fromSubscriptionInfoListToDTO(subscriptionInfoList, requestTimezone);
             return Response.ok().entity(subscriptionInfoListDTO).build();
 
         } catch (APIManagementException e) {
