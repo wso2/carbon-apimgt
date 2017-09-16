@@ -27,7 +27,7 @@
                         var contextWithoutTenantAndVersion = contextWithoutTenant;
                         contextWithoutTenantAndVersion = contextWithoutTenantAndVersion.replace(api.version + "/", "");
                         contextWithoutTenantAndVersion = contextWithoutTenantAndVersion.replace(api.version, "");%>
-+                       <br/><%= encode.forHtml(transports[t]) %>://<%=domainValue%><%= contextWithoutTenantANDVersion %>
+                        <br/><%= encode.forHtml(transports[t]) %>://<%=domainValue%><%= contextWithoutTenantAndVersion %>
                     <%}%>
                 </div>
                 <%
