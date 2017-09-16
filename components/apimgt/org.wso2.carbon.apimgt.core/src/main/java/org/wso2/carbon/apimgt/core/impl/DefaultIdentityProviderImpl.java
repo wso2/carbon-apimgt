@@ -114,6 +114,7 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
         if (userResponse == null) {
             String errorMessage =
                     "Error occurred while retrieving Id of user " + userId + ". Error : Response is null.";
+            log.error(errorMessage);
             throw new IdentityProviderException(errorMessage, ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
         }
         if (userResponse.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
@@ -122,16 +123,16 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
             JsonObject parsedResponseBody = (JsonObject) parser.parse(responseBody);
             userEmail =  parsedResponseBody.get("emails").toString().replaceAll("[\\[\\]\"]", "");
 
-
-            String message = "Email " + userEmail + " of user " + parsedResponseBody.get(USERNAME).getAsString()
-                    + " is successfully retrieved from SCIM endpoint.";
             if (log.isDebugEnabled()) {
+                String message = "Email " + userEmail + " of user " + parsedResponseBody.get(USERNAME).getAsString()
+                        + " is successfully retrieved from SCIM endpoint.";
                 log.debug(message);
             }
         } else {
             String errorMessage =
                     "Error occurred while retrieving Id of user " + userId + ". Error : " + getErrorMessage(
                             userResponse);
+            log.error(errorMessage);
             throw new IdentityProviderException(errorMessage, ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
         }
         return userEmail;
