@@ -92,6 +92,10 @@
             <classifier>runtime</classifier>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-utils</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -176,7 +180,7 @@
             org.wso2.carbon.apimgt.rest.api.store.*; version="${carbon.apimgt.version}"
         </export.package>
         <carbon.component>
-            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="8"
+            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="9"
         </carbon.component>
     </properties>
 </project>
