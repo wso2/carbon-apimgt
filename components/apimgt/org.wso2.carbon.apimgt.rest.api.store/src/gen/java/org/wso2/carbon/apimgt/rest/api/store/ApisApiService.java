@@ -77,9 +77,6 @@ public abstract class ApisApiService {
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
-    public abstract Response apisApiIdSdksLanguageGet(String apiId
- ,String language
- , Request request) throws NotFoundException;
     public abstract Response apisApiIdSwaggerGet(String apiId
  ,String ifNoneMatch
  ,String ifModifiedSince
