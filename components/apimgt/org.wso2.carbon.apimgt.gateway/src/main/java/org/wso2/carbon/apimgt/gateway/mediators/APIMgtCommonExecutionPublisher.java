@@ -43,13 +43,11 @@ public class APIMgtCommonExecutionPublisher extends AbstractMediator {
         if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService() != null) {
             this.initializeDataPublisher();
         }
-
     }
 
     @Override
     public boolean mediate(MessageContext messageContext) {
-        if (enabled
-                && !skipEventReceiverConnection) {
+        if (enabled) {
             Object totalTimeObject = messageContext.getProperty(APIMgtGatewayConstants
                     .REQUEST_EXECUTION_START_TIME);
             long totalTime = 0;
@@ -95,17 +93,15 @@ public class APIMgtCommonExecutionPublisher extends AbstractMediator {
                     ((Number) backendLatency).longValue());
             executionTimePublisherDTO.setEventTime(System.currentTimeMillis());
             publisher.publishEvent(executionTimePublisherDTO);
-
         }
         return true;
     }
 
     protected void initializeDataPublisher() {
-
         enabled = APIUtil.isAnalyticsEnabled();
         skipEventReceiverConnection = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
                 isSkipEventReceiverConnection();
-        if (!enabled || skipEventReceiverConnection) {
+        if (!enabled) {
             return;
         }
         if (publisher == null) {

@@ -30,12 +30,9 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 */
 public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
 
-
     public APIMgtThrottleUsageHandler() {
         super();
     }
-
-
 
     public boolean mediate(MessageContext messageContext) {
         super.mediate(messageContext);
@@ -44,7 +41,7 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
         }
 
         try {
-            if (!enabled || skipEventReceiverConnection) {
+            if (!enabled) {
                 return true;
             }
             // gets the access token and username
@@ -84,11 +81,7 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
                 throttlePublisherDTO.setThrottledOutReason(throttleOutReason);
                 throttlePublisherDTO.setSubscriber(authContext.getSubscriber());
                 publisher.publishEvent(throttlePublisherDTO);
-
-
             }
-
-
         } catch (Exception e) {
             log.error("Cannot publish throttling event. " + e.getMessage(), e);
         }

@@ -46,8 +46,7 @@ public class AlertTypesPublisher extends APIMgtCommonExecutionPublisher {
             String checkedAlertListValues) throws APIManagementException {
 
         try {
-
-            if (!enabled || skipEventReceiverConnection) {
+            if (!enabled) {
                 throw new APIManagementException("Data publisher is not enabled");
             }
 
@@ -88,8 +87,7 @@ public class AlertTypesPublisher extends APIMgtCommonExecutionPublisher {
     public void unSubscribe(String userName,String agent) throws APIManagementException {
 
         try {
-
-            if (!enabled || skipEventReceiverConnection) {
+            if (!enabled) {
                 throw new APIManagementException("Data publisher is not enabled");
             }
 
