@@ -74,7 +74,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "Unsupported Definition Type. Only SWAGGER and WSDL are allowed."),
     API_ATTRIBUTE_NOT_FOUND(900335, "API attribute not found", 404, "API attribute not found"),
     SUBSCRIPTION_ALREADY_EXISTS(900336, "Subscription already exists", 409, "Subscription already exists"),
-    SDK_NOT_GENERATED(900337, "Error while generating SDK", 500, "Error while generating SDK"),
+
 
     // Generic codes
     JSON_PARSE_ERROR(900400, "Json parse error", 500, "JSON parse error"),

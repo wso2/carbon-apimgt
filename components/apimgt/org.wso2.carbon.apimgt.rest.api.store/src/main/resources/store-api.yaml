@@ -240,65 +240,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-
-  /apis/{apiId}/sdks/{language}:
-#-----------------------------------------------------
-# Generate an SDK (System Development Kit) for an API in a requested language
-#-----------------------------------------------------
-    get:
-      produces:
-        - application/zip
-      security:
-        - OAuth2Security:
-          - apim:subscribe
-      x-scope: apim:subscribe #TODO Remove when vendor extentions are removed
-      x-wso2-curl: "curl -X GET -k -H \"Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/store/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/sdks/java > Swagger Petstore_java_1.0.0.zip"
-      x-wso2-request: |
-        GET https://localhost:9292/api/am/store/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/sdks/java
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-disposition : attachment; filename=\"Swagger Petstore_android_2217676993812388137_1.0.0.zip\"\nContent-type : application/zip"
-      summary: |
-        Generate SDK for an API for the requested language
-      description: |
-        This operation can be used to generate SDKs (System Development Kits), for the APIs available in the API Store, for a requested development language.
-      parameters:
-        - in : path
-          name: apiId
-          type: string
-          required: true
-          description: |
-            ID of the specific API for which the SDK is required.
-        - in: path
-          name: language
-          type : string
-          required : true
-          description: |
-            Programming language of the SDK that is required.
-      tags:
-        - API (individual)
-      responses:
-        200:
-          description: |
-            OK.
-            SDK generated successfully.
-        400:
-          description: |
-            Bad Request.
-            Requested SDK Language is not supported.
-          schema:
-            $ref: '#/definitions/Error'
-        404:
-          description: |
-            Not found.
-            Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-        500:
-          description:  |
-            Internal Server Error.
-            Error while generating SDK.
-          schema:
-            $ref: '#/definitions/Error'
 ################################################################
 # The WSDL resource of "Individual API" resource APIs
 ################################################################
@@ -1440,7 +1381,7 @@ paths:
 # Update the Composite API implementation
 #-----------------------------------------------------
     put:
-      consumes:
+      consumes:                                  
         - multipart/form-data
       security:
         - OAuth2Security:
@@ -2565,48 +2506,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-######################################################
-# The "SDK Generation Languages" list resource APIs
-######################################################
-  /sdk-gen/languages:
-#-----------------------------------------------------
-# Provide a list of supported languages for SDK (System Development Kit) generation
-#-----------------------------------------------------
-    get:
-      produces:
-        - application/json
-      security:
-        - OAuth2Security:
-          - apim:subscribe
-      x-scope:  apim:subscribe  #TODO Remove when vendor extentions are removed
-      x-wso2-curl:  "curl -X GET -k -H \"Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/store/v1.0/sdk-gen/languages"
-      x-wso2-request: |
-        GET https://localhost:9292/api/am/store/v1.0/sdk-gen/languages
-        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response:  "HTTP/1.1 200 OK\nContent-Type : application/json"
-      summary:  |
-        Provide a list of supported languages for generating SDKs for existing APIs.
-      description:  |
-        This operation will provide a list of programming languages that are supported by the swagger codegen library for generating System Development Kits (SDKs) for APIs available in the API Manager Store
-      tags:
-        - SDK Language list.
-      responses:
-        200:
-          description:  |
-            OK.
-            List of supported languages for generating SDKs.
-        404:
-          description:  |
-            Not Found.
-            The list of languages is not found.
-          schema:
-            $ref: '#/definitions/Error'
-        500:
-          description:  |
-            Internal Server Error.
-            Error while retrieving the list.
-          schema:
-            $ref: '#/definitions/Error'
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
