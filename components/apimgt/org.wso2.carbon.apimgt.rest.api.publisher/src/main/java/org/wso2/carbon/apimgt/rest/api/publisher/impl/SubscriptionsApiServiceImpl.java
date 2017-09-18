@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.SubscriptionsApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ExtendedSubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -185,7 +186,16 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             apiProvider = RestApiUtil.getProvider(username);
             SubscribedAPI subscribedAPI = apiProvider.getSubscriptionByUUID(subscriptionId);
             if (subscribedAPI != null) {
-                SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(subscribedAPI);
+                String externalWorkflowRefId = null;
+                try {
+                    externalWorkflowRefId = apiProvider.getExternalWorkflowReferenceId(subscribedAPI.getSubscriptionId());
+                } catch (APIManagementException e) {
+                    // need not fail if querying workflow reference id throws and error; log and continue
+                    log.error("Error while retrieving external workflow reference for subscription id: " +
+                            subscriptionId, e);
+                }
+                ExtendedSubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.
+                        fromSubscriptionToExtendedSubscriptionDTO(subscribedAPI, externalWorkflowRefId);
                 return Response.ok().entity(subscriptionDTO).build();
             } else {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);

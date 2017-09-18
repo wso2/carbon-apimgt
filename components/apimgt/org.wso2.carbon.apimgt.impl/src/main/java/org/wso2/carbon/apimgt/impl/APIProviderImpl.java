@@ -4807,6 +4807,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     }
 
+    public String getExternalWorkflowReferenceId(int subscriptionId) throws APIManagementException {
+        return apiMgtDAO.getExternalWorkflowReferenceForSubscription(subscriptionId);
+    }
+
     /**
      * Get the workflow status information for the given api for the given workflow type
      * 

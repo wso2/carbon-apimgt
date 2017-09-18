@@ -818,5 +818,14 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     String getLifecycleConfiguration(String tenantDomain) throws APIManagementException;
+
+    /**
+     * Get the external workflow reference id for a subscription
+     *
+     * @param subscriptionId subscription id
+     * @return external workflow reference id if exists, else null
+     * @throws APIManagementException
+     */
+    String getExternalWorkflowReferenceId (int subscriptionId) throws APIManagementException;
     
 }
