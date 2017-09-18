@@ -55,23 +55,23 @@ class NavBar extends Component {
                 }
                 <Divider inset={true} style={{margin: '5px'}}/>
 
-                <MenuItem style={{marginLeft: '-8px', marginTop: '10px'}} onClick={this.toggleSection}><b>THROTTLING_POLICIES</b></MenuItem>
-                {((this.state.expandedSection).includes("THROTTLING_POLICIES")) ?
+                <MenuItem style={{marginLeft: '-8px', marginTop: '10px'}} onClick={this.toggleSection}><b>THROTTLING POLICIES</b></MenuItem>
+                {((this.state.expandedSection).includes("THROTTLING POLICIES")) ?
                     (<div>
                         <MenuItem>
-                            <Link name="advanced_throttling" to="/advanced_throttling">ADVANCED THROTTLING</Link>
+                            <Link name="advanced_throttling" to="/policies/api_policies">API Rate Limits</Link>
                         </MenuItem>
                         <MenuItem>
-                            <Link name="application_tiers" to="/application_tiers">APPLICATION TIERS</Link>
+                            <Link name="application_tiers" to="/policies/application_policies">Application Rate Limits</Link>
                         </MenuItem>
                         <MenuItem>
-                            <Link name="subscription_tiers" to="/subscription_tiers">SUBSCRIPTION TIERS</Link>
+                            <Link name="subscription_tiers" to="/policies/business_plans">Business Plans</Link>
                         </MenuItem>
                         <MenuItem>
-                            <Link name="custom_rules" to="/custom_rules">CUSTOM RULES</Link>
+                            <Link name="custom_rules" to="/policies/custom_rules">Custom Rules</Link>
                         </MenuItem>
                         <MenuItem>
-                            <Link name="black_list" to="/black_list">BLACK LIST</Link>
+                            <Link name="black_list" to="/policies/black_list">Black List</Link>
                         </MenuItem>
                     </div>) : <div/>
                 }
