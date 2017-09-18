@@ -50,6 +50,11 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.ballerina.publisher</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.transport</groupId>
+            <artifactId>org.wso2.carbon.transport.http.netty</artifactId>
+            <version>${gateway.carbon.transport.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

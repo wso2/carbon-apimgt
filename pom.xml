@@ -825,6 +825,8 @@
         <carbon.transport.version>4.3.0-m1</carbon.transport.version>
         <carbon.transport.package.import.version.range>[4.2.0, 5.0.0)</carbon.transport.package.import.version.range>
 
+        <gateway.carbon.transport.version>6.0.1</gateway.carbon.transport.version>
+
         <axiom.version>1.2.11-wso2v10</axiom.version>
         <axiom.import.version.range>[1.2.10-wso2v10,1.2.12-wso2v10)</axiom.import.version.range>
 
@@ -933,6 +935,6 @@
         <wsdl4j.version>1.6.2.wso2v4</wsdl4j.version>
         <xmlschema.version>1.4.7.wso2v2</xmlschema.version>
 
-        <ballerina.version>0.92</ballerina.version>
+        <ballerina.version>0.93</ballerina.version>
     </properties>
 </project>

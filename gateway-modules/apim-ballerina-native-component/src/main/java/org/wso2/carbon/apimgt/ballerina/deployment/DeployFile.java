@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.ballerina.deployment;
 
 import org.ballerinalang.bre.Context;
+import org.ballerinalang.launcher.LauncherUtils;
 import org.ballerinalang.model.types.TypeEnum;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.natives.AbstractNativeFunction;
@@ -66,18 +67,19 @@ public class DeployFile extends AbstractNativeFunction {
 
     @Override
     public BValue[] execute(Context context) {
-        String fileName = getStringArgument(context, 0);
-        String config = getStringArgument(context, 1);
-        String packageName = getStringArgument(context, 2);
-
-        Path path = Paths.get(packageName);
-        String filePath = path.toAbsolutePath() + File.separator + fileName;
-        if (Util.saveFile(filePath, config)) {
-            log.info("write config to File system");
-
-        } else {
-            log.error("Error saving API configuration in " + path);
-        }
+        LauncherUtils.runProgram(programDirPath, Paths.get("dep/abcAPI.bal"), true, new String[0]);
+//        String fileName = getStringArgument(context, 0);
+//        String config = getStringArgument(context, 1);
+//        String packageName = getStringArgument(context, 2);
+//
+//        Path path = Paths.get(packageName);
+//        String filePath = path.toAbsolutePath() + File.separator + fileName;
+//        if (Util.saveFile(filePath, config)) {
+//            log.info("write config to File system");
+//            LauncherUtils.runProgram(programDirPath, Paths.get("org/abc/testService.bal"), true, new String[0]);
+//        } else {
+//            log.error("Error saving API configuration in " + path);
+//        }
         return new BValue[0];
     }
 }
