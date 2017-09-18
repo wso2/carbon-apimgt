@@ -142,7 +142,7 @@ public class ApiStoreSdkGenerationManager {
             APIFileUtils.archiveDirectory(tempSdkGenDir.toString(),
                     tempSdkGenDir.toString(),
                     archiveName);
-                log.debug("Generating the archive was successful for directory {}.",tempSdkGenDir.toString());
+                log.debug("Generating the archive was successful for directory {}.", tempSdkGenDir.toString());
         } else {
             handleSdkGenException("Swagger definition file not found!");
         }

@@ -590,7 +590,7 @@
                 <version>${com.fasterxml.jackson.dataformat.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.orbit.org.yaml</groupId>
+                <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
                 <version>${snakeyaml.version}</version>
             </dependency>
@@ -926,7 +926,7 @@
         <javax.ws.rs-api.version>2.0</javax.ws.rs-api.version>
         <javax.ws.rs-api.import.version>2.0</javax.ws.rs-api.import.version>
 
-        <snakeyaml.version>1.18.0.wso2v1</snakeyaml.version>
+        <snakeyaml.version>1.18</snakeyaml.version>
         <snakeyaml.version.range>[1.16, 2.0.0)</snakeyaml.version.range>
         <carbon.uuf.version>1.0.0-m14</carbon.uuf.version>
         <carbon-uuf-maven-plugin.version>1.0.0-m13</carbon-uuf-maven-plugin.version>
