@@ -111,19 +111,6 @@ class Listing extends React.Component {
 
         const { value } = this.state;
 
-        let id = 0;
-        function createData(name, version, author, rating) {
-            id += 1;
-            return { name, version, author, rating };
-        }
-
-        const data = [
-            createData('API1', '1.0.0', "admin", 5),
-            createData('API2', '1.0.0', "admin", 4),
-            createData('API3', '1.0.0', "admin", 3),
-            createData('API4', '1.0.0', "admin", 4),
-            createData('API5', '1.0.0', "admin", 2)
-        ];
 
         return (
             <div style={{padding:"20px"}}>
