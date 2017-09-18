@@ -28,11 +28,6 @@ class ApiCreate extends Component {
     render() {
         return (
                 <div>
-                    <h1 className="page-header text-center">Let's get started...</h1>
-                    <p className="text-center">It only takes few minutes to design, publish and manage APIs in WSO2 API
-                        Manager</p>
-                    <br />
-                    <br />
                     <Switch>
                         <Route path={"/api/create/home"} render={() =>
                             <div className="ch-grid-container">

@@ -71,7 +71,7 @@ public interface APIManager {
      * @return boolean result
      * @throws APIManagementException If failed to check ia API exist.
      */
-    boolean checkIfAPIExists(String apiId) throws APIManagementException;
+    boolean isAPIExists(String apiId) throws APIManagementException;
 
     /**
      * Checks whether the given API context is already registered in the system

@@ -34,7 +34,7 @@ public class PublisherApiServiceImpl extends PublisherApiService {
             log.error(errorMessage, e);
             return Response.status(Response.Status.NOT_FOUND).build();
         }
-        String[] apps = {"publisher","store_new"};
+        String[] apps = {"publisher","store", "admin"};
         String[] parts = path.split("/");
         // folder name ex: publisher or store or admin
         String context = parts[1];
@@ -48,7 +48,7 @@ public class PublisherApiServiceImpl extends PublisherApiService {
             //#TODO read from config file
         /* TODO: Check the dot containment in last segment separated by '/' or use regex to capture file extension */
             if (app.equals(context)) {
-                if (rawUri.contains(".")) {
+                if (rawUri.split("\\?")[0].contains(".")) {
                     filePath = "./deployment/webapps" + path;
                 } else {
                     filePath = "./deployment/webapps/" + context + "/public/index.html";
@@ -68,4 +68,3 @@ public class PublisherApiServiceImpl extends PublisherApiService {
     }
 
 }
-

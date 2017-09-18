@@ -231,7 +231,8 @@ public class SampleTestObjectCreator {
                 lastUpdatedTime(LocalDateTime.now()).
                 apiPermission(permissionJson).
                 uriTemplates(getMockUriTemplates()).
-                apiDefinition(apiDefinition);
+                apiDefinition(apiDefinition).
+                securityScheme(3);
         Map map = new HashMap();
         map.put(DEVELOPER_ROLE_ID, 6);
         map.put(ADMIN_ROLE_ID, 15);
@@ -245,7 +246,8 @@ public class SampleTestObjectCreator {
                 context(api.getContext()).
                 description(api.getDescription()).
                 lifeCycleStatus(api.getLifeCycleStatus()).
-                lifecycleInstanceId(api.getLifecycleInstanceId()).build();
+                lifecycleInstanceId(api.getLifecycleInstanceId()).
+                securityScheme(api.getSecurityScheme()).build();
     }
 
     public static API copyAPIIgnoringNonEditableFields(API fromAPI, API toAPI) {
@@ -333,7 +335,8 @@ public class SampleTestObjectCreator {
                 createdTime(LocalDateTime.now()).
                 createdBy(API_CREATOR).
                 apiDefinition(apiDefinition).
-                lastUpdatedTime(LocalDateTime.now());
+                lastUpdatedTime(LocalDateTime.now()).
+                securityScheme(3);
 
         return apiBuilder;
     }
@@ -397,7 +400,8 @@ public class SampleTestObjectCreator {
                 createdBy(API_CREATOR).
                 uriTemplates(Collections.emptyMap()).
                 apiDefinition(apiDefinition).
-                lastUpdatedTime(LocalDateTime.now());
+                lastUpdatedTime(LocalDateTime.now()).
+                securityScheme(3);
 
         return apiBuilder;
     }
@@ -455,7 +459,8 @@ public class SampleTestObjectCreator {
                 context(api.getContext()).
                 description(api.getDescription()).
                 lifeCycleStatus(api.getLifeCycleStatus()).
-                lifecycleInstanceId(api.getLifecycleInstanceId()).build();
+                lifecycleInstanceId(api.getLifecycleInstanceId()).
+                securityScheme(api.getSecurityScheme()).build();
     }
 
     public static String createAlternativeSwaggerDefinition() throws IOException {
@@ -519,7 +524,7 @@ public class SampleTestObjectCreator {
 
     /**
      * Creates a file type documentation info sample
-     * 
+     *
      * @return a file type documentation info sample
      */
     public static DocumentInfo createFileDocumentationInfo() {
@@ -1075,7 +1080,7 @@ public class SampleTestObjectCreator {
         comment.setUpdatedTime(LocalDateTime.now());
         return comment;
     }
-    
+
     public static Rating createDefaultRating(String apiId) {
         Rating rating = new Rating();
         rating.setUuid(UUID.randomUUID().toString());
@@ -1316,7 +1321,7 @@ public class SampleTestObjectCreator {
 
         return siddhiApp;
     }
-    
+
     public static String createDefaultSiddhiAppForAPIThrottlePolicy() {
         APIPolicy apiPolicy = createDefaultAPIPolicy();
         String siddhiApp = "\n@App:name('resource_" + apiPolicy.getPolicyName() + "_condition_0')"
@@ -1400,5 +1405,18 @@ public class SampleTestObjectCreator {
                 + "\ninsert into GlobalThrottleStream;\n";
 
         return siddhiApp;
+    }
+
+    public static String getSampleApiSwagger() throws IOException {
+        //swagger definition
+        InputStream stream = null;
+        String definition = null;
+        try {
+            stream = Thread.currentThread().getContextClassLoader().getResourceAsStream("sampleApi.yaml");
+            definition = IOUtils.toString(stream);
+        } finally {
+            stream.close();
+        }
+        return definition;
     }
 }

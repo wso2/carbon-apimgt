@@ -58,6 +58,7 @@ public class APIMgtAdminServiceImplTestCase {
     private static final String API_VERSION = "1.0.0";
     private static final String API_ID = "erbde56e-4512-498d-b6dc-85a6f1f8b058";
     private static final String API_CONTEXT = "/testContext";
+    private static final String POLICY_LEVEL = "policyLevel";
     private static final String POLICY_NAME = "policyName";
     private static final String POLICY_ID = "drbde46a-4512-498e-b6dr-85a5f1f8b055";
     private static final String BLOCK_CONDITION_TYPE = "Test_condition_type";
@@ -941,26 +942,26 @@ public class APIMgtAdminServiceImplTestCase {
     }
 
     private APIMgtAdminServiceImpl getAPIMgtAdminServiceImpl(ApiDAO apiDAO) {
-        return new APIMgtAdminServiceImpl(null, null, apiDAO, null, null, null);
+        return new APIMgtAdminServiceImpl(null, null, apiDAO, null, null, null, null);
     }
 
     private APIMgtAdminServiceImpl getAPIMgtAdminServiceImpl(ApplicationDAO applicationDAO) {
-        return new APIMgtAdminServiceImpl(null, null, null, null, applicationDAO, null);
+        return new APIMgtAdminServiceImpl(null, null, null, null, applicationDAO, null, null);
     }
 
     private APIMgtAdminServiceImpl getAPIMgtAdminServiceImpl(PolicyDAO policyDAO) {
-        return new APIMgtAdminServiceImpl(null, policyDAO, null, null, null, null);
+        return new APIMgtAdminServiceImpl(null, policyDAO, null, null, null, null, null);
     }
 
     private APIMgtAdminServiceImpl getAPIMgtAdminServiceImpl(APISubscriptionDAO apiSubscriptionDAO) {
-        return new APIMgtAdminServiceImpl(apiSubscriptionDAO, null, null, null, null, null);
+        return new APIMgtAdminServiceImpl(apiSubscriptionDAO, null, null, null, null, null, null);
     }
 
     private APIMgtAdminServiceImpl getAPIMgtAdminServiceImpl(LabelDAO labelDAO) {
-        return new APIMgtAdminServiceImpl(null, null, null, labelDAO, null, null);
+        return new APIMgtAdminServiceImpl(null, null, null, labelDAO, null, null, null);
     }
 
     private APIMgtAdminServiceImpl getAPIMgtAdminServiceImpl(PolicyDAO policyDAO, APIGateway apiGateway) {
-        return new APIMgtAdminServiceImpl(null, policyDAO, null, null, null, apiGateway);
+        return new APIMgtAdminServiceImpl(null, policyDAO, null, null, null, apiGateway, null);
     }
 }

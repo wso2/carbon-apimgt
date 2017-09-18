@@ -66,7 +66,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
 
         List<Subscription> subscribedApiList = null;
         SubscriptionListDTO subscriptionListDTO = null;
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
@@ -133,7 +133,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      */
     @Override
     public Response subscriptionsPost(SubscriptionDTO body, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         SubscriptionDTO subscriptionDTO = null;
         URI location = null;
         try {
@@ -153,8 +153,8 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
                 
             }
-            API api = apiStore.getAPIbyUUID(apiId);
-            if (application != null && api != null) {
+            
+            if (application != null) {
                 SubscriptionResponse addSubResponse = apiStore.addApiSubscription(apiId, applicationId, tier);
                 String subscriptionId = addSubResponse.getSubscriptionUUID();
                 Subscription subscription = apiStore.getSubscriptionByUUID(subscriptionId);
@@ -173,13 +173,10 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             } else {
                 String errorMessage = null;
                 ExceptionCodes exceptionCode = null;
-                if (application == null) {
-                    exceptionCode = ExceptionCodes.APPLICATION_NOT_FOUND;
-                    errorMessage = "Application not found";
-                } else if (api == null) {
-                    exceptionCode = ExceptionCodes.API_NOT_FOUND;
-                    errorMessage = "Api not found";
-                }
+
+                exceptionCode = ExceptionCodes.APPLICATION_NOT_FOUND;
+                errorMessage = "Application not found";
+
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
                         exceptionCode);
                 Map<String, String> paramList = new HashMap<>();
@@ -232,7 +229,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                                                       String ifUnmodifiedSince, Request request) throws
             NotFoundException {
 
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String existingFingerprint = subscriptionsSubscriptionIdGetFingerprint(subscriptionId, null, null,
@@ -271,7 +268,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
     @Override
     public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         SubscriptionDTO subscriptionDTO = null;
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
@@ -308,7 +305,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
      */
     public String subscriptionsSubscriptionIdGetFingerprint(String subscriptionId, String ifNoneMatch,
             String ifModifiedSince, Request request) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestApiUtil.getConsumer(username).getLastUpdatedTimeOfSubscription(subscriptionId);
             return ETagUtils.generateETag(lastUpdatedTime);

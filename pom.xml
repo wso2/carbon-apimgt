@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ /*
-  ~ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
   ~ *
   ~ * Licensed under the Apache License, Version 2.0 (the "License");
   ~ * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>7.0.40-SNAPSHOT</version>
+    <version>7.0.41-SNAPSHOT</version>
 
     <name>WSO2 Carbon - API Management Aggregator POM</name>
 
@@ -123,6 +123,17 @@
                 <artifactId>org.wso2.carbon.apimgt.store.feature</artifactId>
                 <version>${carbon.apimgt.version}</version>
                 <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.admin.feature</artifactId>
+                <version>${carbon.apimgt.version}</version>
+                <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.keymanager</artifactId>
+                <version>${carbon.apimgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.datasources</groupId>
@@ -500,22 +511,17 @@
             <dependency>
                 <groupId>org.ballerinalang</groupId>
                 <artifactId>ballerina-core</artifactId>
-                <version>0.89</version>
+                <version>${ballerina.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.ballerinalang</groupId>
                 <artifactId>workspace-service</artifactId>
-                <version>0.89</version>
+                <version>${ballerina.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-log4j12</artifactId>
                 <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.powermock</groupId>
-                <artifactId>powermock-module-junit4</artifactId>
-                <version>${powermock.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.woden.wso2</groupId>
@@ -537,7 +543,32 @@
                 <artifactId>swagger-codegen</artifactId>
                 <version>${swagger.codegen.version}</version>
             </dependency>
-        </dependencies> 
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>apim-ballerina-plugin</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ballerinalang</groupId>
+                <artifactId>ballerina-launcher</artifactId>
+                <version>${ballerina.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.ballerina.native</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.ballerina.publisher</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.mail</groupId>
+                <artifactId>javax.mail</artifactId>
+                <version>${java-mail.version}</version>
+            </dependency>
+        </dependencies>
     </dependencyManagement>
 
     <build>
@@ -775,7 +806,7 @@
         <!-- Dependencies -->
         <carbon.kernel.version>5.2.0-m3</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[5.1.0, 6.0.0)</carbon.kernel.package.import.version.range>
-        <carbon.apimgt.version>7.0.40-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>7.0.41-SNAPSHOT</carbon.apimgt.version>
 
         <carbon.datasources.version>1.0.0</carbon.datasources.version>
 
@@ -906,6 +937,9 @@
         <apache.woden.version>1.0.0.M9-wso2v1</apache.woden.version>
         <wsdl4j.version>1.6.2.wso2v4</wsdl4j.version>
         <xmlschema.version>1.4.7.wso2v2</xmlschema.version>
+
+        <ballerina.version>0.89</ballerina.version>
+        <java-mail.version>1.5.2</java-mail.version>
         <swagger.codegen.version>2.2.0.wso2v2</swagger.codegen.version>
     </properties>
 </project>

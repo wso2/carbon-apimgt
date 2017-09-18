@@ -29,7 +29,7 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
-import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMStoreConfigurations;
+import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMAppConfigurations;
 import org.wso2.carbon.apimgt.rest.api.authenticator.constants.AuthenticatorConstants;
 import org.wso2.carbon.apimgt.rest.api.authenticator.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.authenticator.internal.ServiceReferenceHolder;
@@ -40,8 +40,10 @@ import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FormDataParam;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -258,7 +260,7 @@ public class AuthenticatorAPI implements Microservice {
         }
         String requestURL = (String) request.getProperty(AuthenticatorConstants.REQUEST_URL);
 
-        APIMStoreConfigurations storeConfigs = ServiceReferenceHolder.getInstance().getAPIMStoreConfiguration();
+        APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance().getAPIMAppConfiguration();
         AuthResponseBean authResponseBean = new AuthResponseBean();
         String grantType = KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE;
         try {
@@ -280,13 +282,14 @@ public class AuthenticatorAPI implements Microservice {
                 String part2 = accessToken.substring(accessToken.length() / 2);
                 NewCookie cookieWithAppContext = AuthUtil
                         .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_1, part1, appContext,
-                                true, false, "future");
+                                true, false, "");
+                authResponseBean.setPartialToken(part1);
                 NewCookie httpOnlyCookieWithAppContext = AuthUtil
                         .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, part2, appContext,
-                                true, true, "future");
+                                true, true, "");
                 NewCookie restAPIContextCookie = AuthUtil
                         .cookieBuilder(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J, part2, restAPIContext,
-                                true, true, "future");
+                                true, true, "");
                 String authUser = authResponseBean.getAuthUser();
                 NewCookie authUserCookie = AuthUtil
                         .cookieBuilder(AuthenticatorConstants.AUTH_USER, authUser, appContext, true, false, "");
@@ -294,12 +297,25 @@ public class AuthenticatorAPI implements Microservice {
                     log.debug("Set cookies for " + appName + " application.");
                 }
                 // Redirect to the store/apis page (redirect URL)
-                URI targetURIForRedirection = new URI(storeConfigs.getApimBaseUrl() + appName);
-                return Response.status(Response.Status.FOUND)
-                        .header(HttpHeaders.LOCATION, targetURIForRedirection).entity(authResponseBean)
-                        .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext,
-                                restAPIContextCookie, authUserCookie)
-                        .build();
+                URI targetURIForRedirection = new URI(appConfigs.getApimBaseUrl() + appName);
+                if (AuthenticatorConstants.PUBLISHER_APPLICATION.equals(appName) || AuthenticatorConstants.STORE_APPLICATION.equals(appName)) {
+                    String authResponseBeanData = authResponseBean.getAuthUser() + "&id_token="
+                            + authResponseBean.getIdToken() + "&partial_token=" + authResponseBean.getPartialToken()
+                            + "&scopes=" + authResponseBean.getScopes() + "&validity_period="
+                            + authResponseBean.getValidityPeriod();
+                    URI redirectURI = new URI(appConfigs.getApimBaseUrl() + appName + "/login?user_name="
+                            + URLEncoder.encode(authResponseBeanData, "UTF-8")
+                            .replaceAll("\\+", "%20").replaceAll("%26", "&").replaceAll("%3D", "="));
+                    return Response.status(Response.Status.FOUND)
+                            .header(HttpHeaders.LOCATION, redirectURI)
+                            .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext, restAPIContextCookie)
+                            .build();
+                } else {
+                    return Response.status(Response.Status.FOUND)
+                            .header(HttpHeaders.LOCATION, targetURIForRedirection).entity(authResponseBean)
+                            .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext, restAPIContextCookie, authUserCookie)
+                            .build();
+                }
             }
         } catch (APIManagementException e) {
             ErrorDTO errorDTO = AuthUtil.getErrorDTO(e.getErrorHandler(), null);
@@ -308,6 +324,9 @@ public class AuthenticatorAPI implements Microservice {
         } catch (URISyntaxException e) {
             log.error(e.getMessage(), e);
             return Response.status(e.getIndex()).build();
+        } catch (UnsupportedEncodingException e) {
+            log.error(e.getMessage(), e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

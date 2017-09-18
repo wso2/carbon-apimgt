@@ -7,15 +7,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
-import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.impl.WSDLProcessFactory;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
@@ -50,7 +47,6 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -77,7 +73,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdDelete(String apiId, String ifMatch, String ifUnmodifiedSince, Request request)
             throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdGetFingerprint(apiId, null, null, request);
@@ -112,7 +108,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId,
             String ifNoneMatch, String ifModifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdDocumentsDocumentIdContentGetFingerprint(apiId, documentId,
@@ -171,7 +167,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     public String apisApiIdDocumentsDocumentIdContentGetFingerprint(String apiId, String documentId, String ifNoneMatch,
             String ifModifiedSince, Request request) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
                     .getLastUpdatedTimeOfDocumentContent(apiId, documentId);
@@ -205,7 +201,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             InputStream fileInputStream, FileInfo fileDetail, String inlineContent, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
         try {
-            String username = RestApiUtil.getLoggedInUsername();
+            String username = RestApiUtil.getLoggedInUsername(request);
             APIPublisher apiProvider = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdDocumentsDocumentIdContentGetFingerprint(apiId, documentId,
                     null, null, request);
@@ -287,7 +283,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             String ifUnmodifiedSince, Request request) throws
             NotFoundException {
         try {
-            String username = RestApiUtil.getLoggedInUsername();
+            String username = RestApiUtil.getLoggedInUsername(request);
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId, null, null,
                     request);
@@ -323,7 +319,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
         try {
-            String username = RestApiUtil.getLoggedInUsername();
+            String username = RestApiUtil.getLoggedInUsername(request);
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
 
             String existingFingerprint = apisApiIdDocumentsDocumentIdGetFingerprint(apiId, documentId,
@@ -367,7 +363,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     public String apisApiIdDocumentsDocumentIdGetFingerprint(String apiId, String documentId,
             String ifNoneMatch, String ifModifiedSince, Request request) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
                     .getLastUpdatedTimeOfDocument(documentId);
@@ -396,7 +392,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdDocumentsDocumentIdPut(String apiId, String documentId, DocumentDTO body, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
 
@@ -474,7 +470,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch,
             Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             List<DocumentInfo> documentInfos = apiPublisher.getAllDocumentation(apiId, offset, limit);
@@ -505,7 +501,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdDocumentsPost(String apiId, DocumentDTO body, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
         try {
-            String username = RestApiUtil.getLoggedInUsername();
+            String username = RestApiUtil.getLoggedInUsername(request);
             APIPublisher apiProvider = RestAPIPublisherUtil.getApiPublisher(username);
             DocumentInfo documentation = MappingUtil.toDocumentInfo(body);
             if (body.getType() == DocumentDTO.TypeEnum.OTHER && StringUtils.isBlank(body.getOtherTypeName())) {
@@ -552,7 +548,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdGatewayConfigGet(String apiId, String ifNoneMatch, String ifModifiedSince,
             Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdGatewayConfigGetFingerprint(apiId, ifNoneMatch,
@@ -586,7 +582,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     public String apisApiIdGatewayConfigGetFingerprint(String apiId, String ifNoneMatch, String ifModifiedSince,
             Request request) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username).getLastUpdatedTimeOfGatewayConfig(
                     apiId);
@@ -613,7 +609,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdGatewayConfigPut(String apiId, String gatewayConfig, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdGatewayConfigGetFingerprint(apiId, null, null, request);
@@ -651,9 +647,9 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdGet(String apiId, String ifNoneMatch, String ifModifiedSince, Request request)
             throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
-            if (!RestAPIPublisherUtil.getApiPublisher(username).checkIfAPIExists(apiId)) {
+            if (!RestAPIPublisherUtil.getApiPublisher(username).isAPIExists(apiId)) {
                 String errorMessage = "API not found : " + apiId;
                 APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
                         ExceptionCodes.API_NOT_FOUND);
@@ -703,7 +699,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     public String apisApiIdGetFingerprint(String apiId, String ifNoneMatch, String ifModifiedSince,
                                           Request request) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username).getLastUpdatedTimeOfAPI(apiId);
             return ETagUtils.generateETag(lastUpdatedTime);
@@ -728,7 +724,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdLifecycleGet(String apiId, String ifNoneMatch, String ifModifiedSince,
             Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             LifecycleState lifecycleState = RestAPIPublisherUtil.getApiPublisher(username).getAPILifeCycleData(apiId);
             return Response.ok().entity(lifecycleState).build();
@@ -757,9 +753,9 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdLifecycleHistoryGet(String apiId, String ifNoneMatch, String ifModifiedSince,
         Request request) throws NotFoundException {
 
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
-            if (RestAPIPublisherUtil.getApiPublisher(username).checkIfAPIExists(apiId)) {
+            if (RestAPIPublisherUtil.getApiPublisher(username).isAPIExists(apiId)) {
                 String lifecycleInstanceId =
                         RestAPIPublisherUtil.getApiPublisher(username).getAPIbyUUID(apiId).getLifecycleInstanceId();
                 if (lifecycleInstanceId != null) {
@@ -807,7 +803,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdPut(String apiId, APIDTO body, String ifMatch, String ifUnmodifiedSince,
             Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdGetFingerprint(apiId, null, null, request);
@@ -856,7 +852,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch, String ifModifiedSince,
             Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdSwaggerGetFingerprint(apiId, ifNoneMatch, ifModifiedSince,
@@ -888,7 +884,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     public String apisApiIdSwaggerGetFingerprint(String apiId, String ifNoneMatch, String ifModifiedSince,
             Request request) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username).getLastUpdatedTimeOfAPI(apiId);
             return ETagUtils.generateETag(lastUpdatedTime);
@@ -914,7 +910,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdSwaggerGetFingerprint(apiId, null, null, request);
@@ -949,7 +945,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdThumbnailGet(String apiId, String ifNoneMatch, String ifModifiedSince,
             Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdThumbnailGetFingerprint(apiId, ifNoneMatch, ifModifiedSince,
@@ -988,7 +984,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     public String apisApiIdThumbnailGetFingerprint(String apiId, String ifNoneMatch, String ifModifiedSince,
             Request request) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
                     .getLastUpdatedTimeOfAPIThumbnailImage(apiId);
@@ -1016,7 +1012,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdThumbnailPost(String apiId, InputStream fileInputStream, FileInfo fileDetail,
             String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String existingFingerprint = apisApiIdThumbnailGetFingerprint(apiId, null, null, request);
@@ -1059,7 +1055,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch, String ifModifiedSince,
             Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             InputStream wsdlStream = null;
@@ -1113,7 +1109,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisApiIdWsdlPut(String apiId, InputStream fileInputStream, FileInfo fileDetail,
             String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             if (fileDetail.getFileName().endsWith(".zip")) {
@@ -1154,7 +1150,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisChangeLifecyclePost(String action, String apiId, String lifecycleChecklist, String ifMatch,
                                             String ifUnmodifiedSince, Request request
     ) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         Map<String, Boolean> lifecycleChecklistMap = new HashMap<>();
         WorkflowResponseDTO response = null;
         try {
@@ -1220,7 +1216,8 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisCopyApiPost(String newVersion, String apiId, Request request) throws NotFoundException {
         APIDTO newVersionedApi;
-        String username = RestApiUtil.getLoggedInUsername();
+        String apiName, newApiVersion;
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             String newAPIVersionId = apiPublisher.createNewAPIVersion(apiId, newVersion);
@@ -1256,7 +1253,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisGet(Integer limit, Integer offset, String query, String ifNoneMatch, Request request)
             throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         APIListDTO apiListDTO = null;
         try {
             apiListDTO = MappingUtil
@@ -1283,7 +1280,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     @Override
     public Response apisHead(String query, String ifNoneMatch, Request request) throws NotFoundException {
         //TODO improve the query parameters searching options
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         String context = "context";
         String name = "name";
         boolean status;
@@ -1337,7 +1334,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisImportDefinitionPost(String type, InputStream fileInputStream, FileInfo fileDetail,
             String url, String additionalProperties, String implementationType, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             if (StringUtils.isBlank(type)) {
                 type = APIDefinitionValidationResponseDTO.DefinitionTypeEnum.SWAGGER.toString();
@@ -1461,7 +1458,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisPost(APIDTO body, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             API.APIBuilder apiBuilder = MappingUtil.toAPI(body);
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -1505,7 +1502,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisValidateDefinitionPost(String type, InputStream fileInputStream, FileInfo fileDetail,
             String url, Request request) throws NotFoundException {
         String errorMessage = "Error while validating the definition";
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             if (StringUtils.isBlank(type)) {
@@ -1585,7 +1582,7 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdLifecycleLifecyclePendingTaskDelete(String apiId, Request request)
             throws NotFoundException {
         try {
-            String username = RestApiUtil.getLoggedInUsername();
+            String username = RestApiUtil.getLoggedInUsername(request);
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             apiPublisher.removePendingLifecycleWorkflowTaskForAPI(apiId);
             return Response.ok().build();

@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.store.common.SampleTestObjectCreator;
+import org.wso2.msf4j.Request;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -54,7 +55,8 @@ public class PoliciesApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = TestUtil.getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         String tierLevel = APIMgtAdminService.PolicyLevel.api.name();
 
@@ -64,7 +66,7 @@ public class PoliciesApiServiceImplTestCase {
                 .thenReturn(tierList);
 
         Response response = policiesApiService.policiesTierLevelGet
-                (tierLevel, 10, 0, null, TestUtil.getRequest());
+                (tierLevel, 10, 0, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -78,7 +80,8 @@ public class PoliciesApiServiceImplTestCase {
 
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiStore);
-        PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
+        Request request = TestUtil.getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         String tierLevel = APIMgtAdminService.PolicyLevel.api.name();
         String tierName = "GOLD";
@@ -89,7 +92,7 @@ public class PoliciesApiServiceImplTestCase {
                 .thenReturn(policy);
 
         Response response = policiesApiService.policiesTierLevelTierNameGet
-                (tierName, tierLevel, null, null, TestUtil.getRequest());
+                (tierName, tierLevel, null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }

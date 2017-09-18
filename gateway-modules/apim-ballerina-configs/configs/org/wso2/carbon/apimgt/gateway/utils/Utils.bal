@@ -40,6 +40,11 @@ function constructAPIIsInMaintenance (message response) {
     messages:setJsonPayload(response, payload);
 }
 
+function constructIncorrectAuthorization (message response) {
+    json payload = {"code":900902, "message":"Incorrect authorization details found"};
+    messages:setJsonPayload(response, payload);
+}
+
 function fromJsonToIntrospectDto (json introspectResponse) (dto:IntrospectDto) {
     dto:IntrospectDto introspectDto = {};
     introspectDto.active, err = (boolean)introspectResponse.active;
@@ -224,10 +229,14 @@ function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO) {
     jwtInfoDTO.jwtHeader, err = (string)jwTInfo.jwtHeader;
     gatewayConf.jwtInfo = jwtInfoDTO;
 
+    //todo: pass the missed attributes from APIM core
     //Extract Analytics Server information and populate AnalyticsInfoDTO to be cached
     json analyticsInfo = conf.analyticsInfo;
     dto:AnalyticsInfoDTO analyticsInfoDTO = {};
+    analyticsInfoDTO.enabled, err = (boolean)analyticsInfo.enabled;
+    analyticsInfoDTO.type = "binary"; //(string)analyticsInfo.type;
     analyticsInfoDTO.serverURL, err = (string)analyticsInfo.serverURL;
+    analyticsInfoDTO.authServerURL = "ssl://localhost:9712"; //(string)analyticsInfo.authServerURL;
     dto:CredentialsDTO analyticsServerCredentialsDTO = {};
     json analyticsServerCredentials = analyticsInfo.credentials;
     analyticsServerCredentialsDTO.username, err = (string)analyticsServerCredentials.username;
@@ -238,7 +247,10 @@ function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO) {
     //Extract Throttling Server information and populate ThrottlingInfoDTO to be cached
     json throttlingInfo = conf.throttlingInfo;
     dto:ThrottlingInfoDTO throttlingInfoDTO = {};
+    throttlingInfoDTO.enabled = true; //(boolean)throttlingInfo.enabled;
+    throttlingInfoDTO.type = "binary"; //(string)throttlingInfo.type;
     throttlingInfoDTO.serverURL, err = (string)throttlingInfo.serverURL;
+    throttlingInfoDTO.authServerURL = "ssl://localhost:9712"; //(string)throttlingInfo.authServerURL;
     json throttlingServerCredentials = throttlingInfo.credentials;
     dto:CredentialsDTO throttlingServerCredentialsDTO = {};
     throttlingServerCredentialsDTO.username, err = (string)throttlingServerCredentials.username;

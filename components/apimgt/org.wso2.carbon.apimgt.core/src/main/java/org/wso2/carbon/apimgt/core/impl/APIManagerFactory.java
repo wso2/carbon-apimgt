@@ -125,7 +125,7 @@ public class APIManagerFactory {
         try {
             return new APIMgtAdminServiceImpl(DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(),
                     DAOFactory.getApiDAO(), DAOFactory.getLabelDAO(), DAOFactory.getApplicationDAO(), new
-                    APIGatewayPublisherImpl());
+                    APIGatewayPublisherImpl(), DAOFactory.getWorkflowDAO());
         } catch (APIMgtDAOException e) {
             log.error("Couldn't create API Management Admin Service", e);
             throw new APIMgtDAOException("Couldn't create API Management Admin Service",
@@ -207,7 +207,7 @@ public class APIManagerFactory {
     /**
      * Get API Store object for a particular user
      *
-     * @param username The username of user who's requesting the object
+     * @param username The username of user who's requesting the objecusernamet
      * @return APIStore object
      * @throws APIManagementException if error occurred while initializing API Store
      */

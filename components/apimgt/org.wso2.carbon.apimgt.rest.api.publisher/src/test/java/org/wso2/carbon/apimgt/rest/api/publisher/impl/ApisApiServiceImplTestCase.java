@@ -55,6 +55,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 import org.wso2.carbon.messaging.CarbonMessage;
+import org.wso2.carbon.transport.http.netty.message.HTTPCarbonMessage;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FileInfo;
 
@@ -780,7 +781,7 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
         Mockito.doReturn(false).doThrow(new IllegalArgumentException())
-                .when(apiPublisher).checkIfAPIExists(apiId);
+                .when(apiPublisher).isAPIExists(apiId);
         Response response = apisApiService.apisApiIdGet(apiId, null,
                 null, getRequest());
         assertEquals(response.getStatus(), 404);
@@ -798,7 +799,7 @@ public class ApisApiServiceImplTestCase {
         String apiId = UUID.randomUUID().toString();
         API api = SampleTestObjectCreator.createDefaultAPI().id(apiId).build();
         Mockito.doReturn(true).doThrow(new IllegalArgumentException())
-                .when(apiPublisher).checkIfAPIExists(apiId);
+                .when(apiPublisher).isAPIExists(apiId);
         Mockito.doReturn(api).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getAPIbyUUID(apiId);
         Response response = apisApiService.apisApiIdGet(apiId, null,
@@ -818,7 +819,7 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
-                .when(apiPublisher).checkIfAPIExists(apiId);
+                .when(apiPublisher).isAPIExists(apiId);
         Response response = apisApiService.apisApiIdGet(apiId, null,
                 null, getRequest());
         assertEquals(response.getStatus(), 400);
@@ -875,7 +876,7 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
         Mockito.doReturn(false).doThrow(new IllegalArgumentException())
-                .when(apiPublisher).checkIfAPIExists(apiId);
+                .when(apiPublisher).isAPIExists(apiId);
         Response response = apisApiService.apisApiIdLifecycleHistoryGet(apiId, null,
                 null, getRequest());
         assertEquals(response.getStatus(), 404);
@@ -893,7 +894,7 @@ public class ApisApiServiceImplTestCase {
         String apiId = UUID.randomUUID().toString();
         API api = SampleTestObjectCreator.createDefaultAPI().id(apiId).build();
         Mockito.doReturn(true).doThrow(new IllegalArgumentException())
-                .when(apiPublisher).checkIfAPIExists(apiId);
+                .when(apiPublisher).isAPIExists(apiId);
         Mockito.doReturn(api).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getAPIbyUUID(apiId);
         Response response = apisApiService.apisApiIdLifecycleHistoryGet(apiId, null,
@@ -911,7 +912,7 @@ public class ApisApiServiceImplTestCase {
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
-                .when(apiPublisher).checkIfAPIExists(apiId);
+                .when(apiPublisher).isAPIExists(apiId);
         Response response = apisApiService.apisApiIdLifecycleHistoryGet(apiId, null,
                 null, getRequest());
         assertEquals(response.getStatus(), 400);
@@ -1843,9 +1844,9 @@ public class ApisApiServiceImplTestCase {
 
     // Sample request to be used by tests
     private Request getRequest() throws Exception {
-        CarbonMessage carbonMessage = Mockito.mock(CarbonMessage.class);
+        CarbonMessage carbonMessage = new HTTPCarbonMessage();
+        carbonMessage.setProperty("LOGGED_IN_USER", USER);
         Request request = new Request(carbonMessage);
-        PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(request);
         return request;
     }
 

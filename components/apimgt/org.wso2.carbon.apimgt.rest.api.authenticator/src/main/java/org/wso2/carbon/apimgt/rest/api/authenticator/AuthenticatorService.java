@@ -35,7 +35,7 @@ import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
-import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMStoreConfigurations;
+import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMAppConfigurations;
 import org.wso2.carbon.apimgt.rest.api.authenticator.constants.AuthenticatorConstants;
 import org.wso2.carbon.apimgt.rest.api.authenticator.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.authenticator.utils.AuthUtil;
@@ -80,8 +80,8 @@ public class AuthenticatorService {
         grantTypes.add(KeyManagerConstants.PASSWORD_GRANT_TYPE);
         grantTypes.add(KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE);
         grantTypes.add(KeyManagerConstants.REFRESH_GRANT_TYPE);
-        APIMStoreConfigurations storeConfigs = ServiceReferenceHolder.getInstance().getAPIMStoreConfiguration();
-        String callBackURL = storeConfigs.getApimBaseUrl() + "login/callback/" + appName;
+        APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance().getAPIMAppConfiguration();
+        String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName;
         // Get scopes of the application
         String scopes = getApplicationScopes(appName);
         if (log.isDebugEnabled()) {
@@ -100,8 +100,8 @@ public class AuthenticatorService {
                 oAuthData.addProperty(KeyManagerConstants.OAUTH_CALLBACK_URIS, oAuthApplicationCallBackURL);
                 oAuthData.addProperty(KeyManagerConstants.TOKEN_SCOPES, scopes);
                 oAuthData.addProperty(KeyManagerConstants.AUTHORIZATION_ENDPOINT,
-                        storeConfigs.getAuthorizationEndpoint());
-                oAuthData.addProperty(AuthenticatorConstants.SSO_ENABLED, storeConfigs.isSsoEnabled());
+                        appConfigs.getAuthorizationEndpoint());
+                oAuthData.addProperty(AuthenticatorConstants.SSO_ENABLED, appConfigs.isSsoEnabled());
             } else {
                 String errorMsg = "No information available in OAuth application.";
                 log.error(errorMsg, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
@@ -145,8 +145,9 @@ public class AuthenticatorService {
         try {
             if (KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE.equals(grantType)) {
                 // Access token for authorization code grant type
-                APIMStoreConfigurations storeConfigs = ServiceReferenceHolder.getInstance().getAPIMStoreConfiguration();
-                String callBackURL = storeConfigs.getApimBaseUrl() + "login/callback/" + appName;
+                APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance()
+                        .getAPIMAppConfiguration();
+                String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName;
                 // Get the Authorization Code
                 if (requestURL.contains("code=")) {
                     String requestURLQueryParameters = requestURL.split("\\?")[1];
@@ -256,8 +257,6 @@ public class AuthenticatorService {
         String applicationRestAPI = null;
         if (AuthenticatorConstants.STORE_APPLICATION.equals(appName)) {
             applicationRestAPI = RestApiUtil.getStoreRestAPIResource();
-        } else if (AuthenticatorConstants.STORE_NEW_APPLICATION.equals(appName)) {
-            applicationRestAPI = RestApiUtil.getStoreRestAPIResource();
         } else if (AuthenticatorConstants.PUBLISHER_APPLICATION.equals(appName)) {
             applicationRestAPI = RestApiUtil.getPublisherRestAPIResource();
         } else if (AuthenticatorConstants.ADMIN_APPLICATION.equals(appName)) {
@@ -266,8 +265,15 @@ public class AuthenticatorService {
         try {
             if (applicationRestAPI != null) {
                 APIDefinition apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
-                Map<String, Scope> applicationScopesMap = null;
-                applicationScopesMap = apiDefinitionFromSwagger20.getScopes(applicationRestAPI);
+                Map<String, Scope> applicationScopesMap;
+                //Todo: when all swaggers modified with no vendor extension, following swagger parser should be modified.
+                //todo: for now only publisher swagger have been modified for no vendor extensions
+                if (AuthenticatorConstants.PUBLISHER_APPLICATION.equals(appName)) {
+                    applicationScopesMap = apiDefinitionFromSwagger20
+                            .getScopesFromSecurityDefinition(applicationRestAPI);
+                } else {
+                    applicationScopesMap = apiDefinitionFromSwagger20.getScopes(applicationRestAPI);
+                }
                 scopes = String.join(" ", applicationScopesMap.keySet());
                 // Set openid scope
                 if (StringUtils.isEmpty(scopes)) {

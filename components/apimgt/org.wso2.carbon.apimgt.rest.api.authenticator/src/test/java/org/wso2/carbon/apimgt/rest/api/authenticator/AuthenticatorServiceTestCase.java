@@ -47,12 +47,12 @@ public class AuthenticatorServiceTestCase {
 
         //// Expected data object to be passed to the front-end
         JsonObject oAuthData = new JsonObject();
-        String scopes = "apim:workflow_approve apim:subscribe openid";
+        String scopes = "apim:subscribe openid";
         oAuthData.addProperty(KeyManagerConstants.OAUTH_CLIENT_ID, oAuthApplicationInfo.getClientId());
         oAuthData.addProperty(KeyManagerConstants.OAUTH_CALLBACK_URIS, oAuthApplicationInfo.getCallBackURL());
         oAuthData.addProperty(KeyManagerConstants.TOKEN_SCOPES , scopes);
         oAuthData.addProperty(KeyManagerConstants.AUTHORIZATION_ENDPOINT, "https://localhost:9443/oauth2/authorize");
-        oAuthData.addProperty(AuthenticatorConstants.SSO_ENABLED, ServiceReferenceHolder.getInstance().getAPIMStoreConfiguration().isSsoEnabled());
+        oAuthData.addProperty(AuthenticatorConstants.SSO_ENABLED, ServiceReferenceHolder.getInstance().getAPIMAppConfiguration().isSsoEnabled());
 
         KeyManager keyManager = Mockito.mock(KeyManager.class);
         AuthenticatorService authenticatorService = new AuthenticatorService(keyManager);
@@ -77,6 +77,50 @@ public class AuthenticatorServiceTestCase {
         }
     }
 
+    @Test(description = "Provide DCR application information to the SSO-IS login")
+    public void testGetAuthenticationConfigurationsForPublisher() throws Exception {
+        // Happy Path - 200
+        //// Mocked response object from DCR api
+        OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
+        oAuthApplicationInfo.setClientId("xxx-client-id-xxx");
+        oAuthApplicationInfo.setCallBackURL("https://localhost/9292/login/callback/publisher");
+
+        //// Expected data object to be passed to the front-end
+        JsonObject oAuthData = new JsonObject();
+        String scopes = "apim:api_view apim:api_create apim:api_update apim:api_delete apim:apidef_update "
+                + "apim:api_publish apim:subscription_view apim:subscription_block openid";
+        oAuthData.addProperty(KeyManagerConstants.OAUTH_CLIENT_ID, oAuthApplicationInfo.getClientId());
+        oAuthData.addProperty(KeyManagerConstants.OAUTH_CALLBACK_URIS, oAuthApplicationInfo.getCallBackURL());
+        oAuthData.addProperty(KeyManagerConstants.TOKEN_SCOPES, scopes);
+        oAuthData.addProperty(KeyManagerConstants.AUTHORIZATION_ENDPOINT, "https://localhost:9443/oauth2/authorize");
+        oAuthData.addProperty(AuthenticatorConstants.SSO_ENABLED,
+                ServiceReferenceHolder.getInstance().getAPIMAppConfiguration().isSsoEnabled());
+
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager);
+
+        //// Get data object to be passed to the front-end
+        Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(oAuthApplicationInfo);
+        JsonObject responseOAuthDataObj = authenticatorService.getAuthenticationConfigurations("publisher");
+        String[] scopesActual = responseOAuthDataObj.get(KeyManagerConstants.TOKEN_SCOPES).toString().split(" ");
+        String[] scopesExpected = oAuthData.get(KeyManagerConstants.TOKEN_SCOPES).toString().split(" ");
+        Assert.assertEquals(scopesActual.length, scopesExpected.length);
+
+        // Error Path - 500 - When OAuthApplicationInfo is null
+        JsonObject emptyOAuthDataObj = new JsonObject();
+        Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(null);
+        JsonObject responseEmptyOAuthDataObj = authenticatorService.getAuthenticationConfigurations("publisher");
+        Assert.assertEquals(responseEmptyOAuthDataObj, emptyOAuthDataObj);
+
+        // Error Path - When DCR application creation fails and throws an APIManagementException
+        Mockito.when(keyManager.createApplication(Mockito.any())).thenThrow(KeyManagementException.class);
+        try {
+            authenticatorService.getAuthenticationConfigurations("publisher");
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Error while creating the keys for OAuth application : publisher");
+        }
+    }
+
     @Test
     public void testGetTokens() throws Exception {
         // Happy Path - 200 - Authorization code grant type
@@ -88,7 +132,7 @@ public class AuthenticatorServiceTestCase {
         //// Expected response object from KeyManager
         AccessTokenInfo tokenInfo = new AccessTokenInfo();
         tokenInfo.setAccessToken("xxx-access-token-xxx");
-        tokenInfo.setScopes("apim:workflow_approve apim:subscribe openid");
+        tokenInfo.setScopes("apim:subscribe openid");
         tokenInfo.setRefreshToken("xxx-refresh-token-xxx");
         tokenInfo.setIdToken("abcdefghijklmnopqrstuvwxyz");
         tokenInfo.setValidityPeriod(-2L);
@@ -143,7 +187,7 @@ public class AuthenticatorServiceTestCase {
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         accessTokenInfo.setIdToken("eyJ4NXQiOiJObUptT0dVeE16WmxZak0yWkRSaE5UWmxZVEExWXpkaFpUUmlPV0UwTldJMk0ySm1PVGMxWkEiLCJraWQiOiJkMGVjNTE0YTMyYjZmODhjMGFiZDEyYTI4NDA2OTliZGQzZGViYTlkIiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiWGg3bFZpSDZDS2pZLXRIT09JaWN5QSIsInN1YiI6ImFkbWluIiwiYXVkIjpbInR6NlJGQnhzdV93Z0RCd3FyUThvVmo3d25FTWEiXSwiYXpwIjoidHo2UkZCeHN1X3dnREJ3cXJROG9Wajd3bkVNYSIsImF1dGhfdGltZSI6MTUwMTczMzQ1NiwiaXNzIjoiaHR0cHM6XC9cL2xvY2FsaG9zdDo5NDQzXC9vYXV0aDJcL3Rva2VuIiwiZXhwIjoxNTAxNzM3MDU3LCJpYXQiOjE1MDE3MzM0NTd9.XXX-XXX");
         accessTokenInfo.setValidityPeriod(-2L);
-        accessTokenInfo.setScopes("apim:workflow_approve apim:subscribe openid");
+        accessTokenInfo.setScopes("apim:subscribe openid");
 
         //// Expected AuthResponseBean object
         AuthResponseBean expectedAuthResponseBean = new AuthResponseBean();
@@ -166,7 +210,7 @@ public class AuthenticatorServiceTestCase {
         //// AccessTokenInfo object with null id token
         AccessTokenInfo invalidTokenInfo = new AccessTokenInfo();
         invalidTokenInfo.setValidityPeriod(-2L);
-        invalidTokenInfo.setScopes("apim:workflow_approve apim:subscribe openid");
+        invalidTokenInfo.setScopes("apim:subscribe openid");
 
         //// Expected AuthResponseBean object when id token is null
         AuthResponseBean expectedResponseBean = new AuthResponseBean();
@@ -186,7 +230,7 @@ public class AuthenticatorServiceTestCase {
         AccessTokenInfo invalidAccessTokenInfo = new AccessTokenInfo();
         invalidAccessTokenInfo.setIdToken("xxx-invalid-id-token-xxx");
         invalidAccessTokenInfo.setValidityPeriod(-2L);
-        invalidAccessTokenInfo.setScopes("apim:workflow_approve apim:subscribe openid");
+        invalidAccessTokenInfo.setScopes("apim:subscribe openid");
 
         try {
             AuthResponseBean errorResponseBean = new AuthResponseBean();

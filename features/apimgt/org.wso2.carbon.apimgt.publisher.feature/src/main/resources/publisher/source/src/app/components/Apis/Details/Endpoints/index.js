@@ -4,6 +4,8 @@ import {Card, Button, message} from 'antd'
 import GenericEndpointInputs from './GenericEndpointInputs'
 import Api from '../../../../data/api'
 import Loading from '../../../Base/Loading/Loading'
+import ApiPermissionValidation from '../../../../data/ApiPermissionValidation'
+import {ScopeValidation, resourceMethod, resourcePath} from '../../../../data/ScopeValidation'
 
 
 class Endpoint extends Component {
@@ -215,7 +217,12 @@ class Endpoint extends Component {
                                            endpoint={this.state.sandboxEndpoint}
                                            match={this.props.match}/>
                 </Card>
-                <Button style={{margin: "5px"}} type="primary" onClick={() => this.updateEndpoints()}>Save</Button>
+                {/* Allowing create endpoints based on scopes */}
+                <ScopeValidation resourcePath={resourcePath.ENDPOINTS} resourceMethod={resourceMethod.POST}>
+                  <ApiPermissionValidation userPermissions={JSON.parse(this.state.api).userPermissionsForApi}>
+                      <Button style={{margin: "5px"}} type="primary" onClick={() => this.updateEndpoints()}>Save</Button>
+                  </ApiPermissionValidation>
+              </ScopeValidation>
             </div>
         );
     }

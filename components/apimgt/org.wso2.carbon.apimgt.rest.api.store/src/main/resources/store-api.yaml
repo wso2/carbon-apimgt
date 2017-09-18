@@ -60,10 +60,6 @@ x-wso2-security:
         roles: Internal/username
         name: apim:subscribe
         key: apim:subscribe
-      - description: ""
-        roles: admin
-        name: apim:workflow_approve
-        key: apim:workflow_approve 
 
 securityDefinitions:
   OAuth2Security:
@@ -72,7 +68,6 @@ securityDefinitions:
     tokenUrl: https://localhost:9443/token
     scopes:
       apim:subscribe: Subscribe API
-      apim:workflow_approve: Approve Workflow
       apim:self-signup: Self Sign-up
 
 ######################################################
@@ -85,6 +80,8 @@ paths:
 # Retrieving the list of all APIs qualifying under a given search condition
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       summary: |
         Retrieving APIs
       description: |
@@ -149,6 +146,8 @@ paths:
 # Retrieve the details of an API definition
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       description: |
         Get details of an API
       parameters:
@@ -198,6 +197,8 @@ paths:
 # Retrieve the API swagger definition
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       description: |
         Get the swagger of an API
       parameters:
@@ -248,6 +249,8 @@ paths:
 # Retrieve the API WSDL definition
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       produces:
         - application/octet-stream
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9292/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/wsdl"
@@ -306,6 +309,8 @@ paths:
 # Retrieve the documents associated with an API that qualify under a search condition
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       description: |
         Get a list of documents belonging to an API.
       parameters:
@@ -354,6 +359,8 @@ paths:
 # Retrieve a particular document of a certain API
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       description: |
         Get a particular document associated with an API.
       parameters:
@@ -410,6 +417,8 @@ paths:
   # Downloads a FILE type document/get the inline content or source url of a certain document
   #-------------------------------------------------------------------------------------------------
       get:
+        security:
+          - OAuth2Security:
         description: |
           Downloads a FILE type document/get the inline content or source url of a certain document.
         parameters:
@@ -471,6 +480,8 @@ paths:
 # Retrieve the Ratings of a certain API
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       description: |
         Get the rating of an API.
       parameters:
@@ -510,6 +521,8 @@ paths:
   # Retrieve a specific rating of an API
   #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       description: |
             Get a specific rating of an API.
       parameters:
@@ -621,6 +634,8 @@ paths:
 # Retrieve a list of all comments of a certain API
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       description: |
         Get a list of Comments that are already added to APIs
       parameters:
@@ -704,6 +719,8 @@ paths:
 # Retrieve an individual Comment for a certain API
 #-----------------------------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       description: |
         Get the individual comment given by a username for a certain API.
       parameters:
@@ -2263,6 +2280,8 @@ paths:
 # Retrieve the list of all available policies
 #-----------------------------------------------------
     get:
+      security:
+        - OAuth2Security:
       description: |
         Get available policies
       parameters:
@@ -2438,53 +2457,6 @@ paths:
           description: |
             Not Found.
             Requested API does not exist.
-          schema:
-            $ref: '#/definitions/Error'
-
-######################################################
-# The "Workflow approval" resource API
-######################################################
-  /workflows/{workflowReferenceId}:
-
-#-------------------------------------------------------------------
-# Resume the workflow by approving or rejecting the workflow request
-#-------------------------------------------------------------------
-    put:
-      security:
-        - OAuth2Security:
-          - apim:workflow_approve
-      x-scope: apim:workflow_approve
-      summary: Update workflow status
-      description: |
-        This operation can be used to approve or reject a workflow task. .
-      parameters:
-       - $ref: '#/parameters/workflowReferenceId'
-       - in: body
-         name: body
-         description: |
-            Workflow event that need to be updated
-         required: true
-         schema:
-           $ref: '#/definitions/Workflow'
-      tags:
-        - Workflows (Individual)
-      responses:
-        200:
-          description: |
-            OK.
-            Workflow request information is returned.
-          schema:
-            $ref: '#/definitions/WorkflowResponse'
-        400:
-          description: |
-            Bad Request.
-            Invalid request or validation error.
-          schema:
-            $ref: '#/definitions/Error'
-        404:
-          description: |
-            Not Found.
-            Workflow for the given reference in not found.
           schema:
             $ref: '#/definitions/Error'
 
@@ -2742,16 +2714,6 @@ parameters:
     in: header
     description: |
       Validator for conditional requests; based on Last Modified header.
-    type: string
-
-# Workflow reference ID
-# Specified as part of the path expression
-  workflowReferenceId:
-    name: workflowReferenceId
-    in: path
-    description: |
-      Workflow reference id
-    required: true
     type: string
 
 # List of labels
@@ -3642,33 +3604,6 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Label'
-
-#-----------------------------------------------------
-# The workflow response resource
-#-----------------------------------------------------
-  Workflow:
-    title: workflow
-    required:
-      - status
-    properties:
-      status:
-        description: |
-          This attribute declares whether this workflow task is approved or rejected.
-        type: string
-        enum:
-          - APPROVED
-          - REJECTED
-        example: APPROVED
-      attributes:
-        description: |
-          Custom attributes to complete the workflow task
-        type: object
-        additionalProperties:
-          type: string
-        example: {}
-      description:
-        type: string
-        example: "Approve workflow request."
 
 #-----------------------------------------------------
 # The workflow executor's response resource

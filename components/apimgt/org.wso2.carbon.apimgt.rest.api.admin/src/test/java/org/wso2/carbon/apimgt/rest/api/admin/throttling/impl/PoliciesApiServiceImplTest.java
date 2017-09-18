@@ -78,8 +78,7 @@ public class PoliciesApiServiceImplTest {
         policies.add(policy2);
         Mockito.doReturn(policies).doThrow(new IllegalArgumentException()).when(adminService).getApiPolicies();
 
-        Response response = policiesApiService.policiesThrottlingAdvancedGet(null, null,
-                                                                             null, getRequest());
+        Response response = policiesApiService.policiesThrottlingAdvancedGet(null, null, getRequest());
         Assert.assertEquals(response.getStatus(), 200);
     }
 
@@ -93,9 +92,7 @@ public class PoliciesApiServiceImplTest {
         PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(adminService)
                 .deletePolicyByUuid(uuid, APIMgtAdminService.PolicyLevel.api);
-        Response response = policiesApiService.policiesThrottlingAdvancedPolicyIdDelete(uuid, null,
-                                                                                        null,
-                                                                    getRequest());
+        Response response = policiesApiService.policiesThrottlingAdvancedIdDelete(uuid, null, null, getRequest());
         Assert.assertEquals(response.getStatus(), 200);
     }
 
@@ -114,8 +111,7 @@ public class PoliciesApiServiceImplTest {
         policy1.setDisplayName("Simple Policy");
         Mockito.doReturn(policy1).doThrow(new IllegalArgumentException()).when(adminService).getApiPolicyByUuid(uuid);
 
-        Response response = policiesApiService.policiesThrottlingAdvancedPolicyIdGet(uuid, null,
-                                                                             null, getRequest());
+        Response response = policiesApiService.policiesThrottlingAdvancedIdGet(uuid, null, null, getRequest());
         Assert.assertEquals(response.getStatus(), 200);
     }
 
@@ -132,9 +128,7 @@ public class PoliciesApiServiceImplTest {
         APIPolicy policy1 = new APIPolicy(uuid, "samplePolicy1");
         Mockito.doReturn(policy1).doThrow(new IllegalArgumentException()).when(adminService).getApiPolicyByUuid(uuid);
 
-        Response response = policiesApiService.policiesThrottlingAdvancedPolicyIdPut(uuid, dto, null,
-                                                                                     null, null,
-                                                                                     getRequest());
+        Response response = policiesApiService.policiesThrottlingAdvancedIdPut(uuid, dto, null, null, getRequest());
         Assert.assertEquals(201, response.getStatus());
     }
 
@@ -144,7 +138,7 @@ public class PoliciesApiServiceImplTest {
         PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
         AdvancedThrottlePolicyDTO dto = new AdvancedThrottlePolicyDTO();
         String uuid = UUID.randomUUID().toString();
-        dto.setPolicyId(uuid);
+        dto.setId(uuid);
         dto.setDisplayName("Sample Policy Display Name");
         dto.setDescription("Simple Description");
         dto.setPolicyName("Simple Policy Name");
@@ -160,7 +154,7 @@ public class PoliciesApiServiceImplTest {
         Mockito.doReturn(policy1).doThrow(new IllegalArgumentException()).when(adminService).getApiPolicyByUuid(uuid);
         PowerMockito.when(AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyDTOToPolicy(dto)).thenReturn(policy1);
         PowerMockito.when(AdvancedThrottlePolicyMappingUtil.fromAdvancedPolicyToDTO(policy1)).thenReturn(dto);
-        Response response = policiesApiService.policiesThrottlingAdvancedPost(dto, null, getRequest());
+        Response response = policiesApiService.policiesThrottlingAdvancedPost(dto, getRequest());
         Assert.assertEquals(201, response.getStatus());
     }
 
@@ -179,8 +173,7 @@ public class PoliciesApiServiceImplTest {
         policies.add(policy2);
         Mockito.doReturn(policies).doThrow(new IllegalArgumentException()).when(adminService).getApplicationPolicies();
 
-        Response response = policiesApiService.policiesThrottlingApplicationGet(null, null,
-                                                                                null, getRequest());
+        Response response = policiesApiService.policiesThrottlingApplicationGet(null, null, getRequest());
         Assert.assertEquals(response.getStatus(), 200);
     }
 
@@ -196,9 +189,7 @@ public class PoliciesApiServiceImplTest {
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(adminService)
                 .deletePolicyByUuid(uuid, APIMgtAdminService.PolicyLevel.application);
 
-        Response response = policiesApiService.policiesThrottlingApplicationPolicyIdDelete(uuid, null,
-                                                                                        null,
-                                                                                        getRequest());
+        Response response = policiesApiService.policiesThrottlingApplicationIdDelete(uuid, null, null, getRequest());
         Assert.assertEquals(response.getStatus(), 200);
     }
 
@@ -215,9 +206,7 @@ public class PoliciesApiServiceImplTest {
         Mockito.doReturn(policy).doThrow(new IllegalArgumentException()).when(adminService)
                 .getApplicationPolicyByUuid(uuid);
 
-        Response response = policiesApiService.policiesThrottlingApplicationPolicyIdGet(uuid, null,
-                                                                                        null,
-                                                                                        getRequest());
+        Response response = policiesApiService.policiesThrottlingApplicationIdGet(uuid, null, null, getRequest());
         Assert.assertEquals(response.getStatus(), 200);
     }
 
@@ -238,9 +227,7 @@ public class PoliciesApiServiceImplTest {
         Mockito.doReturn(policy).doThrow(new IllegalArgumentException()).when(adminService)
                 .getApplicationPolicyByUuid(uuid);
 
-        Response response = policiesApiService.policiesThrottlingApplicationPolicyIdPut(uuid, dto, null,
-                                                                                        null,
-                                                                    null, getRequest());
+        Response response = policiesApiService.policiesThrottlingApplicationIdPut(uuid, dto, null, null, getRequest());
         Assert.assertEquals(response.getStatus(), 200);
     }
 
@@ -260,7 +247,7 @@ public class PoliciesApiServiceImplTest {
         Mockito.doReturn(policies).doThrow(new IllegalArgumentException()).when(adminService).getCustomRules();
 
 
-        Response response = policiesApiService.policiesThrottlingCustomGet(null, null,
+        Response response = policiesApiService.policiesThrottlingCustomGet(null,
                                                                            null, getRequest());
         Assert.assertEquals(response.getStatus(), 200);
     }
@@ -271,7 +258,7 @@ public class PoliciesApiServiceImplTest {
         PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
         CustomRuleDTO dto = new CustomRuleDTO();
         String uuid = UUID.randomUUID().toString();
-        dto.setPolicyId(uuid);
+        dto.setId(uuid);
 
         CustomPolicy policy = CustomPolicyMappingUtil.fromCustomPolicyDTOToModel(dto);
 
@@ -282,7 +269,7 @@ public class PoliciesApiServiceImplTest {
         Mockito.doReturn(uuid).doThrow(new IllegalArgumentException()).when(adminService).addCustomRule(policy);
         Mockito.doReturn(policy).doThrow(new IllegalArgumentException()).when(adminService).getCustomRuleByUUID(uuid);
         PowerMockito.when(CustomPolicyMappingUtil.fromCustomPolicyToDTO(policy)).thenReturn(dto);
-        Response response = policiesApiService.policiesThrottlingCustomPost(dto, null, getRequest());
+        Response response = policiesApiService.policiesThrottlingCustomPost(dto, getRequest());
         Assert.assertEquals(201, response.getStatus());
     }
 
@@ -297,9 +284,7 @@ public class PoliciesApiServiceImplTest {
         PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(adminService).deleteCustomRule(uuid);
 
-        Response response = policiesApiService.policiesThrottlingCustomRuleIdDelete(uuid, null,
-                                                                                    null,
-                                                                                    getRequest());
+        Response response = policiesApiService.policiesThrottlingCustomRuleIdDelete(uuid, null, null, getRequest());
         Assert.assertEquals(response.getStatus(), 200);
     }
 
@@ -332,9 +317,7 @@ public class PoliciesApiServiceImplTest {
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(adminService).updateCustomRule(policy);
         Mockito.doReturn(policy).doThrow(new IllegalArgumentException()).when(adminService).getCustomRuleByUUID(uuid);
         CustomRuleDTO dto = CustomPolicyMappingUtil.fromCustomPolicyToDTO(policy);
-        Response response = policiesApiService.policiesThrottlingCustomRuleIdPut(uuid, dto,null,
-                                                                                 null,
-                                                             null, getRequest());
+        Response response = policiesApiService.policiesThrottlingCustomRuleIdPut(uuid, dto, null, null, getRequest());
         Assert.assertEquals(response.getStatus(), 200);
     }
 
@@ -344,7 +327,7 @@ public class PoliciesApiServiceImplTest {
         PoliciesApiServiceImpl policiesApiService = new PoliciesApiServiceImpl();
         ApplicationThrottlePolicyDTO dto = new ApplicationThrottlePolicyDTO();
         String uuid = UUID.randomUUID().toString();
-        dto.setPolicyId(uuid);
+        dto.setId(uuid);
         dto.setPolicyName("SamplePolicy");
         dto.setDisplayName("DisplayName");
         dto.setDescription("Policy Description");
@@ -362,7 +345,7 @@ public class PoliciesApiServiceImplTest {
         PowerMockito.when(ApplicationThrottlePolicyMappingUtil.fromApplicationThrottlePolicyDTOToModel(dto))
                 .thenReturn(policy);
 
-        Response response = policiesApiService.policiesThrottlingApplicationPost(dto, null, getRequest());
+        Response response = policiesApiService.policiesThrottlingApplicationPost(dto, getRequest());
         Assert.assertEquals(201, response.getStatus());
     }
 
@@ -379,8 +362,7 @@ public class PoliciesApiServiceImplTest {
         PowerMockito.when(RestApiUtil.getAPIMgtAdminService()).thenReturn(adminService);
         Mockito.doReturn(policies).doThrow(new IllegalArgumentException()).when(adminService).getSubscriptionPolicies();
 
-        Response response = policiesApiService.policiesThrottlingSubscriptionGet(null, null,
-                                                                                 null, getRequest());
+        Response response = policiesApiService.policiesThrottlingSubscriptionGet(null, null, getRequest());
         Assert.assertEquals(response.getStatus(), 200);
     }
 
@@ -396,9 +378,7 @@ public class PoliciesApiServiceImplTest {
         Mockito.doNothing().doThrow(new IllegalArgumentException()).when(adminService)
                 .deletePolicyByUuid(uuid, APIMgtAdminService.PolicyLevel.subscription);
 
-        Response response = policiesApiService.policiesThrottlingSubscriptionPolicyIdDelete(uuid, null,
-                                                                                            null,
-                                                                        getRequest());
+        Response response = policiesApiService.policiesThrottlingSubscriptionIdDelete(uuid, null, null, getRequest());
         Assert.assertEquals(response.getStatus(), 200);
     }
 
@@ -414,9 +394,7 @@ public class PoliciesApiServiceImplTest {
         Mockito.doReturn(policy).doThrow(new IllegalArgumentException()).when(adminService)
                 .getSubscriptionPolicyByUuid(uuid);
 
-        Response response = policiesApiService.policiesThrottlingSubscriptionPolicyIdGet(uuid, null,
-                                                                                         null,
-                                                                                         getRequest());
+        Response response = policiesApiService.policiesThrottlingSubscriptionIdGet(uuid, null, null, getRequest());
         Assert.assertEquals(response.getStatus(), 200);
     }
 
@@ -446,9 +424,7 @@ public class PoliciesApiServiceImplTest {
         PowerMockito.when(SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyToDTO(policy))
                 .thenReturn(dto);
 
-        Response response = policiesApiService.policiesThrottlingSubscriptionPolicyIdPut(uuid, dto, null,
-                                                                                         null,
-                                                                     null, getRequest());
+        Response response = policiesApiService.policiesThrottlingSubscriptionIdPut(uuid, dto, null, null, getRequest());
         Assert.assertEquals(201, response.getStatus());
     }
 
@@ -477,7 +453,7 @@ public class PoliciesApiServiceImplTest {
         PowerMockito.when(SubscriptionThrottlePolicyMappingUtil.fromSubscriptionThrottlePolicyToDTO(policy))
                 .thenReturn(dto);
 
-        Response response = policiesApiService.policiesThrottlingSubscriptionPost(dto, null, getRequest());
+        Response response = policiesApiService.policiesThrottlingSubscriptionPost(dto, getRequest());
         Assert.assertEquals(201, response.getStatus());
     }
 

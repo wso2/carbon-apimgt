@@ -53,6 +53,8 @@ public class APIMgtConstants {
     public static final String SWAGGER_V2 = "2.0";
     public static final String SWAGGER_INFO = "info";
     public static final String SWAGGER_RESPONSE_200 = "200";
+    public static final String SWAGGER_APIKEY = "apikey";
+    public static final String SWAGGER_OAUTH2 = "oauth2";
     public static final String API = "API";
     public static final String API_LIFECYCLE = "API_LIFECYCLE";
     public static final String AUTH_NO_AUTHENTICATION = "None";
@@ -64,6 +66,8 @@ public class APIMgtConstants {
     public static final String API_SPECIFIC_ENDPOINT = "API";
     public static final String RESOURCE_SPECIFIC_ENDPOINT = "RESOURCE";
     public static final String PRODUCTION_ENDPOINT = "production";
+    public static final String OAUTH2SECURITY = "OAuth2Security";
+    public static final String SCOPES = "scopes";
 
     public static final String DEFAULT_LABEL_NAME = "Default";
     public static final String DEFAULT_LABEL_ACCESS_URL = "https://localhost:9092";

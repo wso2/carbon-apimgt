@@ -532,20 +532,33 @@ public class MappingUtil {
         return wsdlValidationResponseDTO;
     }
 
+    /**
+     * This method maps the security scheme list in to an integer values
+     *
+     * @param securityScheme security schemes list
+     * @return security scheme integer value
+     */
     public static int mapSecuritySchemeListToInt(List<String> securityScheme) {
         int securitySchemeValue = 0;
         for(String scheme : securityScheme) {
             switch (scheme) {
-                case "Oauth" : securitySchemeValue = securitySchemeValue | 2;
+                case "Oauth" : securitySchemeValue = securitySchemeValue | 1;
                     break;
-                case "apikey" : securitySchemeValue = securitySchemeValue | 1;
+                case "apikey" : securitySchemeValue = securitySchemeValue | 2;
                     break;
                 default:break;
             }
         }
+
         return securitySchemeValue;
     }
 
+    /**
+     * This method maps the security scheme int in to a string list
+     *
+     * @param securityScheme security schemes int value
+     * @return security scheme list
+     */
     public static List<String> mapSecuritySchemeIntToList(int securityScheme) {
         List<String> securitySchemesList = new ArrayList<String>();
         if ((securityScheme & 1) == 1) { //Oauth

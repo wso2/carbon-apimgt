@@ -30,6 +30,10 @@ import io.swagger.models.Operation;
 import io.swagger.models.Path;
 import io.swagger.models.Response;
 import io.swagger.models.Swagger;
+import io.swagger.models.auth.ApiKeyAuthDefinition;
+import io.swagger.models.auth.In;
+import io.swagger.models.auth.OAuth2Definition;
+import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.models.parameters.BodyParameter;
 import io.swagger.models.parameters.FormParameter;
 import io.swagger.models.parameters.Parameter;
@@ -159,6 +163,42 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         }
     }
 
+    /**
+     * This method populates resource to scope mappings into localConfigMap
+     *
+     * @param swagger   swagger oc of the apis
+     * @param namespace namespacee unique identifier of the api
+     */
+    private void populateConfigMapForScope(Swagger swagger, String namespace) {
+        //todo: Keep polulateConfigMapForScope and remove populateConfigMapForScopes after finalizing yamls
+        // todo: -without vendor extensions.
+        Map<String, String> configMap = ServiceReferenceHolder.getInstance().getRestAPIConfigurationMap(namespace);
+        //update local cache with configs defined in configuration file(dep.yaml)
+        if (!localConfigMap.containsKey(namespace)) {
+            localConfigMap.put(namespace, new ConcurrentHashMap<>());
+        }
+        if (configMap != null) {
+            localConfigMap.get(namespace).putAll(configMap);
+        }
+        //update local cache with the resource to scope mapping read from swagger
+        if (swagger != null) {
+            for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
+                Path resource = entry.getValue();
+                Map<HttpMethod, Operation> operationsMap = resource.getOperationMap();
+                for (Map.Entry<HttpMethod, Operation> httpVerbEntry : operationsMap.entrySet()) {
+                    List<Map<String, List<String>>> security = httpVerbEntry.getValue().getSecurity();
+                    if (security != null) {
+                        String scope = security.get(0).get(APIMgtConstants.OAUTH2SECURITY).get(0);
+                        String path = httpVerbEntry.getKey() + "_" + entry.getKey();
+                        if (!localConfigMap.get(namespace).containsKey(path)) {
+                            localConfigMap.get(namespace).put(path, scope);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public List<APIResource> parseSwaggerAPIResources(StringBuilder resourceConfigsJSON)
             throws APIManagementException {
@@ -166,45 +206,136 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigsJSON.toString());
         Map<String, Path> resourceList = swagger.getPaths();
-        Map<String, Scope> scopeMap = getScopes(resourceConfigsJSON.toString());
-        for (Map.Entry<String, Path> resourceEntry : resourceList.entrySet()) {
-            Path resource = resourceEntry.getValue();
-            UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
-            uriTemplateBuilder.uriTemplate(resourceEntry.getKey());
-            for (Map.Entry<HttpMethod, Operation> operationEntry : resource.getOperationMap().entrySet()) {
-                Operation operation = operationEntry.getValue();
-                Map<String, Object> vendorExtensions = operation.getVendorExtensions();
-                APIResource.Builder apiResourceBuilder = new APIResource.Builder();
-                List<String> producesList = operation.getProduces();
-                if (producesList != null) {
-                    String produceSeparatedString = "\"";
-                    produceSeparatedString += String.join("\",\"", producesList) + "\"";
-                    apiResourceBuilder.produces(produceSeparatedString);
+        Map<String, Scope> scopeMap;
+        //todo:remove vendor extensions scope retraction (remove else part)
+        //retrieve scopes depending on OAuth2Security definitions availability
+        if (swagger.getSecurityDefinitions() != null) {
+            scopeMap = getScopesFromSecurityDefinition(resourceConfigsJSON.toString());
+            for (Map.Entry<String, Path> resourceEntry : resourceList.entrySet()) {
+                Path resource = resourceEntry.getValue();
+                UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
+                uriTemplateBuilder.uriTemplate(resourceEntry.getKey());
+                for (Map.Entry<HttpMethod, Operation> operationEntry : resource.getOperationMap().entrySet()) {
+                    APIResource.Builder apiResourceBuilder = setApiResourceBuilderProperties(operationEntry,
+                            uriTemplateBuilder, resourceEntry.getKey());
+                    List<Map<String, List<String>>> security = operationEntry.getValue().getSecurity();
+                    if (security != null) {
+                        String scope = security.get(0).get(APIMgtConstants.OAUTH2SECURITY).get(0);
+                        if (StringUtils.isNotEmpty(scope)) {
+                            apiResourceBuilder.scope(scopeMap.get(scope));
+                        }
+                    }
+                    uriTemplateBuilder.httpVerb(operationEntry.getKey().name());
+                    apiResourceBuilder.uriTemplate(uriTemplateBuilder.build());
+                    apiResources.add(apiResourceBuilder.build());
                 }
-                List<String> consumesList = operation.getConsumes();
-                if (consumesList != null) {
-                    String consumesSeparatedString = "\"";
-                    consumesSeparatedString += String.join("\",\"", consumesList) + "\"";
-                    apiResourceBuilder.consumes(consumesSeparatedString);
+            }
+        } else { //retrieve scopes in vendor extension
+            scopeMap = getScopes(resourceConfigsJSON.toString());
+            for (Map.Entry<String, Path> resourceEntry : resourceList.entrySet()) {
+                Path resource = resourceEntry.getValue();
+                UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
+                uriTemplateBuilder.uriTemplate(resourceEntry.getKey());
+                for (Map.Entry<HttpMethod, Operation> operationEntry : resource.getOperationMap().entrySet()) {
+                    Operation operation = operationEntry.getValue();
+                    Map<String, Object> vendorExtensions = operation.getVendorExtensions();
+                    APIResource.Builder apiResourceBuilder = setApiResourceBuilderProperties(operationEntry,
+                            uriTemplateBuilder, resourceEntry.getKey());
+                    String scope = (String) vendorExtensions.get(APIMgtConstants.SWAGGER_X_SCOPE);
+                    if (StringUtils.isNotEmpty(scope)) {
+                        apiResourceBuilder.scope(scopeMap.get(scope));
+                    }
+                    apiResources.add(apiResourceBuilder.build());
                 }
-                if (operation.getOperationId() != null) {
-                    uriTemplateBuilder.templateId(operation.getOperationId());
-                } else {
-                    uriTemplateBuilder.templateId(APIUtils.generateOperationIdFromPath(resourceEntry.getKey(),
-                            operationEntry.getKey().name()));
-                }
-                uriTemplateBuilder.httpVerb(operationEntry.getKey().name());
-                String scope = (String) vendorExtensions.get(APIMgtConstants.SWAGGER_X_SCOPE);
-                if (StringUtils.isNotEmpty(scope)) {
-                    apiResourceBuilder.scope(scopeMap.get(scope));
-                }
-                apiResourceBuilder.uriTemplate(uriTemplateBuilder.build());
-                apiResources.add(apiResourceBuilder.build());
             }
         }
         resourceConfigsJSON.setLength(0);
         resourceConfigsJSON.append(Json.pretty(swagger));
         return apiResources;
+    }
+
+    /**
+     * Extract properties in Operation entry and assign them to api resource builder properties.
+     *
+     * @param operationEntry     Map entry to be extracted properties
+     * @param uriTemplateBuilder Uri template builder to assign related properties
+     * @param resourcePath       resource path
+     * @return APIResource.Builder object
+     */
+    private APIResource.Builder setApiResourceBuilderProperties(Map.Entry<HttpMethod, Operation> operationEntry,
+            UriTemplate.UriTemplateBuilder uriTemplateBuilder, String resourcePath) {
+        Operation operation = operationEntry.getValue();
+        APIResource.Builder apiResourceBuilder = new APIResource.Builder();
+        List<String> producesList = operation.getProduces();
+        if (producesList != null) {
+            String produceSeparatedString = "\"";
+            produceSeparatedString += String.join("\",\"", producesList) + "\"";
+            apiResourceBuilder.produces(produceSeparatedString);
+        }
+        List<String> consumesList = operation.getConsumes();
+        if (consumesList != null) {
+            String consumesSeparatedString = "\"";
+            consumesSeparatedString += String.join("\",\"", consumesList) + "\"";
+            apiResourceBuilder.consumes(consumesSeparatedString);
+        }
+        if (operation.getOperationId() != null) {
+            uriTemplateBuilder.templateId(operation.getOperationId());
+        } else {
+            uriTemplateBuilder
+                    .templateId(APIUtils.generateOperationIdFromPath(resourcePath, operationEntry.getKey().name()));
+        }
+        uriTemplateBuilder.httpVerb(operationEntry.getKey().name());
+        apiResourceBuilder.uriTemplate(uriTemplateBuilder.build());
+        return apiResourceBuilder;
+    }
+
+    @Override
+    public Map<String, Scope> getScopesFromSecurityDefinition(String resourceConfigJSON) throws APIManagementException {
+        SwaggerParser swaggerParser = new SwaggerParser();
+        Swagger swagger = swaggerParser.parse(resourceConfigJSON);
+        String basePath = swagger.getBasePath();
+        String nameSpace = getNamespaceFromBasePath(basePath);
+        Map<String, String> scopes = null;
+        if (nameSpace == null) {
+            return new HashMap<>();
+        }
+        if (localConfigMap.containsKey(nameSpace)) {
+            if (localConfigMap.get(nameSpace).containsKey(APIMgtConstants.SCOPES)) {
+                return (Map<String, Scope>) localConfigMap.get(nameSpace).get(APIMgtConstants.SCOPES);
+            }
+        } else {
+            populateConfigMapForScope(swagger, nameSpace);
+        }
+        //security header is not found in deployment.yaml.hence, reading from swagger
+        Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
+        if (securityDefinitions != null) {
+            Map.Entry<String, SecuritySchemeDefinition> entry = securityDefinitions.entrySet().iterator().next();
+            OAuth2Definition securityDefinition = (OAuth2Definition) entry.getValue();
+            scopes = securityDefinition.getScopes();
+            //populate Scope object map using oAuth2securityDefinitions
+            Map<String, Scope> scopeMap = populateScopeMap(scopes);
+            localConfigMap.get(nameSpace).put(APIMgtConstants.SCOPES, scopeMap);
+            log.debug("Scopes of extracted from Swagger: {}", scopeMap);
+            return scopeMap;
+        }
+        return new HashMap<>();
+    }
+
+    /**
+     * Populate Scope Object map from OAuth2SecurityDefinitions.
+     *
+     * @param oAuth2SecurityDefinitionMap oAuth2SecurityDefinition Map<String, String> to be converted to Scope objects
+     * @return Scope object map
+     */
+    private Map<String, Scope> populateScopeMap(Map<String, String> oAuth2SecurityDefinitionMap) {
+        Map<String, Scope> scopeMap = new HashMap<>();
+        for (Map.Entry<String, String> scopeEntry : oAuth2SecurityDefinitionMap.entrySet()) {
+            Scope scope = new Scope();
+            scope.setKey(scopeEntry.getKey());
+            scope.setName(scopeEntry.getValue());
+            scopeMap.put(scopeEntry.getKey(), scope);
+        }
+        return scopeMap;
     }
 
     @Override
@@ -248,8 +379,8 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 log.debug("vendor extensions are not found in provided swagger json. resourceConfigsJSON = "
                         + resourceConfigsJSON);
             }
+            return new HashMap<>();
         }
-        return new HashMap<>();
     }
 
     /*
@@ -275,6 +406,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 log.debug("Unable to extract scopes from provided json as it is null.");
             }
         }
+        log.debug("Scopes of extracted from Swagger: {}", scopeMap);
         return scopeMap;
     }
 
@@ -317,6 +449,17 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         info.setContact(contact);
         info.setVersion(api.getVersion());
         swagger.setInfo(info);
+
+        if ((api.getSecurityScheme() & 2) == 2) { //apikey
+            log.debug("API security scheme : API Key Scheme");
+            swagger.securityDefinition(APIMgtConstants.SWAGGER_APIKEY, new ApiKeyAuthDefinition(
+                    APIMgtConstants.SWAGGER_APIKEY, In.HEADER));
+        }
+        if ((api.getSecurityScheme() & 1) == 1) {
+            log.debug("API security Scheme : Oauth");
+            swagger.securityDefinition(APIMgtConstants.SWAGGER_OAUTH2, new OAuth2Definition());
+        }
+
         Map<String, Path> stringPathMap = new HashMap();
         for (UriTemplate uriTemplate : api.getUriTemplates().values()) {
             String uriTemplateString = uriTemplate.getUriTemplate();
@@ -346,6 +489,18 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 operation.setConsumes(consumesList);
             }
             operation.addResponse("200", getDefaultResponse());
+            if (!APIMgtConstants.AUTH_NO_AUTHENTICATION.equals(uriTemplate.getAuthType()) &&
+                    ((api.getSecurityScheme() & 2) == 2)) {
+                log.debug("API security scheme : API Key Scheme ---- Resource Auth Type : Not None");
+                operation.addSecurity(APIMgtConstants.SWAGGER_APIKEY, null);
+            }
+
+            if (!APIMgtConstants.AUTH_NO_AUTHENTICATION.equals(uriTemplate.getAuthType()) &&
+                    ((api.getSecurityScheme() & 1) == 1)) {
+                log.debug("API security scheme : Oauth Scheme ---- Resource Auth Type : Not None");
+                operation.addSecurity(APIMgtConstants.SWAGGER_OAUTH2, null);
+            }
+
             if (stringPathMap.containsKey(uriTemplateString)) {
                 Path path = stringPathMap.get(uriTemplateString);
                 path.set(uriTemplate.getHttpVerb().toLowerCase(), operation);
