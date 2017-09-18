@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.rest.api.common.codegen;
 
 import io.swagger.codegen.CodegenOperation;
 import io.swagger.codegen.CodegenParameter;
-import io.swagger.codegen.SupportingFile;
 import io.swagger.codegen.languages.StaticDocCodegen;
 import io.swagger.models.Model;
 import io.swagger.models.Operation;
@@ -31,19 +30,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * The class responsible for manipulating swagger code gen StaticDocCodegen to cater APIM HTML doc gen requirements.
+ */
 public class DynamicHtmlGen extends StaticDocCodegen {
-    
+
     private Map<String, String> tagToSanitizedMap;
-    
+
     public DynamicHtmlGen() {
         tagToSanitizedMap = new HashMap<>();
     }
-    
+
     @Override
     public String toApiName(String name) {
         return tagToSanitizedMap.getOrDefault(name, name);
     }
-    
+
     @Override
     public String sanitizeTag(String tag) {
         String sanitizedTag = super.sanitizeTag(tag);
@@ -81,5 +83,5 @@ public class DynamicHtmlGen extends StaticDocCodegen {
     public String escapeQuotationMark(String input) {
         return input;
     }
-    
+
 }
