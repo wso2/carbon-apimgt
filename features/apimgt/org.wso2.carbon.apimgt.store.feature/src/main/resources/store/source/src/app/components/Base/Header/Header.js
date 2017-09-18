@@ -24,17 +24,17 @@ import qs from 'qs'
 import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
 import IconButton from 'material-ui/IconButton';
-import MenuIcon from 'material-ui-icons/Menu';
 import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
 import Menu, { MenuItem } from 'material-ui/Menu';
 import SearchIcon from 'material-ui-icons/Search';
-import AppIcon from 'material-ui-icons/Apps';
+import MenuIcon from 'material-ui-icons/Menu';
 import PlaylistAddIcon from 'material-ui-icons/PlaylistAdd';
 import CloseIcon from 'material-ui-icons/Close';
 import TextField from 'material-ui/TextField';
 import InfoIcon from 'material-ui-icons/Info';
 import InfoLightBulb from 'material-ui-icons/LightbulbOutline';
+import Avatar from 'material-ui/Avatar';
 import List, {
     ListItem,
     ListItemIcon,
@@ -151,24 +151,20 @@ class Header extends React.Component {
                             <MenuIcon color="contrast" onClick={this.props.toggleDrawer}/>
                         </IconButton> : <span></span> }
                         <Typography type="title" color="inherit" style={{flex: 1}}>
-                            <Link to="/" style={{textDecoration: 'none'}}>
-                                <Button color="primary">
-                                    <img className="brand" src="/store/public/images/logo.svg" alt="wso2-logo"/>
+                            <Link to="/" className="home">
+                                    <img className="brand" src="/store/public/images/logo-inverse.svg" alt="wso2-logo"/>
                                     <span color="contrast" style={{fontSize: "15px", color:"#fff"}}>APIM Store</span>
-                                </Button>
-
                             </Link>
                         </Typography>
                         { user ?
                             <div style={{display:"flex"}}>
-                                <IconButton aria-label="Search" onClick={this.toggleSearch} color="contrast">
+                                <Button aria-label="Search" onClick={this.toggleSearch} color="contrast">
                                     <SearchIcon />
-                                </IconButton>
+                                </Button>
 
-                                {/* Main menu */}
                                 <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClickMainMenu}
                                         color="contrast">
-                                    <AppIcon />
+                                    <MenuIcon />
                                 </Button>
                                 <Menu
                                     id="simple-menu"
@@ -188,7 +184,8 @@ class Header extends React.Component {
                                 {/* User menu */}
                                 <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClickUserMenu}
                                         color="contrast">
-                                    {user.name}
+                                        <Avatar alt="{user.name}" src="/store/public/images/users/user.png" style={{marginRight:"5px"}}></Avatar>
+                                        <span style={{textTransform:"none", marginLeft:"5px"}}>{user.name}</span>
                                 </Button>
                                 <Menu
                                     id="simple-menu"

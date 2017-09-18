@@ -25,7 +25,7 @@ const LoadingAnimation = (props) => {
     return (
         <Grid container spacing={24}>
             <Grid item xs={12}>
-                <LinearProgress />
+                <LinearProgress color="accent"/>
             </Grid>
         </Grid>
     );

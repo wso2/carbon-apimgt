@@ -33,6 +33,11 @@ import Slide from 'material-ui/transitions/Slide';
 import Grid from 'material-ui/Grid';
 import DeleteIcon from 'material-ui-icons/Delete';
 
+import Avatar from 'material-ui/Avatar';
+import {red, purple} from 'material-ui/colors';
+import deepOrange from 'material-ui/colors/deepOrange';
+import Color from 'random-material-color';
+
 
 class ApiThumb extends React.Component {
     constructor(props) {
@@ -67,24 +72,29 @@ class ApiThumb extends React.Component {
 
     render() {
         let details_link = "/apis/" + this.props.api.id;
-        const {name, version, context} = this.props.api;
+        const {name, version, context, description} = this.props.api;
         if (!this.state.active) { // Controls the delete state, We set the state to inactive on delete success call
             return null;
         }
+        let firstTwoLetters = n => {
+            let m = n.substr(0,2);
+            return m.charAt(0).toUpperCase() + m.slice(1);
+        };
+        let randomApiThumbColor = Color.getColor({shades: ['400']});
         return (
             <Grid item xs={12} sm={6} md={3} lg={2} xl={2}>
                 <Card>
-                    <CardMedia image="/store/public/images/api/api-default.png">
-                        <img src="/store/public/images/api/api-default.png" style={{width:"100%"}}/>
-                    </CardMedia>
+                    <Avatar className="default-thumb" style={{backgroundColor: randomApiThumbColor}}>
+                        {firstTwoLetters(name)}
+                    </Avatar>
                     <CardContent>
-                        <Typography type="headline" component="h2">
+                        <Typography type="headline" component="h2" noWrap>
                             {name}
                         </Typography>
-                        <Typography component="div">
+                        <Typography component="div" noWrap>
                             <p>{version}</p>
                             <p>{context}</p>
-                            <p className="description">{this.props.api.description}</p>
+                            <p className="description">{description}</p>
                         </Typography>
                     </CardContent>
                     <CardActions>
@@ -109,8 +119,6 @@ class ApiThumb extends React.Component {
                                 //todo:Delete button should be enabled after M6 based on permission model
                             </DialogActions>
                         </Dialog>
-
-
                     </CardActions>
                 </Card>
             </Grid>

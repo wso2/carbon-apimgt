@@ -115,7 +115,7 @@ class InlineEditor extends Component {
                         <h3 style={{paddingTop: 20}}>Inline Editor</h3>
                         <hr/>
                         <h2>Document Name : {this.props.documentName}</h2>
-                        <Row gutter={1} style={{paddingTop: 20}}>
+                        <Row style={{paddingTop: 20}}>
                             <Col span={100}>
                                 <div>
                                     <ReactQuill
@@ -131,7 +131,7 @@ class InlineEditor extends Component {
                                 </div>
                             </Col>
                         </Row>
-                        <Row gutter={1}>
+                        <Row>
                             <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
                             <Col span={2}>
                                     <Button type="primary"
