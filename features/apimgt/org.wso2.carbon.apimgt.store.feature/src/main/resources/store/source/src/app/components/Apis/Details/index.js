@@ -41,17 +41,9 @@ export default class Details extends Component {
         };
     }
 
-
     handleChange = (event, value) => {
-    var tabs = [
-    "overview",
-    "console",
-    "documentation",
-    "forum",
-    "sdk"
-    ]; 
         this.setState({ value });
-        this.props.history.push({pathname: "/apis/" + this.props.match.params.api_uuid + "/" + tabs[value]});
+        this.props.history.push({pathname: "/apis/" + this.props.match.params.api_uuid + "/" + value});
     };
     componentDidMount() {
         this.props.setLeftMenu(true);
