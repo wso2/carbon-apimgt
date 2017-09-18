@@ -17,7 +17,7 @@
  */
 
 import React, {Component} from 'react'
-import API from '../../../../data/api'
+import API from '../../../../data/api.js'
 import {Button, message} from 'antd';
 import DocumentsTable from './DocumentsTable';
 import Loading from '../../../Base/Loading/Loading'
@@ -57,7 +57,7 @@ class Documents extends Component {
         );
     }
 
-    downloadFile(response) {
+       downloadFile(response) {
         let fileName = "";
         const contentDisposition = response.headers["content-disposition"];
 
@@ -95,6 +95,7 @@ class Documents extends Component {
             }, 100);
         }
     }
+
 
     render() {
         if (!this.state.documentsList) {
