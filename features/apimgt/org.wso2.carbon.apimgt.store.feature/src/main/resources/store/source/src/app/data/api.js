@@ -93,6 +93,7 @@ class API {
 
         var promise_get = this.client.then(
             (client) => {
+		debugger;
                 return client.apis["API (individual)"].get_apis__apiId__documents(
                     {apiId: id}, this._requestMetaData());
             }
@@ -112,18 +113,15 @@ class API {
      * @param callback {function} Function which needs to be called upon success of of getting document.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getFileForDocument(api_id, docId, callback = null) {
-        var promise_get = this.client.then(
+    getFileForDocument(api_id, docId) {
+        var promised_getDocContent = this.client.then(
             (client) => {
-		debugger;
-                client.apis["API (individual)"].get_apis__apiId__documents__documentId__content({
-                        apiId: api_id,
-                        documentId: docId
-                    },
-                    this._requestMetaData());
+                let payload = {apiId: api_id, documentId: docId, "Accept": "application/octet-stream"};
+                return client.apis["API (individual)"].get_apis__apiId__documents__documentId__content(
+                    payload, this._requestMetaData({"Content-Type": "multipart/form-data"}));
             }
         );
-        return promise_get;
+        return promised_getDocContent;
     }
 
     /**

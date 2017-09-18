@@ -18,7 +18,7 @@
 
 import React, {Component} from 'react'
 import {Table, Popconfirm} from 'antd';
-import API from '../../../../data/api'
+import API from '../../../../data/api.js'
 import Loading from '../../../Base/Loading/Loading'
 import Grid from 'material-ui/Grid';
 import Paper from 'material-ui/Paper';
@@ -27,13 +27,13 @@ class DocumentsTable extends Component {
     constructor(props) {
         super(props);
         this.api_id = this.props.apiId;
+        this.viewDocContentHandler=this.viewDocContentHandler.bind(this);
+        this.handleCloseModal = this.handleCloseModal.bind(this);
         this.state = {
             showInlineEditor: false,
             documentId: null,
             selectedDocName: null
         }
-        this.viewDocContentHandler=this.viewDocContentHandler.bind(this);
-        this.handleCloseModal = this.handleCloseModal.bind(this);
     }
 
     componentDidMount() {
@@ -62,8 +62,8 @@ class DocumentsTable extends Component {
      2- If the document type is 'INLINE' open the content with an inline editor
      3- If the document type is 'FILE' download the file
      */
-    viewDocContentHandler(document) {
 
+    viewDocContentHandler(document) {
         if (document.sourceType === "URL") {
             window.open(document.sourceUrl, '_blank');
         } else if (document.sourceType === "INLINE") {
@@ -73,17 +73,18 @@ class DocumentsTable extends Component {
                     selectedDocName:document.name
                 });
         } else if (document.sourceType === "FILE") {
-	    const apiclient = new API();
-            let promised_get_content = this.props.client.getFileForDocument(this.api_id , document.documentId);
+            let promised_get_content = this.props.client.getFileForDocument(this.props.apiId, document.documentId);
             promised_get_content.then((done) => {
                 this.props.downloadFile(done);
             }).catch((error_response) => {
+		throw error_response;
                 let error_data = JSON.parse(error_response.data);
                 let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
                 console.error(messageTxt);
             });
         }
     }
+
 
     handleCloseModal () {
         this.setState({ showInlineEditor: false });
