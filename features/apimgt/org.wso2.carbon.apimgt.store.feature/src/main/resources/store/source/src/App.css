@@ -44,3 +44,17 @@ header.MuiAppBar-colorPrimary-6{
 .title-toolbar{
     margin-left: 0;
 }
+.home{
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+.home .brand{
+    margin-right: 5px;
+    width:80px;
+    float: right;
+}
+.home span,.home span:active,.home span:visited{
+    font-weight: 200;
+    text-decoration: none;
+}
