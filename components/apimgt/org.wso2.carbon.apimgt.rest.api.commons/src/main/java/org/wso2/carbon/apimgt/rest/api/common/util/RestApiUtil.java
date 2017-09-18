@@ -72,18 +72,11 @@ public class RestApiUtil {
     /**
      * Get the current logged in user's username
      *
-     * @param request
-     * @return The current logged in user.
+     * @param request msf4j request
+     * @return The current logged in user's username or null if user is not logged in.
      */
     public static String getLoggedInUsername(Request request) {
-        String loggedInUser = null;
-        try {
-            loggedInUser = request.getProperty(LOGGED_IN_USER).toString();
-        } catch (NullPointerException e) {
-            String message = "Error while getting loggedInUser from request";
-            log.error(message, e);
-        }
-        return loggedInUser;
+        return request.getProperty(LOGGED_IN_USER) != null ? request.getProperty(LOGGED_IN_USER).toString() : null;
     }
 
     /**
@@ -202,11 +195,11 @@ public class RestApiUtil {
     }
 
     /**
-     * Returns an Analyzer for a specific user.
+     * Returns an APIAnalytics for a specific user.
      *
      * @param username
-     * @return {@code Analyzer}
-     * @throws APIManagementException if failed to get Analyzer
+     * @return {@code APIAnalytics}
+     * @throws APIManagementException if failed to get APIAnalytics
      */
     public static Analyzer getAnalyzer(String username) throws APIManagementException {
         return APIManagerFactory.getInstance().getAnalyzer(username);
