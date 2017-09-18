@@ -9,6 +9,7 @@ import org.wso2.msf4j.Request;
 
 import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CompositeAPIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.DedicatedGatewayDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.store.dto.FileInfoDTO;
@@ -22,6 +23,15 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 public abstract class CompositeApisApiService {
+    public abstract Response compositeApisApiIdDedicatedGatewayGet(String apiId
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+ , Request request) throws NotFoundException;
+    public abstract Response compositeApisApiIdDedicatedGatewayPut(String apiId
+ ,DedicatedGatewayDTO body
+ ,String ifMatch
+ ,String ifUnmodifiedSince
+ , Request request) throws NotFoundException;
     public abstract Response compositeApisApiIdDelete(String apiId
  ,String ifMatch
  ,String ifUnmodifiedSince

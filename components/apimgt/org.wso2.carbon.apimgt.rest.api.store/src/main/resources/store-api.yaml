@@ -69,6 +69,7 @@ securityDefinitions:
     scopes:
       apim:subscribe: Subscribe API
       apim:self-signup: Self Sign-up
+      apim:dedicated_gateway: Updating dedicated Gateway
 
 ######################################################
 # The "API Collection" resource APIs
@@ -1177,6 +1178,137 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+######################################################
+# Dedicated Gateway API
+######################################################
+  /composite-apis/{apiId}/dedicated-gateway:
+#-----------------------------------------------------
+# Retrieve dedicated Gateway Enabled
+#-----------------------------------------------------
+    get:
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9090/api/am/store/v1/composite-apis/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/dedicated-gateway"
+      x-wso2-request: |
+        GET https://127.0.0.1:9292/api/am/store/v1/composite-apis/96077508-fd01-4fae-bc64-5de0e2baf43c/dedicated-gateway
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n\"isEnabled\":true\n}"
+      security:
+        - OAuth2Security:
+          - apim:subscribe
+      x-scope: apim:subscribe
+      summary: Get details of dedicated-gateway
+      description: |
+        This operation can be used to retrieve whether the dedicated gateway is enabled in a certain Composite API.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+      tags:
+        - DedicatedGateway (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            isEnabled of dedicated Gateway returned
+          schema:
+            $ref: '#/definitions/DedicatedGateway'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        404:
+          description: |
+            Not Found.
+            Requested Dedicated Gateway does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported.
+          schema:
+            $ref: '#/definitions/Error'
+#-----------------------------------------------------
+# Update a dedicated Gateway of a certain API
+#-----------------------------------------------------
+    put:
+      x-wso2-curl: "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -H \"Content-Type: application/json\" -X PUT -d data.json \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/dedicated-gateway"
+      x-wso2-request: "PUT https://127.0.0.1:9292/api/am/store/v1/composite-apis/96077508-fd01-4fae-bc64-5de0e2baf43c/dedicated-gateway\nAuthorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\nContent-Type: application/json\n\n{\n   \"isEnabled\": \"true\"\n}"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"enabled\": \"true\"\n}"
+      security:
+        - OAuth2Security:
+          - apim:dedicated_gateway
+      x-scope: apim:dedicated_gateway
+      summary: Update enabling of dedicated Gateway of Composite API
+      description: |
+        This operation can be used to update metadata of an API's dedicated-gateway.
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - in: body
+          name: body
+          description: |
+            dedicated Gateway object that needs to be added
+          required: true
+          schema:
+            $ref: '#/definitions/DedicatedGateway'
+        - $ref: '#/parameters/If-Match'
+        - $ref: '#/parameters/If-Unmodified-Since'
+      tags:
+        - dedicated-gateway (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Dedicated Gateway of Composite API updated
+          schema:
+            $ref: '#/definitions/DedicatedGateway'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
 
 ###################################################################
 # The swagger resource of "Individual Composite API" resource APIs
@@ -2814,6 +2946,8 @@ definitions:
         type: string
       version:
         type: string
+      hasOwnGateway:
+        type: boolean
       provider:
         description: |
           If the provider value is not given, the user invoking the API will be used as the provider.
@@ -2892,6 +3026,8 @@ definitions:
         type: array
         items:
           type: string
+      hasOwnGateway:
+        type: boolean
       type:
           type: string
           enum:
@@ -3650,6 +3786,20 @@ definitions:
         type: string
       email:
         type: string
+
+#-----------------------------------------------------
+# The dedicated Gateway Resource
+#-----------------------------------------------------
+  DedicatedGateway:
+    title: Dedicated Gateway for the Composite API
+    required:
+      - isEnabled
+    properties:
+      isEnabled:
+        description: |
+          This attribute declares whether an API should have a dedicated Gateway or not.
+        type: boolean
+        example: true
        
 #-----------------------------------------------------
 # END-OF-FILE

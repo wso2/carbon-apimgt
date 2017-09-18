@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
+import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Rating;
@@ -48,6 +49,7 @@ import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.util.ContainerBasedGatewayConstants;
 import org.wso2.carbon.apimgt.core.util.ThrottleConstants;
 
 import java.io.ByteArrayInputStream;
@@ -87,8 +89,8 @@ public class ApiDAOImpl implements ApiDAO {
             "DESCRIPTION, CURRENT_LC_STATUS, LIFECYCLE_INSTANCE_ID, LC_WORKFLOW_STATUS, SECURITY_SCHEME FROM AM_API";
 
     private static final String API_SELECT = "SELECT UUID, PROVIDER, NAME, CONTEXT, VERSION, IS_DEFAULT_VERSION, " +
-            "DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, TECHNICAL_OWNER, TECHNICAL_EMAIL, " +
-            "BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, CURRENT_LC_STATUS, " +
+            "DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, HAS_OWN_GATEWAY, CACHE_TIMEOUT, TECHNICAL_OWNER, " +
+            "TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, CURRENT_LC_STATUS, " +
             "CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_ALLOW_HEADERS, CORS_ALLOW_METHODS, " +
             "CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API, UPDATED_BY, LC_WORKFLOW_STATUS, " +
             "SECURITY_SCHEME FROM AM_API";
@@ -97,12 +99,12 @@ public class ApiDAOImpl implements ApiDAO {
             "DESCRIPTION, LC_WORKFLOW_STATUS FROM AM_API";
 
     private static final String API_INSERT = "INSERT INTO AM_API (PROVIDER, NAME, CONTEXT, VERSION, " +
-            "IS_DEFAULT_VERSION, DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, CACHE_TIMEOUT, " +
+            "IS_DEFAULT_VERSION, DESCRIPTION, VISIBILITY, IS_RESPONSE_CACHED, HAS_OWN_GATEWAY, CACHE_TIMEOUT, " +
             "UUID, TECHNICAL_OWNER, TECHNICAL_EMAIL, BUSINESS_OWNER, BUSINESS_EMAIL, LIFECYCLE_INSTANCE_ID, " +
             "CURRENT_LC_STATUS, CORS_ENABLED, CORS_ALLOW_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_ALLOW_HEADERS, " +
             "CORS_ALLOW_METHODS, API_TYPE_ID, CREATED_BY, CREATED_TIME, LAST_UPDATED_TIME, COPIED_FROM_API, " +
             "UPDATED_BY, LC_WORKFLOW_STATUS, SECURITY_SCHEME) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?," +
-            "?,?,?,?,?,?,?,?)";
+            "?,?,?,?,?,?,?,?,?)";
 
     private static final String API_DELETE = "DELETE FROM AM_API WHERE UUID = ?";
 
@@ -681,33 +683,34 @@ public class ApiDAOImpl implements ApiDAO {
         statement.setString(6, api.getDescription());
         statement.setString(7, api.getVisibility().toString());
         statement.setBoolean(8, api.isResponseCachingEnabled());
-        statement.setInt(9, api.getCacheTimeout());
-        statement.setString(10, apiPrimaryKey);
+        statement.setBoolean(9, false);
+        statement.setInt(10, api.getCacheTimeout());
+        statement.setString(11, apiPrimaryKey);
 
         BusinessInformation businessInformation = api.getBusinessInformation();
-        statement.setString(11, businessInformation.getTechnicalOwner());
-        statement.setString(12, businessInformation.getTechnicalOwnerEmail());
-        statement.setString(13, businessInformation.getBusinessOwner());
-        statement.setString(14, businessInformation.getBusinessOwnerEmail());
+        statement.setString(12, businessInformation.getTechnicalOwner());
+        statement.setString(13, businessInformation.getTechnicalOwnerEmail());
+        statement.setString(14, businessInformation.getBusinessOwner());
+        statement.setString(15, businessInformation.getBusinessOwnerEmail());
 
-        statement.setString(15, api.getLifecycleInstanceId());
-        statement.setString(16, api.getLifeCycleStatus());
+        statement.setString(16, api.getLifecycleInstanceId());
+        statement.setString(17, api.getLifeCycleStatus());
 
         CorsConfiguration corsConfiguration = api.getCorsConfiguration();
-        statement.setBoolean(17, corsConfiguration.isEnabled());
-        statement.setString(18, String.join(",", corsConfiguration.getAllowOrigins()));
-        statement.setBoolean(19, corsConfiguration.isAllowCredentials());
-        statement.setString(20, String.join(",", corsConfiguration.getAllowHeaders()));
-        statement.setString(21, String.join(",", corsConfiguration.getAllowMethods()));
+        statement.setBoolean(18, corsConfiguration.isEnabled());
+        statement.setString(19, String.join(",", corsConfiguration.getAllowOrigins()));
+        statement.setBoolean(20, corsConfiguration.isAllowCredentials());
+        statement.setString(21, String.join(",", corsConfiguration.getAllowHeaders()));
+        statement.setString(22, String.join(",", corsConfiguration.getAllowMethods()));
 
-        statement.setInt(22, getApiTypeId(connection, ApiType.STANDARD));
-        statement.setString(23, api.getCreatedBy());
-        statement.setTimestamp(24, Timestamp.valueOf(LocalDateTime.now()));
+        statement.setInt(23, getApiTypeId(connection, ApiType.STANDARD));
+        statement.setString(24, api.getCreatedBy());
         statement.setTimestamp(25, Timestamp.valueOf(LocalDateTime.now()));
-        statement.setString(26, api.getCopiedFromApiId());
-        statement.setString(27, api.getUpdatedBy());
-        statement.setString(28, APILCWorkflowStatus.APPROVED.toString());
-        statement.setInt(29, api.getSecurityScheme());
+        statement.setTimestamp(26, Timestamp.valueOf(LocalDateTime.now()));
+        statement.setString(27, api.getCopiedFromApiId());
+        statement.setString(28, api.getUpdatedBy());
+        statement.setString(29, APILCWorkflowStatus.APPROVED.toString());
+        statement.setInt(30, api.getSecurityScheme());
         statement.execute();
 
         if (API.Visibility.RESTRICTED == api.getVisibility()) {
@@ -991,7 +994,7 @@ public class ApiDAOImpl implements ApiDAO {
                     "checking if WSDL exists for API(api: " + apiId + ")", e);
         }
     }
-    
+
     @Override
     public String getWSDL(String apiId) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
@@ -1597,6 +1600,85 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
+    /**
+     * @see ApiDAO#updateDedicatedGateway(DedicatedGateway, String, Set)
+     */
+    @Override
+    public void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId, Set<String> labels)
+            throws APIMgtDAOException {
+
+        // labels will come in three ways.
+        // 1. auto-generated label
+        // 2. existing label set ( if the updateDedicatedGateway is doing with isEnabled=false for a normal API)
+        // 3. null - when API is updated from dedicatedGatewayIsEnabled=true from dedicatedGatewayIsEnabled=false
+
+        final String query = "UPDATE AM_API SET HAS_OWN_GATEWAY = ?, LAST_UPDATED_TIME = ?, UPDATED_BY = ? " +
+                "WHERE API_ID = ?";
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            try {
+
+                statement.setBoolean(1, dedicatedGateway.isEnabled());
+                statement.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+                statement.setString(3, dedicatedGateway.getUpdatedBy());
+                statement.setString(4, apiId);
+
+                // if the labels are null or perAPI-GW
+                if (labels == null || labels.isEmpty() ||
+                        labels.contains(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId)) {
+                    deleteLabelsMapping(connection, apiId);
+                    addLabelMapping(connection, apiId, labels);
+
+                }
+                statement.execute();
+                connection.commit();
+            }  catch (SQLException e) {
+                String msg = "Couldn't update dedicated Gateway details of API : " + apiId;
+                connection.rollback();
+                log.error(msg, e);
+                throw new APIMgtDAOException(msg, ExceptionCodes.APIM_DAO_EXCEPTION);
+            } finally {
+                connection.setAutoCommit(DAOUtil.isAutoCommit());
+            }
+        } catch (SQLException e) {
+            throw new APIMgtDAOException("Error Executing query for updating Container Based Gateway",
+                    ExceptionCodes.APIM_DAO_EXCEPTION);
+
+        }
+    }
+
+    /**
+     * @see ApiDAO#getDedicatedGateway(String)
+     */
+    @Override
+    public DedicatedGateway getDedicatedGateway(String apiId) throws APIMgtDAOException {
+        final String query = "SELECT HAS_OWN_GATEWAY FROM AM_API WHERE API_ID = ?";
+
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            try {
+                statement.setString(1, apiId);
+                statement.execute();
+                try (ResultSet rs = statement.getResultSet()) {
+                    if (rs.next()) {
+                        rs.getBoolean(ContainerBasedGatewayConstants.IS_DEDICATED_GATEWAY_ENABLED);
+                    } else {
+                        throw new APIMgtDAOException("Couldn't Find Dedicated Gateway details ", ExceptionCodes
+                                .ENDPOINT_CONFIG_NOT_FOUND);                    }
+                }
+            } catch (SQLException e) {
+                String errorMessage = "Error while retrieving dedicated gateway details of API : " + apiId;
+                log.error(errorMessage, e);
+                throw new APIMgtDAOException(errorMessage, ExceptionCodes.APIM_DAO_EXCEPTION);
+            }
+        } catch (SQLException e) {
+            String message = "Error while creating database connection/prepared-statement";
+            log.error(message, e);
+            throw new APIMgtDAOException(message, ExceptionCodes.APIM_DAO_EXCEPTION);
+        }
+        return null;
+    }
+
     @Override
     public double getAverageRating(String apiId) throws APIMgtDAOException {
         final String query = "SELECT AVG(RATING) FROM AM_API_RATINGS WHERE API_ID = ?";
@@ -2008,6 +2090,7 @@ public class ApiDAOImpl implements ApiDAO {
                         visibleRoles(getVisibleRoles(connection, apiPrimaryKey)).
                         isResponseCachingEnabled(rs.getBoolean("IS_RESPONSE_CACHED")).
                         cacheTimeout(rs.getInt("CACHE_TIMEOUT")).
+                        hasOwnGateway(rs.getBoolean("HAS_OWN_GATEWAY")).
                         tags(getTags(connection, apiPrimaryKey)).
                         labels(getLabelNames(connection, apiPrimaryKey)).
                         wsdlUri(ApiResourceDAO.

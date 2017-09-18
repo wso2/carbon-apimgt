@@ -29,6 +29,9 @@ public class BaseAPIInfoDTO   {
   @JsonProperty("version")
   private String version = null;
 
+  @JsonProperty("hasOwnGateway")
+  private Boolean hasOwnGateway = null;
+
   @JsonProperty("provider")
   private String provider = null;
 
@@ -156,6 +159,24 @@ public class BaseAPIInfoDTO   {
     this.version = version;
   }
 
+  public BaseAPIInfoDTO hasOwnGateway(Boolean hasOwnGateway) {
+    this.hasOwnGateway = hasOwnGateway;
+    return this;
+  }
+
+   /**
+   * Get hasOwnGateway
+   * @return hasOwnGateway
+  **/
+  @ApiModelProperty(value = "")
+  public Boolean getHasOwnGateway() {
+    return hasOwnGateway;
+  }
+
+  public void setHasOwnGateway(Boolean hasOwnGateway) {
+    this.hasOwnGateway = hasOwnGateway;
+  }
+
   public BaseAPIInfoDTO provider(String provider) {
     this.provider = provider;
     return this;
@@ -207,13 +228,14 @@ public class BaseAPIInfoDTO   {
         Objects.equals(this.description, baseAPIInfo.description) &&
         Objects.equals(this.context, baseAPIInfo.context) &&
         Objects.equals(this.version, baseAPIInfo.version) &&
+        Objects.equals(this.hasOwnGateway, baseAPIInfo.hasOwnGateway) &&
         Objects.equals(this.provider, baseAPIInfo.provider) &&
         Objects.equals(this.type, baseAPIInfo.type);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, type);
+    return Objects.hash(id, name, description, context, version, hasOwnGateway, provider, type);
   }
 
   @Override
@@ -226,6 +248,7 @@ public class BaseAPIInfoDTO   {
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
+    sb.append("    hasOwnGateway: ").append(toIndentedString(hasOwnGateway)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("}");

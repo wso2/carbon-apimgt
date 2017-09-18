@@ -18,10 +18,24 @@ package org.wso2.carbon.apimgt.core.exception;
  */
 
 /**
- * Custom exception for gateway publishing related exceptions
+ * Custom exception for gateway related exceptions
  */
 public class GatewayException extends APIManagementException {
+
+    public GatewayException(String message) {
+        super(message);
+    }
+
     public GatewayException(String message, ExceptionCodes code) {
         super(message, code);
     }
+
+    public GatewayException(String message, Exception e) {
+        super(message, e);
+    }
+
+    public GatewayException(String message, Exception e, ExceptionCodes code) {
+        super(message, e, code);
+    }
+
 }

@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
@@ -65,6 +66,8 @@ public class APIStateChangeWorkflow extends Workflow {
     private APISubscriptionDAO apiSubscriptionDAO;
     private APILifecycleManager apiLifecycleManager;
     private APIGateway apiGateway;
+    private boolean hasOwnGateway;
+    private APIMConfigurations apimConfigurations;
 
     public APIStateChangeWorkflow(ApiDAO apiDAO, APISubscriptionDAO apiSubscriptionDAO, WorkflowDAO workflowDAO,
                                   APILifecycleManager apiLifecycleManager, APIGateway apiGateway) {
@@ -97,6 +100,13 @@ public class APIStateChangeWorkflow extends Workflow {
 
     public void setApiName(String apiName) {
         this.apiName = apiName;
+    }
+    public boolean isHasOwnGateway() {
+        return hasOwnGateway;
+    }
+
+    public void setHasOwnGateway(boolean hasOwnGateway) {
+        this.hasOwnGateway = hasOwnGateway;
     }
 
     public String getApiProvider() {
@@ -133,10 +143,51 @@ public class APIStateChangeWorkflow extends Workflow {
                 log.debug("API state change workflow complete: Approved");
             }
             String invoker = getAttribute(APIMgtConstants.WorkflowConstants.ATTRIBUTE_API_LC_INVOKER);
+            String currentState = getAttribute(APIMgtConstants.WorkflowConstants.ATTRIBUTE_API_CUR_STATE);
             String targetState = getAttribute(APIMgtConstants.WorkflowConstants.ATTRIBUTE_API_TARGET_STATE);
+
+            boolean hasOwnGateway =
+                    Boolean.valueOf(getAttribute(APIMgtConstants.WorkflowConstants.ATTRIBUTE_HAS_OWN_GATEWAY));
+            String apiId = getAttribute(APIMgtConstants.WorkflowConstants.ATTRIBUTE_API_NAME);
+            String label = getAttribute(APIMgtConstants.WorkflowConstants.ATTRIBUTE_API_AUTOGEN_LABEL);
+
+            if (hasOwnGateway) {
+                //assuming that there is no transition from (MAINTENANCE to  PROTOTYPED), (DEPRECATED to CREATED),
+                // (CREATED to DEPRECATED)
+                if ((currentState.equalsIgnoreCase("created") ||
+                        currentState.equalsIgnoreCase("maintenance")) &&
+                        (targetState.equalsIgnoreCase("published") ||
+                                targetState.equalsIgnoreCase("prototyped") ||
+                                targetState.equalsIgnoreCase("deprecated"))) {
+
+                    // No need to auto-generate the label again As hasOwnGateway is true.
+                    //create the gateway
+                    apiGateway.createContainerBasedGateway(apiId, label);
+
+                    //If false
+                    // No need to handle as this is not an APi Update.
+                }
+            }
+
             String localTime = getAttribute(APIMgtConstants.WorkflowConstants.ATTRIBUTE_API_LAST_UPTIME);
             LocalDateTime time = LocalDateTime.parse(localTime);
             updateAPIStatusForWorkflowComplete(getWorkflowReference(), targetState, invoker, time);
+
+            // check whether this removal of gateway cause events left in the topic.
+            // After publishing the state change to the Gateway, remove the gateway for following occasions.
+            if (hasOwnGateway) {
+                if ((currentState.equalsIgnoreCase("published") ||
+                        currentState.equalsIgnoreCase("prototyped") ||
+                        currentState.equalsIgnoreCase("deprecated")) &&
+                        (targetState.equalsIgnoreCase("created") ||
+                                targetState.equalsIgnoreCase("maintenance")) ||
+                        targetState.equalsIgnoreCase("retired")) {
+
+                    // remove gateway
+                    apiGateway.removeContainerBasedGateway(label, apiId);
+                }
+            }
+
         } else if (WorkflowStatus.REJECTED == response.getWorkflowStatus()) {
             if (log.isDebugEnabled()) {
                 log.debug("API state change workflow complete: Rejected");

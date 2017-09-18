@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * The interface used to manage APIs in gateway
@@ -200,4 +201,32 @@ public interface APIGateway {
      * @throws GatewayException If there is a failure in notifying update block condition to gateway
      */
     void deleteBlockCondition(BlockConditions blockConditions) throws GatewayException;
+
+    /**
+     * Startup a new Gateway in Container Management System
+     *
+     * @param id UUID of the API
+     * @param label Auto-generated label of the API
+     * @throws GatewayException If there is a failure in notifying update block condition to gateway
+     */
+     void createContainerBasedGateway(String id, String label) throws GatewayException;
+
+    /**
+     * Remove existing Gateway from the container Management System
+     *
+     * @param label auto-generated label of the original API
+     * @param apiId UUID of the API
+     * @throws GatewayException If there is a failure in notifying update block condition to gateway
+    */
+    void removeContainerBasedGateway(String label, String apiId) throws GatewayException;
+
+    /**
+     * Create or Remove the dedicated Gateway in Container Management System
+     *
+     * @param api API object
+     * @param labelSet labels of the API
+     * @throws GatewayException If there is a failure in notifying update block condition to gateway
+     */
+    void updateDedicatedGateway(API api, Set<String> labelSet, boolean isDedicatedGatewayEnabled)
+            throws GatewayException;
 }

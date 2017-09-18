@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
+import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Rating;
@@ -850,4 +851,23 @@ public interface ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     String getEndpointConfig(String endpointId) throws APIMgtDAOException;
+
+
+    /**
+     * Update Container based Gateway detail of API
+     * @param dedicatedGateway updated DedicatedGateway Object
+     * @param apiId UUID of the API
+     * @param label auto-generated label of the API in a HashSet
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId, Set<String> label)
+            throws APIMgtDAOException;
+
+    /**
+     * Get Container based Gateway
+     * @param apiId uuid of API
+     * @return DedicatedGateway Object
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    DedicatedGateway getDedicatedGateway(String apiId) throws APIMgtDAOException;
 }
