@@ -604,6 +604,11 @@
                 <artifactId>swagger-models</artifactId>
                 <version>${io.swagger.models.version}</version>
             </dependency>
+            <dependency>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>${joda.time.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -983,5 +988,6 @@
         <wso2.carbon.config.version>2.0.0</wso2.carbon.config.version>
         <com.fasterxml.jackson.dataformat.version>2.9.1</com.fasterxml.jackson.dataformat.version>
         <io.swagger.models.version>1.5.16</io.swagger.models.version>
+        <joda.time.version>2.9.9</joda.time.version>
     </properties>
 </project>
