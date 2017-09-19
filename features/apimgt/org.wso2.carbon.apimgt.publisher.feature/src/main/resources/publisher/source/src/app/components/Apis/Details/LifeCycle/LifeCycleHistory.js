@@ -17,16 +17,34 @@
  */
 
 import React from 'react'
-import {Timeline} from 'antd';
+import List, {
+    ListItem,
+    ListItemText,
+} from 'material-ui/List';
+import Avatar from 'material-ui/Avatar'
+import Person from 'material-ui-icons/Person';
 
 const LifeCycleHistory = props => {
     return (
-        <Timeline>
-            {props.lcHistory.map(entry =>
-                <Timeline.Item key={entry.updatedTime}>
-                    {"LC has changed from " + entry.postState + " to " + entry.previousState
-                    + " on " + entry.updatedTime + " by " + entry.user}</Timeline.Item>)}
-        </Timeline>
+    <List>
+        { props.lcHistory.map(entry =>
+            entry.previousState &&
+            <ListItem button key={entry.postState}>
+                <div>
+                    <Avatar>
+                        <Person />
+                    </Avatar>
+
+                    <div>{entry.user}</div>
+                </div>
+                <ListItemText
+                    primary={"LC has changed from " + entry.postState + " to " + entry.previousState}
+                    secondary={entry.updatedTime} />
+            </ListItem>
+        )}
+    </List>
+
+
     );
 };
 

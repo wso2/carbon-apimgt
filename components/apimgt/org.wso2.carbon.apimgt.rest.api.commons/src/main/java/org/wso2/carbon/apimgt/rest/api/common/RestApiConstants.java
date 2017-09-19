@@ -79,6 +79,7 @@ public class RestApiConstants {
     public static final String REST_API_PUBLISHER_VERSION = "v1";
     public static final String REST_API_PUBLISHER_CONTEXT = "/api/am/publisher/";
     public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin";
+    public static final String REST_API_ANALYTICS_CONTEXT = "/api/am/analytics";
     public static final String REST_API_ADMIN_VERSION = "v1";
 
     public static final String AUTHORIZATION_HTTP_HEADER = "Authorization";
@@ -90,6 +91,7 @@ public class RestApiConstants {
     public static final String PUBLISHER_API_YAML = "/publisher-api.yaml";
     public static final String STORE_API_YAML = "/store-api.yaml";
     public static final String ADMIN_API_YAML = "/admin-api.yaml";
+    public static final String ANALYTICS_API_YAML = "/analytics-api.yaml";
     public static final String AUTH_TYPE_BASIC = "Basic";
     public static final String CHARSET_UTF_8 = "UTF-8";
 
@@ -124,6 +126,7 @@ public class RestApiConstants {
         public static final String PUBLISHER = "publisher";
         public static final String STORE = "store";
         public static final String ADMIN = "admin";
+        public static final String ANALYTICS = "analytics";
     }
 }
 

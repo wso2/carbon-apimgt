@@ -175,6 +175,10 @@ public class OracleSQLStatements implements ApiDAOVendorSpecificStatements {
         for (String role : roles) {
             statement.setString(++index, role);
         }
+
+        statement.setString(++index, user);
+        statement.setInt(++index, limit);
+        statement.setInt(++index, offset);
     }
 
     /**

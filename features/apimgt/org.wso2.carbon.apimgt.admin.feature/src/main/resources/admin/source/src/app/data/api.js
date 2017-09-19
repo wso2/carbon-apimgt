@@ -82,6 +82,19 @@ class API {
             }
         );
     }
+
+    /**
+     * Get subscription level policies.
+     * @returns {Promise} Promised policies response
+     */
+    getSubscriptionLevelPolicies() {
+        return this.client.then(
+            (client) => {
+                return client.apis["Subscription Policies"].get_policies_throttling_subscription(
+                    {}, this._requestMetaData());
+            }
+        );
+    }
 }
 
 export default API

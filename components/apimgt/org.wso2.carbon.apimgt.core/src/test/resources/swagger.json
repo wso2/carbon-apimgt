@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "version": "v1.0.0",
+    "version": "v1.0",
     "title": "WSO2 API Manager - Publisher API",
     "description": "This specifies a **RESTful API** for WSO2 **API Manager** - Publisher.\n\nPlease see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.0.4/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources/publisher-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.\n",
     "contact": {
@@ -15,7 +15,8 @@
     }
   },
   "schemes": [
-    "https"
+    "https",
+    "http"
   ],
   "host": "apis.wso2.com",
   "basePath": "/api/am/publisher/v1.0",
@@ -25,58 +26,33 @@
   "produces": [
     "application/json"
   ],
-  "x-wso2-security": {
-    "apim": {
-      "x-wso2-scopes": [
-        {
-          "description": "",
-          "roles": "admin",
-          "name": "apim:api_view",
-          "key": "apim:api_view"
-        },
-        {
-          "description": "",
-          "roles": "admin",
-          "name": "apim:api_create",
-          "key": "apim:api_create"
-        },
-        {
-          "description": "",
-          "roles": "admin",
-          "name": "apim:api_publish",
-          "key": "apim:api_publish"
-        },
-        {
-          "description": "",
-          "roles": "admin",
-          "name": "apim:tier_view",
-          "key": "apim:tier_view"
-        },
-        {
-          "description": "",
-          "roles": "admin",
-          "name": "apim:tier_manage",
-          "key": "apim:tier_manage"
-        },
-        {
-          "description": "",
-          "roles": "admin",
-          "name": "apim:subscription_view",
-          "key": "apim:subscription_view"
-        },
-        {
-          "description": "",
-          "roles": "admin",
-          "name": "apim:subscription_block",
-          "key": "apim:subscription_block"
-        }
-      ]
+  "securityDefinitions": {
+    "OAuth2Security": {
+      "type": "oauth2",
+      "flow": "password",
+      "tokenUrl": "https://localhost:9443/token",
+      "scopes": {
+        "apim:api_view": "View API",
+        "apim:api_create": "Create API",
+        "apim:api_update": "Update API",
+        "apim:api_delete": "Delete API",
+        "apim:apidef_update": "Update API Definition",
+        "apim:api_publish": "Publish API",
+        "apim:subscription_view": "View Subscription",
+        "apim:subscription_block": "Block Subscription"
+      }
     }
   },
+  "security": [
+    {
+      "OAuth2Security": [
+        "apim:api_view"
+      ]
+    }
+  ],
   "paths": {
     "/apis": {
       "get": {
-        "x-scope": "apim:api_view",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis",
         "x-wso2-request": "GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": \"This sample API provides Account Status Validation\",\n         \"name\": \"AccountVal\",\n         \"context\": \"/account\",\n         \"id\": \"2e81f147-c8a8-4f68-b4f0-69e0e7510b01\",\n         \"lifeCycleStatus\": \"PUBLISHED\"\n      },\n            {\n         \"provider\": \"admin\",\n         \"version\": \"1.0.0\",\n         \"description\": null,\n         \"name\": \"api1\",\n         \"context\": \"/api1\",\n         \"id\": \"3e22d2fb-277a-4e9e-8c7e-1c0f7f73960e\",\n         \"lifeCycleStatus\": \"PUBLISHED\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}",
@@ -94,9 +70,6 @@
             "in": "query",
             "description": "**Search condition**.\n\nYou can search in attributes by using an **\"<attribute>:\"** modifier.\n\nEg.\n\"provider:wso2\" will match an API if the provider of the API is exactly \"wso2\".\n\nAdditionally you can use wildcards.\n\nEg.\n\"provider:wso2*\" will match an API if the provider of the API starts with \"wso2\".\n\nSupported attribute modifiers are [**version, context, lifeCycleStatus,\ndescription, subcontext, doc, provider**]\n\nIf no advanced attribute modifier has been specified, search will match the\ngiven query string against API Name.\n",
             "type": "string"
-          },
-          {
-            "$ref": "#/parameters/Accept"
           },
           {
             "$ref": "#/parameters/If-None-Match"
@@ -134,7 +107,6 @@
         }
       },
       "head": {
-        "x-scope": "apim:api_view",
         "x-wso2-curl": "curl -I -k -X HEAD \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9090/api/am/publisher/v1.0/apis?query=name%3AapiName",
         "x-wso2-request": "HEAD https://localhost:9090/api/am/publisher/v1.0/apis?query=name%3AapiName HTTP/1.1\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response": "HTTP/1.1 200 OK Connection: keep-alive Content-Length: 0",
@@ -146,9 +118,6 @@
             "in": "query",
             "description": "**Search condition**.\n\nYou can search in attributes by using an **\"<attribute>:\"** modifier.\n\nEg.\n\"provider:wso2\" will match an API if the provider of the API is exactly \"wso2\".\n\nAdditionally you can use wildcards.\n\nEg.\n\"provider:wso2*\" will match an API if the provider of the API starts with \"wso2\".\n\nSupported attribute modifiers are [**version, context, lifeCycleStatus,\ndescription, subcontext, doc, provider**]\n\nIf no advanced attribute modifier has been specified, search will match the\ngiven query string against API Name.\n",
             "type": "string"
-          },
-          {
-            "$ref": "#/parameters/Accept"
           },
           {
             "$ref": "#/parameters/If-None-Match"
@@ -185,10 +154,16 @@
         }
       },
       "post": {
-        "x-scope": "apim:api_create",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json https://127.0.0.1:9443/api/am/publisher/v1.0/apis",
-        "x-wso2-request": "POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"apiDefinition\": \"{\\\"paths\\\":{\\\"/order\\\":{\\\"post\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Create a new Order\\\",\\\"parameters\\\":[{\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Order object that needs to be added\\\",\\\"name\\\":\\\"body\\\",\\\"required\\\":true,\\\"in\\\":\\\"body\\\"}],\\\"responses\\\":{\\\"201\\\":{\\\"headers\\\":{\\\"Location\\\":{\\\"description\\\":\\\"The URL of the newly created resource.\\\",\\\"type\\\":\\\"string\\\"}},\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Created.\\\"}}}},\\\"/menu\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Return a list of available menu items\\\",\\\"parameters\\\":[],\\\"responses\\\":{\\\"200\\\":{\\\"headers\\\":{},\\\"schema\\\":{\\\"title\\\":\\\"Menu\\\",\\\"properties\\\":{\\\"list\\\":{\\\"items\\\":{\\\"$ref\\\":\\\"#/definitions/MenuItem\\\"},\\\"type\\\":\\\"array\\\"}},\\\"type\\\":\\\"object\\\"},\\\"description\\\":\\\"OK.\\\"}}}}},\\\"schemes\\\":[\\\"https\\\"],\\\"produces\\\":[\\\"application/json\\\"],\\\"swagger\\\":\\\"2.0\\\",\\\"definitions\\\":{\\\"MenuItem\\\":{\\\"title\\\":\\\"Pizza menu Item\\\",\\\"properties\\\":{\\\"price\\\":{\\\"type\\\":\\\"string\\\"},\\\"description\\\":{\\\"type\\\":\\\"string\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"},\\\"image\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"name\\\"]},\\\"Order\\\":{\\\"title\\\":\\\"Pizza Order\\\",\\\"properties\\\":{\\\"customerName\\\":{\\\"type\\\":\\\"string\\\"},\\\"delivered\\\":{\\\"type\\\":\\\"boolean\\\"},\\\"address\\\":{\\\"type\\\":\\\"string\\\"},\\\"pizzaType\\\":{\\\"type\\\":\\\"string\\\"},\\\"creditCardNumber\\\":{\\\"type\\\":\\\"string\\\"},\\\"quantity\\\":{\\\"type\\\":\\\"number\\\"},\\\"orderId\\\":{\\\"type\\\":\\\"integer\\\"}},\\\"required\\\":[\\\"orderId\\\"]}},\\\"consumes\\\":[\\\"application/json\\\"],\\\"info\\\":{\\\"title\\\":\\\"PizzaShackAPI\\\",\\\"description\\\":\\\"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\\\n\\\",\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\",\\\"url\\\":\\\"http://www.apache.org/licenses/LICENSE-2.0.html\\\"},\\\"contact\\\":{\\\"email\\\":\\\"architecture@pizzashack.com\\\",\\\"name\\\":\\\"John Doe\\\",\\\"url\\\":\\\"http://www.pizzashack.com\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"PUBLISHED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": false,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\":    [\r\n      \"http\",\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"pizza\"],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 5000,\r\n      \"production\": 1000\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}",
-        "x-wso2-response": "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/7a2298c4-c905-403f-8fac-38c73301631f\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"apiDefinition\": \"{\\\"paths\\\":{\\\"/order\\\":{\\\"post\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Create a new Order\\\",\\\"parameters\\\":[{\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Order object that needs to be added\\\",\\\"name\\\":\\\"body\\\",\\\"required\\\":true,\\\"in\\\":\\\"body\\\"}],\\\"responses\\\":{\\\"201\\\":{\\\"headers\\\":{\\\"Location\\\":{\\\"description\\\":\\\"The URL of the newly created resource.\\\",\\\"type\\\":\\\"string\\\"}},\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Created.\\\"}}}},\\\"/menu\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Return a list of available menu items\\\",\\\"parameters\\\":[],\\\"responses\\\":{\\\"200\\\":{\\\"headers\\\":{},\\\"schema\\\":{\\\"title\\\":\\\"Menu\\\",\\\"properties\\\":{\\\"list\\\":{\\\"items\\\":{\\\"$ref\\\":\\\"#/definitions/MenuItem\\\"},\\\"type\\\":\\\"array\\\"}},\\\"type\\\":\\\"object\\\"},\\\"description\\\":\\\"OK.\\\"}}}}},\\\"schemes\\\":[\\\"https\\\"],\\\"produces\\\":[\\\"application/json\\\"],\\\"swagger\\\":\\\"2.0\\\",\\\"definitions\\\":{\\\"MenuItem\\\":{\\\"title\\\":\\\"Pizza menu Item\\\",\\\"properties\\\":{\\\"price\\\":{\\\"type\\\":\\\"string\\\"},\\\"description\\\":{\\\"type\\\":\\\"string\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"},\\\"image\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"name\\\"]},\\\"Order\\\":{\\\"title\\\":\\\"Pizza Order\\\",\\\"properties\\\":{\\\"customerName\\\":{\\\"type\\\":\\\"string\\\"},\\\"delivered\\\":{\\\"type\\\":\\\"boolean\\\"},\\\"address\\\":{\\\"type\\\":\\\"string\\\"},\\\"pizzaType\\\":{\\\"type\\\":\\\"string\\\"},\\\"creditCardNumber\\\":{\\\"type\\\":\\\"string\\\"},\\\"quantity\\\":{\\\"type\\\":\\\"number\\\"},\\\"orderId\\\":{\\\"type\\\":\\\"integer\\\"}},\\\"required\\\":[\\\"orderId\\\"]}},\\\"consumes\\\":[\\\"application/json\\\"],\\\"info\\\":{\\\"title\\\":\\\"PizzaShackAPI\\\",\\\"description\\\":\\\"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\\\n\\\",\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\",\\\"url\\\":\\\"http://www.apache.org/licenses/LICENSE-2.0.html\\\"},\\\"contact\\\":{\\\"email\\\":\\\"architecture@pizzashack.com\\\",\\\"name\\\":\\\"John Doe\\\",\\\"url\\\":\\\"http://www.pizzashack.com\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"CREATED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\":    [\r\n      \"http\",\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"pizza\"],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 5000,\r\n      \"production\": 1000\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}",
+        "x-wso2-request": "POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"PUBLISHED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": false,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\":    [\r\n      \"http\",\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"pizza\"],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 5000,\r\n      \"production\": 1000\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}",
+        "x-wso2-response": "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/7a2298c4-c905-403f-8fac-38c73301631f\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"CREATED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\":    [\r\n      \"http\",\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"pizza\"],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 5000,\r\n      \"production\": 1000\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_create"
+            ]
+          }
+        ],
         "summary": "Create a new API",
         "description": "This operation can be used to create a new API specifying the details of the API in the payload. The new API will be in `CREATED` state.\n\nThere is a special capability for a user who has `APIM Admin` permission such that he can create APIs on behalf of other users. For that he can to specify `\"provider\" : \"some_other_user\"` in the payload so that the API's creator will be shown as `some_other_user` in the UI.\n",
         "parameters": [
@@ -200,9 +175,6 @@
             "schema": {
               "$ref": "#/definitions/API"
             }
-          },
-          {
-            "$ref": "#/parameters/Content-Type"
           }
         ],
         "tags": [
@@ -246,18 +218,14 @@
     },
     "/apis/{apiId}": {
       "get": {
-        "x-scope": "apim:api_view",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis/7a2298c4-c905-403f-8fac-38c73301631f",
         "x-wso2-request": "GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/7a2298c4-c905-403f-8fac-38c73301631f\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"apiDefinition\": \"{\\\"paths\\\":{\\\"/order\\\":{\\\"post\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Create a new Order\\\",\\\"parameters\\\":[{\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Order object that needs to be added\\\",\\\"name\\\":\\\"body\\\",\\\"required\\\":true,\\\"in\\\":\\\"body\\\"}],\\\"responses\\\":{\\\"201\\\":{\\\"headers\\\":{\\\"Location\\\":{\\\"description\\\":\\\"The URL of the newly created resource.\\\",\\\"type\\\":\\\"string\\\"}},\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Created.\\\"}}}},\\\"/menu\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Return a list of available menu items\\\",\\\"parameters\\\":[],\\\"responses\\\":{\\\"200\\\":{\\\"headers\\\":{},\\\"schema\\\":{\\\"title\\\":\\\"Menu\\\",\\\"properties\\\":{\\\"list\\\":{\\\"items\\\":{\\\"$ref\\\":\\\"#/definitions/MenuItem\\\"},\\\"type\\\":\\\"array\\\"}},\\\"type\\\":\\\"object\\\"},\\\"description\\\":\\\"OK.\\\"}}}}},\\\"schemes\\\":[\\\"https\\\"],\\\"produces\\\":[\\\"application/json\\\"],\\\"swagger\\\":\\\"2.0\\\",\\\"definitions\\\":{\\\"MenuItem\\\":{\\\"title\\\":\\\"Pizza menu Item\\\",\\\"properties\\\":{\\\"price\\\":{\\\"type\\\":\\\"string\\\"},\\\"description\\\":{\\\"type\\\":\\\"string\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"},\\\"image\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"name\\\"]},\\\"Order\\\":{\\\"title\\\":\\\"Pizza Order\\\",\\\"properties\\\":{\\\"customerName\\\":{\\\"type\\\":\\\"string\\\"},\\\"delivered\\\":{\\\"type\\\":\\\"boolean\\\"},\\\"address\\\":{\\\"type\\\":\\\"string\\\"},\\\"pizzaType\\\":{\\\"type\\\":\\\"string\\\"},\\\"creditCardNumber\\\":{\\\"type\\\":\\\"string\\\"},\\\"quantity\\\":{\\\"type\\\":\\\"number\\\"},\\\"orderId\\\":{\\\"type\\\":\\\"integer\\\"}},\\\"required\\\":[\\\"orderId\\\"]}},\\\"consumes\\\":[\\\"application/json\\\"],\\\"info\\\":{\\\"title\\\":\\\"PizzaShackAPI\\\",\\\"description\\\":\\\"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\\\n\\\",\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\",\\\"url\\\":\\\"http://www.apache.org/licenses/LICENSE-2.0.html\\\"},\\\"contact\\\":{\\\"email\\\":\\\"architecture@pizzashack.com\\\",\\\"name\\\":\\\"John Doe\\\",\\\"url\\\":\\\"http://www.pizzashack.com\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"CREATED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\":    [\r\n      \"http\",\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"pizza\"],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 5000,\r\n      \"production\": 1000\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}",
+        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"endpointId\": \"{\\\"paths\\\":{\\\"/order\\\":{\\\"post\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Create a new Order\\\",\\\"parameters\\\":[{\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Order object that needs to be added\\\",\\\"name\\\":\\\"body\\\",\\\"required\\\":true,\\\"in\\\":\\\"body\\\"}],\\\"responses\\\":{\\\"201\\\":{\\\"headers\\\":{\\\"Location\\\":{\\\"description\\\":\\\"The URL of the newly created resource.\\\",\\\"type\\\":\\\"string\\\"}},\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Created.\\\"}}}},\\\"/menu\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Return a list of available menu items\\\",\\\"parameters\\\":[],\\\"responses\\\":{\\\"200\\\":{\\\"headers\\\":{},\\\"schema\\\":{\\\"title\\\":\\\"Menu\\\",\\\"properties\\\":{\\\"list\\\":{\\\"items\\\":{\\\"$ref\\\":\\\"#/definitions/MenuItem\\\"},\\\"type\\\":\\\"array\\\"}},\\\"type\\\":\\\"object\\\"},\\\"description\\\":\\\"OK.\\\"}}}}},\\\"schemes\\\":[\\\"https\\\"],\\\"produces\\\":[\\\"application/json\\\"],\\\"swagger\\\":\\\"2.0\\\",\\\"definitions\\\":{\\\"MenuItem\\\":{\\\"title\\\":\\\"Pizza menu Item\\\",\\\"properties\\\":{\\\"price\\\":{\\\"type\\\":\\\"string\\\"},\\\"description\\\":{\\\"type\\\":\\\"string\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"},\\\"image\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"name\\\"]},\\\"Order\\\":{\\\"title\\\":\\\"Pizza Order\\\",\\\"properties\\\":{\\\"customerName\\\":{\\\"type\\\":\\\"string\\\"},\\\"delivered\\\":{\\\"type\\\":\\\"boolean\\\"},\\\"address\\\":{\\\"type\\\":\\\"string\\\"},\\\"pizzaType\\\":{\\\"type\\\":\\\"string\\\"},\\\"creditCardNumber\\\":{\\\"type\\\":\\\"string\\\"},\\\"quantity\\\":{\\\"type\\\":\\\"number\\\"},\\\"orderId\\\":{\\\"type\\\":\\\"integer\\\"}},\\\"required\\\":[\\\"orderId\\\"]}},\\\"consumes\\\":[\\\"application/json\\\"],\\\"info\\\":{\\\"title\\\":\\\"PizzaShackAPI\\\",\\\"description\\\":\\\"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\\\n\\\",\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\",\\\"url\\\":\\\"http://www.apache.org/licenses/LICENSE-2.0.html\\\"},\\\"contact\\\":{\\\"email\\\":\\\"architecture@pizzashack.com\\\",\\\"name\\\":\\\"John Doe\\\",\\\"url\\\":\\\"http://www.pizzashack.com\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"CREATED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\":    [\r\n      \"http\",\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"pizza\"],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 5000,\r\n      \"production\": 1000\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}",
         "summary": "Get details of an API",
         "description": "Using this operation, you can retrieve complete details of a single API. You need to provide the Id of the API to retrive it.\n",
         "parameters": [
           {
             "$ref": "#/parameters/apiId"
-          },
-          {
-            "$ref": "#/parameters/Accept"
           },
           {
             "$ref": "#/parameters/If-None-Match"
@@ -308,10 +276,16 @@
         }
       },
       "put": {
-        "x-scope": "apim:api_create",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json https://127.0.0.1:9443/api/am/publisher/v1.0/apis/7a2298c4-c905-403f-8fac-38c73301631f",
-        "x-wso2-request": "PUT https://127.0.0.1:9443/api/am/publisher/v1.0/apis/7a2298c4-c905-403f-8fac-38c73301631f\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"apiDefinition\": \"{\\\"paths\\\":{\\\"/order\\\":{\\\"post\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Create a new Order\\\",\\\"parameters\\\":[{\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Order object that needs to be added\\\",\\\"name\\\":\\\"body\\\",\\\"required\\\":true,\\\"in\\\":\\\"body\\\"}],\\\"responses\\\":{\\\"201\\\":{\\\"headers\\\":{\\\"Location\\\":{\\\"description\\\":\\\"The URL of the newly created resource.\\\",\\\"type\\\":\\\"string\\\"}},\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Created.\\\"}}}},\\\"/menu\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Return a list of available menu items\\\",\\\"parameters\\\":[],\\\"responses\\\":{\\\"200\\\":{\\\"headers\\\":{},\\\"schema\\\":{\\\"title\\\":\\\"Menu\\\",\\\"properties\\\":{\\\"list\\\":{\\\"items\\\":{\\\"$ref\\\":\\\"#/definitions/MenuItem\\\"},\\\"type\\\":\\\"array\\\"}},\\\"type\\\":\\\"object\\\"},\\\"description\\\":\\\"OK.\\\"}}}}},\\\"schemes\\\":[\\\"https\\\"],\\\"produces\\\":[\\\"application/json\\\"],\\\"swagger\\\":\\\"2.0\\\",\\\"definitions\\\":{\\\"MenuItem\\\":{\\\"title\\\":\\\"Pizza menu Item\\\",\\\"properties\\\":{\\\"price\\\":{\\\"type\\\":\\\"string\\\"},\\\"description\\\":{\\\"type\\\":\\\"string\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"},\\\"image\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"name\\\"]},\\\"Order\\\":{\\\"title\\\":\\\"Pizza Order\\\",\\\"properties\\\":{\\\"customerName\\\":{\\\"type\\\":\\\"string\\\"},\\\"delivered\\\":{\\\"type\\\":\\\"boolean\\\"},\\\"address\\\":{\\\"type\\\":\\\"string\\\"},\\\"pizzaType\\\":{\\\"type\\\":\\\"string\\\"},\\\"creditCardNumber\\\":{\\\"type\\\":\\\"string\\\"},\\\"quantity\\\":{\\\"type\\\":\\\"number\\\"},\\\"orderId\\\":{\\\"type\\\":\\\"integer\\\"}},\\\"required\\\":[\\\"orderId\\\"]}},\\\"consumes\\\":[\\\"application/json\\\"],\\\"info\\\":{\\\"title\\\":\\\"PizzaShackAPI\\\",\\\"description\\\":\\\"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\\\n\\\",\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\",\\\"url\\\":\\\"http://www.apache.org/licenses/LICENSE-2.0.html\\\"},\\\"contact\\\":{\\\"email\\\":\\\"architecture@pizzashack.com\\\",\\\"name\\\":\\\"John Doe\\\",\\\"url\\\":\\\"http://www.pizzashack.com\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"CREATED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\":    [\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"pizza\",\"chicken\"],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 500,\r\n      \"production\": 100\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}",
-        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"apiDefinition\": \"{\\\"paths\\\":{\\\"/order\\\":{\\\"post\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Create a new Order\\\",\\\"parameters\\\":[{\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Order object that needs to be added\\\",\\\"name\\\":\\\"body\\\",\\\"required\\\":true,\\\"in\\\":\\\"body\\\"}],\\\"responses\\\":{\\\"201\\\":{\\\"headers\\\":{\\\"Location\\\":{\\\"description\\\":\\\"The URL of the newly created resource.\\\",\\\"type\\\":\\\"string\\\"}},\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Created.\\\"}}}},\\\"/menu\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Return a list of available menu items\\\",\\\"parameters\\\":[],\\\"responses\\\":{\\\"200\\\":{\\\"headers\\\":{},\\\"schema\\\":{\\\"title\\\":\\\"Menu\\\",\\\"properties\\\":{\\\"list\\\":{\\\"items\\\":{\\\"$ref\\\":\\\"#/definitions/MenuItem\\\"},\\\"type\\\":\\\"array\\\"}},\\\"type\\\":\\\"object\\\"},\\\"description\\\":\\\"OK.\\\"}}}}},\\\"schemes\\\":[\\\"https\\\"],\\\"produces\\\":[\\\"application/json\\\"],\\\"swagger\\\":\\\"2.0\\\",\\\"definitions\\\":{\\\"MenuItem\\\":{\\\"title\\\":\\\"Pizza menu Item\\\",\\\"properties\\\":{\\\"price\\\":{\\\"type\\\":\\\"string\\\"},\\\"description\\\":{\\\"type\\\":\\\"string\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"},\\\"image\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"name\\\"]},\\\"Order\\\":{\\\"title\\\":\\\"Pizza Order\\\",\\\"properties\\\":{\\\"customerName\\\":{\\\"type\\\":\\\"string\\\"},\\\"delivered\\\":{\\\"type\\\":\\\"boolean\\\"},\\\"address\\\":{\\\"type\\\":\\\"string\\\"},\\\"pizzaType\\\":{\\\"type\\\":\\\"string\\\"},\\\"creditCardNumber\\\":{\\\"type\\\":\\\"string\\\"},\\\"quantity\\\":{\\\"type\\\":\\\"number\\\"},\\\"orderId\\\":{\\\"type\\\":\\\"integer\\\"}},\\\"required\\\":[\\\"orderId\\\"]}},\\\"consumes\\\":[\\\"application/json\\\"],\\\"info\\\":{\\\"title\\\":\\\"PizzaShackAPI\\\",\\\"description\\\":\\\"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\\\n\\\",\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\",\\\"url\\\":\\\"http://www.apache.org/licenses/LICENSE-2.0.html\\\"},\\\"contact\\\":{\\\"email\\\":\\\"architecture@pizzashack.com\\\",\\\"name\\\":\\\"John Doe\\\",\\\"url\\\":\\\"http://www.pizzashack.com\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"CREATED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\": [\"https\"],\r\n   \"tags\":    [\r\n      \"chicken\",\r\n      \"pizza\"\r\n   ],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 500,\r\n      \"production\": 100\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}",
+        "x-wso2-request": "PUT https://127.0.0.1:9443/api/am/publisher/v1.0/apis/7a2298c4-c905-403f-8fac-38c73301631f\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"endpointId\": \"{\\\"paths\\\":{\\\"/order\\\":{\\\"post\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Create a new Order\\\",\\\"parameters\\\":[{\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Order object that needs to be added\\\",\\\"name\\\":\\\"body\\\",\\\"required\\\":true,\\\"in\\\":\\\"body\\\"}],\\\"responses\\\":{\\\"201\\\":{\\\"headers\\\":{\\\"Location\\\":{\\\"description\\\":\\\"The URL of the newly created resource.\\\",\\\"type\\\":\\\"string\\\"}},\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Created.\\\"}}}},\\\"/menu\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Return a list of available menu items\\\",\\\"parameters\\\":[],\\\"responses\\\":{\\\"200\\\":{\\\"headers\\\":{},\\\"schema\\\":{\\\"title\\\":\\\"Menu\\\",\\\"properties\\\":{\\\"list\\\":{\\\"items\\\":{\\\"$ref\\\":\\\"#/definitions/MenuItem\\\"},\\\"type\\\":\\\"array\\\"}},\\\"type\\\":\\\"object\\\"},\\\"description\\\":\\\"OK.\\\"}}}}},\\\"schemes\\\":[\\\"https\\\"],\\\"produces\\\":[\\\"application/json\\\"],\\\"swagger\\\":\\\"2.0\\\",\\\"definitions\\\":{\\\"MenuItem\\\":{\\\"title\\\":\\\"Pizza menu Item\\\",\\\"properties\\\":{\\\"price\\\":{\\\"type\\\":\\\"string\\\"},\\\"description\\\":{\\\"type\\\":\\\"string\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"},\\\"image\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"name\\\"]},\\\"Order\\\":{\\\"title\\\":\\\"Pizza Order\\\",\\\"properties\\\":{\\\"customerName\\\":{\\\"type\\\":\\\"string\\\"},\\\"delivered\\\":{\\\"type\\\":\\\"boolean\\\"},\\\"address\\\":{\\\"type\\\":\\\"string\\\"},\\\"pizzaType\\\":{\\\"type\\\":\\\"string\\\"},\\\"creditCardNumber\\\":{\\\"type\\\":\\\"string\\\"},\\\"quantity\\\":{\\\"type\\\":\\\"number\\\"},\\\"orderId\\\":{\\\"type\\\":\\\"integer\\\"}},\\\"required\\\":[\\\"orderId\\\"]}},\\\"consumes\\\":[\\\"application/json\\\"],\\\"info\\\":{\\\"title\\\":\\\"PizzaShackAPI\\\",\\\"description\\\":\\\"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\\\n\\\",\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\",\\\"url\\\":\\\"http://www.apache.org/licenses/LICENSE-2.0.html\\\"},\\\"contact\\\":{\\\"email\\\":\\\"architecture@pizzashack.com\\\",\\\"name\\\":\\\"John Doe\\\",\\\"url\\\":\\\"http://www.pizzashack.com\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"CREATED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\":    [\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"pizza\",\"chicken\"],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 500,\r\n      \"production\": 100\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}",
+        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"endpointId\": \"{\\\"paths\\\":{\\\"/order\\\":{\\\"post\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Create a new Order\\\",\\\"parameters\\\":[{\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Order object that needs to be added\\\",\\\"name\\\":\\\"body\\\",\\\"required\\\":true,\\\"in\\\":\\\"body\\\"}],\\\"responses\\\":{\\\"201\\\":{\\\"headers\\\":{\\\"Location\\\":{\\\"description\\\":\\\"The URL of the newly created resource.\\\",\\\"type\\\":\\\"string\\\"}},\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Created.\\\"}}}},\\\"/menu\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Return a list of available menu items\\\",\\\"parameters\\\":[],\\\"responses\\\":{\\\"200\\\":{\\\"headers\\\":{},\\\"schema\\\":{\\\"title\\\":\\\"Menu\\\",\\\"properties\\\":{\\\"list\\\":{\\\"items\\\":{\\\"$ref\\\":\\\"#/definitions/MenuItem\\\"},\\\"type\\\":\\\"array\\\"}},\\\"type\\\":\\\"object\\\"},\\\"description\\\":\\\"OK.\\\"}}}}},\\\"schemes\\\":[\\\"https\\\"],\\\"produces\\\":[\\\"application/json\\\"],\\\"swagger\\\":\\\"2.0\\\",\\\"definitions\\\":{\\\"MenuItem\\\":{\\\"title\\\":\\\"Pizza menu Item\\\",\\\"properties\\\":{\\\"price\\\":{\\\"type\\\":\\\"string\\\"},\\\"description\\\":{\\\"type\\\":\\\"string\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"},\\\"image\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"name\\\"]},\\\"Order\\\":{\\\"title\\\":\\\"Pizza Order\\\",\\\"properties\\\":{\\\"customerName\\\":{\\\"type\\\":\\\"string\\\"},\\\"delivered\\\":{\\\"type\\\":\\\"boolean\\\"},\\\"address\\\":{\\\"type\\\":\\\"string\\\"},\\\"pizzaType\\\":{\\\"type\\\":\\\"string\\\"},\\\"creditCardNumber\\\":{\\\"type\\\":\\\"string\\\"},\\\"quantity\\\":{\\\"type\\\":\\\"number\\\"},\\\"orderId\\\":{\\\"type\\\":\\\"integer\\\"}},\\\"required\\\":[\\\"orderId\\\"]}},\\\"consumes\\\":[\\\"application/json\\\"],\\\"info\\\":{\\\"title\\\":\\\"PizzaShackAPI\\\",\\\"description\\\":\\\"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\\\n\\\",\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\",\\\"url\\\":\\\"http://www.apache.org/licenses/LICENSE-2.0.html\\\"},\\\"contact\\\":{\\\"email\\\":\\\"architecture@pizzashack.com\\\",\\\"name\\\":\\\"John Doe\\\",\\\"url\\\":\\\"http://www.pizzashack.com\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"CREATED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\": [\"https\"],\r\n   \"tags\":    [\r\n      \"chicken\",\r\n      \"pizza\"\r\n   ],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 500,\r\n      \"production\": 100\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_update"
+            ]
+          }
+        ],
         "summary": "Update an API",
         "description": "This operation can be used to update an existing API.\nBut the properties `name`, `version`, `context`, `provider`, `state` will not be changed by this operation.\n",
         "parameters": [
@@ -326,9 +300,6 @@
             "schema": {
               "$ref": "#/definitions/API"
             }
-          },
-          {
-            "$ref": "#/parameters/Content-Type"
           },
           {
             "$ref": "#/parameters/If-Match"
@@ -392,10 +363,16 @@
         }
       },
       "delete": {
-        "x-scope": "apim:api_create",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE https://127.0.0.1:9443/api/am/publisher/v1.0/apis/6fb74674-4ab8-4b52-9886-f9a376985060",
         "x-wso2-request": "DELETE https://127.0.0.1:9443/api/am/publisher/v1.0/apis/6fb74674-4ab8-4b52-9886-f9a376985060\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response": "HTTP/1.1 200 OK",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_delete"
+            ]
+          }
+        ],
         "summary": "Delete an API",
         "description": "This operation can be used to delete an existing API proving the Id of the API.\n",
         "parameters": [
@@ -439,18 +416,14 @@
     },
     "/apis/{apiId}/swagger": {
       "get": {
-        "x-scope": "apim:api_view",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/swagger",
         "x-wso2-request": "GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/swagger\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}",
+        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}",
         "summary": "Get swagger definition",
         "description": "This operation can be used to retrieve the swagger definition of an API.\n",
         "parameters": [
           {
             "$ref": "#/parameters/apiId"
-          },
-          {
-            "$ref": "#/parameters/Accept"
           },
           {
             "$ref": "#/parameters/If-None-Match"
@@ -501,10 +474,16 @@
         "consumes": [
           "multipart/form-data"
         ],
-        "x-scope": "apim:api_create",
-        "x-wso2-curl": "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F apiDefinition=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger\"",
-        "x-wso2-request": "PUT https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger\nAuthorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\nContent-Length: 477\nContent-Type: multipart/form-data; boundary=------------------------4f51e636c0003d99\n\n--------------------------4f51e636c0003d99\nContent-Disposition: form-data; name=\"apiDefinition\"\n\n{\"paths\":{\"\\/*\":{\"get\":{\"x-auth-type\":\"Application\",\"x-throttling-policy\":\"Unlimited\",\"responses\":{\"200\":{\"description\":\"OK\"}}}}},\"x-wso2-security\":{\"apim\":{\"x-wso2-scopes\":[]}},\"swagger\":\"2.0\",\"info\":{\"title\":\"PhoneVerification\",\"description\":\"Verify a phone number\",\"contact\":{\"email\":\"xx@ee.com\",\"name\":\"xx\"},\"version\":\"1.0.0\"}}\n--------------------------4f51e636c0003d99--\n",
-        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}",
+        "x-wso2-curl": "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F endpointId=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger\"",
+        "x-wso2-request": "PUT https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger\nAuthorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\nContent-Length: 477\nContent-Type: multipart/form-data; boundary=------------------------4f51e636c0003d99\n\n--------------------------4f51e636c0003d99\nContent-Disposition: form-data; name=\"apiDefinition\"\n\n{\"paths\":{\"\\/*\":{\"get\":{\"x-auth-type\":\"Application\",\"x-throttling-policy\":\"Unlimited\",\"responses\":{\"200\":{\"description\":\"OK\"}}}}},\"swagger\":\"2.0\",\"info\":{\"title\":\"PhoneVerification\",\"description\":\"Verify a phone number\",\"contact\":{\"email\":\"xx@ee.com\",\"name\":\"xx\"},\"version\":\"1.0.0\"}}\n--------------------------4f51e636c0003d99--\n",
+        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:apidef_update"
+            ]
+          }
+        ],
         "summary": "Update swagger definition",
         "description": "This operation can be used to update the swagger definition of an existing API. Swagger definition to be updated is passed as a form data parameter `apiDefinition`.\n",
         "parameters": [
@@ -513,13 +492,10 @@
           },
           {
             "in": "formData",
-            "name": "apiDefinition",
+            "name": "endpointId",
             "description": "Swagger definition of the API",
             "type": "string",
             "required": true
-          },
-          {
-            "$ref": "#/parameters/Content-Type"
           },
           {
             "$ref": "#/parameters/If-Match"
@@ -580,20 +556,168 @@
         }
       }
     },
-    "/apis/{apiId}/gateway-config": {
+    "/apis/{apiId}/wsdl": {
       "get": {
-        "x-scope": "apim:api_view",
-        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/swagger",
-        "x-wso2-request": "GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/swagger\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_view"
+            ]
+          }
+        ],
+        "produces": [
+          "application/octet-stream"
+        ],
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9292/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/wsdl",
+        "x-wso2-request": "GET https://127.0.0.1:9292/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/wsdl\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}",
-        "summary": "Get gateway definition",
-        "description": "This operation can be used to retrieve the gateway configuration of an API.\n",
+        "summary": "Get swagger definition",
+        "description": "This operation can be used to retrieve the swagger definition of an API.\n",
         "parameters": [
           {
             "$ref": "#/parameters/apiId"
           },
           {
-            "$ref": "#/parameters/Accept"
+            "$ref": "#/parameters/If-None-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Modified-Since"
+          }
+        ],
+        "tags": [
+          "API (Individual)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nRequested WSDL document of the API is returned\n",
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
+                "type": "string"
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"
+          },
+          "404": {
+            "description": "Not Found.\nRequested API does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable.\nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_create"
+            ]
+          }
+        ],
+        "x-wso2-curl": "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F inlineContent=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/wsdl\"",
+        "x-wso2-request": "PUT https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/wsdl\nAuthorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\nContent-Length: 477\nContent-Type: multipart/form-data; boundary=------------------------4f51e636c0003d99\n\n--------------------------4f51e636c0003d99\nContent-Disposition: form-data; name=\"apiDefinition\"\n\n{\"paths\":{\"\\/*\":{\"get\":{\"x-auth-type\":\"Application\",\"x-throttling-policy\":\"Unlimited\",\"responses\":{\"200\":{\"description\":\"OK\"}}}}},\"x-wso2-security\":{\"apim\":{\"x-wso2-scopes\":[]}},\"swagger\":\"2.0\",\"info\":{\"title\":\"PhoneVerification\",\"description\":\"Verify a phone number\",\"contact\":{\"email\":\"xx@ee.com\",\"name\":\"xx\"},\"version\":\"1.0.0\"}}\n--------------------------4f51e636c0003d99--\n",
+        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}",
+        "summary": "Update WSDL definition",
+        "description": "This operation can be used to update the WSDL definition of an existing API. WSDL to be updated is passed as a form data parameter `inlineContent`.\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId"
+          },
+          {
+            "in": "formData",
+            "name": "file",
+            "description": "WSDL file or archive to upload",
+            "type": "file",
+            "required": true
+          },
+          {
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
+          }
+        ],
+        "tags": [
+          "API (Individual)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nSuccessful response with updated WSDL definition\n",
+            "headers": {
+              "Location": {
+                "description": "The URL of the newly created resource.\n",
+                "type": "string"
+              },
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "403": {
+            "description": "Forbidden.\nThe request must be conditional but no condition has been specified.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nThe resource to be updated does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/apis/{apiId}/gateway-config": {
+      "get": {
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/swagger",
+        "x-wso2-request": "GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/swagger\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}",
+        "summary": "Get gateway definition",
+        "description": "This operation can be used to retrieve the gateway configuration of an API.\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId"
           },
           {
             "$ref": "#/parameters/If-None-Match"
@@ -644,10 +768,16 @@
         "consumes": [
           "multipart/form-data"
         ],
-        "x-scope": "apim:api_create",
-        "x-wso2-curl": "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F apiDefinition=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger\"",
-        "x-wso2-request": "PUT https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger\nAuthorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\nContent-Length: 477\nContent-Type: multipart/form-data; boundary=------------------------4f51e636c0003d99\n\n--------------------------4f51e636c0003d99\nContent-Disposition: form-data; name=\"apiDefinition\"\n\n{\"paths\":{\"\\/*\":{\"get\":{\"x-auth-type\":\"Application\",\"x-throttling-policy\":\"Unlimited\",\"responses\":{\"200\":{\"description\":\"OK\"}}}}},\"x-wso2-security\":{\"apim\":{\"x-wso2-scopes\":[]}},\"swagger\":\"2.0\",\"info\":{\"title\":\"PhoneVerification\",\"description\":\"Verify a phone number\",\"contact\":{\"email\":\"xx@ee.com\",\"name\":\"xx\"},\"version\":\"1.0.0\"}}\n--------------------------4f51e636c0003d99--\n",
-        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}",
+        "x-wso2-curl": "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F endpointId=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger\"",
+        "x-wso2-request": "PUT https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger\nAuthorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\nContent-Length: 477\nContent-Type: multipart/form-data; boundary=------------------------4f51e636c0003d99\n\n--------------------------4f51e636c0003d99\nContent-Disposition: form-data; name=\"apiDefinition\"\n\n{\"paths\":{\"\\/*\":{\"get\":{\"x-auth-type\":\"Application\",\"x-throttling-policy\":\"Unlimited\",\"responses\":{\"200\":{\"description\":\"OK\"}}}}},\"swagger\":\"2.0\",\"info\":{\"title\":\"PhoneVerification\",\"description\":\"Verify a phone number\",\"contact\":{\"email\":\"xx@ee.com\",\"name\":\"xx\"},\"version\":\"1.0.0\"}}\n--------------------------4f51e636c0003d99--\n",
+        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:apidef_update"
+            ]
+          }
+        ],
         "summary": "Update gateway configuration",
         "description": "This operation can be used to update the gateway configuration of an existing API. gateway configuration to be updated is passed as a form data parameter `gatewayConfig`.\n",
         "parameters": [
@@ -660,9 +790,6 @@
             "description": "gateway configuration of the API",
             "type": "string",
             "required": true
-          },
-          {
-            "$ref": "#/parameters/Content-Type"
           },
           {
             "$ref": "#/parameters/If-Match"
@@ -725,7 +852,6 @@
     },
     "/apis/{apiId}/thumbnail": {
       "get": {
-        "x-scope": "apim:api_view",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail > image.jpg",
         "x-wso2-request": "GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail\nAuthorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9\n",
         "x-wso2-response": "HTTP/1.1 200 OK\r\nContent-Type: image/jpeg\r\n\r\n[image content]",
@@ -734,9 +860,6 @@
         "parameters": [
           {
             "$ref": "#/parameters/apiId"
-          },
-          {
-            "$ref": "#/parameters/Accept"
           },
           {
             "$ref": "#/parameters/If-None-Match"
@@ -787,10 +910,16 @@
         "consumes": [
           "multipart/form-data"
         ],
-        "x-scope": "apim:api_create",
         "x-wso2-curl": "curl -X POST -H \"Authorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9\" https://127.0.0.1:9443/api/am/publisher/v1.0/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail -F file=@image.jpg",
         "x-wso2-request": "POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/thumbnail\nAuthorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9\nContent-Type: multipart/form-data; boundary=------------------------5e542e0e5b50e1e4\nContent-Length: 18333\n\n--------------------------5e542e0e5b50e1e4\nContent-Disposition: form-data; name=\"file\"; filename=\"image.jpg\"\nContent-Type: image/jpeg\n\n[image content]\n\n--------------------------5e542e0e5b50e1e4--\n",
         "x-wso2-response": "HTTP/1.1 201 Created\r\nLocation: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/thumbnail\r\nContent-Type: application/json\r\n\r\n{\r\n   \"relativePath\": \"/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/thumbnail\",\r\n   \"mediaType\": \"image/jpeg\"\r\n}",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_update"
+            ]
+          }
+        ],
         "summary": "Upload a thumbnail image",
         "description": "This operation can be used to upload a thumbnail image of an API. The thumbnail to be uploaded should be given as a form data parameter `file`.\n",
         "parameters": [
@@ -803,9 +932,6 @@
             "description": "Image to upload",
             "type": "file",
             "required": true
-          },
-          {
-            "$ref": "#/parameters/Content-Type"
           },
           {
             "$ref": "#/parameters/If-Match"
@@ -865,10 +991,16 @@
     },
     "/apis/copy-api": {
       "post": {
-        "x-scope": "apim:api_create",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/copy-api?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&newVersion=2.0.0\"",
         "x-wso2-request": "POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis/copy-api?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&newVersion=2.0.0\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-response": "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/25a84fc9-38c0-4578-95e8-29fb6b1c4771\nContent-Type: application/json\n\n{\r\n   \"id\": \"25a84fc9-38c0-4578-95e8-29fb6b1c4771\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"2.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"apiDefinition\": \"{\\\"paths\\\":{\\\"\\\\/order\\\":{\\\"post\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Create a new Order\\\",\\\"parameters\\\":[{\\\"schema\\\":{\\\"$ref\\\":\\\"#\\\\/definitions\\\\/Order\\\"},\\\"description\\\":\\\"Order object that needs to be added\\\",\\\"name\\\":\\\"body\\\",\\\"required\\\":true,\\\"in\\\":\\\"body\\\"}],\\\"responses\\\":{\\\"201\\\":{\\\"schema\\\":{\\\"$ref\\\":\\\"#\\\\/definitions\\\\/Order\\\"},\\\"headers\\\":{\\\"Location\\\":{\\\"description\\\":\\\"The URL of the newly created resource.\\\",\\\"type\\\":\\\"string\\\"}},\\\"description\\\":\\\"Created.\\\"}}}},\\\"\\\\/menu\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Return a list of available menu items\\\",\\\"parameters\\\":[],\\\"responses\\\":{\\\"200\\\":{\\\"schema\\\":{\\\"title\\\":\\\"Menu\\\",\\\"properties\\\":{\\\"list\\\":{\\\"items\\\":{\\\"$ref\\\":\\\"#\\\\/definitions\\\\/MenuItem\\\"},\\\"type\\\":\\\"array\\\"}},\\\"type\\\":\\\"object\\\"},\\\"headers\\\":{},\\\"description\\\":\\\"OK.\\\"}}}}},\\\"schemes\\\":[\\\"https\\\"],\\\"produces\\\":[\\\"application\\\\/json\\\"],\\\"swagger\\\":\\\"2.0\\\",\\\"definitions\\\":{\\\"MenuItem\\\":{\\\"title\\\":\\\"Pizza menu Item\\\",\\\"properties\\\":{\\\"price\\\":{\\\"type\\\":\\\"string\\\"},\\\"description\\\":{\\\"type\\\":\\\"string\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"},\\\"image\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"name\\\"]},\\\"Order\\\":{\\\"title\\\":\\\"Pizza Order\\\",\\\"properties\\\":{\\\"customerName\\\":{\\\"type\\\":\\\"string\\\"},\\\"delivered\\\":{\\\"type\\\":\\\"boolean\\\"},\\\"pizzaType\\\":{\\\"type\\\":\\\"string\\\"},\\\"address\\\":{\\\"type\\\":\\\"string\\\"},\\\"creditCardNumber\\\":{\\\"type\\\":\\\"string\\\"},\\\"quantity\\\":{\\\"type\\\":\\\"number\\\"},\\\"orderId\\\":{\\\"type\\\":\\\"integer\\\"}},\\\"required\\\":[\\\"orderId\\\"]}},\\\"consumes\\\":[\\\"application\\\\/json\\\"],\\\"info\\\":{\\\"title\\\":\\\"PizzaShackAPI\\\",\\\"description\\\":\\\"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\\\n\\\",\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\",\\\"url\\\":\\\"http:\\\\/\\\\/www.apache.org\\\\/licenses\\\\/LICENSE-2.0.html\\\"},\\\"contact\\\":{\\\"email\\\":\\\"architecture@pizzashack.com\\\",\\\"name\\\":\\\"John Doe\\\",\\\"url\\\":\\\"http:\\\\/\\\\/www.pizzashack.com\\\"},\\\"version\\\":\\\"2.0.0\\\"}}\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"CREATED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\": [\"https\"],\r\n   \"tags\":    [\r\n      \"chicken\",\r\n      \"pizza\"\r\n   ],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 500,\r\n      \"production\": 100\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}",
+        "x-wso2-response": "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/25a84fc9-38c0-4578-95e8-29fb6b1c4771\nContent-Type: application/json\n\n{\r\n   \"id\": \"25a84fc9-38c0-4578-95e8-29fb6b1c4771\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"2.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"endpointId\": \"{\\\"paths\\\":{\\\"\\\\/order\\\":{\\\"post\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Create a new Order\\\",\\\"parameters\\\":[{\\\"schema\\\":{\\\"$ref\\\":\\\"#\\\\/definitions\\\\/Order\\\"},\\\"description\\\":\\\"Order object that needs to be added\\\",\\\"name\\\":\\\"body\\\",\\\"required\\\":true,\\\"in\\\":\\\"body\\\"}],\\\"responses\\\":{\\\"201\\\":{\\\"schema\\\":{\\\"$ref\\\":\\\"#\\\\/definitions\\\\/Order\\\"},\\\"headers\\\":{\\\"Location\\\":{\\\"description\\\":\\\"The URL of the newly created resource.\\\",\\\"type\\\":\\\"string\\\"}},\\\"description\\\":\\\"Created.\\\"}}}},\\\"\\\\/menu\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Return a list of available menu items\\\",\\\"parameters\\\":[],\\\"responses\\\":{\\\"200\\\":{\\\"schema\\\":{\\\"title\\\":\\\"Menu\\\",\\\"properties\\\":{\\\"list\\\":{\\\"items\\\":{\\\"$ref\\\":\\\"#\\\\/definitions\\\\/MenuItem\\\"},\\\"type\\\":\\\"array\\\"}},\\\"type\\\":\\\"object\\\"},\\\"headers\\\":{},\\\"description\\\":\\\"OK.\\\"}}}}},\\\"schemes\\\":[\\\"https\\\"],\\\"produces\\\":[\\\"application\\\\/json\\\"],\\\"swagger\\\":\\\"2.0\\\",\\\"definitions\\\":{\\\"MenuItem\\\":{\\\"title\\\":\\\"Pizza menu Item\\\",\\\"properties\\\":{\\\"price\\\":{\\\"type\\\":\\\"string\\\"},\\\"description\\\":{\\\"type\\\":\\\"string\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"},\\\"image\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"name\\\"]},\\\"Order\\\":{\\\"title\\\":\\\"Pizza Order\\\",\\\"properties\\\":{\\\"customerName\\\":{\\\"type\\\":\\\"string\\\"},\\\"delivered\\\":{\\\"type\\\":\\\"boolean\\\"},\\\"pizzaType\\\":{\\\"type\\\":\\\"string\\\"},\\\"address\\\":{\\\"type\\\":\\\"string\\\"},\\\"creditCardNumber\\\":{\\\"type\\\":\\\"string\\\"},\\\"quantity\\\":{\\\"type\\\":\\\"number\\\"},\\\"orderId\\\":{\\\"type\\\":\\\"integer\\\"}},\\\"required\\\":[\\\"orderId\\\"]}},\\\"consumes\\\":[\\\"application\\\\/json\\\"],\\\"info\\\":{\\\"title\\\":\\\"PizzaShackAPI\\\",\\\"description\\\":\\\"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\\\n\\\",\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\",\\\"url\\\":\\\"http:\\\\/\\\\/www.apache.org\\\\/licenses\\\\/LICENSE-2.0.html\\\"},\\\"contact\\\":{\\\"email\\\":\\\"architecture@pizzashack.com\\\",\\\"name\\\":\\\"John Doe\\\",\\\"url\\\":\\\"http:\\\\/\\\\/www.pizzashack.com\\\"},\\\"version\\\":\\\"2.0.0\\\"}}\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"CREATED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\": [\"https\"],\r\n   \"tags\":    [\r\n      \"chicken\",\r\n      \"pizza\"\r\n   ],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 500,\r\n      \"production\": 100\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_create"
+            ]
+          }
+        ],
         "summary": "Create a new API version",
         "description": "This operation can be used to create a new version of an existing API. The new version is specified as `newVersion` query parameter. New API will be in `CREATED` state.\n",
         "parameters": [
@@ -913,10 +1045,16 @@
     },
     "/apis/change-lifecycle": {
       "post": {
-        "x-scope": "apim:api_publish",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish\"",
         "x-wso2-request": "POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response": "HTTP/1.1 200 OK",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_publish"
+            ]
+          }
+        ],
         "summary": "Change API Status",
         "description": "This operation is used to change the lifecycle of an API. Eg: Publish an API which is in `CREATED` state. In order to change the lifecycle, we need to provide the lifecycle `action` as a query parameter.\n\nFor example, to Publish an API, `action` should be `Publish`.\n\nSome actions supports providing additional paramters which should be provided as `lifecycleChecklist` parameter. Please see parameters table for more information.\n",
         "parameters": [
@@ -959,6 +1097,9 @@
         "responses": {
           "200": {
             "description": "OK.\nLifecycle changed successfully.\n",
+            "schema": {
+              "$ref": "#/definitions/WorkflowResponse"
+            },
             "headers": {
               "ETag": {
                 "description": "Entity Tag of the changed API. Used by caches, or in conditional requests (Will be supported in future).\n",
@@ -966,6 +1107,18 @@
               },
               "Last-Modified": {
                 "description": "Date and time the API lifecycle has been modified the last time.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
+                "type": "string"
+              }
+            }
+          },
+          "202": {
+            "description": "Accepted.\nThe request has been accepted.\n",
+            "schema": {
+              "$ref": "#/definitions/WorkflowResponse"
+            },
+            "headers": {
+              "Location": {
+                "description": "Location of the newly created Application.\n",
                 "type": "string"
               }
             }
@@ -982,6 +1135,12 @@
               "$ref": "#/definitions/Error"
             }
           },
+          "409": {
+            "description": "Conflict.\nPending workflow task exists.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
           "412": {
             "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
             "schema": {
@@ -991,14 +1150,347 @@
         }
       }
     },
+    "/apis/{apiId}/lifecycle-history": {
+      "get": {
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer f8828f52-175a-4cb2-b246-02b1e6054f97\" http://127.0.0.1:9090/api/am/publisher/v1.0/apis/0527a55e-8dcf-4ce5-bddf-c77e8418be8a/lifecycle-history",
+        "x-wso2-request": "GET http://127.0.0.1:9090/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-history\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response": "HTTP/1.1 200 OK\n Content-Type: application/json \n Content-Encoding: gzip \n Transfer-Encoding: chunked \n\n [ { \"postState\" : \"Created\",\n    \"updatedTime\" : \"Feb 23, 2017 5:17:02 PM\",\n\"user\" : \"admin\"\n  },\n { \"postState\" : \"Published\",\n    \"previousState\" : \"Created\",\n    \"updatedTime\" : \"Feb 23, 2017 5:17:17 PM\",\n    \"user\" : \"admin\"\n }\n]",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_publish"
+            ]
+          }
+        ],
+        "summary": "Get Lifecycle state change history of the API.",
+        "description": "This operation can be used to retrieve Lifecycle state change history of the API.\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Modified-Since"
+          }
+        ],
+        "tags": [
+          "API (Individual)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nLifecycle state change history returned successfully.\n",
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
+                "type": "string"
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"
+          },
+          "404": {
+            "description": "Not Found.\nRequested API does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/apis/{apiId}/lifecycle": {
+      "get": {
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer f8828f52-175a-4cb2-b246-02b1e6054f97\" http://127.0.0.1:9090/api/am/publisher/v1.0/apis/0527a55e-8dcf-4ce5-bddf-c77e8418be8a/lifecycle",
+        "x-wso2-request": "GET http://127.0.0.1:9090/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response": "HTTP/1.1 200 OK\n Content-Type: application/json \n Content-Encoding: gzip \n Transfer-Encoding: chunked \n\n {  \n   \"lcName\":\"API_LIFECYCLE\",\n   \"state\":\"Published\",\n   \"lifecycleId\":\"2febf145f07e457c9643100b6ec60679\",\n   \"checkItemBeanList\":[  \n\n   ],\n   \"inputBeanList\":[  \n\n   ],\n   \"customCodeBeanList\":[  \n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Maintenance\"\n      },\n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Deprecated\"\n      },\n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Created\"\n      },\n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Prototyped\"\n      }\n   ],\n   \"availableTransitionBeanList\":[  \n      {  \n         \"event\":\"Move to Maintenance\",\n         \"targetState\":\"Maintenance\"\n      },\n      {  \n         \"event\":\"Deploy as a Prototype\",\n         \"targetState\":\"Prototyped\"\n      },\n      {  \n         \"event\":\"Demote to Created\",\n         \"targetState\":\"Created\"\n      },\n      {  \n         \"event\":\"Deprecate\",\n         \"targetState\":\"Deprecated\"\n      },\n      {  \n         \"event\":\"Publish\",\n         \"targetState\":\"Published\"\n      }\n   ],\n   \"permissionBeanList\":[  \n\n   ]\n}",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_publish"
+            ]
+          }
+        ],
+        "summary": "Get Lifecycle state data of the API.",
+        "description": "This operation can be used to retrieve Lifecycle state data of the API.\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Modified-Since"
+          }
+        ],
+        "tags": [
+          "API (Individual)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nLifecycle state data returned successfully.\n",
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/LifecycleState"
+            }
+          },
+          "304": {
+            "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"
+          },
+          "404": {
+            "description": "Not Found.\nRequested API does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/apis/{apiId}/lifecycle/lifecycle-pending-task": {
+      "delete": {
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer f8828f52-175a-4cb2-b246-02b1e6054f97\" -X DELETE http://127.0.0.1:9090/api/am/publisher/v1.0/apis/0527a55e-8dcf-4ce5-bddf-c77e8418be8a/lifecycle/lifecycle-pending-task",
+        "x-wso2-request": "DELETE http://127.0.0.1:9090/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle/lifecycle-pending-task\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response": "HTTP/1.1 200 OK",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_publish"
+            ]
+          }
+        ],
+        "summary": "Delete pending lifecycle state change tasks.",
+        "description": "This operation can be used to remove pending lifecycle state change requests that are in pending state\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/apiId"
+          }
+        ],
+        "tags": [
+          "API (Individual)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nLifecycle state change pending task removed successfully.\n"
+          },
+          "404": {
+            "description": "Not Found.\nRequested API does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/apis/import-definition": {
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_create"
+            ]
+          }
+        ],
+        "summary": "Import API Definition",
+        "description": "This operation can be used to create api from api definition.\n\nAPI definition can be either Swagger or a WSDL\n\nWSDL can be speficied as a single file or a ZIP archive with WSDLs and reference XSDs etc.\nWhen the type is WSDL, it is a **must** to specify additionalProperties with API's name, version, context and endpoints. See the example for additionalProperties.\n",
+        "parameters": [
+          {
+            "in": "formData",
+            "name": "type",
+            "description": "Definition type to upload",
+            "type": "string",
+            "required": false,
+            "enum": [
+              "SWAGGER",
+              "WSDL"
+            ],
+            "default": "SWAGGER"
+          },
+          {
+            "in": "formData",
+            "name": "file",
+            "description": "Definition to uploadas a file",
+            "type": "file",
+            "required": false
+          },
+          {
+            "in": "formData",
+            "name": "url",
+            "description": "Definition url",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "formData",
+            "name": "additionalProperties",
+            "description": "Additional attributes specified as a stringified JSON with API's schema",
+            "type": "string",
+            "required": false
+          },
+          {
+            "in": "formData",
+            "name": "implementationType",
+            "type": "string",
+            "enum": [
+              "soap",
+              "httpBinding"
+            ],
+            "default": "SOAP",
+            "description": "Currently this is only used when creating an API using a WSDL.\n\nIf 'SOAP' is specified, the API will be created with only one resource 'POST /' which is to be used for SOAP \noperations.\n\nIf 'HTTP_BINDING' is specified, the API will be created with resources using HTTP binding operations \nwhich are extracted from the WSDL.\n",
+            "required": false
+          },
+          {
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
+          }
+        ],
+        "tags": [
+          "API (Collection)"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created.\nSuccessful response with the newly created object as entity in the body.\nLocation header contains URL of newly created entity.\n",
+            "schema": {
+              "$ref": "#/definitions/API"
+            },
+            "headers": {
+              "Location": {
+                "description": "The URL of the newly created resource.\n",
+                "type": "string"
+              },
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "415": {
+            "description": "Unsupported Media Type.\nThe entity of the request was in a not supported format.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/apis/validate-definition": {
+      "post": {
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_create"
+            ]
+          }
+        ],
+        "summary": "Validate API definition and retrieve a summary",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "description": "This operation can be used to validate a swagger or WSDL definition and retrieve a summary.\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/definitionType"
+          },
+          {
+            "$ref": "#/parameters/definitionFile"
+          },
+          {
+            "$ref": "#/parameters/definitionUrl"
+          }
+        ],
+        "tags": [
+          "API (Collection)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nAPI definition validation information is returned\n",
+            "schema": {
+              "$ref": "#/definitions/APIDefinitionValidationResponse"
+            },
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "404": {
+            "description": "Not Found.\nWorkflow for the given reference in not found.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/apis/{apiId}/documents": {
       "get": {
-        "x-scope": "apim:api_view",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents\"",
         "x-wso2-request": "GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"visibility\": \"API_LEVEL\",\n         \"sourceType\": \"INLINE\",\n         \"sourceUrl\": null,\n         \"otherTypeName\": null,\n         \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n         \"summary\": \"This is a sample documentation for v1.0.0.0\",\n         \"name\": \"PhoneVerification API Documentation\",\n         \"type\": \"HOWTO\"\n      },\n            {\n         \"visibility\": \"API_LEVEL\",\n         \"sourceType\": \"URL\",\n         \"sourceUrl\": \"http://wiki.cdyne.com/index.php/Phone_Verification\",\n         \"otherTypeName\": null,\n         \"documentId\": \"4145df31-04f1-440c-8d08-68952874622c\",\n         \"summary\": \"This is the URL for online documentation\",\n         \"name\": \"Online Documentation\",\n         \"type\": \"SAMPLES\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}",
+        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"visibility\": \"API_LEVEL\",\n         \"sourceType\": \"INLINE\",\n         \"sourceUrl\": null,\n         \"otherTypeName\": null,\n         \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n         \"summary\": \"This is a sample documentation for v1.0.0\",\n         \"name\": \"PhoneVerification API Documentation\",\n         \"type\": \"HOWTO\"\n      },\n            {\n         \"visibility\": \"API_LEVEL\",\n         \"sourceType\": \"URL\",\n         \"sourceUrl\": \"http://wiki.cdyne.com/index.php/Phone_Verification\",\n         \"otherTypeName\": null,\n         \"documentId\": \"4145df31-04f1-440c-8d08-68952874622c\",\n         \"summary\": \"This is the URL for online documentation\",\n         \"name\": \"Online Documentation\",\n         \"type\": \"SAMPLES\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}",
         "summary": "Get a list of documents of an API",
-        "description": "This operation can be used to retrive a list of documents belonging to an API by providing the id of the API.\n",
+        "description": "This operation can be used to retrieve a list of documents belonging to an API by providing the id of the API.\n",
         "parameters": [
           {
             "$ref": "#/parameters/apiId"
@@ -1008,9 +1500,6 @@
           },
           {
             "$ref": "#/parameters/offset"
-          },
-          {
-            "$ref": "#/parameters/Accept"
           },
           {
             "$ref": "#/parameters/If-None-Match"
@@ -1054,10 +1543,16 @@
         }
       },
       "post": {
-        "x-scope": "apim:api_create",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents\"",
         "x-wso2-request": "POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n    \"visibility\": \"API_LEVEL\",\n    \"sourceType\": \"INLINE\",\n    \"sourceUrl\": null,\n    \"otherTypeName\": null,\n    \"summary\": \"This is a sample documentation\",\n    \"name\": \"Introduction to PhoneVerification API\",\n    \"type\": \"HOWTO\"\n}",
         "x-wso2-response": "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058\",\n   \"summary\": \"This is a sample documentation\",\n   \"name\": \"Introduction to PhoneVerification API\",\n   \"type\": \"HOWTO\"\n}",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_create"
+            ]
+          }
+        ],
         "summary": "Add a new document to an API",
         "description": "This operation can be used to add a new documentation to an API. This operation only adds the metadata of a document. To add the actual content we need to use **Upload the content of an API document ** API once we obtain a document Id by this operation.\n",
         "parameters": [
@@ -1074,7 +1569,10 @@
             }
           },
           {
-            "$ref": "#/parameters/Content-Type"
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
           }
         ],
         "tags": [
@@ -1115,7 +1613,6 @@
     },
     "/apis/{apiId}/documents/{documentId}": {
       "get": {
-        "x-scope": "apim:api_view",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\"",
         "x-wso2-request": "GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n   \"summary\": \"This is a sample documentation\",\n   \"name\": \"PhoneVerification API Documentation\",\n   \"type\": \"HOWTO\"\n}",
@@ -1127,9 +1624,6 @@
           },
           {
             "$ref": "#/parameters/documentId"
-          },
-          {
-            "$ref": "#/parameters/Accept"
           },
           {
             "$ref": "#/parameters/If-None-Match"
@@ -1180,10 +1674,16 @@
         }
       },
       "put": {
-        "x-scope": "apim:api_create",
         "x-wso2-curl": "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" -H \"Content-Type: application/json\" -X PUT -d data.json \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\"",
-        "x-wso2-request": "PUT https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\nAuthorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n   \"summary\": \"This is a sample documentation for v1.0.0.0\",\n   \"name\": \"PhoneVerification API Documentation\",\n   \"type\": \"HOWTO\"\n}",
-        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n   \"summary\": \"This is a sample documentation for v1.0.0.0\",\n   \"name\": \"PhoneVerification API Documentation\",\n   \"type\": \"HOWTO\"\n}",
+        "x-wso2-request": "PUT https://127.0.0.1:9443/api/am/publisher/v1.0/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\nAuthorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n   \"summary\": \"This is a sample documentation for v1.0.0\",\n   \"name\": \"PhoneVerification API Documentation\",\n   \"type\": \"HOWTO\"\n}",
+        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n   \"summary\": \"This is a sample documentation for v1.0.0\",\n   \"name\": \"PhoneVerification API Documentation\",\n   \"type\": \"HOWTO\"\n}",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_update"
+            ]
+          }
+        ],
         "summary": "Update a document of an API",
         "description": "This operation can be used to update metadata of an API's document.\n",
         "parameters": [
@@ -1201,9 +1701,6 @@
             "schema": {
               "$ref": "#/definitions/Document"
             }
-          },
-          {
-            "$ref": "#/parameters/Content-Type"
           },
           {
             "$ref": "#/parameters/If-Match"
@@ -1261,10 +1758,16 @@
         }
       },
       "delete": {
-        "x-scope": "apim:api_create",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058",
         "x-wso2-request": "DELETE https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response": "HTTP/1.1 200 OK",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_delete"
+            ]
+          }
+        ],
         "summary": "Delete a document of an API",
         "description": "This operation can be used to delete a document associated with an API.\n",
         "parameters": [
@@ -1305,7 +1808,9 @@
     },
     "/apis/{apiId}/documents/{documentId}/content": {
       "get": {
-        "x-scope": "apim:api_view",
+        "produces": [
+          "application/octet-stream"
+        ],
         "x-wso2-curl": "curl -k -H \"Authorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\" > sample.pdf",
         "x-wso2-request": "GET https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\nAuthorization:Bearer b0982cd2aacd463ff5f63cd5ebe58f4a\n",
         "x-wso2-response": "HTTP/1.1 200 OK\nContent-Disposition: attachment; filename=\"sample.pdf\"\nContent-Type: application/octet-stream\nContent-Length: 7802\n\n%PDF-1.4\n%äüöß\n2 0 obj\n<</Length 3 0 R/Filter/FlateDecode>>\nstream\n..\n>>\nstartxref\n7279\n%%EOF",
@@ -1317,9 +1822,6 @@
           },
           {
             "$ref": "#/parameters/documentId"
-          },
-          {
-            "$ref": "#/parameters/Accept"
           },
           {
             "$ref": "#/parameters/If-None-Match"
@@ -1379,10 +1881,16 @@
         "consumes": [
           "multipart/form-data"
         ],
-        "x-scope": "apim:api_create",
         "x-wso2-curl": "curl -k -H \"Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -F file=@\"sample.pdf\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/daf732d3-bda2-46da-b381-2c39d901ea61/content\"",
         "x-wso2-request": "POST https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/documents/b3a79270-02bb-4e39-9ac1-90ce8f6c84af/content\nAuthorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Length: 8004\nContent-Type: multipart/form-data; boundary=------------------------7b9a53f1ffa452b9\n\n--------------------------7b9a53f1ffa452b9\nContent-Disposition: form-data; name=\"file\"; filename=\"sample.pdf\"\nContent-Type: application/octet-stream\n\n[file content]\n\n--------------------------7b9a53f1ffa452b9--\n",
         "x-wso2-response": "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/documents/b3a79270-02bb-4e39-9ac1-90ce8f6c84af/content\nContent-Type: application/json\n\n{\n    \"visibility\":\"API_LEVEL\",\n    \"sourceType\":\"FILE\",\n    \"sourceUrl\":null,\n    \"otherTypeName\":null,\n    \"documentId\":\"daf732d3-bda2-46da-b381-2c39d901ea61\",\n    \"summary\":\"This is a sample documentation pdf\",\n    \"name\":\"Introduction to PhoneVerification API PDF\",\n    \"type\":\"HOWTO\"\n}",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_create"
+            ]
+          }
+        ],
         "summary": "Upload the content of an API document",
         "description": "Thid operation can be used to upload a file or add inline content to an API document.\n\n**IMPORTANT:**\n* Either **file** or **inlineContent** form data parameters should be specified at one time.\n* Document's source type should be **FILE** in order to upload a file to the document using **file** parameter.\n* Document's source type should be **INLINE** in order to add inline content to the document using **inlineContent** parameter.\n",
         "parameters": [
@@ -1405,9 +1913,6 @@
             "description": "Inline content of the document",
             "type": "string",
             "required": false
-          },
-          {
-            "$ref": "#/parameters/Content-Type"
           },
           {
             "$ref": "#/parameters/If-Match"
@@ -1465,57 +1970,49 @@
         }
       }
     },
-    "/applications/{applicationId}": {
+    "/export/apis": {
       "get": {
-        "x-scope": "apim:api_create",
-        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/applications/896658a0-b4ee-4535-bbfa-806c894a4015",
-        "x-wso2-request": "GET https://127.0.0.1:9443/api/am/publisher/v1.0/applications/896658a0-b4ee-4535-bbfa-806c894a4015\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"groupId\": \"\",\n   \"subscriber\": \"admin\",\n   \"throttlingTier\": \"Unlimited\",\n   \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n   \"description\": null,\n   \"name\": \"DefaultApplication\"\n}",
-        "summary": "Get details of an application",
-        "description": "This operation can be used to retrieve details of an individual application specifying the application id in the URI.\n",
+        "produces": [
+          "application/zip"
+        ],
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/publisher/v1.0/export/apis?query=xxx > exported-apis.zip",
+        "x-wso2-request": "GET https://127.0.0.1:9443/api/am/publisher/v1.0/export/apis?query=xxx\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response": "HTTP/1.1 200 OK\n Connection: keep-alive\n  Content-Disposition: attachment; filename=\"exported-apis.zip\"\n  Content-Type: application/zip",
+        "summary": "Export information related to an API.",
+        "description": "This operation can be used to export information related to a particular API.\n",
         "parameters": [
           {
-            "$ref": "#/parameters/applicationId"
+            "name": "query",
+            "in": "query",
+            "description": "API search query\n",
+            "required": true,
+            "type": "string"
           },
           {
-            "$ref": "#/parameters/Accept"
+            "$ref": "#/parameters/limit"
           },
           {
-            "$ref": "#/parameters/If-None-Match"
-          },
-          {
-            "$ref": "#/parameters/If-Modified-Since"
+            "$ref": "#/parameters/offset"
           }
         ],
         "tags": [
-          "Application (Individual)"
+          "Export Configuration"
         ],
         "responses": {
           "200": {
-            "description": "OK.\nApplication returned.\n",
-            "schema": {
-              "$ref": "#/definitions/Application"
-            },
+            "description": "OK.\nExport Configuration returned.\n",
             "headers": {
               "Content-Type": {
                 "description": "The content type of the body.\n",
                 "type": "string"
-              },
-              "ETag": {
-                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
-                "type": "string"
-              },
-              "Last-Modified": {
-                "description": "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
-                "type": "string"
               }
+            },
+            "schema": {
+              "type": "file"
             }
           },
-          "304": {
-            "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"
-          },
           "404": {
-            "description": "Not Found.\nRequested application does not exist.\n",
+            "description": "Not Found.\nRequested API does not exist.\n",
             "schema": {
               "$ref": "#/definitions/Error"
             }
@@ -1525,16 +2022,166 @@
             "schema": {
               "$ref": "#/definitions/Error"
             }
+          },
+          "412": {
+            "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/import/apis": {
+      "put": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "x-wso2-curl": "curl -k -F \"file=@exported.zip\" -X PUT -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/publisher/v1.0/import/apis",
+        "x-wso2-request": "PUT https://127.0.0.1:9292/api/am/publisher/v1.0/import/apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\"count\":2,\"list\":[{\"id\":\"4df90edc-f76b-4b19-bf57-7d161fa04467\",\"name\":\"testApi2\",\"context\":\"/test2\",\"version\":\"2.0.3\",\"provider\":\"admin\",\"lifeCycleStatus\":\"Created\",\"workflowStatus\":\"APPROVED\"},{\"id\":\"4066bc9e-1d87-4296-bcca-f6e38d3da6d0\",\"name\":\"testApi\",\"context\":\"/testApi\",\"version\":\"1.0.0\",\"provider\":\"admin\",\"lifeCycleStatus\":\"Created\",\"workflowStatus\":\"APPROVED\"}]}",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_update"
+            ]
+          }
+        ],
+        "summary": "Imports API(s).",
+        "description": "This operation can be used to import one or more existing APIs.\n",
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "description": "Zip archive consisting on exported api configuration\n",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "name": "provider",
+            "in": "query",
+            "description": "If defined, updates the existing provider of each API with the specified provider.\nThis is to cater scenarios where the current API provider does not exist in the environment\nthat the API is imported to.\n",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Import Configuration"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nSuccessful response with the updated object as entity in the body.\n",
+            "schema": {
+              "$ref": "#/definitions/APIList"
+            },
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable.\nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "x-wso2-curl": "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/publisher/v1.0/import/apis",
+        "x-wso2-request": "POST https://127.0.0.1:9292/api/am/publisher/v1.0/import/apis\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\"count\":2,\"list\":[{\"id\":\"4df90edc-f76b-4b19-bf57-7d161fa04467\",\"name\":\"testApi2\",\"context\":\"/test2\",\"version\":\"2.0.3\",\"provider\":\"admin\",\"lifeCycleStatus\":\"Created\",\"workflowStatus\":\"APPROVED\"},{\"id\":\"4066bc9e-1d87-4296-bcca-f6e38d3da6d0\",\"name\":\"testApi\",\"context\":\"/testApi\",\"version\":\"1.0.0\",\"provider\":\"admin\",\"lifeCycleStatus\":\"Created\",\"workflowStatus\":\"APPROVED\"}]}",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_create"
+            ]
+          }
+        ],
+        "summary": "Imports API(s).",
+        "description": "This operation can be used to import one or more existing APIs.\n",
+        "parameters": [
+          {
+            "name": "file",
+            "in": "formData",
+            "description": "Zip archive consisting on exported api configuration\n",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "name": "provider",
+            "in": "query",
+            "description": "If defined, updates the existing provider of each API with the specified provider.\nThis is to cater scenarios where the current API provider does not exist in the environment\nthat the API is imported to.\n",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Import Configuration"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nSuccessful response with the updated object as entity in the body.\n",
+            "schema": {
+              "$ref": "#/definitions/APIList"
+            },
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable.\nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "412": {
+            "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           }
         }
       }
     },
     "/subscriptions": {
       "get": {
-        "x-scope": "apim:subscription_view",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b\"",
         "x-wso2-request": "GET https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n \n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"subscriptionId\": \"64eca60b-2e55-4c38-8603-e9e6bad7d809\",\n         \"policy\": \"Gold\",\n         \"apiIdentifier\": \"admin-PhoneVerification-1.0.0\",\n         \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n         \"lifeCycleStatus\": \"UNBLOCKED\"\n      },\n            {\n         \"subscriptionId\": \"7ac22c34-8745-4cfe-91e0-262c50b2f2e3\",\n         \"policy\": \"Gold\",\n         \"apiIdentifier\": \"admin-PhoneVerification-1.0.0\",\n         \"applicationId\": \"367a2361-8db5-4140-8133-c6c8dc7fa0c4\",\n         \"lifeCycleStatus\": \"UNBLOCKED\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:subscription_view"
+            ]
+          }
+        ],
         "summary": "Get all Subscriptions",
         "description": "This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of\n\n1. Retrieving all subscriptions for the user's APIs.\n`GET https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions`\n\n2. Retrieving subscriptions for a specific API.\n`GET https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`\n",
         "parameters": [
@@ -1546,9 +2193,6 @@
           },
           {
             "$ref": "#/parameters/offset"
-          },
-          {
-            "$ref": "#/parameters/Accept"
           },
           {
             "$ref": "#/parameters/If-None-Match"
@@ -1588,18 +2232,21 @@
     },
     "/subscriptions/{subscriptionId}": {
       "get": {
-        "x-scope": "apim:subscription_view",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809",
         "x-wso2-request": "GET https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions/64eca60b-2e55-4c38-8603-e9e6bad7d809\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"subscriptionId\": \"64eca60b-2e55-4c38-8603-e9e6bad7d809\",\n   \"policy\": \"Gold\",\n   \"apiIdentifier\": \"admin-PhoneVerification-1.0.0\",\n   \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n   \"lifeCycleStatus\": \"UNBLOCKED\"\n}",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:subscription_view"
+            ]
+          }
+        ],
         "summary": "Get details of a subscription",
         "description": "This operation can be used to get details of a single subscription.\n",
         "parameters": [
           {
             "$ref": "#/parameters/subscriptionId"
-          },
-          {
-            "$ref": "#/parameters/Accept"
           },
           {
             "$ref": "#/parameters/If-None-Match"
@@ -1646,10 +2293,16 @@
     },
     "/subscriptions/block-subscription": {
       "post": {
-        "x-scope": "apim:subscription_block",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions/block-subscription?subscriptionId=64eca60b-2e55-4c38-8603-e9e6bad7d809&blockState=PROD_ONLY_BLOCKED\"",
         "x-wso2-request": "POST https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions/block-subscription?subscriptionId=64eca60b-2e55-4c38-8603-e9e6bad7d809&blockState=PROD_ONLY_BLOCKED\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n \n{\n   \"subscriptionId\": \"64eca60b-2e55-4c38-8603-e9e6bad7d809\",\n   \"policy\": \"Gold\",\n   \"apiIdentifier\": \"admin-PhoneVerification-1.0.0\",\n   \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n   \"lifeCycleStatus\": \"PROD_ONLY_BLOCKED\"\n}",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:subscription_block"
+            ]
+          }
+        ],
         "summary": "Block a subscription",
         "description": "This operation can be used to block a subscription. Along with the request, `blockState` must be specified as a query parameter.\n\n1. `BLOCKED` : Subscription is completely blocked for both Production and Sandbox environments.\n2. `PROD_ONLY_BLOCKED` : Subscription is blocked for Production environment only.\n",
         "parameters": [
@@ -1714,10 +2367,16 @@
     },
     "/subscriptions/unblock-subscription": {
       "post": {
-        "x-scope": "apim:subscription_block",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions/unblock-subscription?subscriptionId=64eca60b-2e55-4c38-8603-e9e6bad7d809\"",
         "x-wso2-request": "POST https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions/unblock-subscription?subscriptionId=64eca60b-2e55-4c38-8603-e9e6bad7d809\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8`\n",
         "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"subscriptionId\": \"64eca60b-2e55-4c38-8603-e9e6bad7d809\",\n   \"policy\": \"Gold\",\n   \"apiIdentifier\": \"admin-PhoneVerification-1.0.0\",\n   \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n   \"lifeCycleStatus\": \"UNBLOCKED\"\n} ",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:subscription_block"
+            ]
+          }
+        ],
         "summary": "Unblock a Subscription",
         "parameters": [
           {
@@ -1771,10 +2430,16 @@
     },
     "/policies/{tierLevel}": {
       "get": {
-        "x-scope": "apim:tier_view",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/policies/api",
         "x-wso2-request": "GET https://127.0.0.1:9443/api/am/publisher/v1.0/policies/api\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"unitTime\": 60000,\n         \"tierPlan\": \"FREE\",\n         \"tierLevel\": \"api\",\n         \"stopOnQuotaReach\": true,\n         \"requestCount\": 1,\n         \"description\": \"Allows 1 request(s) per minute.\",\n         \"name\": \"Bronze\",\n         \"attributes\": {}\n      },\n            {\n         \"unitTime\": 60000,\n         \"tierPlan\": \"FREE\",\n         \"tierLevel\": \"api\",\n         \"stopOnQuotaReach\": true,\n         \"requestCount\": 20,\n         \"description\": \"Allows 20 request(s) per minute.\",\n         \"name\": \"Gold\",\n         \"attributes\": {}\n      },\n            {\n         \"unitTime\": 60000,\n         \"tierPlan\": \"FREE\",\n         \"tierLevel\": \"api\",\n         \"stopOnQuotaReach\": true,\n         \"requestCount\": 5,\n         \"description\": \"Allows 5 request(s) per minute.\",\n         \"name\": \"Silver\",\n         \"attributes\": {}\n      },\n            {\n         \"unitTime\": 0,\n         \"tierPlan\": null,\n         \"tierLevel\": \"api\",\n         \"stopOnQuotaReach\": true,\n         \"requestCount\": 0,\n         \"description\": \"Allows unlimited requests\",\n         \"name\": \"Unlimited\",\n         \"attributes\": {}\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 4\n}",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_update"
+            ]
+          }
+        ],
         "summary": "Get all policies",
         "description": "This operation can be used to list the available policies for a given policy level. Tier level should be specified as a path parameter and should be one of `api`, `application` and `resource`.\n",
         "parameters": [
@@ -1786,9 +2451,6 @@
           },
           {
             "$ref": "#/parameters/tierLevel"
-          },
-          {
-            "$ref": "#/parameters/Accept"
           },
           {
             "$ref": "#/parameters/If-None-Match"
@@ -1824,73 +2486,20 @@
             }
           }
         }
-      },
-      "post": {
-        "x-scope": "apim:tier_manage",
-        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://127.0.0.1:9443/api/am/publisher/v1.0/policies/api\"",
-        "x-wso2-request": "POST https://127.0.0.1:9443/api/am/publisher/v1.0/policies/api\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n    \"unitTime\": 60000,\n    \"tierPlan\": \"FREE\",\n    \"tierLevel\": \"api\",\n    \"stopOnQuotaReach\": true,\n    \"requestCount\": 5,\n    \"description\": \"Allows 5 request(s) per minute.\",\n    \"name\": \"Low\",\n    \"attributes\": {\n            \"a\":10,\n            \"b\":30\n        }\n}",
-        "x-wso2-response": "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v1.0/policies/Low\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 5,\n   \"description\": \"Allows 5 request(s) per minute.\",\n   \"name\": \"Low\",\n   \"attributes\":    {\n      \"b\": \"30\",\n      \"a\": \"10\"\n   }\n}",
-        "summary": "Create a Tier",
-        "description": "This operation can be used to create a new throttling policy. The only supported policy level is `api` policies.\n`POST https://127.0.0.1:9443/api/am/publisher/v1.0/policies/api`\n\n**IMPORTANT:**\n* This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling policies modification related operations.\n",
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "description": "Tier object that should to be added\n",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/Tier"
-            }
-          },
-          {
-            "$ref": "#/parameters/tierLevel"
-          },
-          {
-            "$ref": "#/parameters/Content-Type"
-          }
-        ],
-        "tags": [
-          "Throttling Tier (Collection)"
-        ],
-        "responses": {
-          "201": {
-            "description": "Created.\nSuccessful response with the newly created object as entity in the body.\nLocation header contains URL of newly created entity.\n",
-            "schema": {
-              "$ref": "#/definitions/Tier"
-            },
-            "headers": {
-              "Location": {
-                "description": "Location of the newly created policy.\n",
-                "type": "string"
-              },
-              "Content-Type": {
-                "description": "The content type of the body.\n",
-                "type": "string"
-              },
-              "ETag": {
-                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional request'\n",
-                "type": "string"
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.\nInvalid request or validation error\n",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "415": {
-            "description": "Unsupported media type.\nThe entity of the request was in a not supported format.\n"
-          }
-        }
       }
     },
     "/policies/{tierLevel}/{tierName}": {
       "get": {
-        "x-scope": "apim:tier_view",
         "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9443/api/am/publisher/v1.0/policies/api/Bronze",
         "x-wso2-request": "GET https://127.0.0.1:9443/api/am/publisher/v1.0/policies/api/Bronze\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_update"
+            ]
+          }
+        ],
         "summary": "Get details of a policy",
         "description": "This operation can be used to retrieve details of a single policy by specifying the policy level and policy name.\n",
         "parameters": [
@@ -1899,9 +2508,6 @@
           },
           {
             "$ref": "#/parameters/tierLevel"
-          },
-          {
-            "$ref": "#/parameters/Accept"
           },
           {
             "$ref": "#/parameters/If-None-Match"
@@ -1950,32 +2556,194 @@
             }
           }
         }
-      },
-      "put": {
-        "x-scope": "apim:tier_manage",
-        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"https://127.0.0.1:9443/api/am/publisher/v1.0/policies/api/Low\"",
-        "x-wso2-request": "PUT https://127.0.0.1:9443/api/am/publisher/v1.0/policies/api/Low\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 10,\n   \"description\": \"Allows 10 request(s) per minute.\",\n   \"name\": \"Low\",\n   \"attributes\":    {\n      \"a\": \"30\",\n      \"b\": \"10\",\n      \"c\": \"20\"\n   }\n}\n",
-        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 10,\n   \"description\": \"Allows 10 request(s) per minute.\",\n   \"name\": \"Low\",\n   \"attributes\":    {\n      \"b\": \"10\",\n      \"c\": \"20\",\n      \"a\": \"30\"\n   }\n}",
-        "summary": "Update a Tier",
-        "description": "This operation can be used to update an existing policy. The only supported policy level is `api` policies.\n`PUT https://127.0.0.1:9443/api/am/publisher/v1.0/policies/api/Low`\n\n**IMPORTANT:**\n* This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling policies modification related operations.\n",
+      }
+    },
+    "/endpoints": {
+      "get": {
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints\"",
+        "x-wso2-request": "GET https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"list\": [   {\n      \"showInApiConsole\": true,\n      \"serverUrl\": \"https://192.168.56.1:9444//services/\",\n      \"endpoints\":       {\n         \"http\": \"http://192.168.56.1:8281\",\n         \"https\": \"https://192.168.56.1:8244\"\n      },\n      \"name\": \"Production and Sandbox\",\n      \"type\": \"hybrid\"\n   }],\n   \"count\": 1\n}",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_view"
+            ]
+          }
+        ],
+        "summary": "Get all endpoints",
+        "description": "This operation can be used to retrieve the list of endpoints available.\n",
         "parameters": [
           {
-            "$ref": "#/parameters/tierName"
+            "$ref": "#/parameters/If-None-Match"
           },
+          {
+            "$ref": "#/parameters/If-Modified-Since"
+          }
+        ],
+        "tags": [
+          "Endpoint (Collection)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nEndpoint list is returned.\n",
+            "schema": {
+              "$ref": "#/definitions/EndPointList"
+            },
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
+                "type": "string"
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"
+          },
+          "404": {
+            "description": "Not Found.\nRequested API does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "post": {
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints\"",
+        "x-wso2-request": "",
+        "x-wso2-response": "",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_create"
+            ]
+          }
+        ],
+        "summary": "Add a new endpoint",
+        "description": "This operation can be used to add a new endpoint.\n",
+        "parameters": [
           {
             "in": "body",
             "name": "body",
-            "description": "Tier object that needs to be modified\n",
+            "description": "EndPoint object that needs to be added\n",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/Tier"
+              "$ref": "#/definitions/EndPoint"
             }
           },
           {
-            "$ref": "#/parameters/tierLevel"
+            "$ref": "#/parameters/If-None-Match"
           },
           {
-            "$ref": "#/parameters/Content-Type"
+            "$ref": "#/parameters/If-Modified-Since"
+          }
+        ],
+        "tags": [
+          "Endpoint (Collection)"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created.\nSuccessful response with the newly created Document object as entity in the body.\nLocation header contains URL of newly added document.\n",
+            "schema": {
+              "$ref": "#/definitions/EndPoint"
+            },
+            "headers": {
+              "Location": {
+                "description": "Location to the newly created Document.\n",
+                "type": "string"
+              },
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "415": {
+            "description": "Unsupported media type.\nThe entity of the request was in a not supported format.\n"
+          }
+        }
+      },
+      "head": {
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_create"
+            ]
+          }
+        ],
+        "summary": "Check given Endpoint is already exist\n",
+        "description": "Using this operation, you can check a given Endpoint name is already used. You need to provide the name you want to check.\n",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          }
+        ],
+        "tags": [
+          "Endpoint (Collection)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nRequested Endpoint attibute status is returned\n",
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.\nRequested Endpoint attribute does not meet requiremnts.\n"
+          },
+          "404": {
+            "description": "Not Found.\nRequested Endpoint does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          },
+          "406": {
+            "description": "Not Acceptable.\nThe requested media type is not supported\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/endpoints/{endpointId}": {
+      "get": {
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints/1234-123-2111-345\"",
+        "x-wso2-request": "GET https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints/1234-123-2111-345\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"list\": [   {\n      \"showInApiConsole\": true,\n      \"serverUrl\": \"https://192.168.56.1:9444//services/\",\n      \"endpoints\":       {\n         \"http\": \"http://192.168.56.1:8281\",\n         \"https\": \"https://192.168.56.1:8244\"\n      },\n      \"name\": \"Production and Sandbox\",\n      \"type\": \"hybrid\"\n   }],\n   \"count\": 1\n}",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_create"
+            ]
+          }
+        ],
+        "summary": "Get specific endpoints",
+        "description": "This operation can be used to retrieve endpoint specific details.\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/endpointId"
           },
           {
             "$ref": "#/parameters/If-Match"
@@ -1985,13 +2753,77 @@
           }
         ],
         "tags": [
-          "Throttling Tier (Individual)"
+          "Endpoint (individual)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.\nEndpoint details returned.\n",
+            "schema": {
+              "$ref": "#/definitions/EndPoint"
+            },
+            "headers": {
+              "Content-Type": {
+                "description": "The content type of the body.\n",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
+                "type": "string"
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"
+          },
+          "404": {
+            "description": "Not Found.\nRequested API does not exist.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
+          }
+        }
+      },
+      "put": {
+        "x-wso2-curl": "",
+        "x-wso2-request": "",
+        "x-wso2-response": "",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_create"
+            ]
+          }
+        ],
+        "summary": "Update a Tier",
+        "description": "This operation can be used to update an existing endpoint.\n`PUT https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints/api/Low`\n",
+        "parameters": [
+          {
+            "$ref": "#/parameters/endpointId"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Tier object that needs to be modified\n",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/EndPoint"
+            }
+          },
+          {
+            "$ref": "#/parameters/If-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Unmodified-Since"
+          }
+        ],
+        "tags": [
+          "Endpoint (individual)"
         ],
         "responses": {
           "200": {
             "description": "OK.\nSubscription updated.\n",
             "schema": {
-              "$ref": "#/definitions/Tier"
+              "$ref": "#/definitions/EndPoint"
             },
             "headers": {
               "Location": {
@@ -2033,18 +2865,21 @@
         }
       },
       "delete": {
-        "x-scope": "apim:tier_manage",
-        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE \"https://127.0.0.1:9443/api/am/publisher/v1.0/policies/api/Low\"",
-        "x-wso2-request": "DELETE https://127.0.0.1:9443/api/am/publisher/v1.0/policies/api/Low\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X DELETE https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints/6fb74674-4ab8-4b52-9886-f9a376985060",
+        "x-wso2-request": "DELETE https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints/6fb74674-4ab8-4b52-9886-f9a376985060\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response": "HTTP/1.1 200 OK",
-        "summary": "Delete a Tier",
-        "description": "This operation can be used to delete an existing policy. The only supported policy level is `api` policies.\n`DELETE https://127.0.0.1:9443/api/am/publisher/v1.0/policies/api/Low`\n\n**IMPORTANT:**\n* This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling policies modification related operations.\n",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_create"
+            ]
+          }
+        ],
+        "summary": "Delete an endpoint",
+        "description": "This operation can be used to delete an existing Endpoint proving the Id of the Endpoint.\n",
         "parameters": [
           {
-            "$ref": "#/parameters/tierName"
-          },
-          {
-            "$ref": "#/parameters/tierLevel"
+            "$ref": "#/parameters/endpointId"
           },
           {
             "$ref": "#/parameters/If-Match"
@@ -2054,11 +2889,17 @@
           }
         ],
         "tags": [
-          "Throttling Tier (Individual)"
+          "Endpoint (individual)"
         ],
         "responses": {
           "200": {
             "description": "OK.\nResource successfully deleted.\n"
+          },
+          "403": {
+            "description": "Forbidden.\nThe request must be conditional but no condition has been specified.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           },
           "404": {
             "description": "Not Found.\nResource to be deleted does not exist.\n",
@@ -2075,109 +2916,35 @@
         }
       }
     },
-    "/policies/update-permission": {
-      "post": {
-        "x-scope": "apim:tier_manage",
-        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST -d @data.json \"https://127.0.0.1:9443/api/am/publisher/v1.0/policies/update-permission?tierName=Bronze&tierLevel=api\"",
-        "x-wso2-request": "POST https://127.0.0.1:9443/api/am/publisher/v1.0/policies/update-permission?tierName=Bronze&tierLevel=api\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\nContent-Type: application/json\n\n{\n    \"permissionType\":\"deny\",\n    \"roles\": [\"Internal/everyone\",\"admin\"]\n}",
-        "x-wso2-response": "HTTP/1.1 200 OK",
-        "summary": "Update policy permission",
-        "description": "This operation can be used to update policy permissions which controls access for the particular policy based on the subscribers' roles.\n",
-        "parameters": [
-          {
-            "$ref": "#/parameters/tierName-Q"
-          },
-          {
-            "$ref": "#/parameters/tierLevel-Q"
-          },
-          {
-            "$ref": "#/parameters/If-Match"
-          },
-          {
-            "$ref": "#/parameters/If-Unmodified-Since"
-          },
-          {
-            "in": "body",
-            "name": "permissions",
-            "schema": {
-              "$ref": "#/definitions/TierPermission"
-            }
-          }
-        ],
-        "tags": [
-          "Throttling Tier (Individual)"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK.\nSuccessfully updated policy permissions\n",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Tier"
-              }
-            },
-            "headers": {
-              "ETag": {
-                "description": "Entity Tag of the modified policy.\n Used by caches, or in conditional requests (Will be supported in future).\n",
-                "type": "string"
-              },
-              "Last-Modified": {
-                "description": "Date and time the policy has been modified.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
-                "type": "string"
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.\nInvalid request or validation error.\n",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "403": {
-            "description": "Forbidden.\nThe request must be conditional but no condition has been specified.\n",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "404": {
-            "description": "Not Found.\nRequested policy does not exist.\n",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          },
-          "412": {
-            "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
-            "schema": {
-              "$ref": "#/definitions/Error"
-            }
-          }
-        }
-      }
-    },
-    "/environments": {
+    "/labels": {
       "get": {
-        "x-scope": "apim:api_view",
-        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/environments\"",
-        "x-wso2-request": "GET https://127.0.0.1:9443/api/am/publisher/v1.0/environments\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"list\": [   {\n      \"showInApiConsole\": true,\n      \"serverUrl\": \"https://192.168.56.1:9444//services/\",\n      \"endpoints\":       {\n         \"http\": \"http://192.168.56.1:8281\",\n         \"https\": \"https://192.168.56.1:8244\"\n      },\n      \"name\": \"Production and Sandbox\",\n      \"type\": \"hybrid\"\n   }],\n   \"count\": 1\n}",
-        "summary": "Get all gateway environments",
-        "description": "This operation can be used to retrieve the list of gateway environments available.\n",
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/publisher/v1.0/labels\"",
+        "x-wso2-request": "GET https://127.0.0.1:9443/api/am/publisher/v1.0/labels\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "security": [
+          {
+            "OAuth2Security": [
+              "apim:api_publish"
+            ]
+          }
+        ],
+        "summary": "Get all labels",
+        "description": "This operation can be used to retrieve the list of labels available.\n",
         "parameters": [
           {
-            "in": "query",
-            "name": "apiId",
-            "description": "Will return environment list for the provided API.\n",
-            "type": "string"
+            "$ref": "#/parameters/If-None-Match"
+          },
+          {
+            "$ref": "#/parameters/If-Modified-Since"
           }
         ],
         "tags": [
-          "Environment (Collection)"
+          "Label (Collection)"
         ],
         "responses": {
           "200": {
-            "description": "OK.\nEnvironment list is returned.\n",
+            "description": "OK.\nLabel list is returned.\n",
             "schema": {
-              "$ref": "#/definitions/EnvironmentList"
+              "$ref": "#/definitions/LabelList"
             },
             "headers": {
               "Content-Type": {
@@ -2211,10 +2978,31 @@
       "required": true,
       "type": "string"
     },
+    "endpointId": {
+      "name": "endpointId",
+      "in": "path",
+      "description": "**Endpoint ID** consisting of the **UUID** of the Endpoint**.\n",
+      "required": true,
+      "type": "string"
+    },
     "apiId-Q": {
       "name": "apiId",
       "in": "query",
       "description": "**API ID** consisting of the **UUID** of the API.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.\n",
+      "required": true,
+      "type": "string"
+    },
+    "name": {
+      "name": "name",
+      "in": "path",
+      "description": "Name of the API\n",
+      "required": true,
+      "type": "string"
+    },
+    "version": {
+      "name": "version",
+      "in": "path",
+      "description": "Version of the API\n",
       "required": true,
       "type": "string"
     },
@@ -2298,21 +3086,6 @@
       "default": 0,
       "type": "integer"
     },
-    "Accept": {
-      "name": "Accept",
-      "in": "header",
-      "description": "Media types acceptable for the response. Default is application/json.\n",
-      "default": "application/json",
-      "type": "string"
-    },
-    "Content-Type": {
-      "name": "Content-Type",
-      "in": "header",
-      "description": "Media type of the entity in the body. Default is application/json.\n",
-      "default": "application/json",
-      "required": true,
-      "type": "string"
-    },
     "If-None-Match": {
       "name": "If-None-Match",
       "in": "header",
@@ -2336,6 +3109,32 @@
       "in": "header",
       "description": "Validator for conditional requests; based on Last Modified header.\n",
       "type": "string"
+    },
+    "definitionType": {
+      "in": "formData",
+      "name": "type",
+      "description": "Definition type to upload",
+      "type": "string",
+      "required": true,
+      "enum": [
+        "SWAGGER",
+        "WSDL"
+      ],
+      "default": "SWAGGER"
+    },
+    "definitionFile": {
+      "in": "formData",
+      "name": "file",
+      "description": "Definition to upload as a file",
+      "type": "file",
+      "required": false
+    },
+    "definitionUrl": {
+      "in": "formData",
+      "name": "url",
+      "description": "Definition url",
+      "type": "string",
+      "required": false
     }
   },
   "definitions": {
@@ -2396,6 +3195,16 @@
         "lifeCycleStatus": {
           "type": "string",
           "example": "CREATED"
+        },
+        "workflowStatus": {
+          "type": "string",
+          "example": "APPROVED"
+        },
+        "securityScheme": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -2405,11 +3214,9 @@
         "name",
         "context",
         "version",
-        "apiDefinition",
         "policies",
         "isDefaultVersion",
         "transport",
-        "endpointConfig",
         "visibility"
       ],
       "properties": {
@@ -2439,65 +3246,6 @@
           "type": "string",
           "example": "admin"
         },
-        "apiDefinition": {
-          "description": "Swagger definition of the API which contains details about URI templates and scopes\n",
-          "type": "string",
-          "example": {
-            "paths": {
-              "/substract": {
-                "get": {
-                  "x-auth-type": "Application & Application User",
-                  "x-throttling-policy": "Unlimited",
-                  "parameters": [
-                    {
-                      "name": "x",
-                      "required": true,
-                      "type": "string",
-                      "in": "query"
-                    },
-                    {
-                      "name": "y",
-                      "required": true,
-                      "type": "string",
-                      "in": "query"
-                    }
-                  ],
-                  "responses": {
-                    "200": {}
-                  }
-                }
-              },
-              "/add": {
-                "get": {
-                  "x-auth-type": "Application & Application User",
-                  "x-throttling-policy": "Unlimited",
-                  "parameters": [
-                    {
-                      "name": "x",
-                      "required": true,
-                      "type": "string",
-                      "in": "query"
-                    },
-                    {
-                      "name": "y",
-                      "required": true,
-                      "type": "string",
-                      "in": "query"
-                    }
-                  ],
-                  "responses": {
-                    "200": {}
-                  }
-                }
-              }
-            },
-            "swagger": "2.0",
-            "info": {
-              "title": "CalculatorAPI",
-              "version": "1.0.0"
-            }
-          }
-        },
         "wsdlUri": {
           "description": "WSDL URL if the API is based on a WSDL endpoint\n",
           "type": "string",
@@ -2506,6 +3254,22 @@
         "lifeCycleStatus": {
           "type": "string",
           "example": "CREATED"
+        },
+        "workflowStatus": {
+          "type": "string",
+          "example": "APPROVED"
+        },
+        "createdTime": {
+          "type": "string",
+          "example": "2017-02-20T13:57:16.229Z"
+        },
+        "apiPolicy": {
+          "type": "string",
+          "example": "UNLIMITED"
+        },
+        "lastUpdatedTime": {
+          "type": "string",
+          "example": "2017-02-20T13:57:16.229Z"
         },
         "responseCaching": {
           "type": "string",
@@ -2544,6 +3308,16 @@
             "add"
           ]
         },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "example": [
+            "public",
+            "private"
+          ]
+        },
         "policies": {
           "type": "array",
           "items": {
@@ -2552,20 +3326,6 @@
           "example": [
             "Unlimited"
           ]
-        },
-        "maxTps": {
-          "properties": {
-            "production": {
-              "type": "integer",
-              "format": "int64",
-              "example": 1000
-            },
-            "sandbox": {
-              "type": "integer",
-              "format": "int64",
-              "example": 1000
-            }
-          }
         },
         "visibility": {
           "type": "string",
@@ -2584,36 +3344,27 @@
           },
           "example": []
         },
+        "permission": {
+          "type": "string",
+          "example": "[{\"groupId\" : 1000, \"permission\" : [\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]"
+        },
+        "userPermissionsForApi": {
+          "type": "array",
+          "description": "LoggedIn user permissions for the API\n",
+          "items": {
+            "type": "string"
+          },
+          "example": [
+            "READ",
+            "UPDATE"
+          ]
+        },
         "visibleTenants": {
           "type": "array",
           "items": {
             "type": "string"
           },
           "example": []
-        },
-        "endpointConfig": {
-          "type": "string",
-          "example": "{\"production_endpoints\":{\"url\":\"https://127.0.0.1:9443/am/sample/calculator/v1.0/api\",\"config\":null},\"implementation_status\":\"managed\",\"endpoint_type\":\"http\"}"
-        },
-        "endpointSecurity": {
-          "properties": {
-            "type": {
-              "type": "string",
-              "example": "basic",
-              "enum": [
-                "basic",
-                "digest"
-              ]
-            },
-            "username": {
-              "type": "string",
-              "example": "admin"
-            },
-            "password": {
-              "type": "string",
-              "example": "password"
-            }
-          }
         },
         "gatewayEnvironments": {
           "description": "Comma separated list of gateway environments.\n",
@@ -2677,6 +3428,75 @@
               }
             }
           }
+        },
+        "endpoint": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "key": {
+                "type": "string",
+                "example": "01234567-0123-0123-0123-012345678901"
+              },
+              "inline": {
+                "$ref": "#/definitions/EndPoint"
+              },
+              "type": {
+                "type": "string",
+                "example": "Production"
+              }
+            }
+          }
+        },
+        "securityScheme": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "operations": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "postapiresource"
+              },
+              "uritemplate": {
+                "type": "string",
+                "default": "/*"
+              },
+              "httpVerb": {
+                "type": "string",
+                "default": "GET"
+              },
+              "authType": {
+                "type": "string",
+                "default": "Any"
+              },
+              "policy": {
+                "type": "string",
+                "example": "Unlimited"
+              },
+              "endpoint": {
+                "type": "array",
+                "items": {
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "example": "01234567-0123-0123-0123-012345678901"
+                    },
+                    "inline": {
+                      "$ref": "#/definitions/EndPoint"
+                    },
+                    "type": {
+                      "type": "string",
+                      "example": "Production"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -2706,10 +3526,6 @@
         "description": {
           "type": "string",
           "example": "Sample calculator application"
-        },
-        "groupId": {
-          "type": "string",
-          "example": ""
         }
       }
     },
@@ -2786,6 +3602,10 @@
           "type": "string",
           "example": ""
         },
+        "fileName": {
+          "type": "string",
+          "example": ""
+        },
         "inlineContent": {
           "type": "string",
           "example": "This is doc content. This can have many lines."
@@ -2793,6 +3613,10 @@
         "otherTypeName": {
           "type": "string",
           "example": ""
+        },
+        "permission": {
+          "type": "string",
+          "example": "[{\"groupId\" : 1000, \"permission\" : [\"READ\",\"UPDATE\"]},{\"groupId\" : 1001, \"permission\" : [\"READ\",\"UPDATE\"]}]"
         },
         "visibility": {
           "type": "string",
@@ -2802,6 +3626,20 @@
             "API_LEVEL"
           ],
           "example": "API_LEVEL"
+        },
+        "createdTime": {
+          "type": "string",
+          "example": "2017-02-20T13:57:16.229Z"
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "lastUpdatedTime": {
+          "type": "string",
+          "example": "2017-02-20T13:57:16.229Z"
+        },
+        "lastUpdatedBy": {
+          "type": "string"
         }
       }
     },
@@ -2897,32 +3735,6 @@
         }
       }
     },
-    "TierPermission": {
-      "title": "tierPermission",
-      "required": [
-        "permissionType",
-        "roles"
-      ],
-      "properties": {
-        "permissionType": {
-          "type": "string",
-          "enum": [
-            "allow",
-            "deny"
-          ],
-          "example": "deny"
-        },
-        "roles": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "example": [
-            "Internal/everyone"
-          ]
-        }
-      }
-    },
     "SubscriptionList": {
       "title": "Subscription List",
       "properties": {
@@ -2934,12 +3746,12 @@
         "next": {
           "type": "string",
           "description": "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n",
-          "example": "/subscriptions?limit=1&offset=2&apiId=01234567-0123-0123-0123-012345678901&groupId="
+          "example": "/subscriptions?limit=1&offset=2&apiId=01234567-0123-0123-0123-012345678901"
         },
         "previous": {
           "type": "string",
           "description": "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n",
-          "example": "/subscriptions?limit=1&offset=0&apiId=01234567-0123-0123-0123-012345678901&groupId="
+          "example": "/subscriptions?limit=1&offset=0&apiId=01234567-0123-0123-0123-012345678901"
         },
         "list": {
           "type": "array",
@@ -2952,37 +3764,34 @@
     "Subscription": {
       "title": "Subscription",
       "required": [
-        "applicationId",
-        "apiIdentifier",
-        "policy"
+        "subscriptionId",
+        "applicationInfo",
+        "policy",
+        "subscriptionStatus"
       ],
       "properties": {
         "subscriptionId": {
           "type": "string",
           "example": "01234567-0123-0123-0123-012345678901"
         },
-        "applicationId": {
-          "type": "string",
-          "example": "01234567-0123-0123-0123-012345678901"
-        },
-        "apiIdentifier": {
-          "type": "string",
-          "example": "01234567-0123-0123-0123-012345678901"
+        "applicationInfo": {
+          "$ref": "#/definitions/Application"
         },
         "policy": {
           "type": "string",
           "example": "Unlimited"
         },
-        "lifeCycleStatus": {
+        "subscriptionStatus": {
           "type": "string",
           "enum": [
             "BLOCKED",
             "PROD_ONLY_BLOCKED",
-            "UNBLOCKED",
+            "SANDBOX_ONLY_BLOCKED",
+            "ACTIVE",
             "ON_HOLD",
             "REJECTED"
           ],
-          "example": "UNBLOCKED"
+          "example": "BLOCKED"
         }
       }
     },
@@ -3054,68 +3863,6 @@
         }
       }
     },
-    "Environment": {
-      "title": "Environment",
-      "required": [
-        "name",
-        "type",
-        "serverUrl",
-        "endpoints",
-        "showInApiConsole"
-      ],
-      "properties": {
-        "name": {
-          "type": "string",
-          "example": "Production and Sandbox"
-        },
-        "type": {
-          "type": "string",
-          "example": "hybrid"
-        },
-        "serverUrl": {
-          "type": "string",
-          "example": "https://localhost:9443//services/"
-        },
-        "showInApiConsole": {
-          "type": "boolean",
-          "example": true
-        },
-        "endpoints": {
-          "$ref": "#/definitions/EnvironmentEndpoints"
-        }
-      }
-    },
-    "EnvironmentList": {
-      "title": "Environment List",
-      "properties": {
-        "count": {
-          "type": "integer",
-          "description": "Number of Environments returned.\n",
-          "example": 1
-        },
-        "list": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Environment"
-          }
-        }
-      }
-    },
-    "EnvironmentEndpoints": {
-      "title": "Environment Endpoints",
-      "properties": {
-        "http": {
-          "type": "string",
-          "description": "HTTP environment URL",
-          "example": "http://localhost:8280"
-        },
-        "https": {
-          "type": "string",
-          "description": "HTTPS environment URL",
-          "example": "https://localhost:8244"
-        }
-      }
-    },
     "FileInfo": {
       "title": "File Information including meta data",
       "properties": {
@@ -3128,6 +3875,358 @@
           "type": "string",
           "description": "media-type of the file",
           "example": "image/jpeg"
+        }
+      }
+    },
+    "EndPoint": {
+      "title": "Endpoints",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "UUID of the Endpoint entry\n",
+          "example": "01234567-0123-0123-0123-012345678901"
+        },
+        "name": {
+          "type": "string",
+          "description": "name of the Endpoint entry\n",
+          "example": "Endpoint 1"
+        },
+        "endpointConfig": {
+          "type": "string",
+          "description": "Endpoint Configuration",
+          "example": "{url: http://localhost:8280, timeout: 1000}"
+        },
+        "endpointSecurity": {
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "example": false
+            },
+            "type": {
+              "type": "string",
+              "example": "basic"
+            },
+            "username": {
+              "type": "string",
+              "example": "basic"
+            },
+            "password": {
+              "type": "string",
+              "example": "basic"
+            }
+          }
+        },
+        "maxTps": {
+          "type": "integer",
+          "format": "int64",
+          "description": "Endpoint max tps",
+          "example": 1000
+        },
+        "type": {
+          "type": "string",
+          "example": "http"
+        }
+      }
+    },
+    "EndPointList": {
+      "title": "EndPoint List",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "description": "Number of EndPoints returned.\n",
+          "example": 1
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/EndPoint"
+          }
+        }
+      }
+    },
+    "Label": {
+      "title": "Label",
+      "required": [
+        "labelId",
+        "name",
+        "access_urls"
+      ],
+      "properties": {
+        "labelId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "access_urls": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "LabelList": {
+      "title": "Label List",
+      "properties": {
+        "count": {
+          "type": "integer",
+          "description": "Number of Labels returned.\n"
+        },
+        "next": {
+          "type": "string",
+          "description": "Link to the next subset of resources qualified.\nEmpty if no more resources are to be returned.\n"
+        },
+        "previous": {
+          "type": "string",
+          "description": "Link to the previous subset of resources qualified.\nEmpty if current subset is the first subset returned.\n"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Label"
+          }
+        }
+      }
+    },
+    "LifecycleState": {
+      "title": "Lifecycle State",
+      "properties": {
+        "lcName": {
+          "type": "string",
+          "example": "API Lifecycle"
+        },
+        "state": {
+          "type": "string",
+          "example": "Created"
+        },
+        "lifecyelId": {
+          "type": "string",
+          "example": "01234567-0123-0123-0123-012345678901"
+        },
+        "checkItemBeanList": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "permissionBeans": {
+                "type": "array",
+                "items": {
+                  "properties": {
+                    "roles": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "forTarget": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "name": {
+                "type": "string",
+                "example": "Deprecate old versions after publish the API"
+              },
+              "validationBeans": {
+                "type": "array",
+                "items": {
+                  "properties": {
+                    "classObject": {
+                      "type": "object"
+                    },
+                    "targetName": {
+                      "type": "string",
+                      "example": "Published"
+                    },
+                    "customMessage": {
+                      "type": "string",
+                      "example": "Validation successful"
+                    }
+                  }
+                }
+              },
+              "targets": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "value": {
+                "type": "boolean",
+                "example": false
+              }
+            }
+          }
+        },
+        "inputBeanList": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "name": {
+                "type": "string",
+                "example": "Gateways to be published"
+              },
+              "isRequired": {
+                "type": "boolean",
+                "example": true
+              },
+              "label": {
+                "type": "string"
+              },
+              "placeHolder": {
+                "type": "string"
+              },
+              "tooltip": {
+                "type": "string"
+              },
+              "regex": {
+                "type": "string"
+              },
+              "values": {
+                "type": "string"
+              },
+              "forTarget": {
+                "type": "string",
+                "example": "Created"
+              }
+            }
+          }
+        },
+        "customCodeBeanList": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "classObject": {
+                "type": "object"
+              },
+              "targetName": {
+                "type": "string",
+                "example": "Published"
+              },
+              "customMessage": {
+                "type": "string",
+                "example": "Validation successful"
+              }
+            }
+          }
+        },
+        "availableTransitionBeanList": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "event": {
+                "type": "string",
+                "example": "Promote"
+              },
+              "targetState": {
+                "type": "string",
+                "example": "Created"
+              }
+            }
+          }
+        },
+        "permissionBeanList": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "roles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "forTarget": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "WorkflowResponse": {
+      "title": "workflow Response",
+      "required": [
+        "workflowStatus"
+      ],
+      "properties": {
+        "workflowStatus": {
+          "description": "This attribute declares whether this workflow task is approved or rejected.\n",
+          "type": "string",
+          "enum": [
+            "CREATED",
+            "APPROVED",
+            "REJECTED",
+            "REGISTERED"
+          ],
+          "example": "APPROVED"
+        },
+        "jsonPayload": {
+          "description": "Attributes that returned after the workflow execution\n",
+          "type": "string"
+        }
+      }
+    },
+    "APIDefinitionValidationResponse": {
+      "title": "API definition validation Response",
+      "required": [
+        "isValid"
+      ],
+      "properties": {
+        "isValid": {
+          "description": "This attribute declares whether this definition is valid or not.\n",
+          "type": "boolean",
+          "example": true
+        },
+        "definitionType": {
+          "description": "This attribute declares whether this definition is a swagger or WSDL\n",
+          "type": "string",
+          "enum": [
+            "SWAGGER",
+            "WSDL"
+          ],
+          "example": "WSDL"
+        },
+        "wsdlInfo": {
+          "description": "Summary of the WSDL including the basic information",
+          "properties": {
+            "version": {
+              "description": "WSDL version\n",
+              "type": "string",
+              "example": "1.1"
+            },
+            "endpoints": {
+              "description": "A list of endpoints the service exposes\n",
+              "type": "array",
+              "items": {
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Name of the endpoint",
+                    "example": "StockQuoteSoap"
+                  },
+                  "location": {
+                    "type": "string",
+                    "description": "Endpoint URL",
+                    "example": "http://www.webservicex.net/stockquote.asmx"
+                  }
+                }
+              }
+            },
+            "bindingInfo": {
+              "description": "WSDL binding related information\n",
+              "properties": {
+                "hasHttpBinding": {
+                  "description": "Indicates whether the WSDL contains HTTP Bindings",
+                  "type": "boolean"
+                },
+                "hasSoapBinding": {
+                  "description": "Indicates whether the WSDL contains SOAP Bindings",
+                  "type": "boolean"
+                }
+              }
+            }
+          }
         }
       }
     }

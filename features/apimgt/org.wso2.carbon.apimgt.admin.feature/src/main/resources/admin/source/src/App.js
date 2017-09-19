@@ -25,11 +25,8 @@ import AuthManager from './app/data/AuthManager'
 import qs from 'qs'
 import 'antd/dist/antd.css'
 import './App.css'
-import AdvancedThrottling from './app/components/ThrottlingPolicies/AdvancedThrottling';
-import ApplicationTiers from './app/components/ThrottlingPolicies/ApplicationTiers'
-import SubscriptionTiers from "./app/components/ThrottlingPolicies/SubscriptionTiers";
-import CustomRules from "./app/components/ThrottlingPolicies/CustomRules";
-import BlackList from "./app/components/ThrottlingPolicies/BlackList";
+
+import ThrottlingPolicies from './app/components/ThrottlingPolicies'
 /**
  * Render protected application paths
  */
@@ -45,12 +42,8 @@ class Protected extends Component {
             return (
                 <Base>
                     <Switch>
-                        <Redirect exact from="/" to="/advanced_throttling"/>
-                        <Route path={"/advanced_throttling"} render={props => (<AdvancedThrottling/>)}/>
-                        <Route path={"/application_tiers"} render={props => (<ApplicationTiers/>)}/>
-                        <Route path={"/subscription_tiers"} render={props => (<SubscriptionTiers/>)}/>
-                        <Route path={"/custom_rules"} render={props => (<CustomRules/>)}/>
-                        <Route path={"/black_list"} render={props => (<BlackList/>)}/>
+                        <Redirect exact from="/" to="/policies"/>
+                        <Route path={"/policies"} component={ThrottlingPolicies} />
                         <Route path={"/tasks"} component={Tasks} />
                         <Route component={PageNotFound}/>
                     </Switch>

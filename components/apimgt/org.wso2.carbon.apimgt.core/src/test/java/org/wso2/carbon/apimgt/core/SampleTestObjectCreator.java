@@ -605,7 +605,7 @@ public class SampleTestObjectCreator {
         application.setStatus(APIMgtConstants.ApplicationStatus.APPLICATION_CREATED);
         application.setPolicy(fiftyPerMinApplicationPolicy);
         application.setCreatedTime(LocalDateTime.now());
-        application.setUpdatedUser(ADMIN);
+        application.setUpdatedUser(owner);
         application.setUpdatedTime(LocalDateTime.now());
         return application;
     }

@@ -109,6 +109,15 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
             pathTemplate = resourceMethod.getAnnotation(javax.ws.rs.Path.class).value();
         }
         String nameSpace = getNamespaceFromBasePath(basepath);
+        if (basepath.contains(APIMgtConstants.APPType.PUBLISHER)) {
+            nameSpace = APIMgtConstants.NAMESPACE_PUBLISHER_API;
+        } else if (basepath.contains(APIMgtConstants.APPType.STORE)) {
+            nameSpace = APIMgtConstants.NAMESPACE_STORE_API;
+        } else if (basepath.contains(APIMgtConstants.APPType.ADMIN)) {
+            nameSpace = APIMgtConstants.NAMESPACE_ADMIN_API;
+        } else if (basepath.contains(APIMgtConstants.APPType.ANALYTICS)) {
+            nameSpace = APIMgtConstants.NAMESPACE_ANALYTICS_API;
+        }
 
         //if namespace is not available in local cache add it.
         if (nameSpace != null && !localConfigMap.containsKey(nameSpace)) {
@@ -362,8 +371,12 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
             }
             if (securityHeaderScopes == null || StringUtils.isEmpty(securityHeaderScopes)) {
                 //security header is not found in deployment.yaml.hence, reading from swagger
-                securityHeaderScopes = swagger.getVendorExtensions().
-                        get(APIMgtConstants.SWAGGER_X_WSO2_SECURITY).toString();
+                /*securityHeaderScopes = swagger.getVendorExtensions().
+                        get(APIMgtConstants.SWAGGER_X_WSO2_SECURITY).toString();*/
+                securityHeaderScopes = new Gson()
+                        .toJson(swagger
+                                .getVendorExtensions()
+                                .get(APIMgtConstants.SWAGGER_X_WSO2_SECURITY));
                 localConfigMap.get(nameSpace).put(APIMgtConstants.SWAGGER_X_WSO2_SCOPES, securityHeaderScopes);
             }
             try {

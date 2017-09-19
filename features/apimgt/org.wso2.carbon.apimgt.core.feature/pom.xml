@@ -145,6 +145,14 @@
             <groupId>org.apache.ws.commons.schema.wso2</groupId>
             <artifactId>XmlSchema</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.swagger</groupId>
+            <artifactId>swagger-codegen</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-models</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -328,6 +336,10 @@
                                     <version>${swagger.parser.version}</version>
                                 </bundle>
                                 <bundle>
+                                    <symbolicName>swagger-codegen</symbolicName>
+                                    <version>${swagger.codegen.version}</version>
+                                </bundle>
+                                <bundle>
                                     <symbolicName>com.google.gson</symbolicName>
                                     <version>${google.code.gson.version}</version>
                                 </bundle>
@@ -382,6 +394,10 @@
                                 <bundle>
                                     <symbolicName>XmlSchema</symbolicName>
                                     <version>${xmlschema.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>io.swagger.models</symbolicName>
+                                    <version>${io.swagger.models.version}</version>
                                 </bundle>
                             </bundles>
                         </configuration>
