@@ -18,20 +18,33 @@
 
 import React, {Component} from 'react'
 import BasicTabs from './NavTab.js'
+import Overview from './Overview.js'
+import {Route, Switch, Redirect} from 'react-router-dom'
 import API from '../../../data/api.js'
+import {PageNotFound} from '../../Base/Errors/index'
+import AppBar from 'material-ui/AppBar';
+import Tabs, { Tab } from 'material-ui/Tabs';
+import PhoneIcon from 'material-ui-icons/Phone';
+import FavoriteIcon from 'material-ui-icons/Favorite';
+import PersonPinIcon from 'material-ui-icons/PersonPin';
+import Loading from '../../Base/Loading/Loading'
 
 export default class Details extends Component {
 
     constructor(props){
         super(props);
+        this.state = {
+	application: null , 
+            value: 'overview',
+        };
     }
 
     componentDidMount() {
-        const application = new API();
-        let promised_application = application.getApplication(this.applicationId);
-        promised_api.then(
+        const client = new API();
+        let promised_application = client.getApplication(this.props.match.params.application_uuid);
+        promised_application.then(
             response => {
-                this.setState({api: response.obj});
+                this.setState({application: response.obj});
             }
         ).catch(
             error => {
@@ -46,21 +59,41 @@ export default class Details extends Component {
         );
     }
 
+    handleChange = (event, value) => {
+        this.setState({ value });
+    };
 
-
-    render() {
+    render() { 
+	let redirect_url = "/applications/" + this.props.match.params.application_uuid + "/overview";
         return (
             <div>
                 <div>
-                    <h1>Single App Page</h1>
+                    <h1>Application Details</h1>
                 </div>
 
-                <div>
-                    <BasicTabs/>
-                </div>
+                <div className="tab-content">
+                <AppBar position="static" color="default" style={{margin:"10px 0px 10px 35px"}}>
+                    <Tabs
+                        value={this.state.value}
+                        onChange={this.handleChange}
+                        fullWidth
+                        indicatorColor="accent"
+                        textColor="accent"
+                    >
+                        <Tab value="overview" icon={<PhoneIcon />} label="Overview" />
+                        <Tab value="productionkeys" icon={<PhoneIcon />} label="Production Keys" />
+                        <Tab value="sandBoxkeys" icon={<PhoneIcon />} label="SandBox Keys" />
+                    </Tabs>
+                </AppBar>
+                <Switch>
+                    <Redirect exact from="/applications/:applicationId" to={redirect_url}/>
+                    <Route path="/applications/:applicationId/overview" component={Overview}/>
+                    <Route path="/applications/:applicationId/productionkeys" component={Overview}/>
+                    <Route path="/applications/:applicationId/sandBoxkeys" component={Overview}/>
+                    <Route component={PageNotFound}/>
+                </Switch>
             </div>
-
-
+            </div>
         );
     }
 
