@@ -26,6 +26,7 @@ import AppBar from 'material-ui/AppBar';
 import Tabs, { Tab } from 'material-ui/Tabs';
 import PhoneIcon from 'material-ui-icons/Phone';
 import FavoriteIcon from 'material-ui-icons/Favorite';
+import BasicInfo from './BasicInfo'
 import PersonPinIcon from 'material-ui-icons/PersonPin';
 import Loading from '../../Base/Loading/Loading'
 
@@ -61,17 +62,15 @@ export default class Details extends Component {
 
     handleChange = (event, value) => {
         this.setState({ value });
+        this.props.history.push({pathname: "/applications/" + this.props.match.params.application_uuid + "/" + value});
     };
 
     render() { 
 	let redirect_url = "/applications/" + this.props.match.params.application_uuid + "/overview";
         return (
             <div>
-                <div>
-                    <h1>Application Details</h1>
-                </div>
-
                 <div className="tab-content">
+                <BasicInfo uuid={this.props.match.params.application_uuid} />
                 <AppBar position="static" color="default" style={{margin:"10px 0px 10px 35px"}}>
                     <Tabs
                         value={this.state.value}
@@ -83,6 +82,7 @@ export default class Details extends Component {
                         <Tab value="overview" icon={<PhoneIcon />} label="Overview" />
                         <Tab value="productionkeys" icon={<PhoneIcon />} label="Production Keys" />
                         <Tab value="sandBoxkeys" icon={<PhoneIcon />} label="SandBox Keys" />
+                        <Tab value="subscriptions" icon={<PhoneIcon />} label="Subscriptions" />
                     </Tabs>
                 </AppBar>
                 <Switch>
@@ -90,6 +90,7 @@ export default class Details extends Component {
                     <Route path="/applications/:applicationId/overview" component={Overview}/>
                     <Route path="/applications/:applicationId/productionkeys" component={Overview}/>
                     <Route path="/applications/:applicationId/sandBoxkeys" component={Overview}/>
+                    <Route path="/applications/:applicationId/subscriptions" component={Overview}/>
                     <Route component={PageNotFound}/>
                 </Switch>
             </div>

@@ -73,16 +73,7 @@ class Overview extends Component {
             return <Loading/>
         }
         return (
-
                 <Grid container style={{paddingLeft:"40px"}}>
-                    <Grid item xs={12} sm={6} md={9} lg={9} xl={10} >
-                        <Paper style={{display:"flex"}}>
-                            <Typography type="display2" gutterBottom className="page-title">
-                                {application.name} - <span>Overview</span>
-                            </Typography>
-                         
-                        </Paper>
-                    </Grid>
                     <Grid item xs={12} sm={6} md={9} lg={9} xl={10} >
                         <Paper>
                             <Table>
