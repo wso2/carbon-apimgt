@@ -43,7 +43,4 @@ public abstract class EndpointsApiService {
  ,String ifNoneMatch
  ,String ifModifiedSince
  , Request request) throws NotFoundException;
-    public abstract Response endpointsServicesDiscoverGet(String ifNoneMatch
- ,String ifModifiedSince
- , Request request) throws NotFoundException;
 }

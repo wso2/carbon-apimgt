@@ -474,13 +474,13 @@ class API {
     }
 
     /**
-     * Get All Discovered Endpoints.
-     * @returns {Promise} Promised list of discovered endpoints
+     * Get All Discovered Services.
+     * @returns {Promise} Promised list of discovered services
      */
-    discoverEndpoints() {
+    discoverServices() {
         return this.client.then(
             (client) => {
-                return client.apis["Endpoint (Collection)"].get_endpoints_services_discover(
+                return client.apis["External Resources (Collection)"].get_external_resources_services(
                     {}, this._requestMetaData());
             }
         );
