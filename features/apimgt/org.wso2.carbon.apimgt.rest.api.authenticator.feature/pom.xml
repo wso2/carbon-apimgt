@@ -44,7 +44,7 @@
             <artifactId>jackson-dataformat-yaml</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.org.yaml</groupId>
+            <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
         </dependency>
         <dependency>
@@ -93,8 +93,8 @@
                                     <version>${com.fasterxml.jackson.dataformat.version}</version>
                                 </bundle>
                                 <bundle>
-                                    <symbolicName>snakeyaml</symbolicName>
-                                    <version>${snakeyaml.version}</version>
+                                    <symbolicName>org.yaml.snakeyaml</symbolicName>
+                                    <version>${snakeyaml.version}.0</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>com.google.guava</symbolicName>

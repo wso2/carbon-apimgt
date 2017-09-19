@@ -595,7 +595,7 @@
                 <version>${com.fasterxml.jackson.dataformat.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.orbit.org.yaml</groupId>
+                <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
                 <version>${snakeyaml.version}</version>
             </dependency>
@@ -603,6 +603,11 @@
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-models</artifactId>
                 <version>${io.swagger.models.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>${joda.time.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -931,7 +936,7 @@
         <javax.ws.rs-api.version>2.0</javax.ws.rs-api.version>
         <javax.ws.rs-api.import.version>2.0</javax.ws.rs-api.import.version>
 
-        <snakeyaml.version>1.18.0.wso2v1</snakeyaml.version>
+        <snakeyaml.version>1.18</snakeyaml.version>
         <snakeyaml.version.range>[1.16, 2.0.0)</snakeyaml.version.range>
         <carbon.uuf.version>1.0.0-m14</carbon.uuf.version>
         <carbon-uuf-maven-plugin.version>1.0.0-m13</carbon-uuf-maven-plugin.version>
@@ -983,5 +988,6 @@
         <wso2.carbon.config.version>2.0.0</wso2.carbon.config.version>
         <com.fasterxml.jackson.dataformat.version>2.9.1</com.fasterxml.jackson.dataformat.version>
         <io.swagger.models.version>1.5.16</io.swagger.models.version>
+        <joda.time.version>2.9.9</joda.time.version>
     </properties>
 </project>
