@@ -346,7 +346,6 @@ class API {
         var promise_create_subscription = this.client.then(
             (client) => {
                 let subscriptionData = {apiIdentifier:apiId, applicationId:applicationId, policy:policy};
-                debugger;
                 let payload = {body: subscriptionData};
                 return client.apis["Subscription (individual)"].post_subscriptions(
                     payload, {'Content-Type':'application/json'}
