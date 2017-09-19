@@ -294,23 +294,27 @@ class API {
     }
 
     /**
-     * Get keys of an application
-     * @param applicationId id of the application that needs to get the keys
-     * @param callback {function} Function which needs to be called upon success
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     * Create a subscription
+     * @param apiId id of the API that needs to be subscribed
+     * @param applicationId id of the application that needs to be subscribed
+     * @param policy throttle policy applicable for the subscription
+     * @param callback callback url
      */
     subscribe(apiId, applicationId, policy, callback = null) {
-        debugger;
-        var promise_get = this.client.then(
+        var promise_create_subscription = this.client.then(
             (client) => {
+                let subscriptionData = {apiIdentifier:apiId, applicationId:applicationId, policy:policy};
+                debugger;
+                let payload = {body: subscriptionData};
                 return client.apis["Subscription (individual)"].post_subscriptions(
-                    {apiId:apiId, applicationId:applicationId, policy:policy}, this._requestMetaData());
+                    payload, {'Content-Type':'application/json'}
+                );
             }
         );
         if (callback) {
-            return promise_get.then(callback);
+            return promise_create_subscription.then(callback);
         } else {
-            return promise_get;
+            return promise_create_subscription;
         }
     }
 

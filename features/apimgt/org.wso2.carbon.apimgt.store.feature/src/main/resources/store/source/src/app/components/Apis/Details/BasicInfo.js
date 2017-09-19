@@ -30,6 +30,7 @@ import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
 import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
+import { MenuItem } from 'material-ui/Menu';
 import { Delete, Edit, CreateNewFolder, Description  }from 'material-ui-icons';
 import Table, { TableBody, TableCell, TableRow } from 'material-ui/Table';
 import Select from 'react-select';
@@ -47,7 +48,12 @@ class BasicInfo extends Component {
             dropDownPolicies: null,
             notFound: false,
             matDropVisible: false,
-            matDropValue: 'one'
+            matDropValue: 'one',
+            subscribedApplicationIds: [],
+            options: [],
+            tiers: [],
+            applicationId: null,
+            policyName: null
         };
         this.api_uuid = this.props.uuid;
         this.logChange = this.logChange.bind(this);
@@ -58,8 +64,15 @@ class BasicInfo extends Component {
         let promised_api = api.getAPIById(this.api_uuid);
         promised_api.then(
             response => {
-                console.info(response.obj)
+                console.info(response.obj);
                 this.setState({api: response.obj});
+                let apiTiers = response.obj.policies;
+                let tiers = [];
+                for (let i = 0; i < apiTiers.length; i++) {
+                    let tierName = apiTiers[i];
+                    tiers.push({value: tierName, label: tierName});
+                }
+                this.setState({tiers: tiers});
             }
         ).catch(
             error => {
@@ -73,10 +86,40 @@ class BasicInfo extends Component {
             }
         );
 
+        let existing_subscriptions = api.getSubscriptions(this.api_uuid, null);
+        existing_subscriptions.then((response) => {
+            let subscribedApplications = [];
+            //get the application IDs of existing subscriptions
+            response.body.list.map(element => subscribedApplications.push(element.applicationId));
+            this.setState({subscribedApplicationIds: subscribedApplications});
+        }).catch(
+            error => {
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
+            }
+        );
+
         let promised_applications = api.getAllApplications();
         promised_applications.then(
-            response => {
-                this.setState({applications: response.obj.list});
+            (response) => {
+                let applicationResponseObj = response.body;
+                let applications = [];
+                for (let i = 0; i < applicationResponseObj.list.length; i++) {
+                    let applicationId = applicationResponseObj.list[i].applicationId;
+                    let applicationName = applicationResponseObj.list[i].name;
+                    //include the application only if it does not has an existing subscriptions
+                    if (this.state.subscribedApplicationIds.includes(applicationId)) {
+                        continue;
+                    } else {
+                        applications.push({value: applicationId, label: applicationName});
+                    }
+                }
+                this.setState({options: applications});
             }
         ).catch(
             error => {
@@ -135,6 +178,26 @@ class BasicInfo extends Component {
         );
     }
 
+    handleChange = name => event => {
+        this.setState({[name]: event.value});
+    };
+
+    createSubscription = (e) => {
+        e.preventDefault();
+        let apiId = this.api_uuid;
+        let applicationId = this.state.applicationId;
+        let policy = this.state.policyName;
+        let api = new Api();
+        let promised_subscribe = api.subscribe(apiId, applicationId, policy);
+        promised_subscribe.then(response => {
+            console.log("Subscription created successfully with ID : " + response.body.subscriptionId);
+        }).catch(
+            function (error_response) {
+                console.log("Error while creating the subscription.");
+            }
+        );
+    };
+
     populateApplicationDropdown(){
         return this.dropDownApplications;
     }
@@ -178,11 +241,6 @@ class BasicInfo extends Component {
         }
 
         const api = this.state.api;
-        const dropDownOptions = ["option1","option2","option3"];
-        let options = [
-            { value: 'one', label: 'One' },
-            { value: 'two', label: 'Two' }
-        ];
 
 
 
@@ -269,23 +327,27 @@ class BasicInfo extends Component {
                         <Typography type="subheading" gutterBottom>
                             Applications
                         </Typography>
+                        {this.state.options &&
                         <Select
                             name="form-field-name"
                             value={this.state.matDropValue}
-                            options={options}
-                            onChange={this.logChange}
+                            options={this.state.options}
+                            onChange={this.handleChange('applicationId')}
                         />
+                        }
                         <Typography type="subheading" gutterBottom>
                             Tiers
                         </Typography>
+                        {this.state.tiers &&
                         <Select
                             name="form-field-name"
                             value={this.state.matDropValue}
-                            options={options}
-                            onChange={this.logChange}
+                            options={this.state.tiers}
+                            onChange={this.handleChange('policyName')}
                         />
+                        }
                         <br />
-                        <Button raised color="primary" style={{paddingTop: '20px;'}}>
+                        <Button onClick={this.createSubscription} raised color="primary" style={{paddingTop: '20px;'}}>
                             <Subscriptions style={{paddingRight: '10px;'}} /> Subscribe
                         </Button>
 
