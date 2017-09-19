@@ -17,9 +17,8 @@
 */
 package org.wso2.carbon.apimgt.core.models;
 
-import org.wso2.carbon.kernel.annotations.Configuration;
-import org.wso2.carbon.kernel.annotations.Element;
-
+import org.wso2.carbon.config.annotation.Configuration;
+import org.wso2.carbon.config.annotation.Element;
 /**
  * WorkflowConfigProperties is used to map the properties related to a specific workflow executor configuration
  */

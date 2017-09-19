@@ -186,7 +186,9 @@
             javax.ws.rs.*; version="${javax.ws.rs.import.version.range}",
             com.google.gson.*; version="${google.code.gson.import.version.range}",
             org.wso2.carbon.messaging.*;version="${carbon.messaging.package.import.version.range}",
-            org.wso2.carbon.kernel.*;version="${carbon.kernel.package.import.version.range}"
+            org.wso2.carbon.kernel.*;version="${carbon.kernel.package.import.version.range}",
+            org.wso2.carbon.config.*;version="${carbon.config.package.import.version.range}",
+            org.wso2.carbon.utils.*;version="${carbon.utils.package.import.version.range}"
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.rest.api.authenticator.internal,

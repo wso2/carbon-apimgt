@@ -224,6 +224,10 @@
             <artifactId>powermock-module-junit4</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.config</groupId>
+            <artifactId>org.wso2.carbon.config</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -867,6 +871,8 @@
             javax.jms.*,;version="${geronimo-jms.import.version.range}",
             javax.ws.rs.*;version="${javax.ws.rs-api.import.version}",
             org.apache.activemq.*;resolution:=optional,
+            org.wso2.carbon.config.*;version="${carbon.config.package.import.version.range}",
+            org.wso2.carbon.utils.*;version="${carbon.utils.package.import.version.range}",
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.core.internal,

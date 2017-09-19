@@ -39,8 +39,8 @@ import org.wso2.carbon.apimgt.core.impl.BrokerImpl;
 import org.wso2.carbon.apimgt.core.util.BrokerUtil;
 import org.wso2.carbon.apimgt.core.util.ThrottlerUtil;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExtensionsConfigBuilder;
+import org.wso2.carbon.config.provider.ConfigProvider;
 import org.wso2.carbon.datasource.core.api.DataSourceService;
-import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
 
 import javax.naming.Context;

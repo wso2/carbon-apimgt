@@ -20,8 +20,8 @@ package org.wso2.carbon.apimgt.core.workflow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.models.WorkflowConfig;
-import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
-import org.wso2.carbon.kernel.configprovider.ConfigProvider;
+import org.wso2.carbon.config.ConfigurationException;
+import org.wso2.carbon.config.provider.ConfigProvider;
 
 /**
  * This builder can be used to build {@link WorkflowConfig} object based on the workflow extension configuration file
@@ -42,7 +42,7 @@ public class WorkflowExtensionsConfigBuilder {
 
         try {
             workflowConfig = configProvider.getConfigurationObject(WorkflowConfig.class);
-        } catch (CarbonConfigurationException e) {
+        } catch (ConfigurationException e) {
             logger.error("Error while loading the configuration for worlflow ", e);
             //build default executors
             workflowConfig = new WorkflowConfig();
