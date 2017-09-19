@@ -127,7 +127,9 @@ export default class EndpointsListing extends Component {
                         <Button shape="circle" icon="plus"/>
                     </Dropdown>
                 </div>
-                <h3>Global Endpoints</h3>
+                <span style={{display:"block", "margin-top": "10px"}}>
+                <h3>&nbsp;Global Endpoints</h3>
+                </span>
                 <Table rowSelection={rowSelection} loading={endpoints === null} columns={columns}
                        dataSource={endpoints}
                        rowKey="id"

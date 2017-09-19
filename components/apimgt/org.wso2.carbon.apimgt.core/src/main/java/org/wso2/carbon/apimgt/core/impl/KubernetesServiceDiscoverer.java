@@ -68,13 +68,11 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
             //this.client = new DefaultOpenShiftClient(buildConfig(serviceDiscoveryConfiurations.getMasterUrl()));
             this.client = new DefaultKubernetesClient(buildConfig(serviceDiscoveryConfiurations.getMasterUrl()));
         } catch (KubernetesClientException e) {
-            log.error("Authentication error or config for Kubernetes client not properly built");
-            log.error(e.getMessage());
+            log.error("Authentication error or config for Kubernetes client not properly built", e.getMessage());
         }
         servicesList = new ArrayList<>();
         kubeEndpointIndex = 0;
     }
-
 
     public static KubernetesServiceDiscoverer getInstance() {
         return new KubernetesServiceDiscoverer();
@@ -85,7 +83,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
         System.setProperty("kubernetes.auth.tryServiceAccount", "true");
         ConfigBuilder configBuilder = new ConfigBuilder().withMasterUrl(masterUrl)
                 .withCaCertFile(caCertLocation);
-        Config config;
+        Config config = null;
         if (insidePod) {
             log.debug("Using mounted service account token");
             try {
@@ -94,9 +92,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
                         "UTF-8");
                 config = configBuilder.withOauthToken(saMountedToken).build();
             } catch (IOException e) {
-                config = null;
-                log.error("Token file not found");
-                log.error(e.getMessage());
+                log.error("Token file not found", e.getMessage());
             }
         } else {
             log.debug("Using externally stored service account token");
@@ -104,6 +100,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
         }
         return config;
     }
+
 
     @Override
     public Boolean isEnabled() {
@@ -127,7 +124,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
     @Override
     public List<Endpoint> listServices(String namespace) throws MalformedURLException {
         if (client != null) {
-            log.debug("Looking for services in namespace " + namespace);
+            log.debug("Looking for services in namespace {}", namespace);
             try {
                 ServiceList services = client.services().inNamespace(namespace).list();
                 addServiceEndpointsToList(services, namespace);
@@ -142,7 +139,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
     public List<Endpoint> listServices(String namespace, HashMap<String, String> criteria)
             throws MalformedURLException {
         if (client != null) {
-            log.debug("Looking for services, with the specified labels, in namespace " + namespace);
+            log.debug("Looking for services, with the specified labels, in namespace {}", namespace);
             try {
                 ServiceList services = client.services().inNamespace(namespace).withLabels(criteria).list();
                 addServiceEndpointsToList(services, namespace);
@@ -168,6 +165,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
         return this.servicesList;
     }
 
+
     private void addServiceEndpointsToList(ServiceList services, String filterNamespace)
             throws MalformedURLException {
         List<Service> serviceItems = services.getItems();
@@ -179,10 +177,11 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
                 String protocol = servicePort.getName();
                 if (protocol != null && (protocol.equals("http") || protocol.equals("https"))) {
                     int port = servicePort.getPort();
+                    String namespace = service.getMetadata().getNamespace();
                     if (insidePod) {
                         //ClusterIP Service
                         URL clusterIPServiceURL = new URL(protocol, serviceSpec.getClusterIP(), port, "");
-                        Endpoint clusterIPEndpoint = constructDiscoveredEndpoint(serviceName, protocol,
+                        Endpoint clusterIPEndpoint = constructDiscoveredEndpoint(serviceName, namespace, protocol,
                                 "ClusterIP", clusterIPServiceURL);
                         if (clusterIPEndpoint != null) {
                             this.servicesList.add(clusterIPEndpoint);
@@ -194,7 +193,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
                                     .getAdditionalProperties().get("externalName");
                             URL externalNameServiceURL = new URL(protocol + "://" + externalName);
                             Endpoint externalNameEndpoint = constructDiscoveredEndpoint(serviceName,
-                                    protocol, "ExternalName", externalNameServiceURL);
+                                    namespace, protocol, "ExternalName", externalNameServiceURL);
                             if (externalNameEndpoint != null) {
                                 this.servicesList.add(externalNameEndpoint);
                             }
@@ -204,8 +203,8 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
                     if (!service.getSpec().getType().equals("ClusterIP") && endpointsAvailable) {
                         URL nodePortServiceURL = findNodePortServiceURLForAPort(filterNamespace,
                                 serviceName, protocol, servicePort.getNodePort());
-                        Endpoint nodePortEndpoint = constructDiscoveredEndpoint(serviceName, protocol,
-                                "NodePort", nodePortServiceURL);
+                        Endpoint nodePortEndpoint = constructDiscoveredEndpoint(serviceName, namespace,
+                                protocol, "NodePort", nodePortServiceURL);
                         if (nodePortEndpoint != null) {
                             this.servicesList.add(nodePortEndpoint);
                         }
@@ -218,29 +217,29 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
                             URL loadBalancerServiceURL = new URL(protocol,
                                     loadBalancerIngresses.get(0).getIp(), port, "");
                             Endpoint loadBalancerEndpoint = constructDiscoveredEndpoint(serviceName,
-                                    protocol, "LoadBalancer", loadBalancerServiceURL);
+                                    namespace, protocol, "LoadBalancer", loadBalancerServiceURL);
                             if (loadBalancerEndpoint != null) {
                                 this.servicesList.add(loadBalancerEndpoint);
                             }
-                        } else if (log.isDebugEnabled()) {
-                            log.debug("Service:{}  Namespace:{}  Port:{}/{} has no loadbalancer ingresses available.",
-                                    serviceName, service.getMetadata().getNamespace(),
-                                    port, protocol);
+                        } else {
+                            log.debug("Service:{}  Namespace:{}  Port:{}/{} " +
+                                            "has no loadbalancer ingresses available.",
+                                    serviceName, namespace, port, protocol);
                         }
                     }
                     //ExternalName - Special case. Not managed by Kubernetes but the cluster administrator.
                     List<String> specialExternalIps = service.getSpec().getExternalIPs();
                     if (!specialExternalIps.isEmpty()) {
                         URL externalIpServiceURL = new URL(protocol, specialExternalIps.get(0), port, "");
-                        Endpoint externalIpEndpoint = constructDiscoveredEndpoint(serviceName, protocol,
-                                "ExternalIP", externalIpServiceURL);
+                        Endpoint externalIpEndpoint = constructDiscoveredEndpoint(serviceName, namespace,
+                                protocol, "ExternalIP", externalIpServiceURL);
                         if (externalIpEndpoint != null) {
                             this.servicesList.add(externalIpEndpoint);
                         }
                     }
 
                 } else if (log.isDebugEnabled()) {
-                    log.debug("Service:{}  Port:{}/{}     Application level protocol not defined.",
+                    log.debug("Service:{} Namespace:{} Port:{}/{}  Application level protocol not defined.",
                             serviceName, service.getMetadata().getNamespace(),
                             servicePort.getPort(), protocol);
                 }
@@ -248,14 +247,16 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
         }
     }
 
-    private Endpoint constructDiscoveredEndpoint(String serviceName, String portType,
+    private Endpoint constructDiscoveredEndpoint(String serviceName, String namespace, String portType,
                                                  String urlType, URL url) {
         //todo check if empty
         if (url == null) {
             return null;
         }
-        String endpointConfig = String.format("{\"serviceUrl\": \"%s\", \"serviceType\": \"%s\"}",
-                                                url.toString(), urlType);
+        String endpointConfig = String.format("{\"serviceUrl\": \"%s\"," +
+                                                " \"urlType\": \"%s\"," +
+                                                "\"namespace\": \"%s\"}",
+                                                url.toString(), urlType, namespace);
         String endpointIndex = String.format("ds-%d", kubeEndpointIndex);
 
         return constructEndPoint(endpointIndex, serviceName, endpointConfig,
@@ -263,7 +264,8 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
     }
 
     private Endpoint constructEndPoint(String id, String name, String endpointConfig,
-                                       Long maxTps, String type, String endpointSecurity, String applicableLevel) {
+                                       Long maxTps, String type, String endpointSecurity,
+                                       String applicableLevel) {
         Endpoint.Builder endpointBuilder = new Endpoint.Builder();
         endpointBuilder.id(id);
         endpointBuilder.name(name);
@@ -278,7 +280,8 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
     }
 
     private URL findNodePortServiceURLForAPort(String filerNamespace, String serviceName,
-                                               String protocol, int nodePort) throws MalformedURLException {
+                                               String protocol, int nodePort)
+            throws MalformedURLException {
         URL url;
         Endpoints endpoint = findEndpoint(filerNamespace, serviceName);
         List<EndpointSubset> endpointSubsets = endpoint.getSubsets();
@@ -309,27 +312,29 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
         return null;
     }
 
-    private Endpoints findEndpoint(String filerNamespace, String serviceName) {
+    private Endpoints findEndpoint(String filterNamespace, String serviceName) {
         Endpoints endpoint;
-        if (filerNamespace == null) {
-            //Below, method ".inAnyNamespace()" did not support ".withName()".
-            //Therefore ".withField()" is used.
-            //It returns a single item list which has the only endpoint created for the service.
+        if (filterNamespace == null) {
+            /*
+            In the line below, method ".inAnyNamespace()" did not support the extension ".withName()"
+            like .inNamespace() does. Therefore ".withField()" is used.
+            It returns a single item list which has the only endpoint created for the service.
+            */
             endpoint = client.endpoints().inAnyNamespace()
                     .withField("metadata.name", serviceName).list().getItems().get(0);
         } else {
-            endpoint = client.endpoints().inNamespace(filerNamespace).withName(serviceName).get();
+            endpoint = client.endpoints().inNamespace(filterNamespace).withName(serviceName).get();
         }
         return endpoint;
     }
 
-    private Pod findPod(String filerNamespace, String podName) {
+    private Pod findPod(String filterNamespace, String podName) {
         Pod pod;
-        if (filerNamespace == null) {
+        if (filterNamespace == null) {
             pod = client.pods().inAnyNamespace()
                     .withField("metadata.name", podName).list().getItems().get(0);
         } else {
-            pod = client.pods().inNamespace(filerNamespace).withName(podName).get();
+            pod = client.pods().inNamespace(filterNamespace).withName(podName).get();
         }
         return pod;
     }

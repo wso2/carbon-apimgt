@@ -13,14 +13,46 @@ import java.util.List;
  */
 public interface ServiceDiscoverer {
 
+    /**
+     * To check whether service discovery is enabled in the configurations class.
+     *
+     * @return Whether service discovery is enabled
+     */
     Boolean isEnabled();
 
+    /**
+     * To get list of endpoints without any filtering.
+     *
+     * @return List of Endpoints
+     * @throws MalformedURLException
+     */
     List<Endpoint> listServices() throws MalformedURLException;
 
-    List<Endpoint> listServices(String namesapce) throws MalformedURLException;
+    /**
+     * To get list of endpoints, with a specific namespace.
+     *
+     * @param namespace     Namespace of the expected endpoints
+     * @return List of Endpoints with the specified namespace
+     * @throws MalformedURLException
+     */
+    List<Endpoint> listServices(String namespace) throws MalformedURLException;
 
-    List<Endpoint> listServices(String namesapce, HashMap<String, String> criteria) throws MalformedURLException;
-
+    /**
+     * To get list of endpoints, with a specific criteria.
+     *
+     * @param criteria    A criteria the endpoints should be filtered by
+     * @return List of Endpoints with the specified criteria
+     * @throws MalformedURLException
+     */
     List<Endpoint> listServices(HashMap<String, String> criteria) throws MalformedURLException;
 
+    /**
+     * To get list of endpoints, with a specific namespace and a criteria.
+     *
+     * @param namespace   Namespace of the expected endpoints
+     * @param criteria    A criteria the endpoints should be filtered by
+     * @return List of Endpoints with the specified namespace and criteria
+     * @throws MalformedURLException
+     */
+    List<Endpoint> listServices(String namespace, HashMap<String, String> criteria) throws MalformedURLException;
 }

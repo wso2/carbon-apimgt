@@ -4,30 +4,31 @@ import org.wso2.carbon.kernel.annotations.Configuration;
 import org.wso2.carbon.kernel.annotations.Element;
 
 /**
- * Class to hold Service Discovery configurations
+ * Class to hold Service Discovery configurations and generate yaml file
  */
-@Configuration(description = "Service Discovery configurations")
+@Configuration(namespace = "wso2.carbon.serviceDiscovery", description = "Service Discovery configurations")
 public class ServiceDiscoveryConfiurations {
 
-    private String serviceAccountToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJl" +
-            "cm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2" +
-            "UiOiJteS1wcm9qZWN0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6Im15" +
-            "LXNlcnZpY2UtZGlzY292ZXJ5LXRva2VuLTdtNjRjIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9" +
-            "zZXJ2aWNlLWFjY291bnQubmFtZSI6Im15LXNlcnZpY2UtZGlzY292ZXJ5Iiwia3ViZXJuZXRlcy5pby9zZX" +
-            "J2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiNjdlNjFiMWQtOGJkMS0xMWU3LTkyOGEtMDgwMD" +
-            "I3NTVmMDgxIiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50Om15LXByb2plY3Q6bXktc2VydmljZS1kaX" +
-            "Njb3ZlcnkifQ.Z3QaL4OIkLtuD32XtY183b8StQNOOI6uUcJi_9VQViJGtNhK7utjV-Q9nu3GVeD4Z7GwCvI" +
-            "H6F0hOwZGjdhNDIbUBh5mnNbzcxcX57RxrVLunymsuCZ2zurAeKpeXYwwlfeyHJfysOBXOFCIP4USlRmDoM8" +
-            "YcRjLsYS47fKlf4iCbzcPxPPlMkmQOMo_k0q_c03BRXKm-3d6mutokhOMoSvx4_9B1eMnTTRnz4k7SlNhHfN" +
-            "fSyv_FwzBbQLX7leb1ep3gmQ0nSLaEllBh5htkZXAGpMPsZvxRcZK1c9xj_0mpLiSYN8Rn9GLM9Fd6m2OPKA" +
-            "StKzeNCu9O3vBp1KNdg";
+    //kubernetes
+    private String serviceAccountToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlc" +
+            "m5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2Ui" +
+            "OiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6InNlcnZpY2U" +
+            "tZGlzY292ZXJ5LXNhLXRva2VuLTJnNGJnIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aW" +
+            "NlLWFjY291bnQubmFtZSI6InNlcnZpY2UtZGlzY292ZXJ5LXNhIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlY" +
+            "WNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiMjRjMjRjOTgtOTgyYi0xMWU3LWI2MjYtMDgwMDI3NTVm" +
+            "MDgxIiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmRlZmF1bHQ6c2VydmljZS1kaXNjb3Zlcnktc2E" +
+            "ifQ.OkAfoETwdbeH-ARM3mRMR24oqUahfvP3gLw-QqzqY446jHMkmnfh71yYPI8X_pdwA7de1WCPSw3Plci" +
+            "NlEhzC-Zv5w7itpmEWoB-80SsEAa07g1g713TpSqlv3oL0-98zTF8RyyyFez_5hwBP6XsbRKLv0B3cSPbI3" +
+            "ByZCIcfHlThkenUarb1RGDtcS8RmcpPD-hpzsD44Jy9wMs9y_bhkCltv911EXxbqD2vlg6je4LUp0s2Zze-" +
+            "IsDXS9PwzYZo4J33I3OxrenONJjBWV2LdOwi_HXJNOT8iVCV_jtXxzZ8123A8CEjmdalpceulGNfS5S7OF-A" +
+            "g7GHwiHH33jGA";
     private String caCertLocation = System.getProperty("user.dir") + "/resources/security/ca.crt";
     private Boolean insidePod   = false;
 
     @Element(description = "enable service discovery")
     public Boolean enabled = true;
     @Element(description = "container management system master URL")
-    private String masterUrl = "https://192.168.99.100:8443/";
+    private String masterUrl = "https://192.168.99.100:8443/";  //kubernetes
     @Element(description = "container management system specific properties")
     private String properties = "{\"insidePod\": " + insidePod + "}";
     @Element(description = "security properties")

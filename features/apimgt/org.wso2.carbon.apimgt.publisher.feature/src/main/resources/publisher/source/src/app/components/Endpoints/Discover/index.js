@@ -36,7 +36,7 @@ export default class EndpointsDiscover extends Component {
 
     componentDidMount() {
         const api = new API();
-        const promised_discoveredEndpoints = api.discoverEndpoints();
+        const promised_discoveredEndpoints = api.discoverServices();
         // TODO: Handle catch case , auth errors and ect ~tmkb ------copied from EndpointListing class
         promised_discoveredEndpoints.then(
             response => {
@@ -52,34 +52,36 @@ export default class EndpointsDiscover extends Component {
             title: 'Name',
             dataIndex: 'name',
             key: 'age',
-            width: '30%',
+            width: '20%',
             sorter: (a, b) => a.name.length - b.name.length,
-            render: (text, record) => <Link to={"/endpoints/" + record.id}>{text}</Link>
+            render: (text, record) => (
+            <span>
+                <Link to={"/endpoints/" + record.id}>{text}</Link>
+                <span className="ant-divider" />
+                {JSON.parse(record.endpointConfig).namespace}
+            </span>
+            )
         }, {
             title: 'Type',
-            dataIndex: 'type',
-            width: '10%'
+            dataIndex: 'type'
         }, {
             title: 'Service URL',
             dataIndex: 'endpointConfig',
-            width: '30%',
             render: (text, record) => (
             <span>
                 {JSON.parse(text).serviceUrl}
                 <span className="ant-divider" />
-                {JSON.parse(text).serviceType}
+                {JSON.parse(text).urlType}
             </span>
             )
         }, {
             title: 'Max TPS',
             dataIndex: 'maxTps',
-            width: '10%',
             sorter: (a, b) => a.maxTps - b.maxTps,
         }, {
             title: 'Action',
             key: 'action',
             dataIndex: 'id',
-            width: '20%',
             render: (text, record) =><ButtonCell record={record} api={api}/>
         }];
         const endpointListAndCreatMenu = (
@@ -97,7 +99,9 @@ export default class EndpointsDiscover extends Component {
                 <Dropdown overlay={endpointListAndCreatMenu}>
                     <Button icon="left" />
                 </Dropdown>
-                <h3>Discovered Service Endpoints</h3>
+                <span style={{display:"block", "margin-top": "10px"}}>
+                    <h3>&nbsp; Discovered Service Endpoints</h3>
+                </span>
                 <Table loading={endpoints === null }
                     columns={columns}
                     dataSource={endpoints}
@@ -134,7 +138,8 @@ class ButtonCell extends Component {
     handleAddEndpointToDB = (endpointUuid, serviceName, endpointType, config, security,
         maximumTps) => {
         let endpointDefinition = {
-            name: serviceName + "-" + endpointType + "-" + JSON.parse(config).serviceType,
+            name: JSON.parse(config).namespace + "-" + serviceName + "-"
+                    + endpointType + "-" + JSON.parse(config).urlType,
             type: endpointType,
             endpointConfig: config,
             endpointSecurity: security,
@@ -161,7 +166,9 @@ class ButtonCell extends Component {
     componentDidMount() {
         let record = this.state.record;
         let api = this.state.api;
-        let endpointName = record.name+"-"+record.type+"-"+JSON.parse(record.endpointConfig).serviceType;
+        let endpointConfig = JSON.parse(record.endpointConfig);
+        let endpointName = endpointConfig.namespace + "-" + record.name + "-"
+                            + record.type + "-" + endpointConfig.urlType;
         let promised_endpointAlreadyInDB = api.checkIfEndpointExists(endpointName);
         promised_endpointAlreadyInDB.then(
             response => {
@@ -172,7 +179,6 @@ class ButtonCell extends Component {
         ).catch(
             error => {
                 if(error.response.status==404){
-                     //console.log(endpointName+" not in database");
                      this.setState({
                          actionButton: this.getAddButton()
                      });
