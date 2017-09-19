@@ -229,7 +229,11 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                             uriTemplateBuilder, resourceEntry.getKey());
                     List<Map<String, List<String>>> security = operationEntry.getValue().getSecurity();
                     if (security != null) {
-                        String scope = security.get(0).get(APIMgtConstants.OAUTH2SECURITY).get(0);
+                        List<String> securityScopes = security.get(0).get(security.get(0).keySet().toArray()[0]);
+                        if (securityScopes.size() == 0) {
+                            continue;
+                        }
+                        String scope = securityScopes.get(0);
                         if (StringUtils.isNotEmpty(scope)) {
                             apiResourceBuilder.scope(scopeMap.get(scope));
                         }
@@ -371,8 +375,10 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
             }
             if (securityHeaderScopes == null || StringUtils.isEmpty(securityHeaderScopes)) {
                 //security header is not found in deployment.yaml.hence, reading from swagger
-                securityHeaderScopes = swagger.getVendorExtensions().
-                        get(APIMgtConstants.SWAGGER_X_WSO2_SECURITY).toString();
+                securityHeaderScopes = new Gson()
+                        .toJson(swagger
+                                .getVendorExtensions()
+                                .get(APIMgtConstants.SWAGGER_X_WSO2_SECURITY));
                 localConfigMap.get(nameSpace).put(APIMgtConstants.SWAGGER_X_WSO2_SCOPES, securityHeaderScopes);
             }
             try {
