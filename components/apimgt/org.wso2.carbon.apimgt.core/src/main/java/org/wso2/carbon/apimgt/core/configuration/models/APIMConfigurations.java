@@ -88,6 +88,17 @@ public class APIMConfigurations {
             "org.wso2.carbon.apimgt.core.impl.WSDL11ProcessorImpl",
             "org.wso2.carbon.apimgt.core.impl.WSDL20ProcessorImpl");
 
+    @Element(description = "SDK Generation Language Configurations")
+    private SdkLanguageConfigurations sdkLanguageConfigurations = new SdkLanguageConfigurations();
+
+    public SdkLanguageConfigurations getSdkLanguageConfigurations() {
+        return sdkLanguageConfigurations;
+    }
+
+    public void setSdkLanguageConfigurations(SdkLanguageConfigurations sdkLanguageConfigurations) {
+        this.sdkLanguageConfigurations = sdkLanguageConfigurations;
+    }
+
     public boolean isReverseProxyEnabled() {
         return reverseProxyEnabled;
     }

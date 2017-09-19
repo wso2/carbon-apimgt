@@ -39,6 +39,18 @@
             <groupId>com.googlecode.json-simple.wso2</groupId>
             <artifactId>json-simple</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -75,6 +87,18 @@
                                 <bundle>
                                     <symbolicName>json-simple</symbolicName>
                                     <version>${json-simple.wso2.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>com.fasterxml.jackson.dataformat.jackson-dataformat-yaml</symbolicName>
+                                    <version>${com.fasterxml.jackson.dataformat.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>snakeyaml</symbolicName>
+                                    <version>${snakeyaml.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>com.google.guava</symbolicName>
+                                    <version>${google.guava.version}.0</version>
                                 </bundle>
                             </bundles>
                             <importFeatures>
