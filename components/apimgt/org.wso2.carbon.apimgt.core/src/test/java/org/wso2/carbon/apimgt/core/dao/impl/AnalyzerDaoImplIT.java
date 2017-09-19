@@ -19,8 +19,13 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.dao.AnalyticsDAO;
+import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.analytics.APICount;
+import org.wso2.carbon.apimgt.core.models.analytics.APIInfo;
+import org.wso2.carbon.apimgt.core.models.analytics.APISubscriptionCount;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
+import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionCount;
 
 import java.time.Instant;
 import java.util.List;
@@ -52,4 +57,46 @@ public class AnalyzerDaoImplIT extends DAOIntegrationTestBase {
         Assert.assertEquals(applicationCountList.size(), 1);
     }
 
+    @Test
+    public void testGetAPIList() throws Exception {
+        Instant fromTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis());
+        API testAPI1 = TestUtil.addCustomAPI("Name1", "1.0.0", "sample1");
+        API testAPI2 = TestUtil.addCustomAPI("Name2", "1.0.0", "sample2");
+        Instant toTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis());
+        AnalyticsDAO analyticsDAO = DAOFactory.getAnalyticsDAO();
+        List<APIInfo> apiInfoList = analyticsDAO
+                .getAPIInfo(fromTimeStamp, toTimeStamp, null);
+        Assert.assertEquals(apiInfoList.size(), 2);
+        APIInfo apiInfo1 = apiInfoList.get(0);
+        APIInfo apiInfo2 = apiInfoList.get(1);
+        API result1 = new API.APIBuilder(apiInfo1.getProvider(), apiInfo1.getName(), apiInfo1.getVersion()).build();
+        API result2 = new API.APIBuilder(apiInfo2.getProvider(), apiInfo2.getName(), apiInfo2.getVersion()).build();
+        Assert.assertTrue(TestUtil.testAPIEqualsLazy(testAPI1, result1));
+        Assert.assertTrue(TestUtil.testAPIEqualsLazy(testAPI2, result2));
+    }
+
+    @Test
+    public void testGetSubscriptionCount() throws Exception {
+        Instant fromTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis());
+        API testAPI = TestUtil.addTestAPI();
+        Application testApplication = TestUtil.addTestApplication();
+        TestUtil.subscribeToAPI(testAPI, testApplication);
+        Instant toTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis());
+        AnalyticsDAO analyticsDAO = DAOFactory.getAnalyticsDAO();
+        List<SubscriptionCount> subscriptionCount = analyticsDAO.getSubscriptionCount(fromTimeStamp, toTimeStamp, null);
+        Assert.assertEquals(subscriptionCount.size(), 1);
+    }
+
+    @Test
+    public void testGetSubscriptionCountPerAPI() throws Exception {
+        Instant fromTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis());
+        API testAPI = TestUtil.addTestAPI();
+        Application testApplication = TestUtil.addTestApplication();
+        TestUtil.subscribeToAPI(testAPI, testApplication);
+        Instant toTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis());
+        AnalyticsDAO analyticsDAO = DAOFactory.getAnalyticsDAO();
+        List<APISubscriptionCount> subscriptionCount = analyticsDAO.getAPISubscriptionCount(fromTimeStamp, toTimeStamp,
+                testAPI.getId());
+        Assert.assertEquals(subscriptionCount.size(), 1);
+    }
 }
