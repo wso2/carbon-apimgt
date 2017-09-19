@@ -42,12 +42,14 @@ import org.wso2.carbon.apimgt.core.workflow.WorkflowExtensionsConfigBuilder;
 import org.wso2.carbon.datasource.core.api.DataSourceService;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
+
 import javax.naming.Context;
 import javax.naming.NamingException;
 
+
 /**
  * Bundle activator component responsible for retrieving the JNDIContextManager OSGi service
- * and reading its datasource configuration
+ * and reading its datasource configuration.
  */
 @Component(
         name = "dao",
@@ -62,9 +64,19 @@ public class BundleActivator {
     @Activate
     protected void start(BundleContext bundleContext) {
         try {
+            // Set default timestamp to UTC
+            java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("Etc/UTC"));
             Context ctx = jndiContextManager.newInitialContext();
-            DataSource dataSource = new DataSourceImpl((HikariDataSource) ctx.lookup("java:comp/env/jdbc/WSO2AMDB"));
-            DAOUtil.initialize(dataSource);
+            DataSource dataSourceAMDB = new DataSourceImpl(
+                    (HikariDataSource) ctx.lookup("java:comp/env/jdbc/WSO2AMDB"));
+            DAOUtil.initialize(dataSourceAMDB);
+            boolean isAnalyticsEnabled = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
+                    .getAnalyticsConfigurations().isEnabled();
+            if (isAnalyticsEnabled) {
+                DataSource dataSourceStatDB = new DataSourceImpl(
+                        (HikariDataSource) ctx.lookup("java:comp/env/jdbc/WSO2AMSTATSDB"));
+                DAOUtil.initializeAnalyticsDataSource(dataSourceStatDB);
+            }
             WorkflowExtensionsConfigBuilder.build(configProvider);
             Broker broker = new BrokerImpl();
             BrokerUtil.initialize(broker);
@@ -83,7 +95,7 @@ public class BundleActivator {
         }
     }
 
-    @Reference (
+    @Reference(
             name = "org.wso2.carbon.datasource.DataSourceService",
             service = DataSourceService.class,
             cardinality = ReferenceCardinality.AT_LEAST_ONE,
@@ -113,6 +125,7 @@ public class BundleActivator {
     protected void unregisterDataSourceService(DataSourceService dataSourceService) {
         log.debug("Un registering apim data source");
     }
+
     /**
      * Get the ConfigProvider service.
      *
