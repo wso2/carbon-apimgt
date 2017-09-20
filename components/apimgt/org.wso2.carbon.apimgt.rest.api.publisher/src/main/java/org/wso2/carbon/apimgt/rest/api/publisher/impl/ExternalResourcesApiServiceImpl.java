@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.ServiceDiscoverer;
+import org.wso2.carbon.apimgt.core.exception.ServiceDiscoveryException;
 import org.wso2.carbon.apimgt.core.impl.KubernetesServiceDiscoverer;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.rest.api.common.dto.*;
@@ -56,6 +57,11 @@ public class ExternalResourcesApiServiceImpl extends ExternalResourcesApiService
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
             log.error(errorMessage, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
+        } catch (ServiceDiscoveryException e) {
+            String errorMessage = "Error while Discovering Service Endpoints";
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
 }

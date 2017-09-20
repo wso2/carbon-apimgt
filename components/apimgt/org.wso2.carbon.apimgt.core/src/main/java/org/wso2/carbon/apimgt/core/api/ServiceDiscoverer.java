@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.core.api;
 
+import org.wso2.carbon.apimgt.core.exception.ServiceDiscoveryException;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 
 import java.net.MalformedURLException;
@@ -26,7 +27,7 @@ public interface ServiceDiscoverer {
      * @return List of Endpoints
      * @throws MalformedURLException
      */
-    List<Endpoint> listServices() throws MalformedURLException;
+    List<Endpoint> listServices() throws ServiceDiscoveryException;
 
     /**
      * To get list of endpoints, with a specific namespace.
@@ -35,7 +36,7 @@ public interface ServiceDiscoverer {
      * @return List of Endpoints with the specified namespace
      * @throws MalformedURLException
      */
-    List<Endpoint> listServices(String namespace) throws MalformedURLException;
+    List<Endpoint> listServices(String namespace) throws ServiceDiscoveryException;
 
     /**
      * To get list of endpoints, with a specific criteria.
@@ -44,7 +45,7 @@ public interface ServiceDiscoverer {
      * @return List of Endpoints with the specified criteria
      * @throws MalformedURLException
      */
-    List<Endpoint> listServices(HashMap<String, String> criteria) throws MalformedURLException;
+    List<Endpoint> listServices(HashMap<String, String> criteria) throws ServiceDiscoveryException;
 
     /**
      * To get list of endpoints, with a specific namespace and a criteria.
@@ -54,5 +55,5 @@ public interface ServiceDiscoverer {
      * @return List of Endpoints with the specified namespace and criteria
      * @throws MalformedURLException
      */
-    List<Endpoint> listServices(String namespace, HashMap<String, String> criteria) throws MalformedURLException;
+    List<Endpoint> listServices(String namespace, HashMap<String, String> criteria) throws ServiceDiscoveryException;
 }

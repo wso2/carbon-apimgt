@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.ServiceDiscoverer;
 import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryConfiurations;
+import org.wso2.carbon.apimgt.core.exception.ServiceDiscoveryException;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
@@ -57,7 +58,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
     private int kubeEndpointIndex;
 
 
-    private KubernetesServiceDiscoverer() {
+    private KubernetesServiceDiscoverer() throws ServiceDiscoveryException {
         serviceDiscoveryConfiurations = new ServiceDiscoveryConfiurations();
         JSONObject security = new JSONObject(serviceDiscoveryConfiurations.getSecurity());
         JSONObject cmsProperties = new JSONObject(serviceDiscoveryConfiurations.getProperties());
@@ -68,17 +69,18 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
             //this.client = new DefaultOpenShiftClient(buildConfig(serviceDiscoveryConfiurations.getMasterUrl()));
             this.client = new DefaultKubernetesClient(buildConfig(serviceDiscoveryConfiurations.getMasterUrl()));
         } catch (KubernetesClientException e) {
-            log.error("Authentication error or config for Kubernetes client not properly built", e.getMessage());
+            String msg = "Authentication error or config for Kubernetes client not properly built";
+            throw new ServiceDiscoveryException(msg, e);
         }
         servicesList = new ArrayList<>();
         kubeEndpointIndex = 0;
     }
 
-    public static KubernetesServiceDiscoverer getInstance() {
+    public static KubernetesServiceDiscoverer getInstance() throws ServiceDiscoveryException {
         return new KubernetesServiceDiscoverer();
     }
 
-    private Config buildConfig(String masterUrl) {
+    private Config buildConfig(String masterUrl) throws ServiceDiscoveryException {
         System.setProperty("kubernetes.auth.tryKubeConfig", "false");
         System.setProperty("kubernetes.auth.tryServiceAccount", "true");
         ConfigBuilder configBuilder = new ConfigBuilder().withMasterUrl(masterUrl)
@@ -92,7 +94,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
                         "UTF-8");
                 config = configBuilder.withOauthToken(saMountedToken).build();
             } catch (IOException e) {
-                log.error("Token file not found", e.getMessage());
+                throw new ServiceDiscoveryException("Token file not found", e);
             }
         } else {
             log.debug("Using externally stored service account token");
@@ -108,28 +110,36 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
     }
 
     @Override
-    public List<Endpoint> listServices() throws MalformedURLException {
+    public List<Endpoint> listServices() throws ServiceDiscoveryException {
         if (client != null) {
             log.debug("Looking for services in all namespaces");
             try {
                 ServiceList services = client.services().inAnyNamespace().list();
                 addServiceEndpointsToList(services, null);
             } catch (KubernetesClientException e) {
-                log.error(e.getMessage());
+                String msg = "Error occured while trying to list services using Kubernetes client";
+                throw new ServiceDiscoveryException(msg, e);
+            } catch (MalformedURLException e) {
+                String msg = "Error occured due to MalformedURL when trying to add endpoints to list";
+                throw new ServiceDiscoveryException(msg, e);
             }
         }
         return this.servicesList;
     }
 
     @Override
-    public List<Endpoint> listServices(String namespace) throws MalformedURLException {
+    public List<Endpoint> listServices(String namespace) throws ServiceDiscoveryException {
         if (client != null) {
             log.debug("Looking for services in namespace {}", namespace);
             try {
                 ServiceList services = client.services().inNamespace(namespace).list();
                 addServiceEndpointsToList(services, namespace);
             } catch (KubernetesClientException e) {
-                log.error(e.getMessage());
+                String msg = "Error occured while trying to list services using Kubernetes client";
+                throw new ServiceDiscoveryException(msg, e);
+            } catch (MalformedURLException e) {
+                String msg = "Error occured due to MalformedURL when trying to add endpoints to list";
+                throw new ServiceDiscoveryException(msg, e);
             }
         }
         return this.servicesList;
@@ -137,14 +147,18 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
 
     @Override
     public List<Endpoint> listServices(String namespace, HashMap<String, String> criteria)
-            throws MalformedURLException {
+            throws ServiceDiscoveryException {
         if (client != null) {
             log.debug("Looking for services, with the specified labels, in namespace {}", namespace);
             try {
                 ServiceList services = client.services().inNamespace(namespace).withLabels(criteria).list();
                 addServiceEndpointsToList(services, namespace);
             } catch (KubernetesClientException e) {
-                log.error(e.getMessage());
+                String msg = "Error occured while trying to list services using Kubernetes client";
+                throw new ServiceDiscoveryException(msg, e);
+            } catch (MalformedURLException e) {
+                String msg = "Error occured due to MalformedURL when trying to add endpoints to list";
+                throw new ServiceDiscoveryException(msg, e);
             }
         }
         return this.servicesList;
@@ -152,14 +166,18 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
 
     @Override
     public List<Endpoint> listServices(HashMap<String, String> criteria)
-            throws MalformedURLException {
+            throws ServiceDiscoveryException {
         if (client != null) {
             log.debug("Looking for services, with the specified labels, in all namespaces");
             try {
                 ServiceList services = client.services().withLabels(criteria).list();
                 addServiceEndpointsToList(services, null);
             } catch (KubernetesClientException e) {
-                log.error(e.getMessage());
+                String msg = "Error occured while trying to list services using Kubernetes client";
+                throw new ServiceDiscoveryException(msg, e);
+            } catch (MalformedURLException e) {
+                String msg = "Error occured due to Malformed URL when trying to add endpoints to list";
+                throw new ServiceDiscoveryException(msg, e);
             }
         }
         return this.servicesList;
