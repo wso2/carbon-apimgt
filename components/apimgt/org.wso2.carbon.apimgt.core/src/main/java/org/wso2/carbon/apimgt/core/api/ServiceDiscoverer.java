@@ -25,7 +25,7 @@ public interface ServiceDiscoverer {
      * To get list of endpoints without any filtering.
      *
      * @return List of Endpoints
-     * @throws MalformedURLException
+     * @throws ServiceDiscoveryException If an error occurs while listing
      */
     List<Endpoint> listServices() throws ServiceDiscoveryException;
 
@@ -34,7 +34,7 @@ public interface ServiceDiscoverer {
      *
      * @param namespace     Namespace of the expected endpoints
      * @return List of Endpoints with the specified namespace
-     * @throws MalformedURLException
+     * @throws ServiceDiscoveryException If an error occurs while listing
      */
     List<Endpoint> listServices(String namespace) throws ServiceDiscoveryException;
 
@@ -43,7 +43,7 @@ public interface ServiceDiscoverer {
      *
      * @param criteria    A criteria the endpoints should be filtered by
      * @return List of Endpoints with the specified criteria
-     * @throws MalformedURLException
+     * @throws ServiceDiscoveryException If an error occurs while listing
      */
     List<Endpoint> listServices(HashMap<String, String> criteria) throws ServiceDiscoveryException;
 
@@ -53,7 +53,7 @@ public interface ServiceDiscoverer {
      * @param namespace   Namespace of the expected endpoints
      * @param criteria    A criteria the endpoints should be filtered by
      * @return List of Endpoints with the specified namespace and criteria
-     * @throws MalformedURLException
+     * @throws ServiceDiscoveryException If an error occurs while listing
      */
     List<Endpoint> listServices(String namespace, HashMap<String, String> criteria) throws ServiceDiscoveryException;
 }
