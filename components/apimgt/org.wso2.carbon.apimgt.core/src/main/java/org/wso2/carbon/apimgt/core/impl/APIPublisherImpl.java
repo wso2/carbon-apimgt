@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.api.ServiceDiscoverer;
 import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
@@ -57,6 +58,7 @@ import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.exception.NotificationException;
+import org.wso2.carbon.apimgt.core.exception.ServiceDiscoveryException;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.executors.NotificationExecutor;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
@@ -97,6 +99,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -1389,7 +1392,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * Return list of endpoints
      *
      * @return List of Endpoints..
-     * @throws APIManagementException If filed to get endpoints.
+     * @throws APIManagementException If failed to get endpoints.
      */
     @Override
     public List<Endpoint> getAllEndpoints() throws APIManagementException {
@@ -2061,5 +2064,32 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 }
             }
         }
+    }
+
+
+    /**
+     * Discover and Return a list of service endpoints
+     *
+     * @return {@code List<Endpoint>}
+     * @throws ServiceDiscoveryException If an error occurred while discoverying services
+     */
+    @Override
+    public List<Endpoint> discoverServiceEndpoints() throws ServiceDiscoveryException {
+        List<Endpoint> discoveredEndpointList = null;
+        ServiceDiscoverer serviceDiscoverer = null;
+        try {
+            serviceDiscoverer = KubernetesServiceDiscoverer.getInstance();
+            if (serviceDiscoverer.isEnabled()) {
+                discoveredEndpointList = serviceDiscoverer.listServices();
+            } else {
+                String msg = "Service Discovery is not Enabled in the configuration";
+                throw new ServiceDiscoveryException(msg);
+            }
+        } catch (ServiceDiscoveryException e) {
+            String msg = "Failed to Discover Service Endpoints";
+            log.error(msg, e);
+            throw new ServiceDiscoveryException(msg, e);
+        }
+        return discoveredEndpointList;
     }
 }

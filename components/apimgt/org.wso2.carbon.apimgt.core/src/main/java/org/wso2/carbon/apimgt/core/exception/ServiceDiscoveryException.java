@@ -5,6 +5,10 @@ package org.wso2.carbon.apimgt.core.exception;
  */
 public class ServiceDiscoveryException extends APIManagementException {
 
+    public ServiceDiscoveryException(String msg) {
+        super(msg);
+    }
+
     public ServiceDiscoveryException(String message, Throwable e) {
         super(message, e);
     }

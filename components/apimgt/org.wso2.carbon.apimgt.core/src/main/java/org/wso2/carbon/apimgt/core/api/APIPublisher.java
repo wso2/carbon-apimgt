@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
+import org.wso2.carbon.apimgt.core.exception.ServiceDiscoveryException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
@@ -554,4 +555,12 @@ public interface APIPublisher extends APIManager {
             throws APIMgtDAOException, APIMgtWSDLException;
 
     Set<String> getSubscribersByAPIId(String apiId) throws APIManagementException;
+
+    /**
+     * Discover and Return a list of service endpoints
+     *
+     * @return {@code List<Endpoint>}
+     * @throws ServiceDiscoveryException If an error occurred while discoverying services
+     */
+    List<Endpoint> discoverServiceEndpoints() throws ServiceDiscoveryException;
 }
