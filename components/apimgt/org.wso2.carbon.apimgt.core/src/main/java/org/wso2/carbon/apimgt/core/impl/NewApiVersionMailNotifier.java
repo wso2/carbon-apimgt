@@ -57,12 +57,8 @@ public class NewApiVersionMailNotifier extends Notifier {
     public void sendNotifications(NotificationDTO notificationDTO) throws
             APIManagementException {
 
-        Properties props = new Properties();
-        props.put("mail.smtp.host", SMTP_HOST_NAME);
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.port", "587");
-        props.put("mail.transport.protocol", "smtp");
+
+        Properties props = notificationDTO.getProperties();
         //get Notifier email List
         Set<String> emailList = getEmailNotifierList(notificationDTO);
 

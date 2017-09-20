@@ -123,11 +123,9 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
             JsonObject parsedResponseBody = (JsonObject) parser.parse(responseBody);
             userEmail =  parsedResponseBody.get("emails").toString().replaceAll("[\\[\\]\"]", "");
 
-            if (log.isDebugEnabled()) {
-                String message = "Email " + userEmail + " of user " + parsedResponseBody.get(USERNAME).getAsString()
-                        + " is successfully retrieved from SCIM endpoint.";
-                log.debug(message);
-            }
+            log.debug("Email {} of user {} is successfully retrieved from SCIM endpoint.",
+                    userEmail, parsedResponseBody.get(USERNAME).getAsString());
+
         } else {
             String errorMessage =
                     "Error occurred while retrieving Id of user " + userId + ". Error : " + getErrorMessage(
