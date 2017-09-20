@@ -19,6 +19,7 @@
 import React, {Component} from 'react'
 import BasicTabs from './NavTab.js'
 import Overview from './Overview.js'
+import ProductionKeys from './ProductionKeys.js'
 import {Route, Switch, Redirect} from 'react-router-dom'
 import API from '../../../data/api.js'
 import {PageNotFound} from '../../Base/Errors/index'
@@ -35,7 +36,7 @@ export default class Details extends Component {
     constructor(props){
         super(props);
         this.state = {
-	application: null , 
+            application: null,
             value: 'overview',
         };
     }
@@ -65,7 +66,7 @@ export default class Details extends Component {
         this.props.history.push({pathname: "/applications/" + this.props.match.params.application_uuid + "/" + value});
     };
 
-    render() { 
+    render() {
 	let redirect_url = "/applications/" + this.props.match.params.application_uuid + "/overview";
         return (
             <div>
@@ -88,7 +89,7 @@ export default class Details extends Component {
                 <Switch>
                     <Redirect exact from="/applications/:applicationId" to={redirect_url}/>
                     <Route path="/applications/:applicationId/overview" component={Overview}/>
-                    <Route path="/applications/:applicationId/productionkeys" component={Overview}/>
+                    <Route path="/applications/:applicationId/productionkeys" component={ProductionKeys}/>
                     <Route path="/applications/:applicationId/sandBoxkeys" component={Overview}/>
                     <Route path="/applications/:applicationId/subscriptions" component={Overview}/>
                     <Route component={PageNotFound}/>

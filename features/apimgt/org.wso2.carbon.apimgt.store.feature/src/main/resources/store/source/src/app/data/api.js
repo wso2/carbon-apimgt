@@ -260,7 +260,7 @@ class API {
                 (client) => {
                 let payload = {applicationId: applicationId, body: request_content};
                 return client.apis["Application (individual)"].post_applications__applicationId__generate_keys(
-                    {payload}, this._requestMetaData());
+                    payload, this._requestMetaData());
         }
         );
         if (callback) {
@@ -283,7 +283,7 @@ class API {
                 (client) => {
                 let payload = {applicationId: applicationId, body: request_content};
                 return client.apis["Application (individual)"].post_applications__applicationId__generate_token(
-                    {payload}, this._requestMetaData());
+                    payload, this._requestMetaData());
         }
         );
         if (callback) {

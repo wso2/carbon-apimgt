@@ -58,3 +58,14 @@ header.MuiAppBar-colorPrimary-6{
     font-weight: 200;
     text-decoration: none;
 }
+.tab-content{
+    padding-left:40px;
+}
+.key-container{
+    padding: 20px;
+}
+.key-container h3{
+    padding-bottom:10px;
+    font-size:15px;
+    font-weight: 200;
+}
