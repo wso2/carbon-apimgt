@@ -523,16 +523,3 @@ function fromJsonToBlockConditionDto (json event) (dto:BlockConditionDto) {
     blockConditionDto.key = key;
     return blockConditionDto;
 }
-
-
-function fromJSONToAPIKeyDTO (json apiKey) (dto:APIKeyDTO) {
-    system:println("fromJSONToAPIKeyDTO() in Utils");
-    dto:APIKeyDTO APIKeyDTO = {};
-
-    APIKeyDTO.name, err = (string)apiKey.name;
-    APIKeyDTO.context, err = (string)apiKey.context;
-    APIKeyDTO.apiKey, err = (string)apiKey.apiKey;
-    APIKeyDTO.securityScheme = jsons:getInt(apiKey, "$.securityScheme");
-    return APIKeyDTO;
-
-}
