@@ -271,6 +271,25 @@ class API {
         }
     }
 
+    getRatingFromUser(api_id, callback = null) {
+        var promise_get = this.client.then(
+            (client) => {
+                //console.log(client.apis["API (individual)"]);
+                return client.apis["API (individual)"].get_apis__apiId__ratings(
+                      {apiId: api_id}, this._requestMetaData());
+            }
+        ).catch(
+              error => {
+                  alert(error);
+              }
+         );
+         if (callback) {
+             return promise_get.then(callback);
+         } else {
+             return promise_get;
+         }
+    }
+
     getAllComments(api_id, callback = null) {
         var promise_get = this.client.then(
             (client) => {
@@ -291,7 +310,7 @@ class API {
     }
 
     addRating(api_id, ratingInfo, callback = null) {
-       alert("apiID : " + api_id);
+      // alert("apiID : " + api_id);
         var promise = this.client.then(
             (client) => {
                 console.log(client.apis["API (individual)"]);

@@ -412,12 +412,56 @@ class StarRatingBar extends React.Component {
 
         this.state = {
                         previousRating : 0,
-                        rating : 0
+                        rating : 0,
+                        api:null
                      };
 
         this.handleMouseOver = this.handleMouseOver.bind(this);
         this.handleRatingUpdate = this.handleRatingUpdate.bind(this);
         this.handleMouseOut = this.handleMouseOut.bind(this);
+    }
+
+    componentDidMount() {
+        const api = new Api();
+        let promised_api = api.getAPIById(this.props.apiIdProp);
+        promised_api.then(
+            response => {
+                console.log("instarbar");
+                console.info(response.obj)
+                //this.setState({api: response.obj});
+            }
+        ).catch(
+            error => {
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
+            }
+        );
+
+        //get user rating
+        let promised_rating = api.getRatingFromUser(this.props.apiIdProp, null);
+        promised_rating.then(
+            response => {
+                console.log(response.obj.userRating);
+                this.setState({rating :response.obj.userRating});
+                this.setState({previousRating :response.obj.userRating});
+                alert(this.state.rating);
+            }
+        ).catch(
+            error => {
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
+            }
+        );
     }
 
     handleMouseOver(index) {
@@ -430,20 +474,17 @@ class StarRatingBar extends React.Component {
     }
 
     handleRatingUpdate() {
-       // alert("rating : " + this.state.rating + "api id : " + this.props.apiIdProp);
         this.setState({previousRating : this.state.rating});
         this.setState({rating : this.state.rating});
-        handleMouseOver(rating);
 
         var api = new Api();
         let ratingInfo = {"rating" : this.state.rating};
         let promise = api.addRating(this.props.apiIdProp, ratingInfo);
         promise.then(
             response => {
-                message.success("Rating updated successfully :: rating : " + this.state.previousRating);
+                message.success("Rating updated successfully");
             }).catch (
                  error => {
-                     alert(error); //todo : remove this
                      message.error("Error occurred while adding ratings!");
                  }
              );
