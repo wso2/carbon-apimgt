@@ -57,7 +57,7 @@ function authenticate (message m) (boolean, message) {
     string apiKey = apikeyHeader;
 try {
     dto:APIKeyDTO apiKeyDto = holder:getFromAPIKeyCache(apiContext, apiKey);
-system:println(apiKeyDto);
+    //system:println(apiKeyDto);
     if (apiKeyDto != null) {
         system:println("apiKeyDto not null");
         if (apikeyErr == null && apiKeyDto.securityScheme == 2) {
