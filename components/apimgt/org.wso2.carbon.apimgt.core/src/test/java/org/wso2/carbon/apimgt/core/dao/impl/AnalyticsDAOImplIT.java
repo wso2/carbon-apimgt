@@ -21,11 +21,13 @@ import org.wso2.carbon.apimgt.core.TestUtil;
 import org.wso2.carbon.apimgt.core.dao.AnalyticsDAO;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.analytics.APICount;
 import org.wso2.carbon.apimgt.core.models.analytics.APIInfo;
 import org.wso2.carbon.apimgt.core.models.analytics.APISubscriptionCount;
 import org.wso2.carbon.apimgt.core.models.analytics.ApplicationCount;
 import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionCount;
+import org.wso2.carbon.apimgt.core.models.analytics.SubscriptionInfo;
 
 import java.time.Instant;
 import java.util.List;
@@ -33,7 +35,7 @@ import java.util.List;
 /**
  * AnalyzerDaoImpl Test cases.
  */
-public class AnalyzerDaoImplIT extends DAOIntegrationTestBase {
+public class AnalyticsDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testGetApplicationCount() throws Exception {
@@ -98,5 +100,22 @@ public class AnalyzerDaoImplIT extends DAOIntegrationTestBase {
         List<APISubscriptionCount> subscriptionCount = analyticsDAO.getAPISubscriptionCount(fromTimeStamp, toTimeStamp,
                 testAPI.getId());
         Assert.assertEquals(subscriptionCount.size(), 1);
+    }
+
+    @Test
+    public void testGetSubscriptionList() throws Exception {
+        Instant fromTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis());
+        API testAPI = TestUtil.addTestAPI();
+        Application testApplication = TestUtil.addTestApplication();
+        Subscription subscription = TestUtil.subscribeToAPI(testAPI, testApplication);
+        Instant toTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis());
+        AnalyticsDAO analyticsDAO = DAOFactory.getAnalyticsDAO();
+        List<SubscriptionInfo> subscriptionInfo = analyticsDAO.getSubscriptionInfo(fromTimeStamp, toTimeStamp,
+                null);
+        Assert.assertEquals(subscriptionInfo.size(), 1);
+        SubscriptionInfo subscriptionInfoResult = subscriptionInfo.get(0);
+        Assert.assertEquals(subscription.getId(), subscriptionInfoResult.getId());
+        Assert.assertEquals(subscription.getApi().getName(), subscriptionInfoResult.getName());
+        Assert.assertEquals(subscription.getApplication().getName(), subscriptionInfoResult.getAppName());
     }
 }
