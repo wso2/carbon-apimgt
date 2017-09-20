@@ -33,9 +33,10 @@ import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
 import { MenuItem } from 'material-ui/Menu';
 import { Delete, Edit, CreateNewFolder, Description  }from 'material-ui-icons';
 import Table, { TableBody, TableCell, TableRow } from 'material-ui/Table';
-import Select from 'react-select';
+import Select from 'material-ui/Select';
 import 'react-select/dist/react-select.css';
 import Subscriptions  from 'material-ui-icons/Subscriptions';
+import { FormControl } from 'material-ui/Form';
 
 class BasicInfo extends Component {
     constructor(props) {
@@ -73,6 +74,9 @@ class BasicInfo extends Component {
                     tiers.push({value: tierName, label: tierName});
                 }
                 this.setState({tiers: tiers});
+                if (tiers.length > 0) {
+                    this.setState({policyName: tiers[0].value});
+                }
             }
         ).catch(
             error => {
@@ -120,6 +124,9 @@ class BasicInfo extends Component {
                     }
                 }
                 this.setState({options: applications});
+                if (options.length > 0) {
+                    this.setState({applicationId: options[0].value});
+                }
             }
         ).catch(
             error => {
@@ -179,7 +186,7 @@ class BasicInfo extends Component {
     }
 
     handleChange = name => event => {
-        this.setState({[name]: event.value});
+        this.setState({ [name]: event.target.value });
     };
 
     createSubscription = (e) => {
@@ -227,6 +234,7 @@ class BasicInfo extends Component {
         this.setState({matDropValue: val.value});
         console.log("Selected: " + JSON.stringify(val));
     }
+
     render() {
         const formItemLayout = {
             labelCol: {span: 6},
@@ -324,27 +332,33 @@ class BasicInfo extends Component {
                             Applications
                         </Typography>
                         {this.state.options &&
-                        <Select
-                            name="form-field-name"
-                            value={this.state.matDropValue}
-                            options={this.state.options}
-                            onChange={this.handleChange('applicationId')}
-                        />
+                        <FormControl style={{width:"100%",marginBottom:"20px"}}>
+                            <Select
+                                style={{width:"100%"}}
+                                value={this.state.applicationId}
+                                onChange={this.handleChange('applicationId')}
+                            >
+                                {this.state.options.map((option) => <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>)}
+                            </Select>
+                        </FormControl>
                         }
                         <Typography type="subheading" gutterBottom>
                             Tiers
                         </Typography>
                         {this.state.tiers &&
-                        <Select
-                            name="form-field-name"
-                            value={this.state.matDropValue}
-                            options={this.state.tiers}
-                            onChange={this.handleChange('policyName')}
-                        />
+                        <FormControl style={{width:"100%"}}>
+                            <Select
+                                style={{width:"100%"}}
+                                value={this.state.policyName}
+                                onChange={this.handleChange('policyName')}
+                            >
+                                {this.state.tiers.map((tier) => <MenuItem key={tier.value} value={tier.value}>{tier.label}</MenuItem>)}
+                            </Select>
+                        </FormControl>
                         }
                         <br />
-                        <Button onClick={this.createSubscription} raised color="primary" style={{paddingTop: '20px;'}}>
-                            <Subscriptions style={{paddingRight: '10px;'}} /> Subscribe
+                        <Button onClick={this.createSubscription} raised color="primary" style={{paddingTop: '20px'}}>
+                            <Subscriptions style={{paddingRight: '10px'}} /> Subscribe
                         </Button>
 
                             {/*<Select>
