@@ -86,6 +86,7 @@ class Listing extends Component {
 
     constructor(props) {
         super(props);
+	
     }
 
     componentDidMount() {
@@ -165,7 +166,6 @@ class Listing extends Component {
                                                 {n.name}
                                             </Link>
                                         </TableCell>
-
                                         <TableCell disablePadding>
                                             {n.throttlingTier}
                                         </TableCell>

@@ -85,7 +85,11 @@ class ApplicationCreate extends Component {
         let new_api = new API();
         let promised_create = new_api.createApplication(application_data);
         promised_create.then(response => {
-            console.log("Application created successfully.");
+        let uuid = JSON.parse(response.data).applicationId;
+	//Once application loading fixed this need to pass application ID and load app
+        let redirect_url = "/applications/";
+        this.props.history.push(redirect_url);
+        console.log("Application created successfully.");
         }).catch(
             function (error_response) {
                 console.log("Error while creating the application");
