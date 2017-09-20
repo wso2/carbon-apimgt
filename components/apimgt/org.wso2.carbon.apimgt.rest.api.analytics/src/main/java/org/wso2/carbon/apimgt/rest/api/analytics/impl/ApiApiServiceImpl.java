@@ -107,8 +107,8 @@ public class ApiApiServiceImpl extends ApiApiService {
         try {
             log.debug("Retrieving APIs created over time. [From: {} To: {} API Id: {}]");
             Analyzer analyzer = RestApiUtil.getAnalyzer(username);
-            List<APISubscriptionCount> apiSubscriptionCountList = analyzer.getAPISubscriptionCount(startTime, endTime,
-                    apiId);
+            List<APISubscriptionCount> apiSubscriptionCountList = analyzer.getAPISubscriptionCount
+                    (fromISO8601ToInstant(startTime), fromISO8601ToInstant(endTime), apiId);
             APISubscriptionCountListDTO apiSubscriptionListDTO = AnalyticsMappingUtil
                     .fromAPISubscriptionCountListToDTO(apiSubscriptionCountList);
             return Response.ok().entity(apiSubscriptionListDTO).build();

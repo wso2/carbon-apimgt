@@ -74,7 +74,7 @@ public interface Analyzer {
      * @return valid {@link APISubscriptionCount} List or null
      * @throws APIManagementException if error occurs while accessing data layer
      */
-    List<APISubscriptionCount> getAPISubscriptionCount(String fromTime, String toTime, String apiId) throws
+    List<APISubscriptionCount> getAPISubscriptionCount(Instant fromTime, Instant toTime, String apiId) throws
             APIManagementException;
 
     /**

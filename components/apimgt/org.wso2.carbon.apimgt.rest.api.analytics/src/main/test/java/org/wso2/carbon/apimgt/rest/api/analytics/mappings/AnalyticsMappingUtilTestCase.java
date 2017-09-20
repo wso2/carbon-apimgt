@@ -35,8 +35,11 @@ import org.wso2.carbon.apimgt.rest.api.analytics.dto.ApplicationCountListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionCountListDTO;
 import org.wso2.carbon.apimgt.rest.api.analytics.dto.SubscriptionInfoListDTO;
 
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil.epochToISO8601DateTime;
 
 /**
  * Test cases for Analytics Mapping Util methods.
@@ -50,12 +53,12 @@ public class AnalyticsMappingUtilTestCase {
         applicationCountList.add(SampleTestObjectCreator.createRandomApplicationCountObject());
         applicationCountList.add(SampleTestObjectCreator.createRandomApplicationCountObject());
         ApplicationCountListDTO applicationCountListDTO = AnalyticsMappingUtil.
-                fromApplicationCountToListDTO(applicationCountList);
+                fromApplicationCountToListDTO(applicationCountList, ZoneOffset.UTC);
 
         Assert.assertEquals(applicationCountList.size(), applicationCountListDTO.getList().size());
         for (int i = 0; i < applicationCountList.size(); i++) {
-            Assert.assertEquals(Long.valueOf(applicationCountList.get(i).getTimestamp()),
-                    Long.valueOf(applicationCountListDTO.getList().get(i).getTime()));
+            Assert.assertEquals(epochToISO8601DateTime(applicationCountList.get(i).getTimestamp(),
+                    ZoneOffset.UTC), applicationCountListDTO.getList().get(i).getTime());
         }
     }
 
@@ -66,12 +69,12 @@ public class AnalyticsMappingUtilTestCase {
         apiCountList.add(SampleTestObjectCreator.createRandomAPICountObject());
         apiCountList.add(SampleTestObjectCreator.createRandomAPICountObject());
         APICountListDTO apiCountListDTO = AnalyticsMappingUtil.
-                fromAPICountToListDTO(apiCountList);
+                fromAPICountToListDTO(apiCountList, ZoneOffset.UTC);
 
         Assert.assertEquals(apiCountList.size(), apiCountListDTO.getList().size());
         for (int i = 0; i < apiCountList.size(); i++) {
-            Assert.assertEquals(Long.valueOf(apiCountList.get(i).getTimestamp()),
-                    Long.valueOf(apiCountListDTO.getList().get(i).getTime()));
+            Assert.assertEquals(epochToISO8601DateTime(apiCountList.get(i).getTimestamp(), ZoneOffset.UTC),
+                    apiCountListDTO.getList().get(i).getTime());
         }
     }
 
@@ -82,12 +85,12 @@ public class AnalyticsMappingUtilTestCase {
         apiInfoList.add(SampleTestObjectCreator.createRandomAPIInfoObject());
         apiInfoList.add(SampleTestObjectCreator.createRandomAPIInfoObject());
         APIInfoListDTO apiInfoListDTO = AnalyticsMappingUtil.
-                fromAPIInfoListToDTO(apiInfoList);
+                fromAPIInfoListToDTO(apiInfoList, ZoneOffset.UTC);
 
         Assert.assertEquals(apiInfoList.size(), apiInfoListDTO.getList().size());
         for (int i = 0; i < apiInfoList.size(); i++) {
-            Assert.assertEquals(Long.valueOf(apiInfoList.get(i).getCreatedTime()),
-                    Long.valueOf(apiInfoListDTO.getList().get(i).getTime()));
+            Assert.assertEquals(epochToISO8601DateTime(apiInfoList.get(i).getCreatedTime(), ZoneOffset.UTC),
+                    apiInfoListDTO.getList().get(i).getTime());
             Assert.assertEquals(apiInfoList.get(i).getName(), apiInfoListDTO.getList().get(i).getName());
             Assert.assertEquals(apiInfoList.get(i).getContext(), apiInfoListDTO.getList().get(i).getContext());
             Assert.assertEquals(apiInfoList.get(i).getDescription(), apiInfoListDTO.getList().get(i).getDescription());
@@ -126,14 +129,14 @@ public class AnalyticsMappingUtilTestCase {
         subscriptionCountList.add(SampleTestObjectCreator.createRandomSubscriptionCountObject());
         subscriptionCountList.add(SampleTestObjectCreator.createRandomSubscriptionCountObject());
         SubscriptionCountListDTO subscriptionCountListToDTO = AnalyticsMappingUtil.
-                fromSubscriptionCountListToDTO(subscriptionCountList);
+                fromSubscriptionCountListToDTO(subscriptionCountList, ZoneOffset.UTC);
 
         Assert.assertEquals(subscriptionCountList.size(), subscriptionCountListToDTO.getList().size());
         for (int i = 0; i < subscriptionCountList.size(); i++) {
             Assert.assertEquals(Long.valueOf(subscriptionCountList.get(i).getCount()),
                     Long.valueOf(subscriptionCountListToDTO.getList().get(i).getCount()));
-            Assert.assertEquals(Long.valueOf(subscriptionCountList.get(i).getTimestamp()),
-                    Long.valueOf(subscriptionCountListToDTO.getList().get(i).getTime()));
+            Assert.assertEquals(epochToISO8601DateTime(subscriptionCountList.get(i).getTimestamp(), ZoneOffset.UTC),
+                    subscriptionCountListToDTO.getList().get(i).getTime());
         }
     }
 
@@ -144,7 +147,7 @@ public class AnalyticsMappingUtilTestCase {
         subscriptionInfoList.add(SampleTestObjectCreator.createRandomSubscriptionInfoObject());
         subscriptionInfoList.add(SampleTestObjectCreator.createRandomSubscriptionInfoObject());
         SubscriptionInfoListDTO subscriptionInfoListDTO = AnalyticsMappingUtil.
-                fromSubscriptionInfoListToDTO(subscriptionInfoList);
+                fromSubscriptionInfoListToDTO(subscriptionInfoList, ZoneOffset.UTC);
 
         Assert.assertEquals(subscriptionInfoList.size(), subscriptionInfoListDTO.getList().size());
         for (int i = 0; i < subscriptionInfoList.size(); i++) {
@@ -162,8 +165,8 @@ public class AnalyticsMappingUtilTestCase {
                     subscriptionInfoListDTO.getList().get(i).getSubscriptionStatus());
             Assert.assertEquals(subscriptionInfoList.get(i).getSubscriptionTier(),
                     subscriptionInfoListDTO.getList().get(i).getSubscriptionTier());
-            Assert.assertEquals(Long.valueOf(subscriptionInfoList.get(i).getCreatedTime()),
-                    Long.valueOf(subscriptionInfoListDTO.getList().get(i).getCreatedTime()));
+            Assert.assertEquals(epochToISO8601DateTime(subscriptionInfoList.get(i).getCreatedTime(), ZoneOffset.UTC),
+                    subscriptionInfoListDTO.getList().get(i).getCreatedTime());
         }
     }
 }

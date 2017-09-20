@@ -92,10 +92,10 @@ public class AnalyzerImpl implements Analyzer {
     }
 
     /**
-     * @see Analyzer#getAPISubscriptionCount(String, String, String)
+     * @see Analyzer#getAPISubscriptionCount(Instant, Instant, String)
      */
     @Override
-    public List<APISubscriptionCount> getAPISubscriptionCount(String fromTime, String toTime, String apiId) throws
+    public List<APISubscriptionCount> getAPISubscriptionCount(Instant fromTime, Instant toTime, String apiId) throws
             APIManagementException {
         List<APISubscriptionCount> apiSubscriptionCountList;
         try {

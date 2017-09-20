@@ -149,18 +149,18 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
 
 
     /**
-     * @see AnalyticsDAO#getAPISubscriptionCount(String, String, String)
+     * @see AnalyticsDAO#getAPISubscriptionCount(Instant, Instant, String)
      */
     @Override
     @SuppressFBWarnings("SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING")
-    public List<APISubscriptionCount> getAPISubscriptionCount(String fromTime, String toTime, String apiId)
+    public List<APISubscriptionCount> getAPISubscriptionCount(Instant fromTime, Instant toTime, String apiId)
             throws APIMgtDAOException {
         final String query;
         if (StringUtils.isNotEmpty(apiId)) {
             query = "SELECT api.UUID,api.NAME,api.VERSION,api.PROVIDER,count(subs.UUID) as COUNT " +
                     "FROM AM_SUBSCRIPTION subs,AM_API api " +
                     "WHERE api.UUID=subs.API_ID " +
-                    "AND (sub.CREATED_TIME BETWEEN ? AND ?) +" +
+                    "AND (subs.CREATED_TIME BETWEEN ? AND ?) " +
                     "AND subs.SUB_STATUS = 'ACTIVE' " +
                     "AND api.UUID=? " +
                     "GROUP BY subs.API_ID;";
@@ -168,15 +168,15 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
             query = "SELECT api.UUID,api.NAME,api.VERSION,api.PROVIDER,count(subs.UUID) as COUNT " +
                     "FROM AM_SUBSCRIPTION subs,AM_API api " +
                     "WHERE api.UUID=subs.API_ID " +
-                    "AND (sub.CREATED_TIME BETWEEN ? AND ?) +" +
+                    "AND (subs.CREATED_TIME BETWEEN ? AND ?) " +
                     "AND subs.SUB_STATUS = 'ACTIVE' " +
                     "GROUP BY subs.API_ID;";
         }
         List<APISubscriptionCount> apiSubscriptionCountList = new ArrayList<>();
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setString(1, fromTime);
-            statement.setString(2, toTime);
+            statement.setTimestamp(1, Timestamp.from(fromTime));
+            statement.setTimestamp(2, Timestamp.from(toTime));
 
             if (StringUtils.isNotEmpty(apiId)) {
                 statement.setString(3, apiId);
@@ -194,7 +194,6 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                     apiSubscriptionCountList.add(apiSubscriptionCount);
                 }
             }
-
         } catch (SQLException e) {
             throw new APIMgtDAOException("Error while creating database connection/prepared-statement", e);
         }
