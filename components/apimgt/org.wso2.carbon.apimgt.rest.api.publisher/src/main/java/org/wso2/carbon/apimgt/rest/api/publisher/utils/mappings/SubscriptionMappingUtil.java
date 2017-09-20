@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ExtendedSubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -53,6 +54,31 @@ public class SubscriptionMappingUtil {
         subscriptionDTO.setApplicationId(subscription.getApplication().getUUID());
         subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.valueOf(subscription.getSubStatus()));
         subscriptionDTO.setTier(subscription.getTier() == null ? null : subscription.getTier().getName());
+        return subscriptionDTO;
+    }
+
+    /**
+     * Converts a SubscribedAPI object into {@link ExtendedSubscriptionDTO}. Uses {@param workflowReferenceId}.
+     *
+     * @param subscription SubscribedAPI object
+     * @param workflowReferenceId external workflow reference id
+     * @return SubscriptionDTO corresponds to SubscribedAPI object
+     */
+    public static ExtendedSubscriptionDTO fromSubscriptionToExtendedSubscriptionDTO(SubscribedAPI subscription,
+            String workflowReferenceId) {
+        ExtendedSubscriptionDTO subscriptionDTO = new ExtendedSubscriptionDTO();
+        subscriptionDTO.setSubscriptionId(subscription.getUUID());
+        APIIdentifier apiId = subscription.getApiId();
+        APIIdentifier apiIdEmailReplacedBack = new APIIdentifier(
+                APIUtil.replaceEmailDomainBack(apiId.getProviderName()), apiId.getApiName(), apiId.getVersion());
+        subscriptionDTO.setApiIdentifier(apiIdEmailReplacedBack.toString());
+        subscriptionDTO.setApplicationId(subscription.getApplication().getUUID());
+        subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.valueOf(subscription.getSubStatus()));
+        subscriptionDTO.setTier(subscription.getTier() == null ? null : subscription.getTier().getName());
+        if (workflowReferenceId != null && SubscriptionDTO.StatusEnum.ON_HOLD.name()
+                .equals(subscription.getSubStatus())) {
+            subscriptionDTO.setWorkflowId(workflowReferenceId);
+        }
         return subscriptionDTO;
     }
 

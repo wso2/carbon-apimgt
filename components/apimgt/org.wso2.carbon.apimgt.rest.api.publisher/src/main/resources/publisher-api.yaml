@@ -1952,7 +1952,7 @@ paths:
             OK.
             Subscription returned
           schema:
-            $ref: '#/definitions/Subscription'
+            $ref: '#/definitions/ExtendedSubscription'
           headers:
             Content-Type:
               description: The content type of the body.
@@ -3550,6 +3550,20 @@ definitions:
           - ON_HOLD
           - REJECTED
         example: UNBLOCKED
+
+#-----------------------------------------------------
+# The Extended Subscription resource
+#-----------------------------------------------------
+  ExtendedSubscription:
+    title: Subscription with Ext. Workflow Reference
+    required:
+      - workflowId
+    allOf:
+      - $ref: '#/definitions/Subscription'
+      - properties:
+          workflowId:
+            type: string
+            example: 01234567-0123-0123-0123-012345678901
 
 #-----------------------------------------------------
 # The Sequence resource
