@@ -48,43 +48,40 @@ public class GenerateArchivesTest {
 
     @Test
     public void testGenerateMainArchives() {
-        String type = "main";
         String packagePath = "org/wso2/carbon/apimgt/gateway/auth";
         String targetName = temDir.getAbsolutePath() + File.separator + "auth";
         try {
-            generateArchives.main(new String[] { type, srcDir, packagePath, targetName });
+            generateArchives.main(new String[] {srcDir, packagePath, targetName });
         } catch (Exception e) {
             //catching Exception class to catch all the runtime exceptions
             log.error("error generating archives ", e);
             Assert.fail("Exception occurred while building ballerina sources");
         }
-        File authBMZ = new File(temDir + File.separator + "auth.bmz");
-        Assert.assertTrue(authBMZ.exists(), "auth.bmz archive generation failed");
+        File authBALX = new File(temDir + File.separator + "auth.balx");
+        Assert.assertTrue(authBALX.exists(), "auth.balx archive generation failed");
     }
 
     @Test
     public void testGenerateServiceArchives() {
-        String type = "service";
         String packagePath = "org/wso2/carbon/apimgt/gateway/services";
         String targetName = temDir.getAbsolutePath() + File.separator + "services";
         try {
-            generateArchives.main(new String[] { type, srcDir, packagePath, targetName });
+            generateArchives.main(new String[] {srcDir, packagePath, targetName });
         } catch (Exception e) {
             //catching Exception class to catch all the runtime exceptions
             log.error("error generating archives ", e);
             Assert.fail("Exception occurred while building ballerina sources");
         }
-        File authBMZ = new File(temDir + File.separator + "services.bsz");
-        Assert.assertTrue(authBMZ.exists(), "service.bsz archive generation failed");
+        File servicesBALX = new File(temDir + File.separator + "services.balx");
+        Assert.assertTrue(servicesBALX.exists(), "service.balx archive generation failed");
     }
 
     @Test
     public void testGenerateArchivesFromInvalidFile() {
-        String type = "main";
         String packagePath = "org/wso2/carbon/apimgt/gateway/invalidfile/invalidfile.notbal";
         String targetName = temDir.getAbsolutePath() + File.separator + "invalidfile";
         try {
-            generateArchives.main(new String[] { type, srcDir, packagePath, targetName });
+            generateArchives.main(new String[] {srcDir, packagePath, targetName });
             Assert.fail("Exception should be occurred for non ballerina files");
         } catch (IllegalArgumentException e) {
             log.error("error generating archives ", e);
@@ -93,11 +90,10 @@ public class GenerateArchivesTest {
 
     @Test
     public void testGenerateArchivesFromValidBalFile() {
-        String type = "main";
         String packagePath = "org/wso2/carbon/apimgt/gateway/bal/validfile.bal";
         String targetName = temDir.getAbsolutePath() + File.separator + "validfile";
         try {
-            generateArchives.main(new String[] { type, srcDir, packagePath, targetName });
+            generateArchives.main(new String[] {srcDir, packagePath, targetName });
         } catch (IllegalArgumentException e) {
             log.error("error generating archives ", e);
             Assert.fail("Exception should not be occurred for valid ballerina files");
@@ -107,11 +103,10 @@ public class GenerateArchivesTest {
 
     @Test
     public void testGenerateArchivesFromInvalidPath() {
-        String type = "main";
         String packagePath = "org/wso2/carbon/apimgt/gateway/nopackage";
         String targetName = temDir.getAbsolutePath() + File.separator + "nopackage";
         try {
-            generateArchives.main(new String[] { type, srcDir, packagePath, targetName });
+            generateArchives.main(new String[] {srcDir, packagePath, targetName });
             Assert.fail("Exception should be occurred for invalid source path");
         } catch (RuntimeException e) {
             log.error("error generating archives ", e);

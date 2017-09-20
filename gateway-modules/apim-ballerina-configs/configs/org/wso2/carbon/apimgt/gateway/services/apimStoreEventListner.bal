@@ -9,7 +9,7 @@ import ballerina.lang.strings;
 import org.wso2.carbon.apimgt.gateway.constants as Constants;
 import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
 
-@jms:config {
+@jms:configuration {
     initialContextFactory:"org.apache.activemq.jndi.ActiveMQInitialContextFactory",
     providerUrl:"tcp://localhost:61616",
     connectionFactoryType:"topic",
@@ -19,7 +19,9 @@ import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
 
 service<jms> apimStoreEventListner {
 
-    @http:GET {}
+    @http:resourceConfig {
+        methods: ["GET"]
+    }
     resource onMessage (message m) {
         try {
             errors:TypeCastError err;

@@ -50,7 +50,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
     @Override
     public Response compositeApisApiIdDelete(String apiId, String ifMatch, String ifUnmodifiedSince, Request request)
             throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String existingFingerprint = compositeApisApiIdDeleteFingerprint(apiId, ifMatch,
@@ -83,7 +83,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
     @Override
     public Response compositeApisApiIdGet(String apiId, String ifNoneMatch, String ifModifiedSince,
             Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             if (!RestApiUtil.getConsumer(username).isCompositeAPIExist(apiId)) {
                 String errorMessage = "API not found : " + apiId;
@@ -118,7 +118,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
     @Override
     public Response compositeApisApiIdImplementationGet(String apiId, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String existingFingerprint = compositeApisApiIdImplementationGetFingerprint(apiId, ifNoneMatch,
@@ -142,7 +142,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
     public Response compositeApisApiIdImplementationPut(String apiId,
             InputStream apiImplementationInputStream, FileInfo apiImplementationDetail, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String existingFingerprint = compositeApisApiIdImplementationGetFingerprint(apiId, null, null, request);
@@ -182,7 +182,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
     @Override
     public Response compositeApisApiIdPut(String apiId, CompositeAPIDTO body, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String existingFingerprint = compositeApisApiIdGetFingerprint(apiId, null, null, request);
@@ -218,7 +218,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
     @Override
     public Response compositeApisApiIdSwaggerGet(String apiId, String ifNoneMatch, String ifModifiedSince,
             Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String existingFingerprint = compositeApisApiIdSwaggerGetFingerprint(apiId, ifNoneMatch, ifModifiedSince,
@@ -251,7 +251,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
     @Override
     public Response compositeApisApiIdSwaggerPut(String apiId, String apiDefinition, String ifMatch,
             String ifUnmodifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             String existingFingerprint = compositeApisApiIdSwaggerGetFingerprint(apiId, null, null, request);
@@ -274,7 +274,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
     @Override
     public Response compositeApisGet(Integer limit, Integer offset, String query, String ifNoneMatch,
             Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         CompositeAPIListDTO apiListDTO = null;
         try {
             apiListDTO = CompositeAPIMappingUtil.toCompositeAPIListDTO(RestApiUtil.getConsumer(username).
@@ -290,7 +290,7 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
 
     @Override
     public Response compositeApisPost(CompositeAPIDTO body, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             CompositeAPI.Builder apiBuilder = CompositeAPIMappingUtil.toAPI(body);
             APIStore apiStore = RestApiUtil.getConsumer(username);
@@ -324,32 +324,33 @@ public class CompositeApisApiServiceImpl extends CompositeApisApiService {
 
     private String compositeApisApiIdDeleteFingerprint(String apiId, String ifMatch, String ifUnmodifiedSince,
                                                        Request request) {
-        return getEtag(apiId);
+        return getEtag(apiId, request.getProperty("LOGGED_IN_USER").toString());
     }
 
     private String compositeApisApiIdGetFingerprint(String apiId, String ifNoneMatch, String ifModifiedSince,
             Request request) {
-        return getEtag(apiId);
+        return getEtag(apiId, request.getProperty("LOGGED_IN_USER").toString());
     }
 
     private String compositeApisApiIdSwaggerGetFingerprint(String apiId, String ifNoneMatch, String ifModifiedSince,
             Request request) {
-        return getEtag(apiId);
+        return getEtag(apiId, request.getProperty("LOGGED_IN_USER").toString());
     }
 
     private String compositeApisApiIdImplementationGetFingerprint(String apiId, String ifNoneMatch,
             String ifModifiedSince, Request request) {
-        return getEtag(apiId);
+        return getEtag(apiId, request.getProperty("LOGGED_IN_USER").toString());
     }
 
     /**
      * Retrieves last updatedtime for an API given the api id
      *
      * @param apiId API ID
+     * @param loggedInUser
      * @return Last updated time
      */
-    private String getEtag(String apiId){
-        String username = RestApiUtil.getLoggedInUsername();
+    private String getEtag(String apiId, String loggedInUser){
+        String username = loggedInUser;
         String eTag = "";
         try {
             String lastUpdatedTime = RestApiUtil.getConsumer(username).getLastUpdatedTimeOfAPI(apiId);

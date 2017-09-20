@@ -3,7 +3,7 @@ import ballerina.lang.system;
 import ballerina.lang.errors;
 
 function testParseJson () (boolean) {
-    string actual = "{\"enabled\":false,\"type\":null,\"username\":null,\"password\":null}";
+    string actual = "{\"enabled\":false,\"typeAttr\":null,\"username\":null,\"password\":null}";
     json parsedJson = util:parse(actual);
     system:println(parsedJson);
     if (parsedJson != null) {
@@ -11,11 +11,11 @@ function testParseJson () (boolean) {
         errors:TypeCastError err;
         boolean enabled;
         enabled, err = (boolean)parsedJson.enabled;
-        string type;
+        string typeAttr;
         string username;
         string password;
-        if(parsedJson.type != null){
-            type, err = (string)parsedJson.type;
+        if(parsedJson.typeAttr != null){
+            typeAttr, err = (string)parsedJson.typeAttr;
         }
         if(parsedJson.username != null){
             username, err = (string)parsedJson.username;

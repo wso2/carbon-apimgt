@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.rest.api.common.exception.BadRequestException;
 import org.wso2.carbon.transport.http.netty.config.ListenerConfiguration;
 import org.wso2.carbon.transport.http.netty.config.TransportsConfiguration;
 import org.wso2.carbon.transport.http.netty.config.YAMLTransportConfigurationBuilder;
+import org.wso2.msf4j.Request;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
@@ -53,6 +54,7 @@ public class RestApiUtil {
     private static String publisherRestAPIDefinition;
     private static String storeRestAPIDefinition;
     private static String adminRestAPIDefinition;
+    private static final String LOGGED_IN_USER = "LOGGED_IN_USER";
     private static final String HTTP = "http";
     private static final String HTTPS = "https";
     private static APIMConfigurations apimConfigurations = APIMConfigurationService.getInstance()
@@ -61,12 +63,17 @@ public class RestApiUtil {
     /**
      * Get the current logged in user's username
      * @return The current logged in user.
+     * @param request
      */
-    public static String getLoggedInUsername() {
-//        CarbonContext carbonContext = CarbonContext.getCurrentContext();
-//        Principal principal = carbonContext.getUserPrincipal();
-//        return principal.getName();
-        return "admin";
+    public static String getLoggedInUsername(Request request) {
+        String loggedInUser = null;
+        try {
+            loggedInUser = request.getProperty(LOGGED_IN_USER).toString();
+       } catch (NullPointerException e) {
+           String message = "Error while getting loggedInUser from request";
+           log.error(message, e);
+       }
+        return loggedInUser;
     }
 
     /**

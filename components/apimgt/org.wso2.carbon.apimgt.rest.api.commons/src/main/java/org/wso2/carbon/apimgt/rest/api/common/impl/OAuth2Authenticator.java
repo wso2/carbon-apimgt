@@ -51,6 +51,7 @@ import java.util.Optional;
  */
 public class OAuth2Authenticator implements RESTAPIAuthenticator {
     private static final Logger log = LoggerFactory.getLogger(OAuth2Authenticator.class);
+    private static final String LOGGED_IN_USER = "LOGGED_IN_USER";
     private static String authServerURL;
 
     static {
@@ -87,11 +88,13 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
                         partialTokenFromCookie;
             }
             isTokenValid = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
+            request.setProperty(LOGGED_IN_USER, getEndUserName(accessToken));
         } else if (headers != null && headers.contains(RestApiConstants.AUTHORIZATION_HTTP_HEADER)) {
             String authHeader = headers.get(RestApiConstants.AUTHORIZATION_HTTP_HEADER);
             String accessToken = extractAccessToken(authHeader);
             if (accessToken != null) {
                 isTokenValid = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
+                request.setProperty(LOGGED_IN_USER, getEndUserName(accessToken));
             }
         } else {
             throw new APIMgtSecurityException("Missing Authorization header in the request.`",
@@ -109,6 +112,18 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
 
         //scope validation
         return validateScopes(request, serviceMethodInfo, accessTokenInfo.getScopes(), restAPIResource);
+    }
+
+    /**
+     * Extract the EndUsername from accessToken.
+     *
+     * @param accessToken the access token
+     * @return loggedInUser if the token is a valid token
+     */
+    private String getEndUserName(String accessToken) throws APIMgtSecurityException {
+        String loggedInUser;
+        loggedInUser = validateToken(accessToken).getEndUserName();
+        return loggedInUser.substring(0, loggedInUser.lastIndexOf("@"));
     }
 
     /**

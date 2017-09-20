@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ /*
-  ~ * Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
   ~ *
   ~ * Licensed under the Apache License, Version 2.0 (the "License");
   ~ * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>7.0.40-SNAPSHOT</version>
+    <version>7.0.41-SNAPSHOT</version>
 
     <name>WSO2 Carbon - API Management Aggregator POM</name>
 
@@ -123,6 +123,17 @@
                 <artifactId>org.wso2.carbon.apimgt.store.feature</artifactId>
                 <version>${carbon.apimgt.version}</version>
                 <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.admin.feature</artifactId>
+                <version>${carbon.apimgt.version}</version>
+                <type>zip</type>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.keymanager</artifactId>
+                <version>${carbon.apimgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.datasources</groupId>
@@ -790,7 +801,7 @@
         <!-- Dependencies -->
         <carbon.kernel.version>5.2.0-m3</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[5.1.0, 6.0.0)</carbon.kernel.package.import.version.range>
-        <carbon.apimgt.version>7.0.40-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>7.0.41-SNAPSHOT</carbon.apimgt.version>
 
         <carbon.datasources.version>1.0.0</carbon.datasources.version>
 
@@ -813,6 +824,8 @@
 
         <carbon.transport.version>4.3.0-m1</carbon.transport.version>
         <carbon.transport.package.import.version.range>[4.2.0, 5.0.0)</carbon.transport.package.import.version.range>
+
+        <gateway.carbon.transport.version>6.0.1</gateway.carbon.transport.version>
 
         <axiom.version>1.2.11-wso2v10</axiom.version>
         <axiom.import.version.range>[1.2.10-wso2v10,1.2.12-wso2v10)</axiom.import.version.range>
@@ -922,6 +935,6 @@
         <wsdl4j.version>1.6.2.wso2v4</wsdl4j.version>
         <xmlschema.version>1.4.7.wso2v2</xmlschema.version>
 
-        <ballerina.version>0.89</ballerina.version>
+        <ballerina.version>0.93</ballerina.version>
     </properties>
 </project>

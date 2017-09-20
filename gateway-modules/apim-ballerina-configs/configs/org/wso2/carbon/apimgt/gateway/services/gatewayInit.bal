@@ -20,11 +20,17 @@ function initGateway () (boolean) {
 
     try {
         //Register gateway in API Core
+        system:println("Registering gateway...");
         gatewayUtil:registerGateway();
+        system:println("Gateway registered successfully.");
         //Retrieve APIs from API Core and deploy
         gatewayUtil:loadAPIs();
+        system:println("Loaded APIs successfully.");
         gatewayUtil:loadGlobalEndpoints();
+        system:println("Loaded global endpoints successfully.");
         gatewayUtil:loadBlockConditions();
+        system:println("Loaded block conditions successfully.");
+        //gatewayUtil:deployFile("a","b");
     } catch (errors:Error e) {
         system:println("Error while initilazing API gateway. " + e.msg);
     }

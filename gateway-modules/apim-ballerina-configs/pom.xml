@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-gateway-modules</artifactId>
-        <version>7.0.40-SNAPSHOT</version>
+        <version>7.0.41-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -50,6 +50,11 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.ballerina.publisher</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.transport</groupId>
+            <artifactId>org.wso2.carbon.transport.http.netty</artifactId>
+            <version>${gateway.carbon.transport.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -68,7 +73,6 @@
                         <configuration>
                             <mainClass>org.wso2.carbon.apimgt.plugin.GenerateArchives</mainClass>
                             <arguments>
-                                <argument>main</argument>
                                 <argument>${project.basedir}/configs</argument>
                                 <argument>org/wso2/carbon/apimgt/gateway/auth/</argument>
                                 <argument>${project.build.directory}/auth</argument>
@@ -84,7 +88,6 @@
                         <configuration>
                             <mainClass>org.wso2.carbon.apimgt.plugin.GenerateArchives</mainClass>
                             <arguments>
-                                <argument>main</argument>
                                 <argument>${project.basedir}/configs</argument>
                                 <argument>org/wso2/carbon/apimgt/gateway/throttle/</argument>
                                 <argument>${project.build.directory}/throttle</argument>
@@ -100,7 +103,6 @@
                         <configuration>
                             <mainClass>org.wso2.carbon.apimgt.plugin.GenerateArchives</mainClass>
                             <arguments>
-                                <argument>service</argument>
                                 <argument>${project.basedir}/configs</argument>
                                 <argument>org/wso2/carbon/apimgt/gateway/services/</argument>
                                 <argument>${project.build.directory}/services</argument>
@@ -116,7 +118,6 @@
                         <configuration>
                             <mainClass>org.wso2.carbon.apimgt.plugin.GenerateArchives</mainClass>
                             <arguments>
-                                <argument>main</argument>
                                 <argument>${project.basedir}/configs</argument>
                                 <argument>org/wso2/carbon/apimgt/gateway/handler/</argument>
                                 <argument>${project.build.directory}/analytics</argument>

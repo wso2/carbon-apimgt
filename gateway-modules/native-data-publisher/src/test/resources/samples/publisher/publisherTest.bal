@@ -29,5 +29,5 @@ function publishData () {
                         };
 
     publisher:EventConnector das = create publisher:EventConnector(propertiesMap);
-    publisher:EventConnector.publish(das, event);
+    das.publish(event);
 }

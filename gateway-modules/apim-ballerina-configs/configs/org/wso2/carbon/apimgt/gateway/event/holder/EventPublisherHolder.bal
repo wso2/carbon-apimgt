@@ -46,7 +46,7 @@ function getPublisherInstance (map propertiesMap) (publisher:EventConnector) {
 function getAnalyticsConfigMap () (map) {
     dto:AnalyticsInfoDTO dto = holders:getAnalyticsConf ();
     map propertiesMap = {
-                        "type": dto.type,
+                        "type": dto.protocol,
                         "receiverURLSet": dto.serverURL,
                         "authURLSet": dto.authServerURL,
                         "username": dto.credentials.username,
@@ -59,7 +59,7 @@ function getAnalyticsConfigMap () (map) {
 function getThrottleConfigMap () (map) {
     dto:ThrottlingInfoDTO dto = holders:getThrottleConf ();
     map propertiesMap = {
-                        "type": dto.type,
+                        "type": dto.protocol,
                         "receiverURLSet": dto.serverURL,
                         "authURLSet": dto.authServerURL,
                         "username": dto.credentials.username,

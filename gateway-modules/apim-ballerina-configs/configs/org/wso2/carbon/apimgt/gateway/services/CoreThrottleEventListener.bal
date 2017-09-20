@@ -10,7 +10,7 @@ import org.wso2.carbon.apimgt.gateway.utils as gatewayUtils;
 import org.wso2.carbon.apimgt.gateway.holders;
 import org.wso2.carbon.apimgt.gateway.dto;
 
-@jms:config {
+@jms:configuration {
     initialContextFactory:"org.apache.activemq.jndi.ActiveMQInitialContextFactory",
     providerUrl:"tcp://localhost:61616",
     connectionFactoryType:"topic",
@@ -20,7 +20,9 @@ import org.wso2.carbon.apimgt.gateway.dto;
 
 service<jms> ThrottleCoreJmsService {
 
-    @http:GET {}
+    @http:resourceConfig {
+        methods: ["GET"]
+    }
     resource onMessage (message m) {
         json event = messages:getJsonPayload(m);
         errors:TypeCastError err;

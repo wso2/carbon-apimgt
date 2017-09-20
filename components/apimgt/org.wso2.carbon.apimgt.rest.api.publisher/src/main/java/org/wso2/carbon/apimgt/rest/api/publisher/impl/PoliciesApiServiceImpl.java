@@ -6,9 +6,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
@@ -37,7 +35,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
     @Override
     public Response policiesTierLevelGet(String tierLevel, Integer limit, Integer offset, String ifNoneMatch,
             Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
 
         log.info("Received Policy GET request for tierLevel " + tierLevel);
 
@@ -68,7 +66,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
     @Override
     public Response policiesTierLevelTierNameGet(String tierName, String tierLevel, String ifNoneMatch,
             String ifModifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         String existingFingerprint = policiesTierLevelTierNameGetFingerprint(tierName, tierLevel, ifNoneMatch,
                 ifModifiedSince, request);
         if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
@@ -100,7 +98,7 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
      */
     public String policiesTierLevelTierNameGetFingerprint(String tierName, String tierLevel, String ifNoneMatch,
             String ifModifiedSince, Request request) {
-        String username = RestApiUtil.getLoggedInUsername();
+        String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
                     .getLastUpdatedTimeOfThrottlingPolicy(RestApiUtil.mapRestApiPolicyLevelToPolicyLevelEnum
