@@ -116,9 +116,9 @@ export default class BusinessPlans extends Component {
                                       <TableCell>{n.policyName}</TableCell>
                                       <TableCell>{n.defaultLimit.type}</TableCell>
                                       <TableCell>{n.defaultLimit.requestCountLimit.requestCount}</TableCell>
-                                      <TableCell>{n.defaultLimit.unitTime}</TableCell>
+                                      <TableCell>{n.defaultLimit.unitTime} {n.defaultLimit.timeUnit}</TableCell>
                                       <TableCell>{n.rateLimitCount}</TableCell>
-                                      <TableCell>{n.defaultLimit.timeUnit}</TableCell>
+                                      <TableCell>{n.rateLimitTimeUnit}</TableCell>
                                       <TableCell>
                                       <span>
                                          <Link to={"/policies/business_plans/" + n.id}>

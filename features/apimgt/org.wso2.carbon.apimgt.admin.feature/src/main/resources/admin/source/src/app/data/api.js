@@ -95,6 +95,20 @@ class API {
             }
         );
     }
+
+    /**
+     * Create subscription level policy
+     * @returns {Promise} Promised policies response
+     */
+    createSubscriptionLevelPolicy(body) {
+      let payload = {body: body, "Content-Type": "application/json"};
+        return this.client.then(
+            (client) => {
+                return client.apis["Subscription Policies"].post_policies_throttling_subscription(
+                    payload, this._requestMetaData());
+            }
+        );
+    }
 }
 
 export default API
