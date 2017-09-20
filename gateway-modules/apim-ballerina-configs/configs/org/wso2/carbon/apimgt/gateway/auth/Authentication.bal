@@ -55,26 +55,26 @@ function authenticate (message m) (boolean, message) {
     authHeader, authErr = extractHeaderWithName(constants:AUTHORIZATION, m);
     apikeyHeader, apikeyErr = extractHeaderWithName("apikey", m);
     string apiKey = apikeyHeader;
-try {
-    dto:APIKeyDTO apiKeyDto = holder:getFromAPIKeyCache(apiContext, apiKey);
-    //system:println(apiKeyDto);
-    if (apiKeyDto != null) {
-        system:println("apiKeyDto not null");
-        if (apikeyErr == null && apiKeyDto.securityScheme == 2) {
-            system:println("Api key check for MicroGateway");
-
-            state = true;
-            response = m;
-            return state, response;
-        } else {
-            messages:setHeader(response, "Content-Type", "application/json");
-            http:setStatusCode(response, 401);
-            gatewayUtil:constructIncorrectAuthorization(response);
-            return false, response;
-        }
-
-    }
-}catch(errors:NullReferenceError err) {
+//try {
+//    dto:APIKeyDTO apiKeyDto = holder:getFromAPIKeyCache(apiContext, apiKey);
+//    //system:println(apiKeyDto);
+//    if (apiKeyDto != null) {
+//        system:println("apiKeyDto not null");
+//        if (apikeyErr == null && apiKeyDto.securityScheme == 2) {
+//            system:println("Api key check for MicroGateway");
+//
+//            state = true;
+//            response = m;
+//            return state, response;
+//        } else {
+//            messages:setHeader(response, "Content-Type", "application/json");
+//            http:setStatusCode(response, 401);
+//            gatewayUtil:constructIncorrectAuthorization(response);
+//            return false, response;
+//        }
+//
+//    }
+//}catch(errors:NullReferenceError err) {
     dto:APIDTO apiDto = holder:getFromAPICache(apiIdentifier);
 
     if (apiDto == null) {
@@ -209,7 +209,7 @@ try {
         gatewayUtil:constructIncorrectAuthorization(response);
         return false, response;
     }
-}
+//}
     return state, response;
 }
 
@@ -233,6 +233,7 @@ function validateSubscription (string apiContext, string version, dto:Introspect
     return subscriptionDto;
 }
 function validateResource (string apiContext, string apiVersion, string uriTemplate, string verb) (dto:ResourceDto) {
+    system:println();
     dto:ResourceDto resourceDto = holder:getFromResourceCache(apiContext, apiVersion, uriTemplate, verb);
     return resourceDto;
 }
