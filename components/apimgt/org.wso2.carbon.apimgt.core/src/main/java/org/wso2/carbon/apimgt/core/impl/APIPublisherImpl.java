@@ -59,6 +59,7 @@ import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.exception.NotificationException;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.executors.NotificationExecutor;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
@@ -2038,7 +2039,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     private void sendEmailNotification(String apiId, String apiName, String newVersion)
             throws APIManagementException {
         Set<String> subscriberList;
-        NotificationConfigurations notificationConfigurations = new NotificationConfigurations();
+        NotificationConfigurations notificationConfigurations = ServiceReferenceHolder.getInstance().
+                getAPIMConfiguration().getNotificationConfigurations();
 
         // check notification Enabled
         if (notificationConfigurations.getNotificationEnable()) {
@@ -2054,7 +2056,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                             .NOTIFICATION_TYPE_NEW_VERSION);
                     new NotificationExecutor().sendAsyncNotifications(notificationDTO);
                 } catch (NotificationException e) {
-                   log.error(e.getMessage());
+                    String msg = "Error occurred while sending Async Notifications";
+                    log.error(msg, e);
                 }
             }
         }
