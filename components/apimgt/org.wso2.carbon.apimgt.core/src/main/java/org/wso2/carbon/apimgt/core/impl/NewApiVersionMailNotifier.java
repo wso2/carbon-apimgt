@@ -22,9 +22,9 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.MailConfigurations;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.template.dto.NotificationDTO;
 
 import java.util.HashSet;
@@ -46,7 +46,7 @@ import javax.mail.internet.MimeMessage;
  */
 public class NewApiVersionMailNotifier extends Notifier {
     private static final Log log = LogFactory.getLog(NewApiVersionMailNotifier.class);
-    static MailConfigurations mailConfigurations = new APIMConfigurations().
+    static MailConfigurations mailConfigurations = ServiceReferenceHolder.getInstance().getAPIMConfiguration().
             getNotificationConfigurations().getMailConfigurations();
     private static final String SMTP_HOST_NAME = mailConfigurations.getSmtpHostname();
     private static final String SMTP_AUTH_USER = mailConfigurations.getSmtpAuthUser();
@@ -57,20 +57,16 @@ public class NewApiVersionMailNotifier extends Notifier {
     public void sendNotifications(NotificationDTO notificationDTO) throws
             APIManagementException {
 
-        Properties props = new Properties();
-        props.put("mail.smtp.host", SMTP_HOST_NAME);
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.port", "587");
-        props.put("mail.transport.protocol", "smtp");
-        //get Notifier email List
-        Set<String> sendTo = getEmailNotifierList(notificationDTO);
 
-        if (sendTo.isEmpty()) {
+        Properties props = notificationDTO.getProperties();
+        //get Notifier email List
+        Set<String> emailList = getEmailNotifierList(notificationDTO);
+
+        if (emailList.isEmpty()) {
             log.debug("Email Notifier Set is Empty");
             return;
         }
-        for (String mail : sendTo) {
+        for (String mail : emailList) {
             try {
                 Authenticator auth = new SMTPAuthenticator();
                 Session mailSession = Session.getDefaultInstance(props, auth);
@@ -81,11 +77,8 @@ public class NewApiVersionMailNotifier extends Notifier {
                 message.setSubject(notificationDTO.getTitle());
                 message.setContent(notificationDTO.getMessage(), NotifierConstants.TEXT_TYPE);
                 message.setFrom(new InternetAddress(mailConfigurations.getFromUser()));
-
                 message.addRecipient(Message.RecipientType.TO, new InternetAddress(mail));
-
                 Transport.send(message);
-
             } catch (MessagingException e) {
                 log.error("Exception Occurred during Email notification Sending", e);
             }
