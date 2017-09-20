@@ -290,6 +290,26 @@ class API {
 
     }
 
+    addRating(api_id, ratingInfo, callback = null) {
+       alert("apiID : " + api_id);
+        var promise = this.client.then(
+            (client) => {
+                console.log(client.apis["API (individual)"]);
+                return client.apis["API (individual)"].put_apis__apiId__user_rating(
+                    {apiId: api_id, body: ratingInfo}, this._requestMetaData());
+            }
+        ).catch(
+             error => {
+                 alert("error in adding "+error);
+             }
+         );
+        if (callback) {
+            return promise.then(callback);
+        } else {
+            return promise;
+        }
+    }
+
     /**
      * Generate application keys
      * @param applicationId id of the application that needs to generate the keys

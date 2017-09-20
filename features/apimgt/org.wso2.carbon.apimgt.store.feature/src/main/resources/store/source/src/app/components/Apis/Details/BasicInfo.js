@@ -60,6 +60,7 @@ class BasicInfo extends Component {
         };
         this.api_uuid = this.props.uuid;
         this.logChange = this.logChange.bind(this);
+       // this.handleStarRatingUpdate = this.handleStarRatingUpdate(this);
     }
 
     componentDidMount() {
@@ -236,11 +237,6 @@ class BasicInfo extends Component {
         this.setState({matDropValue: val.value});
         console.log("Selected: " + JSON.stringify(val));
     }
-
-    mouseHoverOnRater() {
-
-    }
-    
     render() {
         const formItemLayout = {
             labelCol: {span: 6},
@@ -331,8 +327,7 @@ class BasicInfo extends Component {
                                 <TableRow>
                                     <TableCell>Rating</TableCell>
                                     <TableCell>
-                                        <StarRatingBar ratingProp = {this.state.previousRating}></StarRatingBar>
-                                        
+                                        <StarRatingBar apiIdProp = {this.api_uuid}></StarRatingBar>
                                     </TableCell>
                                 </TableRow>
 
@@ -396,15 +391,11 @@ class Star extends React.Component {
     }
 
     handleHoveringOver(event) {
-        this.props.passToRatingBar(this.props.name);
-    }
-
-    handleMouseClick(event) {
-
+        this.props.hoverOver(this.props.name);
+       // console.log(this.props);
     }
 
     render() {
-        //alert('rerendering star ' + (this.state.isRated));
         return this.props.isRated ?
             <span onMouseOver = {this.handleHoveringOver} style={{color: 'gold'}}>
                 ★
@@ -420,33 +411,55 @@ class StarRatingBar extends React.Component {
         super(props);
 
         this.state = {
-                        previousRating : this.props.ratingProp,
-                        rating : this.props.ratingProps
-
+                        previousRating : 0,
+                        rating : 0
                      };
 
         this.handleMouseOver = this.handleMouseOver.bind(this);
-
+        this.handleRatingUpdate = this.handleRatingUpdate.bind(this);
+        this.handleMouseOut = this.handleMouseOut.bind(this);
     }
 
     handleMouseOver(index) {
         this.setState({rating : index});
     }
 
-    handleMouseClick(index) {
-        //todo : update rating on mouse click
+    handleMouseOut() {
+       // alert("rating : " + this.state.rating + "previous rating : " + this.state.previousRating);
+        this.setState({rating : this.state.previousRating});
+    }
+
+    handleRatingUpdate() {
+       // alert("rating : " + this.state.rating + "api id : " + this.props.apiIdProp);
+        this.setState({previousRating : this.state.rating});
+        this.setState({rating : this.state.rating});
+        handleMouseOver(rating);
+
+        var api = new Api();
+        let ratingInfo = {"rating" : this.state.rating};
+        let promise = api.addRating(this.props.apiIdProp, ratingInfo);
+        promise.then(
+            response => {
+                message.success("Rating updated successfully :: rating : " + this.state.previousRating);
+            }).catch (
+                 error => {
+                     alert(error); //todo : remove this
+                     message.error("Error occurred while adding ratings!");
+                 }
+             );
     }
 
     render() {
         //alert('rerendering rater ' + (this.state.rating >= 3));
-        return (<div>
-                <Star name = {1} isRated = {this.state.rating >= 1} passToRatingBar = {this.handleMouseOver}> </Star>
-                <Star name = {2} isRated = {this.state.rating >= 2} passToRatingBar = {this.handleMouseOver}> </Star>
-                <Star name = {3} isRated = {this.state.rating >= 3} passToRatingBar = {this.handleMouseOver}> </Star>
-                <Star name = {4} isRated = {this.state.rating >= 4} passToRatingBar = {this.handleMouseOver}> </Star>
-                <Star name = {5} isRated = {this.state.rating >= 5} passToRatingBar = {this.handleMouseOver}> </Star>
+        return (<div onClick = {this.handleRatingUpdate} onMouseOut = {this.handleMouseOut}>
+                <Star name = {1} isRated = {this.state.rating >= 1} hoverOver = {this.handleMouseOver} > </Star>
+                <Star name = {2} isRated = {this.state.rating >= 2} hoverOver = {this.handleMouseOver} > </Star>
+                <Star name = {3} isRated = {this.state.rating >= 3} hoverOver = {this.handleMouseOver} > </Star>
+                <Star name = {4} isRated = {this.state.rating >= 4} hoverOver = {this.handleMouseOver} > </Star>
+                <Star name = {5} isRated = {this.state.rating >= 5} hoverOver = {this.handleMouseOver} > </Star>
                </div>);
     }
 }
+
 
 export default BasicInfo
