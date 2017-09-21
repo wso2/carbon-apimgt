@@ -8,7 +8,6 @@ const config = {
         path: path.resolve(__dirname, 'public/dist'),
         filename: '[name].js'
     },
-    devtool: "source-map",
     plugins: [],
     watch: false,
     module: {
@@ -50,6 +49,7 @@ const config = {
 
 if (process.env.NODE_ENV === "development") {
     config.watch = true;
+    config.devtool = "source-map";
 }
 
 module.exports = config;
