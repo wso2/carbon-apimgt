@@ -99,7 +99,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -2071,10 +2070,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * Discover and Return a list of service endpoints
      *
      * @return {@code List<Endpoint>}
-     * @throws ServiceDiscoveryException If an error occurred while discoverying services
+     * @throws APIManagementException If an error occurred while discovering services
      */
     @Override
-    public List<Endpoint> discoverServiceEndpoints() throws ServiceDiscoveryException {
+    public List<Endpoint> discoverServiceEndpoints() throws APIManagementException {
         List<Endpoint> discoveredEndpointList = null;
         ServiceDiscoverer serviceDiscoverer = null;
         try {
@@ -2083,12 +2082,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 discoveredEndpointList = serviceDiscoverer.listServices();
             } else {
                 String msg = "Service Discovery is not Enabled in the configuration";
-                throw new ServiceDiscoveryException(msg);
+                log.error(msg);
             }
         } catch (ServiceDiscoveryException e) {
-            String msg = "Failed to Discover Service Endpoints";
+            String msg = "Error while Discovering Service Endpoints";
             log.error(msg, e);
-            throw new ServiceDiscoveryException(msg, e);
+            throw new APIManagementException(msg, e, e.getErrorHandler());
         }
         return discoveredEndpointList;
     }
