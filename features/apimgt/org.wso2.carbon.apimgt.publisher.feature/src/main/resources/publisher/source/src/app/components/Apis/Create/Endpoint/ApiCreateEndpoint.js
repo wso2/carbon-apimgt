@@ -190,12 +190,13 @@ class ApiCreateEndpoint extends React.Component {
                         <TextField
                             error={!this.state.apiFields.apiVersion && this.state.validate}
                             id="apiVersion"
-                            label="Version"
+                            label="Version(Version input not support in this release)"
                             type="text"
                             name="apiVersion"
                             margin="normal"
+			    disabled= "true"
                             style={{width:"100%"}}
-                            value={this.state.apiFields.apiVersion}
+                            value="1.0.0"
                             onChange={this.inputChange}
                         />
                         <TextField
