@@ -15,19 +15,7 @@ import org.wso2.msf4j.formparam.FormDataParam;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.InputStream;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.HEAD;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
@@ -45,6 +33,7 @@ public class EndpointsApi implements Microservice  {
    private final EndpointsApiService delegate = EndpointsApiServiceFactory.getEndpointsApi();
 
     @DELETE
+    @OPTIONS
     @Path("/{endpointId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -69,6 +58,7 @@ public class EndpointsApi implements Microservice  {
         return delegate.endpointsEndpointIdDelete(endpointId,ifMatch,ifUnmodifiedSince, request);
     }
     @GET
+    @OPTIONS
     @Path("/{endpointId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -91,6 +81,7 @@ public class EndpointsApi implements Microservice  {
         return delegate.endpointsEndpointIdGet(endpointId,ifMatch,ifUnmodifiedSince, request);
     }
     @PUT
+    @OPTIONS
     @Path("/{endpointId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -116,7 +107,7 @@ public class EndpointsApi implements Microservice  {
         return delegate.endpointsEndpointIdPut(endpointId,body,ifMatch,ifUnmodifiedSince, request);
     }
     @GET
-    
+    @OPTIONS
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Get all endpoints", notes = "This operation can be used to retrieve the list of endpoints available. ", response = EndPointListDTO.class, authorizations = {
@@ -137,7 +128,7 @@ public class EndpointsApi implements Microservice  {
         return delegate.endpointsGet(ifNoneMatch,ifModifiedSince, request);
     }
     @HEAD
-    
+    @OPTIONS
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Check given Endpoint is already exist ", notes = "Using this operation, you can check a given Endpoint name is already used. You need to provide the name you want to check. ", response = void.class, authorizations = {
@@ -160,7 +151,7 @@ public class EndpointsApi implements Microservice  {
         return delegate.endpointsHead(name,ifNoneMatch, request);
     }
     @POST
-    
+    @OPTIONS
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Add a new endpoint", notes = "This operation can be used to add a new endpoint. ", response = EndPointDTO.class, authorizations = {

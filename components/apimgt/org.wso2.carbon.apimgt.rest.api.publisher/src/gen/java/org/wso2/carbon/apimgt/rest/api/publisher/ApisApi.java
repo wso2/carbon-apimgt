@@ -40,6 +40,7 @@ public class ApisApi implements Microservice  {
    private final ApisApiService delegate = ApisApiServiceFactory.getApisApi();
 
     @DELETE
+    @OPTIONS
     @Path("/{apiId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -122,6 +123,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdDocumentsDocumentIdContentPost(apiId,documentId,fileInputStream, fileDetail,inlineContent,ifMatch,ifUnmodifiedSince, request);
     }
     @DELETE
+    @OPTIONS
     @Path("/{apiId}/documents/{documentId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -171,6 +173,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdDocumentsDocumentIdGet(apiId,documentId,ifNoneMatch,ifModifiedSince, request);
     }
     @PUT
+    @OPTIONS
     @Path("/{apiId}/documents/{documentId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -272,6 +275,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdGatewayConfigGet(apiId,ifNoneMatch,ifModifiedSince, request);
     }
     @PUT
+    @OPTIONS
     @Path("/{apiId}/gateway-config")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
@@ -324,6 +328,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdGet(apiId,ifNoneMatch,ifModifiedSince, request);
     }
     @GET
+    @OPTIONS
     @Path("/{apiId}/lifecycle")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -373,6 +378,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisApiIdLifecycleHistoryGet(apiId,ifNoneMatch,ifModifiedSince, request);
     }
     @DELETE
+    @OPTIONS
     @Path("/{apiId}/lifecycle/lifecycle-pending-task")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -658,7 +664,7 @@ public class ApisApi implements Microservice  {
         return delegate.apisGet(limit,offset,query,ifNoneMatch, request);
     }
     @HEAD
-    
+    @OPTIONS
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Check given API attibute name is already exist ", notes = "Using this operation, you can check a given API context is already used. You need to provide the context name you want to check. ", response = void.class, authorizations = {

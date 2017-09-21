@@ -99,7 +99,8 @@ public class RESTAPISecurityInterceptor implements Interceptor {
 
             response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE, HEAD");
             response.setHeader("Access-Control-Allow-Headers", "Accept, Accept-Encoding, Accept-Language," +
-                    " authorization, Cache-Control, Connection, Cookie, Host, Pragma, Referer, User-Agent");
+                    " authorization, Cache-Control, Connection, Cookie, Host, Pragma," +
+                    " Referer, User-Agent, Content-Type");
             response.setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).send();
             return false;
         }

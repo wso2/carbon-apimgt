@@ -35,6 +35,7 @@ import PlaylistAddIcon from 'material-ui-icons/PlaylistAdd';
 import CloseIcon from 'material-ui-icons/Close';
 import TextField from 'material-ui/TextField';
 import InfoIcon from 'material-ui-icons/Info';
+
 import InfoLightBulb from 'material-ui-icons/LightbulbOutline';
 import List, {
     ListItem,
@@ -67,8 +68,10 @@ class Header extends React.Component {
             searchVisible: false,
             openTips: false,
             showLeftMenu: this.props.showLeftMenu,
-            availableEnv:[]
+            availableEnv:[],
+            value: localStorage.getItem('currentEnv')
         }
+        this.handleChange = this.handleChange.bind(this);
     }
     componentDidMount(){
         let envdetails = new ConfigManager();
@@ -78,7 +81,9 @@ class Header extends React.Component {
             this.setState({availableEnv: allAvailableEnv});
 
         })
-        //console.log(this.state.availableEnv);
+
+        this.setState({value: localStorage.getItem("currentEnv")});
+        console.log(localStorage.getItem("currentEnv"));
     }
 
     handleClickUserMenu = event => {
@@ -112,6 +117,12 @@ class Header extends React.Component {
     handleRequestCloseTips = () => {
         this.setState({ openTips: false });
     };
+    handleChange(event) {
+        let envalue = event.target.value;
+        localStorage.setItem("currentEnv",envalue);
+        this.setState({value: event.target.value});
+        location.reload();
+    };
     componentWillReceiveProps(nextProps){
         if(nextProps.showLeftMenu){
             this.setState({showLeftMenu:nextProps.showLeftMenu});
@@ -119,6 +130,12 @@ class Header extends React.Component {
     }
 
     render(props) {
+        const intialValue = this.state.value;
+        const environmentLength = this.state.availableEnv.length;
+        let styles = {
+            background: "#3f51b5",
+            border: 0
+        };
         let user = AuthManager.getUser();
         const focusUsernameInputField = input => {
             input && input.focus();
@@ -174,6 +191,10 @@ class Header extends React.Component {
 
                             </Link>
                         </Typography>
+                        <select value={intialValue} onChange={this.handleChange} style={styles}>
+                            {this.state.availableEnv.map(environment => <option
+                                value={environment.env}>{environment.env}</option>)}
+                        </select>
                         { user ?
                             <div style={{display:"flex"}}>
                                 <IconButton aria-label="Search" onClick={this.toggleSearch} color="contrast">
@@ -238,12 +259,8 @@ class Header extends React.Component {
                                     </MenuItem>
                                 </Menu>
 
-                                <select color="contrast">
-                                    <option value="volvo">Volvo</option>
-                                    <option value="saab">Saab</option>
-                                    <option value="opel">Opel</option>
-                                    <option value="audi">Audi</option>
-                                </select>
+
+
                             </div>
                             :
                             <div></div> }
