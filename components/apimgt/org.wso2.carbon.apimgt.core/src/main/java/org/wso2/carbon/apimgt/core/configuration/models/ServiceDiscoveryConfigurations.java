@@ -7,7 +7,7 @@ import org.wso2.carbon.kernel.annotations.Element;
  * Class to hold Service Discovery configurations and generate yaml file
  */
 @Configuration(namespace = "wso2.carbon.serviceDiscovery", description = "Service Discovery configurations")
-public class ServiceDiscoveryConfiurations {
+public class ServiceDiscoveryConfigurations {
 
     //kubernetes
     private String serviceAccountToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlc" +

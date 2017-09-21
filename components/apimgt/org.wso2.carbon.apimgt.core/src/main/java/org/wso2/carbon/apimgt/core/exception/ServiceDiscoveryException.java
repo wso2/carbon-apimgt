@@ -9,7 +9,19 @@ public class ServiceDiscoveryException extends APIManagementException {
         super(msg);
     }
 
+    public ServiceDiscoveryException(Throwable throwable) {
+        super(throwable);
+    }
+
     public ServiceDiscoveryException(String message, Throwable e) {
         super(message, e);
+    }
+
+    public ServiceDiscoveryException(String msg, ExceptionCodes code) {
+        super(msg, code);
+    }
+
+    public ServiceDiscoveryException(String msg, Throwable e, ExceptionCodes code) {
+        super(msg, e, code);
     }
 }

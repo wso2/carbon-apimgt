@@ -3,7 +3,6 @@ package org.wso2.carbon.apimgt.core.api;
 import org.wso2.carbon.apimgt.core.exception.ServiceDiscoveryException;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 
-import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.List;
 

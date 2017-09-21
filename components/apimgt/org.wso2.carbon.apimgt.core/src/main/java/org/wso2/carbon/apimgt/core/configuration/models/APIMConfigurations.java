@@ -74,6 +74,9 @@ public class APIMConfigurations {
     @Element(description = "Throttling Configurations")
     private ThrottlingConfigurations throttlingConfigurations = new ThrottlingConfigurations();
 
+    @Element(description = "Service Discovery Configurations")
+    private ServiceDiscoveryConfigurations serviceDiscoveryConfigurations = new ServiceDiscoveryConfigurations();
+
     @Element(description = "comment moderator role")
     private String commentModeratorRole = "comment-moderator";
 
@@ -217,6 +220,14 @@ public class APIMConfigurations {
 
     public void setThrottlingConfigurations(ThrottlingConfigurations throttlingConfigurations) {
         this.throttlingConfigurations = throttlingConfigurations;
+    }
+
+    public ServiceDiscoveryConfigurations getServiceDiscoveryConfigurations() {
+        return serviceDiscoveryConfigurations;
+    }
+
+    public void setServiceDiscoveryConfigurations(ServiceDiscoveryConfigurations serviceDiscoveryConfigurations) {
+        this.serviceDiscoveryConfigurations = serviceDiscoveryConfigurations;
     }
 
     public String getCommentModeratorRole() {
