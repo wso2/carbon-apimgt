@@ -163,14 +163,14 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                     "AND (subs.CREATED_TIME BETWEEN ? AND ?) " +
                     "AND subs.SUB_STATUS = 'ACTIVE' " +
                     "AND api.UUID=? " +
-                    "GROUP BY subs.API_ID;";
+                    "GROUP BY api.UUID,api.NAME,api.VERSION,api.PROVIDER";
         } else {
             query = "SELECT api.UUID,api.NAME,api.VERSION,api.PROVIDER,count(subs.UUID) as COUNT " +
                     "FROM AM_SUBSCRIPTION subs,AM_API api " +
                     "WHERE api.UUID=subs.API_ID " +
                     "AND (subs.CREATED_TIME BETWEEN ? AND ?) " +
                     "AND subs.SUB_STATUS = 'ACTIVE' " +
-                    "GROUP BY subs.API_ID;";
+                    "GROUP BY api.UUID,api.NAME,api.VERSION,api.PROVIDER";
         }
         List<APISubscriptionCount> apiSubscriptionCountList = new ArrayList<>();
         try (Connection connection = DAOUtil.getConnection();
@@ -289,7 +289,7 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                     SubscriptionInfo subscriptionInfo = new SubscriptionInfo();
                     subscriptionInfo.setId(rs.getString("UUID"));
                     subscriptionInfo.setName(rs.getString("API_NAME"));
-                    subscriptionInfo.setVersion(rs.getString("VERSION"));
+                    subscriptionInfo.setVersion(rs.getString("API_VERSION"));
                     subscriptionInfo.setAppName(rs.getString("APP_NAME"));
                     subscriptionInfo.setDescription(rs.getString("DESCRIPTION"));
                     subscriptionInfo.setCreatedTime(rs.getTimestamp("CREATED_TIME").getTime());
@@ -317,12 +317,12 @@ public class AnalyticsDAOImpl implements AnalyticsDAO {
                     "FROM AM_API " +
                     "WHERE CREATED_TIME BETWEEN ? AND ? " +
                     "AND CREATED_BY = ? " +
-                    "GROUP BY CREATED_TIME ORDER BY CREATED_TIME ASC";
+                    "ORDER BY CREATED_TIME ASC";
         } else {
             query = "SELECT UUID,PROVIDER,NAME,CONTEXT,VERSION,CREATED_TIME,CURRENT_LC_STATUS, LC_WORKFLOW_STATUS  " +
                     "FROM AM_API " +
                     "WHERE CREATED_TIME BETWEEN ? AND ? " +
-                    "GROUP BY CREATED_TIME ORDER BY CREATED_TIME ASC";
+                    "ORDER BY CREATED_TIME ASC";
         }
         List<APIInfo> apiInfoList = new ArrayList<>();
         try (Connection connection = DAOUtil.getConnection();
