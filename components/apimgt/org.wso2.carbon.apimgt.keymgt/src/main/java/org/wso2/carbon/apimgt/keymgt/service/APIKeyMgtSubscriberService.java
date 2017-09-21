@@ -93,7 +93,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
     private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
     private static final String OAUTH_RESPONSE_TOKEN_SCOPE = "scope";
     private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
-    private static final String APP_DISPLAY_NAME = "_DisplayName_";
+    private static final String APP_DISPLAY_NAME = "DisplayName";
 
 
 
