@@ -32,6 +32,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Kubernetes and Openshift implementation of Service Discoverer
@@ -63,11 +64,11 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
     private KubernetesServiceDiscoverer() throws ServiceDiscoveryException {
         serviceDiscoveryConfigurations = ServiceReferenceHolder.getInstance()
                 .getAPIMConfiguration().getServiceDiscoveryConfigurations();
-        JSONObject security = new JSONObject(serviceDiscoveryConfigurations.getSecurity());
-        JSONObject cmsProperties = new JSONObject(serviceDiscoveryConfigurations.getProperties());
-        serviceAccountToken = security.getString("serviceAccountToken");
-        caCertLocation = security.getString("caCertLocation");
-        insidePod = cmsProperties.getBoolean("insidePod");
+        Map<String, String> security = serviceDiscoveryConfigurations.getSecurity();
+        Map<String, String> cmsProperties = serviceDiscoveryConfigurations.getCmsSpecificParameters();
+        serviceAccountToken = security.get("serviceAccountToken");
+        caCertLocation = security.get("caCertLocation");
+        insidePod = Boolean.parseBoolean(cmsProperties.get("insidePod"));
         try {
             this.client = new DefaultOpenShiftClient(buildConfig(serviceDiscoveryConfigurations.getMasterUrl()));
         } catch (KubernetesClientException e) {
