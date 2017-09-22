@@ -33,12 +33,15 @@ import org.wso2.carbon.apimgt.core.models.BlockConditions;
 import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -229,16 +232,176 @@ public class PolicyDAOImplIT extends DAOIntegrationTestBase {
     @Test(description = "Get Subscription Policies")
     public void testGetSubscriptionPolicies() throws Exception {
         SubscriptionPolicy policy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
+        SubscriptionPolicy policy2 = SampleTestObjectCreator.createSubscriptionPolicyWithBandwithLimit();
+        //policy 1 has following 2 true. checking for fault scenario from policy2
+        policy2.setStopOnQuotaReach(false);
+        policy2.setDeployed(false);
+        
         PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
         //add policy
         policyDAO.addSubscriptionPolicy(policy);
+        policyDAO.addSubscriptionPolicy(policy2);
+        
         List<SubscriptionPolicy> policyList = policyDAO.getSubscriptionPolicies();
         Assert.assertNotNull(policyList);
-        Assert.assertNotNull(policyDAO.getSubscriptionPolicy(policy.getPolicyName()), "Retrieving Subscription policy "
-                + "by name failed for policy with name: " + policy.getPolicyName());
-        Assert.assertNotNull(policyDAO.getSubscriptionPolicyByUuid(policy.getUuid()), "Retrieving Subscription policy "
-                + "by id failed for policy with id: " + policy.getUuid());
+ 
+        SubscriptionPolicy retrievedPolicy = null;
+        SubscriptionPolicy retrievedPolicy2 = null;
+        //there are defaut policies already there
+        for (Iterator iterator = policyList.iterator(); iterator.hasNext();) {
+            SubscriptionPolicy subscriptionPolicy = (SubscriptionPolicy) iterator.next();
+            if (subscriptionPolicy.getPolicyName().equals(policy.getPolicyName())) {
+                retrievedPolicy = policy;
+            } 
+            
+            if (subscriptionPolicy.getPolicyName().equals(policy2.getPolicyName())) {
+                retrievedPolicy2 = policy2;
+            }
+        }
+        
+        Assert.assertNotNull(retrievedPolicy, "Policy " + policy.getPolicyName() + " not in DB");
+        Assert.assertNotNull(retrievedPolicy2, "Policy " + policy2.getPolicyName() + " not in DB");
+        
+        Assert.assertEquals(retrievedPolicy.getPolicyName(), policy.getPolicyName(),
+                "Subscription policy name mismatch");
+        Assert.assertEquals(retrievedPolicy.getDisplayName(), policy.getDisplayName(),
+                "Subscription policy display name mismatch");
+        Assert.assertEquals(retrievedPolicy.getDescription(), policy.getDescription(),
+                "Subscription policy description mismatch");
+        Assert.assertEquals(retrievedPolicy.isDeployed(), policy.isDeployed(),
+                "Subscription policy isDeployed mismatch");
+        Assert.assertEquals(retrievedPolicy.getRateLimitCount(), policy.getRateLimitCount(),
+                "Subscription policy rate limit mismatch");
+        Assert.assertEquals(retrievedPolicy.getRateLimitTimeUnit(), policy.getRateLimitTimeUnit(),
+                "Subscription policy rate limit mismatch");
+        Assert.assertEquals(retrievedPolicy.isStopOnQuotaReach(), policy.isStopOnQuotaReach(),
+                "Subscription policy stop on quota reach mismatch");
+        Assert.assertEquals(retrievedPolicy.getCustomAttributes(), policy.getCustomAttributes(),
+                "Subscription policy custom attribute mismatch");
+
+        Assert.assertEquals(retrievedPolicy.getDefaultQuotaPolicy().getType(), policy.getDefaultQuotaPolicy().getType(),
+                "Subscription policy default quota type mismatch");
+        
+        RequestCountLimit limitRetrieved = (RequestCountLimit) retrievedPolicy.getDefaultQuotaPolicy().getLimit();
+        RequestCountLimit policyLimit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
+        Assert.assertEquals(limitRetrieved.getRequestCount(), policyLimit.getRequestCount(),
+                "Subscription policy default quota count mismatch");
+        Assert.assertEquals(limitRetrieved.getTimeUnit(), policyLimit.getTimeUnit(),
+                "Subscription policy default quota time unit mismatch");
+        Assert.assertEquals(limitRetrieved.getUnitTime(), policyLimit.getUnitTime(),
+                "Subscription policy default quota unit time mismatch");
+        
+        //check policy related properties for policy 2
+               
+
+        Assert.assertEquals(retrievedPolicy2.getPolicyName(), policy2.getPolicyName(),
+                "Subscription policy name mismatch");
+        Assert.assertEquals(retrievedPolicy2.getDisplayName(), policy2.getDisplayName(),
+                "Subscription policy display name mismatch");
+        Assert.assertEquals(retrievedPolicy2.getDescription(), policy2.getDescription(),
+                "Subscription policy description mismatch");
+        Assert.assertEquals(retrievedPolicy2.isDeployed(), policy2.isDeployed(),
+                "Subscription policy isDeployed mismatch");
+        Assert.assertEquals(retrievedPolicy2.getRateLimitCount(), policy2.getRateLimitCount(),
+                "Subscription policy rate limit mismatch");
+        Assert.assertEquals(retrievedPolicy2.getRateLimitTimeUnit(), policy2.getRateLimitTimeUnit(),
+                "Subscription policy rate limit mismatch");
+        Assert.assertEquals(retrievedPolicy2.isStopOnQuotaReach(), policy2.isStopOnQuotaReach(),
+                "Subscription policy stop on quota reach mismatch");
+        Assert.assertEquals(retrievedPolicy2.getCustomAttributes(), policy2.getCustomAttributes(),
+                "Subscription policy custom attribute mismatch");
+
+        Assert.assertEquals(retrievedPolicy2.getDefaultQuotaPolicy().getType(),
+                policy2.getDefaultQuotaPolicy().getType(), "Subscription policy default quota type mismatch");
+        BandwidthLimit limitRetrieved2 = (BandwidthLimit) retrievedPolicy2.getDefaultQuotaPolicy().getLimit();
+        BandwidthLimit policyLimit2 = (BandwidthLimit) policy2.getDefaultQuotaPolicy().getLimit();
+        Assert.assertEquals(limitRetrieved2.getDataAmount(), policyLimit2.getDataAmount(),
+                "Subscription policy default quota data amount mismatch");
+        Assert.assertEquals(limitRetrieved2.getDataUnit(), policyLimit2.getDataUnit(),
+                "Subscription policy default quota data amount mismatch");
+        Assert.assertEquals(limitRetrieved2.getTimeUnit(), policyLimit2.getTimeUnit(),
+                "Subscription policy default quota time unit mismatch");
+        Assert.assertEquals(limitRetrieved2.getUnitTime(), policyLimit2.getUnitTime(),
+                "Subscription policy default quota unit time mismatch"); 
+   
     }
+    
+    @Test(description = "Get Subscription Policy by Name and UUID")
+    public void testGetSubscriptionPolicyByUUIDandName() throws Exception {
+        SubscriptionPolicy policy = SampleTestObjectCreator.createDefaultSubscriptionPolicy();
+       
+        PolicyDAO policyDAO = DAOFactory.getPolicyDAO();
+        //add policy
+        policyDAO.addSubscriptionPolicy(policy);
+        
+        SubscriptionPolicy retrievedPolicy = policyDAO.getSubscriptionPolicy(policy.getPolicyName());
+        Assert.assertNotNull(retrievedPolicy);
+        
+        Assert.assertEquals(retrievedPolicy.getPolicyName(), policy.getPolicyName(),
+                "Subscription policy name mismatch");
+        Assert.assertEquals(retrievedPolicy.getDisplayName(), policy.getDisplayName(),
+                "Subscription policy display name mismatch");
+        Assert.assertEquals(retrievedPolicy.getDescription(), policy.getDescription(),
+                "Subscription policy description mismatch");
+        Assert.assertEquals(retrievedPolicy.isDeployed(), policy.isDeployed(),
+                "Subscription policy isDeployed mismatch");
+        Assert.assertEquals(retrievedPolicy.getRateLimitCount(), policy.getRateLimitCount(),
+                "Subscription policy rate limit mismatch");
+        Assert.assertEquals(retrievedPolicy.getRateLimitTimeUnit(), policy.getRateLimitTimeUnit(),
+                "Subscription policy rate limit mismatch");
+        Assert.assertEquals(retrievedPolicy.isStopOnQuotaReach(), policy.isStopOnQuotaReach(),
+                "Subscription policy stop on quota reach mismatch");
+        Assert.assertEquals(retrievedPolicy.getCustomAttributes(), policy.getCustomAttributes(),
+                "Subscription policy custom attribute mismatch");
+
+        Assert.assertEquals(retrievedPolicy.getDefaultQuotaPolicy().getType(), policy.getDefaultQuotaPolicy().getType(),
+                "Subscription policy default quota type mismatch");
+        RequestCountLimit limitRetrieved = (RequestCountLimit) retrievedPolicy.getDefaultQuotaPolicy().getLimit();
+        RequestCountLimit policyLimit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
+        Assert.assertEquals(limitRetrieved.getRequestCount(), policyLimit.getRequestCount(),
+                "Subscription policy default quota count mismatch");
+        Assert.assertEquals(limitRetrieved.getTimeUnit(), policyLimit.getTimeUnit(),
+                "Subscription policy default quota time unit mismatch");
+        Assert.assertEquals(limitRetrieved.getUnitTime(), policyLimit.getUnitTime(),
+                "Subscription policy default quota unit time mismatch");
+        
+        //get the UUID of the created policy. since this value is generated in the code, we use previously retrieved
+        //policy to get the uuid and again query the policy
+        
+        String uuid = retrievedPolicy.getUuid();        
+        retrievedPolicy = policyDAO.getSubscriptionPolicyByUuid(uuid);
+        Assert.assertNotNull(retrievedPolicy);
+        
+        Assert.assertEquals(retrievedPolicy.getPolicyName(), policy.getPolicyName(),
+                "Subscription policy name mismatch");
+        Assert.assertEquals(retrievedPolicy.getDisplayName(), policy.getDisplayName(),
+                "Subscription policy display name mismatch");
+        Assert.assertEquals(retrievedPolicy.getDescription(), policy.getDescription(),
+                "Subscription policy description mismatch");
+        Assert.assertEquals(retrievedPolicy.isDeployed(), policy.isDeployed(),
+                "Subscription policy isDeployed mismatch");
+        Assert.assertEquals(retrievedPolicy.getRateLimitCount(), policy.getRateLimitCount(),
+                "Subscription policy rate limit mismatch");
+        Assert.assertEquals(retrievedPolicy.getRateLimitTimeUnit(), policy.getRateLimitTimeUnit(),
+                "Subscription policy rate limit mismatch");
+        Assert.assertEquals(retrievedPolicy.isStopOnQuotaReach(), policy.isStopOnQuotaReach(),
+                "Subscription policy stop on quota reach mismatch");
+        Assert.assertEquals(retrievedPolicy.getCustomAttributes(), policy.getCustomAttributes(),
+                "Subscription policy custom attribute mismatch");
+
+        Assert.assertEquals(retrievedPolicy.getDefaultQuotaPolicy().getType(), policy.getDefaultQuotaPolicy().getType(),
+                "Subscription policy default quota type mismatch");
+        limitRetrieved = (RequestCountLimit) retrievedPolicy.getDefaultQuotaPolicy().getLimit();
+        policyLimit = (RequestCountLimit) policy.getDefaultQuotaPolicy().getLimit();
+        Assert.assertEquals(limitRetrieved.getRequestCount(), policyLimit.getRequestCount(),
+                "Subscription policy default quota count mismatch");
+        Assert.assertEquals(limitRetrieved.getTimeUnit(), policyLimit.getTimeUnit(),
+                "Subscription policy default quota time unit mismatch");
+        Assert.assertEquals(limitRetrieved.getUnitTime(), policyLimit.getUnitTime(),
+                "Subscription policy default quota unit time mismatch");
+        
+    }
+
 
     @Test(description = "Get API Policies with bandwidth limit")
     public void testGetAPIPolicyWithBandwidthLimit()
