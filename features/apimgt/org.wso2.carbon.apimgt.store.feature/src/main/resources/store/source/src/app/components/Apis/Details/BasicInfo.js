@@ -55,8 +55,6 @@ class BasicInfo extends Component {
             tiers: [],
             applicationId: null,
             policyName: null
-            previousRating:0,
-            probableNextRating:0
         };
         this.api_uuid = this.props.uuid;
         this.logChange = this.logChange.bind(this);
