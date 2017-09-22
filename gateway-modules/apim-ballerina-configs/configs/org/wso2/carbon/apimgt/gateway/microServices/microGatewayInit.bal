@@ -10,12 +10,13 @@ service<http> gatewayInitService {
     boolean isCacheInitialized = holder:initializeCache();
     boolean isReady = initGateway();
 
+    boolean subscriptionsInitialized = retrieveOfflineSubscriptions();
 }
 
 function initGateway () (boolean) {
     system:println("initGateway() in microGatewayInit.bal");
     try {
-        loadAPIKeys();
+        loadOfflineAPIs();
         return true;
     } catch (errors:Error e) {
         system:println("Error while initilazing API gateway. " + e.msg);

@@ -10,8 +10,7 @@ import org.wso2.carbon.apimgt.gateway.holders as holder;
 import org.wso2.carbon.apimgt.ballerina.deployment;
 import org.wso2.carbon.apimgt.ballerina.util as apimgtUtil;
 import ballerina.lang.strings;
-import ballerina.lang.files;
-import ballerina.lang.blobs;
+
 import org.wso2.carbon.apimgt.ballerina.util;
 function registerGateway () (json) {
     system:println("registerGateway() in APICoreUtil");
@@ -108,112 +107,6 @@ function getAPIs () (json) {
     return apiList;
 }
 
-function returnValue(string pair)(string){
-    string[] array = strings:split(pair," ");
-    return array[1];
-}
-
-function returnAPI(int i,string[] array)(dto:APIDTO){
-    dto:APIDTO api = {};
-    api.id=returnValue(array[i+1]);
-   // system:println(api.id);
-    api.name=returnValue(array[i+2]);
-    //system:println(api.name);
-    api.context=returnValue(array[i+3]);
-    //system:println(api.context);
-    api.version=returnValue(array[i+4]);
-    //system:println(api.version);
-    api.lifeCycleStatus=returnValue(array[i+5]);
-    //system:println(api.lifeCycleStatus);
-    api.securityScheme,_=<int>returnValue(array[i+6]);
-    //system:println(api.securityScheme);
-    return api;
-}
-function loadOfflineAPIs () {
-    system:println("start loadOfflineAPIs() in APICoreUtil");
-    json apiList={};
-
-    files:File t = {path:"/home/sabeena/Desktop/API Repo/getOfflineAPIs.txt"};
-    files:open(t, "r");         //opens the file in the read mode
-    var content, n = files:read(t, 100000000);
-        //so there's a limit! only 100000000 can be read
-
-    string strAPIList = blobs:toString(content, "utf-8");
-    string[] array = strings:split(strAPIList, "\n");
-
-    //system:println("array okay");
-    //system:println(array);
-
-    var count,_ = <int>array[0];
-    apiList.count = count;
-//system:println(apiList);
-    //dto:APIDTO list = [];
-    int index=0;
-
-    while(index<count){
-        dto:APIDTO api = returnAPI(6*index,array);
-        //list[index] = api;
-
-        string apiConfig;
-        int status;
-
-       // system:println(api);
-
-        status, apiConfig = getOfflineAPIServiceConfig(api.id);
-
-        system:println("status");
-        system:println(status);
-        system:println("apiConfig");
-        system:println(apiConfig);
-
-        int maxRetries = 3;
-        int i = 0;
-        while (status == Constants:NOT_FOUND) {
-            apimgtUtil:wait(10000);
-            status, apiConfig = getOfflineAPIServiceConfig(api.id);
-            i = i + 1;
-            if (i > maxRetries) {
-                break;
-            }
-        }
-        //todo : tobe implement
-        // deployService(api, apiConfig);
-        //Update API cache
-        holder:putIntoAPICache(api);
-
-        //system:println("ai me :(");
-
-        retrieveOfflineResources(api.context, api.version);
-
-        index = index+1;
-
-    }
-    system:println("end loadOfflineAPIs() in APICoreUtil");
-}
-
-function getOfflineAPIServiceConfig (string apiId) (int, string) {
-    system:println("start getOfflineAPIServiceConfig() in APICoreUtil");
-    string apiConfig;
-    int status;
-    files:File target = {path:"/home/sabeena/Desktop/API Repo/"+ apiId + ".bal"};
-    boolean b = files:exists(target);
-    system:println(b);
-    if(b){
-        files:open(target, "r");
-        var content, n = files:read(target, 100000000);
-        apiConfig = blobs:toString(content, "utf-8");
-        status = 200;
-    }else{
-        target = {path:"/home/sabeena/Desktop/API Repo/ErrorDTO.bal"};
-        files:open(target, "r");
-        var content, n = files:read(target, 100000000);
-        apiConfig = blobs:toString(content, "utf-8");
-        status= 404;
-    }
-    system:println("end getOfflineAPIServiceConfig() in APICoreUtil");
-    return status, apiConfig;
-}
-
 function getEndpoints () (json) {
     system:println("getEndpoints() in APICoreUtil");
     string apiCoreURL;
@@ -233,26 +126,6 @@ function getEndpoints () (json) {
         throw e;
     }
     system:println(endpointList);
-    return endpointList;
-}
-
-function getOfflineEndpoints () (json) {
-    system:println("getOfflineEndpoints() in APICoreUtil");
-    string apiCoreURL;
-    message request = {};
-    message response = {};
-    json endpointList;
-    try {
-        http:ClientConnector client = create http:ClientConnector(getAPICoreURL());
-        string query = "?limit=-1";
-        response = http:ClientConnector.get(client, "/api/am/core/v1.0/endpoints" + query, request);
-        endpointList = messages:getJsonPayload(response);
-        system:println(endpointList);
-        return endpointList;
-    } catch (errors:Error e) {
-        system:println("Error occurred while retrieving gateway APIs from API Core. " + e.msg);
-        throw e;
-    }
     return endpointList;
 }
 
