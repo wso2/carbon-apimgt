@@ -187,15 +187,20 @@ function putIntoApplicationCache (dto:ApplicationDto applicationDto) {
 }
 function getFromApplicationCache (string applicationId) (dto:ApplicationDto) {
     system:println("getFromApplicationCache() in CacheHolder");
-    any application = caching:getCacheEntry(constants:APPLICATION_CACHE, applicationId);
-    if (application != null) {
-        dto:ApplicationDto dto;
-        errors:TypeCastError err;
-        dto, err = (dto:ApplicationDto)application;
-        system:println(dto);
-        return dto;
-    } else {
-        return null;
+    if(applicationId == ""){
+        dto:ApplicationDto app = {};
+        return app;
+    }else{
+        any application = caching:getCacheEntry(constants:APPLICATION_CACHE, applicationId);
+        if (application != null) {
+            dto:ApplicationDto dto;
+            errors:TypeCastError err;
+            dto, err = (dto:ApplicationDto)application;
+            system:println(dto);
+            return dto;
+        } else {
+            return null;
+    }
     }
 }
 function removeApplicationFromCache (string applicationId) {
@@ -260,16 +265,22 @@ function putIntoPolicyCache (dto:PolicyDto policyDto) {
 }
 function getFromPolicyCache (string id) (dto:PolicyDto) {
     system:println("getFromPolicyCache() in CacheHolder");
-    any policy = caching:getCacheEntry(constants:POLICY_CACHE, id);
-    if (policy != null) {
-        dto:PolicyDto dto;
-        errors:TypeCastError err;
-        dto, err = (dto:PolicyDto)policy;
-        system:println(dto);
-        return dto;
-    } else {
-        return null;
+    if((id == "") || (id == "Unlimited")|| (id == " ")){
+        dto:PolicyDto policy = {};
+        return policy;
+    }else{
+            any policy = caching:getCacheEntry(constants:POLICY_CACHE, id);
+            if (policy != null) {
+                dto:PolicyDto dto;
+                errors:TypeCastError err;
+                dto, err = (dto:PolicyDto)policy;
+                system:println(dto);
+                return dto;
+            } else {
+                return null;
+            }
     }
+
 }
 function removeFromPolicyCache (string id) {
     system:println("removeFromPolicyCache() in CacheHolder");

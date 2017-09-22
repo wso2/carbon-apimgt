@@ -37,8 +37,7 @@ function authenticate (message m) (boolean, message) {
     dto:ResourceDto resourceDto;
     json userInfo;
     boolean introspectCacheHit = true;
-    string apiContext = messages:getProperty(m, constants:BASE_PATH);
-
+    string apiContext = messages:getProperty(m,constants:BASE_PATH);
     //todo get this from ballerina property once they set versioning
     string version = "1.0.0";
     //todo need to have elected resource to be in properties
@@ -52,32 +51,9 @@ function authenticate (message m) (boolean, message) {
 
     //check api status
     string apiIdentifier = apiContext + ":" + version;
-    authHeader, authErr = extractHeaderWithName(constants:AUTHORIZATION, m);
-    apikeyHeader, apikeyErr = extractHeaderWithName("apikey", m);
-    string apiKey = apikeyHeader;
-//try {
-//    dto:APIKeyDTO apiKeyDto = holder:getFromAPIKeyCache(apiContext, apiKey);
-//    //system:println(apiKeyDto);
-//    if (apiKeyDto != null) {
-//        system:println("apiKeyDto not null");
-//        if (apikeyErr == null && apiKeyDto.securityScheme == 2) {
-//            system:println("Api key check for MicroGateway");
-//
-//            state = true;
-//            response = m;
-//            return state, response;
-//        } else {
-//            messages:setHeader(response, "Content-Type", "application/json");
-//            http:setStatusCode(response, 401);
-//            gatewayUtil:constructIncorrectAuthorization(response);
-//            return false, response;
-//        }
-//
-//    }
-//}catch(errors:NullReferenceError err) {
     dto:APIDTO apiDto = holder:getFromAPICache(apiIdentifier);
 
-    if (apiDto == null) {
+    if (apiDto == null){
         http:setStatusCode(response, 404);
         return false, response;
     }
@@ -104,7 +80,8 @@ function authenticate (message m) (boolean, message) {
         //and return method
     }
 
-
+    authHeader, authErr = extractHeaderWithName(constants:AUTHORIZATION, m);
+    apikeyHeader, apikeyErr = extractHeaderWithName("apikey", m);
 
     if (authErr != null && apikeyErr != null) {
         http:setStatusCode(response, 400);
@@ -183,7 +160,7 @@ function authenticate (message m) (boolean, message) {
 
     } else if (apikeyErr == null && ((apiDto.securityScheme == 2) || (apiDto.securityScheme == 3))) {
         system:println("Api key check...");
-        //string apiKey = apikeyHeader;
+        string apiKey = apikeyHeader;
         subscriptionDto = holder:getFromSubscriptionCache(apiContext, version, apiKey);
         if (subscriptionDto != null) {
             boolean subscriptionBlocked = false;
@@ -206,13 +183,12 @@ function authenticate (message m) (boolean, message) {
     } else {
         messages:setHeader(response, "Content-Type", "application/json");
         http:setStatusCode(response, 401);
-        gatewayUtil:constructIncorrectAuthorization(response);
+        gatewayUtil:constructIncorrectAuthorization (response);
         return false, response;
     }
-//}
+
     return state, response;
 }
-
 
 function doIntrospect (string authToken) (dto:IntrospectDto) {
     message request = {};
@@ -233,7 +209,6 @@ function validateSubscription (string apiContext, string version, dto:Introspect
     return subscriptionDto;
 }
 function validateResource (string apiContext, string apiVersion, string uriTemplate, string verb) (dto:ResourceDto) {
-    system:println();
     dto:ResourceDto resourceDto = holder:getFromResourceCache(apiContext, apiVersion, uriTemplate, verb);
     return resourceDto;
 }
@@ -253,31 +228,27 @@ function validateScopes (dto:ResourceDto resourceDto, dto:IntrospectDto introspe
 
 function constructAPIKeyValidationDto (dto:SubscriptionDto subscriptionDto, dto:ResourceDto resourceDto) (dto:KeyValidationDto ) {
     dto:KeyValidationDto keyValidationInfoDTO = {};
-    //dto:ApplicationDto applicationDto = holder:getFromApplicationCache(subscriptionDto.applicationId);
-    //keyValidationInfoDTO.username = applicationDto.applicationOwner;
-    //dto:PolicyDto applicationPolicy = holder:getFromPolicyCache(applicationDto.applicationPolicy);
-    //keyValidationInfoDTO.applicationPolicy = applicationPolicy.name;
-    //dto:PolicyDto subscriptionPolicy = holder:getFromPolicyCache(subscriptionDto.subscriptionPolicy);
-    //keyValidationInfoDTO.subscriptionPolicy = subscriptionPolicy.name;
-    //keyValidationInfoDTO.stopOnQuotaReach = subscriptionPolicy.stopOnQuotaReach;
-    //dto:PolicyDto apiLevelPolicy = holder:getFromPolicyCache(subscriptionDto.apiLevelPolicy);
-    //keyValidationInfoDTO.apiLevelPolicy = subscriptionDto.apiLevelPolicy;
-    //dto:PolicyDto resourceLevelPolicy = holder:getFromPolicyCache(resourceDto.policy);
-   // keyValidationInfoDTO.resourceLevelPolicy = resourceLevelPolicy.name;
+    dto:ApplicationDto applicationDto = holder:getFromApplicationCache(subscriptionDto.applicationId);
+    keyValidationInfoDTO.username = applicationDto.applicationOwner;
+    dto:PolicyDto applicationPolicy = holder:getFromPolicyCache(applicationDto.applicationPolicy);
+    keyValidationInfoDTO.applicationPolicy = applicationPolicy.name;
+    dto:PolicyDto subscriptionPolicy = holder:getFromPolicyCache(subscriptionDto.subscriptionPolicy);
+    keyValidationInfoDTO.subscriptionPolicy = subscriptionPolicy.name;
+    keyValidationInfoDTO.stopOnQuotaReach = subscriptionPolicy.stopOnQuotaReach;
+    dto:PolicyDto apiLevelPolicy = holder:getFromPolicyCache(subscriptionDto.apiLevelPolicy);
+    keyValidationInfoDTO.apiLevelPolicy = subscriptionDto.apiLevelPolicy;
+    dto:PolicyDto resourceLevelPolicy = holder:getFromPolicyCache(resourceDto.policy);
+    keyValidationInfoDTO.resourceLevelPolicy = resourceLevelPolicy.name;
     keyValidationInfoDTO.verb = resourceDto.httpVerb;
     keyValidationInfoDTO.apiName = subscriptionDto.apiName;
     keyValidationInfoDTO.apiProvider = subscriptionDto.apiProvider;
     keyValidationInfoDTO.apiContext = subscriptionDto.apiContext;
     keyValidationInfoDTO.apiVersion = subscriptionDto.apiVersion;
     keyValidationInfoDTO.applicationId = subscriptionDto.applicationId;
-   // keyValidationInfoDTO.applicationName = applicationDto.applicationName;
+    keyValidationInfoDTO.applicationName = applicationDto.applicationName;
     keyValidationInfoDTO.keyType = subscriptionDto.keyEnvType;
-    //keyValidationInfoDTO.subscriber = applicationDto.applicationOwner;
+    keyValidationInfoDTO.subscriber = applicationDto.applicationOwner;
     keyValidationInfoDTO.resourcePath = resourceDto.uriTemplate;
-
-    system:println("keyValidationInfoDTO");
-    system:println(keyValidationInfoDTO);
-
     return keyValidationInfoDTO;
 }
 
