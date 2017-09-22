@@ -93,13 +93,20 @@ public class AnalyticsDAOImplIT extends DAOIntegrationTestBase {
     public void testGetSubscriptionCountPerAPI() throws Exception {
         Instant fromTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis());
         API testAPI = TestUtil.addTestAPI();
+        API testAPI1 = TestUtil.addCustomAPI("TestAPI1", "1.0.0", "test1");
+        API testAPI2 = TestUtil.addCustomAPI("TestAPI2", "1.0.0", "test2");
         Application testApplication = TestUtil.addTestApplication();
+        Application testApplication2 = TestUtil.addCustomApplication("APP2", "admin");
         TestUtil.subscribeToAPI(testAPI, testApplication);
+        TestUtil.subscribeToAPI(testAPI, testApplication2);
+        TestUtil.subscribeToAPI(testAPI1, testApplication2);
+        TestUtil.subscribeToAPI(testAPI1, testApplication);
+        TestUtil.subscribeToAPI(testAPI2, testApplication2);
         Instant toTimeStamp = Instant.ofEpochMilli(System.currentTimeMillis());
         AnalyticsDAO analyticsDAO = DAOFactory.getAnalyticsDAO();
         List<APISubscriptionCount> subscriptionCount = analyticsDAO.getAPISubscriptionCount(fromTimeStamp, toTimeStamp,
-                testAPI.getId());
-        Assert.assertEquals(subscriptionCount.size(), 1);
+                null);
+        Assert.assertEquals(subscriptionCount.size(), 3);
     }
 
     @Test
