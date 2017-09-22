@@ -48,7 +48,7 @@ class Overview extends Component {
             notFound: false,
             tabValue: "Social Sites",
             comment: '',
-            commentList:[]
+            commentList:null
         };
         this.api_uuid = this.props.match.params.api_uuid;
         this.handleTabChange = this.handleTabChange.bind(this);
@@ -166,7 +166,8 @@ class Overview extends Component {
         let promise = api.addComment(this.api_uuid, commentInfo);
         promise.then(
             response => {
-                this.state.commentList.push(this.state.comment);
+                //this.state.commentList.push(this.state.comment);
+                this.handleGetAllComments();
                 this.setState({comment : ''});
                 message.success("Comment added successfully");
             }).catch (
@@ -194,11 +195,12 @@ class Overview extends Component {
             response => {
                 var index = 0;
                 var comments = [];
-                while(response.obj.list[index]){
-                    comments.push(response.obj.list[index].commentText);
+                console.log(response.obj);
+               /* while(response.obj.list[index]){
+                    let comment = {"commentText" : };
                     index = index + 1;
-                }
-                this.setState({commentList : comments});
+                }*/
+                this.setState({commentList : response.obj.list});
                 console.log(comments);
             }).catch (
                  error => {
@@ -302,7 +304,13 @@ class Overview extends Component {
                             </div>
                             <div>
                                 {this.state.commentList ? this.state.commentList.map((comment) => {
-                                    return <Row><p>{comment}</p></Row>
+                                    return <div><Row>
+                                            <Card bodyStyle={{padding: 5}} style={{background : "#e0d9d8"}}><p>{comment.commentText}</p></Card>
+                                           </Row>
+
+                                           <Row>
+                                           <p>Posted By {comment.createdBy} at {comment.createdTime}</p>
+                                          </Row><br /></div>
                                     }) : <br></br>
                                 }
                             </div>

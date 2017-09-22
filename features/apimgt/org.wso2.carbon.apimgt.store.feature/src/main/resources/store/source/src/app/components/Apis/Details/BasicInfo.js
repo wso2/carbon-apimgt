@@ -412,8 +412,7 @@ class StarRatingBar extends React.Component {
 
         this.state = {
                         previousRating : 0,
-                        rating : 0,
-                        api:null
+                        rating : 0
                      };
 
         this.handleMouseOver = this.handleMouseOver.bind(this);
@@ -449,7 +448,7 @@ class StarRatingBar extends React.Component {
                 console.log(response.obj.userRating);
                 this.setState({rating :response.obj.userRating});
                 this.setState({previousRating :response.obj.userRating});
-                alert(this.state.rating);
+               // alert(this.state.rating);
             }
         ).catch(
             error => {
