@@ -15,14 +15,12 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.apache.commons.io.IOUtils;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.ServiceDiscoverer;
 import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryConfigurations;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.ServiceDiscoveryException;
-import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
@@ -62,8 +60,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
     }
 
     private KubernetesServiceDiscoverer() throws ServiceDiscoveryException {
-        serviceDiscoveryConfigurations = ServiceReferenceHolder.getInstance()
-                .getAPIMConfiguration().getServiceDiscoveryConfigurations();
+        serviceDiscoveryConfigurations = ServiceDiscoveryConfigBuilder.getServiceDiscoveryConfiguration();
         Map<String, String> security = serviceDiscoveryConfigurations.getSecurity();
         Map<String, String> cmsProperties = serviceDiscoveryConfigurations.getCmsSpecificParameters();
         serviceAccountToken = security.get("serviceAccountToken");
