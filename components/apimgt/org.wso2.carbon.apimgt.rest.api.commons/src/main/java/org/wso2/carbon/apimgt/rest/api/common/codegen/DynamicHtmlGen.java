@@ -23,10 +23,13 @@ import io.swagger.codegen.CodegenParameter;
 import io.swagger.codegen.languages.StaticDocCodegen;
 import io.swagger.models.Model;
 import io.swagger.models.Operation;
+import io.swagger.models.Path;
 import io.swagger.models.Swagger;
 import io.swagger.models.parameters.Parameter;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -39,6 +42,20 @@ public class DynamicHtmlGen extends StaticDocCodegen {
 
     public DynamicHtmlGen() {
         tagToSanitizedMap = new HashMap<>();
+    }
+
+    @Override
+    public void preprocessSwagger(Swagger swagger) {
+        super.preprocessSwagger(swagger);
+        for (Path path : swagger.getPaths().values()) {
+            cleanExtraTags(path.getGet());
+            cleanExtraTags(path.getPost());
+            cleanExtraTags(path.getPut());
+            cleanExtraTags(path.getHead());
+            cleanExtraTags(path.getOptions());
+            cleanExtraTags(path.getPatch());
+            cleanExtraTags(path.getDelete());
+        }
     }
 
     @Override
@@ -82,6 +99,23 @@ public class DynamicHtmlGen extends StaticDocCodegen {
     @Override
     public String escapeQuotationMark(String input) {
         return input;
+    }
+
+    /**
+     * Keep a single tag for a given operation
+     * 
+     * @param operation swagger operation for a path
+     */
+    private void cleanExtraTags(Operation operation) {
+        if (operation != null) {
+            List<String> tags = operation.getTags();
+            if (tags != null) {
+                int size = tags.size();
+                for (int i = 1; i < size; i++) {
+                    tags.remove(1); //If we remove element 1, next element will become element 1
+                }
+            }
+        }
     }
 
 }
