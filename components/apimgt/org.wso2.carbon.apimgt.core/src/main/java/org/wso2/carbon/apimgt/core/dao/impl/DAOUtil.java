@@ -39,6 +39,7 @@ public class DAOUtil {
     private static final Logger log = LoggerFactory.getLogger(DAOUtil.class);
     private static final String DB_NAME_POSTGRESQL = "PostgreSQL";
     private static DataSource dataSource;
+    private static DataSource analyticsDataSource;
 
     static final String DAO_ERROR_PREFIX = "Error occurred in DAO layer while ";
 
@@ -48,6 +49,13 @@ public class DAOUtil {
         }
 
         DAOUtil.dataSource = dataSource;
+    }
+
+    public static synchronized void initializeAnalyticsDataSource(DataSource analyticsDataSource) {
+        if (DAOUtil.analyticsDataSource != null) {
+            return;
+        }
+        DAOUtil.analyticsDataSource = analyticsDataSource;
     }
 
     /**
@@ -65,6 +73,21 @@ public class DAOUtil {
     }
 
     /**
+     * Utility method to get a new database connection for analytics datasource
+     *
+     * @return Connection
+     * @throws java.sql.SQLException if failed to get Connection
+     */
+
+    static Connection getAnalyticsConnection() throws SQLException {
+        if (analyticsDataSource != null) {
+            return analyticsDataSource.getConnection();
+        }
+        throw new SQLException("Analytics datasource is not configured properly.");
+    }
+
+
+    /**
      * Get is auto commit enabled
      *
      * @return true if auto commit is enabled, false otherwise
@@ -72,6 +95,16 @@ public class DAOUtil {
      */
     public static boolean isAutoCommit() throws SQLException {
         return dataSource.getDatasource().isAutoCommit();
+    }
+
+    /**
+     * Get is auto commit enabled in analytics datasource
+     *
+     * @return true if auto commit is enabled, false otherwise
+     * @throws SQLException Error while getting if auto commit is enabled
+     */
+    public static boolean isAnalyticsAutoCommit() throws SQLException {
+        return analyticsDataSource.getDatasource().isAutoCommit();
     }
 
     static String getParameterString(int numberOfParameters) {
@@ -106,6 +139,10 @@ public class DAOUtil {
 
     public static void clearDataSource() {
         dataSource = null;
+    }
+
+    public static void clearAnalyticsDataSource() {
+        analyticsDataSource = null;
     }
 }
 

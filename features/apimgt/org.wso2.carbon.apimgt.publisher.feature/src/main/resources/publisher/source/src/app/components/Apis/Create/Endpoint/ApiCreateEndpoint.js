@@ -36,7 +36,9 @@ class ApiCreateEndpoint extends React.Component {
         this.api = new API();
         this.state = {
             api: this.api,
-            apiFields: {},
+            apiFields: {
+	    apiVersion: "1.0.0"
+	    },
             validate: false,
             messageOpen: false,
             message:'',
@@ -89,9 +91,10 @@ class ApiCreateEndpoint extends React.Component {
         e.preventDefault();
         const values = this.state.apiFields;
         //Check for form errors manually
+debugger;
         if( !values.apiName || !values.apiVersion || !values.apiContext ){
             this.setState({ messageOpen: true });
-            this.setState({message: 'Please fill both username and password fields'});
+            this.setState({message: 'Please fill all required fields'});
             this.setState({validate: true});
             return;
         }
@@ -188,15 +191,14 @@ class ApiCreateEndpoint extends React.Component {
                             onChange={this.inputChange}
                         />
                         <TextField
-                            error={!this.state.apiFields.apiVersion && this.state.validate}
                             id="apiVersion"
-                            label="Version"
+                            label="Version(Version input not support in this release)"
                             type="text"
                             name="apiVersion"
-                            margin="normal"
+                            margin="normal"			
                             style={{width:"100%"}}
+			    disabled="true" 
                             value={this.state.apiFields.apiVersion}
-                            onChange={this.inputChange}
                         />
                         <TextField
                             error={!this.state.apiFields.apiContext && this.state.validate}

@@ -158,7 +158,7 @@ public class ApisApi implements Microservice  {
     @GET
     @Path("/{apiId}/documents/{documentId}/content")
     @Consumes({ "application/json" })
-    @Produces({ "application/json" })
+    @Produces({ "application/octet-stream" })
     @io.swagger.annotations.ApiOperation(value = "", notes = "Downloads a FILE type document/get the inline content or source url of a certain document. ", response = void.class, tags={ "Retrieve Document", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. File or inline content returned. ", response = void.class),
@@ -278,6 +278,29 @@ public class ApisApi implements Microservice  {
 , @Context Request request)
     throws NotFoundException {
         return delegate.apisApiIdRatingsRatingIdGet(apiId,ratingId,ifNoneMatch,ifModifiedSince, request);
+    }
+    @GET
+    @Path("/{apiId}/sdks/{language}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/zip" })
+    @io.swagger.annotations.ApiOperation(value = "Generate SDK for an API for the requested language ", notes = "This operation can be used to generate SDKs (System Development Kits), for the APIs available in the API Store, for a requested development language. ", response = void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
+        })
+    }, tags={ "API (individual)", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. SDK generated successfully. ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Requested SDK Language is not supported. ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not found. Requested API does not exist. ", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 500, message = "Internal Server Error. Error while generating SDK. ", response = void.class) })
+    public Response apisApiIdSdksLanguageGet(@ApiParam(value = "ID of the specific API for which the SDK is required. ",required=true) @PathParam("apiId") String apiId
+,@ApiParam(value = "Programming language of the SDK that is required. ",required=true) @PathParam("language") String language
+, @Context Request request)
+    throws NotFoundException {
+        return delegate.apisApiIdSdksLanguageGet(apiId,language, request);
     }
     @GET
     @Path("/{apiId}/swagger")

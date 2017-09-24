@@ -93,6 +93,7 @@ class API {
 
         var promise_get = this.client.then(
             (client) => {
+		debugger;
                 return client.apis["API (individual)"].get_apis__apiId__documents(
                     {apiId: id}, this._requestMetaData());
             }
@@ -112,18 +113,15 @@ class API {
      * @param callback {function} Function which needs to be called upon success of of getting document.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getFileForDocument(api_id, docId, callback = null) {
-        var promise_get = this.client.then(
+    getFileForDocument(api_id, docId) {
+        var promised_getDocContent = this.client.then(
             (client) => {
-		debugger;
-                client.apis["API (individual)"].get_apis__apiId__documents__documentId__content({
-                        apiId: api_id,
-                        documentId: docId
-                    },
-                    this._requestMetaData());
+                let payload = {apiId: api_id, documentId: docId, "Accept": "application/octet-stream"};
+                return client.apis["API (individual)"].get_apis__apiId__documents__documentId__content(
+                    payload, this._requestMetaData({"Content-Type": "multipart/form-data"}));
             }
         );
-        return promise_get;
+        return promised_getDocContent;
     }
 
     /**
@@ -262,7 +260,7 @@ class API {
                 (client) => {
                 let payload = {applicationId: applicationId, body: request_content};
                 return client.apis["Application (individual)"].post_applications__applicationId__generate_keys(
-                    {payload}, this._requestMetaData());
+                    payload, this._requestMetaData());
         }
         );
         if (callback) {
@@ -285,7 +283,7 @@ class API {
                 (client) => {
                 let payload = {applicationId: applicationId, body: request_content};
                 return client.apis["Application (individual)"].post_applications__applicationId__generate_token(
-                    {payload}, this._requestMetaData());
+                    payload, this._requestMetaData());
         }
         );
         if (callback) {
@@ -338,23 +336,26 @@ class API {
     }
 
     /**
-     * Get keys of an application
-     * @param applicationId id of the application that needs to get the keys
-     * @param callback {function} Function which needs to be called upon success
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     * Create a subscription
+     * @param apiId id of the API that needs to be subscribed
+     * @param applicationId id of the application that needs to be subscribed
+     * @param policy throttle policy applicable for the subscription
+     * @param callback callback url
      */
     subscribe(apiId, applicationId, policy, callback = null) {
-        debugger;
-        var promise_get = this.client.then(
+        var promise_create_subscription = this.client.then(
             (client) => {
+                let subscriptionData = {apiIdentifier:apiId, applicationId:applicationId, policy:policy};
+                let payload = {body: subscriptionData};
                 return client.apis["Subscription (individual)"].post_subscriptions(
-                    {apiId:apiId, applicationId:applicationId, policy:policy}, this._requestMetaData());
+                    payload, {'Content-Type':'application/json'}
+                );
             }
         );
         if (callback) {
-            return promise_get.then(callback);
+            return promise_create_subscription.then(callback);
         } else {
-            return promise_get;
+            return promise_create_subscription;
         }
     }
 

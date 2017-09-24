@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.api.Analyzer;
 import org.wso2.carbon.apimgt.core.configuration.APIMConfigurationService;
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -39,6 +40,13 @@ import org.wso2.msf4j.Request;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
+import java.time.DateTimeException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,34 +54,29 @@ import java.util.Set;
 
 
 /**
- * Utility class for all REST APIS.
+ * Utility class for all REST APIs.
  */
 public class RestApiUtil {
 
     private static final Logger log = LoggerFactory.getLogger(RestApiUtil.class);
-    private static String publisherRestAPIDefinition;
-    private static String storeRestAPIDefinition;
-    private static String adminRestAPIDefinition;
     private static final String LOGGED_IN_USER = "LOGGED_IN_USER";
     private static final String HTTP = "http";
     private static final String HTTPS = "https";
+    private static String publisherRestAPIDefinition;
+    private static String storeRestAPIDefinition;
+    private static String adminRestAPIDefinition;
+    private static String analyticsRestApiDefinition;
     private static APIMConfigurations apimConfigurations = APIMConfigurationService.getInstance()
             .getApimConfigurations();
 
     /**
      * Get the current logged in user's username
-     * @return The current logged in user.
-     * @param request
+     *
+     * @param request msf4j request
+     * @return The current logged in user's username or null if user is not logged in.
      */
     public static String getLoggedInUsername(Request request) {
-        String loggedInUser = null;
-        try {
-            loggedInUser = request.getProperty(LOGGED_IN_USER).toString();
-       } catch (NullPointerException e) {
-           String message = "Error while getting loggedInUser from request";
-           log.error(message, e);
-       }
-        return loggedInUser;
+        return request.getProperty(LOGGED_IN_USER) != null ? request.getProperty(LOGGED_IN_USER).toString() : null;
     }
 
     /**
@@ -81,7 +84,7 @@ public class RestApiUtil {
      *
      * @param msg error message
      * @param log Log instance
-     * @throws BadRequestException  If 400 bad request comes.
+     * @throws BadRequestException If 400 bad request comes.
      */
     public static void handleBadRequest(String msg, Logger log) throws BadRequestException {
         BadRequestException badRequestException = buildBadRequestException(msg);
@@ -105,7 +108,7 @@ public class RestApiUtil {
      * Returns a generic errorDTO
      *
      * @param errorHandler The error handler object.
-     * @param paramList map of parameters specific to the error.
+     * @param paramList    map of parameters specific to the error.
      * @return A generic errorDTO with the specified details
      */
     public static ErrorDTO getErrorDTO(ErrorHandler errorHandler, Map<String, String> paramList) {
@@ -134,13 +137,14 @@ public class RestApiUtil {
     /**
      * Return errorDTO object. This method accept APIMGTException as a parameter so we can set the e.getMessage
      * directly to the errorDTO.
+     *
      * @param errorHandler Error Handler object.
-     * @param paramList Parameter list
-     * @param e APIMGTException object.
+     * @param paramList    Parameter list
+     * @param e            APIMGTException object.
      * @return ErrorDTO Object.
      */
     public static ErrorDTO getErrorDTO(ErrorHandler errorHandler, HashMap<String, String> paramList,
-            APIManagementException e) {
+                                       APIManagementException e) {
         ErrorDTO errorDTO = new ErrorDTO();
         errorDTO.setCode(errorHandler.getErrorCode());
         errorDTO.setMoreInfo(paramList);
@@ -156,9 +160,9 @@ public class RestApiUtil {
     /**
      * Returns a generic errorDTO
      *
-     * @param message specifies the error message
-     * @param code  error code.
-     * @param description   error description.
+     * @param message     specifies the error message
+     * @param code        error code.
+     * @param description error description.
      * @return A generic errorDTO with the specified details
      */
     public static ErrorDTO getErrorDTO(String message, Long code, String description) {
@@ -172,9 +176,9 @@ public class RestApiUtil {
     /**
      * Returns an APIStore.
      *
-     * @param subscriberName    Name of the subscriber.
-     * @return  {@code APIStore}
-     * @throws APIManagementException   if failed to get the consumers.
+     * @param subscriberName Name of the subscriber.
+     * @return {@code APIStore}
+     * @throws APIManagementException if failed to get the consumers.
      */
     public static APIStore getConsumer(String subscriberName) throws APIManagementException {
         return APIManagerFactory.getInstance().getAPIConsumer(subscriberName);
@@ -183,7 +187,7 @@ public class RestApiUtil {
     /**
      * Returns an APIStore for anonymous user.
      *
-     * @return  {@code APIStore}
+     * @return {@code APIStore}
      * @throws APIManagementException if failed to get the consumer object.
      */
     public static APIStore getConsumer() throws APIManagementException {
@@ -191,10 +195,21 @@ public class RestApiUtil {
     }
 
     /**
+     * Returns an APIAnalytics for a specific user.
+     *
+     * @param username
+     * @return {@code APIAnalytics}
+     * @throws APIManagementException if failed to get APIAnalytics
+     */
+    public static Analyzer getAnalyzer(String username) throws APIManagementException {
+        return APIManagerFactory.getInstance().getAnalyzer(username);
+    }
+
+    /**
      * Returns an APIMgtAdminService.
      *
      * @return API Management Admin Service
-     * @throws APIManagementException   If failed to retrieve admin service.
+     * @throws APIManagementException If failed to retrieve admin service.
      */
     public static APIMgtAdminService getAPIMgtAdminService() throws APIManagementException {
         return APIManagerFactory.getInstance().getAPIMgtAdminService();
@@ -241,8 +256,8 @@ public class RestApiUtil {
     /**
      * Returns the paginated url for Applications API
      *
-     * @param offset  starting index
-     * @param limit   max number of objects returned
+     * @param offset starting index
+     * @param limit  max number of objects returned
      * @return constructed paginated url
      */
     public static String getApplicationPaginatedURL(Integer offset, Integer limit) {
@@ -275,7 +290,6 @@ public class RestApiUtil {
     }
 
 
-
     /**
      * Search the Policy in the given collection of Policies. Returns it if it is included there. Otherwise return null
      *
@@ -304,7 +318,7 @@ public class RestApiUtil {
      * during runtime.
      *
      * @return String associated with API Manager publisher REST API
-     * @throws APIManagementException   if failed to get publisher api resource.
+     * @throws APIManagementException if failed to get publisher api resource.
      */
     public static String getPublisherRestAPIResource() throws APIManagementException {
 
@@ -330,7 +344,7 @@ public class RestApiUtil {
      * during runtime.
      *
      * @return String associated with API Manager store REST API
-     * @throws  APIManagementException   if failed to get store api resource
+     * @throws APIManagementException if failed to get store api resource
      */
     public static String getStoreRestAPIResource() throws APIManagementException {
 
@@ -353,8 +367,8 @@ public class RestApiUtil {
     /**
      * This method return API swagger definition of Admin REST API
      *
-     * @return  String associated with API Manager admin REST API
-     * @throws APIManagementException   if failed to get admin api resource
+     * @return String associated with API Manager admin REST API
+     * @throws APIManagementException if failed to get admin api resource
      */
     public static String getAdminRestAPIResource() throws APIManagementException {
 
@@ -377,7 +391,7 @@ public class RestApiUtil {
      * used to convert yaml to json
      *
      * @param yamlString yaml String
-     * @return  Json string
+     * @return Json string
      */
     public static String convertYmlToJson(String yamlString) {
         Yaml yaml = new Yaml();
@@ -424,9 +438,30 @@ public class RestApiUtil {
     }
 
     /**
+     * This method return API swagger definition of Analytics REST API
+     *
+     * @return swagger definition as a String
+     * @throws APIMgtSecurityException if failed to get analytics api resource
+     */
+    public static String getAnalyticsRestAPIResource() throws APIMgtSecurityException {
+        if (analyticsRestApiDefinition == null) {
+            try {
+                analyticsRestApiDefinition = IOUtils
+                        .toString(RestApiUtil.class.getResourceAsStream(RestApiConstants.ANALYTICS_API_YAML), "UTF-8");
+            } catch (IOException e) {
+                String message = "Error while reading the swagger definition of Analytics Rest API";
+                log.error(message, e);
+                throw new APIMgtSecurityException(message, ExceptionCodes.API_NOT_FOUND);
+            }
+
+        }
+        return analyticsRestApiDefinition;
+    }
+
+    /**
      * Util method for mapping from rest API policy level String to {@link APIMgtAdminService.PolicyLevel} enum
      */
-    public static APIMgtAdminService.PolicyLevel mapRestApiPolicyLevelToPolicyLevelEnum (String level)
+    public static APIMgtAdminService.PolicyLevel mapRestApiPolicyLevelToPolicyLevelEnum(String level)
             throws APIManagementException {
         if (APIMgtAdminService.PolicyLevel.api.name().equals(level)) {
             return APIMgtAdminService.PolicyLevel.api;
@@ -439,4 +474,43 @@ public class RestApiUtil {
                     ExceptionCodes.POLICY_LEVEL_NOT_SUPPORTED);
         }
     }
+
+    /**
+     * Converts time in millis to ISO-8601 date time format
+     *
+     * @param epochMilliSeconds time in milli seconds
+     * @return time in ISO 8601 format
+     */
+    public static String epochToISO8601DateTime(long epochMilliSeconds, ZoneId zoneId) {
+        // returns ISO 8601 format, e.g. 2014-02-15T01:02:03Z
+        return Instant.ofEpochMilli(epochMilliSeconds).atZone(zoneId).toString();
+    }
+
+    /**
+     * Coverts given ISO8601 timestamp to in UTC time instant
+     *
+     * @param timestamp Timestamp in ISO8601 format
+     * @return Instant  in UTC
+     */
+    public static Instant fromISO8601ToInstant(String timestamp) throws APIManagementException {
+        // returns ISO 8601 format, e.g. 2014-02-15T01:02:03Z
+        try {
+            return Instant.from(DateTimeFormatter.ISO_DATE_TIME.parse(timestamp)).atZone(ZoneOffset.UTC).toInstant();
+        } catch (DateTimeParseException e) {
+            throw new APIManagementException(e.getMessage(), ExceptionCodes.INVALID_DATE_TIME_STAMP);
+        } catch (DateTimeException e) {
+            throw new APIManagementException(e.getMessage(), ExceptionCodes.INVALID_DATE_TIME_STAMP);
+        }
+    }
+
+    /**
+     * Return the ZoneId of given ISO8601 timestamp
+     *
+     * @param timestamp Timestamp in ISO format
+     * @return Zone ID extracted from timestamp
+     */
+    public static ZoneId getRequestTimeZone(String timestamp) {
+        return ZonedDateTime.parse(timestamp).getZone();
+    }
+
 }

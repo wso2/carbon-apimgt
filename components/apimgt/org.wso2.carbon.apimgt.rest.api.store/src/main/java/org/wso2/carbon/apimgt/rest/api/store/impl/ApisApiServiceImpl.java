@@ -15,8 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ApiStoreSdkGenerationException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.impl.ApiStoreSdkGenerationManager;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Comment;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
@@ -64,7 +66,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdCommentsCommentIdDelete(String commentId, String apiId, String ifMatch,
-            String ifUnmodifiedSince, Request request) throws NotFoundException {
+                                                     String ifUnmodifiedSince, Request request)
+            throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
@@ -100,7 +103,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdCommentsCommentIdGet(String commentId, String apiId, String ifNoneMatch,
-            String ifModifiedSince, Request request) throws NotFoundException {
+                                                  String ifModifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
@@ -136,49 +139,49 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return Fingerprint of the comment
      */
     public String apisApiIdCommentsCommentIdGetFingerprint(String commentId, String apiId, String ifNoneMatch,
-            String ifModifiedSince, Request request) {
+                                                           String ifModifiedSince, Request request) {
         return getEtag(commentId, request.getProperty("LOGGED_IN_USER").toString());
     }
 
     /**
      * Retrieves the fingerprint of a comment for commentPut
      *
-     * @param commentId Comment ID
-     * @param apiId  API ID
-     * @param body body of the request
-     * @param ifMatch If-Match header value
+     * @param commentId         Comment ID
+     * @param apiId             API ID
+     * @param body              body of the request
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param request  msf4j request object
+     * @param request           msf4j request object
      * @return Fingerprint of the comment
      */
     public String apisApiIdCommentsCommentIdPutFingerprint(String commentId, String apiId, CommentDTO body,
-            String ifMatch, String ifUnmodifiedSince, Request request) {
+                                                           String ifMatch, String ifUnmodifiedSince, Request request) {
         return getEtag(commentId, request.getProperty("LOGGED_IN_USER").toString());
     }
 
     /**
      * Retrieves the fingerprint of a comment for commentDelete
      *
-     * @param commentId Comment ID
-     * @param apiId API ID
-     * @param ifMatch If-Match header value
+     * @param commentId         Comment ID
+     * @param apiId             API ID
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param request  msf4j request object
-     * @return  Fingerprint of the comment
+     * @param request           msf4j request object
+     * @return Fingerprint of the comment
      */
     public String apisApiIdCommentsCommentIdDeleteFingerprint(String commentId, String apiId, String ifMatch,
-            String ifUnmodifiedSince, Request request) {
+                                                              String ifUnmodifiedSince, Request request) {
         return getEtag(commentId, request.getProperty("LOGGED_IN_USER").toString());
     }
 
     /**
      * Retrieves last updatedtime for a comment given the comment id
      *
-     * @param commentId Comment ID
+     * @param commentId    Comment ID
      * @param loggedInUser
      * @return Last updated time
      */
-    private String getEtag(String commentId, String loggedInUser){
+    private String getEtag(String commentId, String loggedInUser) {
         String username = loggedInUser;
         try {
             String lastUpdatedTime = RestApiUtil.getConsumer(username).getLastUpdatedTimeOfComment(commentId);
@@ -192,11 +195,11 @@ public class ApisApiServiceImpl extends ApisApiService {
 
 
     /**
-     *  Retrives A list of comments for a given API ID
+     * Retrives A list of comments for a given API ID
      *
-     * @param apiId API ID
-     * @param limit Max number of comments to return
-     * @param offset Starting point of pagination
+     * @param apiId   API ID
+     * @param limit   Max number of comments to return
+     * @param offset  Starting point of pagination
      * @param request msf4j request object
      * @return CommentListDTO object
      * @throws NotFoundException if this method is not defined in ApisApiServiceImpl
@@ -224,9 +227,9 @@ public class ApisApiServiceImpl extends ApisApiService {
     /**
      * Update a comment
      *
-     * @param apiId             API ID
-     * @param body              comment body
-     * @param request           msf4j request object
+     * @param apiId   API ID
+     * @param body    comment body
+     * @param request msf4j request object
      * @return comment update response
      * @throws NotFoundException if this method is not defined in ApisApiServiceImpl
      */
@@ -267,18 +270,18 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
-     * @param commentId Comment ID
-     * @param apiId API ID
-     * @param body comment body
-     * @param ifMatch  If-Match header value
+     * @param commentId         Comment ID
+     * @param apiId             API ID
+     * @param body              comment body
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param request msf4j request object
+     * @param request           msf4j request object
      * @return comment update response
      * @throws NotFoundException if this method is not defined in ApisApiServiceImpl
      */
     @Override
     public Response apisApiIdCommentsCommentIdPut(String commentId, String apiId, CommentDTO body,
-            String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
+                                                  String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
@@ -322,7 +325,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId,
-            String ifNoneMatch, String ifModifiedSince, Request request) throws NotFoundException {
+                                                           String ifNoneMatch, String ifModifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
@@ -381,7 +384,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return Fingerprint of the document content
      */
     public String apisApiIdDocumentsDocumentIdContentGetFingerprint(String apiId, String documentId, String ifNoneMatch,
-            String ifModifiedSince, Request request) {
+                                                                    String ifModifiedSince, Request request) {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestApiUtil.getConsumer(username)
@@ -410,7 +413,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String ifNoneMatch,
-            String ifModifiedSince, Request request) throws NotFoundException {
+                                                    String ifModifiedSince, Request request) throws NotFoundException {
         DocumentDTO documentDTO = null;
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
@@ -450,7 +453,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
 
     public String apisApiIdDocumentsDocumentIdGetFingerprint(String apiId, String documentId, String ifNoneMatch,
-            String ifModifiedSince, Request request) {
+                                                             String ifModifiedSince, Request request) {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestApiUtil.getConsumer(username)
@@ -478,7 +481,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch,
-            Request request) throws NotFoundException {
+                                          Request request) throws NotFoundException {
 
         DocumentListDTO documentListDTO = null;
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
@@ -553,7 +556,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @param offset  response offset
      * @param request msf4j request object
      * @return List of Ratings for API
-     * @throws NotFoundException  if failed to find method implementation
+     * @throws NotFoundException if failed to find method implementation
      */
     @Override
     public Response apisApiIdRatingsGet(String apiId, Integer limit, Integer offset, Request request)
@@ -564,7 +567,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
             Rating userRating = apiStore.getRatingForApiFromUser(apiId, username);
-            if(userRating != null) {
+            if (userRating != null) {
                 userRatingValue = userRating.getRating();
             }
             avgRating = apiStore.getAvgRating(apiId);
@@ -585,7 +588,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     @Override
     public Response apisApiIdRatingsRatingIdGet(String apiId, String ratingId, String ifNoneMatch,
-            String ifModifiedSince, Request request) throws NotFoundException {
+                                                String ifModifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
@@ -603,13 +606,67 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
     }
+    /**
+     * Generates an SDK for a API with provided ID and language
+     *
+     * @param apiId   API ID
+     * @param language   SDK language
+     * @param request msf4j request object
+     * @return ZIP file for the generated SDK
+     * @throws NotFoundException if failed to find method implementation
+     */
+    @Override
+    public Response apisApiIdSdksLanguageGet(String apiId, String language, Request request) throws NotFoundException {
+        if (StringUtils.isBlank(apiId) || StringUtils.isBlank(language)) {
+            String errorMessage = "API ID or language is not valid";
+            log.error(errorMessage);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 400L,errorMessage);
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(errorDTO)
+                    .build();
+        }
+        String userName = RestApiUtil.getLoggedInUsername(request);
+        ApiStoreSdkGenerationManager sdkGenerationManager = new ApiStoreSdkGenerationManager();
+        if (!sdkGenerationManager.getSdkGenLanguages().containsKey(language)) {
+            String errorMessage = "Specified language parameter doesn't exist";
+            log.error(errorMessage);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 400L, errorMessage);
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(errorDTO)
+                    .build();
+        }
+        String tempZipFilePath;
+        try {
+            tempZipFilePath = sdkGenerationManager.generateSdkForApi(apiId, language, userName);
+        } catch (ApiStoreSdkGenerationException e) {
+            String errorMessage = "Error while generating SDK for requested language";
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving API for SDK generation " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+        File sdkZipFile = new File(tempZipFilePath);
+
+        return Response.ok()
+                .entity(sdkZipFile)
+                .header("Content-Disposition", "attachment; filename=\"" + sdkZipFile.getName() + "\"")
+                .build();
+    }
 
     /**
      * Add or update raating to an API
      *
-     * @param apiId       APIID
-     * @param body        RatingDTO object
-     * @param request     msf4j request
+     * @param apiId   APIID
+     * @param body    RatingDTO object
+     * @param request msf4j request
      * @return 201 response if successful
      * @throws NotFoundException if failed to find method implementation
      */
@@ -660,18 +717,18 @@ public class ApisApiServiceImpl extends ApisApiService {
     /**
      * Retrieves the WSDL of the particular API. If the WSDL is added as a single file/URL, the text content of the WSDL
      * will be retrived. If the WSDL is added as an archive, the binary content of the archive will be retrieved.
-     * 
-     * @param apiId UUID of API
-     * @param labelName Name of the label
-     * @param ifNoneMatch If-None-Match header value
+     *
+     * @param apiId           UUID of API
+     * @param labelName       Name of the label
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param request msf4j request
+     * @param request         msf4j request
      * @return WSDL archive/file content
      * @throws NotFoundException
      */
     @Override
     public Response apisApiIdWsdlGet(String apiId, String labelName, String ifNoneMatch,
-            String ifModifiedSince, Request request) throws NotFoundException {
+                                     String ifModifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         WSDLArchiveInfo wsdlArchiveInfo = null;
         try {
@@ -772,7 +829,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch, String ifModifiedSince,
-            Request request) throws NotFoundException {
+                                        Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIStore apiStore = RestApiUtil.getConsumer(username);
@@ -805,7 +862,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return Retrieves the fingerprint String of the swagger
      */
     public String apisApiIdSwaggerGetFingerprint(String apiId, String ifNoneMatch, String ifModifiedSince,
-            Request request) {
+                                                 Request request) {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestApiUtil.getConsumer(username).getLastUpdatedTimeOfAPI(apiId);

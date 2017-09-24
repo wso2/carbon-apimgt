@@ -54,7 +54,7 @@ class LifeCycle extends Component {
         if (this.state.api) {
             return (
                 <div style={{padding: '30px'}}>
-                    <Row gutter={16}>
+                    <Row>
                         <Col span={12}>
                             <Card title="Change Lifecycle" bordered={false} style={{margin: '5px'}}>
                                 <LifeCycleUpdate handleUpdate={this.updateData} lcState={this.state.lcState}
@@ -62,7 +62,7 @@ class LifeCycle extends Component {
                             </Card>
                         </Col>
                     </Row>
-                    <Row gutter={16}>
+                    <Row>
                         <Col span={12}>
                             <Card title="History" bordered={false} style={{margin: '5px'}}><LifeCycleHistory
                                 lcHistory={this.state.lcHistory}/></Card>

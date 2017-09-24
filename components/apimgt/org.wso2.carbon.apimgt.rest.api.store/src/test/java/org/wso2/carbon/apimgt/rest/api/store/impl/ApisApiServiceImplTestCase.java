@@ -29,11 +29,13 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
-import org.wso2.carbon.apimgt.core.exception.APICommentException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.exception.APIRatingException;
+import org.wso2.carbon.apimgt.core.exception.APICommentException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.exception.APIRatingException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtWSDLException;
+import org.wso2.carbon.apimgt.core.exception.ApiStoreSdkGenerationException;
+import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.impl.APIStoreImpl;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Comment;
@@ -43,6 +45,7 @@ import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Rating;
 import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.NotFoundException;
@@ -56,6 +59,8 @@ import org.wso2.msf4j.Request;
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +69,7 @@ import java.util.UUID;
 import static junit.framework.TestCase.assertEquals;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(RestApiUtil.class)
+@PrepareForTest({RestApiUtil.class, APIManagerFactory.class})
 public class ApisApiServiceImplTestCase {
 
     private final static Logger logger = LoggerFactory.getLogger(ApisApiServiceImplTestCase.class);
@@ -76,7 +81,21 @@ public class ApisApiServiceImplTestCase {
     private static final String WSDL_FILE_LOCATION = "wsdl" + File.separator + WSDL_FILE;
     private static final String WSDL_ZIP = "WSDLFiles.zip";
     private static final String WSDL_ZIP_LOCATION = "wsdl" + File.separator + WSDL_ZIP;
+    private static final String correctLanguage = "java";
+    private static final String incorrectLanguage = "javaIncorrect";
+    private static InputStream inputStreamCorrect, inputStreamIncorrect;
+    private static String swaggerPetStoreCorrect, swaggerPetStoreIncorrect;
 
+    static {
+        try {
+            inputStreamCorrect = Thread.currentThread().getContextClassLoader().getResourceAsStream("swaggerPetStoreCorrect.json");
+            inputStreamIncorrect = Thread.currentThread().getContextClassLoader().getResourceAsStream("swaggerPetStoreIncorrect.json");
+            swaggerPetStoreCorrect = IOUtils.toString(inputStreamCorrect);
+            swaggerPetStoreIncorrect = IOUtils.toString(inputStreamIncorrect);
+        } catch (IOException e){
+            logger.error(e.getMessage(), e);
+        }
+    }
     @Test
     public void testApisApiIdCommentsCommentIdDelete() throws NotFoundException, APIManagementException {
         printTestMethodName();
@@ -955,6 +974,116 @@ public class ApisApiServiceImplTestCase {
         Assert.assertEquals(404, response.getStatus());
     }
 
+    @Test
+    public void apisApiIdSdksLanguageGet()
+            throws APIManagementException, ApiStoreSdkGenerationException, NotFoundException {
+        String apiId = UUID.randomUUID().toString();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
+        PowerMockito.mockStatic(APIManagerFactory.class);
+        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
+        Mockito.when(instance.getAPIConsumer(USER)).thenReturn(apiStore);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
+        Endpoint api1SandBoxEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("abcd").build();
+        Endpoint api1ProdEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("cdef").build();
+        API api = TestUtil
+                .createApi("provider1",
+                        apiId,
+                        "testapi1",
+                        "1.0.0",
+                        "Test API 1 - version 1.0.0",
+                TestUtil.createEndpointTypeToIdMap(api1SandBoxEndpointId, api1ProdEndpointId)).build();
+        Mockito.when(apiStore.getAPIbyUUID(apiId)).thenReturn(api);
+        Mockito.when(apiStore.getApiSwaggerDefinition(apiId)).thenReturn(swaggerPetStoreCorrect);
+        Response response = apisApiService.apisApiIdSdksLanguageGet(apiId,correctLanguage,request);
+
+        Assert.assertEquals(200,response.getStatus());
+    }
+    @Test
+    public void apisApiIdSdksLanguageGetNullApiId()
+            throws APIManagementException, ApiStoreSdkGenerationException, NotFoundException {
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        Request request = getRequest();
+        Response response = apisApiService.apisApiIdSdksLanguageGet(null,correctLanguage,request);
+
+        Assert.assertEquals(400,response.getStatus());
+    }
+    @Test
+    public void apisApiIdSdksLanguageGetIncorrectLanguage()
+            throws APIManagementException, ApiStoreSdkGenerationException, NotFoundException{
+        String apiId = UUID.randomUUID().toString();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        Request request = getRequest();
+        Response response = apisApiService.apisApiIdSdksLanguageGet(apiId,incorrectLanguage,request);
+        Assert.assertEquals(400,response.getStatus());
+    }
+
+    @Test
+    public void apisApiIdSdksLanguageGetIncorrectSwagger()
+            throws APIManagementException, ApiStoreSdkGenerationException, NotFoundException{
+        String apiId = UUID.randomUUID().toString();
+
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
+        PowerMockito.mockStatic(APIManagerFactory.class);
+        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
+        Mockito.when(instance.getAPIConsumer(USER)).thenReturn(apiStore);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
+
+        Endpoint api1SandBoxEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("abcd").build();
+        Endpoint api1ProdEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("cdef").build();
+        API api = TestUtil.createApi("provider1",
+                apiId,
+                "testapi1",
+                "1.0.0",
+                "Test API 1 - version 1.0.0",
+                TestUtil.createEndpointTypeToIdMap(api1SandBoxEndpointId, api1ProdEndpointId)).build();
+        Mockito.when(apiStore.getAPIbyUUID(apiId)).thenReturn(api);
+        Mockito.when(apiStore.getApiSwaggerDefinition(apiId)).thenReturn(swaggerPetStoreIncorrect);
+        Response response = apisApiService.apisApiIdSdksLanguageGet(apiId,correctLanguage,request);
+        Assert.assertEquals(500,response.getStatus());
+    }
+    @Test
+    public void apisApiIdSdksLanguageGetIncorrectApiId()
+            throws APIManagementException, ApiStoreSdkGenerationException, NotFoundException{
+        String apiId = UUID.randomUUID().toString();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIStore apiStore = Mockito.mock(APIStoreImpl.class);
+
+        APIManagerFactory instance = Mockito.mock(APIManagerFactory.class);
+        PowerMockito.mockStatic(APIManagerFactory.class);
+        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(instance);
+        Mockito.when(instance.getAPIConsumer(USER)).thenReturn(apiStore);
+
+        PowerMockito.mockStatic(RestApiUtil.class);
+        Request request = getRequest();
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
+        Endpoint api1SandBoxEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("abcd").build();
+        Endpoint api1ProdEndpointId = new Endpoint.Builder().id(UUID.randomUUID().toString()).applicableLevel
+                (APIMgtConstants.API_SPECIFIC_ENDPOINT).name("cdef").build();
+        API api = TestUtil.createApi("provider1", apiId, "testapi1", "1.0.0", "Test API 1 - version 1.0.0",
+                TestUtil.createEndpointTypeToIdMap(api1SandBoxEndpointId, api1ProdEndpointId)).build();
+        Mockito.when(apiStore.getAPIbyUUID(apiId)).thenReturn(api);
+        Mockito.when(apiStore.getApiSwaggerDefinition(apiId)).thenReturn(swaggerPetStoreCorrect);
+        Response response = apisApiService.apisApiIdSdksLanguageGet(apiId+"Error-Part",correctLanguage,request);
+
+        Assert.assertEquals(404,response.getStatus());
+    }
     // Sample request to be used by tests
     private Request getRequest() throws APIMgtSecurityException {
         CarbonMessage carbonMessage = new HTTPCarbonMessage();

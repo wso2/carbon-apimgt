@@ -140,7 +140,22 @@ public class RESTAPISecurityInterceptor implements Interceptor {
                 }
                 return false;
             }
-        } else if (requestURI.contains("/editor") || requestURI.contains("keyserver") || requestURI.contains("core")) {
+        } else if (requestURI.contains("/analytics")) {
+            if (requestURI.contains("swagger.json")) {
+                try {
+                    yamlContent = RestApiUtil.getAnalyticsRestAPIResource();
+                    swagger = new SwaggerParser().parse(yamlContent);
+                    swagger.setBasePath(RestApiUtil.getContext(RestApiConstants.APPType.ANALYTICS));
+                    swagger.setHost(RestApiUtil.getHost(protocol.toLowerCase(Locale.ENGLISH)));
+
+                } catch (APIManagementException e) {
+                    log.error("Couldn't find swagger.json for analytics", e);
+                }
+                response.setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).setEntity(Json.pretty
+                        (swagger)).setMediaType(MediaType.APPLICATION_JSON).send();
+                return false;
+            }
+        }  else if (requestURI.contains("/editor") || requestURI.contains("keyserver") || requestURI.contains("core")) {
             return true;
         } else if (requestURI.contains("/admin")) {
             if (requestURI.contains("swagger.json")) {

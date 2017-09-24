@@ -17,11 +17,12 @@
  */
 
 import React, {Component} from 'react'
-import API from '../../../../data/api'
+import API from '../../../../data/api.js'
 import {Button, message} from 'antd';
 import DocumentsTable from './DocumentsTable';
 import Loading from '../../../Base/Loading/Loading'
-
+import Grid from 'material-ui/Grid';
+import Paper from 'material-ui/Paper'
 
 
 class Documents extends Component {
@@ -57,7 +58,7 @@ class Documents extends Component {
         );
     }
 
-    downloadFile(response) {
+       downloadFile(response) {
         let fileName = "";
         const contentDisposition = response.headers["content-disposition"];
 
@@ -96,6 +97,7 @@ class Documents extends Component {
         }
     }
 
+
     render() {
         if (!this.state.documentsList) {
             return <Loading/>
@@ -111,8 +113,16 @@ class Documents extends Component {
                                         viewDocContentHandler={this.viewDocContentHandler}
                                         downloadFile={this.downloadFile}
                         /> ) :
-                        (<div style={{paddingTop: 20}}><p>No documents added into the API</p></div>)
-                }
+	    (<Grid container style={{paddingLeft:"40px"}}>
+                    <Grid item xs={12} sm={6} md={9} lg={9} xl={10} >
+                        <Paper style={{paddingLeft:"40px"}}>
+            <div style={{paddingTop: 20}}>
+                <h3 style={{paddingBottom: 15}}>No documents added into the API</h3>
+            </div>
+                        </Paper>
+                    </Grid>
+                </Grid>)
+             }
             </div>
         );
     }

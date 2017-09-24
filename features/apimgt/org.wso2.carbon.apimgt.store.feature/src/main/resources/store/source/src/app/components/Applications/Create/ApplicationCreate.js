@@ -31,13 +31,14 @@ import TextField from 'material-ui/TextField';
 import Paper from 'material-ui/Paper';
 import Input from 'material-ui/Input';
 import Select from 'material-ui/Select';
+import { FormControl } from 'material-ui/Form';
 
 class ApplicationCreate extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            quota: "unlimited",
+            quota: "Unlimited",
             tiers: [],
             throttlingTier: null,
             description: null,
@@ -56,6 +57,11 @@ class ApplicationCreate extends Component {
             let tiers = [];
             tierResponseObj.list.map(item => tiers.push(item.name));
             this.setState({tiers: tiers});
+
+            if (tiers.length > 0){
+                console.info(tiers[0]);
+                this.setState({quota: tiers[0]});
+            }
         }
         ).catch(
             error => {
@@ -74,18 +80,26 @@ class ApplicationCreate extends Component {
         this.setState({ [name]: event.target.value });
     };
 
+    handlePolicyChange = name => event => {
+        this.setState({ [name]: event.target.value });
+    };
+
     handleSubmit = (e) => {
         e.preventDefault();
         let application_data = {
             name: this.state.name,
-            throttlingTier: this.state.throttlingTier,
+            throttlingTier: this.state.quota,
             description: this.state.description,
             callbackUrl: "http://my.server.com/callback"
         };
         let new_api = new API();
         let promised_create = new_api.createApplication(application_data);
         promised_create.then(response => {
-            console.log("Application created successfully.");
+        let uuid = JSON.parse(response.data).applicationId;
+	//Once application loading fixed this need to pass application ID and load app
+        let redirect_url = "/applications/";
+        this.props.history.push(redirect_url);
+        console.log("Application created successfully.");
         }).catch(
             function (error_response) {
                 console.log("Error while creating the application");
@@ -118,15 +132,15 @@ class ApplicationCreate extends Component {
                             Per Token Quota
                         </Typography>
                         {this.state.tiers &&
+                        <FormControl style={{width:"40%",marginBottom:"20px"}}>
                             <Select
-                                label="Per Token Quota"
-                                name="form-field-name"
+                                style={{width:"50%"}}
                                 value={this.state.quota}
-                                onChange={this.handleChange('throttlingTier')}
-                                input={<Input id="application-tier"/>}
+                                onChange={this.handlePolicyChange('quota')}
                             >
-                                {this.state.tiers.map(tier => <MenuItem key={tier} value={tier}>{tier}</MenuItem>)}
+                                {this.state.tiers.map((tier) => <MenuItem key={tier} value={tier}>{tier}</MenuItem>)}
                             </Select>
+                        </FormControl>
                         }
                         <br />
                         <Typography type="caption" gutterBottom>

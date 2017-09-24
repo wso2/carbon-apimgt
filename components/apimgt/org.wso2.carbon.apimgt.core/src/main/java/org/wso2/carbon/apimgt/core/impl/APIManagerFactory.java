@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.core.api.APILifecycleManager;
 import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.api.Analyzer;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
@@ -60,6 +61,7 @@ public class APIManagerFactory {
 
     private static final int MAX_PROVIDERS = 50;
     private static final int MAX_CONSUMERS = 500;
+    private static final int MAX_ANALYZERS = 50;
 
     // Thread safe Cache for API Providers
     private static Map<String, APIPublisher> providers =
@@ -83,6 +85,19 @@ public class APIManagerFactory {
         @Override
         public boolean removeEldestEntry(Map.Entry eldest) {
             return size() > MAX_CONSUMERS;
+        }
+    });
+
+    // Thread safe Cache for Analyzers
+    private static Map<String, Analyzer> analyzers = Collections.synchronizedMap(new LinkedHashMap<String, Analyzer>
+            (MAX_ANALYZERS + 1, 1.0F, false) {
+
+        private static final long serialVersionUID = 1375888257077525302L;
+
+        // This method is called just after a new entry has been added
+        @Override
+        public boolean removeEldestEntry(Map.Entry eldest) {
+            return size() > MAX_ANALYZERS;
         }
     });
 
@@ -177,6 +192,38 @@ public class APIManagerFactory {
             }
         }
         return provider;
+    }
+
+    /**
+     * Get Analyzer for a particular user
+     *
+     * @param username The username of user who's requesting the object
+     * @return APIPublisher object
+     * @throws APIManagementException if error occurred while initializing Analytics object
+     */
+    public Analyzer getAnalyzer(String username) throws APIManagementException {
+        Analyzer analyzer = analyzers.get(username);
+        if (analyzer == null) {
+            synchronized (username.intern()) {
+                analyzer = analyzers.get(username);
+                if (analyzer != null) {
+                    return analyzer;
+                }
+
+                analyzer = newAnalyzer(username);
+                analyzers.put(username, analyzer);
+            }
+        }
+        return analyzer;
+    }
+
+    private Analyzer newAnalyzer(String username) throws APIMgtDAOException {
+        try {
+            AnalyzerImpl analyzer = new AnalyzerImpl(username, DAOFactory.getAnalyticsDAO());
+            return analyzer;
+        } catch (APIMgtDAOException e) {
+            throw new APIMgtDAOException("Couldn't Create Analyzer", ExceptionCodes.APIMGT_DAO_EXCEPTION);
+        }
     }
 
     /**
