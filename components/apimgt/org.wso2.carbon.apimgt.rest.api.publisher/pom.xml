@@ -185,6 +185,8 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- REST API documentation generation -->
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
@@ -237,8 +239,6 @@
                         <configuration>
                             <inputSpec>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources/publisher-api.yaml</inputSpec>
                             <language>org.wso2.carbon.apimgt.rest.api.common.codegen.DynamicHtmlGen</language>
-                            <!--<language>org.wso2.carbon.apimgt.rest.api.publisher.impl.DynamicHtmlGen</language>-->
-                            <!--<language>dynamic-html</language>-->
                             <templateDirectory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.commons/src/main/resources/doc-templates</templateDirectory>
                             <output>${project.build.directory}/generated-apidocs</output>
                         </configuration>
@@ -246,18 +246,20 @@
                 </executions>
 
                 <dependencies>
-                    <!--<dependency>-->
-                        <!--<groupId>org.wso2.carbon.apimgt</groupId>-->
-                        <!--<artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>-->
-                        <!--<version>${carbon.apimgt.version}</version>-->
-                    <!--</dependency>-->
                     <dependency>
                         <groupId>org.wso2.carbon.apimgt</groupId>
                         <artifactId>org.wso2.carbon.apimgt.rest.api.commons</artifactId>
                         <version>${carbon.apimgt.version}</version>
                     </dependency>
+                    <dependency>
+                        <groupId>com.atlassian.commonmark</groupId>
+                        <artifactId>commonmark</artifactId>
+                        <version>${atlassian.commonmark.version}</version>
+                    </dependency>
                 </dependencies>
             </plugin>
+            <!-- End of REST API documentation generation -->
+
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
