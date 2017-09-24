@@ -52,7 +52,7 @@ public class SelfSignupApi implements Microservice  {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:self-signup", description = "Self Sign-up")
         })
-    }, tags={ "Signup", })
+    }, tags={ "Sign Up", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = UserDTO.class),
         
