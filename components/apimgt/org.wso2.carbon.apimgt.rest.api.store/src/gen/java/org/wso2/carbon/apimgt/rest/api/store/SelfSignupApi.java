@@ -48,7 +48,7 @@ public class SelfSignupApi implements Microservice  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "User self signup API ", response = UserDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Register a new user", notes = "User self signup API ", response = UserDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:self-signup", description = "Self Sign-up")
         })

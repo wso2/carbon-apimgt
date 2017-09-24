@@ -54,7 +54,7 @@ public class CompositeApisApi implements Microservice  {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "CompositeAPI (Individual)", })
+    }, tags={ "Composite API (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Resource successfully deleted. ", response = void.class),
         
@@ -78,7 +78,7 @@ public class CompositeApisApi implements Microservice  {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "CompositeAPI (Individual)", })
+    }, tags={ "Composite API (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested Compoiste API is returned ", response = CompositeAPIDTO.class),
         
@@ -102,7 +102,7 @@ public class CompositeApisApi implements Microservice  {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "CompositeAPI (Individual)", })
+    }, tags={ "Composite API (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested Ballerina implementation of the Composite API is returned ", response = void.class),
         
@@ -126,7 +126,7 @@ public class CompositeApisApi implements Microservice  {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "CompositeAPI (Individual)", })
+    }, tags={ "Composite API (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Successful response with updated Ballerina implementation ", response = FileInfoDTO.class),
         
@@ -155,7 +155,7 @@ public class CompositeApisApi implements Microservice  {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "CompositeAPI (Individual)", })
+    }, tags={ "Composite API (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Successful response with updated Composite API object ", response = CompositeAPIDTO.class),
         
@@ -182,7 +182,7 @@ public class CompositeApisApi implements Microservice  {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "CompositeAPI (Individual)", })
+    }, tags={ "Composite API (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested swagger document of the Composite API is returned ", response = void.class),
         
@@ -206,7 +206,7 @@ public class CompositeApisApi implements Microservice  {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "CompositeAPI (Individual)", })
+    }, tags={ "Composite API (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Successful response with updated Swagger definition ", response = void.class),
         
@@ -233,7 +233,7 @@ public class CompositeApisApi implements Microservice  {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "CompositeAPI (Collection)", })
+    }, tags={ "Composite API (Collection)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. List of qualifying Composite APIs is returned. ", response = CompositeAPIListDTO.class),
         
@@ -256,7 +256,7 @@ public class CompositeApisApi implements Microservice  {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "CompositeAPI (Collection)", })
+    }, tags={ "Composite API (Collection)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = CompositeAPIDTO.class),
         
