@@ -29,7 +29,6 @@ import {
     Button,
     message,
     Form,
-    Select,
     Dropdown,
     Tag,
     Menu,
@@ -42,13 +41,14 @@ import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import ApiPermissionValidation from '../../../data/ApiPermissionValidation'
 import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation'
-import {Input} from 'antd';
 import {Checkbox} from 'antd';
 import {Table, Icon} from 'antd';
+import { MenuItem } from 'material-ui/Menu';
+import Select from 'material-ui/Select'
+import Input from 'material-ui/Input'
 
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
-const Option = Select.Option;
 
 
 class Permission extends Component {
@@ -57,7 +57,10 @@ class Permission extends Component {
         this.state = {
             api: null,
             notFound: false,
-            roleField: null,
+            visibility: "PUBLIC",
+            visibleRoles:[],
+            visibleRolesDisplay:"none",
+            roleField: "",
             readField: false,
             updateField: false,
             deleteField: false,
@@ -67,6 +70,8 @@ class Permission extends Component {
             permissionData: []
         };
         this.api_uuid = this.props.match.params.api_uuid;
+        this.handleChangeVisibilityField = this.handleChangeVisibilityField.bind(this);
+        this.handleChangeVisibilityRolesField = this.handleChangeVisibilityRolesField.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleInputs = this.handleInputs.bind(this);
         this.handleSwitch = this.handleSwitch.bind(this);
@@ -88,6 +93,7 @@ class Permission extends Component {
                 this.setState({api: response.obj});
                 this.getExistingPermissions(this);
                 this.getExistingSecuritySchemes(this);
+                this.getExistingVisibility(this);
             }
         ).catch(
             error => {
@@ -100,6 +106,22 @@ class Permission extends Component {
                 }
             }
         );
+    }
+
+    handleChangeVisibilityField(event) {
+        this.setState({visibility: event.target.value});
+        if(event.target.value == 'RESTRICTED'){
+            this.setState({visibleRolesDisplay: "inline"});
+        } else {
+            this.setState({visibleRolesDisplay: "none"});
+        }
+
+    }
+
+    handleChangeVisibilityRolesField(event){
+        let roleList = event.target.value.split(',');
+        let roleList2 = roleList.map(e => String(e).trim());
+        this.setState({visibleRoles: roleList2})
     }
 
     handleSwitch(secured) {
@@ -120,6 +142,8 @@ class Permission extends Component {
         promised_api.then(
             response => {
                 var api_data = JSON.parse(response.data);
+                api_data.visibility = this.state.visibility;
+                api_data.visibleRoles = this.state.visibleRoles;
                 var permissionString = this.createPermissionJsonString(this);
                 api_data.permission = permissionString;
                 var securitySchemes = this.createSecuritySchemeArray(this);
@@ -149,6 +173,8 @@ class Permission extends Component {
             }
         );
     }
+
+
 
     handleChangeRoleField(event) {
         this.setState({roleField: event.target.value});
@@ -187,11 +213,11 @@ class Permission extends Component {
         groupPermissions['isManageSubscription'] = this.state.manageSubField;
         permissionData.push(groupPermissions);
         this.setState({permissionData: permissionData,
-                        roleField: null,
-                        readField: false,
-                        updateField: false,
-                        deleteField: false,
-                        manageSubField: false});
+            roleField: null,
+            readField: false,
+            updateField: false,
+            deleteField: false,
+            manageSubField: false});
     }
 
     handleRemoveRole(value) {
@@ -268,6 +294,21 @@ class Permission extends Component {
         }
     }
 
+    getExistingVisibility() {
+        var visibility = this.state.api.visibility;
+        this.setState({visibility: visibility});
+
+        if(visibility == 'RESTRICTED'){
+            this.setState({visibleRolesDisplay: "inline"});
+        } else {
+            this.setState({visibleRolesDisplay: "none"});
+        }
+
+        var visibleRoles = this.state.api.visibleRoles;
+        console.log(visibleRoles);
+        this.setState({visibleRoles: visibleRoles})
+    }
+
     getExistingPermissions() {
         if (!this.state.api) {
             return <Loading/>
@@ -289,16 +330,16 @@ class Permission extends Component {
                 var groupPermissions = {};
 
                 if(permissionArray.includes(ApiPermissionValidation.permissionType.READ)) {
-                   isRead = true;
+                    isRead = true;
                 }
                 if (permissionArray.includes(ApiPermissionValidation.permissionType.UPDATE)){
-                   isUpdate = true;
+                    isUpdate = true;
                 }
                 if (permissionArray.includes(ApiPermissionValidation.permissionType.DELETE)) {
-                   isDelete = true;
+                    isDelete = true;
                 }
                 if (permissionArray.includes(ApiPermissionValidation.permissionType.MANAGE_SUBSCRIPTION)) {
-                   isManageSubscription = true;
+                    isManageSubscription = true;
                 }
                 groupPermissions['key'] = roleName;
                 groupPermissions['isRead'] = isRead;
@@ -329,25 +370,25 @@ class Permission extends Component {
             dataIndex: 'isRead',
             key: 'isRead',
             render: isChecked => <Checkbox checked={isChecked} name="read"
-                                                         value={ApiPermissionValidation.permissionType.READ}></Checkbox>
+                                           value={ApiPermissionValidation.permissionType.READ}></Checkbox>
         }, {
             title: 'Update',
             dataIndex: 'isUpdate',
             key: 'isUpdate',
             render: isChecked => <Checkbox checked={isChecked} name="update"
-                                                       value={ApiPermissionValidation.permissionType.UPDATE}></Checkbox>
+                                           value={ApiPermissionValidation.permissionType.UPDATE}></Checkbox>
         }, {
             title: 'Delete',
             dataIndex: 'isDelete',
             key: 'isDelete',
             render: isChecked => <Checkbox checked={isChecked} name="delete"
-                                                       value={ApiPermissionValidation.permissionType.DELETE}></Checkbox>
+                                           value={ApiPermissionValidation.permissionType.DELETE}></Checkbox>
         }, {
             title: 'Manage Subscriptions',
             dataIndex: 'isManageSubscription',
             key: 'isManageSubscription',
             render: isChecked => <Checkbox checked={isChecked} name="manage_subscription"
-                                          value={ApiPermissionValidation.permissionType.MANAGE_SUBSCRIPTION}></Checkbox>
+                                           value={ApiPermissionValidation.permissionType.MANAGE_SUBSCRIPTION}></Checkbox>
         }, {
             title: 'Action',
             key: 'action',
@@ -407,18 +448,18 @@ class Permission extends Component {
                             <Card bodyStyle={{padding: 5}}>
                                 <Row style={{marginBottom: "10px"}} type="flex" justify="left">
                                     <Col span={8}>Visibility</Col>
-                                    <Col span={16}>
-                                        <Select>
-                                            <Option value="RestrictedByRoles">RestrictedByRoles</Option>
-                                            <Option value="Public">Public</Option>
-                                        </Select>
-                                    </Col>
+
+                                    <Select value = {this.state.visibility} onChange={this.handleChangeVisibilityField}>
+                                        <MenuItem value={"PUBLIC"}>Public</MenuItem>
+                                        <MenuItem value={"RESTRICTED"}>Restricted by Roles</MenuItem>
+                                    </Select>
+
                                 </Row>
 
-                                <Row style={{marginBottom: "10px"}} type="flex" justify="left">
-                                    <Col span={8}>Roles</Col>
+                                <Row style={{marginBottom: "10px", display:`${ this.state.visibleRolesDisplay }`}} type="flex" justify="left">
+                                    <Col span={8}>Visible to Roles</Col>
                                     <Col span={16}>
-                                        <Input name="roles" placeholder="Sales-group,Engineering"/>
+                                        <Input name="roles" placeholder="Sales-group,Engineering" value= {this.state.visibleRoles}  onChange={this.handleChangeVisibilityRolesField}/>
                                     </Col>
                                 </Row>
                             </Card>
@@ -430,32 +471,32 @@ class Permission extends Component {
                                         <Row>
                                             <Col span={4} style={{margin: "10px"}}>
                                                 <Input name="roleField" placeholder="role" value={this.state.roleField}
-                                                                                onChange={this.handleChangeRoleField}/>
+                                                       onChange={this.handleChangeRoleField}/>
                                             </Col>
                                             <Col span={2} style={{margin: "10px"}}>
                                                 <Checkbox name="readField" value={ApiPermissionValidation.permissionType.READ}
-                                                  checked={this.state.readField} onChange={this.handleChangeReadField}>
-                                                                                                        Read </Checkbox>
+                                                          checked={this.state.readField} onChange={this.handleChangeReadField}>
+                                                    Read </Checkbox>
                                             </Col>
                                             <Col span={2} style={{margin: "10px"}}>
                                                 <Checkbox name="updateField" value={ApiPermissionValidation.permissionType.UPDATE}
-                                               checked={this.state.updateField} onChange={this.handleChangeUpdateField}>
-                                                                                                      Update </Checkbox>
+                                                          checked={this.state.updateField} onChange={this.handleChangeUpdateField}>
+                                                    Update </Checkbox>
                                             </Col>
                                             <Col span={2} style={{margin: "10px"}}>
                                                 <Checkbox name="deleteField" value={ApiPermissionValidation.permissionType.DELETE}
-                                               checked={this.state.deleteField} onChange={this.handleChangeDeleteField}>
-                                                                                                      Delete </Checkbox>
+                                                          checked={this.state.deleteField} onChange={this.handleChangeDeleteField}>
+                                                    Delete </Checkbox>
                                             </Col>
                                             <Col span={5} style={{margin: "10px"}}>
                                                 <Checkbox name="manageSubField"
-                                          value={ApiPermissionValidation.permissionType.MANAGE_SUBSCRIPTION}
-                                         checked={this.state.manageSubField} onChange={this.handleChangeManageSubField}>
-                                                Manage Subscriptions </Checkbox>
+                                                          value={ApiPermissionValidation.permissionType.MANAGE_SUBSCRIPTION}
+                                                          checked={this.state.manageSubField} onChange={this.handleChangeManageSubField}>
+                                                    Manage Subscriptions </Checkbox>
                                             </Col>
                                             <Col span={1} style={{margin: "10px"}}>
                                                 <Button name="add" onClick=
-                                                          {this.handleAddRole.bind(this, permissionData)}> Add </Button>
+                                                    {this.handleAddRole.bind(this, permissionData)}> Add </Button>
                                             </Col>
                                         </Row>
                                     </Col>
@@ -475,11 +516,11 @@ class Permission extends Component {
                                         <Row>
                                             <Col span={8} style={{margin: "10px"}}>
                                                 <Checkbox name="oauthField" checked={this.state.oauthField}
-                                                onChange={this.toggleOauthSelect}>Oauth</Checkbox>
+                                                          onChange={this.toggleOauthSelect}>Oauth</Checkbox>
                                             </Col>
                                             <Col span={8} style={{margin: "10px"}}>
                                                 <Checkbox name="apikeyField" checked={this.state.apikeyField}
-                                                onChange={this.toggleApiKeySelect}>API Key</Checkbox>
+                                                          onChange={this.toggleApiKeySelect}>API Key</Checkbox>
                                             </Col>
                                         </Row>
                                     </Col>
@@ -519,11 +560,11 @@ class Permission extends Component {
                             }
                             {/* Allowing update API with scopes */}
                             <ScopeValidation resourcePath={resourcePath.SINGLE_API} resourceMethod={resourceMethod.PUT}>
-                              <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
-                                  <Button loading={this.state.creating} type="primary"
-                                          onClick={this.handleSubmit}>Update</Button>
-                              </ApiPermissionValidation>
-                          </ScopeValidation>
+                                <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
+                                    <Button loading={this.state.creating} type="primary"
+                                            onClick={this.handleSubmit}>Update</Button>
+                                </ApiPermissionValidation>
+                            </ScopeValidation>
                         </form>
                     </Col>
                 </Row>
@@ -555,3 +596,4 @@ class PermissionFormWrapper extends React.Component {
 }
 
 export default PermissionFormWrapper
+
