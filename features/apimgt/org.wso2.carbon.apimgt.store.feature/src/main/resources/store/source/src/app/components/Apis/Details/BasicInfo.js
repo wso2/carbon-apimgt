@@ -390,7 +390,6 @@ class Star extends React.Component {
 
     handleHoveringOver(event) {
         this.props.hoverOver(this.props.name);
-       // console.log(this.props);
     }
 
     render() {
@@ -419,23 +418,11 @@ class StarRatingBar extends React.Component {
     }
 
     componentDidMount() {
-        const api = new Api();
+        var api = new Api();
         let promised_api = api.getAPIById(this.props.apiIdProp);
         promised_api.then(
             response => {
-                console.log("instarbar");
-                console.info(response.obj)
-                //this.setState({api: response.obj});
-            }
-        ).catch(
-            error => {
-                if (process.env.NODE_ENV !== "production") {
-                    console.log(error);
-                }
-                let status = error.status;
-                if (status === 404) {
-                    this.setState({notFound: true});
-                }
+                console.info(response.obj);
             }
         );
 
@@ -446,17 +433,6 @@ class StarRatingBar extends React.Component {
                 console.log(response.obj.userRating);
                 this.setState({rating :response.obj.userRating});
                 this.setState({previousRating :response.obj.userRating});
-               // alert(this.state.rating);
-            }
-        ).catch(
-            error => {
-                if (process.env.NODE_ENV !== "production") {
-                    console.log(error);
-                }
-                let status = error.status;
-                if (status === 404) {
-                    this.setState({notFound: true});
-                }
             }
         );
     }
@@ -466,7 +442,6 @@ class StarRatingBar extends React.Component {
     }
 
     handleMouseOut() {
-       // alert("rating : " + this.state.rating + "previous rating : " + this.state.previousRating);
         this.setState({rating : this.state.previousRating});
     }
 
@@ -488,7 +463,6 @@ class StarRatingBar extends React.Component {
     }
 
     render() {
-        //alert('rerendering rater ' + (this.state.rating >= 3));
         return (<div onClick = {this.handleRatingUpdate} onMouseOut = {this.handleMouseOut}>
                 <Star name = {1} isRated = {this.state.rating >= 1} hoverOver = {this.handleMouseOver} > </Star>
                 <Star name = {2} isRated = {this.state.rating >= 2} hoverOver = {this.handleMouseOver} > </Star>
