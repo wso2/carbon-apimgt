@@ -41,7 +41,7 @@ public class ServiceDiscoveryConfigurations {
     @Element(description = "security properties")
     private Map<String, String> security = new HashMap<>();
 
-    public ServiceDiscoveryConfigurations(){
+    public ServiceDiscoveryConfigurations() {
         cmsSpecificParameters.put("insidePod", insidePod.toString());
         security.put("serviceAccountToken", serviceAccountToken);
         security.put("caCertLocation", caCertLocation);

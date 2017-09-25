@@ -183,14 +183,16 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
                         discoverClusterIPURL(serviceSpec, serviceName, port, protocol, namespace);
 
                         if (serviceSpec.getType().equals("ExternalName")) {
-                            discoverExternalNameURL(service, serviceName, protocol, namespace);
+                            discoverExternalNameURL(serviceSpec, serviceName, protocol, namespace);
                         }
                     }
                     if (!serviceSpec.getType().equals("ClusterIP") && endpointsAvailable) {
                         discoverNodePortURL(serviceName, servicePort, protocol, filterNamespace, namespace);
                     }
-                    discoverLoadBalancerURL(service, serviceName, port, protocol, namespace);
-                    discoverExternalIPURL(service, serviceName, port, protocol, namespace);
+                    if (service.getSpec().getType().equals("LoadBalancer")) {
+                        discoverLoadBalancerURL(service, serviceName, port, protocol, namespace);
+                    }
+                    discoverExternalIPURL(serviceSpec, serviceName, port, protocol, namespace);
 
                 } else if (log.isDebugEnabled()) {
                     log.debug("Service:{} Namespace:{} Port:{}/{}  Application level protocol not defined.",
@@ -203,94 +205,109 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
 
     private void discoverClusterIPURL(ServiceSpec serviceSpec, String serviceName, int port,
                                       String protocol, String namespace) {
-        URL clusterIPServiceURL = null;
         try {
-            clusterIPServiceURL = new URL(protocol, serviceSpec.getClusterIP(), port, "");
+            URL url = new URL(protocol, serviceSpec.getClusterIP(), port, "");
+            Endpoint endpoint = constructEndpoint(serviceName, namespace, protocol, "ClusterIP", url);
+            if (endpoint != null) {
+                this.servicesList.add(endpoint);
+            }
         } catch (MalformedURLException e) {
             log.error("Service:{} Namespace:{} URLType:ClusterIP   URL malformed",
                     serviceName, namespace);
         }
-        Endpoint clusterIPEndpoint = constructEndpoint(serviceName, namespace, protocol,
-                "ClusterIP", clusterIPServiceURL);
-        if (clusterIPEndpoint != null) {
-            this.servicesList.add(clusterIPEndpoint);
-        }
     }
 
-    private void discoverExternalNameURL(Service service, String serviceName, String protocol,
+    private void discoverExternalNameURL(ServiceSpec serviceSpec, String serviceName, String protocol,
                                          String namespace) {
-        String externalName = (String) service.getSpec()
-                .getAdditionalProperties().get("externalName");
-        URL externalNameServiceURL = null;
+        String externalName = (String) serviceSpec.getAdditionalProperties().get("externalName");
         try {
-            externalNameServiceURL = new URL(protocol + "://" + externalName);
+            URL url = new URL(protocol + "://" + externalName);
+            Endpoint endpoint = constructEndpoint(serviceName, namespace, protocol, "ExternalName", url);
+            if (endpoint != null) {
+                this.servicesList.add(endpoint);
+            }
         } catch (MalformedURLException e) {
-            log.error("Service:{} Namespace:{} URLType:ExternalName   URL malformed",
-                    serviceName, namespace);
-        }
-        Endpoint externalNameEndpoint = constructEndpoint(serviceName,
-                namespace, protocol, "ExternalName", externalNameServiceURL);
-        if (externalNameEndpoint != null) {
-            this.servicesList.add(externalNameEndpoint);
+            log.error("Service:{} Namespace:{} URLType:ExternalName   URL malformed", serviceName, namespace);
         }
     }
 
     private void discoverNodePortURL(String serviceName, ServicePort servicePort, String protocol,
                                      String filterNamespace, String namespace) {
-        URL nodePortServiceURL = null;
-        try {
-            nodePortServiceURL = findNodePortServiceURLForAPort(filterNamespace,
-                    serviceName, protocol, servicePort.getNodePort());
-        } catch (MalformedURLException e) {
-            log.error("Service:{} Namespace:{} URLType:NodePort   URL malformed", serviceName, namespace);
+        //because pod name comes with an extension to its service
+        //endpoint name is the service name as it is
+        Endpoints kubernetesEndpoint = findEndpoint(filterNamespace, serviceName);
+        List<EndpointSubset> endpointSubsets = kubernetesEndpoint.getSubsets();
+        if (endpointSubsets == null) {
+            //no endpoints for the service : when LoadBalancer type or pods not selected
+            log.debug("Service:{}   No endpoints found for the service.", serviceName);
+            endpointsAvailable = false;
+            return;
         }
-        Endpoint nodePortEndpoint = constructEndpoint(serviceName, namespace,
-                protocol, "NodePort", nodePortServiceURL);
-        if (nodePortEndpoint != null) {
-            this.servicesList.add(nodePortEndpoint);
+        for (EndpointSubset endpointSubset : endpointSubsets) {
+            List<EndpointAddress> endpointAddresses = endpointSubset.getAddresses();
+            if (endpointAddresses.isEmpty()) {  //no endpoints for the service : when NodePort type
+                log.debug("Service:{}   No endpoints found for the service.", serviceName);
+                endpointsAvailable = false;
+                return;
+            }
+            for (EndpointAddress endpointAddress : endpointAddresses) {
+                String podName = endpointAddress.getTargetRef().getName();
+                Pod pod = findPod(filterNamespace, podName);
+                try {
+                    URL url = new URL(protocol, pod.getStatus().getHostIP(), servicePort.getNodePort(), "");
+                    Endpoint endpoint = constructEndpoint(serviceName, namespace, protocol, "NodePort", url);
+                    if (endpoint != null) {
+                        this.servicesList.add(endpoint);
+                    }
+                    return;
+                } catch (NullPointerException e) { //no pods available for this address
+                    log.debug("Service:{}  Pod {}  not available", serviceName, podName);
+                } catch (MalformedURLException e) {
+                    log.error("Service:{} Namespace:{} URLType:NodePort   URL malformed", serviceName, namespace);
+                }
+            }
         }
     }
 
     private void discoverLoadBalancerURL(Service service, String serviceName, int port, String protocol,
                                          String namespace) {
-        if (service.getSpec().getType().equals("LoadBalancer")) {
-            List<LoadBalancerIngress> loadBalancerIngresses = service.getStatus()
-                    .getLoadBalancer().getIngress();
-            if (!loadBalancerIngresses.isEmpty()) {
-                URL loadBalancerServiceURL = null;
+        List<LoadBalancerIngress> loadBalancerIngresses = service.getStatus()
+                .getLoadBalancer().getIngress();
+        if (!loadBalancerIngresses.isEmpty()) {
+            for (LoadBalancerIngress loadBalancerIngress : loadBalancerIngresses) {
                 try {
-                    loadBalancerServiceURL = new URL(protocol,
-                            loadBalancerIngresses.get(0).getIp(), port, "");
+                    URL url = new URL(protocol, loadBalancerIngress.getIp(), port, "");
+                    Endpoint endpoint = constructEndpoint(serviceName, namespace, protocol, "LoadBalancer", url);
+                    if (endpoint != null) {
+                        this.servicesList.add(endpoint);
+                        return;
+                    }
                 } catch (MalformedURLException e) {
                     log.error("Service:{} Namespace:{} URLType:LoadBalancer   URL malformed", serviceName, namespace);
                 }
-                Endpoint loadBalancerEndpoint = constructEndpoint(serviceName,
-                        namespace, protocol, "LoadBalancer", loadBalancerServiceURL);
-                if (loadBalancerEndpoint != null) {
-                    this.servicesList.add(loadBalancerEndpoint);
-                }
-            } else {
-                log.debug("Service:{}  Namespace:{}  Port:{}/{} " +
-                                "has no loadbalancer ingresses available.",
-                        serviceName, namespace, port, protocol);
             }
+        } else {
+            log.debug("Service:{}  Namespace:{}  Port:{}/{} has no loadbalancer ingresses available.",
+                    serviceName, namespace, port, protocol);
         }
     }
 
-    private void discoverExternalIPURL(Service service, String serviceName, int port, String protocol,
+    private void discoverExternalIPURL(ServiceSpec serviceSpec, String serviceName, int port, String protocol,
                                        String namespace) {
-        List<String> specialExternalIps = service.getSpec().getExternalIPs();
-        if (!specialExternalIps.isEmpty()) {
-            URL externalIpServiceURL = null;
-            try {
-                externalIpServiceURL = new URL(protocol, specialExternalIps.get(0), port, "");
-            } catch (MalformedURLException e) {
-                log.error("Service:{} Namespace:{} URLType:ExternalIP   URL malformed", serviceName, namespace);
-            }
-            Endpoint externalIpEndpoint = constructEndpoint(serviceName, namespace,
-                    protocol, "ExternalIP", externalIpServiceURL);
-            if (externalIpEndpoint != null) {
-                this.servicesList.add(externalIpEndpoint);
+        List<String> specialExternalIPs = serviceSpec.getExternalIPs();
+        if (!specialExternalIPs.isEmpty()) {
+            for (String specialExternalIP : specialExternalIPs) {
+                try {
+                    URL url = new URL(protocol, specialExternalIP, port, "");
+                    Endpoint externalIpEndpoint = constructEndpoint(serviceName, namespace,
+                            protocol, "ExternalIP", url);
+                    if (externalIpEndpoint != null) {
+                        this.servicesList.add(externalIpEndpoint);
+                        return;
+                    }
+                } catch (MalformedURLException e) {
+                    log.error("Service:{} Namespace:{} URLType:ExternalIP   URL malformed", serviceName, namespace);
+                }
             }
         }
     }
@@ -326,37 +343,6 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
         return endpointBuilder.build();
     }
 
-    private URL findNodePortServiceURLForAPort(String filerNamespace, String serviceName,
-                                               String protocol, int nodePort) throws MalformedURLException {
-        URL url;
-        Endpoints endpoint = findEndpoint(filerNamespace, serviceName);
-        List<EndpointSubset> endpointSubsets = endpoint.getSubsets();
-        if (endpointSubsets == null) {
-            //no endpoints for the service : when LoadBalancer type or pods not selected
-            log.debug("Service:{}   No endpoints found for the service.", serviceName);
-            endpointsAvailable = false;
-            return null;
-        }
-        for (EndpointSubset endpointSubset : endpointSubsets) {
-            List<EndpointAddress> endpointAddresses = endpointSubset.getAddresses();
-            if (endpointAddresses.isEmpty()) {  //no endpoints for the service : when NodePort type
-                log.debug("Service:{}   No endpoints found for the service.", serviceName);
-                endpointsAvailable = false;
-                return null;
-            }
-            for (EndpointAddress endpointAddress : endpointAddresses) {
-                String podName = endpointAddress.getTargetRef().getName();
-                Pod pod = findPod(filerNamespace, podName);
-                try {
-                    url = new URL(protocol, pod.getStatus().getHostIP(), nodePort, "");
-                    return url;
-                } catch (NullPointerException e) { //no pods available for this address
-                    log.debug("Service:{}  Pod {}  not available", serviceName, podName);
-                }
-            }
-        }
-        return null;
-    }
 
     private Endpoints findEndpoint(String filterNamespace, String serviceName) {
         Endpoints endpoint;
@@ -377,6 +363,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
     private Pod findPod(String filterNamespace, String podName) {
         Pod pod;
         if (filterNamespace == null) {
+            //same reason as in findEndpoint
             pod = client.pods().inAnyNamespace()
                     .withField("metadata.name", podName).list().getItems().get(0);
         } else {
