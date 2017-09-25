@@ -1,7 +1,7 @@
 {
-  "name": "wso2_apim_publisher",
+  "name": "wso2_apim_store",
   "version": "1.0.0",
-  "description": "WSO2 API Manager Web Apps Publisher",
+  "description": "WSO2 API Manager Store Web App",
   "main": "app.js",
   "scripts": {
     "test": "NODE_ENV=test NODE_TLS_REJECT_UNAUTHORIZED='0' mocha --recursive --require babel-register  -r mock-local-storage \"./source/test/**/*.test.js\"",
