@@ -429,7 +429,6 @@ public interface APIConsumer extends APIManager {
      * @return Applications
      * @throws APIManagementException if failed to applications for given subscriber
      */
-
     Application[] getLightWeightApplications(Subscriber subscriber, String groupingId) throws APIManagementException;
 
     /**

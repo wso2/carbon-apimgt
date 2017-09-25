@@ -4411,9 +4411,6 @@ public class ApiMgtDAO {
         return applications;
     }
 
-
-
-
     public Application[] getLightWeightApplications(Subscriber subscriber, String groupingId) throws
             APIManagementException {
 
@@ -4526,7 +4523,6 @@ public class ApiMgtDAO {
         }
         return applications;
     }
-
 
     /**
      * Returns all the consumerkeys of application which are subscribed for the given api
