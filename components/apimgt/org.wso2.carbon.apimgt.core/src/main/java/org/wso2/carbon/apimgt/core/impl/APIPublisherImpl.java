@@ -314,6 +314,31 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         apiBuilder.lastUpdatedTime(localDateTime);
         apiBuilder.createdBy(getUsername());
         apiBuilder.updatedBy(getUsername());
+
+        // if has own gateway feature enabled
+        if (apiBuilder.hasOwnGateway()) {
+            // create a label
+            List<Label> labelList = new ArrayList<>();
+            Label autoGenLabel = new Label.Builder().
+                    id(UUID.randomUUID().toString()).
+                    name(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiBuilder.getId()).
+                    accessUrls(null).build();
+            labelList.add(autoGenLabel);
+            //Add to the db
+            getLabelDAO().addLabels(labelList);
+            //add to the API
+            Set<String> labelSet = new HashSet<>();
+            labelSet.add(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiBuilder.getId());
+            apiBuilder.labels(labelSet);
+        }
+        if (apiBuilder.getLabels().isEmpty() && !apiBuilder.hasOwnGateway()) {
+            Set<String> labelSet = new HashSet<>();
+            labelSet.add(APIMgtConstants.DEFAULT_LABEL_NAME);
+            apiBuilder.labels(labelSet);
+        }
+        Map<String, Endpoint> apiEndpointMap = apiBuilder.getEndpoint();
+        validateEndpoints(apiEndpointMap, false);
+
         try {
             if (!isApiNameExist(apiBuilder.getName()) && !isContextExist(apiBuilder.getContext())) {
                 LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle(APIMgtConstants.API_LIFECYCLE,
