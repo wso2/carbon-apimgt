@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+
+    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/github.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+    <script src="assets/js/jquery-2.2.0.min.js" type="text/javascript"></script>
+    <script src="assets/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="assets/js/highlight.pack.js" type="text/javascript"></script>
+    <script src="assets/js/main.js" type="text/javascript"></script>
+    <script src="assets/js/marked.min.js" type="text/javascript"></script>
+
+    <title>WSO2 API Manager - Analytics : vv1.0</title>
+
+
+    <!-- Custom CSS -->
+    <link href="css/simple-sidebar.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+<nav class="navbar navbar-fixed-top">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="https://docs.wso2.com/api-manager">
+            <img src="assets/images/logo.png" alt="WSO2 Api manager" title="WSO2 Api Manager Documentation">
+        </a>
+    </div>
+    <div id="navbar" class="collapse navbar-collapse pull-right">
+        <ul class="nav navbar-nav">
+            <li>
+                <a href="#menu-toggle" id="menu-toggle" class="button-primary"><span
+                        class="glyphicon glyphicon-list"></span> Navigation</a>
+            </li>
+        </ul>
+    </div><!--/.nav-collapse -->
+</nav>
+<div id="wrapper">
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper">
+        <nav class="bs-docs-sidebar" id="navbar">
+            <h3>Overview</h3>
+            <ul class="nav nav-stacked fixed">
+                <li class="section-box">
+                    <ul class="nav nav-stacked">
+                        <li id="ov-index"><a href="index.html">Introduction</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <h3>Resources</h3>
+            <ul class="nav nav-stacked fixed">
+                        <hr/>
+                        <span class="class-name">default</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apiCountOverTimeGet"><a href="#!/operations#Default#apiCountOverTimeGet">Retrieve APIs created over time details
+</a></li>
+                                        <li id="op-apiListGet"><a href="#!/operations#Default#apiListGet">Retrieve API information for a given time peroid
+</a></li>
+                                        <li id="op-apiSubscriberCountByApiGet"><a href="#!/operations#Default#apiSubscriberCountByApiGet">Retrieve Subscriber count by APIs
+</a></li>
+                                        <li id="op-applicationCountOverTimeGet"><a href="#!/operations#Default#applicationCountOverTimeGet">Retrieve application created over time details
+</a></li>
+                                        <li id="op-subscriptionCountOverTimeGet"><a href="#!/operations#Default#subscriptionCountOverTimeGet">Retrieve APIs created over time details
+</a></li>
+                                        <li id="op-subscriptionListGet"><a href="#!/operations#Default#subscriptionListGet">Retrieve Subscription details
+</a></li>
+                            </ul>
+                        </li>
+            </ul>
+            <h3>Definitions</h3>
+            <ul class="nav nav-stacked fixed">
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APICount"><a href="#!/models#APICount">APICount</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APICountList"><a href="#!/models#APICountList">APICountList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APIInfo"><a href="#!/models#APIInfo">APIInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APIInfoList"><a href="#!/models#APIInfoList">APIInfoList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APISubscriptionCount"><a href="#!/models#APISubscriptionCount">APISubscriptionCount</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APISubscriptionCountList"><a href="#!/models#APISubscriptionCountList">APISubscriptionCountList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ApplicationCount"><a href="#!/models#ApplicationCount">ApplicationCount</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ApplicationCountList"><a href="#!/models#ApplicationCountList">ApplicationCountList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-SubscriptionCount"><a href="#!/models#SubscriptionCount">SubscriptionCount</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-SubscriptionCountList"><a href="#!/models#SubscriptionCountList">SubscriptionCountList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-SubscriptionInfo"><a href="#!/models#SubscriptionInfo">SubscriptionInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-SubscriptionInfoList"><a href="#!/models#SubscriptionInfoList">SubscriptionInfoList</a></li>
+                            </ul>
+                        </li>
+            </ul>
+        </nav>
+    </div>
+    <!-- /#sidebar-wrapper -->
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <div class="container-fluid main-content">
+            <div class="row" class="">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="non-sidebar">
+                        <div class="main-content">
+                            <h2>Introduction</h2>
+
+                            <p class="marked">This document specifies a **RESTful API** for WSO2 **API Manager** - Analytics.
+It is written with [swagger 2](http://swagger.io/).
+</p>
+
+                            <div class="sect2">
+                                    <h3>Version information</h3>
+
+                                    <div class="paragraph">
+                                        <p class="marked">v1.0</p>
+                                    </div>
+
+                                        <h3>Contact information</h3>
+
+                                        <div class="paragraph">
+                                            <p class="marked">Contact: <a href="http://wso2.com/products/api-manager/">WSO2</a></p>
+
+                                            <p>Email: architecture@wso2.com</p>
+                                        </div>
+
+                                        <h3>License information</h3>
+
+                                        <div class="paragraph">
+                                            <p class="marked">License: Apache 2.0</p>
+
+                                            <p class="marked">URL: http://www.apache.org/licenses/LICENSE-2.0.html</p>
+                                        </div>
+
+                                    <h3>URI Scheme</h3>
+
+                                    <div class="paragraph">
+                                        <p class="marked">Host: apis.wso2.com</p>
+
+                                        <p class="marked">BasePath: /api/am/analytics/v1.0</p>
+                                        <code>Scheme: [HTTPS, HTTP]</code>
+                                    </div>
+                                    <h3>Consumes</h3>
+
+                                    <div class="paragraph">
+                                        <code>[application/json]</code>
+                                    </div>
+                                    <h3>Produces</h3>
+
+                                    <div class="paragraph">
+                                        <code>[application/json]</code>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
+
+    </div>
+</div>
+<!-- /#wrapper -->
+</body>
+
+</html>
