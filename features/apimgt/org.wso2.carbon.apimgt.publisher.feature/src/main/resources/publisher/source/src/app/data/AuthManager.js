@@ -165,7 +165,7 @@ class AuthManager {
             const validityPeriod = response.data.validityPeriod; // In seconds
             const WSO2_AM_TOKEN_1 = response.data.partialToken;
             const user = new User(response.data.authUser, response.data.idToken);
-            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/publisher");
+            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, this.contextPath);
             user.scopes = response.data.scopes.split(" ");
             AuthManager.setUser(user);
         });
@@ -186,8 +186,9 @@ class AuthManager {
         };
         const promisedLogout = axios.post(url, null, {headers: headers});
         return promisedLogout.then(response => {
-            Utils.delete_cookie("WSO2_AM_TOKEN_1");
-            localStorage.removeItem("wso2_user");
+            Utils.delete_cookie("WSO2_AM_TOKEN_1",this.contextPath);
+            localStorage.removeItem(User.CONST.LOCALSTORAGE_USER);
+            SingleClient._instance = null; // Single client should be re initialize after log out
         });
     }
 
