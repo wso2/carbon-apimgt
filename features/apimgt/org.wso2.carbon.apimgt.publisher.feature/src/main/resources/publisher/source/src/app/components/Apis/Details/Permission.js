@@ -29,7 +29,6 @@ import {
     Button,
     message,
     Form,
-    Select,
     Dropdown,
     Tag,
     Menu,
@@ -42,13 +41,14 @@ import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import ApiPermissionValidation from '../../../data/ApiPermissionValidation'
 import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation'
-import {Input} from 'antd';
 import {Checkbox} from 'antd';
 import {Table, Icon} from 'antd';
+import { MenuItem } from 'material-ui/Menu';
+import Select from 'material-ui/Select'
+import Input from 'material-ui/Input'
 
 const RadioButton = Radio.Button;
 const RadioGroup = Radio.Group;
-const Option = Select.Option;
 
 
 class Permission extends Component {
@@ -60,7 +60,7 @@ class Permission extends Component {
             visibility: "PUBLIC",
             visibleRoles:[],
             visibleRolesDisplay:"none",
-            roleField: null,
+            roleField: "",
             readField: false,
             updateField: false,
             deleteField: false,
@@ -93,6 +93,7 @@ class Permission extends Component {
                 this.setState({api: response.obj});
                 this.getExistingPermissions(this);
                 this.getExistingSecuritySchemes(this);
+                this.getExistingVisibility(this);
             }
         ).catch(
             error => {
@@ -107,19 +108,20 @@ class Permission extends Component {
         );
     }
 
-    handleChangeVisibilityField(visibility) {
-        this.setState({visibility: visibility});
-        if(visibility == 'RESTRICTED'){
+    handleChangeVisibilityField(event) {
+        this.setState({visibility: event.target.value});
+        if(event.target.value == 'RESTRICTED'){
             this.setState({visibleRolesDisplay: "inline"});
         } else {
             this.setState({visibleRolesDisplay: "none"});
         }
+
     }
 
     handleChangeVisibilityRolesField(event){
         let roleList = event.target.value.split(',');
-        let roleListTrimmed = roleList.map(e => String(e).trim());
-        this.setState({visibleRoles: roleListTrimmed})
+        let roleList2 = roleList.map(e => String(e).trim());
+        this.setState({visibleRoles: roleList2})
     }
 
     handleSwitch(secured) {
@@ -292,6 +294,21 @@ class Permission extends Component {
         }
     }
 
+    getExistingVisibility() {
+        var visibility = this.state.api.visibility;
+        this.setState({visibility: visibility});
+
+        if(visibility == 'RESTRICTED'){
+            this.setState({visibleRolesDisplay: "inline"});
+        } else {
+            this.setState({visibleRolesDisplay: "none"});
+        }
+
+        var visibleRoles = this.state.api.visibleRoles;
+        console.log(visibleRoles);
+        this.setState({visibleRoles: visibleRoles})
+    }
+
     getExistingPermissions() {
         if (!this.state.api) {
             return <Loading/>
@@ -431,18 +448,18 @@ class Permission extends Component {
                             <Card bodyStyle={{padding: 5}}>
                                 <Row style={{marginBottom: "10px"}} type="flex" justify="left">
                                     <Col span={8}>Visibility</Col>
-                                    <Col span={16}>
-                                        <Select value = {this.state.visibility} onChange={this.handleChangeVisibilityField}>
-                                            <Option value="PUBLIC">Public</Option>
-                                            <Option value="RESTRICTED">Restricted By Roles</Option>
-                                        </Select>
-                                    </Col>
+
+                                    <Select value = {this.state.visibility} onChange={this.handleChangeVisibilityField}>
+                                        <MenuItem value={"PUBLIC"}>Public</MenuItem>
+                                        <MenuItem value={"RESTRICTED"}>Restricted by Roles</MenuItem>
+                                    </Select>
+
                                 </Row>
 
                                 <Row style={{marginBottom: "10px", display:`${ this.state.visibleRolesDisplay }`}} type="flex" justify="left">
                                     <Col span={8}>Visible to Roles</Col>
                                     <Col span={16}>
-                                        <Input name="roles" placeholder="Sales-group,Engineering"  onChange={this.handleChangeVisibilityRolesField}/>
+                                        <Input name="roles" placeholder="Sales-group,Engineering" value= {this.state.visibleRoles}  onChange={this.handleChangeVisibilityRolesField}/>
                                     </Col>
                                 </Row>
                             </Card>
