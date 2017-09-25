@@ -58,7 +58,6 @@ class BasicInfo extends Component {
         };
         this.api_uuid = this.props.uuid;
         this.logChange = this.logChange.bind(this);
-       // this.handleStarRatingUpdate = this.handleStarRatingUpdate(this);
     }
 
     componentDidMount() {
