@@ -255,7 +255,6 @@ class API {
     addComment(api_id, commentInfo, callback = null) {
         var promise = this.client.then(
             (client) => {
-                //console.log(client.apis["API (individual)"]);
                 return client.apis["API (individual)"].post_apis__apiId__comments(
                     {apiId: api_id, body: commentInfo}, this._requestMetaData());
             }
@@ -274,7 +273,6 @@ class API {
     getRatingFromUser(api_id, callback = null) {
         var promise_get = this.client.then(
             (client) => {
-                //console.log(client.apis["API (individual)"]);
                 return client.apis["API (individual)"].get_apis__apiId__ratings(
                       {apiId: api_id}, this._requestMetaData());
             }
@@ -310,7 +308,6 @@ class API {
     }
 
     addRating(api_id, ratingInfo, callback = null) {
-      // alert("apiID : " + api_id);
         var promise = this.client.then(
             (client) => {
                 console.log(client.apis["API (individual)"]);

@@ -166,27 +166,15 @@ class Overview extends Component {
         let promise = api.addComment(this.api_uuid, commentInfo);
         promise.then(
             response => {
-                //this.state.commentList.push(this.state.comment);
                 this.handleGetAllComments();
                 this.setState({comment : ''});
                 message.success("Comment added successfully");
             }).catch (
                  error => {
-                     alert(error); //todo : remove this
                      message.error("Error occurred while adding comments!");
                  }
              );
     }
-
-   /* validateComment(event) {
-        let newComment = event.target.value;
-        if(newComment.length > 450) {
-            let trimmedComment = newComment.substring(0,450);
-            this.setState({comment : trimmedComment});
-        } else {
-            this.setState({comment : event.target.value});
-        }
-    }*/
 
     handleGetAllComments() {
         var api = new Api();
@@ -195,16 +183,10 @@ class Overview extends Component {
             response => {
                 var index = 0;
                 var comments = [];
-                console.log(response.obj);
-               /* while(response.obj.list[index]){
-                    let comment = {"commentText" : };
-                    index = index + 1;
-                }*/
                 this.setState({commentList : response.obj.list});
                 console.log(comments);
             }).catch (
                  error => {
-                     alert(error);
                      message.error("Error occurred while retrieving comments!");
                  }
             );
