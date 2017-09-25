@@ -30,7 +30,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Kubernetes and Openshift implementation of Service Discoverer
@@ -38,7 +37,7 @@ import java.util.Map;
 public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
 
     private OpenShiftClient client;
-    private ServiceDiscoveryConfigurations serviceDiscoveryConfigurations;
+    private ServiceDiscoveryConfigurations config;
     private final Logger log  = LoggerFactory.getLogger(KubernetesServiceDiscoverer.class);
 
 
@@ -56,18 +55,16 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
 
     @Override
     public Boolean isEnabled() {
-        return serviceDiscoveryConfigurations.isServiceDiscoveryEnabled();
+        return config.isServiceDiscoveryEnabled();
     }
 
     private KubernetesServiceDiscoverer() throws ServiceDiscoveryException {
-        serviceDiscoveryConfigurations = ServiceDiscoveryConfigBuilder.getServiceDiscoveryConfiguration();
-        Map<String, String> security = serviceDiscoveryConfigurations.getSecurity();
-        Map<String, String> cmsProperties = serviceDiscoveryConfigurations.getCmsSpecificParameters();
-        serviceAccountToken = security.get("serviceAccountToken");
-        caCertLocation = security.get("caCertLocation");
-        insidePod = Boolean.parseBoolean(cmsProperties.get("insidePod"));
+        config = ServiceDiscoveryConfigBuilder.getServiceDiscoveryConfiguration();
+        serviceAccountToken = config.getSecurityParameter("serviceAccountToken");
+        caCertLocation = config.getSecurityParameter("caCertLocation");
+        insidePod = Boolean.parseBoolean(config.getCmsSpecificParameter("insidePod"));
         try {
-            this.client = new DefaultOpenShiftClient(buildConfig(serviceDiscoveryConfigurations.getMasterUrl()));
+            this.client = new DefaultOpenShiftClient(buildConfig(config.getMasterUrl()));
         } catch (KubernetesClientException e) {
             String msg = "Error occurred while creating Kubernetes client";
             throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_INITIALIZING_SERVICE_DISCOVERY);

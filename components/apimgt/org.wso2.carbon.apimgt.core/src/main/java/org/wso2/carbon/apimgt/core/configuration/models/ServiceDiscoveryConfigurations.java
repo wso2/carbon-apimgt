@@ -51,12 +51,12 @@ public class ServiceDiscoveryConfigurations {
         security.put("tokenAliasPassword", "admin");
     }
 
-    public Map<String, String> getCmsSpecificParameters() {
-        return cmsSpecificParameters;
+    public String getCmsSpecificParameter(String key) {
+        return cmsSpecificParameters.get(key);
     }
 
-    public Map<String, String> getSecurity() {
-        return security;
+    public String getSecurityParameter(String key) {
+        return security.get(key);
     }
 
     public Boolean isServiceDiscoveryEnabled() {
