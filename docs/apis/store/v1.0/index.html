@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+
+    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/github.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+    <script src="assets/js/jquery-2.2.0.min.js" type="text/javascript"></script>
+    <script src="assets/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="assets/js/highlight.pack.js" type="text/javascript"></script>
+    <script src="assets/js/main.js" type="text/javascript"></script>
+    <script src="assets/js/marked.min.js" type="text/javascript"></script>
+
+    <title>WSO2 API Manager - Store : vv1.0</title>
+
+
+    <!-- Custom CSS -->
+    <link href="css/simple-sidebar.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+<nav class="navbar navbar-fixed-top">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="https://docs.wso2.com/api-manager">
+            <img src="assets/images/logo.png" alt="WSO2 Api manager" title="WSO2 Api Manager Documentation">
+        </a>
+    </div>
+    <div id="navbar" class="collapse navbar-collapse pull-right">
+        <ul class="nav navbar-nav">
+            <li>
+                <a href="#menu-toggle" id="menu-toggle" class="button-primary"><span
+                        class="glyphicon glyphicon-list"></span> Navigation</a>
+            </li>
+        </ul>
+    </div><!--/.nav-collapse -->
+</nav>
+<div id="wrapper">
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper">
+        <nav class="bs-docs-sidebar" id="navbar">
+            <h3>Overview</h3>
+            <ul class="nav nav-stacked fixed">
+                <li class="section-box">
+                    <ul class="nav nav-stacked">
+                        <li id="ov-index"><a href="index.html">Introduction</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <h3>Resources</h3>
+            <ul class="nav nav-stacked fixed">
+                        <hr/>
+                        <span class="class-name">API (Collection)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisGet"><a href="#!/operations#APICollection#apisGet">Retrieve/Search APIs
+</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">API (Individual)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdGet"><a href="#!/operations#APIIndividual#apisApiIdGet">Get details of an API</a></li>
+                                        <li id="op-apisApiIdSdksLanguageGet"><a href="#!/operations#APIIndividual#apisApiIdSdksLanguageGet">Generate a SDK for an API
+</a></li>
+                                        <li id="op-apisApiIdSwaggerGet"><a href="#!/operations#APIIndividual#apisApiIdSwaggerGet">Get API swagger definition</a></li>
+                                        <li id="op-apisApiIdWsdlGet"><a href="#!/operations#APIIndividual#apisApiIdWsdlGet">Get API WSDL definition</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Application (Collection)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-applicationsGet"><a href="#!/operations#ApplicationCollection#applicationsGet">Get all applications</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Application (Individual)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-applicationsApplicationIdDelete"><a href="#!/operations#ApplicationIndividual#applicationsApplicationIdDelete">Delete an application</a></li>
+                                        <li id="op-applicationsApplicationIdGet"><a href="#!/operations#ApplicationIndividual#applicationsApplicationIdGet">Get details of an application</a></li>
+                                        <li id="op-applicationsApplicationIdPut"><a href="#!/operations#ApplicationIndividual#applicationsApplicationIdPut">Update an application</a></li>
+                                        <li id="op-applicationsPost"><a href="#!/operations#ApplicationIndividual#applicationsPost">Create a new application</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Application Key (Collection)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-applicationsApplicationIdKeysGet"><a href="#!/operations#ApplicationKeyCollection#applicationsApplicationIdKeysGet">Retrieve all application keys</a></li>
+                                        <li id="op-applicationsApplicationIdKeysKeyTypeGet"><a href="#!/operations#ApplicationKeyCollection#applicationsApplicationIdKeysKeyTypeGet">Retrieve application keys for a provided type</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Application Key (Individual)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-applicationsApplicationIdGenerateKeysPost"><a href="#!/operations#ApplicationKeyIndividual#applicationsApplicationIdGenerateKeysPost">Generate application keys</a></li>
+                                        <li id="op-applicationsApplicationIdKeysKeyTypePut"><a href="#!/operations#ApplicationKeyIndividual#applicationsApplicationIdKeysKeyTypePut">Update an application key</a></li>
+                                        <li id="op-applicationsApplicationIdMapKeysPost"><a href="#!/operations#ApplicationKeyIndividual#applicationsApplicationIdMapKeysPost">Map application keys</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Application Token (Individual)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-applicationsApplicationIdGenerateTokenPost"><a href="#!/operations#ApplicationTokenIndividual#applicationsApplicationIdGenerateTokenPost">Generate application token</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Comment (Collection)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdCommentsGet"><a href="#!/operations#CommentCollection#apisApiIdCommentsGet">Retrieve API comments</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Comment (Individual)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdCommentsCommentIdDelete"><a href="#!/operations#CommentIndividual#apisApiIdCommentsCommentIdDelete">Delete an API comment</a></li>
+                                        <li id="op-apisApiIdCommentsCommentIdGet"><a href="#!/operations#CommentIndividual#apisApiIdCommentsCommentIdGet">Get details of an API comment</a></li>
+                                        <li id="op-apisApiIdCommentsCommentIdPut"><a href="#!/operations#CommentIndividual#apisApiIdCommentsCommentIdPut">Update an API comment</a></li>
+                                        <li id="op-apisApiIdCommentsPost"><a href="#!/operations#CommentIndividual#apisApiIdCommentsPost">Add an API comment</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Composite API (Collection)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-compositeApisGet"><a href="#!/operations#CompositeAPICollection#compositeApisGet">Retrieve/Search Composite APIs
+</a></li>
+                                        <li id="op-compositeApisPost"><a href="#!/operations#CompositeAPICollection#compositeApisPost">Create a new API</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Composite API (Individual)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-compositeApisApiIdDelete"><a href="#!/operations#CompositeAPIIndividual#compositeApisApiIdDelete">Delete a Composite API</a></li>
+                                        <li id="op-compositeApisApiIdGet"><a href="#!/operations#CompositeAPIIndividual#compositeApisApiIdGet">Get details of a Composite API</a></li>
+                                        <li id="op-compositeApisApiIdImplementationGet"><a href="#!/operations#CompositeAPIIndividual#compositeApisApiIdImplementationGet">Get Composite API implementation</a></li>
+                                        <li id="op-compositeApisApiIdImplementationPut"><a href="#!/operations#CompositeAPIIndividual#compositeApisApiIdImplementationPut">Update Composite API implementation</a></li>
+                                        <li id="op-compositeApisApiIdPut"><a href="#!/operations#CompositeAPIIndividual#compositeApisApiIdPut">Update a Composite API</a></li>
+                                        <li id="op-compositeApisApiIdSwaggerGet"><a href="#!/operations#CompositeAPIIndividual#compositeApisApiIdSwaggerGet">Get swagger definition</a></li>
+                                        <li id="op-compositeApisApiIdSwaggerPut"><a href="#!/operations#CompositeAPIIndividual#compositeApisApiIdSwaggerPut">Update swagger definition</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Document (Collection)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdDocumentsGet"><a href="#!/operations#DocumentCollection#apisApiIdDocumentsGet">Get a list of API documents</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Document (Individual)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdDocumentsDocumentIdContentGet"><a href="#!/operations#DocumentIndividual#apisApiIdDocumentsDocumentIdContentGet">Get the content of an API document</a></li>
+                                        <li id="op-apisApiIdDocumentsDocumentIdGet"><a href="#!/operations#DocumentIndividual#apisApiIdDocumentsDocumentIdGet">Get a document of an API</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Label (Collection)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-labelInfoGet"><a href="#!/operations#LabelCollection#labelInfoGet">Get label information based on the label name</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Rating (Collection)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdRatingsGet"><a href="#!/operations#RatingCollection#apisApiIdRatingsGet">Get API ratings</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Rating (Individual)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdRatingsRatingIdGet"><a href="#!/operations#RatingIndividual#apisApiIdRatingsRatingIdGet">Get a single API rating</a></li>
+                                        <li id="op-apisApiIdUserRatingPut"><a href="#!/operations#RatingIndividual#apisApiIdUserRatingPut">Add or update logged in user's rating for an API</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">SDK Languages</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-sdkGenLanguagesGet"><a href="#!/operations#SDKLanguages#sdkGenLanguagesGet">Get a list of supported SDK languages
+</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Sign Up</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-selfSignupPost"><a href="#!/operations#SignUp#selfSignupPost">Register a new user</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Subscription (Collection)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-subscriptionsGet"><a href="#!/operations#SubscriptionCollection#subscriptionsGet">Get all subscriptions</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Subscription (Individual)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-subscriptionsPost"><a href="#!/operations#SubscriptionIndividual#subscriptionsPost">Add a new subscription</a></li>
+                                        <li id="op-subscriptionsSubscriptionIdDelete"><a href="#!/operations#SubscriptionIndividual#subscriptionsSubscriptionIdDelete">Remove a subscription</a></li>
+                                        <li id="op-subscriptionsSubscriptionIdGet"><a href="#!/operations#SubscriptionIndividual#subscriptionsSubscriptionIdGet">Get details of a subscription</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Tag (Collection)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-tagsGet"><a href="#!/operations#TagCollection#tagsGet">Get all tags</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Tier (Collection)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-policiesTierLevelGet"><a href="#!/operations#TierCollection#policiesTierLevelGet">Get all available policies</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Tier (Individual)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-policiesTierLevelTierNameGet"><a href="#!/operations#TierIndividual#policiesTierLevelTierNameGet">Get a single policy details</a></li>
+                            </ul>
+                        </li>
+            </ul>
+            <h3>Definitions</h3>
+            <ul class="nav nav-stacked fixed">
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APIList"><a href="#!/models#APIList">APIList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-API_businessInformation"><a href="#!/models#API_businessInformation">API_businessInformation</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Application"><a href="#!/models#Application">Application</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ApplicationInfo"><a href="#!/models#ApplicationInfo">ApplicationInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ApplicationKeyGenerateRequest"><a href="#!/models#ApplicationKeyGenerateRequest">ApplicationKeyGenerateRequest</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ApplicationKeyMappingRequest"><a href="#!/models#ApplicationKeyMappingRequest">ApplicationKeyMappingRequest</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ApplicationKeys"><a href="#!/models#ApplicationKeys">ApplicationKeys</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ApplicationKeysList"><a href="#!/models#ApplicationKeysList">ApplicationKeysList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ApplicationList"><a href="#!/models#ApplicationList">ApplicationList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ApplicationToken"><a href="#!/models#ApplicationToken">ApplicationToken</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ApplicationTokenGenerateRequest"><a href="#!/models#ApplicationTokenGenerateRequest">ApplicationTokenGenerateRequest</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-BaseAPI"><a href="#!/models#BaseAPI">BaseAPI</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-BaseAPIInfo"><a href="#!/models#BaseAPIInfo">BaseAPIInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Comment"><a href="#!/models#Comment">Comment</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-CommentList"><a href="#!/models#CommentList">CommentList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-CompositeAPIList"><a href="#!/models#CompositeAPIList">CompositeAPIList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Document"><a href="#!/models#Document">Document</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-DocumentList"><a href="#!/models#DocumentList">DocumentList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Error"><a href="#!/models#Error">Error</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ErrorListItem"><a href="#!/models#ErrorListItem">ErrorListItem</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-FileInfo"><a href="#!/models#FileInfo">FileInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Label"><a href="#!/models#Label">Label</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-LabelList"><a href="#!/models#LabelList">LabelList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Rating"><a href="#!/models#Rating">Rating</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-RatingList"><a href="#!/models#RatingList">RatingList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Subscription"><a href="#!/models#Subscription">Subscription</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-SubscriptionList"><a href="#!/models#SubscriptionList">SubscriptionList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Tag"><a href="#!/models#Tag">Tag</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-TagList"><a href="#!/models#TagList">TagList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Tier"><a href="#!/models#Tier">Tier</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-TierList"><a href="#!/models#TierList">TierList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-User"><a href="#!/models#User">User</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-WorkflowResponse"><a href="#!/models#WorkflowResponse">WorkflowResponse</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-API"><a href="#!/models#API">API</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-APIInfo"><a href="#!/models#APIInfo">APIInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-CompositeAPI"><a href="#!/models#CompositeAPI">CompositeAPI</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-CompositeAPIInfo"><a href="#!/models#CompositeAPIInfo">CompositeAPIInfo</a></li>
+                            </ul>
+                        </li>
+            </ul>
+        </nav>
+    </div>
+    <!-- /#sidebar-wrapper -->
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <div class="container-fluid main-content">
+            <div class="row" class="">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="non-sidebar">
+                        <div class="main-content">
+                            <h2>Introduction</h2>
+
+                            <p class="marked">This document specifies a **RESTful API** for WSO2 **API Manager** - Store.
+
+It is written with [swagger 2](http://swagger.io/).
+</p>
+
+                            <div class="sect2">
+                                    <h3>Version information</h3>
+
+                                    <div class="paragraph">
+                                        <p class="marked">v1.0</p>
+                                    </div>
+
+                                        <h3>Contact information</h3>
+
+                                        <div class="paragraph">
+                                            <p class="marked">Contact: <a href="http://wso2.com/products/api-manager/">WSO2</a></p>
+
+                                            <p>Email: architecture@wso2.com</p>
+                                        </div>
+
+                                        <h3>License information</h3>
+
+                                        <div class="paragraph">
+                                            <p class="marked">License: Apache 2.0</p>
+
+                                            <p class="marked">URL: http://www.apache.org/licenses/LICENSE-2.0.html</p>
+                                        </div>
+
+                                    <h3>URI Scheme</h3>
+
+                                    <div class="paragraph">
+                                        <p class="marked">Host: apis.wso2.com</p>
+
+                                        <p class="marked">BasePath: /api/am/store/v1.0</p>
+                                        <code>Scheme: [HTTPS, HTTP]</code>
+                                    </div>
+                                    <h3>Consumes</h3>
+
+                                    <div class="paragraph">
+                                        <code>[application/json]</code>
+                                    </div>
+                                    <h3>Produces</h3>
+
+                                    <div class="paragraph">
+                                        <code>[application/json]</code>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
+
+    </div>
+</div>
+<!-- /#wrapper -->
+</body>
+
+</html>
