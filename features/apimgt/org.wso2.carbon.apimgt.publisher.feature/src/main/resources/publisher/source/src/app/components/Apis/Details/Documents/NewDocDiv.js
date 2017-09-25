@@ -30,7 +30,7 @@ class NewDocDiv extends Component {
         return (
             <div>
                 <div>
-                    <Row type="flex" gutter={80} style={{paddingTop: 10}}>
+                    <Row type="flex" style={{paddingTop: 10}}>
                         <Col span={6}>
                             <NewDocInfoDiv
                                 onDocInfoChange={this.props.onDocInfoChange}
@@ -56,7 +56,7 @@ class NewDocDiv extends Component {
                     </Row>
                 </div>
                 <div name="action-buttons" style={{paddingBottom: 20}}>
-                    <Row gutter={1}>
+                    <Row>
                         <Col span={1}>
                             {
                                 this.props.updatingDoc ? (

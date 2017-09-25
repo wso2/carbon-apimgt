@@ -18,10 +18,10 @@
 
 import React, {Component} from 'react'
 import {Table, Popconfirm} from 'antd';
-import InlineEditor from "./InlineEditor";
 import API from '../../../../data/api.js'
 import Loading from '../../../Base/Loading/Loading'
-import ApiPermissionValidation from '../../../../data/ApiPermissionValidation'
+import Grid from 'material-ui/Grid';
+import Paper from 'material-ui/Paper';
 
 class DocumentsTable extends Component {
     constructor(props) {
@@ -34,12 +34,11 @@ class DocumentsTable extends Component {
             documentId: null,
             selectedDocName: null
         }
-        //TODO: Add permission/valid scope checks for document Edit/Delete actions
     }
 
     componentDidMount() {
         const api = new API();
-        let promised_api = api.get(this.api_id);
+        let promised_api = api.getAPIById(this.api_id);
         promised_api.then(
             response => {
                 this.setState({api: response.obj});
@@ -63,6 +62,7 @@ class DocumentsTable extends Component {
      2- If the document type is 'INLINE' open the content with an inline editor
      3- If the document type is 'FILE' download the file
      */
+
     viewDocContentHandler(document) {
         if (document.sourceType === "URL") {
             window.open(document.sourceUrl, '_blank');
@@ -77,12 +77,14 @@ class DocumentsTable extends Component {
             promised_get_content.then((done) => {
                 this.props.downloadFile(done);
             }).catch((error_response) => {
+		throw error_response;
                 let error_data = JSON.parse(error_response.data);
                 let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
                 console.error(messageTxt);
             });
         }
     }
+
 
     handleCloseModal () {
         this.setState({ showInlineEditor: false });
@@ -92,6 +94,7 @@ class DocumentsTable extends Component {
         if (!this.state.api) {
             return <Loading/>
         }
+
         this.columns = [{
             title: 'Name',
             dataIndex: 'name',
@@ -105,34 +108,22 @@ class DocumentsTable extends Component {
             dataIndex: 'actions',
             key: 'actions',
             render: (text1, record) => (<div>
-                <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
-                    <a href="#" onClick={() => this.props.onEditAPIDocument(record)}>Edit | </a>
-                </ApiPermissionValidation>
-                <a href="#" onClick={() => this.viewDocContentHandler(record)}>View | </a>
-                <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
-                    <Popconfirm title="Are you sure you want to delete this document?"
-                                onConfirm={() => this.props.deleteDocHandler(record.documentId)}
-                                okText="Yes" cancelText="No">
-                        <a href="#">Delete</a>
-                    </Popconfirm>
-                </ApiPermissionValidation>
+                <a href="#" onClick={() => this.viewDocContentHandler(record)}>View Document </a>
             </div>)
         }
         ];
         return (
+                <Grid container style={{paddingLeft:"40px"}}>
+                    <Grid item xs={12} sm={6} md={9} lg={9} xl={10} >
+                        <Paper style={{paddingLeft:"40px"}}>
             <div style={{paddingTop: 20}}>
                 <h3 style={{paddingBottom: 15}}>Current Documents</h3>
                 <Table dataSource={ this.props.documentsList } columns={this.columns}/>
-                {this.state.showInlineEditor &&
-                <InlineEditor showInlineEditor={this.state.showInlineEditor}
-                              handleCloseModal={this.handleCloseModal}
-                              apiId={this.props.apiId}
-                              documentId={this.state.documentId}
-                              documentName={this.state.selectedDocName}
-                              client={this.props.client}
-                />
-                }
+                {this.state.showInlineEditor && <div>eeeee</div>                }
             </div>
+                        </Paper>
+                    </Grid>
+                </Grid>
         );
     }
 }

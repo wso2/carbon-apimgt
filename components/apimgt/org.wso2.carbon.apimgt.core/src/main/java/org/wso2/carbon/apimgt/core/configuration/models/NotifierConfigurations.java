@@ -42,6 +42,11 @@ public class NotifierConfigurations {
         propertyList.put("Template", "<html> <body> <h3 style=\"color:Black;\"> We’re happy to announce the arrival" +
                 " of the next major version $2 of $1 API  which is now available in Our API Store." +
                 "</h3><a href=\"https://localhost:9443/store\">Click here to Visit WSO2 API Store</a></body></html>");
+        propertyList.put("mail.smtp.host", "smtp.gmail.com");
+        propertyList.put("mail.smtp.auth", "true");
+        propertyList.put("mail.smtp.starttls.enable", "true");
+        propertyList.put("mail.smtp.port", "587");
+        propertyList.put("mail.transport.protocol", "smtp");
     }
 
     public String getExecutorClass() {

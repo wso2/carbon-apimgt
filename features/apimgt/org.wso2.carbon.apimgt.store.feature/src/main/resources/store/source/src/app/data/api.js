@@ -84,12 +84,54 @@ class API {
     }
 
     /**
+     * Get the Documents of an API
+     * @param id {String} UUID of the API in which the documents needed
+     * @param callback {function} Function which needs to be called upon success of getting documents
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getDocumentsByAPIId(id, callback = null) {
+
+        var promise_get = this.client.then(
+            (client) => {
+		debugger;
+                return client.apis["API (individual)"].get_apis__apiId__documents(
+                    {apiId: id}, this._requestMetaData());
+            }
+        );
+        if (callback) {
+            return promise_get.then(callback);
+        } else {
+            console.info("returninng promise");
+            return promise_get;
+        }
+    }
+
+    /**
+     * Get the Document content of an API by document Id
+     * @param api_id {String} UUID of the API in which the document needed
+     * @param docId {String} UUID of the Document need to view
+     * @param callback {function} Function which needs to be called upon success of of getting document.
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getFileForDocument(api_id, docId) {
+        var promised_getDocContent = this.client.then(
+            (client) => {
+                let payload = {apiId: api_id, documentId: docId, "Accept": "application/octet-stream"};
+                return client.apis["API (individual)"].get_apis__apiId__documents__documentId__content(
+                    payload, this._requestMetaData({"Content-Type": "multipart/form-data"}));
+            }
+        );
+        return promised_getDocContent;
+    }
+
+    /**
      * Get the swagger of an API
      * @param id {String} UUID of the API in which the swagger is needed
      * @param callback {function} Function which needs to be called upon success of the API deletion
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getSwaggerByAPIId(id, callback = null) {
+
         var promise_get = this.client.then(
             (client) => {
                 return client.apis["API (Individual)"].get_apis__apiId__swagger(
@@ -149,11 +191,10 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getAllTiers(tierLevel, callback = null) {
-        let promise_get_all = this.client.then(
+        var promise_get_all = this.client.then(
             (client) => {
-                let req = {authorization :  "Bearer e74a576e-cab9-36ff", requestContentType :"application/json"};
                 return client.apis["Tier Collection"].get_policies__tierLevel_(
-                    {tierLevel:tierLevel}, req);
+                    {tierLevel:tierLevel}, this._requestMetaData());
             }
         );
         if (callback) {
@@ -170,12 +211,11 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     createApplication(application, callback = null) {
-        //debugger;
-        var promise_get = this.client.then(
+        var promise_create = this.client.then(
                 (client) => {
                     let payload = {body: application};
-                    return client.apis["Create"].post_applications(
-                        {payload}, this._requestMetaData());
+                    return client.apis["Application (individual)"].post_applications(
+                        payload, {'Content-Type':'application/json'});
         }
         );
         if (callback) {
@@ -220,7 +260,7 @@ class API {
                 (client) => {
                 let payload = {applicationId: applicationId, body: request_content};
                 return client.apis["Application (individual)"].post_applications__applicationId__generate_keys(
-                    {payload}, this._requestMetaData());
+                    payload, this._requestMetaData());
         }
         );
         if (callback) {
@@ -243,7 +283,7 @@ class API {
                 (client) => {
                 let payload = {applicationId: applicationId, body: request_content};
                 return client.apis["Application (individual)"].post_applications__applicationId__generate_token(
-                    {payload}, this._requestMetaData());
+                    payload, this._requestMetaData());
         }
         );
         if (callback) {
@@ -296,23 +336,26 @@ class API {
     }
 
     /**
-     * Get keys of an application
-     * @param applicationId id of the application that needs to get the keys
-     * @param callback {function} Function which needs to be called upon success
-     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     * Create a subscription
+     * @param apiId id of the API that needs to be subscribed
+     * @param applicationId id of the application that needs to be subscribed
+     * @param policy throttle policy applicable for the subscription
+     * @param callback callback url
      */
     subscribe(apiId, applicationId, policy, callback = null) {
-        debugger;
-        var promise_get = this.client.then(
+        var promise_create_subscription = this.client.then(
             (client) => {
+                let subscriptionData = {apiIdentifier:apiId, applicationId:applicationId, policy:policy};
+                let payload = {body: subscriptionData};
                 return client.apis["Subscription (individual)"].post_subscriptions(
-                    {apiId:apiId, applicationId:applicationId, policy:policy}, this._requestMetaData());
+                    payload, {'Content-Type':'application/json'}
+                );
             }
         );
         if (callback) {
-            return promise_get.then(callback);
+            return promise_create_subscription.then(callback);
         } else {
-            return promise_get;
+            return promise_create_subscription;
         }
     }
 

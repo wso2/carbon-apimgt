@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>7.0.41-SNAPSHOT</version>
+        <version>7.0.43-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -38,6 +38,18 @@
         <dependency>
             <groupId>com.googlecode.json-simple.wso2</groupId>
             <artifactId>json-simple</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
     </dependencies>
 
@@ -75,6 +87,18 @@
                                 <bundle>
                                     <symbolicName>json-simple</symbolicName>
                                     <version>${json-simple.wso2.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>com.fasterxml.jackson.dataformat.jackson-dataformat-yaml</symbolicName>
+                                    <version>${com.fasterxml.jackson.dataformat.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>org.yaml.snakeyaml</symbolicName>
+                                    <version>${snakeyaml.version}.0</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>com.google.guava</symbolicName>
+                                    <version>${google.guava.version}.0</version>
                                 </bundle>
                             </bundles>
                             <importFeatures>

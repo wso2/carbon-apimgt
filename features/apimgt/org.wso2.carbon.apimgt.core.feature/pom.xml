@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>7.0.41-SNAPSHOT</version>
+        <version>7.0.43-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -55,10 +55,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-yaml</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
@@ -150,40 +146,12 @@
             <artifactId>XmlSchema</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.com.squareup.okio</groupId>
-            <artifactId>okio</artifactId>
+            <groupId>org.wso2.orbit.io.swagger</groupId>
+            <artifactId>swagger-codegen</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
-            <artifactId>okhttp</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
-            <artifactId>logging-interceptor</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
-            <artifactId>okhttp-ws</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.dnsjava</groupId>
-            <artifactId>dnsjava</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.io.fabric8</groupId>
-            <artifactId>kubernetes-client</artifactId>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-models</artifactId>
         </dependency>
     </dependencies>
 
@@ -333,7 +301,7 @@
                                 </bundle>
                                 <bundle>
                                     <symbolicName>com.fasterxml.jackson.core.jackson-annotations</symbolicName>
-                                    <version>${com.fasterxml.jackson.annotations.version}</version>
+                                    <version>${com.fasterxml.jackson.core.version}</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>com.fasterxml.jackson.core.jackson-core</symbolicName>
@@ -341,11 +309,7 @@
                                 </bundle>
                                 <bundle>
                                     <symbolicName>com.fasterxml.jackson.core.jackson-databind</symbolicName>
-                                    <version>${com.fasterxml.jackson.databind.version}</version>
-                                </bundle>
-                                <bundle>
-                                    <symbolicName>com.fasterxml.jackson.dataformat.jackson-dataformat-yaml</symbolicName>
-                                    <version>${com.fasterxml.jackson.dataformat.version}</version>
+                                    <version>${com.fasterxml.jackson.core.version}</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>nimbus-jose-jwt</symbolicName>
@@ -370,6 +334,10 @@
                                 <bundle>
                                     <symbolicName>swagger-parser</symbolicName>
                                     <version>${swagger.parser.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>swagger-codegen</symbolicName>
+                                    <version>${swagger.codegen.version}</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>com.google.gson</symbolicName>
@@ -420,10 +388,6 @@
                                     <version>${wsdl4j.version}</version>
                                 </bundle>
                                 <bundle>
-                                    <symbolicName>json</symbolicName>
-                                    <version>20160212.0.0</version>
-                                </bundle>
-                                <bundle>
                                     <symbolicName>woden</symbolicName>
                                     <version>${apache.woden.version}</version>
                                 </bundle>
@@ -432,32 +396,8 @@
                                     <version>${xmlschema.version}</version>
                                 </bundle>
                                 <bundle>
-                                    <symbolicName>okio</symbolicName>
-                                    <version>${wso2.okio.version}</version>
-                                </bundle>
-                                <bundle>
-                                    <symbolicName>okhttp</symbolicName>
-                                    <version>${wso2.okhttp.version}</version>
-                                </bundle>
-                                <bundle>
-                                    <symbolicName>logging-interceptor</symbolicName>
-                                    <version>${wso2.okhttp.version}</version>
-                                </bundle>
-                                <bundle>
-                                    <symbolicName>okhttp-ws</symbolicName>
-                                    <version>${wso2.okhttp-ws.version}</version>
-                                </bundle>
-                                <bundle>
-                                    <symbolicName>dnsjava</symbolicName>
-                                    <version>${wso2.dnsjava.version}</version>
-                                </bundle>
-                                <bundle>
-                                    <symbolicName>org.yaml.snakeyaml</symbolicName>
-                                    <version>${snakeyaml.version}</version>
-                                </bundle>
-                                <bundle>
-                                    <symbolicName>kubernetes-client</symbolicName>
-                                    <version>${wso2.kubernetes-client.version}</version>
+                                    <symbolicName>io.swagger.models</symbolicName>
+                                    <version>${io.swagger.models.version}</version>
                                 </bundle>
                             </bundles>
                         </configuration>

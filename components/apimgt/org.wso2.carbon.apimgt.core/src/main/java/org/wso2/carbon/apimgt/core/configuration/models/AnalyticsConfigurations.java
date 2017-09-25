@@ -22,7 +22,7 @@ import org.wso2.carbon.kernel.annotations.Configuration;
 import org.wso2.carbon.kernel.annotations.Element;
 
 /**
- * Class to hold Analytics configurations
+ * Class to hold Analytics configurations.
  */
 @Configuration(description = "Analytics configurations")
 public class AnalyticsConfigurations {

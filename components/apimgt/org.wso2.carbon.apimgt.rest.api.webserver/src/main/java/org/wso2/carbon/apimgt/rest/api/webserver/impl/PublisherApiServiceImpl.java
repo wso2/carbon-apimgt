@@ -9,6 +9,8 @@ import org.wso2.msf4j.Request;
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Locale;
@@ -27,13 +29,12 @@ public class PublisherApiServiceImpl extends PublisherApiService {
         String absURL = protocol + "://" + hostName + ":" + port + rawUri;
         String path;
         try {
-            URL requestURL = new URL(absURL);
+            URI requestURL = new URI(absURL);
             path = requestURL.getPath();
-        } catch (MalformedURLException e) {
+        } catch (URISyntaxException e) {
             String errorMessage = "Invalid URL, URL parsing error for : " + absURL;
             log.error(errorMessage, e);
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
+            return Response.status(Response.Status.NOT_FOUND).build();        }
         String[] apps = {"publisher","store", "admin"};
         String[] parts = path.split("/");
         // folder name ex: publisher or store or admin

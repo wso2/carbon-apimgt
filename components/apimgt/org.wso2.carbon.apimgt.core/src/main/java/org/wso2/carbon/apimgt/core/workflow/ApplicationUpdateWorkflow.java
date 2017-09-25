@@ -83,9 +83,9 @@ public class ApplicationUpdateWorkflow extends Workflow {
         application.setPolicy(new ApplicationPolicy(policyId, tier));
         application.setDescription(description);
         application.setId(applicationId);
-        application.setUpdatedTime(LocalDateTime.now());
         application.setUpdatedUser(updatedUser);
         application.setPermissionString(permission);
+        application.setUpdatedTime(LocalDateTime.now());
 
         if (existingApplication == null && updatedApplication == null) {
             // this is when complete method is executed through workflow rest api

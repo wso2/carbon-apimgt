@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.core;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
@@ -28,12 +29,15 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class TestUtil {
 
@@ -72,6 +76,22 @@ public class TestUtil {
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         apiDAO.addAPI(api);
         return api;
+    }
+
+    /**
+     * Subscribe an application to given API
+     *
+     * @param api         API to be subscribed to
+     * @param application Application to subscribe to the API
+     * @return {@link Subscription} object
+     * @throws APIManagementException If failed to add subscription.
+     */
+    public static Subscription subscribeToAPI(API api, Application application) throws APIManagementException {
+        APISubscriptionDAO subscriptionDAO = DAOFactory.getAPISubscriptionDAO();
+        String subscriptionId = UUID.randomUUID().toString();
+        subscriptionDAO.addAPISubscription(subscriptionId, api.getId(), application.getId(), api
+                .getPolicies().iterator().next().getUuid(), APIMgtConstants.SubscriptionStatus.ACTIVE);
+        return subscriptionDAO.getAPISubscription(subscriptionId);
     }
 
     public static API addAlternativeAPI() throws APIManagementException {
@@ -118,7 +138,7 @@ public class TestUtil {
 
     /**
      * Lazy test for equality of given two APIs using its name, provider and version attributes
-     * 
+     *
      * @param api1 API 1
      * @param api2 API 2
      * @return returns the equality of the given two APIs
@@ -176,6 +196,18 @@ public class TestUtil {
         return null;
     }
 
+    public static TestUtil getInstance() {
+        return instance;
+    }
+
+    public static int getRestApiPort() {
+        return APIM_REST_API_PORT + TEST_PORT_OFFSET;
+    }
+
+    public static int getIdentityServerPort() {
+        return IDP_REST_API_PORT + TEST_PORT_OFFSET;
+    }
+
     /**
      * Utility for get Docker running host
      *
@@ -190,17 +222,5 @@ public class TestUtil {
             ip = uri.getHost();
         }
         return ip;
-    }
-
-    public static TestUtil getInstance() {
-        return instance;
-    }
-
-    public static int getRestApiPort() {
-        return APIM_REST_API_PORT + TEST_PORT_OFFSET;
-    }
-
-    public static int getIdentityServerPort() {
-        return IDP_REST_API_PORT + TEST_PORT_OFFSET;
     }
 }

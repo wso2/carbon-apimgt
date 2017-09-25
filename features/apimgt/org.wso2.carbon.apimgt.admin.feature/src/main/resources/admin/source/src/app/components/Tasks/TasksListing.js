@@ -25,6 +25,14 @@
  import Button from 'material-ui/Button';
 
  import API from '../../data/api'
+ import Message from '../Shared/Message'
+
+ const messages = {
+   success: 'Updated successfully!',
+   updateFailure: 'Error while updating task',
+   error: 'Something went wrong while updating the workflow task!',
+   retrieveFailure: 'Error while retrieving tasks'
+ };
 
  class TasksListing extends Component {
    constructor(props) {
@@ -32,25 +40,23 @@
        this.state = {
            workflows: null,
            selectedRowKeys: [],
-           open:false,
-           message: ''
+
        };
        this.state.workflow_type = props.match.params.workflow_type;
        this.onSelectChange = this.onSelectChange.bind(this);
        this.handleWorkflowComplete = this.handleWorkflowComplete.bind(this);
-       this.handleRequestClose = this.handleRequestClose.bind(this);
    }
 
 
    handleWorkflowComplete(referenceId, status) {
-       //const hideMessage = message.loading("Completing worklow task ...", 0);
+
        const api = new API();
 
        let promised_update = api.completeWorkflow(referenceId, status);
        promised_update.then(
            response => {
              if (response.status !== 200) {
-                 this.setState({open: true, message: "Something went wrong while updating the workflow task!"});
+                 this.msg.error(messages.error);
                  return;
              }
              let workflows = this.state.workflows;
@@ -60,13 +66,16 @@
                      break;
                  }
              }
-             this.setState({active: false, workflows: workflows, open: true, message: "Updated successfully!"});
+             this.setState({active: false, workflows: workflows});
+             this.msg.info(messages.success);
+           }
+       ).catch(
+           error => {
+             this.msg.error(messages.updateFailure);
            }
        );
    }
-   handleRequestClose() {
-       this.setState({ open: false });
-   }
+
    //Since Same component is used for all the tasks, this is implemented to reload the tables
    componentWillReceiveProps(nextProps){
 
@@ -85,6 +94,10 @@
                   workflow_type: nextProps.match.params.workflow_type
                 });
            }
+       ).catch(
+           error => {
+             this.msg.error(message.retrieveFailure);
+           }
        );
      }
    }
@@ -94,10 +107,13 @@
        const type = "AM_" + this.state.workflow_type.toUpperCase() ;
 
        const promised_workflows = api.getWorkflows(type);
-       /* TODO: Handle catch case , auth errors and ect ~tmkb*/
        promised_workflows.then(
            response => {
               this.setState({workflows: response.obj.list});
+           }
+       ).catch(
+           error => {
+             this.msg.error(message.retrieveFailure);
            }
        );
    }
@@ -148,19 +164,7 @@
                  })}
                </TableBody>
              </Table>
-             <Snackbar
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'center',
-              }}
-              open={this.state.open}
-              autoHideDuration={6e3}
-              onRequestClose={this.handleRequestClose}
-              SnackbarContentProps={{
-                'aria-describedby': 'message-id',
-              }}
-              message={<span id="message-id">{this.state.message}</span>}
-            />
+             <Message ref={a => this.msg = a}/>
            </div>
        );
    }

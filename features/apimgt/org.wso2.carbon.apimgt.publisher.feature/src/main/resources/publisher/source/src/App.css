@@ -95,3 +95,28 @@ div.horizontal{
 .button-left{
     margin-right: 20px;
 }
+.message-content-box{
+    display:flex;
+}
+.message-content-box > span{
+    text-indent: 20px;
+}
+#react-root .title-gap{
+    margin-top:20px;
+    margin-bottom:20px;
+}
+.lifecycle-box{
+    background: transparent url(/publisher/public/images/lifecycle.svg) left top no-repeat;
+    width: 438px;
+    height: 281px;
+    padding:100px 0 0 85px;
+}
+div#react-root .lifecycle-box-state{
+    color:#0c5487;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 16px;
+}
+div#react-root .lifecycle-box-state-tip{
+    color:#444;
+}

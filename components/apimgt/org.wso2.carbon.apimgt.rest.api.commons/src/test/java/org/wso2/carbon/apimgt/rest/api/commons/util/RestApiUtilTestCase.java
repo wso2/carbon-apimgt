@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -102,7 +103,7 @@ public class RestApiUtilTestCase {
         Assert.assertEquals(errorDTO1.getCode(), errorDTOExpected.getCode());
         Assert.assertEquals(errorDTO1.getMessage(), errorDTOExpected.getMessage());
         Assert.assertEquals(errorDTO1.getMoreInfo(), new HashMap<String, String>());
-     }
+    }
 
     @Test(description = "Test get Error DTO as String")
     public void testGetErrorDTO2() throws Exception {
@@ -158,14 +159,15 @@ public class RestApiUtilTestCase {
             actualMatch = true;
         }
         Assert.assertEquals(actualMatch, true);
-      }
+    }
 
     @Test(description = "Test Application paginated URL")
     public void testGetApplicationPaginatedURL() throws Exception {
         String expectedPaginatedUrl = "/applications?limit=10&offset=5&groupId={groupId}";
-        String paginatedUrl =  RestApiUtil.getApplicationPaginatedURL(5, 10);
+        String paginatedUrl = RestApiUtil.getApplicationPaginatedURL(5, 10);
         Assert.assertEquals(paginatedUrl, expectedPaginatedUrl);
     }
+
     @Test(description = "Test get gateway config URL")
     public void testGetGatewayConfigGetURL() throws Exception {
 
@@ -174,6 +176,7 @@ public class RestApiUtilTestCase {
         String path = RestApiUtil.getGatewayConfigGetURL(uuid);
         Assert.assertEquals(path, pathExpected);
     }
+
     @Test(description = "Test get gateway config URL")
     public void testGetGetSwaggerGetURL() throws Exception {
 
@@ -232,7 +235,7 @@ public class RestApiUtilTestCase {
         try {
             RestApiUtil.getStoreRestAPIResource();
 
-         } catch (APIMgtSecurityException ex) {
+        } catch (APIMgtSecurityException ex) {
             Assert.assertEquals(ex.getMessage(), "Error reading swagger definition of Store REST API");
         }
     }
@@ -254,14 +257,14 @@ public class RestApiUtilTestCase {
     public void testConvertYmlToJson() throws Exception {
         final String testYaml =
                 "list:\n" +
-                "    item 1\n" +
-                "    item 2\n" +
-                "items:\n" +
-                "    - name: item1\n" +
-                "      price: 10\n" +
-                "\n" +
-                "    - name: item2\n" +
-                "      price: 20";
+                        "    item 1\n" +
+                        "    item 2\n" +
+                        "items:\n" +
+                        "    - name: item1\n" +
+                        "      price: 10\n" +
+                        "\n" +
+                        "    - name: item2\n" +
+                        "      price: 20";
         final String expectedJson =
                 "{\"list\":\"item 1 item 2\",\"items\":[{\"name\":\"item1\",\"price\":10},{\"name\":\"item2\",\"" +
                         "price\":20}]}";
@@ -326,4 +329,27 @@ public class RestApiUtilTestCase {
         }
     }
 
+    @Test(description = "Test timestamp conversion")
+    public void testFromISO8601ToInstant() {
+        String timeStamp = "2017-10-27T16:22:27.600Z";
+        try {
+            Instant instant = RestApiUtil.fromISO8601ToInstant(timeStamp);
+            Assert.assertEquals(instant.toString(), timeStamp);
+        } catch (APIManagementException e) {
+            Assert.assertFalse(true, "Error occurred while converting timestamp: " + e.getMessage());
+        }
+
+    }
+
+    @Test(description = "Test invalid timestamp conversion")
+    public void testFromISO8601ToInstantInvalidTimeStamp() {
+        String timeStamp = "2017-10-27T16:22:27";
+        try {
+            RestApiUtil.fromISO8601ToInstant(timeStamp);
+            Assert.assertFalse(true, "Error occurred while converting timestamp");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(true);
+        }
+
+    }
 }

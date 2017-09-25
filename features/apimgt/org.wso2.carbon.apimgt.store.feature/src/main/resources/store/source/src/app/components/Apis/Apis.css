@@ -90,3 +90,25 @@ h2 span{
     justify-content: space-between;
     align-items:center;
 }
+.api-image{
+    height: 200px;
+}
+
+/*need a better solution*/
+.default-thumb{
+    height: 200px!important;
+    border-radius: 0!important;
+    width: 100%!important;
+    font-weight: 200!important;
+    font-size: 6vw!important;
+}
+@media only screen and (max-width: 320px) {
+    .default-thumb {
+        font-size: 10vw!important;
+    }
+}
+@media only screen and (max-width: 767px) {
+    .default-thumb {
+        font-size: 7em!important;
+    }
+}

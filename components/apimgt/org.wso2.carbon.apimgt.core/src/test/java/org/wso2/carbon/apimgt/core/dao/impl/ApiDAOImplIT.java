@@ -802,7 +802,7 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         final int numberOfPublishedWithLabelPrivate = 2;
         final int numberOfCreatedWithLabelPublic = 3;
 
-        // Add APIs with Status = PUBLISHED having labels "public" and "private" 
+        // Add APIs with Status = PUBLISHED having labels "public" and "private"
         List<API> publishedAPIsPublicPrivateSummary = new ArrayList<>();
         Set<String> labelsPublicPrivate = new HashSet<>(Arrays.asList(publicLabel, privateLabel));
         testAddGetEndpoint();
@@ -836,10 +836,10 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
             apiDAO.addAPI(api);
         }
 
-        //verifying APIs with Status = PUBLISHED having labels "public" or "private" 
+        //verifying APIs with Status = PUBLISHED having labels "public" or "private"
         List<API> publishedPublicPrivateApiListFromDB = apiDAO
                 .getAPIsByStatus(Arrays.asList(publicLabel, privateLabel), publishedStatus);
-        
+
         List<API> publishedApisWithPublicOrPrivateLabels = new ArrayList<>();
         publishedApisWithPublicOrPrivateLabels.addAll(publishedAPIsPrivateSummary);
         publishedApisWithPublicOrPrivateLabels.addAll(publishedAPIsPublicPrivateSummary);
@@ -852,22 +852,22 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         publishedApisWithPrivateLabels.addAll(publishedAPIsPrivateSummary);
         publishedApisWithPrivateLabels.addAll(publishedAPIsPublicPrivateSummary);
 
-        
-        //verifying APIs with Status = PUBLISHED having label "private" 
+
+        //verifying APIs with Status = PUBLISHED having label "private"
         List<API> publishedPrivateApiListFromDB = apiDAO
                 .getAPIsByStatus(Collections.singletonList(privateLabel), publishedStatus);
         Assert.assertTrue(
                 APIUtils.isListsEqualIgnoreOrder(publishedPrivateApiListFromDB, publishedApisWithPrivateLabels,
                         new APIComparator()));
 
-        //verifying APIs with Status = CREATED having label "public" 
+        //verifying APIs with Status = CREATED having label "public"
         List<API> createdPublicApiListFromDB = apiDAO
                 .getAPIsByStatus(Collections.singletonList(publicLabel), createdStatus);
         Assert.assertTrue(
                 APIUtils.isListsEqualIgnoreOrder(createdPublicApiListFromDB, createdAPIsPublicSummary,
                         new APIComparator()));
 
-        //verifying APIs with Status = CREATED having label "private" 
+        //verifying APIs with Status = CREATED having label "private"
         List<API> createdPrivateApiListFromDB = apiDAO
                 .getAPIsByStatus(Collections.singletonList(privateLabel), createdStatus);
         Assert.assertTrue(createdPrivateApiListFromDB.isEmpty());
@@ -1339,13 +1339,8 @@ public class ApiDAOImplIT extends DAOIntegrationTestBase {
         Endpoint endpoint = SampleTestObjectCreator.createMockEndpoint();
         apiDAO.addEndpoint(endpoint);
         apiDAO.deleteEndpoint(endpoint.getId());
-
-        try {
-            apiDAO.getEndpoint(endpoint.getId());
-            Assert.fail("Exception not thrown when getting non existing endpoint");
-        } catch (APIMgtDAOException e) {
-            Assert.assertEquals(e.getErrorHandler(), ExceptionCodes.ENDPOINT_NOT_FOUND);
-        }
+        Endpoint retrieved = apiDAO.getEndpoint(endpoint.getId());
+        Assert.assertNull(retrieved);
     }
 
     @Test

@@ -82,6 +82,33 @@ class API {
             }
         );
     }
+
+    /**
+     * Get subscription level policies.
+     * @returns {Promise} Promised policies response
+     */
+    getSubscriptionLevelPolicies() {
+        return this.client.then(
+            (client) => {
+                return client.apis["Subscription Policies"].get_policies_throttling_subscription(
+                    {}, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
+     * Create subscription level policy
+     * @returns {Promise} Promised policies response
+     */
+    createSubscriptionLevelPolicy(body) {
+      let payload = {body: body, "Content-Type": "application/json"};
+        return this.client.then(
+            (client) => {
+                return client.apis["Subscription Policies"].post_policies_throttling_subscription(
+                    payload, this._requestMetaData());
+            }
+        );
+    }
 }
 
 export default API

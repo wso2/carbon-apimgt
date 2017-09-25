@@ -18,15 +18,16 @@
 
 import React from 'react'
 import PropTypes from 'prop-types'
-import {Spin, Row, Col} from 'antd'
+import Grid from 'material-ui/Grid'
+import { LinearProgress } from 'material-ui/Progress';
 
 const LoadingAnimation = (props) => {
     return (
-        <Row type="flex" justify="center" align="middle">
-            <Col span={24} style={{textAlign: "center"}}>
-                <Spin spinning={true} size="large"/>
-            </Col>
-        </Row>
+        <Grid container spacing={24}>
+            <Grid item xs={12}>
+                <LinearProgress color="accent"/>
+            </Grid>
+        </Grid>
     );
 };
 

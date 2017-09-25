@@ -29,6 +29,7 @@ import LoadingAnimation from './app/components/Base/Loading/Loading.js';
 import 'antd/dist/antd.css'
 import {message} from 'antd'
 import './App.css'
+import 'typeface-roboto'
 // import './materialize.css'
 
 /**
@@ -42,7 +43,7 @@ class Protected extends Component {
         /* TODO: need to fix the header to avoid conflicting with messages ~tmkb*/
         this.handleResponse = this.handleResponse.bind(this);
         /* TODO: Get apim base url from config*/
-        Axios.get("https://localhost:9292/login/login/store").then(this.handleResponse);
+        Axios.get(location.origin + "/login/login/store").then(this.handleResponse);
     }
 
     handleResponse = (response) => {

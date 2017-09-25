@@ -13,7 +13,7 @@
   ~ * distributed under the License is distributed on an "AS IS" BASIS,
   ~ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ * See the License for the specific language governing permissions and
-  ~ * limitations under the License.
+  ~ * limitations under the License
   ~ */
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -28,7 +28,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>7.0.41-SNAPSHOT</version>
+    <version>7.0.43-SNAPSHOT</version>
 
     <name>WSO2 Carbon - API Management Aggregator POM</name>
 
@@ -85,6 +85,11 @@
             <dependency>
                 <groupId>org.wso2.carbon.apimgt</groupId>
                 <artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.rest.api.analytics</artifactId>
                 <version>${carbon.apimgt.version}</version>
             </dependency>
             <dependency>
@@ -163,7 +168,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-                <version>${com.fasterxml.jackson.annotations.version}</version>
+                <version>${com.fasterxml.jackson.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.jackson</groupId>
@@ -259,12 +264,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>${com.fasterxml.jackson.databind.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.dataformat</groupId>
-                <artifactId>jackson-dataformat-yaml</artifactId>
-                <version>${com.fasterxml.jackson.dataformat.version}</version>
+                <version>${com.fasterxml.jackson.core.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.ws.rs</groupId>
@@ -569,34 +569,30 @@
                 <version>${java-mail.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.orbit.com.squareup.okio</groupId>
-                <artifactId>okio</artifactId>
-                <version>${wso2.okio.version}</version>
+                <groupId>org.wso2.orbit.io.swagger</groupId>
+                <artifactId>swagger-codegen</artifactId>
+                <version>${swagger.codegen.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
-                <artifactId>okhttp-ws</artifactId>
-                <version>${wso2.okhttp-ws.version}</version>
+                <groupId>com.samskivert</groupId>
+                <artifactId>jmustache</artifactId>
+                <version>${samskivert.mustache.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
-                <artifactId>okhttp</artifactId>
-                <version>${wso2.okhttp.version}</version>
+                <groupId>org.codehaus.plexus</groupId>
+                <artifactId>plexus-utils</artifactId>
+                <version>${plexus.utils.version}</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
-                <artifactId>logging-interceptor</artifactId>
-                <version>${wso2.okhttp.version}</version>
+                <groupId>org.wso2.carbon.config</groupId>
+                <artifactId>org.wso2.carbon.config</artifactId>
+                <version>${wso2.carbon.config.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.orbit.dnsjava</groupId>
-                <artifactId>dnsjava</artifactId>
-                <version>${wso2.dnsjava.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.json</groupId>
-                <artifactId>json</artifactId>
-                <version>${org.json.version}</version>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>${com.fasterxml.jackson.dataformat.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.yaml</groupId>
@@ -604,9 +600,14 @@
                 <version>${snakeyaml.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.orbit.io.fabric8</groupId>
-                <artifactId>kubernetes-client</artifactId>
-                <version>${wso2.kubernetes-client.version}</version>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-models</artifactId>
+                <version>${io.swagger.models.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>${joda.time.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -846,11 +847,11 @@
         <!-- Dependencies -->
         <carbon.kernel.version>5.2.0-m3</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[5.1.0, 6.0.0)</carbon.kernel.package.import.version.range>
-        <carbon.apimgt.version>7.0.41-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>7.0.43-SNAPSHOT</carbon.apimgt.version>
 
         <carbon.datasources.version>1.0.0</carbon.datasources.version>
 
-        <org.wso2.msf4j.version>2.3.0-m3</org.wso2.msf4j.version>
+        <org.wso2.msf4j.version>2.3.0-m1</org.wso2.msf4j.version>
         <msf4j.package.import.version.range>[2.0.0, 3.0.0)</msf4j.package.import.version.range>
 
         <osgi.api.version>6.0.0</osgi.api.version>
@@ -861,17 +862,14 @@
         <spring.framework.package.import.version.range>[4.1.6, 4.2.0)</spring.framework.package.import.version.range>
 
         <org.apache.cxf.version>3.0.3</org.apache.cxf.version>
-        <com.fasterxml.jackson.core.version>2.8.4</com.fasterxml.jackson.core.version>
-        <com.fasterxml.jackson.databind.version>2.8.4</com.fasterxml.jackson.databind.version>
-        <com.fasterxml.jackson.annotations.version>2.8.4</com.fasterxml.jackson.annotations.version>
-        <com.fasterxml.jackson.dataformat.version>2.8.4</com.fasterxml.jackson.dataformat.version>
+        <com.fasterxml.jackson.core.version>2.9.0</com.fasterxml.jackson.core.version>
 
         <findbugs.jsr305.version>3.0.0</findbugs.jsr305.version>
         <pax.logging.api.version>1.9.0</pax.logging.api.version>
         <slf4j.logging.package.import.version.range>[1.7.1, 2.0.0)</slf4j.logging.package.import.version.range>
 
-        <carbon.transport.version>4.4.29</carbon.transport.version>
-        <carbon.transport.package.import.version.range>[4.4.0, 5.0.0)</carbon.transport.package.import.version.range>
+        <carbon.transport.version>4.3.0-m1</carbon.transport.version>
+        <carbon.transport.package.import.version.range>[4.2.0, 5.0.0)</carbon.transport.package.import.version.range>
 
         <axiom.version>1.2.11-wso2v10</axiom.version>
         <axiom.import.version.range>[1.2.10-wso2v10,1.2.12-wso2v10)</axiom.import.version.range>
@@ -905,7 +903,7 @@
         <json-simple.wso2.import.version.range>[1.1, 1.2.0)</json-simple.wso2.import.version.range>
         <json-simple.wso2.export.version>1.1.wso2v1</json-simple.wso2.export.version>
         <com.h2database.wso2.version>1.2.140.wso2v3</com.h2database.wso2.version>
-        <io.swagger.version>1.5.12</io.swagger.version>
+        <io.swagger.version>1.5.16</io.swagger.version>
         <io.swagger.import.version.range>[1.5.0, 1.6.0)</io.swagger.import.version.range>
         <org.hibernate.version>5.2.4.Final</org.hibernate.version>
         <carbon.security.caas.version>1.0.0-m2</carbon.security.caas.version>
@@ -933,13 +931,13 @@
         <org.wso2.carbon.security.caas.import.version.range>[1.0.0,2.0.0)</org.wso2.carbon.security.caas.import.version.range>
         <google.code.gson.import.version.range>[2.7,3.0)</google.code.gson.import.version.range>
 
-        <com.fasterxml.jackson.datatype.version>2.7.5</com.fasterxml.jackson.datatype.version>
-        <com.fasterxml.jackson.datatbind.version>2.7.5</com.fasterxml.jackson.datatbind.version>
+        <com.fasterxml.jackson.datatype.version>2.7.4</com.fasterxml.jackson.datatype.version>
+        <com.fasterxml.jackson.datatbind.version>2.7.4</com.fasterxml.jackson.datatbind.version>
         <javax.ws.rs-api.version>2.0</javax.ws.rs-api.version>
         <javax.ws.rs-api.import.version>2.0</javax.ws.rs-api.import.version>
 
-        <snakeyaml.version>1.17</snakeyaml.version>
-        <snakeyaml.version.range>[1.17.0, 2.0.0)</snakeyaml.version.range>
+        <snakeyaml.version>1.18</snakeyaml.version>
+        <snakeyaml.version.range>[1.16, 2.0.0)</snakeyaml.version.range>
         <carbon.uuf.version>1.0.0-m14</carbon.uuf.version>
         <carbon-uuf-maven-plugin.version>1.0.0-m13</carbon-uuf-maven-plugin.version>
         <carbon.uuf.common.version>1.0.0-m8</carbon.uuf.common.version>
@@ -952,8 +950,8 @@
         <!--<slf4j.version>1.7.5</slf4j.version>-->
         <slf4j.logging.package.import.version.range>[1.7.1, 2.0.0)</slf4j.logging.package.import.version.range>
         <!--End of Dependency for integration gateway extension-->
-        <swagger.parser.version>1.0.21.wso2v2</swagger.parser.version>
-        <swagger.parser.import.version.range>[1.0.21, 1.0.22)</swagger.parser.import.version.range>
+        <swagger.parser.version>1.0.32.wso2v1</swagger.parser.version>
+        <swagger.parser.import.version.range>[1.0.30, 1.0.33)</swagger.parser.import.version.range>
         <google.code.gson.version>2.7</google.code.gson.version>
         <google.code.gson.import.version.range>[2.7, 2.8)</google.code.gson.import.version.range>
         <velocity.version>1.7.0.wso2v1</velocity.version>
@@ -961,7 +959,7 @@
         <!-- Jacoco for code coverage -->
         <jacoco.version>0.7.9</jacoco.version>
         <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
-        <google.guava.version>18.0</google.guava.version>
+        <google.guava.version>20.0</google.guava.version>
         <andes.version>3.0.5</andes.version>
         <securevault.version>1.0.0-wso2v2</securevault.version>
         <slf4j.version>1.7.22</slf4j.version>
@@ -972,12 +970,7 @@
         <h2.version>1.4.192</h2.version>
         <carbon.lcm.version>1.1.1</carbon.lcm.version>
         <carbon.lcm.import.version.range>[1.1.0, 1.2.0)</carbon.lcm.import.version.range>
-        <org.json.version>20160212</org.json.version>
-        <wso2.okhttp-ws.version>3.4.2.wso2v2</wso2.okhttp-ws.version>
-        <wso2.okhttp.version>3.8.0.wso2v2</wso2.okhttp.version>
-        <wso2.okio.version>1.6.0.wso2v1</wso2.okio.version>
-        <wso2.kubernetes-client.version>2.5.2.wso2v3</wso2.kubernetes-client.version>
-        <wso2.dnsjava.version>2.1.7.wso2v1</wso2.dnsjava.version>
+
         <nimbusds.version>2.26.1.wso2v2</nimbusds.version>
         <nimbusds.import.version.range>[2.26.1, 2.26.2)</nimbusds.import.version.range>
         <geronimo-jms.version>1.1.0.wso2v1</geronimo-jms.version>
@@ -988,5 +981,13 @@
 
         <ballerina.version>0.89</ballerina.version>
         <java-mail.version>1.5.2</java-mail.version>
+
+        <swagger.codegen.version>2.2.3.wso2v1</swagger.codegen.version>
+        <samskivert.mustache.version>1.13</samskivert.mustache.version>
+        <plexus.utils.version>1.5.7</plexus.utils.version>
+        <wso2.carbon.config.version>2.0.0</wso2.carbon.config.version>
+        <com.fasterxml.jackson.dataformat.version>2.9.1</com.fasterxml.jackson.dataformat.version>
+        <io.swagger.models.version>1.5.16</io.swagger.models.version>
+        <joda.time.version>2.9.9</joda.time.version>
     </properties>
 </project>

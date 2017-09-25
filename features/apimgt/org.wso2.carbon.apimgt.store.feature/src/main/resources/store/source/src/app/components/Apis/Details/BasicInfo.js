@@ -30,11 +30,13 @@ import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
 import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
+import { MenuItem } from 'material-ui/Menu';
 import { Delete, Edit, CreateNewFolder, Description  }from 'material-ui-icons';
 import Table, { TableBody, TableCell, TableRow } from 'material-ui/Table';
-import Select from 'react-select';
+import Select from 'material-ui/Select';
 import 'react-select/dist/react-select.css';
 import Subscriptions  from 'material-ui-icons/Subscriptions';
+import { FormControl } from 'material-ui/Form';
 
 class BasicInfo extends Component {
     constructor(props) {
@@ -47,7 +49,12 @@ class BasicInfo extends Component {
             dropDownPolicies: null,
             notFound: false,
             matDropVisible: false,
-            matDropValue: 'one'
+            matDropValue: 'one',
+            subscribedApplicationIds: [],
+            options: [],
+            tiers: [],
+            applicationId: null,
+            policyName: null
         };
         this.api_uuid = this.props.uuid;
         this.logChange = this.logChange.bind(this);
@@ -58,8 +65,18 @@ class BasicInfo extends Component {
         let promised_api = api.getAPIById(this.api_uuid);
         promised_api.then(
             response => {
-                console.info(response.obj)
+                console.info(response.obj);
                 this.setState({api: response.obj});
+                let apiTiers = response.obj.policies;
+                let tiers = [];
+                for (let i = 0; i < apiTiers.length; i++) {
+                    let tierName = apiTiers[i];
+                    tiers.push({value: tierName, label: tierName});
+                }
+                this.setState({tiers: tiers});
+                if (tiers.length > 0) {
+                    this.setState({policyName: tiers[0].value});
+                }
             }
         ).catch(
             error => {
@@ -73,10 +90,43 @@ class BasicInfo extends Component {
             }
         );
 
+        let existing_subscriptions = api.getSubscriptions(this.api_uuid, null);
+        existing_subscriptions.then((response) => {
+            let subscribedApplications = [];
+            //get the application IDs of existing subscriptions
+            response.body.list.map(element => subscribedApplications.push(element.applicationId));
+            this.setState({subscribedApplicationIds: subscribedApplications});
+        }).catch(
+            error => {
+                if (process.env.NODE_ENV !== "production") {
+                    console.log(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
+            }
+        );
+
         let promised_applications = api.getAllApplications();
         promised_applications.then(
-            response => {
-                this.setState({applications: response.obj.list});
+            (response) => {
+                let applicationResponseObj = response.body;
+                let applications = [];
+                for (let i = 0; i < applicationResponseObj.list.length; i++) {
+                    let applicationId = applicationResponseObj.list[i].applicationId;
+                    let applicationName = applicationResponseObj.list[i].name;
+                    //include the application only if it does not has an existing subscriptions
+                    if (this.state.subscribedApplicationIds.includes(applicationId)) {
+                        continue;
+                    } else {
+                        applications.push({value: applicationId, label: applicationName});
+                    }
+                }
+                this.setState({options: applications});
+                if (options.length > 0) {
+                    this.setState({applicationId: options[0].value});
+                }
             }
         ).catch(
             error => {
@@ -135,6 +185,26 @@ class BasicInfo extends Component {
         );
     }
 
+    handleChange = name => event => {
+        this.setState({ [name]: event.target.value });
+    };
+
+    createSubscription = (e) => {
+        e.preventDefault();
+        let apiId = this.api_uuid;
+        let applicationId = this.state.applicationId;
+        let policy = this.state.policyName;
+        let api = new Api();
+        let promised_subscribe = api.subscribe(apiId, applicationId, policy);
+        promised_subscribe.then(response => {
+            console.log("Subscription created successfully with ID : " + response.body.subscriptionId);
+        }).catch(
+            function (error_response) {
+                console.log("Error while creating the subscription.");
+            }
+        );
+    };
+
     populateApplicationDropdown(){
         return this.dropDownApplications;
     }
@@ -164,6 +234,7 @@ class BasicInfo extends Component {
         this.setState({matDropValue: val.value});
         console.log("Selected: " + JSON.stringify(val));
     }
+
     render() {
         const formItemLayout = {
             labelCol: {span: 6},
@@ -178,11 +249,6 @@ class BasicInfo extends Component {
         }
 
         const api = this.state.api;
-        const dropDownOptions = ["option1","option2","option3"];
-        let options = [
-            { value: 'one', label: 'One' },
-            { value: 'two', label: 'Two' }
-        ];
 
 
 
@@ -208,11 +274,7 @@ class BasicInfo extends Component {
                     <Grid item xs={12} sm={12} md={3} lg={3} xl={2} style={{paddingLeft:"40px"}}>
 
                         <Card>
-                            <CardMedia
-                                image="/store/public/images/api/api-default.png"
-                                title="Contemplative Reptile"
-                            >
-                                <img alt="API thumb" width="100%" src="/store/public/images/api/api-default.png"/>
+                            <CardMedia image="/store/public/images/api/api-default.png" >
                             </CardMedia>
                             <CardContent>
                                 <div className="custom-card">
@@ -269,24 +331,34 @@ class BasicInfo extends Component {
                         <Typography type="subheading" gutterBottom>
                             Applications
                         </Typography>
-                        <Select
-                            name="form-field-name"
-                            value={this.state.matDropValue}
-                            options={options}
-                            onChange={this.logChange}
-                        />
+                        {this.state.options &&
+                        <FormControl style={{width:"100%",marginBottom:"20px"}}>
+                            <Select
+                                style={{width:"100%"}}
+                                value={this.state.applicationId}
+                                onChange={this.handleChange('applicationId')}
+                            >
+                                {this.state.options.map((option) => <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>)}
+                            </Select>
+                        </FormControl>
+                        }
                         <Typography type="subheading" gutterBottom>
                             Tiers
                         </Typography>
-                        <Select
-                            name="form-field-name"
-                            value={this.state.matDropValue}
-                            options={options}
-                            onChange={this.logChange}
-                        />
+                        {this.state.tiers &&
+                        <FormControl style={{width:"100%"}}>
+                            <Select
+                                style={{width:"100%"}}
+                                value={this.state.policyName}
+                                onChange={this.handleChange('policyName')}
+                            >
+                                {this.state.tiers.map((tier) => <MenuItem key={tier.value} value={tier.value}>{tier.label}</MenuItem>)}
+                            </Select>
+                        </FormControl>
+                        }
                         <br />
-                        <Button raised color="primary" style={{paddingTop: '20px;'}}>
-                            <Subscriptions style={{paddingRight: '10px;'}} /> Subscribe
+                        <Button onClick={this.createSubscription} raised color="primary" style={{paddingTop: '20px'}}>
+                            <Subscriptions style={{paddingRight: '10px'}} /> Subscribe
                         </Button>
 
                             {/*<Select>

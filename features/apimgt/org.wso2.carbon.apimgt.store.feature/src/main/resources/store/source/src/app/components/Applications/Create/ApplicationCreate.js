@@ -18,43 +18,51 @@
 
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import Button from 'material-ui/Button';
 import API from '../../../data/api'
 
+import Button from 'material-ui/Button';
+import { MenuItem } from 'material-ui/Menu';
+import {Form} from 'material-ui/Form'
 import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
 import { Delete, Edit, CreateNewFolder, Description  }from 'material-ui-icons';
 import TextField from 'material-ui/TextField';
 
 import Paper from 'material-ui/Paper';
-import Select from 'react-select';
+import Input from 'material-ui/Input';
+import Select from 'material-ui/Select';
+import { FormControl } from 'material-ui/Form';
 
 class ApplicationCreate extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
-           quota: "unlimited",
-            tires: []
+            quota: "Unlimited",
+            tiers: [],
+            throttlingTier: null,
+            description: null,
+            name: null,
+            callbackUrl: null
         };
-        this.quotaChange = this.quotaChange.bind(this);
+        this.handleChange = this.handleChange.bind(this);
     }
 
     componentDidMount() {
         //Get all the tires to populate the drop down.
         const api = new API();
-        let promised_tires = api.getAllTiers("application");
-        promised_tires.then(
-            response => {
-                let tires = [];
-                for(let i=0; i<response.obj.count;i++) {
-                    let tier = {};
-                    tier.name = response.obj.list[i].name;
-                    tier.description = response.obj.list[i].description;
-                    tires.push(tier);
-                }
-                this.setState({tiers: tires});
+        let promised_tiers = api.getAllTiers("application");
+        promised_tiers.then((response) => {
+            let tierResponseObj = response.body;
+            let tiers = [];
+            tierResponseObj.list.map(item => tiers.push(item.name));
+            this.setState({tiers: tiers});
+
+            if (tiers.length > 0){
+                console.info(tiers[0]);
+                this.setState({quota: tiers[0]});
             }
+        }
         ).catch(
             error => {
                 if (process.env.NODE_ENV !== "production") {
@@ -67,9 +75,37 @@ class ApplicationCreate extends Component {
             }
         );
     }
-    quotaChange(val){
-            this.setState({quota: val.value});
-    }
+
+    handleChange = name => event => {
+        this.setState({ [name]: event.target.value });
+    };
+
+    handlePolicyChange = name => event => {
+        this.setState({ [name]: event.target.value });
+    };
+
+    handleSubmit = (e) => {
+        e.preventDefault();
+        let application_data = {
+            name: this.state.name,
+            throttlingTier: this.state.quota,
+            description: this.state.description,
+            callbackUrl: "http://my.server.com/callback"
+        };
+        let new_api = new API();
+        let promised_create = new_api.createApplication(application_data);
+        promised_create.then(response => {
+        let uuid = JSON.parse(response.data).applicationId;
+	//Once application loading fixed this need to pass application ID and load app
+        let redirect_url = "/applications/";
+        this.props.history.push(redirect_url);
+        console.log("Application created successfully.");
+        }).catch(
+            function (error_response) {
+                console.log("Error while creating the application");
+            });
+    };
+
     render() {
         return (
             <Grid>
@@ -91,22 +127,20 @@ class ApplicationCreate extends Component {
                             token to invoke a collection of APIs and to subscribe to one API multiple times with different
                             SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.
                         </p>
-                        <TextField
-                            label="Application Name"
-                            placeholder="Name"
-                            style={{width:"100%"}}
-                        />
+                    <Input name="applicationName" placeholder="Application Name" onChange={this.handleChange('name')}/>
                         <Typography type="caption" style={{marginTop:"20px"}} gutterBottom >
                             Per Token Quota
                         </Typography>
-                        {this.state.tires &&
+                        {this.state.tiers &&
+                        <FormControl style={{width:"40%",marginBottom:"20px"}}>
                             <Select
-                                label="Per Token Quota"
-                                name="form-field-name"
+                                style={{width:"50%"}}
                                 value={this.state.quota}
-                                options={this.state.tires}
-                                onChange={this.quotaChange}
-                            />
+                                onChange={this.handlePolicyChange('quota')}
+                            >
+                                {this.state.tiers.map((tier) => <MenuItem key={tier} value={tier}>{tier}</MenuItem>)}
+                            </Select>
+                        </FormControl>
                         }
                         <br />
                         <Typography type="caption" gutterBottom>
@@ -114,17 +148,10 @@ class ApplicationCreate extends Component {
                             shared among all the subscribed APIs of the application.
                         </Typography>
                         <br />
+                        <Input name="description" placeholder="Application Description" onChange={this.handleChange('description')}/>
 
-                        <TextField
-                                id="multiline-flexible"
-                                label="Description"
-                                multiline
-                                rowsMax="4"
-                                margin="normal"
-                                style={{width:"100%"}}
-                        />
                         <br />
-                    <Button raised color="primary" style={{marginRight:"20px"}}>
+                    <Button onClick={this.handleSubmit} raised color="primary" style={{marginRight:"20px"}}>
                         Add Application
                     </Button>
                     <Button raised >

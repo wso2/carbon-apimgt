@@ -24,7 +24,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>7.0.41-SNAPSHOT</version>
+        <version>7.0.43-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -225,8 +225,20 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.io.fabric8</groupId>
-            <artifactId>kubernetes-client</artifactId>
+            <groupId>org.wso2.orbit.io.swagger</groupId>
+            <artifactId>swagger-codegen</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.samskivert</groupId>
+            <artifactId>jmustache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.config</groupId>
+            <artifactId>org.wso2.carbon.config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -871,6 +883,7 @@
             javax.jms.*,;version="${geronimo-jms.import.version.range}",
             javax.ws.rs.*;version="${javax.ws.rs-api.import.version}",
             org.apache.activemq.*;resolution:=optional,
+            io.swagger.codegen.*;version="${swagger.codegen.version}",
         </import.package>
         <export.package>
             !org.wso2.carbon.apimgt.core.internal,
