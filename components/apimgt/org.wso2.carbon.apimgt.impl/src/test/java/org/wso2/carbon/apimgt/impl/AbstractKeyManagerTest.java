@@ -18,9 +18,16 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.compass.core.util.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
 
 public class AbstractKeyManagerTest {
 
@@ -30,9 +37,78 @@ public class AbstractKeyManagerTest {
                 "\"tokenScope\": \"Production\", \"owner\": \"admin\", \"grantType\": \"password refresh_token\", \"saasApp\": true }";
 
         AbstractKeyManager keyManager = new AMDefaultKeyManagerImpl();
-        keyManager.buildAccessTokenRequestFromJSON(jsonPayload, new AccessTokenRequest());
+        // test AccessTokenRequest null scenario
+        AccessTokenRequest accessTokenRequest1 = keyManager.buildAccessTokenRequestFromJSON(jsonPayload, null);
+        Assert.notNull(accessTokenRequest1);
 
+        // test json payload without required parameters
+        AccessTokenRequest accessTokenRequest2 = keyManager.buildAccessTokenRequestFromJSON(jsonPayload, accessTokenRequest1);
+        Assert.notNull(accessTokenRequest2);
+        assertNull(accessTokenRequest2.getClientId());
 
+        // test json payload null
+        assertNull(keyManager.buildAccessTokenRequestFromJSON(null, null));
+
+        String jsonPayload2 = "{ \"callbackUrl\": \"www.google.lk\", \"client_id\": \"XBPcXSfGK47WiEX7enchoP2Dcvga\", " +
+                "\"client_secret\": \"4UD8VX8NaQMtrHCwqzI1tHJLPoca\", \"owner\": \"admin\", \"grantType\": \"password refresh_token\", " +
+                "\"validityPeriod\": \"3600\" }";
+        AccessTokenRequest accessTokenRequest3 = keyManager.buildAccessTokenRequestFromJSON(jsonPayload2,
+                new AccessTokenRequest());
+
+        assertEquals("XBPcXSfGK47WiEX7enchoP2Dcvga", accessTokenRequest3.getClientId());
+        assertEquals("4UD8VX8NaQMtrHCwqzI1tHJLPoca", accessTokenRequest3.getClientSecret());
+        assertEquals(3600, accessTokenRequest3.getValidityPeriod());
+
+        //Error path with invalid json
+        try {
+            keyManager.buildAccessTokenRequestFromJSON("{dd}", null);
+            assertTrue(false);
+        } catch (APIManagementException e) {
+            assertEquals("Error occurred while parsing JSON String", e.getMessage());
+        }
+
+        //Error path with empty JSON
+        assertNull(keyManager.buildAccessTokenRequestFromJSON("{}", null));
+        keyManager.buildAccessTokenRequestFromJSON(null,new AccessTokenRequest());
     }
 
+    @Test
+    public void buildFromJSONTest() throws APIManagementException {
+        AbstractKeyManager keyManager = new AMDefaultKeyManagerImpl();
+        assertNotNull(keyManager.buildFromJSON(new OAuthApplicationInfo(), "{}"));
+        String jsonPayload2 = "{ \"callbackUrl\": \"www.google.lk\", \"client_id\": \"XBPcXSfGK47WiEX7enchoP2Dcvga\", " +
+                "\"client_secret\": \"4UD8VX8NaQMtrHCwqzI1tHJLPoca\", \"owner\": \"admin\", \"grantType\": \"password refresh_token\", " +
+                "\"validityPeriod\": \"3600\" }";
+        OAuthApplicationInfo oAuthApplicationInfo1 = keyManager.buildFromJSON(new OAuthApplicationInfo(), jsonPayload2);
+        assertEquals("XBPcXSfGK47WiEX7enchoP2Dcvga", oAuthApplicationInfo1.getClientId());
+        try {
+            keyManager.buildFromJSON(new OAuthApplicationInfo(), "{invalid}");
+            assertTrue(false);
+        } catch (APIManagementException e) {
+            assertEquals("Error occurred while parsing JSON String", e.getMessage());
+        }
+    }
+
+    @Test
+    public void buildAccessTokenRequestFromOAuthAppTest() throws APIManagementException {
+        AbstractKeyManager keyManager = new AMDefaultKeyManagerImpl();
+
+        //test null flow
+        assertNull(keyManager.buildAccessTokenRequestFromOAuthApp(null, null));
+
+        // test without client id and secret
+        try {
+            keyManager.buildAccessTokenRequestFromOAuthApp(new OAuthApplicationInfo(), new AccessTokenRequest());
+            assertTrue(false);
+        } catch (APIManagementException e) {
+            assertEquals("Consumer key or Consumer Secret missing.", e.getMessage());
+        }
+
+        OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
+        oAuthApplicationInfo.setClientId("XBPcXSfGK47WiEX7enchoP2Dcvga");
+        oAuthApplicationInfo.setClientSecret("4UD8VX8NaQMtrHCwqzI1tHJLPoca");
+        oAuthApplicationInfo.addParameter("tokenScope", new String[]{"view", "update"});
+        oAuthApplicationInfo.addParameter("validityPeriod", "1200");
+        keyManager.buildAccessTokenRequestFromOAuthApp(oAuthApplicationInfo, null);
+    }
 }
