@@ -74,11 +74,13 @@ import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
+import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.UserStoreException;
+import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -124,25 +126,24 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
             if (username == null) {
 
-                this.registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry();
-                this.configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry();
+                this.registry = getRegistryService().getGovernanceUserRegistry();
+                this.configRegistry = getRegistryService().getConfigSystemRegistry();
 
                 this.username = CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
                 ServiceReferenceHolder.setUserRealm((ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealm()));
             } else {
                 String tenantDomainName = MultitenantUtils.getTenantDomain(username);
                 String tenantUserName = MultitenantUtils.getTenantAwareUsername(username);
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomainName);
+                int tenantId = getTenantManager().getTenantId(tenantDomainName);
                 this.tenantId = tenantId;
                 this.tenantDomain = tenantDomainName;
                 this.username = tenantUserName;
 
-                APIUtil.loadTenantRegistry(tenantId);
+                loadTenantRegistry(tenantId);
 
-                this.registry = ServiceReferenceHolder.getInstance().
-                        getRegistryService().getGovernanceUserRegistry(tenantUserName, tenantId);
+                this.registry = getRegistryService().getGovernanceUserRegistry(tenantUserName, tenantId);
 
-                this.configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry(tenantId);
+                this.configRegistry = getRegistryService().getConfigSystemRegistry(tenantId);
 
                 //load resources for each tenants.
                 APIUtil.loadloadTenantAPIRXT(tenantUserName, tenantId);
@@ -161,8 +162,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 ServiceReferenceHolder.setUserRealm((UserRealm) (ServiceReferenceHolder.getInstance().
                         getRealmService().getTenantUserRealm(tenantId)));
             }
-            ServiceReferenceHolder.setUserRealm(ServiceReferenceHolder.getInstance().
-                    getRegistryService().getConfigSystemRegistry().getUserRealm());
+            ServiceReferenceHolder.setUserRealm(getRegistryService().getConfigSystemRegistry().getUserRealm());
             registerCustomQueries(configRegistry, username);
         } catch (RegistryException e) {
             handleException("Error while obtaining registry objects", e);
@@ -199,8 +199,7 @@ public abstract class AbstractAPIManager implements APIManager {
         } else if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             int tenantId;
             try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().
-                        getTenantManager().getTenantId(tenantDomain);
+                tenantId = getTenantManager().getTenantId(tenantDomain);
                 AuthorizationManager authManager = ServiceReferenceHolder.getInstance().getRealmService().
                         getTenantUserRealm(tenantId).getAuthorizationManager();
                 authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
@@ -310,13 +309,12 @@ public abstract class AbstractAPIManager implements APIManager {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
+            GenericArtifactManager artifactManager = getGenericArtifactManager();
             GenericArtifact[] artifacts = artifactManager.getAllGenericArtifacts();
             for (GenericArtifact artifact : artifacts) {
                 API api = null;
                 try {
-                    api = APIUtil.getAPI(artifact);
+                    api = getApi(artifact);
                 } catch (APIManagementException e) {
                     //log and continue since we want to load the rest of the APIs.
                     log.error("Error while loading API " + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME), e);
@@ -337,20 +335,24 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiSortedList;
     }
 
+    protected API getApi(GenericArtifact artifact) throws APIManagementException {
+        return APIUtil.getAPI(artifact);
+    }
+
     public API getAPI(APIIdentifier identifier) throws APIManagementException {
         String apiPath = APIUtil.getAPIPath(identifier);
         Registry registry;
         try {
             String apiTenantDomain = MultitenantUtils.getTenantDomain(
                     APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
-            int apiTenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+            int apiTenantId = getTenantManager()
                     .getTenantId(apiTenantDomain);
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(apiTenantDomain)) {
-                APIUtil.loadTenantRegistry(apiTenantId);
+                loadTenantRegistry(apiTenantId);
             }
 
             if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) { //cross tenant scenario
-                registry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(
+                registry = getRegistryService().getGovernanceUserRegistry(
                         MultitenantUtils.getTenantAwareUsername(
                                 APIUtil.replaceEmailDomainBack(identifier.getProviderName())), apiTenantId);
             } else {
@@ -365,7 +367,7 @@ public abstract class AbstractAPIManager implements APIManager {
             }
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
 
-            API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
+            API api = getApiForPublishing(registry, apiArtifact);
 
             //check for API visibility
             if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) { //global api
@@ -387,6 +389,14 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
+    protected API getApiForPublishing(Registry registry, GenericArtifact apiArtifact) throws APIManagementException {
+        return APIUtil.getAPIForPublishing(apiArtifact, registry);
+    }
+
+    protected void loadTenantRegistry(int apiTenantId) throws RegistryException {
+        APIUtil.loadTenantRegistry(apiTenantId);
+    }
+
     /**
      * Get API by registry artifact id
      *
@@ -400,26 +410,24 @@ public abstract class AbstractAPIManager implements APIManager {
             Registry registry;
             if (requestedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals
                     (requestedTenantDomain)) {
-                int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                int id = getTenantManager()
                         .getTenantId(requestedTenantDomain);
-                registry = ServiceReferenceHolder.getInstance().
-                        getRegistryService().getGovernanceSystemRegistry(id);
+                registry = getRegistryService().getGovernanceSystemRegistry(id);
             } else {
                 if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
                     // at this point, requested tenant = carbon.super but logged in user is anonymous or tenant
-                    registry = ServiceReferenceHolder.getInstance().
-                            getRegistryService().getGovernanceSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);
+                    registry = getRegistryService().getGovernanceSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);
                 } else {
                     // both requested tenant and logged in user's tenant are carbon.super
                     registry = this.registry;
                 }
             }
 
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            GenericArtifactManager artifactManager = getGenericArtifactManager();
 
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(uuid);
             if (apiArtifact != null) {
-                return APIUtil.getAPIForPublishing(apiArtifact, registry);
+                return getApiForPublishing(registry, apiArtifact);
             } else {
                 handleResourceNotFoundException(
                         "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist");
@@ -434,6 +442,10 @@ public abstract class AbstractAPIManager implements APIManager {
         return null;
     }
 
+    protected TenantManager getTenantManager() {
+        return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager();
+    }
+
     /**
      * Get minimal details of API by registry artifact id
      *
@@ -446,21 +458,19 @@ public abstract class AbstractAPIManager implements APIManager {
             Registry registry;
             if (requestedTenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals
                     (requestedTenantDomain)) {
-                int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                int id = getTenantManager()
                         .getTenantId(requestedTenantDomain);
-                registry = ServiceReferenceHolder.getInstance().
-                        getRegistryService().getGovernanceSystemRegistry(id);
+                registry = getRegistryService().getGovernanceSystemRegistry(id);
             } else {
                 if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
                     // at this point, requested tenant = carbon.super but logged in user is anonymous or tenant
-                    registry = ServiceReferenceHolder.getInstance().
-                            getRegistryService().getGovernanceSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);
+                    registry = getRegistryService().getGovernanceSystemRegistry(MultitenantConstants.SUPER_TENANT_ID);
                 } else {
                     // both requested tenant and logged in user's tenant are carbon.super
                     registry = this.registry;
                 }
             }
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            GenericArtifactManager artifactManager = getGenericArtifactManager();
 
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(uuid);
             if (apiArtifact != null) {
@@ -530,7 +540,7 @@ public abstract class AbstractAPIManager implements APIManager {
         if (manager != null) {
             return manager;
         }
-        manager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+        manager = getGenericArtifactManager();
         genericArtifactCache.put(tenantDomain, manager);
         return manager;
     }
@@ -542,17 +552,17 @@ public abstract class AbstractAPIManager implements APIManager {
             String tenantDomain = MultitenantUtils
                     .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                int id = getTenantManager()
                         .getTenantId(tenantDomain);
                 // explicitly load the tenant's registry
-                APIUtil.loadTenantRegistry(id);
-                passRegistry = ServiceReferenceHolder.getInstance().getRegistryService()
+                loadTenantRegistry(id);
+                passRegistry = getRegistryService()
                         .getGovernanceSystemRegistry(id);
             } else {
                 if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
                     // explicitly load the tenant's registry
-                    APIUtil.loadTenantRegistry(MultitenantConstants.SUPER_TENANT_ID);
-                    passRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(
+                    loadTenantRegistry(MultitenantConstants.SUPER_TENANT_ID);
+                    passRegistry = getRegistryService().getGovernanceUserRegistry(
                             identifier.getProviderName(), MultitenantConstants.SUPER_TENANT_ID);
                 } else {
                     passRegistry = this.registry;
@@ -578,7 +588,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 throw new APIManagementException("artifact id is null for : " + apiPath);
             }
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-            return APIUtil.getAPI(apiArtifact);
+            return getApi(apiArtifact);
 
         } catch (RegistryException e) {
             handleException("Failed to get API from : " + apiPath, e);
@@ -946,9 +956,9 @@ public abstract class AbstractAPIManager implements APIManager {
             Registry registryType;
             //Tenant store anonymous mode if current tenant and the required tenant is not matching
             if (this.tenantDomain == null || isTenantDomainNotMatching(apiTenantDomain)) {
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(
+                int tenantId = getTenantManager().getTenantId(
                         apiTenantDomain);
-                registryType = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(
+                registryType = getRegistryService().getGovernanceUserRegistry(
                         CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
             } else {
                 registryType = registry;
@@ -1051,10 +1061,9 @@ public abstract class AbstractAPIManager implements APIManager {
             /* If the API provider is a tenant, load tenant registry*/
             boolean isTenantMode = (tenantDomain != null);
             if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant store anonymous mode
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                int tenantId = getTenantManager()
                         .getTenantId(tenantDomain);
-                registryType = ServiceReferenceHolder.getInstance().
-                        getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
+                registryType = getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
             } else {
                 registryType = registry;
             }
@@ -1141,10 +1150,9 @@ public abstract class AbstractAPIManager implements APIManager {
             //Tenant store anonymous mode if current tenant and the required tenant is not matching
             if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(
                     requestedTenantDomain))) {
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                int tenantId = getTenantManager()
                         .getTenantId(requestedTenantDomain);
-                registryType = ServiceReferenceHolder.getInstance().
-                        getRegistryService()
+                registryType = getRegistryService()
                         .getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
             } else {
                 registryType = registry;
@@ -1187,13 +1195,11 @@ public abstract class AbstractAPIManager implements APIManager {
 
 	        /* If the API provider is a tenant, load tenant registry*/
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-                registry = ServiceReferenceHolder.getInstance().
-                        getRegistryService().getGovernanceSystemRegistry(id);
+                int id = getTenantManager().getTenantId(tenantDomain);
+                registry = getRegistryService().getGovernanceSystemRegistry(id);
             } else {
                 if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
-                    registry = ServiceReferenceHolder.getInstance().
-                            getRegistryService().getGovernanceUserRegistry(identifier.getProviderName(), MultitenantConstants.SUPER_TENANT_ID);
+                    registry = getRegistryService().getGovernanceUserRegistry(identifier.getProviderName(), MultitenantConstants.SUPER_TENANT_ID);
                 } else {
                     registry = this.registry;
                 }
@@ -1261,7 +1267,7 @@ public abstract class AbstractAPIManager implements APIManager {
         //TODO : need to set the proper email
         subscriber.setEmail("");
         try {
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+            int tenantId = getTenantManager()
                     .getTenantId(MultitenantUtils.getTenantDomain(username));
             subscriber.setTenantId(tenantId);
             apiMgtDAO.addSubscriber(subscriber, groupingId);
@@ -1324,13 +1330,11 @@ public abstract class AbstractAPIManager implements APIManager {
 
 	        /* If the API provider is a tenant, load tenant registry*/
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                int id = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-                registry = ServiceReferenceHolder.getInstance().
-                        getRegistryService().getGovernanceSystemRegistry(id);
+                int id = getTenantManager().getTenantId(tenantDomain);
+                registry = getRegistryService().getGovernanceSystemRegistry(id);
             } else {
                 if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
-                    registry = ServiceReferenceHolder.getInstance().
-                            getRegistryService().getGovernanceUserRegistry(identifier.getProviderName(), MultitenantConstants.SUPER_TENANT_ID);
+                    registry = getRegistryService().getGovernanceUserRegistry(identifier.getProviderName(), MultitenantConstants.SUPER_TENANT_ID);
                 } else {
                     registry = this.registry;
                 }
@@ -1711,10 +1715,9 @@ public abstract class AbstractAPIManager implements APIManager {
             int tenantIDLocal = 0;
             String userNameLocal = this.username;
             if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(requestedTenantDomain))) {//Tenant store anonymous mode
-                tenantIDLocal = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                tenantIDLocal = getTenantManager()
                         .getTenantId(requestedTenantDomain);
-                userRegistry = ServiceReferenceHolder.getInstance().
-                        getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantIDLocal);
+                userRegistry = getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantIDLocal);
                 userNameLocal = CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
             } else {
                 userRegistry = this.registry;
@@ -2222,9 +2225,9 @@ public abstract class AbstractAPIManager implements APIManager {
             Registry registryType;
             //Tenant store anonymous mode if current tenant and the required tenant is not matching
             if (this.tenantDomain == null || isTenantDomainNotMatching(apiTenantDomain)) {
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(
+                int tenantId = getTenantManager().getTenantId(
                         apiTenantDomain);
-                registryType = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(
+                registryType = getRegistryService().getGovernanceUserRegistry(
                         CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
             } else {
                 registryType = registry;
@@ -2237,6 +2240,10 @@ public abstract class AbstractAPIManager implements APIManager {
             log.debug("Error while getting the lastUpdated time due to " + e.getMessage(), e);
         }
         return null;
+    }
+
+    protected RegistryService getRegistryService() {
+        return ServiceReferenceHolder.getInstance().getRegistryService();
     }
 
     /**
@@ -2264,5 +2271,8 @@ public abstract class AbstractAPIManager implements APIManager {
         }
         return null;
 
+    }
+    protected GenericArtifactManager getGenericArtifactManager() throws APIManagementException {
+        return  APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
     }
 }
