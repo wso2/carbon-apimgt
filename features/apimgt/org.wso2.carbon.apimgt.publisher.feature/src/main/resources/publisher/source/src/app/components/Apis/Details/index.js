@@ -20,7 +20,6 @@ import React, {Component} from 'react'
 import {Route, Switch, Redirect} from 'react-router-dom'
 
 import Overview from './Overview'
-import NavBar from './NavBar'
 import LifeCycle from './LifeCycle/LifeCycle'
 import Documents from './Documents/Documents'
 import {PageNotFound} from '../../Base/Errors/index'
@@ -28,33 +27,32 @@ import Resources from './Resources/Resources'
 import PermissionFormWrapper from './Permission'
 import Endpoints from './Endpoints'
 import Subscriptions from './Subscriptions/Subscriptions'
+import NavBar from  './NavBar'
+
 
 export default class Details extends Component {
-    componentDidMount() {
-        this.props.setLeftMenu(true);
-    }
 
-    componentWillUnmount() {
-        /* Hide the left side nav bar when detail page is unmount ,
-         since the left nav bar is currently only associated with details page*/
-        this.props.setLeftMenu(false);
-    }
 
     render() {
         let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
         return (
-            <div className="tab-content">
-                <Switch>
-                    <Redirect exact from="/apis/:api_uuid" to={redirect_url}/>
-                    <Route path="/apis/:api_uuid/overview" component={Overview}/>
-                    <Route path="/apis/:api_uuid/lifecycle" component={LifeCycle}/>
-                    <Route path="/apis/:api_uuid/resources" component={Resources}/>
-                    <Route path="/apis/:api_uuid/permission" component={PermissionFormWrapper}/>
-                    <Route path="/apis/:api_uuid/documents" component={Documents}/>
-                    <Route path="/apis/:api_uuid/endpoints" component={Endpoints}/>
-                    <Route path="/apis/:api_uuid/subscriptions" component={Subscriptions}/>
-                    <Route component={PageNotFound}/>
-                </Switch>
+            <div className="main-content-container">
+                <div className="main-content-left">
+                    <NavBar />
+                </div>
+                <div className="main-content-right">
+                    <Switch>
+                        <Redirect exact from="/apis/:api_uuid" to={redirect_url}/>
+                        <Route path="/apis/:api_uuid/overview" component={Overview}/>
+                        <Route path="/apis/:api_uuid/lifecycle" component={LifeCycle}/>
+                        <Route path="/apis/:api_uuid/resources" component={Resources}/>
+                        <Route path="/apis/:api_uuid/permission" component={PermissionFormWrapper}/>
+                        <Route path="/apis/:api_uuid/documents" component={Documents}/>
+                        <Route path="/apis/:api_uuid/endpoints" component={Endpoints}/>
+                        <Route path="/apis/:api_uuid/subscriptions" component={Subscriptions}/>
+                        <Route component={PageNotFound}/>
+                    </Switch>
+                </div>
             </div>
         );
     }

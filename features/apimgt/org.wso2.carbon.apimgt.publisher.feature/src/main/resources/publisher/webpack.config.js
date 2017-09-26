@@ -6,9 +6,10 @@ const config = {
     },
     output: {
         path: path.resolve(__dirname, 'public/dist'),
-        filename: '[name].js'
+        filename: "[name].bundle.js",
+        chunkFilename: "[name].bundle.js",
+        publicPath: 'public/dist/'
     },
-    devtool: "source-map",
     plugins: [],
     watch: false,
     module: {
@@ -50,6 +51,32 @@ const config = {
 
 if (process.env.NODE_ENV === "development") {
     config.watch = true;
+    config.devtool = "source-map";
+}
+if (process.env.NODE_ENV === 'production') {
+    config.plugins.push(
+        new webpack.LoaderOptionsPlugin({
+            minimize: true,
+            debug: false
+        }),
+        new webpack.optimize.UglifyJsPlugin({
+            compress: {
+                warnings: false,
+                screw_ie8: true,
+                conditionals: true,
+                unused: true,
+                comparisons: true,
+                sequences: true,
+                dead_code: true,
+                evaluate: true,
+                if_return: true,
+                join_vars: true
+            },
+            output: {
+                comments: false
+            },
+        })
+    );
 }
 
 module.exports = config;

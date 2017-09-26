@@ -19,8 +19,6 @@ import React from 'react';
 
 import Header from './Header/Header'
 
-import Drawer from 'material-ui/Drawer';
-import NavBar from  '../Apis/Details/NavBar'
 import Grid from 'material-ui/Grid';
 
 const defaultOffset = "250px";
@@ -73,13 +71,7 @@ class Layout extends React.Component {
         return (
             <div  style={{marginLeft:this.state.layoutLeftOffset}}  >
                 <Header toggleDrawer={this.toggleDrawer} showLeftMenu={this.state.showLeftMenu} />
-                <Drawer
-                    open={this.state.drawerOpen && this.state.showLeftMenu}
-                    onRequestClose={this.handleLeftClose}
-                    type="persistent"
-                >
-                    <NavBar />
-                </Drawer>
+
                 <Grid container spacing={0} >
                     <Grid item xs={12} >
                         {this.props.children}

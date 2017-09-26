@@ -19,17 +19,26 @@
 import React, {Component} from 'react'
 
 import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom'
-import {Apis, Base, Login, Logout, Endpoints} from './app/components'
+// import {Apis, Base, Login, Logout, Endpoints} from './app/components'
 import {PageNotFound} from './app/components/Base/Errors'
-import ApiCreate from './app/components/Apis/Create/ApiCreate'
+// import ApiCreate from './app/components/Apis/Create/ApiCreate'
 import AuthManager from './app/data/AuthManager'
 import qs from 'qs'
 import Axios from 'axios';
 import LoadingAnimation from './app/components/Base/Loading/Loading.js';
-
+import {getAsyncComponent} from 'async-react-component';
 import 'antd/dist/antd.css'
 import {message} from 'antd'
 import './App.css'
+
+
+const Apis = () => import(/* webpackChunkName: "apis" */ './app/components/Apis/Apis');
+const Endpoints = () => import(/* webpackChunkName: "endpoints" */ './app/components/Endpoints');
+const ApiCreate = () => import(/* webpackChunkName: "create" */ './app/components/Apis/Create/ApiCreate');
+const Base = () => import(/* webpackChunkName: "base" */ './app/components/Base');
+const BaseLayout = getAsyncComponent(Base);
+const Login = () => import(/* webpackChunkName: "login" */  './app/components/Login/Login');
+const Logout = () => import(/* webpackChunkName: "logout" */ './app/components/Logout');
 
 /**
  * Render protected application paths
@@ -38,7 +47,6 @@ class Protected extends Component {
     constructor(props) {
         super(props);
         this.state = {showLeftMenu: false, authConfigs: null};
-        this.setLeftMenu = this.setLeftMenu.bind(this);
         message.config({top: '48px'}); // .custom-header height + some offset
         /* TODO: need to fix the header to avoid conflicting with messages ~tmkb*/
         this.handleResponse = this.handleResponse.bind(this);
@@ -64,16 +72,18 @@ class Protected extends Component {
         // Note: AuthManager.getUser() method is a passive check, which simply check the user availability in browser storage,
         // Not actively check validity of access token from backend
         if (AuthManager.getUser()) {
+
+
             return (
-                <Base showLeftMenu={this.state.showLeftMenu}>
+                <BaseLayout>
                     <Switch>
                         <Redirect exact from="/" to="/apis"/>
-                        <Route path={"/apis"} render={ props => (<Apis setLeftMenu={this.setLeftMenu}/>)}/>
-                        <Route path={"/endpoints"} component={Endpoints}/>
-                        <Route path={"/api/create"} component={ApiCreate}/>
+                        <Route path={"/apis"} component={getAsyncComponent(Apis)}/>
+                        <Route path={"/endpoints"} component={getAsyncComponent(Endpoints)}/>
+                        <Route path={"/api/create"} component={getAsyncComponent(ApiCreate)}/>
                         <Route component={PageNotFound}/>
                     </Switch>
-                </Base>
+                </BaseLayout>
             );
         }
         let params = qs.stringify({referrer: this.props.location.pathname});
@@ -104,8 +114,8 @@ class Publisher extends Component {
         return (
             <Router basename="/publisher">
                 <Switch>
-                    <Route path={"/login"} component={Login}/>
-                    <Route path={"/logout"} component={Logout}/>
+                    <Route path={"/login"} component={getAsyncComponent(Login)}/>
+                    <Route path={"/logout"} component={getAsyncComponent(Logout)}/>
                     <Route component={Protected}/>
                 </Switch>
             </Router>

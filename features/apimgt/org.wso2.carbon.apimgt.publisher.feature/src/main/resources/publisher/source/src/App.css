@@ -1,8 +1,23 @@
+.main-content-container{
+    display: flex;
+    x-justify-content: space-around;
+    x-align-items: stretch;
+    flex: 1;
+}
+.main-content-left{
+    width: 250px;
+    flex-grow: 1;
+    flex-basis: 250px;
+    border-right: solid 1px #ccc;
+    flex-direction: column;
+    height: 100vmin;
+
+}
+img.brand{
+    width: 100px;
+}
 .MuiDrawer-docked-101 .MuiDrawer-paper-96{
     background: rgb(236,239,241);
-}
-#react-root{
-    background: #fff;
 }
 header.MuiAppBar-colorPrimary-6{
     background-color: rgb(9, 117, 239);

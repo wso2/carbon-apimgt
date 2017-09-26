@@ -16,13 +16,14 @@
  * under the License.
  */
 import React, {Component} from 'react'
-import ApiCreateEndpoint from './Endpoint/ApiCreateEndpoint'
-import ApiCreateSwagger from './Swagger/ApiCreateSwagger'
-import ApiCreateWSDL from './WSDL/ApiCreateWSDL'
+import {getAsyncComponent} from 'async-react-component';
 
 import {Route, Switch, Link} from 'react-router-dom'
 import './ApiCreate.css'
 
+const ApiCreateEndpoint = () => import(/* webpackChunkName: "ApiCreateEndpoint" */ './Endpoint/ApiCreateEndpoint');
+const ApiCreateWSDL = () => import(/* webpackChunkName: "ApiCreateWSDL" */ './WSDL/ApiCreateWSDL');
+const ApiCreateSwagger = () => import(/* webpackChunkName: "ApiCreateSwagger" */ './Swagger/ApiCreateSwagger');
 
 class ApiCreate extends Component {
     render() {
@@ -107,9 +108,9 @@ class ApiCreate extends Component {
                                 </ul>
                             </div>
                         } />
-                        <Route path={"/api/create/rest"} component={ApiCreateEndpoint}/>
-                        <Route path={"/api/create/swagger"} component={ApiCreateSwagger}/>
-                        <Route path={"/api/create/wsdl"} component={ApiCreateWSDL}/>
+                        <Route path={"/api/create/rest"} component={getAsyncComponent(ApiCreateEndpoint)}/>
+                        <Route path={"/api/create/swagger"} component={getAsyncComponent(ApiCreateSwagger)}/>
+                        <Route path={"/api/create/wsdl"} component={getAsyncComponent(ApiCreateWSDL)}/>
                     </Switch>
                     {/*<ApiCreateEndpoint/>*/}
 
