@@ -1628,7 +1628,6 @@ public class ApiDAOImpl implements ApiDAO {
                         labels.contains(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId)) {
                     deleteLabelsMapping(connection, apiId);
                     addLabelMapping(connection, apiId, labels);
-
                 }
                 statement.execute();
                 connection.commit();
@@ -1643,7 +1642,6 @@ public class ApiDAOImpl implements ApiDAO {
         } catch (SQLException e) {
             throw new APIMgtDAOException("Error Executing query for updating Container Based Gateway",
                     ExceptionCodes.APIM_DAO_EXCEPTION);
-
         }
     }
 

@@ -154,11 +154,11 @@ public class APIStateChangeWorkflow extends Workflow {
             if (hasOwnGateway) {
                 //assuming that there is no transition from (MAINTENANCE to  PROTOTYPED), (DEPRECATED to CREATED),
                 // (CREATED to DEPRECATED)
-                if ((currentState.equalsIgnoreCase("created") ||
-                        currentState.equalsIgnoreCase("maintenance")) &&
-                        (targetState.equalsIgnoreCase("published") ||
-                                targetState.equalsIgnoreCase("prototyped") ||
-                                targetState.equalsIgnoreCase("deprecated"))) {
+                if ((currentState.equalsIgnoreCase(APIStatus.CREATED.getStatus()) ||
+                        currentState.equalsIgnoreCase(APIStatus.MAINTENANCE.getStatus())) &&
+                        (targetState.equalsIgnoreCase(APIStatus.PUBLISHED.getStatus()) ||
+                                targetState.equalsIgnoreCase(APIStatus.PROTOTYPED.getStatus()) ||
+                                targetState.equalsIgnoreCase(APIStatus.DEPRECATED.getStatus()))) {
 
                     // No need to auto-generate the label again As hasOwnGateway is true.
                     //create the gateway
@@ -176,12 +176,12 @@ public class APIStateChangeWorkflow extends Workflow {
             // check whether this removal of gateway cause events left in the topic.
             // After publishing the state change to the Gateway, remove the gateway for following occasions.
             if (hasOwnGateway) {
-                if ((currentState.equalsIgnoreCase("published") ||
-                        currentState.equalsIgnoreCase("prototyped") ||
-                        currentState.equalsIgnoreCase("deprecated")) &&
-                        (targetState.equalsIgnoreCase("created") ||
-                                targetState.equalsIgnoreCase("maintenance")) ||
-                        targetState.equalsIgnoreCase("retired")) {
+                if ((currentState.equalsIgnoreCase(APIStatus.PUBLISHED.getStatus()) ||
+                        currentState.equalsIgnoreCase(APIStatus.PROTOTYPED.getStatus()) ||
+                        currentState.equalsIgnoreCase(APIStatus.DEPRECATED.getStatus())) &&
+                        (targetState.equalsIgnoreCase(APIStatus.CREATED.getStatus()) ||
+                                targetState.equalsIgnoreCase(APIStatus.MAINTENANCE.getStatus())) ||
+                        targetState.equalsIgnoreCase(APIStatus.RETIRED.getStatus())) {
 
                     // remove gateway
                     apiGateway.removeContainerBasedGateway(label, apiId);

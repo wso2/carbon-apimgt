@@ -263,10 +263,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             } else {
                 labelSet = getAPIbyUUID(apiId).getLabels();
             }
-
             // create or remove dedicated Gateway
             gateway.updateDedicatedGateway(api, labelSet, dedicatedGateway.isEnabled());
-
             getApiDAO().updateDedicatedGateway(dedicatedGateway, apiId, labelSet);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error occurred while updating dedicatedGateway details of API with id " + apiId;

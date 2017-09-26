@@ -1820,7 +1820,6 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
             } else {
                 labelSet = getAPIbyUUID(apiId).getLabels();
             }
-
             // create or remove dedicated Gateway
             gateway.updateDedicatedGateway(api, labelSet, dedicatedGateway.isEnabled());
 

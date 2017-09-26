@@ -94,9 +94,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
         apiSummary.setContext(api.getContext());
         gatewayDTO.setApiSummary(apiSummary);
         publishToPublisherTopic(gatewayDTO);
-
-        // adding to the dedicated Gateway will happen as a seperate REST call
-
     }
 
     @Override
@@ -439,11 +436,11 @@ public class APIGatewayPublisherImpl implements APIGateway {
     @Override
     public void createContainerBasedGateway(String apiId, String label) throws GatewayException {
 
-        if ("kubernetes".equalsIgnoreCase(config.getContainerGatewayConfigs().getCmsType())) {
+        if (ContainerBasedGatewayConstants.K8.equalsIgnoreCase(config.getContainerGatewayConfigs().getCmsType())) {
             KubernetesGatewayImpl kubernetesGateway = new KubernetesGatewayImpl();
             kubernetesGateway.createContainerGateway(apiId, label);
 
-        } else if ("openshift".equalsIgnoreCase(config.getContainerGatewayConfigs().getCmsType())) {
+        } else if (ContainerBasedGatewayConstants.OPENSHIFT.equalsIgnoreCase(config.getContainerGatewayConfigs().getCmsType())) {
             OpenShiftGatewayImpl openShiftGateway = new OpenShiftGatewayImpl();
             openShiftGateway.createContainerGateway(apiId, label);
         }
@@ -457,12 +454,12 @@ public class APIGatewayPublisherImpl implements APIGateway {
     @Override
     public void removeContainerBasedGateway(String label, String apiId) throws GatewayException {
 
-        if ("kubernetes".equalsIgnoreCase(config.getContainerGatewayConfigs().getCmsType())) {
+        if (ContainerBasedGatewayConstants.K8.equalsIgnoreCase(config.getContainerGatewayConfigs().getCmsType())) {
             KubernetesGatewayImpl kubernetesGateway = new KubernetesGatewayImpl();
             kubernetesGateway.removeContainerBasedGateway(label, apiId, config.getContainerGatewayConfigs()
                     .getKubernetesGatewayConfigurations().getNamespace());
 
-        } else if ("openshift".equalsIgnoreCase(config.getContainerGatewayConfigs().getCmsType())) {
+        } else if (ContainerBasedGatewayConstants.OPENSHIFT.equalsIgnoreCase(config.getContainerGatewayConfigs().getCmsType())) {
             OpenShiftGatewayImpl openShiftGateway = new OpenShiftGatewayImpl();
             openShiftGateway.removeContainerBasedGateway(label, apiId, config.getContainerGatewayConfigs()
                     .getOpenshiftGatewayConfigurations().getNamespace());

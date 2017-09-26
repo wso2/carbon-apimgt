@@ -105,7 +105,7 @@ public class KubernetesGatewayImpl implements ContainerBasedGatewayGenerator {
                     if (client.services().inNamespace(namespace).withLabel(label) != null) {
                         Service result = client.services().inNamespace(namespace).load(inputStream).create();
                         if (log.isDebugEnabled()) {
-                            log.debug("The Kubernetes Service Definition :\n " + serviceTemplate);
+                            log.debug("The Kubernetes Service Definition : " + serviceTemplate);
                         }
                         log.info("Created Service : " + result.getMetadata().getName());
                     } else {
@@ -157,7 +157,7 @@ public class KubernetesGatewayImpl implements ContainerBasedGatewayGenerator {
                         Deployment result =
                                 client.extensions().deployments().inNamespace(namespace).load(inputStream).create();
                         if (log.isDebugEnabled()) {
-                            log.debug("The Kubernetes Deployment Definition :\n " + deploymentTemplate);
+                            log.debug("The Kubernetes Deployment Definition : " + deploymentTemplate);
                         }
                         log.info("Created deployment : ", result.getMetadata().getName());
                     } else {

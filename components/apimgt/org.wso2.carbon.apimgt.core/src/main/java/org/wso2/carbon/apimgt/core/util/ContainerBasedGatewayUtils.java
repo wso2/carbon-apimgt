@@ -38,7 +38,7 @@ import java.nio.charset.StandardCharsets;
 public class ContainerBasedGatewayUtils {
 
     private static APIMConfigurations apimConfigurations = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
-    //todo : temporary
+
     private static String saTokenFile = apimConfigurations.getContainerGatewayConfigs()
          .getKubernetesGatewayConfigurations().getSaTokenFile();
 
@@ -56,9 +56,7 @@ public class ContainerBasedGatewayUtils {
         try (InputStream inputStream = new FileInputStream(tokenFile);
              InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
              BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
-
             token = bufferedReader.readLine();
-
         } catch (FileNotFoundException e) {
             throw new GatewayException("Service Account Access Token file is not found in the given location", e,
                     ExceptionCodes.FILE_NOT_FOUND_IN_LOCATION);
