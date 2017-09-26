@@ -1825,9 +1825,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
 
             getApiDAO().updateDedicatedGateway(dedicatedGateway, apiId, labelSet);
         } catch (APIMgtDAOException e) {
-            String errorMsg = "Error occurred while updating dedicatedGateway details of API with id " + apiId;
-            log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
+            throw new APIManagementException("Error occurred while updating dedicatedGateway details of API with id "
+                    + apiId, e, e.getErrorHandler());
         }
     }
 
@@ -1841,9 +1840,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         try {
             dedicatedGateway = getApiDAO().getDedicatedGateway(apiId);
         } catch (APIMgtDAOException e) {
-            String errorMsg = "Error occurred while retrieving dedicated Gateway details of API with id " + apiId;
-            log.error(errorMsg, e);
-            throw new APIManagementException(errorMsg, e, e.getErrorHandler());
+            throw new APIManagementException("Error occurred while retrieving dedicated Gateway details of API with id "
+                    + apiId, e, e.getErrorHandler());
         }
         return dedicatedGateway;
     }
