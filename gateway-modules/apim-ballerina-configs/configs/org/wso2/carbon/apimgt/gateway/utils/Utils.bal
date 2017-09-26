@@ -272,49 +272,6 @@ function retrieveResources (string apiContext, string apiVersion) {
     system:println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 }
 
-function returnApplication(int i,string[] array)(dto:ApplicationDto){
-    dto:ApplicationDto app = {};
-
-    app.applicationId = returnVal(array[i]);
-    system:println(app.applicationId);
-    app.applicationName = returnVal(array[i + 1]);
-    system:println(app.applicationName);
-    app.applicationPolicy = returnVal(array[i + 3]);
-    system:println(app.applicationPolicy);
-    app.applicationOwner = returnVal(array[i + 2]);
-    system:println(app.applicationOwner);
-
-    return app;
-}
-
-function retrieveOfflineApplications () (boolean) {
-    system:println("retrieveOfflineApplications() in Utils");
-    system:println("****************************************************************************************************************");
-
-    files:File t = {path:"/home/sabeena/Desktop/API Repo/retrieveOfflineApplications.txt"};
-    files:open(t, "r");
-    var content, n = files:read(t, 100000000);
-
-    string strSubsList = blobs:toString(content, "utf-8");
-    string[] array = strings:split(strSubsList, "\n");
-    system:println(array);
-
-    if(array.length % 4 == 0) {
-        int count = array.length / 4;
-        int index = 0;
-
-        while (index < count) {
-            dto:ApplicationDto app = returnApplication(4* index, array);
-            holders:putIntoApplicationCache(app);
-            system:println(app);
-            index = index + 1;
-        }
-    }
-
-    system:println("****************************************************************************************************************");
-    return true;
-}
-
 function retrieveApplications () (boolean) {
     system:println("retrieveApplications() in Utils");
     system:println("****************************************************************************************************************");

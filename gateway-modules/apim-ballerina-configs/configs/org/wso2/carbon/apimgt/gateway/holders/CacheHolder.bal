@@ -29,34 +29,7 @@ function putIntoTokenCache (string key, dto:IntrospectDto introspectDto) {
     system:println("putIntoTokenCache() in CacheHolder");
     caching:putCacheEntry(constants:TOKEN_CACHE, key, introspectDto);
 }
-function getFromAPIKeyCache (string context, string apikey) (dto:APIKeyDTO) {
-    system:println("getFromAPIKeyCache() in CacheHolder");
-    string key = context + ":" + apikey;
-    any apiKey = caching:getCacheEntry(constants:APIKEY_CACHE, key);
-    system:println("after caching--------------------");
-    system:println(apiKey);
-    if (apiKey != null) {
-        dto:APIKeyDTO dto;
-        errors:TypeCastError err;
-        dto, err = (dto:APIKeyDTO)apiKey;
-        system:println(dto);
-        return dto;
-    } else {
-        return null;
-    }
-}
 
-function putIntoAPIKeyCache (dto:APIKeyDTO apiKeyDTO) {
-    system:println("putIntoAPIKeyCache() in CacheHolder");
-    string key = apiKeyDTO.context + ":" + apiKeyDTO.apiKey;
-
-    system:println("key :");
-    system:println(key);
-    system:println("apiKeyDTO :");
-    system:println(apiKeyDTO);
-
-    caching:putCacheEntry("APIKEY_CACHE", key, apiKeyDTO);
-}
 function getFromSubscriptionCache (string apiContext, string version, string consumerKey) (dto:SubscriptionDto) {
     system:println("getFromSubscriptionCache() in CacheHolder");
     string key = apiContext + ":" + version + ":" + consumerKey;
@@ -75,14 +48,9 @@ function getFromSubscriptionCache (string apiContext, string version, string con
 function putIntoSubscriptionCache (dto:SubscriptionDto subscriptionDto) {
     system:println("putIntoSubscriptionCache() in CacheHolder");
     string key = subscriptionDto.apiContext + ":" + subscriptionDto.apiVersion + ":" + subscriptionDto.consumerKey;
-
-    system:println("key :");
-    system:println(key);
-    system:println("subscriptionDto :");
-    system:println(subscriptionDto);
-
     caching:putCacheEntry(constants:SUBSCRIPTION_CACHE, key, subscriptionDto);
 }
+
 function getFromResourceCache (string apiContext, string apiVersion, string resourceUri, string httpVerb) (dto:ResourceDto) {
     system:println("getFromResourceCache() in CacheHolder");
     string internalKey = resourceUri + ":" + httpVerb;
@@ -187,10 +155,10 @@ function putIntoApplicationCache (dto:ApplicationDto applicationDto) {
 }
 function getFromApplicationCache (string applicationId) (dto:ApplicationDto) {
     system:println("getFromApplicationCache() in CacheHolder");
-    if(applicationId == ""){
-        dto:ApplicationDto app = {};
-        return app;
-    }else{
+    //if(applicationId == ""){
+    //    dto:ApplicationDto app = {};
+    //    return app;
+    //}else{
         any application = caching:getCacheEntry(constants:APPLICATION_CACHE, applicationId);
         if (application != null) {
             dto:ApplicationDto dto;
@@ -202,7 +170,7 @@ function getFromApplicationCache (string applicationId) (dto:ApplicationDto) {
             return null;
     }
     }
-}
+
 function removeApplicationFromCache (string applicationId) {
     system:println("removeApplicationFromCache() in CacheHolder");
     caching:removeCacheEntry(constants:APPLICATION_CACHE, applicationId);
@@ -223,9 +191,6 @@ function initializeCache () (boolean) {
     system:println("initializeCache() in CacheHolder");
     //cache for token introspect
     caching:createCache(constants:TOKEN_CACHE, "15");
-
-
-    caching:createCache(constants:APIKEY_CACHE, "15");
     //cache for subscription
     caching:createCache(constants:SUBSCRIPTION_CACHE, "15");
     //cache for resource
@@ -265,7 +230,9 @@ function putIntoPolicyCache (dto:PolicyDto policyDto) {
 }
 function getFromPolicyCache (string id) (dto:PolicyDto) {
     system:println("getFromPolicyCache() in CacheHolder");
-    if((id == "") || (id == "Unlimited")|| (id == " ")){
+    if((id == "") || (id == "Unlimited")){
+        //null for applicationDto.applicationPolicy,subscriptionDto.subscriptionPolicy,resourceDto.policy
+        //unlimited for subscriptionDto.apiLevelPolicy
         dto:PolicyDto policy = {};
         return policy;
     }else{

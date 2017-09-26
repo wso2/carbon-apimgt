@@ -11,6 +11,7 @@ service<http> gatewayInitService {
     boolean isReady = initGateway();
 
     boolean subscriptionsInitialized = retrieveOfflineSubscriptions();
+    boolean applicationsInitialized = retrieveOfflineApplications();
 }
 
 function initGateway () (boolean) {
