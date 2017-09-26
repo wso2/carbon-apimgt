@@ -24,7 +24,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>7.0.41-SNAPSHOT</version>
+        <version>7.0.43-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -223,6 +223,10 @@
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.fabric8</groupId>
+            <artifactId>kubernetes-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.io.swagger</groupId>

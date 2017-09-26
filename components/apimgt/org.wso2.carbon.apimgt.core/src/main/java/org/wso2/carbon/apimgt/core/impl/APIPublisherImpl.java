@@ -63,6 +63,7 @@ import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
+import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Event;
@@ -85,6 +86,7 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.APILCWorkflowStatus;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
+import org.wso2.carbon.apimgt.core.util.ContainerBasedGatewayConstants;
 import org.wso2.carbon.apimgt.core.workflow.APIStateChangeWorkflow;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.lcm.core.exception.LifecycleException;
@@ -231,6 +233,61 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
+     * @see APIPublisherImpl#updateDedicatedGateway(DedicatedGateway, String)
+     */
+    @Override
+    public void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId) throws APIManagementException {
+        APIGateway gateway = getApiGateway();
+        API api = getAPIbyUUID(apiId);
+        try {
+
+            // label generation for the API
+            Set<String> labelSet = new HashSet<>();
+            String autoGenlabel = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId;
+            if (dedicatedGateway.isEnabled()) {
+
+                // create a label if not exist for container based gateway
+                if (api.getLabels().contains(autoGenlabel)) {
+                    // create a label
+                    List<Label> labelList = new ArrayList<>();
+                    // todo : add the access URL of the gateway here itself
+                    Label autoGenLabel = new Label.Builder().id(UUID.randomUUID().toString()).
+                            name(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId).
+                            accessUrls(null).build();
+                    labelList.add(autoGenLabel);
+                    //Add to the db
+                    getLabelDAO().addLabels(labelList);
+                    //add to the API
+                    labelSet.add(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId);
+                }
+            } else {
+                labelSet = getAPIbyUUID(apiId).getLabels();
+            }
+            // create or remove dedicated Gateway
+            gateway.updateDedicatedGateway(api, labelSet, dedicatedGateway.isEnabled());
+            getApiDAO().updateDedicatedGateway(dedicatedGateway, apiId, labelSet);
+        } catch (APIMgtDAOException e) {
+            throw new APIManagementException("Error occurred while updating dedicatedGateway details of API with id "
+                    + apiId, e, e.getErrorHandler());
+        }
+    }
+
+    /**
+     * @see APIPublisherImpl#getDedicatedGateway(String)
+     */
+    @Override
+    public DedicatedGateway getDedicatedGateway(String apiId) throws APIManagementException {
+       DedicatedGateway dedicatedGateway;
+        try {
+            dedicatedGateway = getApiDAO().getDedicatedGateway(apiId);
+        } catch (APIMgtDAOException e) {
+            throw new APIManagementException("Error occurred while retrieving dedicated Gateway details of API with id "
+                    + apiId, e, e.getErrorHandler());
+        }
+        return dedicatedGateway;
+    }
+
+    /**
      * Adds a new API to the system
      *
      * @param apiBuilder API model object
@@ -253,13 +310,31 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         apiBuilder.lastUpdatedTime(localDateTime);
         apiBuilder.createdBy(getUsername());
         apiBuilder.updatedBy(getUsername());
-        if (apiBuilder.getLabels().isEmpty()) {
+
+        // if has own gateway feature enabled
+        if (apiBuilder.hasOwnGateway()) {
+            // create a label
+            List<Label> labelList = new ArrayList<>();
+            Label autoGenLabel = new Label.Builder().
+                    id(UUID.randomUUID().toString()).
+                    name(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiBuilder.getId()).
+                    accessUrls(null).build();
+            labelList.add(autoGenLabel);
+            //Add to the db
+            getLabelDAO().addLabels(labelList);
+            //add to the API
+            Set<String> labelSet = new HashSet<>();
+            labelSet.add(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiBuilder.getId());
+            apiBuilder.labels(labelSet);
+        }
+        if (apiBuilder.getLabels().isEmpty() && !apiBuilder.hasOwnGateway()) {
             Set<String> labelSet = new HashSet<>();
             labelSet.add(APIMgtConstants.DEFAULT_LABEL_NAME);
             apiBuilder.labels(labelSet);
         }
         Map<String, Endpoint> apiEndpointMap = apiBuilder.getEndpoint();
         validateEndpoints(apiEndpointMap, false);
+
         try {
             if (!isApiNameExist(apiBuilder.getName()) && !isContextExist(apiBuilder.getContext())) {
                 LifecycleState lifecycleState = getApiLifecycleManager().addLifecycle(APIMgtConstants.API_LIFECYCLE,
@@ -855,6 +930,18 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_CUR_STATE, currentState.getState());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_TARGET_STATE, status);
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_LC_INVOKER, getUsername());
+                workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_NAME, originalAPI.getId());
+                workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_HAS_OWN_GATEWAY,
+                        String.valueOf(originalAPI.hasOwnGateway()));
+
+                if (originalAPI.hasOwnGateway()) {
+                    // then we have only one label
+                    workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_AUTOGEN_LABEL,
+                            originalAPI.getLabels().toArray()[0].toString());
+                }
+                workflow.setAttribute(WorkflowConstants.ATTRIBUTE_HAS_OWN_GATEWAY,
+                        String.valueOf(originalAPI.hasOwnGateway()));
+
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_LAST_UPTIME,
                         originalAPI.getLastUpdatedTime().toString());
                

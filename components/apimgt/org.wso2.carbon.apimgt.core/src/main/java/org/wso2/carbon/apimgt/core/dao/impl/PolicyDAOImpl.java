@@ -722,7 +722,8 @@ public class PolicyDAOImpl implements PolicyDAO {
         try {
             List<SubscriptionPolicy> policyList = new ArrayList<>();
             String sqlQuery = "SELECT UUID, NAME, QUOTA_TYPE, TIME_UNIT, UNIT_TIME, QUOTA, QUOTA_UNIT, DESCRIPTION, "
-                    + "DISPLAY_NAME, CUSTOM_ATTRIBUTES, IS_DEPLOYED from AM_SUBSCRIPTION_POLICY";
+                    + "DISPLAY_NAME, CUSTOM_ATTRIBUTES, IS_DEPLOYED,RATE_LIMIT_COUNT, RATE_LIMIT_TIME_UNIT, "
+                    + "STOP_ON_QUOTA_REACH, BILLING_PLAN FROM AM_SUBSCRIPTION_POLICY";
 
             try (Connection connection = DAOUtil.getConnection();
                  PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
@@ -745,7 +746,8 @@ public class PolicyDAOImpl implements PolicyDAO {
     public SubscriptionPolicy getSubscriptionPolicy(String policyName) throws APIMgtDAOException {
         try {
             final String query = "SELECT UUID, NAME, QUOTA_TYPE, TIME_UNIT, UNIT_TIME, QUOTA, QUOTA_UNIT, DESCRIPTION, "
-                    + "DISPLAY_NAME, CUSTOM_ATTRIBUTES, IS_DEPLOYED FROM AM_SUBSCRIPTION_POLICY WHERE NAME = ?";
+                    + "DISPLAY_NAME, CUSTOM_ATTRIBUTES, IS_DEPLOYED, RATE_LIMIT_COUNT, RATE_LIMIT_TIME_UNIT, "
+                    + "STOP_ON_QUOTA_REACH, BILLING_PLAN FROM AM_SUBSCRIPTION_POLICY WHERE NAME = ?";
             try (Connection conn = DAOUtil.getConnection();
                  PreparedStatement statement = conn.prepareStatement(query)) {
                 statement.setString(1, policyName);
@@ -1050,7 +1052,8 @@ public class PolicyDAOImpl implements PolicyDAO {
      */
     private SubscriptionPolicy getSubscriptionPolicyById(String uuid) throws SQLException, APIMgtDAOException {
         final String query = "SELECT NAME, UUID, QUOTA_TYPE, TIME_UNIT, UNIT_TIME, QUOTA, QUOTA_UNIT, DESCRIPTION, "
-                + "DISPLAY_NAME, CUSTOM_ATTRIBUTES, IS_DEPLOYED FROM AM_SUBSCRIPTION_POLICY WHERE UUID = ?";
+                + "DISPLAY_NAME, CUSTOM_ATTRIBUTES, IS_DEPLOYED, RATE_LIMIT_COUNT, RATE_LIMIT_TIME_UNIT, "
+                + "STOP_ON_QUOTA_REACH, BILLING_PLAN FROM AM_SUBSCRIPTION_POLICY WHERE UUID = ?";
         try (Connection conn = DAOUtil.getConnection();
              PreparedStatement statement = conn.prepareStatement(query)) {
             statement.setString(1, uuid);
@@ -1083,6 +1086,7 @@ public class PolicyDAOImpl implements PolicyDAO {
         SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(rs.getString(APIMgtConstants.
                 ThrottlePolicyConstants.COLUMN_NAME));
         setCommonPolicyDetails(subscriptionPolicy, rs);
+        setSubscriptionPolicyDetals(subscriptionPolicy, rs);
         InputStream binary = rs.getBinaryStream(APIMgtConstants.ThrottlePolicyConstants.
                 COLUMN_CUSTOM_ATTRIB);
         if (binary != null) {
@@ -1100,6 +1104,17 @@ public class PolicyDAOImpl implements PolicyDAO {
             }
         }
         return subscriptionPolicy;
+    }
+
+    private void setSubscriptionPolicyDetals(SubscriptionPolicy subscriptionPolicy, ResultSet rs) throws SQLException {
+
+        subscriptionPolicy.setBillingPlan(rs.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_BILLING_PLAN));
+        subscriptionPolicy
+                .setRateLimitCount(rs.getInt(APIMgtConstants.ThrottlePolicyConstants.COLUMN_RATE_LIMIT_COUNT));
+        subscriptionPolicy.setRateLimitTimeUnit(
+                rs.getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_RATE_LIMIT_TIME_UNIT));
+        subscriptionPolicy
+                .setStopOnQuotaReach(rs.getBoolean(APIMgtConstants.ThrottlePolicyConstants.COLUMN_STOP_ON_QUOTA_REACH));
     }
 
     @Override
