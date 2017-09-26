@@ -50,7 +50,7 @@ const resourcePath = {
     ENDPOINT : "/endpoints/{endpointId}",
     LABLES : "/labels",
     WORKFLOW : "/workflows/{workflowReferenceId}",
-    DISCOVER_SERVICES : "/external-resources/services"
+    SERVICE_DISCOVERY : "/external-resources/services"
 };
 
 const resourceMethod = {

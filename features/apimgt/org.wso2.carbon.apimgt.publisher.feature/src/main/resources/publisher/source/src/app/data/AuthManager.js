@@ -158,7 +158,8 @@ class AuthManager {
             password: password,
             grant_type: 'password',
             validity_period: 3600,
-            scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage apim:subscription_view apim:subscription_block apim:subscribe'
+            scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage '
+             + 'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover'
         };
         let promised_response = axios.post(this.getTokenEndpoint(), qs.stringify(data), {headers: headers});
         promised_response.then(response => {
@@ -196,7 +197,7 @@ class AuthManager {
             grant_type: 'refresh_token',
             validity_period: '3600',
             scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage' +
-            ' apim:subscription_view apim:subscription_block apim:subscribe'
+            ' apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover'
         };
         let referrer = (document.referrer.indexOf("https") !== -1) ? document.referrer : null;
         let url = this.contextPath + '/auth/apis/login/token';

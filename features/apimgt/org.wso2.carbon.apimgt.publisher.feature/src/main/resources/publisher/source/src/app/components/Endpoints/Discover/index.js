@@ -22,7 +22,7 @@ import {Link} from 'react-router-dom'
 import {Table, Icon, Button, Dropdown, Menu, message} from 'antd';
 
 import API from '../../../data/api'
-
+import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation';
 
 
 export default class EndpointsDiscover extends Component {
@@ -84,7 +84,7 @@ export default class EndpointsDiscover extends Component {
             dataIndex: 'id',
             render: (text, record) =><ButtonCell record={record} api={api}/>
         }];
-        const endpointListAndCreatMenu = (
+        const serviceEndpointsListAndCreateMenu = (
             <Menu>
                 <Menu.Item key="0">
                     <Link to="/endpoints">List Endpoints</Link>
@@ -95,19 +95,21 @@ export default class EndpointsDiscover extends Component {
             </Menu>
         );
         return (
-            <div>
-                <Dropdown overlay={endpointListAndCreatMenu}>
-                    <Button icon="left" />
-                </Dropdown>
-                <span style={{display:"block", "margin-top": "10px"}}>
-                    <h3>&nbsp; Discovered Service Endpoints</h3>
-                </span>
-                <Table loading={endpoints === null }
-                    columns={columns}
-                    dataSource={endpoints}
-                    rowKey="id"
-                    size="middle"/>
-            </div>
+            <ScopeValidation resourcePath={resourcePath.SERVICE_DISCOVERY} resourceMethod={resourceMethod.GET}>
+                <div>
+                    <Dropdown overlay={serviceEndpointsListAndCreateMenu}>
+                        <Button icon="left" />
+                    </Dropdown>
+                    <span>
+                        <h3>Discovered Service Endpoints</h3>
+                    </span>
+                    <Table loading={endpoints === null }
+                        columns={columns}
+                        dataSource={endpoints}
+                        rowKey="id"
+                        size="middle"/>
+                </div>
+            </ScopeValidation>
         );
     }
 }
