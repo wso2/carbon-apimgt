@@ -44,9 +44,9 @@ consumes:
   - application/json
 
 # The following media types may be passed as output in message bodies of the API.
-# The media type(s) consumable by the requestor is specified in the Accept header field
+# The media type(s) consumable by the requester is specified in the Accept header field
 # of the corresponding request.
-# The actual media type returned will be specfied in the Content-Type header field
+# The actual media type returned will be specified in the Content-Type header field
 # of the of the response.
 # The default of the Accept header is json, i.e. there is not needed to
 # set the value, but supporting it serves extensibility.
@@ -67,6 +67,7 @@ securityDefinitions:
       apim:api_publish: Publish API
       apim:subscription_view: View Subscription
       apim:subscription_block: Block Subscription
+      apim:external_services_discover: Discover External Services
 
 security:
   - OAuth2Security:
@@ -2938,7 +2939,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n  \"list\": [\n    {\n      \"id\": \"ds-0\",\n      \"name\": \"service-1\",\n      \"endpointConfig\": {\n        \"serviceUrl\": \"http://192.168.56.1:8281\",\n        \"serviceType\": \"NodePort\",\n        \"namespace\": \"default\"\n      },\n      \"endpointSecurity\": {\n        \"enabled\": false\n      },\n      \"maxTps\": 1000,\n      \"type\": \"http\"\n    }\n  ],\n  \"count\": 1\n}"
       security:
         - OAuth2Security:
-          - apim:api_view
+          - apim:external_services_discover
       summary: Get all service endpoints after service discovery
       description: |
         This operation can be used to retrieve the list of service endpoints available in the cluster after a process of service discovery.

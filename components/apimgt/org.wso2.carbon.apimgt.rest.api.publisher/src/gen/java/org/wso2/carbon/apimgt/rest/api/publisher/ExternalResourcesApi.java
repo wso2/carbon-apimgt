@@ -49,7 +49,7 @@ public class ExternalResourcesApi implements Microservice  {
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Get all service endpoints after service discovery", notes = "This operation can be used to retrieve the list of service endpoints available in the cluster after a process of service discovery. ", response = EndPointListDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
-            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:external_services_discover", description = "Discover External Services")
         })
     }, tags={ "External Resources (Collection)", })
     @io.swagger.annotations.ApiResponses(value = { 

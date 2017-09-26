@@ -27,7 +27,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 public class ExternalResourcesApiServiceImpl extends ExternalResourcesApiService {
-    private static final Logger log = LoggerFactory.getLogger(EndpointsApiServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(ExternalResourcesApiServiceImpl.class);
 
     /**
      * Retrieve all service endpoints via service discovery
