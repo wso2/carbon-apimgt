@@ -59,6 +59,7 @@ import org.wso2.carbon.identity.application.common.model.InboundAuthenticationCo
 import org.wso2.carbon.identity.application.common.model.InboundAuthenticationRequestConfig;
 import org.wso2.carbon.identity.application.common.model.Property;
 import org.wso2.carbon.identity.application.common.model.ServiceProvider;
+import org.wso2.carbon.identity.application.common.model.ServiceProviderProperty;
 import org.wso2.carbon.identity.application.common.util.IdentityApplicationConstants;
 import org.wso2.carbon.identity.application.mgt.ApplicationManagementService;
 import org.wso2.carbon.identity.base.IdentityException;
@@ -92,6 +93,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
     private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
     private static final String OAUTH_RESPONSE_TOKEN_SCOPE = "scope";
     private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
+    private static final String APP_DISPLAY_NAME = "DisplayName";
 
 
 
@@ -134,13 +136,19 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             }
 
             // Append the username before Application name to make application name unique across two users.
+            String displayName = applicationName.substring(0, applicationName.lastIndexOf("_"));
             applicationName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + applicationName;
 
             // Create the Service Provider
             ServiceProvider serviceProvider = new ServiceProvider();
             serviceProvider.setApplicationName(applicationName);
             serviceProvider.setDescription("Service Provider for application " + applicationName);
-
+            ServiceProviderProperty[] serviceProviderProperties = new ServiceProviderProperty[1];
+            ServiceProviderProperty serviceProviderProperty = new ServiceProviderProperty();
+            serviceProviderProperty.setName(APP_DISPLAY_NAME);
+            serviceProviderProperty.setValue(displayName);
+            serviceProviderProperties[0] = serviceProviderProperty;
+            serviceProvider.setSpProperties(serviceProviderProperties);
             ApplicationManagementService appMgtService = ApplicationManagementService.getInstance();
             appMgtService.createApplication(serviceProvider, tenantDomain, userName);
             ServiceProvider serviceProviderCreated = appMgtService.getApplicationExcludingFileBasedSPs(applicationName, tenantDomain);
@@ -403,9 +411,9 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
                         grantTypeString.append(grantType).append(" ");
                     }
                     oAuthConsumerAppDTO.setGrantTypes(grantTypeString.toString().trim());
-                }               
-                
-                
+                }
+
+
                 oAuthAdminService.updateConsumerApplication(oAuthConsumerAppDTO);
                 log.debug("Updated the OAuthApplication...");
 
@@ -555,7 +563,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             String[] tmp = keyMgtServerURL.split(webContextRoot + "/services");
             tokenEndpoint = tmp[0] + tokenEndpointName;
         }
-      
+
         //To revoke tokens we should call revoke API deployed in API gateway.
         String revokeEndpoint = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
                 getFirstProperty(APIConstants.REVOKE_API_URL);
@@ -563,7 +571,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
 		URL revokeEndpointURL = new URL(revokeEndpoint);
 		String revokeEndpointProtocol = revokeEndpointURL.getProtocol();
 		int revokeEndpointPort = revokeEndpointURL.getPort();
-	
+
 
         HttpClient tokenEPClient =  APIUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
         HttpClient revokeEPClient = APIUtil.getHttpClient(revokeEndpointPort, revokeEndpointProtocol);
@@ -621,7 +629,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             log.error(errMsg, e);
             throw new APIKeyMgtException(errMsg, e);
         }
-        
+
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         apiMgtDAO.updateRefreshedApplicationAccessToken(tokenScope, newAccessToken,
                 validityPeriod);
