@@ -19,7 +19,10 @@
 
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
-import {Table, Icon, Button, Dropdown, Menu, message} from 'antd';
+import {Table, Icon, Dropdown, Button, Menu, message, Radio} from 'antd';
+const RadioGroup = Radio.Group;
+const RadioButton = Radio.Button;
+import Typography from 'material-ui/Typography';
 
 import API from '../../../data/api'
 import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation';
@@ -30,8 +33,39 @@ export default class EndpointsDiscover extends Component {
         super(props);
         this.state = {
             endpoints: null,
+            viewableEndpoints: null,
+            filterType: "",
             endpointBeingAdded: false,
         };
+        this.handleFilterTextInputChange = this.handleFilterTextInputChange.bind(this);
+        this.handleRadioButtonChange = this.handleRadioButtonChange.bind(this);
+    }
+
+    handleRadioButtonChange(e) {
+        this.setState({
+            filterType: e.target.value
+        })
+    }
+
+    handleFilterTextInputChange(e) {
+        this.setState({
+            viewableEndpoints: this.filterEndpoints(e.target.value)
+        })
+    }
+
+    filterEndpoints(filterText){
+        const { endpoints } = this.state;
+        switch(this.state.filterType) {
+            case "namespace":
+                console.log("namespace");
+                return endpoints.filter(el => JSON.parse(el.endpointConfig).namespace.startsWith(filterText))
+            case "criteria":
+            case "name":
+                return endpoints.filter(el => el.name.startsWith(filterText))
+            default :
+
+                return endpoints.filter(el => el.name.startsWith(filterText))
+        }
     }
 
     componentDidMount() {
@@ -40,16 +74,20 @@ export default class EndpointsDiscover extends Component {
         // TODO: Handle catch case , auth errors and ect ~tmkb ------copied from EndpointListing class
         promised_discoveredEndpoints.then(
             response => {
-                this.setState({endpoints: response.obj.list});
+                const list = response.obj.list;
+                this.setState({
+                    endpoints: list,
+                    viewableEndpoints: list
+                });
             }
         );
     }
 
     render() {
-        const {selectedRowKeys, endpoints} = this.state;
+        const {viewableEndpoints} = this.state;
         const api = new API();
         const columns = [{
-            title: 'Name',
+            title: 'Name | Namespace | Criteria',
             dataIndex: 'name',
             key: 'age',
             width: '20%',
@@ -68,11 +106,11 @@ export default class EndpointsDiscover extends Component {
             title: 'Service URL',
             dataIndex: 'endpointConfig',
             render: (text, record) => (
-            <span>
-                {JSON.parse(text).serviceUrl}
-                <span className="ant-divider" />
-                {JSON.parse(text).urlType}
-            </span>
+                <span>
+                    {JSON.parse(text).serviceUrl}
+                    <span className="ant-divider" />
+                    {JSON.parse(text).urlType}
+                </span>
             )
         }, {
             title: 'Max TPS',
@@ -100,12 +138,27 @@ export default class EndpointsDiscover extends Component {
                     <Dropdown overlay={serviceEndpointsListAndCreateMenu}>
                         <Button icon="left" />
                     </Dropdown>
-                    <span>
-                        <h3>Discovered Service Endpoints</h3>
-                    </span>
-                    <Table loading={endpoints === null }
+                    <Typography className="page-title" type="display1">
+                        Discover Service Endpoints
+                    </Typography>
+                    <div style={{ margin:16 }}>
+                        <input
+                          type="text"
+                          placeholder="Search..."
+                          onChange={this.handleFilterTextInputChange}
+                        />
+                        <div style={{ marginLeft: 16, display: 'inline-block' }}>
+                            <span style={{ marginRight: 16 }}> Filter by</span>
+                            <RadioGroup onChange={this.handleRadioButtonChange} defaultValue="name">
+                              <RadioButton value="namespace">Namespace</RadioButton>
+                              <RadioButton value="criteria">Prior Defined Key:Value Pairs</RadioButton>
+                              <RadioButton value="name">Service Name</RadioButton>
+                            </RadioGroup>
+                        </div>
+                    </div>
+                    <Table loading={viewableEndpoints === null }
                         columns={columns}
-                        dataSource={endpoints}
+                        dataSource={viewableEndpoints}
                         rowKey="id"
                         size="middle"/>
                 </div>
@@ -114,13 +167,15 @@ export default class EndpointsDiscover extends Component {
     }
 }
 
+
+
 class ButtonCell extends Component {
     constructor(props) {
         super(props);
         this.state = {
             record: this.props.record,
             api: this.props.api,
-            actionButton: <Button type="primary" loading>Loading</Button>
+            actionButton: <Button type="primary" loading>Loading...</Button>
         };
     }
     getUpdateButton(){
