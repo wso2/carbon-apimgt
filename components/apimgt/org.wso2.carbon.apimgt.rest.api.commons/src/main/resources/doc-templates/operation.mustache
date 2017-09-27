@@ -14,13 +14,10 @@
             {{#scopes}}
                 <code>{{scope}}</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has '{{scope}}' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
             {{/scopes}}
-            {{^scopes}}
-                <p>Not required</p>
-            {{/scopes}}
             {{/authMethods}}
-{{^authMethods}}
-<p>Not required</p>
-{{/authMethods}}
+            {{^authMethods}}
+                <p>Not required</p>
+            {{/authMethods}}
 
             <div class="pointer" data-toggle="collapse" data-target="#request-{{operationId}}">
                 <h4 class="section-heading">
