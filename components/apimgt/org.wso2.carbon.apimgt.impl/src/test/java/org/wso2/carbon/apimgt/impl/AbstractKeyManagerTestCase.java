@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2005-2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*  Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 *  WSO2 Inc. licenses this file to you under the Apache License,
 *  Version 2.0 (the "License"); you may not use this file except
@@ -29,7 +29,7 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
-public class AbstractKeyManagerTest {
+public class AbstractKeyManagerTestCase {
 
     @Test
     public void buildAccessTokenRequestFromJSONTest() throws APIManagementException {
@@ -69,18 +69,24 @@ public class AbstractKeyManagerTest {
 
         //Error path with empty JSON
         assertNull(keyManager.buildAccessTokenRequestFromJSON("{}", null));
-        keyManager.buildAccessTokenRequestFromJSON(null,new AccessTokenRequest());
+        keyManager.buildAccessTokenRequestFromJSON(null, new AccessTokenRequest());
     }
 
     @Test
     public void buildFromJSONTest() throws APIManagementException {
         AbstractKeyManager keyManager = new AMDefaultKeyManagerImpl();
+
+        // test with empty json payload
         assertNotNull(keyManager.buildFromJSON(new OAuthApplicationInfo(), "{}"));
+
+        // test with valid json
         String jsonPayload2 = "{ \"callbackUrl\": \"www.google.lk\", \"client_id\": \"XBPcXSfGK47WiEX7enchoP2Dcvga\", " +
                 "\"client_secret\": \"4UD8VX8NaQMtrHCwqzI1tHJLPoca\", \"owner\": \"admin\", \"grantType\": \"password refresh_token\", " +
                 "\"validityPeriod\": \"3600\" }";
         OAuthApplicationInfo oAuthApplicationInfo1 = keyManager.buildFromJSON(new OAuthApplicationInfo(), jsonPayload2);
         assertEquals("XBPcXSfGK47WiEX7enchoP2Dcvga", oAuthApplicationInfo1.getClientId());
+
+        //test with invalid json
         try {
             keyManager.buildFromJSON(new OAuthApplicationInfo(), "{invalid}");
             assertTrue(false);
@@ -104,11 +110,17 @@ public class AbstractKeyManagerTest {
             assertEquals("Consumer key or Consumer Secret missing.", e.getMessage());
         }
 
+        // test with all the parameters
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         oAuthApplicationInfo.setClientId("XBPcXSfGK47WiEX7enchoP2Dcvga");
         oAuthApplicationInfo.setClientSecret("4UD8VX8NaQMtrHCwqzI1tHJLPoca");
         oAuthApplicationInfo.addParameter("tokenScope", new String[]{"view", "update"});
         oAuthApplicationInfo.addParameter("validityPeriod", "1200");
-        keyManager.buildAccessTokenRequestFromOAuthApp(oAuthApplicationInfo, null);
+        AccessTokenRequest accessTokenRequest = keyManager.buildAccessTokenRequestFromOAuthApp(oAuthApplicationInfo,
+                null);
+        assertNotNull(accessTokenRequest);
+        assertEquals("XBPcXSfGK47WiEX7enchoP2Dcvga", accessTokenRequest.getClientId());
+        assertEquals("4UD8VX8NaQMtrHCwqzI1tHJLPoca", accessTokenRequest.getClientSecret());
+        assertEquals(1200, accessTokenRequest.getValidityPeriod());
     }
 }
