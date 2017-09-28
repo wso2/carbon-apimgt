@@ -30,8 +30,6 @@ import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.authenticator.stub.LoginAuthenticationExceptionException;
 import org.wso2.carbon.authenticator.stub.LogoutAuthenticationExceptionException;
 import org.wso2.carbon.event.processor.stub.EventProcessorAdminServiceStub;
-import org.wso2.carbon.event.processor.stub.types.ExecutionPlanConfigurationDto;
-
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -40,22 +38,34 @@ import java.rmi.RemoteException;
 public class GlobalThrottleEngineClient {
     private AuthenticationAdminStub authenticationAdminStub = null;
     private static final Logger log = Logger.getLogger(GlobalThrottleEngineClient.class);
-    ThrottleProperties.PolicyDeployer policyDeployerConfiguration = ServiceReferenceHolder.getInstance()
-            .getAPIManagerConfigurationService().getAPIManagerConfiguration().getThrottleProperties()
-            .getPolicyDeployer();
+    ThrottleProperties.PolicyDeployer policyDeployerConfiguration = getPolicyDeployer();
+
+    protected ThrottleProperties.PolicyDeployer getPolicyDeployer() {
+        return ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getThrottleProperties()
+                .getPolicyDeployer();
+    }
 
     private String login() throws RemoteException, LoginAuthenticationExceptionException, MalformedURLException {
-        authenticationAdminStub = new AuthenticationAdminStub(policyDeployerConfiguration.getServiceUrl() +
-                "AuthenticationAdmin");
+        authenticationAdminStub = getAuthenticationAdminStub();
         String sessionCookie = null;
 
-        if (authenticationAdminStub.login(policyDeployerConfiguration.getUsername(), policyDeployerConfiguration.getPassword(),
-                new URL(policyDeployerConfiguration.getServiceUrl()).getHost())) {
+        if (authenticationAdminStub.login(getPolicyDeployer().getUsername(), getPolicyDeployer().getPassword(),
+                getHost())) {
             ServiceContext serviceContext = authenticationAdminStub._getServiceClient().getLastOperationContext()
                     .getServiceContext();
             sessionCookie = (String) serviceContext.getProperty(HTTPConstants.COOKIE_STRING);
         }
         return sessionCookie;
+    }
+
+    protected String getHost() throws MalformedURLException {
+        return new URL(policyDeployerConfiguration.getServiceUrl()).getHost();
+    }
+
+    protected AuthenticationAdminStub getAuthenticationAdminStub() throws AxisFault {
+        return new AuthenticationAdminStub(policyDeployerConfiguration.getServiceUrl() +
+                "AuthenticationAdmin");
     }
 
     /**
@@ -71,8 +81,7 @@ public class GlobalThrottleEngineClient {
         String result = null;
         try {
             String sessionCookie = login();
-            EventProcessorAdminServiceStub eventProcessorAdminServiceStub = new EventProcessorAdminServiceStub
-                    (policyDeployerConfiguration.getServiceUrl() + "EventProcessorAdminService");
+            EventProcessorAdminServiceStub eventProcessorAdminServiceStub = getEventProcessorAdminServiceStub();
 
             serviceClient = eventProcessorAdminServiceStub._getServiceClient();
             options = serviceClient.getOptions();
@@ -94,7 +103,12 @@ public class GlobalThrottleEngineClient {
         }
         return false;
     }
-    
+
+    protected EventProcessorAdminServiceStub getEventProcessorAdminServiceStub() throws AxisFault {
+        return new EventProcessorAdminServiceStub
+                (policyDeployerConfiguration.getServiceUrl() + "EventProcessorAdminService");
+    }
+
     /**
      * 1. Check validity of execution plan
      * 2. If execution plan exist with same name edit it
@@ -108,8 +122,7 @@ public class GlobalThrottleEngineClient {
         ServiceClient serviceClient;
         Options options;
 
-        EventProcessorAdminServiceStub eventProcessorAdminServiceStub = new EventProcessorAdminServiceStub
-                (policyDeployerConfiguration.getServiceUrl() + "EventProcessorAdminService");
+        EventProcessorAdminServiceStub eventProcessorAdminServiceStub = getEventProcessorAdminServiceStub();
         serviceClient = eventProcessorAdminServiceStub._getServiceClient();
         options = serviceClient.getOptions();
         options.setManageSession(true);
@@ -129,8 +142,7 @@ public class GlobalThrottleEngineClient {
         ServiceClient serviceClient;
         Options options;
 
-        EventProcessorAdminServiceStub eventProcessorAdminServiceStub = new EventProcessorAdminServiceStub
-                (policyDeployerConfiguration.getServiceUrl() + "EventProcessorAdminService");
+        EventProcessorAdminServiceStub eventProcessorAdminServiceStub = getEventProcessorAdminServiceStub();
         serviceClient = eventProcessorAdminServiceStub._getServiceClient();
         options = serviceClient.getOptions();
         options.setManageSession(true);
@@ -211,8 +223,7 @@ public class GlobalThrottleEngineClient {
         }
         EventProcessorAdminServiceStub eventProcessorAdminServiceStub = null;
         try {
-            eventProcessorAdminServiceStub = new EventProcessorAdminServiceStub
-                    (policyDeployerConfiguration.getServiceUrl() + "EventProcessorAdminService");
+            eventProcessorAdminServiceStub = getEventProcessorAdminServiceStub();
             serviceClient = eventProcessorAdminServiceStub._getServiceClient();
             options = serviceClient.getOptions();
             options.setManageSession(true);
