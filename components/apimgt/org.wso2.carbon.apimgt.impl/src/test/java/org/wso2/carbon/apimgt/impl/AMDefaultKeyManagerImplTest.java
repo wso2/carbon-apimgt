@@ -220,9 +220,7 @@ public class AMDefaultKeyManagerImplTest {
         oauthApplication.addParameter("tokenScope", "read_scope");
         oauthApplication.setClientId(CLIENT_ID);
         
-        OAuthApplicationInfo oauthApplicationResponse = keyManager.mapOAuthApplication(oauthRequest);
-
-        Assert.assertEquals("SSSSS", oauthApplicationResponse.getClientSecret());        
+        keyManager.mapOAuthApplication(oauthRequest);        
     }
     
     @Test
@@ -231,6 +229,7 @@ public class AMDefaultKeyManagerImplTest {
         AccessTokenInfo tokenInfo = keyManager.getTokenMetaData("ert567yhk");
         
         Assert.assertNotNull(tokenInfo);
+        Assert.assertTrue(tokenInfo.isTokenValid());
     }
     
     @Test
