@@ -32,8 +32,9 @@ export default class EndpointsDiscover extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            endpoints: null,
+            discoveredEndpoints: null,
             viewableEndpoints: null,
+            storedEndpoints: null,
             filterType: "",
             endpointBeingAdded: false,
         };
@@ -54,37 +55,58 @@ export default class EndpointsDiscover extends Component {
     }
 
     filterEndpoints(filterText){
-        const { endpoints } = this.state;
+        const { discoveredEndpoints } = this.state;
         switch(this.state.filterType) {
             case "namespace":
-                return endpoints.filter(el => JSON.parse(el.endpointConfig).namespace.startsWith(filterText))
+                return discoveredEndpoints.filter(el => JSON.parse(el.endpointConfig).namespace.startsWith(filterText))
             case "criteria":
-                return endpoints.filter(el => JSON.parse(el.endpointConfig).criteria.includes(filterText))
+                return discoveredEndpoints.filter(el => JSON.parse(el.endpointConfig).criteria.includes(filterText))
             case "name":
-                return endpoints.filter(el => el.name.startsWith(filterText))
+                return discoveredEndpoints.filter(el => el.name.startsWith(filterText))
             default :
-                return endpoints.filter(el => el.name.startsWith(filterText))
+                return discoveredEndpoints.filter(el => el.name.startsWith(filterText))
         }
     }
 
-    componentDidMount() {
+    discoverServices() {
         const api = new API();
         const promised_discoveredEndpoints = api.discoverServices();
-        // TODO: Handle catch case , auth errors and ect ~tmkb ------copied from EndpointListing class
         promised_discoveredEndpoints.then(
             response => {
                 const list = response.obj.list;
                 this.setState({
-                    endpoints: list,
-                    viewableEndpoints: list
+                    discoveredEndpoints: list,
+                    viewableEndpoints: list,
                 });
+            }
+        )
+    }
+
+    getStoredEndpoints() {
+        const api = new API();
+        const promised_storedEndpoints = api.getEndpoints();
+        promised_storedEndpoints.then(
+            response => {
+                this.setState({
+                    storedEndpoints: response.obj.list,
+                    databaseChecked: true,
+                });
+            }
+        ).catch(
+            error => {
+                console.error("Error while retrieving stored endpoints");
+                message.error("Error while retrieving stored endpoints");
             }
         );
     }
 
+    componentDidMount() {
+        this.discoverServices();
+        this.getStoredEndpoints();
+    }
+
     render() {
         const {viewableEndpoints} = this.state;
-        const api = new API();
         const columns = [{
             title: 'Name  |  Namespace  |  Criteria',
             dataIndex: 'name',
@@ -93,7 +115,7 @@ export default class EndpointsDiscover extends Component {
             sorter: (a, b) => a.name.length - b.name.length,
             render: (text, record) => (
             <span>
-                <Link to={"/endpoints/" + record.id}>{text}</Link>
+                {text}
                 <span className="ant-divider" />
                 {JSON.parse(record.endpointConfig).namespace}
                 <span className="ant-divider" />
@@ -121,7 +143,7 @@ export default class EndpointsDiscover extends Component {
             title: 'Action',
             key: 'action',
             dataIndex: 'id',
-            render: (text, record) =><ButtonCell record={record} api={api}/>
+            render: (text, record) =><ButtonCell record={record} storedEndpoints={this.state.storedEndpoints}/>
         }];
         const serviceEndpointsListAndCreateMenu = (
             <Menu>
@@ -157,7 +179,7 @@ export default class EndpointsDiscover extends Component {
                             </RadioGroup>
                         </div>
                     </div>
-                    <Table loading={viewableEndpoints === null }
+                    <Table loading={viewableEndpoints === null || this.state.storedEndpoints === null}
                         columns={columns}
                         dataSource={viewableEndpoints}
                         rowKey="id"
@@ -175,15 +197,17 @@ class ButtonCell extends Component {
         super(props);
         this.state = {
             record: this.props.record,
-            api: this.props.api,
+            storedEndpoints: this.props.storedEndpoints,
             actionButton: <Button type="primary" loading>Loading...</Button>
         };
     }
+
     getUpdateButton(){
         return (
             <Button> Update Database </Button>
         );
     }
+
     getAddButton(){
         let record = this.state.record;
         return (
@@ -193,8 +217,10 @@ class ButtonCell extends Component {
             Add to Database</Button>
         );
     }
+
     handleAddEndpointToDB = (endpointUuid, serviceName, endpointType, config, security,
         maximumTps) => {
+        console.log(config);
         let endpointDefinition = {
             name: JSON.parse(config).namespace + "-" + serviceName + "-"
                     + endpointType + "-" + JSON.parse(config).urlType,
@@ -217,33 +243,35 @@ class ButtonCell extends Component {
             error => {
                 console.error(error);
                 message.error("Error occurred while creating the endpoint!");
-                this.setState({endpointBeingAdded: false});
+                this.setState({
+                    endpointBeingAdded: false
+                });
             }
         )
     }
-    componentDidMount() {
+
+    checkIfEndpointExists = () => {
         let record = this.state.record;
-        let api = this.state.api;
         let endpointConfig = JSON.parse(record.endpointConfig);
         let endpointName = endpointConfig.namespace + "-" + record.name + "-"
                             + record.type + "-" + endpointConfig.urlType;
-        let promised_endpointAlreadyInDB = api.checkIfEndpointExists(endpointName);
-        promised_endpointAlreadyInDB.then(
-            response => {
+        return this.state.storedEndpoints.some(el => el.name === endpointName);
+    }
+
+    componentDidMount() {
+        if(this.state.storedEndpoints != null){
+            if(this.checkIfEndpointExists()) {
                 this.setState({
                     actionButton: this.getUpdateButton()
                 });
+            } else {
+                this.setState({
+                    actionButton: this.getAddButton()
+                });
             }
-        ).catch(
-            error => {
-                if(error.response.status==404){
-                     this.setState({
-                         actionButton: this.getAddButton()
-                     });
-                }
-            }
-        )
-     }
+        }
+    }
+
     render() {
         return (this.state.actionButton);
     }
