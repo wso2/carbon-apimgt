@@ -46,19 +46,19 @@ public class SdkGenApi implements Microservice  {
     @Path("/languages")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Provide a list of supported languages for generating SDKs for existing APIs. ", notes = "This operation will provide a list of programming languages that are supported by the swagger codegen library for generating System Development Kits (SDKs) for APIs available in the API Manager Store ", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Get a list of supported SDK languages ", notes = "This operation will provide a list of programming languages that are supported by the swagger codegen library for generating System Development Kits (SDKs) for APIs available in the API Manager Store ", response = void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "SDK Language list.", })
+    }, tags={ "SDK Languages", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. List of supported languages for generating SDKs. ", response = void.class),
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. The list of languages is not found. ", response = void.class),
         
         @io.swagger.annotations.ApiResponse(code = 500, message = "Internal Server Error. Error while retrieving the list. ", response = void.class) })
-    public Response sdkGenLanguagesGet( @Context Request request)
+    public Response sdkGenLanguagesGet(@Context Request request)
     throws NotFoundException {
-        return delegate.sdkGenLanguagesGet( request);
+        return delegate.sdkGenLanguagesGet(request);
     }
 }

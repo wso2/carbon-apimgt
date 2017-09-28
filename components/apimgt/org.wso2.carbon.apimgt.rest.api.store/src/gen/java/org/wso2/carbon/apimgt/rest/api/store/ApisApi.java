@@ -54,7 +54,7 @@ public class ApisApi implements Microservice  {
     @Path("/{apiId}/comments/{commentId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Remove a Comment ", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Delete an API comment", notes = "Remove a Comment ", response = void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
@@ -75,7 +75,11 @@ public class ApisApi implements Microservice  {
     @Path("/{apiId}/comments/{commentId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get the individual comment given by a username for a certain API. ", response = CommentDTO.class, tags={ "Retrieve Comment", })
+    @io.swagger.annotations.ApiOperation(value = "Get details of an API comment", notes = "Get the individual comment given by a username for a certain API. ", response = CommentDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "Retrieve", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Comment returned. ", response = CommentDTO.class),
         
@@ -96,7 +100,7 @@ public class ApisApi implements Microservice  {
     @Path("/{apiId}/comments/{commentId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Update a certain Comment ", response = CommentDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Update an API comment", notes = "Update a certain Comment ", response = CommentDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
@@ -122,7 +126,11 @@ public class ApisApi implements Microservice  {
     @Path("/{apiId}/comments")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of Comments that are already added to APIs ", response = CommentListDTO.class, tags={ "Retrieve", })
+    @io.swagger.annotations.ApiOperation(value = "Retrieve API comments", notes = "Get a list of Comments that are already added to APIs ", response = CommentListDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "Retrieve", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Comments list is returned. ", response = CommentListDTO.class),
         
@@ -138,7 +146,7 @@ public class ApisApi implements Microservice  {
     @Path("/{apiId}/comments")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "", response = CommentDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Add an API comment", notes = "", response = CommentDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
@@ -158,8 +166,12 @@ public class ApisApi implements Microservice  {
     @GET
     @Path("/{apiId}/documents/{documentId}/content")
     @Consumes({ "application/json" })
-    @Produces({ "application/octet-stream" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Downloads a FILE type document/get the inline content or source url of a certain document. ", response = void.class, tags={ "Retrieve Document", })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Get the content of an API document", notes = "Downloads a FILE type document/get the inline content or source url of a certain document. ", response = void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "Retrieve", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. File or inline content returned. ", response = void.class),
         
@@ -182,7 +194,11 @@ public class ApisApi implements Microservice  {
     @Path("/{apiId}/documents/{documentId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a particular document associated with an API. ", response = DocumentDTO.class, tags={ "Retrieve Document", })
+    @io.swagger.annotations.ApiOperation(value = "Get a document of an API", notes = "Get a particular document associated with an API. ", response = DocumentDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "Retrieve", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Document returned. ", response = DocumentDTO.class),
         
@@ -203,7 +219,11 @@ public class ApisApi implements Microservice  {
     @Path("/{apiId}/documents")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of documents belonging to an API. ", response = DocumentListDTO.class, tags={ "Retrieve Documents", })
+    @io.swagger.annotations.ApiOperation(value = "Get a list of API documents", notes = "Get a list of documents belonging to an API. ", response = DocumentListDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "Retrieve", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Document list is returned. ", response = DocumentListDTO.class),
         
@@ -224,7 +244,11 @@ public class ApisApi implements Microservice  {
     @Path("/{apiId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get details of an API ", response = APIDTO.class, tags={ "Retrieve", })
+    @io.swagger.annotations.ApiOperation(value = "Get details of an API", notes = "Get details of an API ", response = APIDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "Retrieve", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested API is returned ", response = APIDTO.class),
         
@@ -244,7 +268,11 @@ public class ApisApi implements Microservice  {
     @Path("/{apiId}/ratings")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get the rating of an API. ", response = RatingListDTO.class, tags={ "Retrieve Rating", })
+    @io.swagger.annotations.ApiOperation(value = "Get API ratings", notes = "Get the rating of an API. ", response = RatingListDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "Retrieve", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Rating returned. ", response = RatingListDTO.class),
         
@@ -262,7 +290,11 @@ public class ApisApi implements Microservice  {
     @Path("/{apiId}/ratings/{ratingId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a specific rating of an API. ", response = RatingDTO.class, tags={ "Retrieve Rating", })
+    @io.swagger.annotations.ApiOperation(value = "Get a single API rating", notes = "Get a specific rating of an API. ", response = RatingDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "API (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Rating returned. ", response = RatingDTO.class),
         
@@ -283,11 +315,11 @@ public class ApisApi implements Microservice  {
     @Path("/{apiId}/sdks/{language}")
     @Consumes({ "application/json" })
     @Produces({ "application/zip" })
-    @io.swagger.annotations.ApiOperation(value = "Generate SDK for an API for the requested language ", notes = "This operation can be used to generate SDKs (System Development Kits), for the APIs available in the API Store, for a requested development language. ", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Generate a SDK for an API ", notes = "This operation can be used to generate SDKs (System Development Kits), for the APIs available in the API Store, for a requested development language. ", response = void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "API (individual)", })
+    }, tags={ "API (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. SDK generated successfully. ", response = void.class),
         
@@ -306,7 +338,11 @@ public class ApisApi implements Microservice  {
     @Path("/{apiId}/swagger")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get the swagger of an API ", response = void.class, tags={ "Retrieve", })
+    @io.swagger.annotations.ApiOperation(value = "Get API swagger definition", notes = "Get the swagger of an API ", response = void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "Retrieve", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested swagger document of the API is returned ", response = void.class),
         
@@ -326,7 +362,7 @@ public class ApisApi implements Microservice  {
     @Path("/{apiId}/user-rating")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Adds or updates a rating ", response = RatingDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Add or update logged in user's rating for an API", notes = "Adds or updates a rating ", response = RatingDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
@@ -347,7 +383,11 @@ public class ApisApi implements Microservice  {
     @Path("/{apiId}/wsdl")
     @Consumes({ "application/json" })
     @Produces({ "application/octet-stream" })
-    @io.swagger.annotations.ApiOperation(value = "Get WSDL definition", notes = "This operation can be used to retrieve the swagger definition of an API. ", response = void.class, tags={ "API (individual)", })
+    @io.swagger.annotations.ApiOperation(value = "Get API WSDL definition", notes = "This operation can be used to retrieve the swagger definition of an API. ", response = void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "API (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Requested WSDL document of the API is returned ", response = void.class),
         
@@ -368,7 +408,11 @@ public class ApisApi implements Microservice  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Retrieving APIs ", notes = "Get a list of available APIs qualifying under a given search condition. ", response = APIListDTO.class, tags={ "Retrieve", })
+    @io.swagger.annotations.ApiOperation(value = "Retrieve/Search APIs ", notes = "Get a list of available APIs qualifying under a given search condition. ", response = APIListDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "Retrieve", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. List of qualifying APIs is returned. ", response = APIListDTO.class),
         

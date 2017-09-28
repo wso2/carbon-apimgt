@@ -48,7 +48,11 @@ public class PoliciesApi implements Microservice  {
     @Path("/{tierLevel}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get available policies ", response = TierListDTO.class, responseContainer = "List", tags={ "Retrieve", })
+    @io.swagger.annotations.ApiOperation(value = "Get all available policies", notes = "Get available policies ", response = TierListDTO.class, responseContainer = "List", authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "Retrieve", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. List of policies returned. ", response = TierListDTO.class, responseContainer = "List"),
         
@@ -67,7 +71,7 @@ public class PoliciesApi implements Microservice  {
     @Path("/{tierLevel}/{tierName}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get policy details ", response = TierDTO.class, tags={ "Retrieve", })
+    @io.swagger.annotations.ApiOperation(value = "Get a single policy details", notes = "Get policy details ", response = TierDTO.class, tags={ "Retrieve", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Tier returned ", response = TierDTO.class),
         

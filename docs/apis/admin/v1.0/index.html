@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+
+    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/github.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+    <script src="assets/js/jquery-2.2.0.min.js" type="text/javascript"></script>
+    <script src="assets/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="assets/js/highlight.pack.js" type="text/javascript"></script>
+    <script src="assets/js/main.js" type="text/javascript"></script>
+    <script src="assets/js/marked.min.js" type="text/javascript"></script>
+
+    <title>WSO2 API Manager - Admin Portal API : vv1.0</title>
+
+
+    <!-- Custom CSS -->
+    <link href="css/simple-sidebar.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+<nav class="navbar navbar-fixed-top">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="https://docs.wso2.com/api-manager">
+            <img src="assets/images/logo.png" alt="WSO2 Api manager" title="WSO2 Api Manager Documentation">
+        </a>
+    </div>
+    <div id="navbar" class="collapse navbar-collapse pull-right">
+        <ul class="nav navbar-nav">
+            <li>
+                <a href="#menu-toggle" id="menu-toggle" class="button-primary"><span
+                        class="glyphicon glyphicon-list"></span> Navigation</a>
+            </li>
+        </ul>
+    </div><!--/.nav-collapse -->
+</nav>
+<div id="wrapper">
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper">
+        <nav class="bs-docs-sidebar" id="navbar">
+            <h3>Overview</h3>
+            <ul class="nav nav-stacked fixed">
+                <li class="section-box">
+                    <ul class="nav nav-stacked">
+                        <li id="ov-index"><a href="index.html">Introduction</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <h3>Resources</h3>
+            <ul class="nav nav-stacked fixed">
+                        <hr/>
+                        <span class="class-name">Advanced Policies</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-policiesThrottlingAdvancedGet"><a href="#!/operations#AdvancedPolicies#policiesThrottlingAdvancedGet">Get all Advanced level throttle policies</a></li>
+                                        <li id="op-policiesThrottlingAdvancedIdDelete"><a href="#!/operations#AdvancedPolicies#policiesThrottlingAdvancedIdDelete">Delete an Advanced level throttle policy</a></li>
+                                        <li id="op-policiesThrottlingAdvancedIdGet"><a href="#!/operations#AdvancedPolicies#policiesThrottlingAdvancedIdGet">Retrieve an Advanced Policy</a></li>
+                                        <li id="op-policiesThrottlingAdvancedIdPut"><a href="#!/operations#AdvancedPolicies#policiesThrottlingAdvancedIdPut">Update an Advanced level throttle policy</a></li>
+                                        <li id="op-policiesThrottlingAdvancedPost"><a href="#!/operations#AdvancedPolicies#policiesThrottlingAdvancedPost">Add an Advanced level throttle policy</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Application Policies</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-policiesThrottlingApplicationGet"><a href="#!/operations#ApplicationPolicies#policiesThrottlingApplicationGet">Get all Application level throttle policies</a></li>
+                                        <li id="op-policiesThrottlingApplicationIdDelete"><a href="#!/operations#ApplicationPolicies#policiesThrottlingApplicationIdDelete">Delete an Application level throttle policy</a></li>
+                                        <li id="op-policiesThrottlingApplicationIdGet"><a href="#!/operations#ApplicationPolicies#policiesThrottlingApplicationIdGet">Retrieve an Application Policy</a></li>
+                                        <li id="op-policiesThrottlingApplicationIdPut"><a href="#!/operations#ApplicationPolicies#policiesThrottlingApplicationIdPut">Update an Application level throttle policy</a></li>
+                                        <li id="op-policiesThrottlingApplicationPost"><a href="#!/operations#ApplicationPolicies#policiesThrottlingApplicationPost">Add an Application level throttle policy</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Blacklist</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-blacklistConditionIdDelete"><a href="#!/operations#Blacklist#blacklistConditionIdDelete">Delete a Blocking condition</a></li>
+                                        <li id="op-blacklistConditionIdGet"><a href="#!/operations#Blacklist#blacklistConditionIdGet">Retrieve a Blocking Condition</a></li>
+                                        <li id="op-blacklistGet"><a href="#!/operations#Blacklist#blacklistGet">Get all blocking condtions</a></li>
+                                        <li id="op-blacklistPost"><a href="#!/operations#Blacklist#blacklistPost">Add a Blocking condition</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Blacklist condition</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-blacklistConditionIdPut"><a href="#!/operations#BlacklistCondition#blacklistConditionIdPut">Update a blacklist condition</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Custom Rules</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-policiesThrottlingCustomGet"><a href="#!/operations#CustomRules#policiesThrottlingCustomGet">Get all Custom Rules</a></li>
+                                        <li id="op-policiesThrottlingCustomPost"><a href="#!/operations#CustomRules#policiesThrottlingCustomPost">Add a Custom Rule</a></li>
+                                        <li id="op-policiesThrottlingCustomRuleIdDelete"><a href="#!/operations#CustomRules#policiesThrottlingCustomRuleIdDelete">Delete a Custom Rule</a></li>
+                                        <li id="op-policiesThrottlingCustomRuleIdGet"><a href="#!/operations#CustomRules#policiesThrottlingCustomRuleIdGet">Retrieve a Custom Rule</a></li>
+                                        <li id="op-policiesThrottlingCustomRuleIdPut"><a href="#!/operations#CustomRules#policiesThrottlingCustomRuleIdPut">Update a Custom Rule</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Label</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-labelsLabelIdDelete"><a href="#!/operations#Label#labelsLabelIdDelete">Delete a Label</a></li>
+                                        <li id="op-labelsLabelIdGet"><a href="#!/operations#Label#labelsLabelIdGet">Retrieve a Label</a></li>
+                                        <li id="op-labelsLabelIdPut"><a href="#!/operations#Label#labelsLabelIdPut">Update a Label</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Label Collection</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-labelsGet"><a href="#!/operations#LabelCollection#labelsGet">Get all registered Labels</a></li>
+                                        <li id="op-labelsPost"><a href="#!/operations#LabelCollection#labelsPost">Add a Label</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Subscription Policies</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-policiesThrottlingSubscriptionGet"><a href="#!/operations#SubscriptionPolicies#policiesThrottlingSubscriptionGet">Get all Subscription level throttle policies</a></li>
+                                        <li id="op-policiesThrottlingSubscriptionIdDelete"><a href="#!/operations#SubscriptionPolicies#policiesThrottlingSubscriptionIdDelete">Delete a Subscription level throttle policy</a></li>
+                                        <li id="op-policiesThrottlingSubscriptionIdGet"><a href="#!/operations#SubscriptionPolicies#policiesThrottlingSubscriptionIdGet">Retrieve a Subscription Policy</a></li>
+                                        <li id="op-policiesThrottlingSubscriptionIdPut"><a href="#!/operations#SubscriptionPolicies#policiesThrottlingSubscriptionIdPut">Update a Subscription level throttle policy</a></li>
+                                        <li id="op-policiesThrottlingSubscriptionPost"><a href="#!/operations#SubscriptionPolicies#policiesThrottlingSubscriptionPost">Add a Subscription level throttle policy</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Workflows (Collection)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-workflowsGet"><a href="#!/operations#WorkflowsCollection#workflowsGet">Get all the uncompleted Workflows</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Workflows (Individual)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-workflowsWorkflowReferenceIdGet"><a href="#!/operations#WorkflowsIndividual#workflowsWorkflowReferenceIdGet">Retrieve workflow information</a></li>
+                                        <li id="op-workflowsWorkflowReferenceIdPut"><a href="#!/operations#WorkflowsIndividual#workflowsWorkflowReferenceIdPut">Update workflow status</a></li>
+                            </ul>
+                        </li>
+            </ul>
+            <h3>Definitions</h3>
+            <ul class="nav nav-stacked fixed">
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-AdvancedThrottlePolicyList"><a href="#!/models#AdvancedThrottlePolicyList">AdvancedThrottlePolicyList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ApplicationThrottlePolicyList"><a href="#!/models#ApplicationThrottlePolicyList">ApplicationThrottlePolicyList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-BandwidthLimit"><a href="#!/models#BandwidthLimit">BandwidthLimit</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-BlockingCondition"><a href="#!/models#BlockingCondition">BlockingCondition</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-BlockingConditionList"><a href="#!/models#BlockingConditionList">BlockingConditionList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ConditionalGroup"><a href="#!/models#ConditionalGroup">ConditionalGroup</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-CustomAttribute"><a href="#!/models#CustomAttribute">CustomAttribute</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-CustomRuleList"><a href="#!/models#CustomRuleList">CustomRuleList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Error"><a href="#!/models#Error">Error</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ErrorListItem"><a href="#!/models#ErrorListItem">ErrorListItem</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-HeaderCondition"><a href="#!/models#HeaderCondition">HeaderCondition</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-IPCondition"><a href="#!/models#IPCondition">IPCondition</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-JWTClaimsCondition"><a href="#!/models#JWTClaimsCondition">JWTClaimsCondition</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Label"><a href="#!/models#Label">Label</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-LabelList"><a href="#!/models#LabelList">LabelList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-QueryParameterCondition"><a href="#!/models#QueryParameterCondition">QueryParameterCondition</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-RequestCountLimit"><a href="#!/models#RequestCountLimit">RequestCountLimit</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-SubscriptionThrottlePolicyList"><a href="#!/models#SubscriptionThrottlePolicyList">SubscriptionThrottlePolicyList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ThrottleCondition"><a href="#!/models#ThrottleCondition">ThrottleCondition</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ThrottleLimit"><a href="#!/models#ThrottleLimit">ThrottleLimit</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ThrottlePolicy"><a href="#!/models#ThrottlePolicy">ThrottlePolicy</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Workflow"><a href="#!/models#Workflow">Workflow</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-WorkflowList"><a href="#!/models#WorkflowList">WorkflowList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-WorkflowRequest"><a href="#!/models#WorkflowRequest">WorkflowRequest</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-WorkflowResponse"><a href="#!/models#WorkflowResponse">WorkflowResponse</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-AdvancedThrottlePolicy"><a href="#!/models#AdvancedThrottlePolicy">AdvancedThrottlePolicy</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-AdvancedThrottlePolicyInfo"><a href="#!/models#AdvancedThrottlePolicyInfo">AdvancedThrottlePolicyInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ApplicationThrottlePolicy"><a href="#!/models#ApplicationThrottlePolicy">ApplicationThrottlePolicy</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-CustomRule"><a href="#!/models#CustomRule">CustomRule</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-SubscriptionThrottlePolicy"><a href="#!/models#SubscriptionThrottlePolicy">SubscriptionThrottlePolicy</a></li>
+                            </ul>
+                        </li>
+            </ul>
+        </nav>
+    </div>
+    <!-- /#sidebar-wrapper -->
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <div class="container-fluid main-content">
+            <div class="row" class="">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="non-sidebar">
+                        <div class="main-content">
+                            <h2>Introduction</h2>
+
+                            <p class="marked">This specifies a **RESTful API** for WSO2 **API Manager** - Admin Portal.
+
+Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.0.4/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources/publisher-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.
+</p>
+
+                            <div class="sect2">
+                                    <h3>Version information</h3>
+
+                                    <div class="paragraph">
+                                        <p class="marked">v1.0</p>
+                                    </div>
+
+                                        <h3>Contact information</h3>
+
+                                        <div class="paragraph">
+                                            <p class="marked">Contact: <a href="http://wso2.com/products/api-manager/">WSO2</a></p>
+
+                                            <p>Email: architecture@wso2.com</p>
+                                        </div>
+
+                                        <h3>License information</h3>
+
+                                        <div class="paragraph">
+                                            <p class="marked">License: Apache 2.0</p>
+
+                                            <p class="marked">URL: http://www.apache.org/licenses/LICENSE-2.0.html</p>
+                                        </div>
+
+                                    <h3>URI Scheme</h3>
+
+                                    <div class="paragraph">
+                                        <p class="marked">Host: apis.wso2.com</p>
+
+                                        <p class="marked">BasePath: /api/am/admin/v1.0</p>
+                                        <code>Scheme: [HTTPS, HTTP]</code>
+                                    </div>
+                                    <h3>Consumes</h3>
+
+                                    <div class="paragraph">
+                                        <code>[application/json]</code>
+                                    </div>
+                                    <h3>Produces</h3>
+
+                                    <div class="paragraph">
+                                        <code>[application/json]</code>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
+
+    </div>
+</div>
+<!-- /#wrapper -->
+</body>
+
+</html>
