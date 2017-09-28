@@ -30,6 +30,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Kubernetes and Openshift implementation of Service Discoverer
@@ -47,7 +48,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
 
     private List<Endpoint> servicesList;
     private Boolean endpointsAvailable; //when false, will not look for NodePort urls for the remaining ports.
-    private int kubeEndpointIndex;
+    private int serviceEndpointIndex;
 
     public static KubernetesServiceDiscoverer getInstance() throws ServiceDiscoveryException {
         return new KubernetesServiceDiscoverer();
@@ -70,7 +71,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
             throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_INITIALIZING_SERVICE_DISCOVERY);
         }
         servicesList = new ArrayList<>();
-        kubeEndpointIndex = 0;
+        serviceEndpointIndex = 0;
     }
 
     private Config buildConfig(String masterUrl) throws ServiceDiscoveryException {
@@ -169,6 +170,8 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
         List<Service> serviceItems = services.getItems();
         for (Service service : serviceItems) {
             String serviceName = service.getMetadata().getName();
+            Map<String, String> labelsMap = service.getMetadata().getLabels();
+            String labels = (labelsMap != null) ? labelsMap.toString() : "";
             ServiceSpec serviceSpec = service.getSpec();
             endpointsAvailable = true;
             for (ServicePort servicePort : serviceSpec.getPorts()) {
@@ -177,34 +180,31 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
                     int port = servicePort.getPort();
                     String namespace = service.getMetadata().getNamespace();
                     if (insidePod) {
-                        discoverClusterIPURL(serviceSpec, serviceName, port, protocol, namespace);
-
+                        addClusterIPEndpoint(serviceSpec, serviceName, port, protocol, namespace, labels);
                         if (serviceSpec.getType().equals("ExternalName")) {
-                            discoverExternalNameURL(serviceSpec, serviceName, protocol, namespace);
+                            addExternalNameEndpoint(serviceSpec, serviceName, protocol, namespace, labels);
                         }
                     }
                     if (!serviceSpec.getType().equals("ClusterIP") && endpointsAvailable) {
-                        discoverNodePortURL(serviceName, servicePort, protocol, filterNamespace, namespace);
+                        addNodePortEndpoint(serviceName, servicePort, protocol, filterNamespace, namespace, labels);
                     }
                     if (service.getSpec().getType().equals("LoadBalancer")) {
-                        discoverLoadBalancerURL(service, serviceName, port, protocol, namespace);
+                        addLoadBalancerEndpoint(service, serviceName, port, protocol, namespace, labels);
                     }
-                    discoverExternalIPURL(serviceSpec, serviceName, port, protocol, namespace);
-
+                    addExternalIPEndpoint(serviceSpec, serviceName, port, protocol, namespace, labels);
                 } else if (log.isDebugEnabled()) {
                     log.debug("Service:{} Namespace:{} Port:{}/{}  Application level protocol not defined.",
-                            serviceName, service.getMetadata().getNamespace(),
-                            servicePort.getPort(), protocol);
+                            serviceName, service.getMetadata().getNamespace(), servicePort.getPort(), protocol);
                 }
             }
         }
     }
 
-    private void discoverClusterIPURL(ServiceSpec serviceSpec, String serviceName, int port,
-                                      String protocol, String namespace) {
+    private void addClusterIPEndpoint(ServiceSpec serviceSpec, String serviceName, int port,
+                                      String protocol, String namespace, String labels) {
         try {
             URL url = new URL(protocol, serviceSpec.getClusterIP(), port, "");
-            Endpoint endpoint = constructEndpoint(serviceName, namespace, protocol, "ClusterIP", url);
+            Endpoint endpoint = constructEndpoint(serviceName, namespace, protocol, "ClusterIP", url, labels);
             if (endpoint != null) {
                 this.servicesList.add(endpoint);
             }
@@ -214,12 +214,12 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
         }
     }
 
-    private void discoverExternalNameURL(ServiceSpec serviceSpec, String serviceName, String protocol,
-                                         String namespace) {
+    private void addExternalNameEndpoint(ServiceSpec serviceSpec, String serviceName, String protocol,
+                                         String namespace, String labels) {
         String externalName = (String) serviceSpec.getAdditionalProperties().get("externalName");
         try {
             URL url = new URL(protocol + "://" + externalName);
-            Endpoint endpoint = constructEndpoint(serviceName, namespace, protocol, "ExternalName", url);
+            Endpoint endpoint = constructEndpoint(serviceName, namespace, protocol, "ExternalName", url, labels);
             if (endpoint != null) {
                 this.servicesList.add(endpoint);
             }
@@ -228,10 +228,10 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
         }
     }
 
-    private void discoverNodePortURL(String serviceName, ServicePort servicePort, String protocol,
-                                     String filterNamespace, String namespace) {
-        //because pod name comes with an extension to its service
-        //endpoint name is the service name as it is
+    private void addNodePortEndpoint(String serviceName, ServicePort servicePort, String protocol,
+                                     String filterNamespace, String namespace, String labels) {
+        //Node URL is found by getting the pod's IP
+        //Pod is found via kubernetes endpoints
         Endpoints kubernetesEndpoint = findEndpoint(filterNamespace, serviceName);
         List<EndpointSubset> endpointSubsets = kubernetesEndpoint.getSubsets();
         if (endpointSubsets == null) {
@@ -252,7 +252,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
                 Pod pod = findPod(filterNamespace, podName);
                 try {
                     URL url = new URL(protocol, pod.getStatus().getHostIP(), servicePort.getNodePort(), "");
-                    Endpoint endpoint = constructEndpoint(serviceName, namespace, protocol, "NodePort", url);
+                    Endpoint endpoint = constructEndpoint(serviceName, namespace, protocol, "NodePort", url, labels);
                     if (endpoint != null) {
                         this.servicesList.add(endpoint);
                     }
@@ -266,15 +266,16 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
         }
     }
 
-    private void discoverLoadBalancerURL(Service service, String serviceName, int port, String protocol,
-                                         String namespace) {
+    private void addLoadBalancerEndpoint(Service service, String serviceName, int port, String protocol,
+                                         String namespace, String labels) {
         List<LoadBalancerIngress> loadBalancerIngresses = service.getStatus()
                 .getLoadBalancer().getIngress();
         if (!loadBalancerIngresses.isEmpty()) {
             for (LoadBalancerIngress loadBalancerIngress : loadBalancerIngresses) {
                 try {
                     URL url = new URL(protocol, loadBalancerIngress.getIp(), port, "");
-                    Endpoint endpoint = constructEndpoint(serviceName, namespace, protocol, "LoadBalancer", url);
+                    Endpoint endpoint = constructEndpoint(serviceName, namespace, protocol,
+                            "LoadBalancer", url, labels);
                     if (endpoint != null) {
                         this.servicesList.add(endpoint);
                         return;
@@ -289,15 +290,15 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
         }
     }
 
-    private void discoverExternalIPURL(ServiceSpec serviceSpec, String serviceName, int port, String protocol,
-                                       String namespace) {
+    private void addExternalIPEndpoint(ServiceSpec serviceSpec, String serviceName, int port, String protocol,
+                                       String namespace, String labels) {
         List<String> specialExternalIPs = serviceSpec.getExternalIPs();
         if (!specialExternalIPs.isEmpty()) {
             for (String specialExternalIP : specialExternalIPs) {
                 try {
                     URL url = new URL(protocol, specialExternalIP, port, "");
                     Endpoint externalIpEndpoint = constructEndpoint(serviceName, namespace,
-                            protocol, "ExternalIP", url);
+                            protocol, "ExternalIP", url, labels);
                     if (externalIpEndpoint != null) {
                         this.servicesList.add(externalIpEndpoint);
                         return;
@@ -311,16 +312,17 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
 
 
     private Endpoint constructEndpoint(String serviceName, String namespace, String portType,
-                                                 String urlType, URL url) {
+                                                 String urlType, URL url, String labels) {
         //todo check if empty
         if (url == null) {
             return null;
         }
         String endpointConfig = String.format("{\"serviceUrl\": \"%s\"," +
                                                 " \"urlType\": \"%s\"," +
-                                                "\"namespace\": \"%s\"}",
-                                                url.toString(), urlType, namespace);
-        String endpointIndex = String.format("ds-%d", kubeEndpointIndex);
+                                                " \"namespace\": \"%s\"," +
+                                                " \"criteria\": \"%s\"}",
+                                                url.toString(), urlType, namespace, labels);
+        String endpointIndex = String.format("ds-%d", serviceEndpointIndex);
         return createEndpoint(endpointIndex, serviceName, endpointConfig,
                 1000L, portType, "{\"enabled\": false}", APIMgtConstants.GLOBAL_ENDPOINT);
     }
@@ -336,7 +338,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
         endpointBuilder.security(endpointSecurity);
         endpointBuilder.applicableLevel(applicableLevel);
 
-        kubeEndpointIndex++;
+        serviceEndpointIndex++;
         return endpointBuilder.build();
     }
 
@@ -360,7 +362,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
     private Pod findPod(String filterNamespace, String podName) {
         Pod pod;
         if (filterNamespace == null) {
-            //same reason as in findEndpoint
+            //same reason as in findEndpoint method
             pod = client.pods().inAnyNamespace()
                     .withField("metadata.name", podName).list().getItems().get(0);
         } else {

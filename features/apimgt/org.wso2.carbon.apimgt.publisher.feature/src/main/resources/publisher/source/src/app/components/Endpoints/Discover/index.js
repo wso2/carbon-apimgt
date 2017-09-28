@@ -57,13 +57,12 @@ export default class EndpointsDiscover extends Component {
         const { endpoints } = this.state;
         switch(this.state.filterType) {
             case "namespace":
-                console.log("namespace");
                 return endpoints.filter(el => JSON.parse(el.endpointConfig).namespace.startsWith(filterText))
             case "criteria":
+                return endpoints.filter(el => JSON.parse(el.endpointConfig).criteria.includes(filterText))
             case "name":
                 return endpoints.filter(el => el.name.startsWith(filterText))
             default :
-
                 return endpoints.filter(el => el.name.startsWith(filterText))
         }
     }
@@ -87,16 +86,18 @@ export default class EndpointsDiscover extends Component {
         const {viewableEndpoints} = this.state;
         const api = new API();
         const columns = [{
-            title: 'Name | Namespace | Criteria',
+            title: 'Name  |  Namespace  |  Criteria',
             dataIndex: 'name',
             key: 'age',
-            width: '20%',
+            width: '40%',
             sorter: (a, b) => a.name.length - b.name.length,
             render: (text, record) => (
             <span>
                 <Link to={"/endpoints/" + record.id}>{text}</Link>
                 <span className="ant-divider" />
                 {JSON.parse(record.endpointConfig).namespace}
+                <span className="ant-divider" />
+                {JSON.parse(record.endpointConfig).criteria}
             </span>
             )
         }, {
@@ -151,7 +152,7 @@ export default class EndpointsDiscover extends Component {
                             <span style={{ marginRight: 16 }}> Filter by</span>
                             <RadioGroup onChange={this.handleRadioButtonChange} defaultValue="name">
                               <RadioButton value="namespace">Namespace</RadioButton>
-                              <RadioButton value="criteria">Prior Defined Key:Value Pairs</RadioButton>
+                              <RadioButton value="criteria">Criteria</RadioButton>
                               <RadioButton value="name">Service Name</RadioButton>
                             </RadioGroup>
                         </div>
