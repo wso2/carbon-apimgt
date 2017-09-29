@@ -1,7 +1,6 @@
 package org.wso2.carbon.apimgt.gateway.constants;
 
 const string API_CORE_URL = "API_CORE_URL";
-const string OFFLINE_DIRECTORY = "OFFLINE_DIRECTORY";
 const string GW_HOME = "GW_HOME";
 const string API_CREATE = "API_CREATE";
 const string API_UPDATE = "API_UPDATE";
@@ -40,7 +39,6 @@ const string POLICY_CACHE = "POLICY_CACHE";
 const string API_CACHE = "API_CACHE";
 const string BLOCK_CONDITION_MAP = "BLOCK_CONDITION_MAP";
 const string BLOCK_CONDITION_IP_RANGE_MAP = "BLOCK_CONDITION_IP_RANGE_MAP";
-const string APIKEY_CACHE = "APIKEY_CACHE";
 
 const string THROTTLE_KEY = "throttleKey";
 const string POLICY_TEMPLATE_KEY = "keyTemplateValue";
@@ -85,3 +83,7 @@ const string GOOGLE_ANALYTICS_HIT_TYPE_PAGEVIEW = "pageView";
 const string X_FORWARDED_FOR_HEADER = "X-Forwarded-For";
 const string HTTP_HOST_HEADER = "HOST";
 const string HTTP_METHOD = "HTTP_METHOD";
+const string PRODUCTION = "PRODUCTION";
+const string SANDBOX = "SANDBOX";
+const string PUBLISHED = "PUBLISHED";
+

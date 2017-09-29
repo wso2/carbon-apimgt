@@ -50,7 +50,6 @@ function putIntoSubscriptionCache (dto:SubscriptionDto subscriptionDto) {
     string key = subscriptionDto.apiContext + ":" + subscriptionDto.apiVersion + ":" + subscriptionDto.consumerKey;
     caching:putCacheEntry(constants:SUBSCRIPTION_CACHE, key, subscriptionDto);
 }
-
 function getFromResourceCache (string apiContext, string apiVersion, string resourceUri, string httpVerb) (dto:ResourceDto) {
     system:println("getFromResourceCache() in CacheHolder");
     string internalKey = resourceUri + ":" + httpVerb;
@@ -126,9 +125,15 @@ function getGatewayConf () (dto:GatewayConfDTO) {
     if(dto!=null){
         gatewayConf, err = (dto:GatewayConfDTO)dto;
         keyManagerConf = gatewayConf.keyManagerInfo;
+        system:println("gatewayConf");
+        system:println(gatewayConf);
+    }else{
+        gatewayConf = {keyManagerInfo:{},jwtInfo:{},analyticsInfo:{},throttlingInfo:{}};
+        keyManagerConf = gatewayConf.keyManagerInfo;
     }
     return gatewayConf;
 }
+
 function getKeyManagerConf () (dto:KeyManagerInfoDTO) {
     system:println("getKeyManagerConf() in CacheHolder");
     getGatewayConf();
@@ -172,7 +177,8 @@ function getFromApplicationCache (string applicationId) (dto:ApplicationDto) {
             system:println(dto);
             return dto;
         } else {
-            return null;
+            dto:ApplicationDto emptyDto = {};
+            return emptyDto;
     }
     }
 
@@ -235,12 +241,12 @@ function putIntoPolicyCache (dto:PolicyDto policyDto) {
 }
 function getFromPolicyCache (string id) (dto:PolicyDto) {
     system:println("getFromPolicyCache() in CacheHolder");
-    if((id == "") || (id == "Unlimited")){
+    //if((id == "") || (id == "Unlimited")){
         //null for applicationDto.applicationPolicy,subscriptionDto.subscriptionPolicy,resourceDto.policy
         //unlimited for subscriptionDto.apiLevelPolicy
-        dto:PolicyDto policy = {};
-        return policy;
-    }else{
+      //  dto:PolicyDto policy = {};
+      //  return policy;
+    //}else{
             any policy = caching:getCacheEntry(constants:POLICY_CACHE, id);
             if (policy != null) {
                 dto:PolicyDto dto;
@@ -249,9 +255,10 @@ function getFromPolicyCache (string id) (dto:PolicyDto) {
                 system:println(dto);
                 return dto;
             } else {
-                return null;
+                dto:PolicyDto emptyDto = {};
+                return emptyDto;
             }
-    }
+   // }
 
 }
 function removeFromPolicyCache (string id) {

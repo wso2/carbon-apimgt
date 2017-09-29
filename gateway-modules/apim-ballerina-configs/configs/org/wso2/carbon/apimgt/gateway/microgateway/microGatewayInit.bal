@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.gateway.microServices;
+package org.wso2.carbon.apimgt.gateway.microgateway;
 
 import ballerina.lang.system;
 import ballerina.lang.errors;
@@ -8,10 +8,10 @@ import ballerina.net.http;
 service<http> gatewayInitService {
 
     boolean isCacheInitialized = holder:initializeCache();
+    boolean isMapsAdded = holder:addThrottleMaps();
     boolean isReady = initGateway();
 
     boolean subscriptionsInitialized = retrieveOfflineSubscriptions();
-    boolean applicationsInitialized = retrieveOfflineApplications();
 }
 
 function initGateway () (boolean) {
