@@ -45,10 +45,13 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
     private String serviceAccountToken;
     private String caCertLocation;
     private Boolean insidePod;
+    private String namespaceFilter;
+    private HashMap<String, String> criteriaFilter;
 
     private List<Endpoint> servicesList;
     private Boolean endpointsAvailable; //when false, will not look for NodePort urls for the remaining ports.
     private int serviceEndpointIndex;
+
 
     public static KubernetesServiceDiscoverer getInstance() throws ServiceDiscoveryException {
         return new KubernetesServiceDiscoverer();
@@ -59,15 +62,51 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
         return config.isServiceDiscoveryEnabled();
     }
 
+    @Override
+    public void setNamespaceFilter() {
+        this.namespaceFilter = config.getCmsSpecificParameter("namespace");
+    }
+
+    @Override
+    public String getNamespaceFilter() {
+        return namespaceFilter;
+    }
+
+    @Override
+    public void setCriteriaFilter() throws ArrayIndexOutOfBoundsException {
+        String criteriaString = config.getCmsSpecificParameter("criteria");
+        if (criteriaString != null) {
+            String[] criteriaArray = criteriaString.split(",");
+            HashMap<String, String> criteriaMap = new HashMap<>();
+            for (String pair : criteriaArray) {
+                String[] entry = pair.split("=");
+                criteriaMap.put(entry[0].trim(), entry[1].trim());
+            }
+            this.criteriaFilter = criteriaMap;
+        }
+    }
+
+    @Override
+    public HashMap<String, String> getCriteriaFilter() {
+        return criteriaFilter;
+    }
+
     private KubernetesServiceDiscoverer() throws ServiceDiscoveryException {
         config = ServiceDiscoveryConfigBuilder.getServiceDiscoveryConfiguration();
         serviceAccountToken = config.getSecurityParameter("serviceAccountToken");
         caCertLocation = config.getSecurityParameter("caCertLocation");
         insidePod = Boolean.parseBoolean(config.getCmsSpecificParameter("insidePod"));
         try {
+            setNamespaceFilter();
+            setCriteriaFilter();
             this.client = new DefaultOpenShiftClient(buildConfig(config.getMasterUrl()));
         } catch (KubernetesClientException e) {
             String msg = "Error occurred while creating Kubernetes client";
+            log.error(msg, e);
+            throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_INITIALIZING_SERVICE_DISCOVERY);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            String msg = "Error occurred while reading filtering criteria from the configuration";
+            log.error(msg, e);
             throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_INITIALIZING_SERVICE_DISCOVERY);
         }
         servicesList = new ArrayList<>();
@@ -98,6 +137,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
         }
         return config;
     }
+
 
 
     @Override
@@ -144,6 +184,10 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
                 String msg = "Error occurred while trying to list services using Kubernetes client";
                 log.error(msg, e);
                 throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_TRYING_TO_DISCOVER_SERVICES);
+            } catch (NoSuchMethodError e) {
+                String msg = "Filtering criteria in the deployment yaml includes unwanted characters";
+                log.error(msg, e);
+                throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_TRYING_TO_DISCOVER_SERVICES);
             }
         }
         return this.servicesList;
@@ -154,10 +198,15 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
         if (client != null) {
             log.debug("Looking for services, with the specified labels, in all namespaces");
             try {
-                ServiceList services = client.services().withLabels(criteria).list();
+                //namespace has to be set to null to check all allowed namespaces
+                ServiceList services = client.services().inNamespace(null).withLabels(criteria).list();
                 addServiceEndpointsToList(services, null);
             } catch (KubernetesClientException e) {
                 String msg = "Error occurred while trying to list services using Kubernetes client";
+                log.error(msg, e);
+                throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_TRYING_TO_DISCOVER_SERVICES);
+            } catch (NoSuchMethodError e) {
+                String msg = "Filtering criteria in the deployment yaml includes unwanted characters";
                 log.error(msg, e);
                 throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_TRYING_TO_DISCOVER_SERVICES);
             }

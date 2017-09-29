@@ -20,6 +20,14 @@ public interface ServiceDiscoverer {
      */
     Boolean isEnabled();
 
+    void setNamespaceFilter();
+
+    String getNamespaceFilter();
+
+    void setCriteriaFilter();
+
+    HashMap<String, String> getCriteriaFilter();
+
     /**
      * To get list of endpoints without any filtering.
      *
@@ -55,4 +63,6 @@ public interface ServiceDiscoverer {
      * @throws ServiceDiscoveryException If an error occurs while listing
      */
     List<Endpoint> listServices(String namespace, HashMap<String, String> criteria) throws ServiceDiscoveryException;
+
+
 }

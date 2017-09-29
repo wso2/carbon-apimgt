@@ -6,25 +6,19 @@ import org.wso2.carbon.apimgt.core.api.ServiceDiscoverer;
 import org.wso2.carbon.apimgt.core.exception.ServiceDiscoveryException;
 import org.wso2.carbon.apimgt.core.impl.KubernetesServiceDiscoverer;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
-import org.wso2.carbon.apimgt.rest.api.common.dto.*;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
 
-
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 
-import java.io.InputStream;
-
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
 import org.wso2.msf4j.Request;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 public class ExternalResourcesApiServiceImpl extends ExternalResourcesApiService {
     private static final Logger log = LoggerFactory.getLogger(ExternalResourcesApiServiceImpl.class);
@@ -45,7 +39,18 @@ public class ExternalResourcesApiServiceImpl extends ExternalResourcesApiService
             EndPointListDTO endPointListDTO = new EndPointListDTO();
             ServiceDiscoverer serviceDiscoverer = KubernetesServiceDiscoverer.getInstance();
             if (serviceDiscoverer.isEnabled()) {
-                List<Endpoint> discoveredEndpointList = serviceDiscoverer.listServices();
+                String namespaceFilter = serviceDiscoverer.getNamespaceFilter();
+                HashMap<String, String> criteriaFilter = serviceDiscoverer.getCriteriaFilter();
+                List<Endpoint> discoveredEndpointList;
+                if ( namespaceFilter ==null && criteriaFilter == null) {
+                    discoveredEndpointList = serviceDiscoverer.listServices();
+                } else if ( namespaceFilter !=null && criteriaFilter != null) {
+                    discoveredEndpointList = serviceDiscoverer.listServices(namespaceFilter, criteriaFilter);
+                } else if ( namespaceFilter != null ) {
+                    discoveredEndpointList = serviceDiscoverer.listServices(namespaceFilter);
+                } else {
+                    discoveredEndpointList = serviceDiscoverer.listServices(criteriaFilter);
+                }
                 for (Endpoint endpoint : discoveredEndpointList) {
                     endPointListDTO.addListItem(MappingUtil.toEndPointDTO(endpoint));
                 }

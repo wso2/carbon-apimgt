@@ -29,8 +29,7 @@ public class ServiceDiscoveryConfigurations {
             "g7GHwiHH33jGA";
     @Ignore
     private String caCertLocation = System.getProperty("user.dir") + "/resources/security/ca.crt";
-    @Ignore
-    private Boolean insidePod   = false;
+
 
     @Element(description = "enable service discovery")
     public Boolean enabled = true;
@@ -42,21 +41,9 @@ public class ServiceDiscoveryConfigurations {
     private Map<String, String> security = new HashMap<>();
 
     public ServiceDiscoveryConfigurations() {
-        cmsSpecificParameters.put("insidePod", insidePod.toString());
+        cmsSpecificParameters.put("insidePod", "false");
         security.put("serviceAccountToken", serviceAccountToken);
         security.put("caCertLocation", caCertLocation);
-        security.put("tokenKeyStoreFilePath", System.getProperty("user.dir") + "/resources/security/wso2carbon.jks");
-        security.put("tokenKeyStorePassword", "admin");
-        security.put("tokenAlias", "serviceAccountToken");
-        security.put("tokenAliasPassword", "admin");
-    }
-
-    public String getCmsSpecificParameter(String key) {
-        return cmsSpecificParameters.get(key);
-    }
-
-    public String getSecurityParameter(String key) {
-        return security.get(key);
     }
 
     public Boolean isServiceDiscoveryEnabled() {
@@ -67,4 +54,11 @@ public class ServiceDiscoveryConfigurations {
         return masterUrl;
     }
 
+    public String getSecurityParameter(String key) {
+        return security.get(key);
+    }
+
+    public String getCmsSpecificParameter(String key) {
+        return cmsSpecificParameters.get(key);
+    }
 }
