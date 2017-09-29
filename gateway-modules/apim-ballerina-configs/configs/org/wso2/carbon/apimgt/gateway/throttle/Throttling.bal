@@ -77,13 +77,13 @@ function isRequestThrottled( message msg) (boolean){
     string apiVersion = keyValidationDto.apiVersion;
     string applicationId = keyValidationDto.applicationId;
 
-    if (authorizedUser == ""){
-        http:setStatusCode( msg, HTTP_UNAUTHORIZED);
-        messages:setProperty(msg, THROTTLED_ERROR_CODE, BLOCKED_ERROR_CODE);
-        messages:setProperty(msg, THROTTLED_OUT_REASON, THROTTLE_OUT_REASON_REQUEST_BLOCKED);
-        setThrottledResponse(msg);
-        return true;
-    }
+    //if (authorizedUser == ""){
+    //    http:setStatusCode( msg, HTTP_UNAUTHORIZED);
+    //    messages:setProperty(msg, THROTTLED_ERROR_CODE, BLOCKED_ERROR_CODE);
+    //    messages:setProperty(msg, THROTTLED_OUT_REASON, THROTTLE_OUT_REASON_REQUEST_BLOCKED);
+    //    setThrottledResponse(msg);
+    //    return true;
+    //}
 
     //todo get the correct key value
     ipLevelBlockingKey = gatewayUtil:getStringProperty(msg, "CLIENT_IP_ADDRESS");

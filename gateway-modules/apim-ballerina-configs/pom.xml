@@ -108,7 +108,7 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>microServices</id>
+                        <id>microgateway</id>
                         <phase>package</phase>
                         <goals>
                             <goal>java</goal>
@@ -118,8 +118,8 @@
                             <arguments>
                                 <argument>service</argument>
                                 <argument>${project.basedir}/configs</argument>
-                                <argument>org/wso2/carbon/apimgt/gateway/microServices/</argument>
-                                <argument>${project.build.directory}/microservices</argument>
+                                <argument>org/wso2/carbon/apimgt/gateway/microgateway/</argument>
+                                <argument>${project.build.directory}/microgateway</argument>
                             </arguments>
                         </configuration>
                     </execution>

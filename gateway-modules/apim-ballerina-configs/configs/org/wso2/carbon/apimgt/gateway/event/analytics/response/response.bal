@@ -45,8 +45,11 @@ function mediate (message m, message res) {
 
     dto:RequestEventDTO requestEventDTO = {};
     requestEventDTO.api = messages:getProperty(m, "api");
+    system:println(messages:getProperty(m, "api"));
     requestEventDTO.context = messages:getProperty(m, "REQUEST_URL");
+    system:println(messages:getProperty(m, "REQUEST_URL"));
     requestEventDTO.version = messages:getProperty(m, "version");
+    system:println(messages:getProperty(m, "version"));
     requestEventDTO.publisher = messages:getProperty(m, "publisher");
     requestEventDTO.subscriptionPolicy = messages:getProperty(m, "subscription_policy");
     requestEventDTO.uriTemplate = messages:getProperty(m, "SUB_PATH");
