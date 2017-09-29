@@ -25,13 +25,6 @@ import java.util.List;
 
 public class APIStatusObserverListTestCase {
 
-    @Test
-    public void testInitNonInitialized() {
-        APIStatusObserverList apiStatusObserverList = APIStatusObserverList.getInstance();
-        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
-        apiStatusObserverList.init(apiManagerConfiguration);
-        Mockito.verify(apiManagerConfiguration, Mockito.times(1)).getProperty(APIConstants.OBSERVER);
-    }
 
     @Test
     public void testInitNonInitializedReadFromConfig() {
