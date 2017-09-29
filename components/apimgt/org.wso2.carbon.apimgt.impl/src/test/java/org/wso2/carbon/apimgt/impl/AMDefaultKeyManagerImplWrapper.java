@@ -166,5 +166,15 @@ public class AMDefaultKeyManagerImplWrapper extends AMDefaultKeyManagerImpl {
         
         return oauthElem;
     }
+    
+    @Override
+    protected boolean checkAccessTokenPartitioningEnabled() {
+        return false;
+    }
+    
+    @Override
+    protected boolean checkUserNameAssertionEnabled() {
+        return false;
+    }
 
 }
