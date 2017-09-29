@@ -62,6 +62,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -74,6 +75,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -98,7 +100,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisGet(Integer limit, Integer offset, String query, String accept, String ifNoneMatch) {
-        List<API> allMatchedApis;
+        List<API> allMatchedApis = new ArrayList<>();
         APIListDTO apiListDTO;
 
         //pre-processing
@@ -125,9 +127,13 @@ public class ApisApiServiceImpl extends ApisApiService {
                 }
             }
 
-            //We should send null as the provider, Otherwise searchAPIs will return all APIs of the provider
-            // instead of looking at type and query
-            allMatchedApis = apiProvider.searchAPIs(searchContent, searchType, null);
+            String username = RestApiUtil.getLoggedInUsername();
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
+            Map<String, Object> result = apiProvider.searchPaginatedAPIs(searchContent, tenantDomain,
+                    offset, limit, false);
+            Set<API> apis = (Set<API>) result.get("apis");
+            allMatchedApis.addAll(apis);
+
             apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, offset, limit);
             APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, allMatchedApis.size());
             return Response.ok().entity(apiListDTO).build();
