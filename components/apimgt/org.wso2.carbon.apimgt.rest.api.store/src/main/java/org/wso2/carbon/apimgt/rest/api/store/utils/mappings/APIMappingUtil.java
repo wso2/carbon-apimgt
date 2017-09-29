@@ -170,6 +170,32 @@ public class APIMappingUtil {
 
         return apiListDTO;
     }
+    
+    /**
+     * Converts a List object of APIs into a DTO
+     *
+     * @param apiList List of APIs
+     * @param limit   maximum number of APIs returns
+     * @param offset  starting index
+     * @return APIListDTO object containing APIDTOs
+     */
+    public static APIListDTO fromAPIListToDTO(List<API> apiList, int offset, int limit) {
+        APIListDTO apiListDTO = new APIListDTO();
+        List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
+        if (apiInfoDTOs == null) {
+            apiInfoDTOs = new ArrayList<>();
+            apiListDTO.setList(apiInfoDTOs);
+        }
+
+        //add the required range of objects to be returned
+        int start = offset < apiList.size() && offset >= 0 ? offset : Integer.MAX_VALUE;
+        int end = offset + limit - 1 <= apiList.size() - 1 ? offset + limit - 1 : apiList.size() - 1;
+        for (int i = start; i <= end; i++) {
+            apiInfoDTOs.add(fromAPIToInfoDTO(apiList.get(i)));
+        }
+        apiListDTO.setCount(apiInfoDTOs.size());
+        return apiListDTO;
+    }
 
     /**
      * Creates a minimal DTO representation of an API object

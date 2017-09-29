@@ -46,6 +46,7 @@ import javax.ws.rs.core.Response;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -90,47 +91,40 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
 
-            //if query parameter is not specified, This will search by name
-            String searchType = APIConstants.API_NAME;
-            String searchContent = "*";
-            if (!StringUtils.isBlank(query)) {
-                String[] querySplit = query.split(":");
-                if (querySplit.length == 2 && StringUtils.isNotBlank(querySplit[0]) && StringUtils
-                        .isNotBlank(querySplit[1])) {
-                    searchType = querySplit[0];
-                    searchContent = querySplit[1];
-                } else if (querySplit.length == 1) {
-                    searchContent = query;
-                } else {
-                    RestApiUtil.handleBadRequest("Provided query parameter '" + query + "' is invalid", log);
+            String newSearchQuery = "";
+            String inputSearchQuery = query.trim();
+            // sub context and doc content doesn't support AND search
+            if (inputSearchQuery.contains(" ")) {
+                if (inputSearchQuery.split(" ").length > 1) {
+                    String[] searchCriterias = inputSearchQuery.split(" ");
+                    for (int i = 0; i < searchCriterias.length; i++) {
+                        if (searchCriterias[i].contains(":") && searchCriterias[i].split(":").length > 1) {
+                            if (APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX
+                                    .equalsIgnoreCase(searchCriterias[i].split(":")[0])
+                                    || APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX
+                                            .equalsIgnoreCase(searchCriterias[i].split(":")[0])) {
+                                throw new APIManagementException("Invalid query. AND based search is not supported for "
+                                        + "doc and subcontext prefixes");
+                            }
+                        }
+                        if (i == 0) {
+                            newSearchQuery = APIUtil.getSingleSearchCriteria(searchCriterias[i]);
+                        } else {
+                            newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG
+                                    + APIUtil.getSingleSearchCriteria(searchCriterias[i]);
+                        }
+                    }
                 }
-            }
-
-            if (searchType.equalsIgnoreCase(APIConstants.API_STATUS) &&
-                    searchContent.equalsIgnoreCase(APIConstants.PROTOTYPED)) {
-                apisMap = apiConsumer.getAllPaginatedAPIsByStatus(requestedTenantDomain, offset, limit,
-                        APIConstants.PROTOTYPED, false);
             } else {
-                apisMap = apiConsumer
-                        .searchPaginatedAPIs(searchContent, searchType, requestedTenantDomain, offset, limit, true);
+                newSearchQuery = APIUtil.getSingleSearchCriteria(inputSearchQuery);
             }
+            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
+            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(newSearchQuery, tenantDomain, offset, limit, false);
+            Set<API> sortedSet = (Set<API>) allMatchedApisMap.get("apis"); // This is a SortedSet
+            ArrayList<API> allMatchedApis = new ArrayList<>(sortedSet);
 
-            Object apisResult = apisMap.get(APIConstants.API_DATA_APIS);
-            //APIConstants.API_DATA_LENGTH is returned by executing searchPaginatedAPIs()
-            if (apisMap.containsKey(APIConstants.API_DATA_LENGTH)) {
-                size = (int) apisMap.get(APIConstants.API_DATA_LENGTH);
-                //APIConstants.API_DATA_TOT_LENGTH is returned by executing getAllPaginatedAPIsByStatus()
-            } else if (apisMap.containsKey(APIConstants.API_DATA_TOT_LENGTH)) {
-                size = (int) apisMap.get(APIConstants.API_DATA_TOT_LENGTH);
-            } else {
-                log.warn("Size could not be determined from apis GET result for query " + query);
-            }
-
-            if (apisResult != null) {
-                Set<API> apiSet = (Set) apisResult;
-                apiListDTO = APIMappingUtil.fromAPISetToDTO(apiSet);
-                APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, size);
-            }
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, offset, limit);
+            APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, allMatchedApis.size());
 
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {

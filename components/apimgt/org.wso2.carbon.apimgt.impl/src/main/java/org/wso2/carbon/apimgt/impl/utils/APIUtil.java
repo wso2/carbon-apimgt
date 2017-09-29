@@ -6462,6 +6462,12 @@ public final class APIUtil {
         if (criteria.contains(":")) {
             if (criteria.split(":").length > 1) {
                 searchKey = criteria.split(":")[0].trim();
+                //if search key is 'tag' instead of 'tags', allow it as well since rest api document says query
+                // param to use for tag search is 'tag' 
+                
+                if (APIConstants.TAG_SEARCH_TYPE_PREFIX3.equals(searchKey)) {
+                    searchKey = APIConstants.TAG_SEARCH_TYPE_PREFIX;
+                }
                 searchValue = criteria.split(":")[1];
                 if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKey) &&
                         !APIConstants.TAG_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKey)) {
