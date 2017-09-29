@@ -50,6 +50,7 @@ import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
 import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 
 import javax.xml.namespace.QName;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -88,31 +89,26 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         if (log.isDebugEnabled()) {
             log.debug("Trying to create OAuth application :" + applicationName);
         }
-
-
+        
         
         String tokenScope = (String) oAuthApplicationInfo.getParameter("tokenScope");
         String tokenScopes[] = new String[1];
         tokenScopes[0] = tokenScope;
 
-        
-        
+               
         org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = null;
-        SubscriberKeyMgtClient keyMgtClient = null;
+
         try {
-            keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
             org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationToCreate = new org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo();
             applicationToCreate.setIsSaasApplication(oAuthApplicationInfo.getIsSaasApplication());
             applicationToCreate.setCallBackURL(oAuthApplicationInfo.getCallBackURL());
             applicationToCreate.setClientName(applicationName);
             applicationToCreate.setAppOwner(userId);
             applicationToCreate.setJsonString(oAuthApplicationInfo.getJsonString());
-            info = keyMgtClient.createOAuthApplicationbyApplicationInfo(applicationToCreate);
+            info = createOAuthApplicationbyApplicationInfo(applicationToCreate);
         } catch (Exception e) {
             handleException("Can not create OAuth application  : " + applicationName, e);
-        } finally {
-            SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
-        }
+        } 
 
         if (info == null || info.getJsonString() == null) {
             handleException("OAuth app does not contains required data  : " + applicationName,
@@ -155,10 +151,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     @Override
     public OAuthApplicationInfo updateApplication(OAuthAppRequest appInfoDTO) throws APIManagementException {
         OAuthApplicationInfo oAuthApplicationInfo = appInfoDTO.getOAuthApplicationInfo();
-        SubscriberKeyMgtClient keyMgtClient = null;
 
         try {
-            keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
 
             String userId = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_USERNAME);
             String[] grantTypes = null;
@@ -181,9 +175,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             if (log.isDebugEnabled() && applicationName != null) {
                 log.debug("Client Name : " + applicationName);
             }
-            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationInfo = keyMgtClient
-                    .updateOAuthApplication(userId, applicationName, oAuthApplicationInfo.getCallBackURL(),
-                            oAuthApplicationInfo.getClientId(), grantTypes);
+            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationInfo = updateOAuthApplication(userId, 
+                            applicationName, oAuthApplicationInfo.getCallBackURL(),oAuthApplicationInfo.getClientId(), 
+                            grantTypes);
             OAuthApplicationInfo newAppInfo = new OAuthApplicationInfo();
             newAppInfo.setClientId(applicationInfo.getClientId());
             newAppInfo.setCallBackURL(applicationInfo.getCallBackURL());
@@ -192,12 +186,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             return newAppInfo;
         } catch (Exception e) {
             handleException("Error occurred while updating OAuth Client : ", e);
-        } finally {
-            if (keyMgtClient != null) {
-                SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
-            }
-        }
-
+        } 
         return null;
     }
 
@@ -224,17 +213,14 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
     @Override
     public OAuthApplicationInfo retrieveApplication(String consumerKey) throws APIManagementException {
-        //SubscriberKeyMgtClient keyMgtClient = APIUtil.getKeyManagementClient();
 
-        SubscriberKeyMgtClient keyMgtClient = null;
         if (log.isDebugEnabled()) {
             log.debug("Trying to retrieve OAuth application for consumer key :" + consumerKey);
         }
 
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         try {
-            keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
-            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = keyMgtClient.getOAuthApplication(consumerKey);
+            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = getOAuthApplication(consumerKey);
 
             if (info == null || info.getClientId() == null) {
                 return null;
@@ -264,11 +250,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         } catch (Exception e) {
             handleException("Can not retrieve OAuth application for the given consumer key : " + consumerKey, e);
-        } finally {
-            if (keyMgtClient != null) {
-                SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
-            }
-        }
+        } 
         return oAuthApplicationInfo;
     }
 
@@ -285,9 +267,9 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             return null;
         }
 
-        String tokenEndpoint = configuration.getParameter(APIConstants.TOKEN_URL);
+        String tokenEndpoint = getConfigurationParamValue(APIConstants.TOKEN_URL);
         //To revoke tokens we should call revoke API deployed in API gateway.
-        String revokeEndpoint = configuration.getParameter(APIConstants.REVOKE_URL);
+        String revokeEndpoint = getConfigurationParamValue(APIConstants.REVOKE_URL);
         URL keyMgtURL = new URL(tokenEndpoint);
         int keyMgtPort = keyMgtURL.getPort();
         String keyMgtProtocol = keyMgtURL.getProtocol();
@@ -298,8 +280,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 URL revokeEndpointURL = new URL(revokeEndpoint);
                 String revokeEndpointProtocol = revokeEndpointURL.getProtocol();
                 int revokeEndpointPort = revokeEndpointURL.getPort();
-
-                HttpClient revokeEPClient = APIUtil.getHttpClient(revokeEndpointPort, revokeEndpointProtocol);
 
                 HttpPost httpRevokePost = new HttpPost(revokeEndpoint);
 
@@ -314,7 +294,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 httpRevokePost.setEntity(new UrlEncodedFormEntity(revokeParams, "UTF-8"));
                 int statusCode;
                 try {
-                    HttpResponse revokeResponse = revokeEPClient.execute(httpRevokePost);
+                    HttpResponse revokeResponse = executeHTTPrequest(revokeEndpointPort, revokeEndpointProtocol, 
+                                                                     httpRevokePost);
                     statusCode = revokeResponse.getStatusLine().getStatusCode();
                 } finally {
                     httpRevokePost.reset();
@@ -330,9 +311,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             }
             //get default application access token name from config.
 
-            String applicationTokenScope = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                                            getAPIManagerConfiguration().getFirstProperty(APIConstants
-                                                                            .APPLICATION_TOKEN_SCOPE);
+            String applicationTokenScope = getConfigurationElementValue(APIConstants.APPLICATION_TOKEN_SCOPE);
 
             // When validity time set to a negative value, a token is considered never to expire.
             if (tokenRequest.getValidityPeriod() == OAuthConstants.UNASSIGNED_VALIDITY_PERIOD) {
@@ -341,7 +320,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             }
 
             //Generate New Access Token
-            HttpClient tokenEPClient = APIUtil.getHttpClient(keyMgtPort, keyMgtProtocol);
             HttpPost httpTokpost = new HttpPost(tokenEndpoint);
             List<NameValuePair> tokParams = new ArrayList<NameValuePair>(3);
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, GRANT_TYPE_VALUE));
@@ -360,7 +338,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
             httpTokpost.setEntity(new UrlEncodedFormEntity(tokParams, "UTF-8"));
             try {
-                HttpResponse tokResponse = tokenEPClient.execute(httpTokpost);
+                HttpResponse tokResponse = executeHTTPrequest(keyMgtPort, keyMgtProtocol, httpTokpost);
                 HttpEntity tokEntity = tokResponse.getEntity();
 
                 if (tokResponse.getStatusLine().getStatusCode() != 200) {
@@ -398,7 +376,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public AccessTokenInfo getTokenMetaData(String accessToken) throws APIManagementException {
 
         AccessTokenInfo tokenInfo = new AccessTokenInfo();
-        OAuth2TokenValidationService oAuth2TokenValidationService = new OAuth2TokenValidationService();
         OAuth2TokenValidationRequestDTO requestDTO = new OAuth2TokenValidationRequestDTO();
         OAuth2TokenValidationRequestDTO.OAuth2AccessToken token = requestDTO.new OAuth2AccessToken();
 
@@ -417,8 +394,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         contextParams[0] = contextParam;
         requestDTO.setContext(contextParams);
 
-        OAuth2ClientApplicationDTO clientApplicationDTO = oAuth2TokenValidationService.findOAuthConsumerIfTokenIsValid
-                (requestDTO);
+        OAuth2ClientApplicationDTO clientApplicationDTO = findOAuthConsumerIfTokenIsValid(requestDTO);
         OAuth2TokenValidationResponseDTO responseDTO = clientApplicationDTO.getAccessTokenValidationResponse();
 
         if (!responseDTO.isValid()) {
@@ -444,9 +420,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         // If token has am_application_scope, consider the token as an Application token.
         String[] scopes = responseDTO.getScope();
-        String applicationTokenScope = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                                                getAPIManagerConfiguration().getFirstProperty(APIConstants.
-                APPLICATION_TOKEN_SCOPE);
+        String applicationTokenScope = getConfigurationElementValue(APIConstants.APPLICATION_TOKEN_SCOPE);
 
         if (scopes != null && applicationTokenScope != null && !applicationTokenScope.isEmpty()) {
             if (Arrays.asList(scopes).contains(applicationTokenScope)) {
@@ -454,8 +428,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             }
         }
 
-        if (APIUtil.checkAccessTokenPartitioningEnabled() &&
-                APIUtil.checkUserNameAssertionEnabled()) {
+        if (checkAccessTokenPartitioningEnabled() &&
+                checkUserNameAssertionEnabled()) {
             tokenInfo.setConsumerKey(ApiMgtDAO.getInstance().getConsumerKeyForTokenWhenTokenPartitioningEnabled(accessToken));
         }
 
@@ -494,15 +468,13 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         oAuthApplicationInfo.setClientSecret(clientSecret);
         //for the first time we set default time period.
         oAuthApplicationInfo.addParameter(ApplicationConstants.VALIDITY_PERIOD,
-                configuration.getParameter(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD));
+                                      getConfigurationParamValue(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD));
 
 
         //check whether given consumer key and secret match or not. If it does not match throw an exception.
-        SubscriberKeyMgtClient keyMgtClient = null;
         org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = null;
         try {
-            keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
-            info = keyMgtClient.getOAuthApplication(oAuthApplicationInfo.getClientId());
+            info = getOAuthApplication(oAuthApplicationInfo.getClientId());
             if (!clientSecret.equals(info.getClientSecret())) {
                 throw new APIManagementException("The secret key is wrong for the given consumer key " + consumerKey);
             }
@@ -510,11 +482,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         } catch (Exception e) {
             handleException("Some thing went wrong while getting OAuth application for given consumer key " +
                     oAuthApplicationInfo.getClientId(), e);
-        } finally {
-            if (keyMgtClient != null) {
-                SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
-            }
-        }
+        } 
         if (info != null && info.getClientId() == null) {
             return null;
         }
@@ -533,18 +501,14 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         if (configuration != null) {
             this.configuration = configuration;
         } else {
-
             // If the provided configuration is null, read the Server-URL and other properties from
-            // APIKeyValidator section.
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
+            // APIKeyValidator section.            
+
             /**
              * we need to read identity.xml here because we need to get default validity time for access_token in order
              * to set in semi-manual.
              */
-            IdentityConfigParser configParser;
-            configParser = IdentityConfigParser.getInstance();
-            OMElement oauthElem = configParser.getConfigElement(CONFIG_ELEM_OAUTH);
+            OMElement oauthElem = getOAuthConfigElement();
 
             String validityPeriod = null;
 
@@ -556,21 +520,24 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 OMElement loginConfigElem =  oauthElem.getFirstChildWithName(getQNameWithIdentityNS("AccessTokenDefaultValidityPeriod"));
                 validityPeriod = loginConfigElem.getText();
             }
-
+            
+            
             if (this.configuration == null) {
                 this.configuration = new KeyManagerConfiguration();
                 this.configuration.setManualModeSupported(true);
                 this.configuration.setResourceRegistrationEnabled(true);
                 this.configuration.setTokenValidityConfigurable(true);
-                this.configuration.addParameter(APIConstants.AUTHSERVER_URL, config.getFirstProperty(APIConstants
+                this.configuration.addParameter(APIConstants.AUTHSERVER_URL, getConfigurationElementValue(APIConstants
                         .KEYMANAGER_SERVERURL));
-                this.configuration.addParameter(APIConstants.KEY_MANAGER_USERNAME, config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME));
-                this.configuration.addParameter(APIConstants.KEY_MANAGER_PASSWORD, config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD))
+                this.configuration.addParameter(APIConstants.KEY_MANAGER_USERNAME, 
+                                                getConfigurationElementValue(APIConstants.API_KEY_VALIDATOR_USERNAME));
+                this.configuration.addParameter(APIConstants.KEY_MANAGER_PASSWORD, 
+                                                getConfigurationElementValue(APIConstants.API_KEY_VALIDATOR_PASSWORD))
                 ;
-                this.configuration.addParameter(APIConstants.REVOKE_URL, config.getFirstProperty(APIConstants
+                this.configuration.addParameter(APIConstants.REVOKE_URL, getConfigurationElementValue(APIConstants
                         .REVOKE_API_URL));
                 this.configuration.addParameter(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD,validityPeriod);
-                String revokeUrl = config.getFirstProperty(APIConstants.REVOKE_API_URL);
+                String revokeUrl = getConfigurationElementValue(APIConstants.REVOKE_API_URL);
 
                 // Read the revoke url and replace revoke part to get token url.
                 String tokenUrl = revokeUrl != null ? revokeUrl.replace("revoke", "token") : null;
@@ -637,6 +604,111 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     private void handleException(String msg, Exception e) throws APIManagementException {
         log.error(msg, e);
         throw new APIManagementException(msg, e);
+    }
+    
+    protected org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo createOAuthApplicationbyApplicationInfo(
+                      org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationToCreate) throws Exception {
+        SubscriberKeyMgtClient keyMgtClient = null;
+        try {
+            keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
+            return keyMgtClient.createOAuthApplicationbyApplicationInfo(applicationToCreate);
+        } finally {
+            SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
+        }
+
+    }
+    
+    protected org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo updateOAuthApplication(String userId, 
+                  String applicationName, String callBackURL, String clientId, String[] grantTypes) throws Exception {
+        SubscriberKeyMgtClient keyMgtClient = null;
+        try {
+            keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
+            return keyMgtClient
+                    .updateOAuthApplication(userId, applicationName, callBackURL, clientId, grantTypes);
+        } finally {
+            SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
+        }
+
+    }
+    
+    protected org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo getOAuthApplication(String consumerKey)
+                                                                                                    throws Exception {
+        SubscriberKeyMgtClient keyMgtClient = null;
+        try {
+            keyMgtClient = SubscriberKeyMgtClientPool.getInstance().get();
+            return keyMgtClient.getOAuthApplication(consumerKey);
+        } finally {
+            SubscriberKeyMgtClientPool.getInstance().release(keyMgtClient);
+        }
+    }
+    
+    /**
+     * Executes the HTTP request and returns the response
+     * @param port 
+     * @param protocol
+     * @param httpPost Post payload
+     * @return response
+     * @throws ClientProtocolException
+     * @throws IOException
+     */
+    protected HttpResponse executeHTTPrequest(int port, String protocol, HttpPost httpPost) throws 
+                                                                                 ClientProtocolException, IOException {
+        HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
+        return httpClient.execute(httpPost);
+    }
+    
+    /**
+     * Returns the value of the provided APIM configuration element
+     * @param property APIM configuration element name
+     * @return APIM configuration element value
+     */
+    protected String getConfigurationElementValue(String property) {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration().
+                getFirstProperty(property);
+    }
+    
+    /**
+     * Return the value of the provided configuration parameter
+     * @param parameter Parameter name
+     * @return Parameter value
+     */
+    protected String getConfigurationParamValue(String parameter) {
+        return configuration.getParameter(parameter);
+    }
+    
+    
+    /**
+     * Returns the OAuth application details if the token is valid
+     * @param requestDTO Token validation request
+     * @return
+     */
+    protected OAuth2ClientApplicationDTO findOAuthConsumerIfTokenIsValid(OAuth2TokenValidationRequestDTO requestDTO) {
+        OAuth2TokenValidationService oAuth2TokenValidationService = new OAuth2TokenValidationService();
+        return oAuth2TokenValidationService.findOAuthConsumerIfTokenIsValid(requestDTO);
+    }
+    
+    /**
+     * Check whether Token partitioning is enabled
+     * @return true/false
+     */
+    protected boolean checkAccessTokenPartitioningEnabled() {
+        return APIUtil.checkAccessTokenPartitioningEnabled(); 
+    }
+    
+    /**
+     * Check whether user name assertion is enabled
+     * @return true/false
+     */
+    protected boolean checkUserNameAssertionEnabled() {
+        return APIUtil.checkUserNameAssertionEnabled();
+    }
+    
+    /**
+     * Returns OAuth COnfiguration from identity.xml
+     * @return OAuth COnfiguration
+     */
+    protected OMElement getOAuthConfigElement() {
+        return IdentityConfigParser.getInstance().getConfigElement(CONFIG_ELEM_OAUTH);
     }
 
 }
