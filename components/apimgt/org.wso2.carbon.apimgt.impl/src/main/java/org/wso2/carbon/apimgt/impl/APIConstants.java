@@ -1188,6 +1188,7 @@ public final class APIConstants {
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX2 = "doc=";
     public static final String TAG_SEARCH_TYPE_PREFIX = "tags";
     public static final String TAG_SEARCH_TYPE_PREFIX2 = "tags=";
+    public static final String TAG_SEARCH_TYPE_PREFIX3 = "tag";
     public static final String NAME_TYPE_PREFIX = "name";
 
     public static class AdvancedThrottleConstants {
@@ -1265,6 +1266,7 @@ public final class APIConstants {
     }
 
     public static final String API_WORKFLOW_STATE_ATTR = "overview_workflowState";
+
 
     public static class WorkflowConfigConstants {
         public static final String WORKFLOW = "WorkflowConfigurations";
