@@ -51,23 +51,25 @@ public class APIExecutorTestCase {
     private API api = Mockito.mock(API.class);
 
     @Before
-    public void setup() throws Exception{
+    public void setup() throws Exception {
         Mockito.when(resource.getUUID()).thenReturn(ARTIFACT_ID);
         Mockito.when(requestContext.getResource()).thenReturn(resource);
         Mockito.when(genericArtifactManager.getGenericArtifact(ARTIFACT_ID)).thenReturn(genericArtifact);
         Mockito.when(genericArtifact.getLifecycleState()).thenReturn("CREATED");
         Mockito.when(api.getEndpointConfig()).thenReturn("http://foo.com/api");
         Mockito.when(api.getId()).thenReturn(apiIdentifier);
-        Mockito.when(apiProvider.propergateAPIStatusChangeToGateways(apiIdentifier, APIStatus.PUBLISHED)).thenReturn(null);
+        Mockito.when(apiProvider.propergateAPIStatusChangeToGateways(apiIdentifier, APIStatus.PUBLISHED))
+                .thenReturn(null);
         Mockito.when(apiProvider.updateAPIforStateChange(apiIdentifier, APIStatus.PUBLISHED, null)).thenReturn(true);
-        Mockito.when(userRegistry.get("/apimgt/applicationdata/provider/john/pizza-shack/1.0.0/api")).thenReturn(resource);
+        Mockito.when(userRegistry.get("/apimgt/applicationdata/provider/john/pizza-shack/1.0.0/api"))
+                .thenReturn(resource);
         Mockito.when(api.getId().getProviderName()).thenReturn("john");
         Mockito.when(api.getId().getApiName()).thenReturn("pizza-shack");
         Mockito.when(api.getId().getVersion()).thenReturn("1.0.0");
     }
 
     @Test
-    public void testExecute() throws Exception{
+    public void testExecute() throws Exception {
 
         Tier tier1 = new Tier("GOLD");
         Tier tier2 = new Tier("SILVER");
@@ -75,7 +77,39 @@ public class APIExecutorTestCase {
         hashSet.add(tier1);
         hashSet.add(tier2);
         Mockito.when(api.getAvailableTiers()).thenReturn(hashSet);
-        APIExecutor apiExecutor = new APIExecutorWrapper(genericArtifactManager, userRegistry, apiProvider, api);
+        APIExecutor apiExecutor = new APIExecutorWrapper(genericArtifactManager, userRegistry, apiProvider, api,
+                "carbon.super");
+        boolean isExecuted = apiExecutor.execute(requestContext, "CREATED", "PUBLISHED");
+        Assert.assertTrue(isExecuted);
+    }
+
+    @Test
+    public void testExecuteWhenArtifactIdnull() throws Exception {
+
+        Tier tier1 = new Tier("GOLD");
+        Tier tier2 = new Tier("SILVER");
+        Set<Tier> hashSet = new HashSet<Tier>();
+        hashSet.add(tier1);
+        hashSet.add(tier2);
+        Mockito.when(api.getAvailableTiers()).thenReturn(hashSet);
+        Mockito.when(resource.getUUID()).thenReturn(null);
+        APIExecutor apiExecutor = new APIExecutorWrapper(genericArtifactManager, userRegistry, apiProvider, api,
+                "carbon.super");
+        boolean isExecuted = apiExecutor.execute(requestContext, "CREATED", "PUBLISHED");
+        Assert.assertFalse(isExecuted);
+    }
+
+    @Test
+    public void testExecuteTenant() throws Exception {
+
+        Tier tier1 = new Tier("GOLD");
+        Tier tier2 = new Tier("SILVER");
+        Set<Tier> hashSet = new HashSet<Tier>();
+        hashSet.add(tier1);
+        hashSet.add(tier2);
+        Mockito.when(api.getAvailableTiers()).thenReturn(hashSet);
+        APIExecutor apiExecutor = new APIExecutorWrapper(genericArtifactManager, userRegistry, apiProvider, api,
+                "foo.com");
         boolean isExecuted = apiExecutor.execute(requestContext, "CREATED", "PUBLISHED");
         Assert.assertTrue(isExecuted);
     }
@@ -98,7 +132,8 @@ public class APIExecutorTestCase {
         Mockito.when(apiTemp.getId().getApiName()).thenReturn("pizza-shack");
         Mockito.when(apiTemp.getId().getVersion()).thenReturn("1.0.0");
         Mockito.when(apiProvider.getAPIsByProvider("john")).thenReturn(apiList);
-        APIExecutor apiExecutor = new APIExecutorWrapper(genericArtifactManager, userRegistry, apiProvider, api);
+        APIExecutor apiExecutor = new APIExecutorWrapper(genericArtifactManager, userRegistry, apiProvider, api,
+                "carbon.super");
         boolean isExecuted = apiExecutor.execute(requestContext, "CREATED", "PUBLISHED");
         Mockito.verify(apiProvider, Mockito.times(1)).getAPIsByProvider("john");
         Assert.assertTrue(isExecuted);

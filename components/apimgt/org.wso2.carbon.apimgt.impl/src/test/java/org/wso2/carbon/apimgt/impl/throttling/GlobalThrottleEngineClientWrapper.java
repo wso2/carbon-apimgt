@@ -36,15 +36,18 @@ public class GlobalThrottleEngineClientWrapper extends GlobalThrottleEngineClien
         this.policyDeployer = policyDeployer;
     }
 
-    @Override protected AuthenticationAdminStub getAuthenticationAdminStub() {
+    @Override
+    protected AuthenticationAdminStub getAuthenticationAdminStub() {
         return authenticationAdminStub;
     }
 
-    @Override protected ThrottleProperties.PolicyDeployer getPolicyDeployer() {
+    @Override
+    protected ThrottleProperties.PolicyDeployer getPolicyDeployer() {
         return policyDeployer;
     }
 
-    @Override protected EventProcessorAdminServiceStub getEventProcessorAdminServiceStub() throws AxisFault {
+    @Override
+    protected EventProcessorAdminServiceStub getEventProcessorAdminServiceStub() throws AxisFault {
         return eventProcessorAdminServiceStub;
     }
 }

@@ -28,7 +28,6 @@ import org.wso2.carbon.user.api.UserStoreException;
 public class APIExecutorWrapper extends APIExecutor {
 
     private final String USER_NAME = "john";
-    private final String TENANT_DOMAIN = "carbon.super";
     private final int TENANT_ID = 1234;
 
     private GenericArtifactManager genericArtifactManager;
@@ -36,18 +35,20 @@ public class APIExecutorWrapper extends APIExecutor {
     private APIProvider apiProvider;
     private API api;
     private String apiPath = "/api/somepath";
+    private String tenantDomain;
 
     public APIExecutorWrapper(GenericArtifactManager genericArtifactManager, UserRegistry userRegistry,
-            APIProvider apiProvider, API api) {
+            APIProvider apiProvider, API api, String tenantDomain) {
         this.genericArtifactManager = genericArtifactManager;
         this.userRegistry = userRegistry;
         this.apiProvider = apiProvider;
         this.api = api;
+        this.tenantDomain = tenantDomain;
     }
 
     @Override
     protected API getApi(GenericArtifact apiArtifact) throws APIManagementException {
-       return  api;
+        return api;
     }
 
     @Override
@@ -57,7 +58,7 @@ public class APIExecutorWrapper extends APIExecutor {
 
     @Override
     protected String getTenantDomain() {
-        return TENANT_DOMAIN;
+        return tenantDomain;
     }
 
     @Override
