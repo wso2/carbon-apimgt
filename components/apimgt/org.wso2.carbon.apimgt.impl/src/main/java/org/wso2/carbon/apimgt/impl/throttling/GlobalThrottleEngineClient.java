@@ -60,7 +60,7 @@ public class GlobalThrottleEngineClient {
     }
 
     protected String getHost() throws MalformedURLException {
-        return new URL(policyDeployerConfiguration.getServiceUrl()).getHost();
+        return new URL(getPolicyDeployer().getServiceUrl()).getHost();
     }
 
     protected AuthenticationAdminStub getAuthenticationAdminStub() throws AxisFault {

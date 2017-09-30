@@ -24,36 +24,27 @@ import java.net.MalformedURLException;
 
 public class GlobalThrottleEngineClientWrapper extends GlobalThrottleEngineClient {
 
-
-    private final String HOST = "foo.com";
     private AuthenticationAdminStub authenticationAdminStub;
     private EventProcessorAdminServiceStub eventProcessorAdminServiceStub;
     private ThrottleProperties.PolicyDeployer policyDeployer;
 
-
-    public GlobalThrottleEngineClientWrapper(AuthenticationAdminStub authenticationAdminStub, EventProcessorAdminServiceStub eventProcessorAdminServiceStub, ThrottleProperties.PolicyDeployer policyDeployer) {
+    public GlobalThrottleEngineClientWrapper(AuthenticationAdminStub authenticationAdminStub,
+            EventProcessorAdminServiceStub eventProcessorAdminServiceStub,
+            ThrottleProperties.PolicyDeployer policyDeployer) {
         this.authenticationAdminStub = authenticationAdminStub;
         this.eventProcessorAdminServiceStub = eventProcessorAdminServiceStub;
         this.policyDeployer = policyDeployer;
     }
 
-    @Override
-    protected AuthenticationAdminStub getAuthenticationAdminStub() {
-        return  authenticationAdminStub;
+    @Override protected AuthenticationAdminStub getAuthenticationAdminStub() {
+        return authenticationAdminStub;
     }
 
-    @Override
-    protected ThrottleProperties.PolicyDeployer getPolicyDeployer() {
-        return  policyDeployer;
+    @Override protected ThrottleProperties.PolicyDeployer getPolicyDeployer() {
+        return policyDeployer;
     }
 
-    @Override
-    protected String getHost() throws MalformedURLException {
-        return HOST;
-    }
-
-    @Override
-    protected EventProcessorAdminServiceStub getEventProcessorAdminServiceStub() throws AxisFault {
+    @Override protected EventProcessorAdminServiceStub getEventProcessorAdminServiceStub() throws AxisFault {
         return eventProcessorAdminServiceStub;
     }
 }

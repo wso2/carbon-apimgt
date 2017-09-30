@@ -15,6 +15,7 @@
 */
 package org.wso2.carbon.apimgt.impl.throttling;
 
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.OperationContext;
@@ -50,7 +51,6 @@ public class GlobalThrottleEngineClientTestCase {
     private Options options = Mockito.mock(Options.class);
     private ThrottleProperties.PolicyDeployer policyDeployer = Mockito.mock(ThrottleProperties.PolicyDeployer.class);
 
-
     @Before
     public void init() throws Exception {
         Mockito.when(serviceClient.getLastOperationContext()).thenReturn(operationContext);
@@ -64,6 +64,7 @@ public class GlobalThrottleEngineClientTestCase {
         Mockito.when(eventProcessorAdminServiceStub.validateExecutionPlan(EX_PLAN_WRONG)).thenReturn("error");
         Mockito.when(policyDeployer.getUsername()).thenReturn(USER_NAME);
         Mockito.when(policyDeployer.getPassword()).thenReturn(PASSWORD);
+        Mockito.when(policyDeployer.getServiceUrl()).thenReturn("http://foo.com");
     }
 
     @Test
@@ -92,12 +93,72 @@ public class GlobalThrottleEngineClientTestCase {
     }
 
     @Test
-    public void testLoginAuthenticationExceptionWhenLogin() throws Exception{
+    public void testRemoteExceptionWhenDeleteExPlan() throws Exception{
+        GlobalThrottleEngineClient globalThrottleEngineClient = new GlobalThrottleEngineClientWrapper(authenticationAdminStub, eventProcessorAdminServiceStub, policyDeployer);
+        Mockito.when(authenticationAdminStub.login(USER_NAME, PASSWORD, HOST)).thenThrow(RemoteException.class);
+        globalThrottleEngineClient.deleteExecutionPlan(EX_PLAN_WRONG);
+        Mockito.verify(authenticationAdminStub, Mockito.atLeastOnce()).login(USER_NAME, PASSWORD, HOST);
+    }
+
+    @Test
+    public void testRemoteExceptionWhenDeployExPlanAndLogout() throws Exception{
+        GlobalThrottleEngineClient globalThrottleEngineClient = new GlobalThrottleEngineClientWrapper(authenticationAdminStub, eventProcessorAdminServiceStub, policyDeployer);
+        Mockito.doThrow(RemoteException.class).when(authenticationAdminStub).logout();
+        globalThrottleEngineClient.deployExecutionPlan(EX_PLAN);
+        Mockito.verify(authenticationAdminStub, Mockito.atLeastOnce()).login(USER_NAME, PASSWORD, HOST);
+        Mockito.verify(eventProcessorAdminServiceStub, Mockito.times(1)).deployExecutionPlan(EX_PLAN);
+    }
+
+    @Test
+    public void testRemoteExceptionWhenUpdateExPlanAndLogout() throws Exception{
+        GlobalThrottleEngineClient globalThrottleEngineClient = new GlobalThrottleEngineClientWrapper(authenticationAdminStub, eventProcessorAdminServiceStub, policyDeployer);
+        Mockito.doThrow(RemoteException.class).when(authenticationAdminStub).logout();
+        globalThrottleEngineClient.updateExecutionPlan(EX_PLAN_NAME, EX_PLAN);
+        Mockito.verify(authenticationAdminStub, Mockito.atLeastOnce()).login(USER_NAME, PASSWORD, HOST);
+        Mockito.verify(eventProcessorAdminServiceStub, Mockito.times(1)).editActiveExecutionPlan(EX_PLAN, EX_PLAN_NAME);
+    }
+
+
+    @Test
+    public void testMalformedURLExceptionWhenValidateExPlan() throws Exception{
+        GlobalThrottleEngineClient globalThrottleEngineClient = new GlobalThrottleEngineClientWrapper(authenticationAdminStub, eventProcessorAdminServiceStub, policyDeployer);
+        Mockito.when(policyDeployer.getServiceUrl()).thenReturn("htp://foo.com");
+        boolean validity= globalThrottleEngineClient.validateExecutionPlan(EX_PLAN);
+        Assert.assertFalse(validity);
+    }
+
+    @Test
+    public void testMalformedURLExceptionWhenDeleteExPlan() throws Exception{
+        GlobalThrottleEngineClient globalThrottleEngineClient = new GlobalThrottleEngineClientWrapper(authenticationAdminStub, eventProcessorAdminServiceStub, policyDeployer);
+        Mockito.when(policyDeployer.getServiceUrl()).thenReturn("htp://foo.com");
+        globalThrottleEngineClient.deleteExecutionPlan(EX_PLAN_NAME);
+        Mockito.verify(eventProcessorAdminServiceStub, Mockito.times(1)).undeployActiveExecutionPlan(EX_PLAN_NAME);
+    }
+
+    @Test
+    public void testRemoteExceptionWhenDeleteExPlanViaEventProcessorStub() throws Exception{
+        GlobalThrottleEngineClient globalThrottleEngineClient = new GlobalThrottleEngineClientWrapper(authenticationAdminStub, eventProcessorAdminServiceStub, policyDeployer);
+        Mockito.doThrow(RemoteException.class).when(eventProcessorAdminServiceStub).undeployActiveExecutionPlan(EX_PLAN_NAME);
+        globalThrottleEngineClient.deleteExecutionPlan(EX_PLAN_NAME);
+        Mockito.verify(eventProcessorAdminServiceStub, Mockito.times(1)).undeployActiveExecutionPlan(EX_PLAN_NAME);
+    }
+
+
+    @Test
+    public void testLoginAuthenticationExceptionWhenLoginWhileDeploying() throws Exception{
         GlobalThrottleEngineClient globalThrottleEngineClient = new GlobalThrottleEngineClientWrapper(authenticationAdminStub, eventProcessorAdminServiceStub, policyDeployer);
         Mockito.when(authenticationAdminStub.login(USER_NAME,PASSWORD,HOST)).thenThrow(LoginAuthenticationExceptionException.class);
         boolean validity= globalThrottleEngineClient.validateExecutionPlan(EX_PLAN_WRONG);
         Mockito.verify(authenticationAdminStub, Mockito.atLeastOnce()).login(USER_NAME, PASSWORD, HOST);
         Assert.assertFalse(validity);
+    }
+
+    @Test
+    public void testLoginAuthenticationExceptionWhenLoginWhileDeleting() throws Exception{
+        GlobalThrottleEngineClient globalThrottleEngineClient = new GlobalThrottleEngineClientWrapper(authenticationAdminStub, eventProcessorAdminServiceStub, policyDeployer);
+        Mockito.when(authenticationAdminStub.login(USER_NAME,PASSWORD,HOST)).thenThrow(LoginAuthenticationExceptionException.class);
+        globalThrottleEngineClient.deleteExecutionPlan(EX_PLAN);
+        Mockito.verify(authenticationAdminStub, Mockito.atLeastOnce()).login(USER_NAME, PASSWORD, HOST);
     }
 
     @Test
