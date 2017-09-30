@@ -16,36 +16,23 @@
 
 package org.wso2.carbon.apimgt.impl.template;
 
-import java.util.Map;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 
 /**
- * This class acts as an model for handlers
+ * Wrapper class for SecurityConfigContext
  */
-public class HandlerConfig {
+public class SecurityConfigContextWrapper extends SecurityConfigContext {
 
-    public String className;
+    private APIManagerConfiguration apiManagerConfiguration;
 
-    public Map<String, String> properties;
-
-    public HandlerConfig(String className, Map<String, String> properties) {
-        this.className = className;
-        this.properties = properties;
+    public SecurityConfigContextWrapper(ConfigContext context, API api,
+                                        APIManagerConfiguration apiManagerConfiguration) {
+        super(context, api);
+        this.apiManagerConfiguration = apiManagerConfiguration;
     }
 
-    public String getClassName() {
-        return className;
+    protected APIManagerConfiguration getApiManagerConfiguration() {
+        return apiManagerConfiguration;
     }
-
-    public void setClassName(String className) {
-        this.className = className;
-    }
-
-    public Map<String, String> getProperties() {
-        return properties;
-    }
-
-    public void setProperties(Map<String, String> properties) {
-        this.properties = properties;
-    }
-
 }

@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.impl.template;
 import org.apache.velocity.VelocityContext;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.apache.commons.codec.binary.Base64;
 /**
@@ -40,8 +41,7 @@ public class SecurityConfigContext extends ConfigContextDecorator {
                         + api.getId().getVersion();
         String unpw = api.getEndpointUTUsername() + ":" + api.getEndpointUTPassword();
 
-        boolean isSecureVaultEnabled = Boolean.parseBoolean(ServiceReferenceHolder.getInstance().
-                                                     getAPIManagerConfigurationService().getAPIManagerConfiguration().
+        boolean isSecureVaultEnabled = Boolean.parseBoolean(getApiManagerConfiguration().
                                                      getFirstProperty(APIConstants.API_SECUREVAULT_ENABLE));
         
         context.put("isEndpointSecured", api.isEndpointSecured());
@@ -54,4 +54,7 @@ public class SecurityConfigContext extends ConfigContextDecorator {
         return context;
     }
 
+    protected APIManagerConfiguration getApiManagerConfiguration() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+    }
 }
