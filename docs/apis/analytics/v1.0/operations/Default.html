@@ -1,0 +1,1175 @@
+<div class="main-content">
+    <h1><a name="default"></a>default</h1>
+
+            <hr/>
+            <h3 class="operation-heading"><a name="apiCountOverTimeGet"></a>Retrieve APIs created over time details
+ <br><small>GET https://apis.wso2.com/api/am/analytics/v1.0/api/count-over-time</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">Get application created over time details from summarized data.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_graph</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:api_graph' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-apiCountOverTimeGet">
+                <h4 class="section-heading">
+                    Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+
+                <div id="request-apiCountOverTimeGet"class="pre collapse in"><code class="json">GET /api/am/analytics/v1.0/api/count-over-time?startTime&#x3D;2017-05-20T16%3A22%3A27.605Z&amp;endTime&#x3D;2017-10-27T16%3A22%3A27.605-05%3A30&amp;createdBy&#x3D;admin HTTP/1.1
+Host: localhost:9292
+accept: application/json
+authorization: Bearer b6b8d5ab-1118-362d-a6a9-2233956d80a0
+cache-control: no-cache
+content-type: application/json
+</code></div>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-apiCountOverTimeGet">
+                <h4 class="section-heading">
+                    Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+                <div id="response-apiCountOverTimeGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 112
+Content-Type: application/json
+{&quot;count&quot;:2,&quot;list&quot;:[{&quot;time&quot;:&quot;2017-09-11T09:55:49.204Z&quot;,&quot;count&quot;:1},{&quot;time&quot;:&quot;2017-09-12T11:34:56.560Z&quot;,&quot;count&quot;:2}]}
+</code></div>
+
+            <h4 class="section-heading">Sample CURL</h4>
+                <div class="pre"><code class="bash">curl -k -H \&quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\&quot;
+https://localhost:9292/api/am/analytics/v1.0/api/count-over-time?from&#x3D;2017-05-30%2012:32:41.972&amp;to&#x3D;2017-07-30%202:32:41.972&amp;created_by&#x3D;admin&amp;subscribed_to&#x3D;TestAPI
+</code></div>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>startTime</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Defines the starting timestamp of the interval
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>endTime</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Defines the ending timestamp of the interval
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>createdBy</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">application/api creator name. In case of any creator is not provided all the details will be provided
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Requested APIs created over time information is returned </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#APICountList">APICountList</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Request paramters attribute does not meet requiremnts. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h3 class="operation-heading"><a name="apiListGet"></a>Retrieve API information for a given time peroid
+ <br><small>GET https://apis.wso2.com/api/am/analytics/v1.0/api/list</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">Get application created over time details from summarized data.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_graph</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:api_graph' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-apiListGet">
+                <h4 class="section-heading">
+                    Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+
+                <div id="request-apiListGet"class="pre collapse in"><code class="json">GET /api/am/analytics/v1.0/api/list?startTime&#x3D;2017-05-20T16%3A22%3A27.605Z&amp;endTime&#x3D;2017-10-27T16%3A22%3A27.605-05%3A30 HTTP/1.1
+Host: localhost:9292
+accept: application/json
+authorization: Bearer 0289fdf8-e30e-3568-8b8b-154d6b42fcd6
+content-type: application/json
+</code></div>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-apiListGet">
+                <h4 class="section-heading">
+                    Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+                <div id="response-apiListGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 228
+Content-Type: application/json
+{&quot;count&quot;:1,&quot;list&quot;:[{&quot;id&quot;:&quot;be36fd10-7b3d-4bec-a54b-4ea754654c19&quot;,&quot;name&quot;:&quot;PetStore&quot;,&quot;context&quot;:&quot;store&quot;,&quot;version&quot;:&quot;v1&quot;,&quot;provider&quot;:&quot;admin&quot;,&quot;lifeCycleStatus&quot;:&quot;Published&quot;,&quot;workflowStatus&quot;:&quot;APPROVED&quot;,&quot;time&quot;:&quot;2017-09-13T09:02:40.230Z&quot;}]}
+</code></div>
+
+            <h4 class="section-heading">Sample CURL</h4>
+                <div class="pre"><code class="bash">curl -X GET \
+&#39;https://localhost:9292/api/am/analytics/v1.0/api/list?startTime&#x3D;2017-05-20T16%3A22%3A27.605Z&amp;endTime&#x3D;2017-10-27T16%3A22%3A27.605-05%3A30&#39; \
+-H &#39;accept: application/json&#39; \
+-H &#39;authorization: Bearer 0289fdf8-e30e-3568-8b8b-154d6b42fcd6&#39; \
+-H &#39;content-type: application/json&#39; \
+</code></div>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>startTime</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Defines the starting timestamp of the interval
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>endTime</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Defines the ending timestamp of the interval
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>createdBy</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">application/api creator name. In case of any creator is not provided all the details will be provided
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Requested APIs created over time information is returned </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#APIInfoList">APIInfoList</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Request paramters attribute does not meet requiremnts. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h3 class="operation-heading"><a name="apiSubscriberCountByApiGet"></a>Retrieve Subscriber count by APIs
+ <br><small>GET https://apis.wso2.com/api/am/analytics/v1.0/api/subscriber-count-by-api</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">Get subscriber count by APIs from summarized data.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_graph</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:api_graph' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-apiSubscriberCountByApiGet">
+                <h4 class="section-heading">
+                    Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+
+                <div id="request-apiSubscriberCountByApiGet"class="pre collapse in"><code class="json">GET /api/am/analytics/v1.0/api/subscriber_count_by_apis
+Host: localhost:9292
+accept: application/json
+authorization: Bearer b6b8d5ab-1118-362d-a6a9-2233956d80a0
+cache-control: no-cache
+content-type: application/json
+</code></div>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-apiSubscriberCountByApiGet">
+                <h4 class="section-heading">
+                    Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+                <div id="response-apiSubscriberCountByApiGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 228
+Content-Type: application/json
+{&quot;count&quot;:0,&quot;list&quot;:[]}
+</code></div>
+
+            <h4 class="section-heading">Sample CURL</h4>
+                <div class="pre"><code class="bash">curl -X GET \
+&#39;https://localhost:9292/api/am/analytics/v1.0/api/subscriber-count-by-api?startTime&#x3D;2017-05-20T16%3A22%3A27.605Z&amp;endTime&#x3D;2017-10-27T16%3A22%3A27.605-05%3A30&#39; \
+-H &#39;accept: application/json&#39; \
+-H &#39;authorization: Bearer 0289fdf8-e30e-3568-8b8b-154d6b42fcd6&#39; \
+-H &#39;content-type: application/json&#39; \
+</code></div>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>startTime</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Defines the starting timestamp of the interval
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>endTime</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Defines the ending timestamp of the interval
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">UUID of the API.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Requested subscriber count by API information is returned </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#APISubscriptionCountList">APISubscriptionCountList</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Request paramters attribute does not meet requiremnts. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h3 class="operation-heading"><a name="applicationCountOverTimeGet"></a>Retrieve application created over time details
+ <br><small>GET https://apis.wso2.com/api/am/analytics/v1.0/application/count-over-time</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">Get application count over time details from summarized data.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:application_graph</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:application_graph' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-applicationCountOverTimeGet">
+                <h4 class="section-heading">
+                    Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+
+                <div id="request-applicationCountOverTimeGet"class="pre collapse in"><code class="json">GET /api/am/analytics/v1.0/application/count-over-time?startTime&#x3D;2017-05-20T16%3A22%3A27.605Z&amp;endTime&#x3D;2017-10-27T16%3A22%3A27.605-05%3A30 HTTP/1.1
+Host: localhost:9292
+accept: application/json
+authorization: Bearer b35a145f-3ca0-39be-8234-7509e3d97198
+cache-control: no-cache
+content-type: application/json
+</code></div>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-applicationCountOverTimeGet">
+                <h4 class="section-heading">
+                    Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+                <div id="response-applicationCountOverTimeGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 21
+Content-Type: application/json
+{&quot;count&quot;:1,&quot;list&quot;:[{&quot;time&quot;:&quot;2017-09-13T11:59:44.367Z&quot;,&quot;count&quot;:1}]}
+</code></div>
+
+            <h4 class="section-heading">Sample CURL</h4>
+                <div class="pre"><code class="bash">curl -X GET \
+&#39;https://localhost:9292/api/am/analytics/v1.0/application/count-over-time?startTime&#x3D;2017-05-20T16%3A22%3A27.605Z&amp;endTime&#x3D;2017-10-27T16%3A22%3A27.605-05%3A30&#39; \
+-H &#39;accept: application/json&#39; \
+-H &#39;authorization: Bearer b35a145f-3ca0-39be-8234-7509e3d97198&#39; \
+-H &#39;cache-control: no-cache&#39; \
+-H &#39;content-type: application/json&#39; \
+</code></div>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>startTime</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Defines the starting timestamp of the interval
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>endTime</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Defines the ending timestamp of the interval
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>createdBy</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">application/api creator name. In case of any creator is not provided all the details will be provided
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Requested applications count over time information is returned </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#ApplicationCountList">ApplicationCountList</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Request paramters attribute does not meet requiremnts. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h3 class="operation-heading"><a name="subscriptionCountOverTimeGet"></a>Retrieve APIs created over time details
+ <br><small>GET https://apis.wso2.com/api/am/analytics/v1.0/subscription/count-over-time</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">Get application created over time details from summarized data.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:subscription_graph</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:subscription_graph' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-subscriptionCountOverTimeGet">
+                <h4 class="section-heading">
+                    Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+
+                <div id="request-subscriptionCountOverTimeGet"class="pre collapse in"><code class="json">GET /api/am/analytics/v1.0/subscription/count-over-time?startTime&#x3D;2017-05-20T16%3A22%3A27.605Z&amp;endTime&#x3D;2017-10-27T16%3A22%3A27.605-05%3A30 HTTP/1.1
+Host: localhost:9292
+accept: application/json
+authorization: Bearer 0289fdf8-e30e-3568-8b8b-154d6b42fcd6
+content-type: application/json
+</code></div>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-subscriptionCountOverTimeGet">
+                <h4 class="section-heading">
+                    Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+                <div id="response-subscriptionCountOverTimeGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 228
+Content-Type: application/json
+{&quot;count&quot;:0,&quot;list&quot;:[]}
+</code></div>
+
+            <h4 class="section-heading">Sample CURL</h4>
+                <div class="pre"><code class="bash">curl -X GET \
+&#39;https://localhost:9292/api/am/analytics/v1.0/subscription/count-over-time?startTime&#x3D;2017-05-20T16%3A22%3A27.605Z&amp;endTime&#x3D;2017-10-27T16%3A22%3A27.605-05%3A30&#39; \
+-H &#39;accept: application/json&#39; \
+-H &#39;authorization: Bearer 0289fdf8-e30e-3568-8b8b-154d6b42fcd6&#39; \
+-H &#39;content-type: application/json&#39; \
+</code></div>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>startTime</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Defines the starting timestamp of the interval
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>endTime</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Defines the ending timestamp of the interval
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>createdBy</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">application/api creator name. In case of any creator is not provided all the details will be provided
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Requested subscription count created over time information is returned </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#SubscriptionCountList">SubscriptionCountList</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Request paramters attribute does not meet requiremnts. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h3 class="operation-heading"><a name="subscriptionListGet"></a>Retrieve Subscription details
+ <br><small>GET https://apis.wso2.com/api/am/analytics/v1.0/subscription/list</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">Get Subscription details from summarized data.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:subscription_graph</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:subscription_graph' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-subscriptionListGet">
+                <h4 class="section-heading">
+                    Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+
+                <div id="request-subscriptionListGet"class="pre collapse in"><code class="json">GET /api/am/analytics/v1.0/subscription/subscription/list?startTime&#x3D;2017-05-20T16%3A22%3A27.605Z&amp;endTime&#x3D;2017-10-27T16%3A22%3A27.605-05%3A30 HTTP/1.1
+Host: localhost:9292
+accept: application/json
+authorization: Bearer 0289fdf8-e30e-3568-8b8b-154d6b42fcd6
+content-type: application/json
+</code></div>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-subscriptionListGet">
+                <h4 class="section-heading">
+                    Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+                <div id="response-subscriptionListGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Connection: keep-alive
+Content-Length: 228
+Content-Type: application/json
+{&quot;count&quot;:0,&quot;list&quot;:[]}
+</code></div>
+
+            <h4 class="section-heading">Sample CURL</h4>
+                <div class="pre"><code class="bash">curl -X GET \
+&#39;https://localhost:9292/api/am/analytics/v1.0/subscription/list?startTime&#x3D;2017-05-20T16%3A22%3A27.605Z&amp;endTime&#x3D;2017-10-27T16%3A22%3A27.605-05%3A30&#39; \
+-H &#39;accept: application/json&#39; \
+-H &#39;authorization: Bearer 0289fdf8-e30e-3568-8b8b-154d6b42fcd6&#39; \
+-H &#39;content-type: application/json&#39; \
+</code></div>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>startTime</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Defines the starting timestamp of the interval
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>endTime</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Defines the ending timestamp of the interval
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>createdBy</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">application/api creator name. In case of any creator is not provided all the details will be provided
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Requested Subscription Information is returned for the given time period </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#SubscriptionInfoList">SubscriptionInfoList</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Request paramters attribute does not meet requiremnts. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+</div>

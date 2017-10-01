@@ -49,7 +49,7 @@ public class SubscriptionsApi implements Microservice  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get subscription list. The API Identifier or Application Identifier the subscriptions of which are to be returned are passed as parameters. ", response = SubscriptionListDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Get all subscriptions", notes = "Get subscription list. The API Identifier or Application Identifier the subscriptions of which are to be returned are passed as parameters. ", response = SubscriptionListDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
@@ -74,7 +74,7 @@ public class SubscriptionsApi implements Microservice  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Add a new subscription ", response = SubscriptionDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Add a new subscription", notes = "Add a new subscription ", response = SubscriptionDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
@@ -96,7 +96,7 @@ public class SubscriptionsApi implements Microservice  {
     @Path("/{subscriptionId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Remove subscription ", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Remove a subscription", notes = "Remove subscription ", response = void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
@@ -120,7 +120,7 @@ public class SubscriptionsApi implements Microservice  {
     @Path("/{subscriptionId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get subscription details ", response = SubscriptionDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Get details of a subscription", notes = "Get subscription details ", response = SubscriptionDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })

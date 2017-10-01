@@ -1,0 +1,159 @@
+<div class="main-content">
+
+        <h2>Tier</h2>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 30%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 30%;"/>
+                </colgroup>
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                    <th>Example</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter">
+                            <p>name</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter">
+                                <a href="#!/models#string">string</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">Platinum</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>description</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter">
+                                <a href="#!/models#string">string</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">Allows 50 request(s) per minute.</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>tierLevel</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter">
+                                <a href="#!/models#string">string</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">api</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>attributes</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">Custom attributes added to the policy policy </p></td>
+                        <td class="parameter">
+                                <a href="#!/models#map">map</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">{}</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>requestCount</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">Maximum number of requests which can be sent within a provided unit time </p></td>
+                        <td class="parameter">
+                                <a href="#!/models#long">long</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">50</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>unitTime</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter">
+                                <a href="#!/models#long">long</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">60000</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>timeUnit</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter">
+                                <a href="#!/models#string">string</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">min</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>tierPlan</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">This attribute declares whether this policy is available under commercial or free </p></td>
+                        <td class="parameter">
+                                <a href="#!/models#string">string</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">FREE</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>stopOnQuotaReach</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">By making this attribute to false, you are capabale of sending requests even if the request count exceeded within a unit time </p></td>
+                        <td class="parameter">
+                                <a href="#!/models#boolean">boolean</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">true</p></td>
+                    </tr>
+                </tbody>
+            </table>
+</div>

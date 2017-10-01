@@ -55,7 +55,7 @@ public class ApplicationsApi implements Microservice  {
     @Path("/{applicationId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Remove an application ", response = void.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Delete an application", notes = "Delete an application ", response = void.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
@@ -79,11 +79,11 @@ public class ApplicationsApi implements Microservice  {
     @Path("/{applicationId}/generate-keys")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Generate keys (Consumer key/secret) for application ", response = ApplicationKeysDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Generate application keys", notes = "Generate keys (Consumer key/secret) for application ", response = ApplicationKeysDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "Application Keys", })
+    }, tags={ "Application (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Keys are generated. ", response = ApplicationKeysDTO.class),
         
@@ -102,11 +102,11 @@ public class ApplicationsApi implements Microservice  {
     @Path("/{applicationId}/generate-token")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Generate an access token for application by client_credentials grant type ", response = ApplicationTokenDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Generate application token", notes = "Generate an access token for application by client_credentials grant type ", response = ApplicationTokenDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "Generate Application Token", })
+    }, tags={ "Application (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Token is generated. ", response = ApplicationTokenDTO.class),
         
@@ -127,7 +127,7 @@ public class ApplicationsApi implements Microservice  {
     @Path("/{applicationId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get application details ", response = ApplicationDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Get details of an application", notes = "Get application details ", response = ApplicationDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
@@ -151,11 +151,11 @@ public class ApplicationsApi implements Microservice  {
     @Path("/{applicationId}/keys")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Retrieve keys (Consumer key/secret) of application ", response = ApplicationKeysListDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Retrieve all application keys", notes = "Retrieve keys (Consumer key/secret) of application ", response = ApplicationKeysListDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "Application Keys", })
+    }, tags={ "Application (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Keys are returned. ", response = ApplicationKeysListDTO.class),
         
@@ -173,11 +173,11 @@ public class ApplicationsApi implements Microservice  {
     @Path("/{applicationId}/keys/{keyType}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Retrieve keys (Consumer key/secret) of application by a given type ", response = ApplicationKeysDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Retrieve application keys for a provided type", notes = "Retrieve keys (Consumer key/secret) of application by a given type ", response = ApplicationKeysDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "Application Keys", })
+    }, tags={ "Application (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Keys of given type are returned. ", response = ApplicationKeysDTO.class),
         
@@ -196,11 +196,11 @@ public class ApplicationsApi implements Microservice  {
     @Path("/{applicationId}/keys/{keyType}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Update grant types and callback url (Consumer Key and Consumer Secret are ignored) ", response = ApplicationKeysDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Update an application key", notes = "Update grant types and callback url (Consumer Key and Consumer Secret are ignored) ", response = ApplicationKeysDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "Application Keys", })
+    }, tags={ "Application (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Ok. Grant types or/and callback url is/are updated. ", response = ApplicationKeysDTO.class),
         
@@ -220,11 +220,11 @@ public class ApplicationsApi implements Microservice  {
     @Path("/{applicationId}/map-keys")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Map keys (Consumer key/secret) to an application ", response = ApplicationKeysDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Map application keys", notes = "Map keys (Consumer key/secret) to an application ", response = ApplicationKeysDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "Application Keys", })
+    }, tags={ "Application (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Keys are mapped. ", response = ApplicationKeysDTO.class),
         
@@ -243,7 +243,7 @@ public class ApplicationsApi implements Microservice  {
     @Path("/{applicationId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Update application details ", response = ApplicationDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Update an application", notes = "Update application details ", response = ApplicationDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
@@ -268,11 +268,11 @@ public class ApplicationsApi implements Microservice  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Get a list of applications ", response = ApplicationListDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Get all applications", notes = "Get a list of applications ", response = ApplicationListDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "Retrieve", })
+    }, tags={ "Application (Collection)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Application list returned. ", response = ApplicationListDTO.class),
         
@@ -293,7 +293,7 @@ public class ApplicationsApi implements Microservice  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "", notes = "Create a new application. ", response = ApplicationDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Create a new application", notes = "Create a new application. ", response = ApplicationDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })

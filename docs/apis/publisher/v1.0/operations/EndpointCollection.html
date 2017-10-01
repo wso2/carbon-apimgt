@@ -1,0 +1,515 @@
+<div class="main-content">
+    <h1><a name="Endpoint (Collection)"></a>Endpoint (Collection)</h1>
+
+            <hr/>
+            <h3 class="operation-heading"><a name="endpointsGet"></a>Get all endpoints <br><small>GET https://apis.wso2.com/api/am/publisher/v1.0/endpoints</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to retrieve the list of endpoints available.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_view</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:api_view' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-endpointsGet">
+                <h4 class="section-heading">
+                    Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+
+                <div id="request-endpointsGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-endpointsGet">
+                <h4 class="section-heading">
+                    Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+                <div id="response-endpointsGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+   &quot;list&quot;: [   {
+      &quot;showInApiConsole&quot;: true,
+      &quot;serverUrl&quot;: &quot;https://192.168.56.1:9444//services/&quot;,
+      &quot;endpoints&quot;:       {
+         &quot;http&quot;: &quot;http://192.168.56.1:8281&quot;,
+         &quot;https&quot;: &quot;https://192.168.56.1:8244&quot;
+      },
+      &quot;name&quot;: &quot;Production and Sandbox&quot;,
+      &quot;type&quot;: &quot;hybrid&quot;
+   }],
+   &quot;count&quot;: 1
+}</code></div>
+
+            <h4 class="section-heading">Sample CURL</h4>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints&quot;</code></div>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resourec.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Modified-Since</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
+formerly retrieved variant of the resource.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Endpoint list is returned. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#EndPointList">EndPointList</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">304</p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h3 class="operation-heading"><a name="endpointsHead"></a>Check given Endpoint is already exist
+ <br><small>HEAD https://apis.wso2.com/api/am/publisher/v1.0/endpoints</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">Using this operation, you can check a given Endpoint name is already used. You need to provide the name you want to check.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_create</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:api_create' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-endpointsHead">
+                <h4 class="section-heading">
+                    Request
+                </h4>
+            </div>
+
+                <code class="bash">HEAD https://apis.wso2.com/api/am/publisher/v1.0/endpoints</code>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-endpointsHead">
+                <h4 class="section-heading">
+                    Response
+                </h4>
+            </div>
+                <p>Not Available</p>
+
+            <h4 class="section-heading">Sample CURL</h4>
+                <p>Not Available</p>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>name</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked"></p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resourec.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Requested Endpoint attibute status is returned </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Requested Endpoint attribute does not meet requiremnts. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested Endpoint does not exist. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h3 class="operation-heading"><a name="endpointsPost"></a>Add a new endpoint <br><small>POST https://apis.wso2.com/api/am/publisher/v1.0/endpoints</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to add a new endpoint.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_create</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:api_create' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-endpointsPost">
+                <h4 class="section-heading">
+                    Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+
+                <div id="request-endpointsPost"class="pre collapse in"><code class="json"></code></div>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-endpointsPost">
+                <h4 class="section-heading">
+                    Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+                <div id="response-endpointsPost" class="pre collapse in"><code class="json"></code></div>
+
+            <h4 class="section-heading">Sample CURL</h4>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json &quot;https://127.0.0.1:9443/api/am/publisher/v1.0/endpoints&quot;</code></div>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            
+                            <span class="param-in">Body </span>
+                        </td>
+                        <td class="param-name">
+                            <p>body</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">EndPoint object that needs to be added
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                EndPoint
+                                    (<a href="#!/models#EndPoint">EndPoint</a>)
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resourec.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Modified-Since</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
+formerly retrieved variant of the resource.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">201</p></td>
+                        <td class="parameter"><p class="marked">Created. Successful response with the newly created Document object as entity in the body. Location header contains URL of newly added document. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#EndPoint">EndPoint</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">415</p></td>
+                        <td class="parameter"><p class="marked">Unsupported media type. The entity of the request was in a not supported format. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+</div>
