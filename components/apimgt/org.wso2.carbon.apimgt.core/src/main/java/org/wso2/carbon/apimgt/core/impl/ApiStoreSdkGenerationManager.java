@@ -69,6 +69,9 @@ public class ApiStoreSdkGenerationManager {
     }
 
     public Map<String, String> getSdkGenLanguages() {
+        if (sdkGenLanguages == null) {
+            return new HashMap<>();
+        }
         return sdkGenLanguages;
     }
 
