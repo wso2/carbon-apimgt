@@ -64,9 +64,9 @@ class Sdk extends React.Component {
     }
 
     // Call the REST API to generate the SDK
-    getSdkForApi(id, language) {
+    getSdkForApi(apiId, language) {
         const api =new Api();
-        let promised_sdk = api.getSdk(id,language);
+        let promised_sdk = api.getSdk(apiId,language);
 
         promised_sdk.then(
             response => {
@@ -104,7 +104,6 @@ class Sdk extends React.Component {
 
         return (
             language_list ?
-
                 <Grid container style={{marginTop:"10px"}}>
                     <Grid item xs={12} sm={6} md={9} lg={9} xl={10}>
                         <Grid container justify="left" spacing="24">
