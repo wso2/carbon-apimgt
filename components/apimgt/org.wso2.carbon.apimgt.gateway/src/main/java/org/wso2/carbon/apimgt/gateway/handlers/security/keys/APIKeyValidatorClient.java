@@ -17,7 +17,6 @@
 package org.wso2.carbon.apimgt.gateway.handlers.security.keys;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
-import edu.umd.cs.findbugs.annotations.*;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -37,6 +36,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.keymgt.stub.validator.APIKeyValidationServiceStub;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.util.ArrayList;
@@ -45,8 +45,6 @@ import java.util.List;
 import java.util.Map;
 
 public class APIKeyValidatorClient {
-
-    private static final int TIMEOUT_IN_MILLIS = 15 * 60 * 1000;
 
     private APIKeyValidationServiceStub keyValidationServiceStub;
     private String username;
@@ -66,13 +64,11 @@ public class APIKeyValidatorClient {
         }
 
         try {
-            ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(null, null);
+            ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem
+                    (getClientRepoLocation(),getAxis2ClientXmlLocation());
             keyValidationServiceStub = new APIKeyValidationServiceStub(ctx, serviceURL + "APIKeyValidationService");
             ServiceClient client = keyValidationServiceStub._getServiceClient();
             Options options = client.getOptions();
-            options.setTimeOutInMilliSeconds(TIMEOUT_IN_MILLIS);
-            options.setProperty(HTTPConstants.SO_TIMEOUT, TIMEOUT_IN_MILLIS);
-            options.setProperty(HTTPConstants.CONNECTION_TIMEOUT, TIMEOUT_IN_MILLIS);
             options.setCallTransportCleanup(true);
             options.setManageSession(true);
 
@@ -220,5 +216,16 @@ public class APIKeyValidatorClient {
         template.setConditionGroups(conditionGroups);
         template.setThrottlingConditions((Arrays.asList(dto.getThrottlingConditions())));
         return template;
+    }
+
+    private String getAxis2ClientXmlLocation() {
+        String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" +
+                ".clientAxis2XmlLocation");
+        return axis2ClientXml;
+    }
+    private String getClientRepoLocation() {
+        String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" +
+                ".ClientRepositoryLocation");
+        return axis2ClientXml;
     }
 }
