@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl;
 
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -26,7 +27,6 @@ import java.io.File;
 import java.io.IOException;
 
 public class ZIPUtilsTestCase {
-
 
     @Test
     public void zipDirTest() throws IOException {
@@ -39,11 +39,10 @@ public class ZIPUtilsTestCase {
         tempFile2.delete();
         tempFile2.mkdirs();
         new File(tempFile.getAbsolutePath() + File.separator + "Test" + File.separator + "demo.txt").createNewFile();
-        System.out.println(tempFile.getAbsolutePath());
         String zipFileName = tempFile.getAbsolutePath() + File.separator + ".." + File.separator + "temp.zip";
         zipUtils.zipDir(tempFile.getAbsolutePath(), zipFileName);
         Assert.assertTrue(new File(zipFileName).exists());
-        tempFile.deleteOnExit();
-        new File(zipFileName).deleteOnExit();
+        FileUtils.deleteDirectory(tempFile);
+        new File(zipFileName).delete();
     }
 }
