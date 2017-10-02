@@ -37,4 +37,7 @@ public class TemplateUtilContext extends ConfigContextDecorator {
         return context;
     }
 
+    public String escapeXml(String url){
+        return StringEscapeUtils.escapeXml(StringEscapeUtils.unescapeXml(url));
+    }
 }
