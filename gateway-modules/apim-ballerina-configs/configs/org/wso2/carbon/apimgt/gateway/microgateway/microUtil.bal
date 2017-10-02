@@ -18,16 +18,12 @@ function loadConfigs () {
 
     if (files:exists(t)) {
         try {
-            //files:File t = {path:name + "/microgateway/microConf.json"};
-            //not working in windows                                     ????????????????
             files:open(t, "r");
             var content, n = files:read(t, 100000000);
-            //so there's a limit! only 100000000bytes can be read        ????????????????
 
             string strConf = blobs:toString(content, "utf-8");
             json conf = util:parse(strConf);
             dto:GatewayConfDTO gatewayConfDTO = gatewayUtil:fromJsonToGatewayConfDTO(conf);
-            //var gatewayConfDTO, _ = <dto:GatewayConfDTO>conf.gatewayConf;
             holders:setGatewayConf(gatewayConfDTO);
         } catch (errors:Error error) {
             system:println("WARNING : analytics configuration not found");
@@ -41,10 +37,8 @@ function readFromJSONFile () (json) {
     string name = system:getEnv(Constants:GW_HOME);
     try {
         files:File t = {path:name + "/microgateway/apiKeys.json"};
-        //not working in windows                                     ????????????????
         files:open(t, "r");
         var content, n = files:read(t, 100000000);
-        //so there's a limit! only 100000000bytes can be read        ????????????????
         string strAPIData = blobs:toString(content, "utf-8");
         json apiData = util:parse(strAPIData);
         return apiData.apis;
@@ -65,7 +59,6 @@ function buildAPIDTO (json api) (dto:APIDTO, errors:Error) {
         APIDTO.context, err = (string)api.context;
         if(api.lifeCycleStatus != null){
             APIDTO.lifeCycleStatus,err = (string)api.lifeCycleStatus;
-                    //user can add a lifeCycleStatus, incase if the API is in Maintenance
         } else {
             APIDTO.lifeCycleStatus = "PUBLISHED";
         }
@@ -113,9 +106,7 @@ function buildSubscriptionDto (json api,json app,string env) (dto:SubscriptionDt
         } else if (env == Constants:PRODUCTION){
             subscriptionDto.consumerKey, err = (string)app.production;
         }
-        //subscriptionDto.applicationId, err = (string)app.appId;
         subscriptionDto.applicationName, err = (string)app.name;
-        //subscriptionDto.applicationOwner, err = (string)app.owner;
         subscriptionDto.keyEnvType = env;
         subscriptionDto.status = "ACTIVE";
         return subscriptionDto,null;
@@ -176,20 +167,18 @@ function findResources (string apiContext, string apiVersion) (json, errors:Erro
     string context;
     string version;
 
-    while (i<count) {
+    while (i < count) {
         context, err = (string)apiList[i].context;
         version, err = (string)apiList[i].version;
         if (context == apiContext && version == apiVersion) {
             resources = apiList[i].resources;
             if (resources == null) {
-                //errors:Error error = {msg:"Resources not found for the api where the context :" +
-                                         // apiContext + " & version :" + apiVersion};
                 errors:Error error = {msg:"Resources not found for the API"};
                 return null,error;
             }
             break;
         }
-        i = i +1;
+        i = i + 1;
     }
     return resources,null;
 }
