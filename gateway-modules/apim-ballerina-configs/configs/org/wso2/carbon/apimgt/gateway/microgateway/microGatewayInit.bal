@@ -15,7 +15,6 @@ service<http> gatewayInitService {
 }
 
 function initGateway () (boolean) {
-    system:println("initGateway() in microGatewayInit.bal");
     try {
         loadConfigs();
         loadOfflineAPIs();
