@@ -112,7 +112,6 @@ function putIntoSubscriptionCache (json subscriptions) {
         json subscription = subscriptions[i];
         dto:SubscriptionDto subscriptionDto = fromJsonToSubscriptionDto(subscription);
         holders:putIntoSubscriptionCache(subscriptionDto);
-        system:println(subscriptionDto);
         i = i + 1;
     }
 }
@@ -134,16 +133,13 @@ function retrieveResources (string apiContext, string apiVersion) {
     string query = "/api/am/core/v1.0/resources/?apiContext=" + apiContext + "&apiVersion=" + apiVersion;
     message request = {};
     http:ClientConnector apiInfoConnector = create http:ClientConnector(getAPICoreURL());
-    messages:setHeader(request, "Content-Type", "application/json");  //message object, header name, header value
+    messages:setHeader(request, "Content-Type", "application/json");
     message response = http:ClientConnector.get(apiInfoConnector, query, request);
     json resources = messages:getJsonPayload(response);
-    int length = jsons:getInt(resources, "$.list.length()");//Evaluates the JSONPath on a JSON object and returns the integer value.
+    int length = jsons:getInt(resources, "$.list.length()");
     int i = 0;
     while (i < length) {
         json resource1 = resources.list[i];
-
-        system:println("resource1  : ");
-       system:println(resource1);
         holders:putIntoResourceCache(apiContext, apiVersion, fromJsonToResourceDto(resource1));
         i = i + 1;
     }
@@ -194,7 +190,6 @@ function putIntoApplicationCache (json application) {
     applicationDto.applicationName, err = (string)application.name;
     applicationDto.applicationOwner, err = (string)application.subscriber;
     applicationDto.applicationPolicy, err = (string)application.throttlingTier;
-    system:println(applicationDto);
     holders:putIntoApplicationCache(applicationDto);
 }
 function putIntoPolicyCache (json policy) {
