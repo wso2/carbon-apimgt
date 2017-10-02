@@ -210,8 +210,6 @@ function validateSubscription (string apiContext, string version, dto:Introspect
 }
 function validateResource (string apiContext, string apiVersion, string uriTemplate, string verb) (dto:ResourceDto) {
     dto:ResourceDto resourceDto = holder:getFromResourceCache(apiContext, apiVersion, uriTemplate, verb);
-    system:println("resourceDto :");
-    system:println(resourceDto);
     return resourceDto;
 }
 function validateScopes (dto:ResourceDto resourceDto, dto:IntrospectDto introspectDto) (boolean){
