@@ -21,7 +21,6 @@ service<jms> apimStoreEventListner {
 
     @http:GET {}
     resource onMessage (message m) {
-        system:println("resource onMessage() in apimStoreEventListner");
         try {
             errors:TypeCastError err;
             json event = messages:getJsonPayload(m);

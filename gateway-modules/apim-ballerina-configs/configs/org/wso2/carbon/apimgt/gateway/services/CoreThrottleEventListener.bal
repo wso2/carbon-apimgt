@@ -22,7 +22,6 @@ service<jms> ThrottleCoreJmsService {
 
     @http:GET {}
     resource onMessage (message m) {
-        system:println("resource onMessage() in CoreThrottleEventListener");
         json event = messages:getJsonPayload(m);
         errors:TypeCastError err;
         string eventType;
