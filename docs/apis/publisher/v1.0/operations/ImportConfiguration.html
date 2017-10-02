@@ -1,0 +1,338 @@
+<div class="main-content">
+    <h1><a name="Import Configuration"></a>Import Configuration</h1>
+
+            <hr/>
+            <h3 class="operation-heading"><a name="importApisPost"></a>Imports API(s). <br><small>POST https://apis.wso2.com/api/am/publisher/v1.0/import/apis</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to import one or more existing APIs.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_create</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:api_create' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-importApisPost">
+                <h4 class="section-heading">
+                    Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+
+                <div id="request-importApisPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9292/api/am/publisher/v1.0/import/apis
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-importApisPost">
+                <h4 class="section-heading">
+                    Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+                <div id="response-importApisPost" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Content-Type: application/json
+
+{&quot;count&quot;:2,&quot;list&quot;:[{&quot;id&quot;:&quot;4df90edc-f76b-4b19-bf57-7d161fa04467&quot;,&quot;name&quot;:&quot;testApi2&quot;,&quot;context&quot;:&quot;/test2&quot;,&quot;version&quot;:&quot;2.0.3&quot;,&quot;provider&quot;:&quot;admin&quot;,&quot;lifeCycleStatus&quot;:&quot;Created&quot;,&quot;workflowStatus&quot;:&quot;APPROVED&quot;},{&quot;id&quot;:&quot;4066bc9e-1d87-4296-bcca-f6e38d3da6d0&quot;,&quot;name&quot;:&quot;testApi&quot;,&quot;context&quot;:&quot;/testApi&quot;,&quot;version&quot;:&quot;1.0.0&quot;,&quot;provider&quot;:&quot;admin&quot;,&quot;lifeCycleStatus&quot;:&quot;Created&quot;,&quot;workflowStatus&quot;:&quot;APPROVED&quot;}]}</code></div>
+
+            <h4 class="section-heading">Sample CURL</h4>
+                <div class="pre"><code class="bash">curl -k -F &quot;file&#x3D;@exported.zip&quot; -X POST -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9292/api/am/publisher/v1.0/import/apis</code></div>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            <span class="param-in">Form </span>
+                            
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>file</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Zip archive consisting on exported api configuration
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                File
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>provider</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">If defined, updates the existing provider of each API with the specified provider.
+This is to cater scenarios where the current API provider does not exist in the environment
+that the API is imported to.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Successful response with the updated object as entity in the body. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#APIList">APIList</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">412</p></td>
+                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h3 class="operation-heading"><a name="importApisPut"></a>Imports API(s). <br><small>PUT https://apis.wso2.com/api/am/publisher/v1.0/import/apis</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to import one or more existing APIs.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_update</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:api_update' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-importApisPut">
+                <h4 class="section-heading">
+                    Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+
+                <div id="request-importApisPut"class="pre collapse in"><code class="json">PUT https://127.0.0.1:9292/api/am/publisher/v1.0/import/apis
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-importApisPut">
+                <h4 class="section-heading">
+                    Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+                <div id="response-importApisPut" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Content-Type: application/json
+
+{&quot;count&quot;:2,&quot;list&quot;:[{&quot;id&quot;:&quot;4df90edc-f76b-4b19-bf57-7d161fa04467&quot;,&quot;name&quot;:&quot;testApi2&quot;,&quot;context&quot;:&quot;/test2&quot;,&quot;version&quot;:&quot;2.0.3&quot;,&quot;provider&quot;:&quot;admin&quot;,&quot;lifeCycleStatus&quot;:&quot;Created&quot;,&quot;workflowStatus&quot;:&quot;APPROVED&quot;},{&quot;id&quot;:&quot;4066bc9e-1d87-4296-bcca-f6e38d3da6d0&quot;,&quot;name&quot;:&quot;testApi&quot;,&quot;context&quot;:&quot;/testApi&quot;,&quot;version&quot;:&quot;1.0.0&quot;,&quot;provider&quot;:&quot;admin&quot;,&quot;lifeCycleStatus&quot;:&quot;Created&quot;,&quot;workflowStatus&quot;:&quot;APPROVED&quot;}]}</code></div>
+
+            <h4 class="section-heading">Sample CURL</h4>
+                <div class="pre"><code class="bash">curl -k -F &quot;file&#x3D;@exported.zip&quot; -X PUT -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9292/api/am/publisher/v1.0/import/apis</code></div>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            <span class="param-in">Form </span>
+                            
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>file</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Zip archive consisting on exported api configuration
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                File
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>provider</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">If defined, updates the existing provider of each API with the specified provider.
+This is to cater scenarios where the current API provider does not exist in the environment
+that the API is imported to.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Successful response with the updated object as entity in the body. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#APIList">APIList</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">412</p></td>
+                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+</div>

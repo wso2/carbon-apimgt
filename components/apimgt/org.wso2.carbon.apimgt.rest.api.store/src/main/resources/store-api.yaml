@@ -83,7 +83,7 @@ paths:
       security:
         - OAuth2Security:
       summary: |
-        Retrieving APIs
+        Retrieve/Search APIs
       description: |
         Get a list of available APIs qualifying under a given search condition.
       parameters:
@@ -112,7 +112,7 @@ paths:
           type: string
         - $ref : "#/parameters/If-None-Match"
       tags:
-        - API Collection
+        - API (Collection)
         - Retrieve
       responses:
         200:
@@ -146,6 +146,7 @@ paths:
 # Retrieve the details of an API definition
 #-----------------------------------------------------
     get:
+      summary: Get details of an API
       security:
         - OAuth2Security:
       description: |
@@ -155,7 +156,7 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since' 
       tags:
-        - API (individual)
+        - API (Individual)
         - Retrieve
       responses:
         200:
@@ -197,6 +198,7 @@ paths:
 # Retrieve the API swagger definition
 #-----------------------------------------------------
     get:
+      summary: Get API swagger definition
       security:
         - OAuth2Security:
       description: |
@@ -206,7 +208,7 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - API (individual)
+        - API (Individual)
         - Retrieve
       responses:
         200:
@@ -258,7 +260,7 @@ paths:
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK\nContent-disposition : attachment; filename=\"Swagger Petstore_android_2217676993812388137_1.0.0.zip\"\nContent-type : application/zip"
       summary: |
-        Generate SDK for an API for the requested language
+        Generate a SDK for an API
       description: |
         This operation can be used to generate SDKs (System Development Kits), for the APIs available in the API Store, for a requested development language.
       parameters:
@@ -275,7 +277,7 @@ paths:
           description: |
             Programming language of the SDK that is required.
       tags:
-        - API (individual)
+        - API (Individual)
       responses:
         200:
           description: |
@@ -317,7 +319,7 @@ paths:
         GET https://127.0.0.1:9292/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/wsdl
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\nContent-Length: 329\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"x-wso2-security\": {\"apim\": {\"x-wso2-scopes\": []}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
-      summary: Get WSDL definition
+      summary: Get API WSDL definition
       description: |
         This operation can be used to retrieve the swagger definition of an API.
       parameters:
@@ -326,7 +328,7 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - API (individual)
+        - API (Individual)
       responses:
         200:
           description: |
@@ -368,6 +370,7 @@ paths:
 # Retrieve the documents associated with an API that qualify under a search condition
 #-----------------------------------------------------
     get:
+      summary: Get a list of API documents
       security:
         - OAuth2Security:
       description: |
@@ -378,8 +381,9 @@ paths:
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - API (individual)
-        - Retrieve Documents
+        - Document (Collection)
+        - API (Individual)
+        - Retrieve
       responses:
         200:
           description: |
@@ -418,6 +422,7 @@ paths:
 # Retrieve a particular document of a certain API
 #-----------------------------------------------------
     get:
+      summary: Get a document of an API
       security:
         - OAuth2Security:
       description: |
@@ -428,8 +433,9 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - API (individual)
-        - Retrieve Document
+        - Document (Individual)
+        - API (Individual)
+        - Retrieve
       responses:
         200:
           description: |
@@ -476,6 +482,7 @@ paths:
   # Downloads a FILE type document/get the inline content or source url of a certain document
   #-------------------------------------------------------------------------------------------------
       get:
+        summary: Get the content of an API document
         security:
           - OAuth2Security:
         description: |
@@ -486,8 +493,9 @@ paths:
           - $ref: '#/parameters/If-None-Match'
           - $ref: '#/parameters/If-Modified-Since'
         tags:
-          - API (individual)
-          - Retrieve Document
+          - Document (Individual)
+          - API (Individual)
+          - Retrieve
         responses:
           200:
             description: |
@@ -539,6 +547,7 @@ paths:
 # Retrieve the Ratings of a certain API
 #-----------------------------------------------------
     get:
+      summary: Get API ratings
       security:
         - OAuth2Security:
       description: |
@@ -548,8 +557,9 @@ paths:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
       tags:
-        - API (individual)
-        - Retrieve Rating
+        - Rating (Collection)
+        - API (Individual)
+        - Retrieve
       responses:
         200:
           description: |
@@ -580,6 +590,7 @@ paths:
   # Retrieve a specific rating of an API
   #-----------------------------------------------------
     get:
+      summary: Get a single API rating
       security:
         - OAuth2Security:
       description: |
@@ -590,8 +601,8 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - API (individual)
-        - Retrieve Rating
+        - Rating (Individual)
+        - API (Individual)
       responses:
         200:
           description: |
@@ -637,6 +648,7 @@ paths:
   # Add or update rating
   #-----------------------------------------------------
     put:
+      summary: Add or update logged in user's rating for an API
       security:
         - OAuth2Security:
           - apim:subscribe
@@ -653,7 +665,8 @@ paths:
           schema:
             $ref: '#/definitions/Rating'
       tags:
-        - API (individual)
+        - Rating (Individual)
+        - API (Individual)
         - Create
       responses:
         201:
@@ -693,6 +706,7 @@ paths:
 # Retrieve a list of all comments of a certain API
 #-----------------------------------------------------
     get:
+      summary: Retrieve API comments
       security:
         - OAuth2Security:
       description: |
@@ -702,7 +716,7 @@ paths:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
       tags:
-        - Comments Collection
+        - Comment (Collection)
         - Retrieve
       responses:
         200:
@@ -721,6 +735,7 @@ paths:
 # Add a new Comment
 #-----------------------------------------------------
     post:
+      summary: Add an API comment 
       security:
         - OAuth2Security:
           - apim:subscribe
@@ -735,7 +750,8 @@ paths:
           schema:
             $ref: '#/definitions/Comment'
       tags:
-        - API (individual)
+        - Comment (Individual)
+        - API (Individual)
         - Create
       responses:
         201:
@@ -778,6 +794,7 @@ paths:
 # Retrieve an individual Comment for a certain API
 #-----------------------------------------------------------------------
     get:
+      summary: Get details of an API comment
       security:
         - OAuth2Security:
       description: |
@@ -788,8 +805,9 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - API (individual)
-        - Retrieve Comment
+        - Comment (Individual)
+        - API (Individual)
+        - Retrieve
       responses:
         200:
           description: |
@@ -829,6 +847,7 @@ paths:
 # Delete a particular Comment
 #-----------------------------------------------------
     delete:
+      summary: Delete an API comment
       security:
         - OAuth2Security:
           - apim:subscribe
@@ -841,7 +860,8 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - API (individual)
+        - Comment (Individual)
+        - API (Individual)
         - Delete
       responses:
         200:
@@ -855,12 +875,11 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-
-
 #-----------------------------------------------------
 # Update a particular Comment
 #-----------------------------------------------------
     put:
+      summary: Update an API comment
       security:
         - OAuth2Security:
           - apim:subscribe
@@ -880,7 +899,8 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - API (individual)
+        - Comment (Individual)
+        - API (Individual)
         - Update
       responses:
         200:
@@ -974,7 +994,7 @@ paths:
           type: string
         - $ref : "#/parameters/If-None-Match"
       tags:
-        - CompositeAPI (Collection)
+        - Composite API (Collection)
       responses:
         200:
           description: |
@@ -1023,7 +1043,7 @@ paths:
           schema:
             $ref: '#/definitions/CompositeAPI'
       tags:
-        - CompositeAPI (Collection)
+        - Composite API (Collection)
       responses:
         201:
           description: |
@@ -1081,7 +1101,7 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - CompositeAPI (Individual)
+        - Composite API (Individual)
       responses:
         200:
           description: |
@@ -1143,7 +1163,7 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - CompositeAPI (Individual)
+        - Composite API (Individual)
       responses:
         200:
           description: |
@@ -1211,7 +1231,7 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - CompositeAPI (Individual)
+        - Composite API (Individual)
       responses:
         200:
           description: |
@@ -1263,7 +1283,7 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - CompositeAPI (Individual)
+        - Composite API (Individual)
       responses:
         200:
           description: |
@@ -1332,7 +1352,7 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - CompositeAPI (Individual)
+        - Composite API (Individual)
       responses:
         200:
           description: |
@@ -1403,7 +1423,7 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - CompositeAPI (Individual)
+        - Composite API (Individual)
       responses:
         200:
           description: |
@@ -1472,7 +1492,7 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - CompositeAPI (Individual)
+        - Composite API (Individual)
       responses:
         200:
           description: |
@@ -1529,6 +1549,7 @@ paths:
 # Retrieve a list of all applications of a certain subscriber
 #-----------------------------------------------------
     get:
+      summary: Get all applications
       security:
         - OAuth2Security:
           - apim:subscribe
@@ -1552,8 +1573,7 @@ paths:
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Application Collection
-        - Retrieve
+        - Application (Collection)
       responses:
         200:
           description: |
@@ -1588,6 +1608,7 @@ paths:
 # Create a new application
 #-----------------------------------------------------
     post:
+      summary: Create a new application
       security:
         - OAuth2Security:
           - apim:subscribe
@@ -1603,7 +1624,7 @@ paths:
           schema:
             $ref: '#/definitions/Application'
       tags:
-        - Application (individual)
+        - Application (Individual)
         - Create
       responses:
         201:
@@ -1661,6 +1682,7 @@ paths:
 # Retrieve the details about a certain application
 #-----------------------------------------------------
     get:
+      summary: Get details of an application
       security:
         - OAuth2Security:
           - apim:subscribe
@@ -1672,7 +1694,7 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - Application (individual)
+        - Application (Individual)
         - Retrieve
       responses:
         200:
@@ -1712,6 +1734,7 @@ paths:
 # Update a certain application
 #-----------------------------------------------------
     put:
+      summary: Update an application
       security:
         - OAuth2Security:
           - apim:subscribe
@@ -1730,7 +1753,7 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - Application (individual)
+        - Application (Individual)
         - Update
       responses:
         200:
@@ -1776,18 +1799,19 @@ paths:
 # Delete a certain application
 #-----------------------------------------------------
     delete:
+      summary: Delete an application
       security:
         - OAuth2Security:
           - apim:subscribe
       x-scope: apim:subscribe
       description: |
-        Remove an application
+        Delete an application
       parameters:
         - $ref: '#/parameters/applicationId'
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - Application (individual)
+        - Application (Individual)
         - Delete
       responses:
         200:
@@ -1827,6 +1851,7 @@ paths:
 # Generate keys for an application
 #-----------------------------------------------------
     post:
+      summary: Generate application keys
       security:
         - OAuth2Security:
           - apim:subscribe
@@ -1843,9 +1868,8 @@ paths:
           schema:
             $ref: '#/definitions/ApplicationKeyGenerateRequest'
       tags:
-        - Application (individual)
-        - Generate Keys
-        - Application Keys
+        - Application Key (Individual)
+        - Application (Individual)
       responses:
         200:
           description: |
@@ -1882,6 +1906,7 @@ paths:
 # Mapping keys for an application
 #-----------------------------------------------------
     post:
+      summary: Map application keys
       security:
         - OAuth2Security:
           - apim:subscribe
@@ -1898,8 +1923,8 @@ paths:
           schema:
             $ref: '#/definitions/ApplicationKeyMappingRequest'
       tags:
-        - Application (individual)
-        - Application Keys
+        - Application Key (Individual)
+        - Application (Individual)
       responses:
         200:
           description: |
@@ -1936,6 +1961,7 @@ paths:
 # Get all keys of an application
 #-----------------------------------------------------
     get:
+      summary: Retrieve all application keys
       security:
         - OAuth2Security:
           - apim:subscribe
@@ -1945,8 +1971,8 @@ paths:
       parameters:
         - $ref: '#/parameters/applicationId'
       tags:
-        - Application (individual)
-        - Application Keys
+        - Application Key (Collection)
+        - Application (Individual)
       responses:
         200:
           description: |
@@ -1983,6 +2009,7 @@ paths:
 # Get a key of an application by key type
 #-----------------------------------------------------
     get:
+      summary: Retrieve application keys for a provided type
       security:
         - OAuth2Security:
           - apim:subscribe
@@ -1993,8 +2020,8 @@ paths:
         - $ref: '#/parameters/applicationId'
         - $ref: '#/parameters/keyType'
       tags:
-        - Application (individual)
-        - Application Keys
+        - Application Key (Collection)
+        - Application (Individual)
       responses:
         200:
           description: |
@@ -2025,6 +2052,7 @@ paths:
 # Update grant types and callback url of an application
 #--------------------------------------------------------------------
     put:
+      summary: Update an application key
       security:
         - OAuth2Security:
           - apim:subscribe
@@ -2042,8 +2070,8 @@ paths:
           schema:
             $ref: '#/definitions/ApplicationKeys'
       tags:
-        - Application (individual)
-        - Application Keys
+        - Application Key (Individual)
+        - Application (Individual)
       responses:
         200:
           description: |
@@ -2080,6 +2108,7 @@ paths:
 # Generate a token for an application
 #-----------------------------------------------------
     post:
+      summary: Generate application token
       security:
         - OAuth2Security:
           - apim:subscribe
@@ -2098,8 +2127,8 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - Application (individual)
-        - Generate Application Token
+        - Application Token (Individual)
+        - Application (Individual)
       responses:
         200:
           description: |
@@ -2136,6 +2165,7 @@ paths:
 # Retrieve all subscriptions of a certain API and application
 #-----------------------------------------------------
     get:
+      summary: Get all subscriptions
       security:
         - OAuth2Security:
           - apim:subscribe
@@ -2152,7 +2182,7 @@ paths:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Subscription Collection
+        - Subscription (Collection)
         - Retrieve
       responses:
         200:
@@ -2181,6 +2211,7 @@ paths:
 # Create a new subscription
 #-----------------------------------------------------
     post:
+      summary: Add a new subscription
       security:
         - OAuth2Security:
           - apim:subscribe
@@ -2196,7 +2227,7 @@ paths:
           schema:
             $ref: '#/definitions/Subscription'
       tags:
-        - Subscription (individual)
+        - Subscription (Individual)
         - Create
       responses:
         201:
@@ -2246,6 +2277,7 @@ paths:
 # Retrieve a certain subscription
 #-----------------------------------------------------
     get:
+      summary: Get details of a subscription
       security:
         - OAuth2Security:
           - apim:subscribe
@@ -2257,7 +2289,7 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - Subscription (individual)
+        - Subscription (Individual)
         - Retrieve
       responses:
         200:
@@ -2288,6 +2320,7 @@ paths:
 # Delete a certain subscription
 #-----------------------------------------------------
     delete:
+      summary: Remove a subscription
       security:
         - OAuth2Security:
           - apim:subscribe
@@ -2299,7 +2332,7 @@ paths:
         - $ref: '#/parameters/If-Match'
         - $ref: '#/parameters/If-Unmodified-Since'
       tags:
-        - Subscription (individual)
+        - Subscription (Individual)
         - Delete
       responses:
         200:
@@ -2339,6 +2372,7 @@ paths:
 # Retrieve the list of all available policies
 #-----------------------------------------------------
     get:
+      summary: Get all available policies
       security:
         - OAuth2Security:
       description: |
@@ -2349,7 +2383,7 @@ paths:
         - $ref: '#/parameters/tierLevel'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Tier Collection
+        - Tier (Collection)
         - Retrieve
       responses:
         200:
@@ -2386,6 +2420,7 @@ paths:
 # Retrieve a certain policy
 #-----------------------------------------------------
     get:
+      summary: Get a single policy details
       description: |
         Get policy details
       parameters:
@@ -2394,7 +2429,7 @@ paths:
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
-        - Tier (individual)
+        - Tier (Individual)
         - Retrieve
       responses:
         200:
@@ -2440,6 +2475,7 @@ paths:
 # Retrieve the list of tags qualifying under a search condition
 #-----------------------------------------------------
     get:
+      summary: Get all tags
       description: |
         Get a list of tags that are already added to APIs
       parameters:
@@ -2447,7 +2483,7 @@ paths:
         - $ref: '#/parameters/offset'
         - $ref: '#/parameters/If-None-Match'
       tags:
-        - Tag Collection
+        - Tag (Collection)
         - Retrieve
       responses:
         200:
@@ -2528,6 +2564,7 @@ paths:
 # Register a new user
 #-----------------------------------------------------
     post:
+      summary: Register a new user
       security:
         - OAuth2Security:
           - apim:self-signup
@@ -2543,7 +2580,7 @@ paths:
           schema:
             $ref: '#/definitions/User'
       tags:
-        - Signup
+        - Sign Up
       responses:
         201:
           description: |
@@ -2578,18 +2615,18 @@ paths:
       security:
         - OAuth2Security:
           - apim:subscribe
-      x-scope:  apim:subscribe  #TODO Remove when vendor extentions are removed
+      x-scope:  apim:subscribe  #TODO Remove when vendor extensions are removed
       x-wso2-curl:  "curl -X GET -k -H \"Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/store/v1.0/sdk-gen/languages"
       x-wso2-request: |
         GET https://localhost:9292/api/am/store/v1.0/sdk-gen/languages
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response:  "HTTP/1.1 200 OK\nContent-Type : application/json"
       summary:  |
-        Provide a list of supported languages for generating SDKs for existing APIs.
+        Get a list of supported SDK languages
       description:  |
         This operation will provide a list of programming languages that are supported by the swagger codegen library for generating System Development Kits (SDKs) for APIs available in the API Manager Store
       tags:
-        - SDK Language list.
+        - SDK Languages
       responses:
         200:
           description:  |
