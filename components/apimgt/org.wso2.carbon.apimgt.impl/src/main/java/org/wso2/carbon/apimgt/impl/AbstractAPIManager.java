@@ -306,8 +306,7 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                startTenantFlow(tenantDomain);
             }
             GenericArtifactManager artifactManager = getGenericArtifactManager();
             GenericArtifact[] artifacts = artifactManager.getAllGenericArtifacts();
@@ -327,7 +326,7 @@ public abstract class AbstractAPIManager implements APIManager {
             handleException("Failed to get APIs from the registry", e);
         } finally {
             if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
+                endTenantFlow();
             }
         }
 
@@ -335,7 +334,7 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiSortedList;
     }
 
-    protected API getApi(GenericArtifact artifact) throws APIManagementException {
+    protected API getApi(GovernanceArtifact artifact) throws APIManagementException {
         return APIUtil.getAPI(artifact);
     }
 
@@ -343,8 +342,7 @@ public abstract class AbstractAPIManager implements APIManager {
         String apiPath = APIUtil.getAPIPath(identifier);
         Registry registry;
         try {
-            String apiTenantDomain = MultitenantUtils.getTenantDomain(
-                    APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            String apiTenantDomain = getTenantDomain(identifier);
             int apiTenantId = getTenantManager()
                     .getTenantId(apiTenantDomain);
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(apiTenantDomain)) {
@@ -358,8 +356,7 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 registry = this.registry;
             }
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
+            GenericArtifactManager artifactManager = getGenericArtifactManager();
             Resource apiResource = registry.get(apiPath);
             String artifactId = apiResource.getUUID();
             if (artifactId == null) {
@@ -389,7 +386,12 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
-    protected API getApiForPublishing(Registry registry, GenericArtifact apiArtifact) throws APIManagementException {
+    protected String getTenantDomain(APIIdentifier identifier) {
+        return MultitenantUtils.getTenantDomain(
+                APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+    }
+
+    protected API getApiForPublishing(Registry registry, GovernanceArtifact apiArtifact) throws APIManagementException {
         return APIUtil.getAPIForPublishing(apiArtifact, registry);
     }
 
@@ -474,7 +476,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(uuid);
             if (apiArtifact != null) {
-                return APIUtil.getAPIInformation(apiArtifact, registry);
+                return getApiInformation(registry, apiArtifact);
             } else {
                 handleResourceNotFoundException(
                         "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist");
@@ -485,6 +487,10 @@ public abstract class AbstractAPIManager implements APIManager {
             handleException("Failed to get tenant Id while getting API with uuid " + uuid, e);
         }
         return null;
+    }
+
+    protected API getApiInformation(Registry registry, GovernanceArtifact apiArtifact) throws APIManagementException {
+        return APIUtil.getAPIInformation(apiArtifact, registry);
     }
 
     /**
@@ -500,11 +506,9 @@ public abstract class AbstractAPIManager implements APIManager {
         boolean tenantFlowStarted = false;
 
         try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(
-                    APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            String tenantDomain = getTenantDomain(identifier);
 
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            startTenantFlow(tenantDomain);
             tenantFlowStarted = true;
 
             Registry registry = getRegistry(identifier, apiPath);
@@ -516,7 +520,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
                 GenericArtifactManager artifactManager = getGenericArtifactManager(identifier, registry);
                 GovernanceArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-                return APIUtil.getAPIInformation(apiArtifact, registry);
+                return getApiInformation(registry,apiArtifact);
             } else {
                 handleException("Failed to get registry from api identifier: " + identifier);
                 return null;
@@ -526,16 +530,24 @@ public abstract class AbstractAPIManager implements APIManager {
             return null;
         } finally {
             if (tenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
+                endTenantFlow();
             }
         }
+    }
+
+    protected void endTenantFlow() {
+        PrivilegedCarbonContext.endTenantFlow();
+    }
+
+    protected void startTenantFlow(String tenantDomain) {
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
     }
 
     private GenericArtifactManager getGenericArtifactManager(APIIdentifier identifier, Registry registry)
             throws APIManagementException {
 
-        String tenantDomain = MultitenantUtils
-                .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+        String tenantDomain = getTenantDomain(identifier);
         GenericArtifactManager manager = genericArtifactCache.get(tenantDomain);
         if (manager != null) {
             return manager;
@@ -549,8 +561,7 @@ public abstract class AbstractAPIManager implements APIManager {
             throws APIManagementException {
         Registry passRegistry;
         try {
-            String tenantDomain = MultitenantUtils
-                    .getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+            String tenantDomain = getTenantDomain(identifier);
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 int id = getTenantManager()
                         .getTenantId(tenantDomain);
@@ -580,8 +591,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public API getAPI(String apiPath) throws APIManagementException {
         try {
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                    APIConstants.API_KEY);
+            GenericArtifactManager artifactManager = getGenericArtifactManager();
             Resource apiResource = registry.get(apiPath);
             String artifactId = apiResource.getUUID();
             if (artifactId == null) {
@@ -949,8 +959,7 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     @Override
     public String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException {
-        String apiTenantDomain = MultitenantUtils.getTenantDomain(
-                APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+        String apiTenantDomain = getTenantDomain(apiId);
         String swaggerDoc = null;
         try {
             Registry registryType;
@@ -1029,8 +1038,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 String docPath = association.getDestinationPath();
 
                 Resource docResource = registry.get(docPath);
-                GenericArtifactManager artifactManager = new GenericArtifactManager(registry,
-                        APIConstants.DOCUMENTATION_KEY);
+                GenericArtifactManager artifactManager = getNewGenericArtifactManager();
                 GenericArtifact docArtifact = artifactManager.getGenericArtifact(docResource.getUUID());
                 Documentation doc = APIUtil.getDocumentation(docArtifact);
                 Date contentLastModifiedDate;
@@ -1052,11 +1060,15 @@ public abstract class AbstractAPIManager implements APIManager {
         return documentationList;
     }
 
+    protected GenericArtifactManager getNewGenericArtifactManager() throws RegistryException {
+        return getGenericArtifactManager(registry);
+    }
+
     public List<Documentation> getAllDocumentation(APIIdentifier apiId, String loggedUsername) throws APIManagementException {
         List<Documentation> documentationList = new ArrayList<Documentation>();
         String apiResourcePath = APIUtil.getAPIPath(apiId);
         try {
-            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
+            String tenantDomain = getTenantDomain(apiId);
             Registry registryType;
             /* If the API provider is a tenant, load tenant registry*/
             boolean isTenantMode = (tenantDomain != null);
@@ -1080,8 +1092,7 @@ public abstract class AbstractAPIManager implements APIManager {
                     handleException("Failed to get documentations for api " + apiId.getApiName(), e);
                 }
                 if (docResource != null) {
-                    GenericArtifactManager artifactManager = new GenericArtifactManager(registryType,
-                            APIConstants.DOCUMENTATION_KEY);
+                    GenericArtifactManager artifactManager = getGenericArtifactManager(registryType);
                     GenericArtifact docArtifact = artifactManager.getGenericArtifact(
                             docResource.getUUID());
                     Documentation doc = APIUtil.getDocumentation(docArtifact, apiId.getProviderName());
@@ -1111,6 +1122,11 @@ public abstract class AbstractAPIManager implements APIManager {
         return documentationList;
     }
 
+    protected GenericArtifactManager getGenericArtifactManager(Registry registryType) throws RegistryException {
+        return new GenericArtifactManager(registryType,
+                APIConstants.DOCUMENTATION_KEY);
+    }
+
     private boolean isTenantDomainNotMatching(String tenantDomain) {
         if (this.tenantDomain != null) {
             return !(this.tenantDomain.equals(tenantDomain));
@@ -1122,8 +1138,7 @@ public abstract class AbstractAPIManager implements APIManager {
                                           String docName) throws APIManagementException {
         Documentation documentation = null;
         String docPath = APIUtil.getAPIDocPath(apiId) + docName;
-        GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry,
-                APIConstants.DOCUMENTATION_KEY);
+        GenericArtifactManager artifactManager = getGenericArtifactManager();
         try {
             Resource docResource = registry.get(docPath);
             GenericArtifact artifact = artifactManager.getGenericArtifact(docResource.getUUID());
@@ -1157,8 +1172,7 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 registryType = registry;
             }
-            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registryType,
-                    APIConstants.DOCUMENTATION_KEY);
+            GenericArtifactManager artifactManager = getGenericArtifactManager(registryType);
             GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
             if (null != artifact) {
                 documentation = APIUtil.getDocumentation(artifact);
@@ -1181,7 +1195,7 @@ public abstract class AbstractAPIManager implements APIManager {
         String contentPath = APIUtil.getAPIDocPath(identifier) +
                 APIConstants.INLINE_DOCUMENT_CONTENT_DIR + RegistryConstants.PATH_SEPARATOR +
                 documentationName;
-        String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+        String tenantDomain = getTenantDomain(identifier);
         Registry registry;
 
         boolean isTenantFlowStarted = false;
@@ -1221,7 +1235,7 @@ public abstract class AbstractAPIManager implements APIManager {
                     + documentationName + " of API: " + identifier.getApiName(), e);
         } finally {
             if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
+                endTenantFlow();
             }
         }
         return null;
@@ -1316,8 +1330,7 @@ public abstract class AbstractAPIManager implements APIManager {
         String artifactPath = APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR +
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                 identifier.getApiName() + RegistryConstants.PATH_SEPARATOR + identifier.getVersion();
-        String tenantDomain = MultitenantUtils.getTenantDomain(
-                APIUtil.replaceEmailDomainBack(identifier.getProviderName()));
+        String tenantDomain = getTenantDomain(identifier);
         Registry registry;
         boolean isTenantFlowStarted = false;
         try {
@@ -1353,7 +1366,7 @@ public abstract class AbstractAPIManager implements APIManager {
                     + ":" + identifier.getVersion(), e);
         } finally {
             if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
+                endTenantFlow();
             }
         }
         return null;
@@ -1366,8 +1379,7 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                startTenantFlow(tenantDomain);
             }
             for (SubscribedAPI subscribedAPI : subscribedAPIs) {
                 String apiPath = APIUtil.getAPIPath(subscribedAPI.getApiId());
@@ -1387,7 +1399,7 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } finally {
             if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
+                endTenantFlow();
             }
         }
         return apiSortedSet;
@@ -1518,7 +1530,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 tierMap = APIUtil.getAllTiers(tenantId);
             } finally {
                 if (isTenantFlowStarted) {
-                    PrivilegedCarbonContext.endTenantFlow();
+                    endTenantFlow();
                 }
             }
         }
@@ -1549,7 +1561,7 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         } finally {
             if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
+                endTenantFlow();
             }
         }
 
@@ -1573,7 +1585,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId, true);
                 tierMap = APIUtil.getTiers(tenantId);
-                PrivilegedCarbonContext.endTenantFlow();
+                endTenantFlow();
             }
             tiers.addAll(tierMap.values());
         } else {
@@ -1594,8 +1606,7 @@ public abstract class AbstractAPIManager implements APIManager {
         Set<Tier> tiers = new TreeSet<Tier>(new TierNameComparator());
         Map<String, Tier> tierMap;
         if (!APIUtil.isAdvanceThrottlingEnabled()) {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            startTenantFlow(tenantDomain);
             int requestedTenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
             if (requestedTenantId == MultitenantConstants.SUPER_TENANT_ID
                     || requestedTenantId == MultitenantConstants.INVALID_TENANT_ID) {
@@ -1604,7 +1615,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 tierMap = APIUtil.getTiers(requestedTenantId);
             }
             tiers.addAll(tierMap.values());
-            PrivilegedCarbonContext.endTenantFlow();
+            endTenantFlow();
         } else {
             tierMap = APIUtil.getTiersFromPolicies(PolicyConstants.POLICY_LEVEL_SUB, tenantId);
             tiers.addAll(tierMap.values());
@@ -1701,13 +1712,11 @@ public abstract class AbstractAPIManager implements APIManager {
             boolean isTenantMode = (requestedTenantDomain != null);
             if (isTenantMode && !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenantDomain)) {
                 isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenantDomain, true);
+                startTenantFlow(requestedTenantDomain);
             } else {
                 requestedTenantDomain = org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
                 isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenantDomain, true);
+                startTenantFlow(requestedTenantDomain);
 
             }
 
@@ -1746,7 +1755,7 @@ public abstract class AbstractAPIManager implements APIManager {
             handleException("Failed to Search APIs", e);
         } finally {
             if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
+                endTenantFlow();
             }
         }
         return result;
@@ -2219,8 +2228,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @throws APIManagementException
      */
     public Map<String, String> getSwaggerDefinitionTimeStamps(APIIdentifier apiIdentifier) throws APIManagementException {
-        String apiTenantDomain = MultitenantUtils.getTenantDomain(
-                APIUtil.replaceEmailDomainBack(apiIdentifier.getProviderName()));
+        String apiTenantDomain = getTenantDomain(apiIdentifier);
         try {
             Registry registryType;
             //Tenant store anonymous mode if current tenant and the required tenant is not matching
