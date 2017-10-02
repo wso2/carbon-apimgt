@@ -111,17 +111,12 @@ public class KeyManagerUserOperationListenerTestCase {
     public void testDoPreDeleteUserWhenHandlerIsDisabled() throws APIManagementException, org
             .wso2.carbon.user.api.UserStoreException {
 
-        APIManagerConfiguration config = Mockito.mock(APIManagerConfiguration.class);
         apiAuthenticationAdminClient = Mockito.mock(APIAuthenticationAdminClient.class);
         KeyManagerUserOperationListener keyManagerUserOperationListener = new KeyManagerUserOperationListenerWrapper
                 (apiMgtDAO, workflowExecutor, null, config, apiAuthenticationAdminClient, false);
-
-        Map<String, Environment> environmentMap = new HashMap<String, Environment>();
         Environment environment = new Environment();
         environmentMap.put("hybrid", environment);
-
         Mockito.when(config.getApiGatewayEnvironments()).thenReturn(environmentMap);
-
         //Throws APIMgtException while retrieving access tokens
         Mockito.doThrow(APIManagementException.class).when(apiMgtDAO).getActiveAccessTokensOfUser(tenantedUsername);
         //Should always continue when the handler is disabled, even though Gateway cache update fails
@@ -131,13 +126,10 @@ public class KeyManagerUserOperationListenerTestCase {
     @Test
     public void testDoPreDeleteUserWhenGatewayEnvironmentsAreNotAvailable() throws APIManagementException {
 
-        APIManagerConfiguration config = Mockito.mock(APIManagerConfiguration.class);
         apiAuthenticationAdminClient = Mockito.mock(APIAuthenticationAdminClient.class);
         KeyManagerUserOperationListener keyManagerUserOperationListener = new KeyManagerUserOperationListenerWrapper
                 (apiMgtDAO, workflowExecutor, null, config, apiAuthenticationAdminClient, true);
-
         Mockito.when(config.getApiGatewayEnvironments()).thenReturn(environmentMap);
-
         //Throws APIMgtException while retrieving access tokens
         Mockito.doThrow(APIManagementException.class).when(apiMgtDAO).getActiveAccessTokensOfUser(tenantedUsername);
         //Should always return true when the gateway environments are not available,
