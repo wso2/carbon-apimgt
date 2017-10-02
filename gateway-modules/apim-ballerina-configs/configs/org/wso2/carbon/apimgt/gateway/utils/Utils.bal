@@ -360,18 +360,25 @@ function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO) {
     keyManagerInfoDTO.introspectEndpoint, err = (string)keyManagerInfo.introspectEndpoint;
 
     dto:CredentialsDTO keyManagerCredentialsDTO = {};
+    system:println(keyManagerInfo.credentials);
     json keyManagerCredentials = keyManagerInfo.credentials;
+    system:println("keyManagerInfo.credentials");
+    system:println(keyManagerInfo.credentials);
     keyManagerCredentialsDTO.username, err = (string)keyManagerCredentials.username;
     keyManagerCredentialsDTO.password, err = (string)keyManagerCredentials.password;
-    gatewayConf.keyManagerInfo = keyManagerInfoDTO;
     keyManagerInfoDTO.credentials = keyManagerCredentialsDTO;
-    //Extract JWT information and populate JWTInfoDTO to be cached
-    json jwTInfo = conf.jwTInfo;
-    dto:JWTInfoDTO jwtInfoDTO = {};
-    jwtInfoDTO.enableJWTGeneration, err = (boolean)jwTInfo.enableJWTGeneration;
-    jwtInfoDTO.jwtHeader, err = (string)jwTInfo.jwtHeader;
-    gatewayConf.jwtInfo = jwtInfoDTO;
+    gatewayConf.keyManagerInfo = keyManagerInfoDTO;
+    system:println("keyManagerInfoDTO");
+    system:println(keyManagerInfoDTO);
 
+    //Extract JWT information and populate JWTInfoDTO to be cached
+    json jwtInfo = conf.jwtInfo;
+    dto:JWTInfoDTO jwtInfoDTO = {};
+    jwtInfoDTO.enableJWTGeneration, err = (boolean)jwtInfo.enableJWTGeneration;
+    jwtInfoDTO.jwtHeader, err = (string)jwtInfo.jwtHeader;
+    gatewayConf.jwtInfo = jwtInfoDTO;
+    system:println("jwtInfoDTO");
+    system:println(jwtInfoDTO);
     //todo: pass the missed attributes from APIM core
     //Extract Analytics Server information and populate AnalyticsInfoDTO to be cached
     json analyticsInfo = conf.analyticsInfo;
@@ -386,7 +393,8 @@ function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO) {
     analyticsServerCredentialsDTO.password, err = (string)analyticsServerCredentials.password;
     analyticsInfoDTO.credentials = analyticsServerCredentialsDTO;
     gatewayConf.analyticsInfo = analyticsInfoDTO;
-
+    system:println("analyticsInfoDTO");
+    system:println(analyticsInfoDTO);
     //Extract Throttling Server information and populate ThrottlingInfoDTO to be cached
     json throttlingInfo = conf.throttlingInfo;
     dto:ThrottlingInfoDTO throttlingInfoDTO = {};
@@ -400,7 +408,8 @@ function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO) {
     throttlingServerCredentialsDTO.password, err = (string)throttlingServerCredentials.password;
     throttlingInfoDTO.credentials = throttlingServerCredentialsDTO;
     gatewayConf.throttlingInfo = throttlingInfoDTO;
-
+    system:println("throttlingInfoDTO");
+    system:println(throttlingInfoDTO);
     return gatewayConf;
 }
 

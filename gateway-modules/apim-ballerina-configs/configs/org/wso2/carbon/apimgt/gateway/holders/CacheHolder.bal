@@ -120,20 +120,13 @@ function getGatewayConf () (dto:GatewayConfDTO) {
 
     system:println("getGatewayConf() in CacheHolder");
     any dto = apimgtMaps:getMapEntry("gatewayConfig");
-
     errors:TypeCastError err;
     if(dto!=null){
         gatewayConf, err = (dto:GatewayConfDTO)dto;
         keyManagerConf = gatewayConf.keyManagerInfo;
-        system:println("gatewayConf");
-        system:println(gatewayConf);
-    }else{
-        gatewayConf = {keyManagerInfo:{},jwtInfo:{},analyticsInfo:{},throttlingInfo:{}};
-        keyManagerConf = gatewayConf.keyManagerInfo;
     }
     return gatewayConf;
 }
-
 function getKeyManagerConf () (dto:KeyManagerInfoDTO) {
     system:println("getKeyManagerConf() in CacheHolder");
     getGatewayConf();
