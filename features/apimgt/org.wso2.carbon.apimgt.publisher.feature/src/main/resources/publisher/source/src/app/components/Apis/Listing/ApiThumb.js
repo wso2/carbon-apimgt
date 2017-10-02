@@ -74,14 +74,14 @@ class ApiThumb extends React.Component {
         return (
             <Grid item xs={12} sm={6} md={3} lg={2} xl={2}>
                 <Card>
-                    <CardMedia>
+                    <CardMedia image="/publisher/public/images/api/api-default.png">
                         <img src="/publisher/public/images/api/api-default.png" style={{width:"100%"}}/>
                     </CardMedia>
                     <CardContent>
                         <Typography type="headline" component="h2">
                             {name}
                         </Typography>
-                        <Typography component="p">
+                        <Typography component="div">
                             <p>{version}</p>
                             <p>{context}</p>
                             <p className="description">{this.props.api.description}</p>
@@ -93,7 +93,6 @@ class ApiThumb extends React.Component {
                                 More...
                             </Button>
                         </Link>
-                        <Button style={{float:"right"}} onClick={() => this.setState({ open: true })}><DeleteIcon /></Button>
                         <Dialog open={this.state.openUserMenu} transition={Slide} onRequestClose={this.handleRequestClose}>
                             <DialogTitle>
                                 {"Use Google's location service?"}
@@ -107,9 +106,7 @@ class ApiThumb extends React.Component {
                                 <Button onClick={this.handleRequestClose} color="primary">
                                     Cancel
                                 </Button>
-                                <Button onClick={this.handleApiDelete} color="primary">
-                                    Delete
-                                </Button>
+                                //todo:Delete button should be enabled after M6 based on permission model
                             </DialogActions>
                         </Dialog>
 

@@ -22,10 +22,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 public abstract class WorkflowsApiService {
-    public abstract Response workflowsGet(String accept
- ,String ifNoneMatch
+    public abstract Response workflowsGet(String ifNoneMatch
  ,String ifModifiedSince
- ,String type
+ ,String workflowType
  , Request request) throws NotFoundException;
     public abstract Response workflowsWorkflowReferenceIdGet(String workflowReferenceId
  , Request request) throws NotFoundException;

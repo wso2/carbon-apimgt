@@ -41,7 +41,7 @@ export default class Details extends Component {
     }
 
     render() {
-        let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/" + NavBar.CONST.OVERVIEW;
+        let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";
         return (
             <div className="tab-content">
                 <Switch>

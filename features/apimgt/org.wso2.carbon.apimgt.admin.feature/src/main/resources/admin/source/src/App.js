@@ -19,7 +19,7 @@
 import React, {Component} from 'react'
 
 import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom'
-import {Base, Login, Logout} from './app/components/'
+import {Base, Login, Logout, Tasks} from './app/components/'
 import {PageNotFound} from './app/components/Base/Errors'
 import AuthManager from './app/data/AuthManager'
 import qs from 'qs'
@@ -51,6 +51,7 @@ class Protected extends Component {
                         <Route path={"/subscription_tiers"} render={props => (<SubscriptionTiers/>)}/>
                         <Route path={"/custom_rules"} render={props => (<CustomRules/>)}/>
                         <Route path={"/black_list"} render={props => (<BlackList/>)}/>
+                        <Route path={"/tasks"} component={Tasks} />
                         <Route component={PageNotFound}/>
                     </Switch>
                 </Base>

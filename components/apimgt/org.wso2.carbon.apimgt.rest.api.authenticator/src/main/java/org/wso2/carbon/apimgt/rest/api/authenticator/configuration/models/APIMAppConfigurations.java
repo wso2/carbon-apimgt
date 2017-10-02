@@ -22,10 +22,10 @@ import org.wso2.carbon.kernel.annotations.Configuration;
 import org.wso2.carbon.kernel.annotations.Element;
 
 /**
- * Class to hold store application configurations.
+ * Class to hold store/publisher application configurations.
  */
-@Configuration(namespace = "wso2.carbon.apimgt.store", description = "APIM Store Configuration Parameters")
-public class APIMStoreConfigurations {
+@Configuration(namespace = "wso2.carbon.apimgt.application", description = "APIM Store/Publisher Configuration Parameters")
+public class APIMAppConfigurations {
     @Element(description = "APIM Base URL")
     private String apimBaseUrl = "https://localhost:9292/";
     @Element(description = "Authorization Endpoint")

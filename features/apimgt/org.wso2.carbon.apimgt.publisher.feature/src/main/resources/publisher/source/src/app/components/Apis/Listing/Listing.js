@@ -35,7 +35,6 @@ import GridIcon from 'material-ui-icons/GridOn';
 import ListIcon from 'material-ui-icons/List';
 
 
-
 const menu = (
     <Menu>
         <Menu.Item>
@@ -125,10 +124,8 @@ class Listing extends React.Component {
             title: 'Action',
             key: 'action',
             render: text => {
-                return (
-                    <Popconfirm title="Confirm delete?" onConfirm={() => this.handleApiDelete(text.id, text.name)}>
-                        <Button type="danger" icon="delete">Delete</Button>
-                    </Popconfirm>)
+                return null;
+                //todo: Delete button should be enabled here after M6 based on permission model
             },
         }];
         return (
@@ -159,11 +156,6 @@ class Listing extends React.Component {
                         </Paper>
                     </Grid>
                     <Grid item xs={12} style={{marginLeft:"40px"}}>
-                            <div className="api-add-links">
-                                <Dropdown overlay={menu} placement="topRight">
-                                    <Button shape="circle" icon="plus"/>
-                                </Dropdown>
-                            </div>
                             <div className="flex-container">
 
                             </div>

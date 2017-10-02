@@ -18,9 +18,10 @@
 
 import React, {Component} from 'react'
 import {Link, withRouter} from 'react-router-dom'
-import Drawer from 'material-ui/Drawer';
-import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
-import MailIcon from 'material-ui-icons/Mail';
+import { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
+import { Description, DonutLarge, Games,FilterNone,
+    LockOutline, InsertDriveFile, Tune, Code, Subscriptions, ChromeReaderMode  } from 'material-ui-icons';
+import Divider from 'material-ui/Divider';
 
 class NavBar extends Component {
 
@@ -46,21 +47,73 @@ class NavBar extends Component {
         const pathSegments = this.props.location.pathname.split('/');
         // This assume that last segment and segment before it contains detail page action and API UUID
         const [active_tab, api_uuid] = pathSegments.reverse();
+        function showActiveTab(tab){
+            return (tab === active_tab) ?  "detail-menu selected-item" : "detail-menu" ;
+        }
         return (
             <div>
-            {Object.entries(NavBar.CONST).map(
-                ([key, val]) => {
-                    return (
-                    <ListItem button key={key} style={{width:"250px"}}>
-                        <ListItemIcon>
-                            <MailIcon />
-                        </ListItemIcon>
-                        <Link name={val} to={"/apis/" + api_uuid + "/" + val}><ListItemText primary={val} /></Link>
-
-                    </ListItem>
-                    )
-                }
-            )}
+                <ListItem style={{width:"250px"}}>
+                    <ListItemIcon>
+                        <ChromeReaderMode />
+                    </ListItemIcon>
+                    <Link name="listing" className="api-details-title" to={"/"} >API Details</Link>
+                </ListItem>
+                <Divider />
+                <ListItem className={showActiveTab("overview")}>
+                    <ListItemIcon>
+                        <Description />
+                    </ListItemIcon>
+                    <Link name="overview" to={"/apis/" + api_uuid + "/overview"} >
+                        <ListItemText primary="overview"  /></Link>
+                </ListItem>
+                <ListItem className={showActiveTab("lifecycle")}>
+                    <ListItemIcon>
+                        <DonutLarge />
+                    </ListItemIcon>
+                    <Link name="lifecycle" to={"/apis/" + api_uuid + "/lifecycle"}><ListItemText primary="lifecycle" /></Link>
+                </ListItem>
+                <ListItem className={showActiveTab("endpoints")}>
+                    <ListItemIcon>
+                        <Games />
+                    </ListItemIcon>
+                    <Link name="endpoints" to={"/apis/" + api_uuid + "/endpoints"}><ListItemText primary="endpoints" /></Link>
+                </ListItem>
+                <ListItem className={showActiveTab("resources")}>
+                    <ListItemIcon>
+                        <FilterNone />
+                    </ListItemIcon>
+                    <Link name="resources" to={"/apis/" + api_uuid + "/resources"}><ListItemText primary="resources" /></Link>
+                </ListItem>
+                <ListItem className={showActiveTab("permission")}>
+                    <ListItemIcon>
+                        <LockOutline />
+                    </ListItemIcon>
+                    <Link name="permission" to={"/apis/" + api_uuid + "/permission"}><ListItemText primary="permission" /></Link>
+                </ListItem>
+                <ListItem className={showActiveTab("documents")}>
+                    <ListItemIcon>
+                        <InsertDriveFile />
+                    </ListItemIcon>
+                    <Link name="documents" to={"/apis/" + api_uuid + "/documents"}><ListItemText primary="documents" /></Link>
+                </ListItem>
+                <ListItem className={showActiveTab("mediation")}>
+                    <ListItemIcon>
+                        <Tune />
+                    </ListItemIcon>
+                    <Link name="mediation" to={"/apis/" + api_uuid + "/mediation"}><ListItemText primary="mediation" /></Link>
+                </ListItem>
+                <ListItem className={showActiveTab("scripting")}>
+                    <ListItemIcon>
+                        <Code />
+                    </ListItemIcon>
+                    <Link name="scripting" to={"/apis/" + api_uuid + "/scripting"}><ListItemText primary="scripting" /></Link>
+                </ListItem>
+                <ListItem className={showActiveTab("subscriptions")}>
+                    <ListItemIcon>
+                        <Subscriptions />
+                    </ListItemIcon>
+                    <Link name="subscriptions" to={"/apis/" + api_uuid + "/subscriptions"}><ListItemText primary="subscriptions" /></Link>
+                </ListItem>
             </div>
         )
     }

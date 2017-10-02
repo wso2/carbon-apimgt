@@ -21,73 +21,62 @@ import {Link, withRouter} from "react-router-dom";
 import AuthManager from '../../../data/AuthManager.js';
 import ConfigManager from '../../../data/ConfigManager.js';
 import qs from 'qs'
-import {Layout, Menu, Icon, Dropdown, Button} from 'antd';
+import {Layout, Menu, Icon} from 'antd';
 const SubMenu = Menu.SubMenu;
 const MenuItemGroup = Menu.ItemGroup;
 const {Header} = Layout;
 
 
-class ComposeHeader extends Component {
-    constructor(props) {
-        super(props);
+const ComposeHeader = (props) => {
+    let params = qs.stringify({referrer: props.location.pathname});
+    let envdetails = new ConfigManager();
+    let variableData = envdetails.env_response
 
-        this.params = qs.stringify({referrer: props.location.pathname});
-        this.state = {
-            availableEnv: []
-        };
-    }
+    return (
+        <Header className='custom-header'>
+            <div className="logo">
+                <Link to="/apis">
+                    <img className="brand" src="/publisher/public/images/logo.svg" alt="wso2-logo"/>
+                    <span>API Publisher</span>
+                </Link>
+            </div>
 
-    componentDidMount(){
-        let envdetails = new ConfigManager();
-        envdetails.env_response.then((response) =>{
-            let allAvailableEnv = response.data.environments;
-            this.setState({availableEnv: allAvailableEnv});
+            <Menu
+                mode="horizontal"
+                defaultSelectedKeys={['2']}
+                className='custom-menu'
+                theme="light"
+            >
+                <Dropdown style={{float:"right"}} overlay={<Menu>
 
-        })
-       console.log(this);
-    }
+                    {JSON.parse(localStorage.getItem("environmentSC")).map(environment => <Menu.Item
+                        key={environment.env}>{environment.env}</Menu.Item>)}
+                </Menu>}>
+                    <a className="ant-dropdown-link" href="#">
+                        {localStorage.getItem("correctvalue")} <Icon type="down" />
+                    </a>
+                </Dropdown>
+                <SubMenu
+                    title={<span><Icon type="down"/>{ AuthManager.getUser() ? AuthManager.getUser().name : ""}</span>}>
+                    <Menu.Item key="setting:2"><Icon type="user"/>Profile</Menu.Item>
+                    <Menu.Item key="setting:1">
+                        <Link to={{pathname: '/logout', search: params}}><Icon type="logout"/>Logout</Link>
+                    </Menu.Item>
+                </SubMenu>
+                <SubMenu title={<Icon type="appstore-o" style={{fontSize: 20}}/>}>
+                    <Menu.Item key="endpoints">
+                        <Link to={{pathname: '/endpoints'}}>
+                            <Icon type="rocket" style={{fontSize: 20}}/> Endpoints
+                        </Link>
+                    </Menu.Item>
+                    <Menu.Item key="settings">
+                        <Link to={{pathname: '/apis'}}>
+                            <Icon type="fork" style={{fontSize: 20}}/> Apis
+                        </Link>
+                    </Menu.Item>
+                </SubMenu>
 
-    handleClick = (e) =>{
-console.log(e);
-    }
-
-    render() {
-        return (
-            <Header className='custom-header'>
-                <div className="logo">
-                    <Link to="/apis">
-                        <img className="brand" src="/publisher/public/images/logo.svg" alt="wso2-logo"/>
-                        <span>API Publisher</span>
-                    </Link>
-                </div>
-
-                <Menu
-                    mode="horizontal"
-                    defaultSelectedKeys={['2']}
-                    className='custom-menu'
-                    theme="light"
-                >
-
-                    <SubMenu
-                        title={<span><Icon
-                            type="down"/>{ AuthManager.getUser() ? AuthManager.getUser().name : ""}</span>}>
-                        <Menu.Item key="setting:2"><Icon type="user"/>Profile</Menu.Item>
-                        <Menu.Item key="setting:1">
-                            <Link to={{pathname: '/logout', search: this.params}}><Icon type="logout"/>Logout</Link>
-                        </Menu.Item>
-                    </SubMenu>
-                    <SubMenu title={<Icon type="appstore-o" style={{fontSize: 20}}/>}>
-                        <Menu.Item key="endpoints">
-                            <Link to={{pathname: '/endpoints'}}>
-                                <Icon type="rocket" style={{fontSize: 20}}/> Endpoints
-                            </Link>
-                        </Menu.Item>
-                        <Menu.Item key="settings">
-                            <Link to={{pathname: '/apis'}}>
-                                <Icon type="fork" style={{fontSize: 20}}/> Apis
-                            </Link>
-                        </Menu.Item>
-                    </SubMenu>
+ </SubMenu>
 
                     {localStorage.getItem("currentEnv") != 'default' &&
                     <SubMenu title={<span><Icon type="setting"/>{localStorage
@@ -96,9 +85,9 @@ console.log(e);
                             key={environment.env}>{environment.env}</Menu.Item>)}
 
                     </SubMenu>
-                    }
-                </Menu>
-            </Header>
+
+            </Menu>
+        </Header>
 
         );
     }

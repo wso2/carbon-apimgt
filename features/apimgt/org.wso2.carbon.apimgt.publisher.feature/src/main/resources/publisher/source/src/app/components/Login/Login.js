@@ -30,6 +30,7 @@ import Snackbar from 'material-ui/Snackbar';
 
 import './login.css'
 import { Menu, Dropdown, Icon, message } from 'antd';
+import User from '../../data/User'
 
 class Login extends Component {
 
@@ -99,6 +100,15 @@ class Login extends Component {
         let params = qs.parse(queryString);
         if (params.referrer) {
             this.setState({referrer: params.referrer});
+        }
+        if (params.user_name) {
+            this.setState({isLogin: true});
+            const validityPeriod = params.validity_period; // In seconds
+            const WSO2_AM_TOKEN_1 = params.partial_token;
+            const user = new User(params.user_name, params.id_token);
+            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/publisher");
+            user.scopes = params.scopes.split(" ");
+            AuthManager.setUser(user);
         }
         let envDetails = this.configManager;
         envDetails.env_response.then((response) => {

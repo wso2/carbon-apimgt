@@ -40,19 +40,16 @@ class NavBar extends Component {
                 {((this.state.expandedSection).includes("TASKS")) ?
                     (<div>
                         <MenuItem>
-                            <Link name="user_creation" to="/user_creation">USER CREATION</Link>
+                            <Link name="application_creation" to="/tasks/application_creation">APPLICATION CREATION</Link>
                         </MenuItem>
                         <MenuItem>
-                            <Link name="application_creation" to="/user_creation">APPLICATION CREATION</Link>
+                            <Link name="subscription_creation" to="/tasks/subscription_creation">SUBSCRIPTION CREATION</Link>
                         </MenuItem>
                         <MenuItem>
-                            <Link name="subscription_creation" to="/user_creation">SUBSCRIPTION CREATION</Link>
+                            <Link name="application_registration" to="/tasks/application_update">APPLICATION UPDATE</Link>
                         </MenuItem>
                         <MenuItem>
-                            <Link name="application_registration" to="/user_creation">APPLICATION REGISTRATION</Link>
-                        </MenuItem>
-                        <MenuItem>
-                            <Link name="api_state_change" to="/user_creation">API STATE CHANGE</Link>
+                            <Link name="api_state_change" to="/tasks/api_state">API STATE CHANGE</Link>
                         </MenuItem>
                     </div>) : <div/>
                 }

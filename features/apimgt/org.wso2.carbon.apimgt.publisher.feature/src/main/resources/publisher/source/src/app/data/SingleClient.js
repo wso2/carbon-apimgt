@@ -20,7 +20,6 @@ import Swagger from 'swagger-client'
 import AuthManager from './AuthManager'
 import ConfigManager from './ConfigManager'
 import Factory from './Factory'
-import axios from 'axios'
 
 
 /**
@@ -68,30 +67,13 @@ console.log("working")
                     return new Swagger(argsv);
                 }
             );
-        debugger;
-
-        this._client = this._client.then((Swagger)=>{
-            Swagger.http.credentials = 'include';
-        return Swagger;
+            console.log(this._client);
+        this._client = this._client.then((response)=>{
+            debugger
+     response.http.credentials = 'include';
+     return response;
         });
-
-
-        // const headers = {
-        //     'Authorization': 'Basic deidwe',
-        //     'Accept': 'application/json',
-        //     'Content-Type': 'application/x-www-form-urlencoded',
-        //     'Access-Control-Allow-Credentials':'true'
-        // };
-        //
-        // let promised_response = axios.get('https://localhost:9294/api/am/publisher/v1.0/apis?limit=25&offset=0', {headers: headers, withCredentials:true }); // enable with credeantials
-        // promised_response.then(response => {
-        //     console.log(response);
-        //
-        //
-        // }).catch(function(e) {
-        //     console.log(e); //
-        // });
-        // this._client.catch(AuthManager.unauthorizedErrorHandler);
+        this._client.catch(AuthManager.unauthorizedErrorHandler);
         // SingleClient._instance = this;
     }
 
@@ -158,6 +140,23 @@ console.log("working")
     static _getSwaggerURL() {
         /* TODO: Read this from configuration ~tmkb*/
         return window.location.protocol + "//" + window.location.host + "/api/am/publisher/v1.0/apis/swagger.yaml";
+    }
+
+    /**
+     * Get Scope for a particular resource path
+     *
+     * @param resourcePath resource path of the action
+     * @param resourceMethod resource method of the action
+     */
+    static getScopeForResource(resourcePath, resourceMethod) {
+        if(!SingleClient.spec){
+            SingleClient.spec = Swagger.resolve({url: SingleClient._getSwaggerURL()});
+        }
+        return SingleClient.spec.then(
+            resolved => {
+                return resolved.spec.paths[resourcePath] && resolved.spec.paths[resourcePath][resourceMethod] && resolved.spec.paths[resourcePath][resourceMethod].security[0].OAuth2Security[0];
+            }
+        )
     }
 
     /**
