@@ -34,7 +34,6 @@ public class APIExecutorWrapper extends APIExecutor {
     private UserRegistry userRegistry;
     private APIProvider apiProvider;
     private API api;
-    private String apiPath = "/api/somepath";
     private String tenantDomain;
 
     public APIExecutorWrapper(GenericArtifactManager genericArtifactManager, UserRegistry userRegistry,
