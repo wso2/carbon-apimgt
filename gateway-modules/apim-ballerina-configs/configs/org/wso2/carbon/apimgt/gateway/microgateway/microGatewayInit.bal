@@ -25,5 +25,4 @@ function initGateway () (boolean) {
         return false;
     }
     return true;
-    //otherwise, missing return statement
 }
