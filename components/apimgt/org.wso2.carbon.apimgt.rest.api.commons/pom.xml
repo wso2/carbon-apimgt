@@ -144,15 +144,8 @@
             <version>1.4.11</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.orbit.io.swagger</groupId>
-            <artifactId>swagger-codegen</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-        </dependency>
     </dependencies>
+
     <properties>
         <import.package>
             org.osgi.framework.*;version="${osgi.framework.import.version.range}",
