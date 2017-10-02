@@ -34,7 +34,8 @@ public class AbstractKeyManagerTestCase {
     @Test
     public void buildAccessTokenRequestFromJSONTest() throws APIManagementException {
         String jsonPayload = "{ \"callbackUrl\": \"www.google.lk\", \"clientName\": \"rest_api_publisher\", " +
-                "\"tokenScope\": \"Production\", \"owner\": \"admin\", \"grantType\": \"password refresh_token\", \"saasApp\": true }";
+                "\"tokenScope\": \"Production\", \"owner\": \"admin\", \"grantType\": \"password refresh_token\", " +
+                "\"saasApp\": true }";
 
         AbstractKeyManager keyManager = new AMDefaultKeyManagerImpl();
         // test AccessTokenRequest null scenario
@@ -42,15 +43,17 @@ public class AbstractKeyManagerTestCase {
         Assert.notNull(accessTokenRequest1);
 
         // test json payload without required parameters
-        AccessTokenRequest accessTokenRequest2 = keyManager.buildAccessTokenRequestFromJSON(jsonPayload, accessTokenRequest1);
+        AccessTokenRequest accessTokenRequest2 = keyManager.buildAccessTokenRequestFromJSON(jsonPayload,
+                accessTokenRequest1);
         Assert.notNull(accessTokenRequest2);
         assertNull(accessTokenRequest2.getClientId());
 
         // test json payload null
         assertNull(keyManager.buildAccessTokenRequestFromJSON(null, null));
 
-        String jsonPayload2 = "{ \"callbackUrl\": \"www.google.lk\", \"client_id\": \"XBPcXSfGK47WiEX7enchoP2Dcvga\", " +
-                "\"client_secret\": \"4UD8VX8NaQMtrHCwqzI1tHJLPoca\", \"owner\": \"admin\", \"grantType\": \"password refresh_token\", " +
+        String jsonPayload2 = "{ \"callbackUrl\": \"www.google.lk\", \"client_id\": \"XBPcXSfGK47WiEX7enchoP2Dcvga\"," +
+                "\"client_secret\": \"4UD8VX8NaQMtrHCwqzI1tHJLPoca\", \"owner\": \"admin\", \"grantType\": \"password" +
+                " refresh_token\", " +
                 "\"validityPeriod\": \"3600\" }";
         AccessTokenRequest accessTokenRequest3 = keyManager.buildAccessTokenRequestFromJSON(jsonPayload2,
                 new AccessTokenRequest());
@@ -80,8 +83,9 @@ public class AbstractKeyManagerTestCase {
         assertNotNull(keyManager.buildFromJSON(new OAuthApplicationInfo(), "{}"));
 
         // test with valid json
-        String jsonPayload2 = "{ \"callbackUrl\": \"www.google.lk\", \"client_id\": \"XBPcXSfGK47WiEX7enchoP2Dcvga\", " +
-                "\"client_secret\": \"4UD8VX8NaQMtrHCwqzI1tHJLPoca\", \"owner\": \"admin\", \"grantType\": \"password refresh_token\", " +
+        String jsonPayload2 = "{ \"callbackUrl\": \"www.google.lk\", \"client_id\": \"XBPcXSfGK47WiEX7enchoP2Dcvga\"," +
+                "\"client_secret\": \"4UD8VX8NaQMtrHCwqzI1tHJLPoca\", \"owner\": \"admin\", \"grantType\": \"password" +
+                "  refresh_token\", " +
                 "\"validityPeriod\": \"3600\" }";
         OAuthApplicationInfo oAuthApplicationInfo1 = keyManager.buildFromJSON(new OAuthApplicationInfo(), jsonPayload2);
         assertEquals("XBPcXSfGK47WiEX7enchoP2Dcvga", oAuthApplicationInfo1.getClientId());
