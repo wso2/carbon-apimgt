@@ -30,6 +30,7 @@ import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 
 public class AbstractAPIManagerWrapper extends AbstractAPIManager {
+
     private GenericArtifactManager genericArtifactManager;
     private RegistryService registryService;
     private TenantManager tenantManager;
@@ -39,21 +40,18 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
     }
 
     public AbstractAPIManagerWrapper(GenericArtifactManager genericArtifactManager, RegistryService registryService,
-            TenantManager tenantManager) throws
-            APIManagementException {
+            TenantManager tenantManager) throws APIManagementException {
         this.genericArtifactManager = genericArtifactManager;
         this.registryService = registryService;
         this.tenantManager = tenantManager;
     }
 
-    public AbstractAPIManagerWrapper( Registry registry) throws
-            APIManagementException {
+    public AbstractAPIManagerWrapper(Registry registry) throws APIManagementException {
         this.registry = registry;
     }
 
-    public AbstractAPIManagerWrapper(GenericArtifactManager genericArtifactManager, Registry registry,TenantManager tenantManager)
-            throws
-            APIManagementException {
+    public AbstractAPIManagerWrapper(GenericArtifactManager genericArtifactManager, Registry registry,
+            TenantManager tenantManager) throws APIManagementException {
         this.genericArtifactManager = genericArtifactManager;
         this.registry = registry;
         this.tenantManager = tenantManager;
@@ -67,28 +65,23 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         this.registryService = registryService;
     }
 
-    @Override
-    protected GenericArtifactManager getGenericArtifactManager() throws APIManagementException {
+    @Override protected GenericArtifactManager getGenericArtifactManager() throws APIManagementException {
         return genericArtifactManager;
     }
 
-    @Override
-    protected GenericArtifactManager getNewGenericArtifactManager()  {
+    @Override protected GenericArtifactManager getNewGenericArtifactManager() {
         return genericArtifactManager;
     }
 
-    @Override
-    protected GenericArtifactManager getGenericArtifactManager(Registry registry) throws RegistryException {
+    @Override protected GenericArtifactManager getGenericArtifactManager(Registry registry) throws RegistryException {
         return genericArtifactManager;
     }
 
-    @Override
-    protected RegistryService getRegistryService(){
+    @Override protected RegistryService getRegistryService() {
         return registryService;
     }
 
-    @Override
-    protected TenantManager getTenantManager() {
+    @Override protected TenantManager getTenantManager() {
         return tenantManager;
     }
 
@@ -96,8 +89,8 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         try {
 
             APIIdentifier apiIdentifier = new APIIdentifier(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER),
-                    artifact.getAttribute(APIConstants.API_OVERVIEW_NAME), artifact.getAttribute(APIConstants
-                    .API_OVERVIEW_VERSION));
+                    artifact.getAttribute(APIConstants.API_OVERVIEW_NAME),
+                    artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
             API api = new API(apiIdentifier);
             return api;
         } catch (GovernanceException e) {
@@ -105,12 +98,13 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         }
     }
 
-    protected API getApiForPublishing(Registry registry, GovernanceArtifact apiArtifact) throws APIManagementException{
+    protected API getApiForPublishing(Registry registry, GovernanceArtifact apiArtifact) throws APIManagementException {
         try {
 
-            APIIdentifier apiIdentifier = new APIIdentifier(apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER),
-                    apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME), apiArtifact.getAttribute(APIConstants
-                    .API_OVERVIEW_VERSION));
+            APIIdentifier apiIdentifier = new APIIdentifier(
+                    apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER),
+                    apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME),
+                    apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION));
             API api = new API(apiIdentifier);
             return api;
         } catch (GovernanceException e) {
@@ -127,7 +121,7 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
     }
 
     protected void startTenantFlow(String tenantDomain) {
-     // Do Nothing
+        // Do Nothing
     }
 
     protected void endTenantFlow() {
