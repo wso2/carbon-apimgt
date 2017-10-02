@@ -14,7 +14,8 @@ public class APIMConfigurations {
 
 
     @Element(description = "Name for environment")
-    private String environmentName = "Default";
+
+    private String environmentName = "Env";
 
     @Element(description = "Set of environments")
     private EnvironmentConfigurations environmentConfigs = new EnvironmentConfigurations();

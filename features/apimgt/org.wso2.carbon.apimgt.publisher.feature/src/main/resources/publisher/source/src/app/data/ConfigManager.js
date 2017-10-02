@@ -16,15 +16,24 @@
  * under the License.
  */
 
-import {Axios} from 'axios'
+import axios from 'axios'
 import DefaultConfig from './DefaultConfigs.json'
 
-class ConfigManager {
+
+export default class ConfigManager {
 
     constructor() {
+ if (this.env_response){
+     return this.env_response
+ }
         this.preBuildConfigs = DefaultConfig;
         this.runTimeConfigs = {};
         this.runTimeConfigLocation = ""; // URL to fetch runtime config JSON
+        this.host = window.location.protocol + "//" + window.location.host;
+        this.envs = "/login/infoenv";
+        this.envUrl = this.host + this.envs;
+        this.env_response = axios.get(this.envUrl);
+
     }
 
     checkRunTimeConfigs() {
@@ -34,4 +43,5 @@ class ConfigManager {
     getConfigs() {
 
     }
+
 }

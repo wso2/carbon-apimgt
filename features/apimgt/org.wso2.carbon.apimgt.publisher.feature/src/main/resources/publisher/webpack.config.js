@@ -8,6 +8,9 @@ const config = {
         path: path.resolve(__dirname, 'public/dist'),
         filename: '[name].js'
     },
+    externals: {
+        "swagger-client": "SwaggerClient"
+    },
     devtool: "source-map",
     plugins: [],
     watch: false,

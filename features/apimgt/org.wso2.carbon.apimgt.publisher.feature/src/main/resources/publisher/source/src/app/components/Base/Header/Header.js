@@ -19,6 +19,7 @@
 import React from 'react'
 import {Link, withRouter} from "react-router-dom";
 import AuthManager from '../../../data/AuthManager.js';
+import ConfigManager from '../../../data/ConfigManager.js';
 import qs from 'qs'
 
 import AppBar from 'material-ui/AppBar';
@@ -65,9 +66,21 @@ class Header extends React.Component {
             openMainMenu: false,
             searchVisible: false,
             openTips: false,
-            showLeftMenu: this.props.showLeftMenu
+            showLeftMenu: this.props.showLeftMenu,
+            availableEnv:[]
         }
     }
+    componentDidMount(){
+        let envdetails = new ConfigManager();
+        envdetails.env_response.then((response) =>{
+            let allAvailableEnv = response.data.environments;
+            console.log(allAvailableEnv);
+            this.setState({availableEnv: allAvailableEnv});
+
+        })
+        //console.log(this.state.availableEnv);
+    }
+
     handleClickUserMenu = event => {
         this.setState({ openUserMenu: true, anchorElUserMenu: event.currentTarget });
     };
@@ -93,6 +106,7 @@ class Header extends React.Component {
         this.setState({searchVisible:!this.state.searchVisible});
     }
     handleClickTips = event => {
+
         this.setState({ openTips: true, anchorElTips: event.currentTarget });
     };
     handleRequestCloseTips = () => {
@@ -223,6 +237,13 @@ class Header extends React.Component {
                                         <Link to="/logout" style={{color: "#000", textDecoration: 'none'}}>Logout</Link>
                                     </MenuItem>
                                 </Menu>
+
+                                <select color="contrast">
+                                    <option value="volvo">Volvo</option>
+                                    <option value="saab">Saab</option>
+                                    <option value="opel">Opel</option>
+                                    <option value="audi">Audi</option>
+                                </select>
                             </div>
                             :
                             <div></div> }

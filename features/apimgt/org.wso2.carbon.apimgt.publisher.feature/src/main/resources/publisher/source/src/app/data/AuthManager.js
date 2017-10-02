@@ -34,6 +34,7 @@ class AuthManager {
         this.userscope = null;
         this.bearer = "Bearer ";
         this.contextPath = "/publisher";
+        this.envs = "/login/infoenv";
     }
 
     static refreshTokenOnExpire() {
@@ -115,8 +116,9 @@ class AuthManager {
      * @returns {User | null} Is any user has logged in or not
      */
     static getUser() {
+        let currentenv = AuthManager.getEnvironment();
         const userData = localStorage.getItem(User.CONST.LOCALSTORAGE_USER);
-        const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1);
+        const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1 + "_" + currentenv);
         if (!(userData && partialToken)) {
             return null;
         }
@@ -136,9 +138,20 @@ class AuthManager {
         /* TODO: IMHO it's better to get this key (`wso2_user`) from configs */
     }
 
+    static getEnvironment(){
+        let currentEnvironment = localStorage.getItem("currentEnv");
+        return currentEnvironment;
+    }
+
     getTokenEndpoint() {
         return this.host + this.token;
     }
+
+    getTokenEnpointEnv(detailedValue){
+
+        return window.location.protocol + "//" + detailedValue.envIsHost + this.token;
+    }
+
 
     /**
      * By given username and password Authenticate the user, Since this REST API has no swagger definition,
@@ -147,7 +160,10 @@ class AuthManager {
      * @param {String} password : Plain text password
      * @returns {AxiosPromise} : Promise object with the login request made
      */
-    authenticateUser(username, password) {
+    authenticateUser(username, password, detailedValue) {
+
+        let tokenDetails = (typeof detailedValue == 'undefined') ?  this.getTokenEndpoint(): this.getTokenEnpointEnv(detailedValue);
+
         const headers = {
             'Authorization': 'Basic deidwe',
             'Accept': 'application/json',
@@ -160,7 +176,7 @@ class AuthManager {
             validity_period: 3600,
             scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage apim:subscription_view apim:subscription_block apim:subscribe'
         };
-        let promised_response = axios.post(this.getTokenEndpoint(), qs.stringify(data), {headers: headers});
+        let promised_response = axios.post(tokenDetails, qs.stringify(data), {headers: headers});
         promised_response.then(response => {
             const validityPeriod = response.data.validityPeriod; // In seconds
             const WSO2_AM_TOKEN_1 = response.data.partialToken;
@@ -168,9 +184,13 @@ class AuthManager {
             user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/publisher");
             user.scopes = response.data.scopes.split(" ");
             AuthManager.setUser(user);
+
+        }).catch(function(e) {
+            console.log(e); //
         });
         return promised_response;
     }
+
 
     /**
      * Revoke the issued OAuth access token for currently logged in user and clear both cookie and localstorage data.

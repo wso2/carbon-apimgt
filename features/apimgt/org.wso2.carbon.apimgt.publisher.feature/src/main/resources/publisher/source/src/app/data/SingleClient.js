@@ -18,6 +18,9 @@
 "use strict";
 import Swagger from 'swagger-client'
 import AuthManager from './AuthManager'
+import ConfigManager from './ConfigManager'
+import Factory from './Factory'
+
 
 /**
  * This class expose single swaggerClient instance created using the given swagger URL (Publisher, Store, ect ..)
@@ -31,31 +34,47 @@ class SingleClient {
      * @param {{}} args : Accept as an optional argument for SwaggerClient constructor.Merge the given args with default args.
      * @returns {SingleClient|*|null}
      */
-    constructor(args = {}) {
-        if (SingleClient._instance) {
-            return SingleClient._instance;
-        }
-        const authorizations = {
-            OAuth2Security: {
-                token: {access_token: AuthManager.getUser().getPartialToken()}
-            }
-        };
-        let promisedResolve = Swagger.resolve({url: SingleClient._getSwaggerURL()});
-        SingleClient.spec = promisedResolve;
-        this._client = promisedResolve.then(
-            resolved => {
-                const argsv = Object.assign(args,
-                    {
-                        spec: this._fixSpec(resolved.spec),
-                        authorizations: authorizations,
-                        requestInterceptor: this._getRequestInterceptor(),
-                        responseInterceptor: this._getResponseInterceptor()
-                    });
-                return new Swagger(argsv);
-            }
-        );
+    constructor(v1,v2,args = {}) {
+
+
+        this.host = v1;
+        this.port = v2;
+
+        // this.detailed = new Factory("default")
+        // console.log(this.detailed);
+
+        // if (SingleClient._instance) {
+        //     return SingleClient._instance;
+        // }
+
+console.log("working")
+            const authorizations = {
+                OAuth2Security: {
+                    token: {access_token: AuthManager.getUser().getPartialToken()}
+                }
+            };
+            let promisedResolve = Swagger.resolve({url: window.location.protocol + "//" + this.host +
+            "/api/am/publisher/v1.0/apis/swagger.yaml"});
+            this._client = promisedResolve.then(
+                resolved => {
+                    const argsv = Object.assign(args,
+                        {
+                            spec: this._fixSpec(resolved.spec),
+                            authorizations: authorizations,
+                            requestInterceptor: this._getRequestInterceptor(),
+                            responseInterceptor: this._getResponseInterceptor()
+                        });
+                    return new Swagger(argsv);
+                }
+            );
+            console.log(this._client);
+        this._client = this._client.then((response)=>{
+            debugger
+     response.http.credentials = 'include';
+     return response;
+        });
         this._client.catch(AuthManager.unauthorizedErrorHandler);
-        SingleClient._instance = this;
+        // SingleClient._instance = this;
     }
 
     /**
@@ -67,7 +86,9 @@ class SingleClient {
      * @private
      */
     _fixSpec(spec) {
-        spec.host = window.location.host; //TODO: Set hostname according to the APIM environment selected by user ~tmkb
+        console.log(this.host);
+        spec.host = this.host; //TODO: Set hostname according to the APIM environment selected by user ~tmkb
+        console.log(spec);
         return spec;
     }
 
@@ -137,9 +158,25 @@ class SingleClient {
             }
         )
     }
+
+    /**
+     * Get Scope for a particular resource path
+     *
+     * @param resourcePath resource path of the action
+     * @param resourceMethod resource method of the action
+     */
+    static getScopeForResource(resourcePath, resourceMethod) {
+        if(!SingleClient.spec){
+            SingleClient.spec = Swagger.resolve({url: SingleClient._getSwaggerURL()});
+        }
+        return SingleClient.spec.then(
+            resolved => {
+                return resolved.spec.paths[resourcePath][resourceMethod].security[0].OAuth2Security[0];
+            }
+        );
+    }
 }
 
-SingleClient._instance = null; // A private class variable to preserve the single instance of a swaggerClient
-SingleClient.spec = null;
+// SingleClient._instance = null;  A private class variable to preserve the single instance of a swaggerClient
 
 export default SingleClient

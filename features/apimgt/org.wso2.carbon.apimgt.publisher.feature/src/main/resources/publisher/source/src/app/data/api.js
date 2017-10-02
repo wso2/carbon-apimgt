@@ -16,6 +16,7 @@
 "use strict";
 import AuthManager from './AuthManager'
 import SingleClient from './SingleClient'
+import Factory from './Factory'
 
 /**
  * An abstract representation of an API
@@ -26,7 +27,12 @@ class API {
      * @param {string} access_key - Access key for invoking the backend REST API call.
      */
     constructor() {
-        this.client = new SingleClient().client;
+       // this.client = new SingleClient().client;
+        let currentenv = localStorage.getItem("currentEnv");
+        this.client = Factory.factoryCheck(currentenv);
+        console.log(this.client);
+
+
     }
 
     /**
@@ -151,6 +157,8 @@ class API {
     getAll(callback = null) {
         var promise_get_all = this.client.then(
             (client) => {
+                // client.http.withCredentials = "same-origin";
+                // client.http.withCredentials = "include";
                 return client.apis["API (Collection)"].get_apis({}, this._requestMetaData());
             }
         );
@@ -212,6 +220,7 @@ class API {
     getSwagger(id, callback = null) {
         var promise_get = this.client.then(
             (client) => {
+
                 return client.apis["API (Individual)"].get_apis__apiId__swagger(
                     {apiId: id}, this._requestMetaData());
             }
