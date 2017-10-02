@@ -13,7 +13,6 @@ import org.wso2.carbon.apimgt.gateway.constants as Constants;
 errors:TypeCastError err;
 
 function loadConfigs () {
-    system:println("loadConfigs() in APICoreUtil");
 
     string name = system:getEnv(Constants:GW_HOME);
     files:File t = {path:name + "/microgateway/microConf.json"};
@@ -95,7 +94,6 @@ function buildAPIDTO (json api) (dto:APIDTO, errors:Error) {
 function loadOfflineAPIs () {
     //load apis for the offline gateway
 
-    //string name = system:getEnv("OFFLINE_GATEWAY_REPO");
     json apiList = readFromJSONFile();
 
     if(apiList != null){
@@ -171,17 +169,6 @@ function retrieveOfflineSubscriptions () (boolean) {
                         system:println("WARNING: " + error.msg);
                     }
                 }
-                //int k=0;
-                //while(k<2){
-                //    var subs,error = buildSubscriptionDto(apiList[i],apps[j],k);
-                //    if(error == null){
-                //        holders:putIntoSubscriptionCache(subs);
-                //    }else{
-                //        system:println("WARNING: " + error.msg);
-                //        return false;
-                //    }
-                //    k=k+1;
-                //}
                 j=j+1;
             }
             i = i+1;
@@ -203,12 +190,12 @@ function findResources (string apiContext, string apiVersion)(json, errors:Error
     string context;
     string version;
 
-    while(i<count){
+    while (i<count) {
         context, err = (string)apiList[i].context;
         version, err = (string)apiList[i].version;
-        if(context == apiContext && version == apiVersion){
+        if (context == apiContext && version == apiVersion) {
             resources = apiList[i].resources;
-            if(resources == null) {
+            if (resources == null) {
                 //errors:Error error = {msg:"Resources not found for the api where the context :" +
                                          // apiContext + " & version :" + apiVersion};
                 errors:Error error = {msg:"Resources not found for the API"};
@@ -225,7 +212,7 @@ function retrieveOfflineResources (string apiContext, string apiVersion) {
     //put the resourceDtos of the given api to the cache
 
     var resources, error = findResources(apiContext, apiVersion);
-    if (error == null){
+    if (error == null) {
         int length = jsons:getInt(resources, "$.length()");
         int j = 0;
         while (j < length) {
@@ -234,7 +221,7 @@ function retrieveOfflineResources (string apiContext, string apiVersion) {
             holders:putIntoResourceCache(apiContext, apiVersion, res);
             j = j + 1;
         }
-    }else{
+    } else {
         system:println("WARNING: " + error.msg);
     }
 }
