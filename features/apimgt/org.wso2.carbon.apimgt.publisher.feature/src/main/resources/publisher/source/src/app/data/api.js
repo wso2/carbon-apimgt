@@ -474,19 +474,6 @@ class API {
     }
 
     /**
-     * Get All Discovered Services.
-     * @returns {Promise} Promised list of discovered services
-     */
-    discoverServices() {
-        return this.client.then(
-            (client) => {
-                return client.apis["External Resources (Collection)"].get_external_resources_services(
-                    {}, this._requestMetaData());
-            }
-        );
-    }
-
-    /**
      * Get endpoint object by its UUID.
      * @param id {String} UUID of the endpoint
      * @returns {Promise.<TResult>}
@@ -494,7 +481,7 @@ class API {
     getEndpoint(id) {
         return this.client.then(
             (client) => {
-                return client.apis["Endpoint (individual)"].get_endpoints_endpointId(
+                return client.apis["Endpoint (individual)"].get_endpoints__endpointId_(
                     {
                         endpointId: id,
                         'Content-Type': 'application/json'
@@ -511,13 +498,14 @@ class API {
     updateEndpoint(data) {
         return this.client.then(
             (client) => {
-                return client.apis["Endpoint (individual)"].put_endpoints_endpointId(
+                return client.apis["Endpoint (individual)"].put_endpoints__endpointId_(
                     {
                         endpointId: data.id,
                         body: data,
                         'Content-Type': 'application/json'
                     }, this._requestMetaData());
-            });
+            }
+        );
     }
 
     /**
@@ -533,6 +521,20 @@ class API {
             }
         );
     }
+
+    /**
+     * Discovered Service Endpoints.
+     * @returns {Promise} Promised list of discovered services
+     */
+    discoverServices() {
+        return this.client.then(
+            (client) => {
+                return client.apis["External Resources (Collection)"].get_external_resources_services(
+                    {}, this._requestMetaData());
+            }
+        );
+    }
+
 
     addDocument(api_id, body) {
 
