@@ -24,6 +24,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
@@ -81,9 +82,32 @@ public class APIProviderHostObjectTest {
         System.setProperty("javax.net.ssl.keyStorePassword", "wso2carbon");
         System.setProperty("javax.net.ssl.trustStore", TRUSTSTORE_FILE_PATH_CLIENT);
         System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
+        //Success case
         org.mozilla.javascript.NativeObject obj =
                 HostObjectUtils.sendHttpHEADRequest("https://localhost:8081/test",
                         "404");
+        Assert.assertEquals("success", obj.get("response"));
+        //Non available path
+        org.mozilla.javascript.NativeObject objError =
+                HostObjectUtils.sendHttpHEADRequest("https://localhost:8081/best",
+                        "404");
+        Assert.assertNotEquals("success", objError.get("response"));
+        //Error Port
+        org.mozilla.javascript.NativeObject objErrorPort =
+                HostObjectUtils.sendHttpHEADRequest("https://localhost:8082/best",
+                        "404");
+        Assert.assertNotEquals("success", objErrorPort.get("response"));
+        //Invalid credentials
+        System.setProperty("javax.net.ssl.trustStorePassword", "Wrong-Password");
+        org.mozilla.javascript.NativeObject objErrorSSL =
+                HostObjectUtils.sendHttpHEADRequest("https://localhost:8081/best",
+                        "404");
+        Assert.assertNotEquals("success", objErrorSSL.get("response"));
+        //With Proxy host and port
+        System.setProperty(APIConstants.HTTP_PROXY_HOST, "localhost");
+        System.setProperty(APIConstants.HTTP_PROXY_PORT, "8081");
+        obj = HostObjectUtils.sendHttpHEADRequest("https://localhost:8081/test",
+                "404");
         Assert.assertEquals("success", obj.get("response"));
         wireMockRule.resetAll();
         wireMockRule.stop();
