@@ -8,8 +8,44 @@ import org.wso2.carbon.apimgt.gateway.holders as holders;
 import ballerina.lang.files;
 import ballerina.lang.blobs;
 import org.wso2.carbon.apimgt.ballerina.util;
+import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
 import org.wso2.carbon.apimgt.gateway.constants as Constants;
 errors:TypeCastError err;
+
+function loadConfigs () {
+    system:println("loadConfigs() in APICoreUtil");
+
+    string name = system:getEnv(Constants:GW_HOME);
+    files:File t = {path:name + "/microgateway/microConf.json"};
+
+    if(files:exists(t)){
+        try {
+            //files:File t = {path:name + "/microgateway/microConf.json"};
+            //not working in windows                                     ????????????????
+            files:open(t, "r");
+            var content, n = files:read(t, 100000000);
+            //so there's a limit! only 100000000bytes can be read        ????????????????
+
+            string strConf = blobs:toString(content, "utf-8");
+            json conf = util:parse(strConf);
+            dto:GatewayConfDTO gatewayConfDTO = gatewayUtil:fromJsonToGatewayConfDTO(conf);
+            //var gatewayConfDTO, _ = <dto:GatewayConfDTO>conf.gatewayConf;
+            holders:setGatewayConf(gatewayConfDTO);
+
+        }catch (errors:Error error) {
+            system:println("WARNING : analytics configuration not found");
+        }
+    }
+
+
+    //if(gatewayConfDTO == null){
+    //    errors:Error error = {msg:"some data missing in the cofiguration file"};
+    //    return error;
+    //}else{
+    //
+    //    return null;
+    //}
+}
 
 function readFromJSONFile()(json){
     //to read from the json data file, return the apiList

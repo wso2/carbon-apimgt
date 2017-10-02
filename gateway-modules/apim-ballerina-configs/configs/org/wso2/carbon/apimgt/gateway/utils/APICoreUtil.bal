@@ -28,6 +28,8 @@ function registerGateway () (json) {
         //Set gateway configuration into global cache
         dto:GatewayConfDTO gatewayConfDTO = fromJsonToGatewayConfDTO(gatewayConfig);
         holder:setGatewayConf(gatewayConfDTO);
+        system:println("gatewayConfDTO");
+        system:println(gatewayConfDTO);
     } catch (errors:Error error) {
         system:println("Error occurred while registering gateway in API Core. " + error.msg);
         throw error;
