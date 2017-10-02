@@ -202,38 +202,37 @@ class ButtonCell extends Component {
         };
     }
 
+    getAddButton(){
+        return (
+            <Button type="primary" onClick={() =>this.handleAddEndpointToDB()}>
+            Add to Database </Button>
+        );
+    }
+
     getUpdateButton(){
         return (
-            <Button> Update Database </Button>
+            <Button type="secondary" onClick={() =>this.handleUpdateEndpoint()}>
+            Update Database </Button>
         );
     }
 
-    getAddButton(){
+    handleAddEndpointToDB = () => {
         let record = this.state.record;
-        return (
-            <Button type="primary" onClick={() =>this.handleAddEndpointToDB(record.id,
-            record.name, record.type, record.endpointConfig, record.endpointSecurity,
-            record.maxTps)}>
-            Add to Database</Button>
-        );
-    }
-
-    handleAddEndpointToDB = (endpointUuid, serviceName, endpointType, config, security,
-        maximumTps) => {
-        console.log(config);
+        let configObject = JSON.parse(record.endpointConfig);
         let endpointDefinition = {
-            name: JSON.parse(config).namespace + "-" + serviceName + "-"
-                    + endpointType + "-" + JSON.parse(config).urlType,
-            type: endpointType,
-            endpointConfig: config,
-            endpointSecurity: security,
-            maxTps: maximumTps
+            name: configObject.namespace + "-" + record.name + "-"
+                    + record.type + "-" + configObject.urlType,
+            type: record.type,
+            endpointConfig: record.endpointConfig,
+            endpointSecurity: record.endpointSecurity,
+            maxTps: record.maxTps
         };
         const api = new API();
         const promisedEndpoint = api.addEndpoint(endpointDefinition);
         return promisedEndpoint.then(
             response => {
                 const {name, id} = response.obj;
+                this.state.storedEndpoints.push(response.obj);
                 message.success("New endpoint " + name + " created successfully");
                 this.setState({
                     actionButton: this.getUpdateButton()
@@ -248,6 +247,43 @@ class ButtonCell extends Component {
                 });
             }
         )
+    }
+
+    handleUpdateEndpoint = () => {
+        const hideMessage = message.loading("Updating the Endpoint ...", 0);
+        let record = this.state.record;
+        let configObject = JSON.parse(record.endpointConfig);
+        let endpointName = configObject.namespace + "-" + record.name + "-"
+                            + record.type + "-" + configObject.urlType;
+        let storedEndpoint = this.state.storedEndpoints.find(el => el.name === endpointName);
+        if (storedEndpoint === null) {
+            message.error("Error while updating. Could not find the " + endpointName + " Endpoint!");
+            hideMessage();
+            return;
+        }
+        let endpointDefinition = {
+            id: storedEndpoint.id,
+            name: endpointName,
+            type: record.type,
+            endpointConfig: record.endpointConfig,
+            endpointSecurity: record.endpointSecurity,
+            maxTps: record.maxTps
+        };
+        const api = new API();
+        let promised_update = api.updateEndpoint(endpointDefinition);
+        promised_update.then(
+            response => {
+                if (response.status !== 200) {
+                    console.log("logging");
+                    console.log(response);
+                    message.error("Something went wrong while updating the " + endpointName + " Endpoint!");
+                    hideMessage();
+                    return;
+                }
+                message.success(endpointName + " Endpoint updated successfully!");
+                hideMessage()
+            }
+        );
     }
 
     checkIfEndpointExists = () => {
