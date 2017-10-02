@@ -146,7 +146,7 @@ public class KeyManagerUserOperationListenerTestCase {
         Environment environment = new Environment();
         environmentMap.put("hybrid", environment);
         Mockito.when(config.getApiGatewayEnvironments()).thenReturn(environmentMap);
-        Mockito.when(apiMgtDAO.getActiveAccessTokensOfUser(tenantedUsername)).thenReturn(null);
+        Mockito.when(apiMgtDAO.getActiveAccessTokensOfUser(tenantedUsername)).thenReturn(new HashSet<String>());
         Assert.assertTrue(keyManagerUserOperationListener.doPreDeleteUser(username, userStoreManager));
     }
 
@@ -169,16 +169,27 @@ public class KeyManagerUserOperationListenerTestCase {
         Environment environment = new Environment();
         environmentMap.put("hybrid", environment);
         Mockito.when(config.getApiGatewayEnvironments()).thenReturn(environmentMap);
-
         Set<String> activeTokens = new HashSet<String>();
         activeTokens.add(UUID.randomUUID().toString());
-
         Mockito.when(apiMgtDAO.getActiveAccessTokensOfUser(tenantedUsername)).thenReturn(activeTokens);
-
         //Test AxisFault while invalidating Cached Tokens via Admin Client
         Mockito.doThrow(AxisFault.class).when(apiAuthenticationAdminClient).invalidateCachedTokens(activeTokens);
         Assert.assertTrue(keyManagerUserOperationListener.doPreDeleteUser(username, userStoreManager));
 
+    }
+
+    @Test
+    public void testDoPreDeleteUserWithActiveAccessTokens() throws APIManagementException {
+        KeyManagerUserOperationListener keyManagerUserOperationListener = new KeyManagerUserOperationListenerWrapper
+                (apiMgtDAO, workflowExecutor, null, config, apiAuthenticationAdminClient, true);
+        Environment environment = new Environment();
+        environmentMap.put("hybrid", environment);
+        Mockito.when(config.getApiGatewayEnvironments()).thenReturn(environmentMap);
+        Set<String> activeTokens = new HashSet<String>();
+        activeTokens.add(UUID.randomUUID().toString());
+        Mockito.when(apiMgtDAO.getActiveAccessTokensOfUser(tenantedUsername)).thenReturn(activeTokens);
+        //Test AxisFault while invalidating Cached Tokens via Admin Client
+        Assert.assertTrue(keyManagerUserOperationListener.doPreDeleteUser(username, userStoreManager));
     }
 
     @Test
