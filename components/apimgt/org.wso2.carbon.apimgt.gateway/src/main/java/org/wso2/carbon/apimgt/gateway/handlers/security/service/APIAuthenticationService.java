@@ -25,7 +25,6 @@ import org.wso2.carbon.mediation.initializer.AbstractServiceBusAdmin;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.cache.Cache;
-import javax.cache.CacheManager;
 import javax.cache.Caching;
 
 import java.util.*;
@@ -39,7 +38,7 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
 
         //Previously we were clearing API key manager side cache. But actually this service deployed at gateway side.
         //Hence we will get cache from gateway cache
-        Cache gatewayCache =  getCacheManager().getCache(APIConstants.GATEWAY_KEY_CACHE_NAME);
+        Cache gatewayCache =  Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.GATEWAY_KEY_CACHE_NAME);
         for (APIKeyMapping mapping : mappings) {
             //According to new cache design we will use cache key to clear cache if its available in mapping
             //Later we construct key using attributes. Now cache key will pass as key
@@ -51,7 +50,7 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
     }
 
     public void invalidateOAuthKeys(String consumerKey, String authorizedUser) {
-        Cache cache = getCacheManager().getCache(APIConstants.KEY_CACHE_NAME);
+        Cache cache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
         String cacheKey = consumerKey + ':' + authorizedUser;
         cache.remove(cacheKey);
 
@@ -68,7 +67,9 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
 
         try {
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = startTenantFlow(tenantDomain);
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
 
             String resourceVerbCacheKey =
@@ -78,7 +79,7 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
             String apiCacheKey = APIUtil.getAPIInfoDTOCacheKey(apiContext, apiVersion);
 
             Cache cache =
-                          getCacheManager()
+                          Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
                                  .getCache(APIConstants.RESOURCE_CACHE_NAME);
 
             if (cache.containsKey(apiCacheKey)) {
@@ -122,22 +123,10 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
 
         } finally {
             if (isTenantFlowStarted) {
-                endTenantFlow();
+                PrivilegedCarbonContext.endTenantFlow();
             }
         }
 
-    }
-
-    protected void endTenantFlow() {
-        PrivilegedCarbonContext.endTenantFlow();
-    }
-
-    protected boolean startTenantFlow(String tenantDomain) {
-        boolean isTenantFlowStarted;
-        isTenantFlowStarted = true;
-        PrivilegedCarbonContext.startTenantFlow();
-        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-        return isTenantFlowStarted;
     }
 
     /**
@@ -147,7 +136,7 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
      */
     public void invalidateKey(String accessToken) {
         //TODO Review and fix
-        Cache keyCache = getCacheManager().getCache(APIConstants.KEY_CACHE_NAME);
+        Cache keyCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.KEY_CACHE_NAME);
         keyCache.remove(accessToken);
         Iterator<Object> iterator = keyCache.iterator();
         while (iterator.hasNext()) {
@@ -176,7 +165,7 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
             return;
         }
 
-        Cache gatewayCache = getCacheManager().
+        Cache gatewayCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
                 getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME);
 
         Map<String, String> cachedObjects = new HashMap<String, String>();
@@ -228,19 +217,22 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
         }
 
         //Remove all tokens from the super tenant cache.
-        getCacheManager().
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
                 getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME).removeAll(cachedObjects.keySet());
 
         //For each each tenant
         for(String tenantDomain : tenantMap.keySet()){
             try{
-                startTenantFlow(tenantDomain);
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                        setTenantDomain(tenantDomain, true);
+
                 if(log.isDebugEnabled()){
                     log.debug("About to delete " + tenantMap.get(tenantDomain).size() + " tokens from tenant " +
                                 tenantDomain + "'s cache");
                 }
 
-                Cache tenantGatewayCache = getCacheManager().
+                Cache tenantGatewayCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
                         getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME);
 
                 //Remove all cached tokens from the tenant's cache
@@ -254,12 +246,8 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
                     log.debug("Removed all cached tokens of " + tenantDomain + " from cache");
                 }
             }finally{
-                endTenantFlow();
+                PrivilegedCarbonContext.endTenantFlow();
             }
         }
-    }
-
-    protected CacheManager getCacheManager() {
-        return Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER);
     }
 }
