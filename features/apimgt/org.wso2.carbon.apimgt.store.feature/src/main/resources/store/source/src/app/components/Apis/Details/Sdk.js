@@ -48,6 +48,10 @@ class Sdk extends React.Component {
 
         promised_languages.then(
             response => {
+                if(response.obj.length == 0){
+                    this.setState({sdkLanguages : false})
+                    return;
+                }
                 this.setState({sdkLanguages : response.obj});
             }
         ).catch(
