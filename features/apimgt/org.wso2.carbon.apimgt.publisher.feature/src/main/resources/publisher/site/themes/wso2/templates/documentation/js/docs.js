@@ -199,6 +199,8 @@ var clearDocs = function () {
 	$('#newDoc').hide();
     $('#addDoc').show('fast');
     $('#updateDoc').hide();
+    $('#newDoc .btn-primary').text(i18n.t('Add Document'));
+    $('#newDoc .btn-primary').val('');
 };
 
 var submitDoc = function() {
