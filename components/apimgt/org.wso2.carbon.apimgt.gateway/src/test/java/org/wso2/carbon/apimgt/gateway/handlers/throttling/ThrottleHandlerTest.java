@@ -456,7 +456,7 @@ public class ThrottleHandlerTest {
     public void testMsgThrottleOutWhenHittingSubscriptionLevelSpike() {
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator,
                 accessInformation);
-        throttleHandler.setProductionMaxCount("100");
+        throttleHandler.setSandboxMaxCount("100");
         SynapseEnvironment synapseEnvironment = Mockito.mock(SynapseEnvironment.class);
         throttleHandler.init(synapseEnvironment);
 
