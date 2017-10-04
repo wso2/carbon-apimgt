@@ -38,14 +38,22 @@
                             log.debug("logout request failed because there is no session details in SAMLSSORelyingPartyObject. Here it is trying to do a login request");
                         }
                         samlLogoutRequest = ssoRelyingParty.getSAMLAuthRequest();
-                        idpURL = site.ssoConfiguration.identityProviderURL ;
+                        idpURL = site.ssoConfiguration.identityProviderLogoutURL ;
+                        if(idpURL == null){
+                            idpURL = site.ssoConfiguration.identityProviderURL ;
+                        	log.info(idpURL);
+                   		}
                 } else {
                         if (log.isDebugEnabled()) {
                             log.debug("doing logout request");
                         }
-                        idpURL = ssoRelyingParty.getProperty("identityProviderURL");
-                        if (!Boolean(idpURL)) {
-                            idpURL = site.ssoConfiguration.identityProviderURL ;
+                        idpURL = site.ssoConfiguration.identityProviderLogoutURL ;
+                        if(idpURL == null){
+                            idpURL = ssoRelyingParty.getProperty("identityProviderURL");
+
+                            if (!Boolean(idpURL)) {
+                                idpURL = site.ssoConfiguration.identityProviderURL ;
+                            }
                         }
                 }
 
