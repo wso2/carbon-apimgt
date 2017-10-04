@@ -3,7 +3,7 @@
     "info": {
         "version": "0.11.0",
         "title": "WSO2 API Manager - Store",
-        "description": "This specifies a **RESTful API** for WSO2 **API Manager** - Store.\n\nPlease see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.0.4/components/apimgt/org.wso2.carbon.apimgt.rest.api.store/src/main/resources/store-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.\n",
+        "description": "This specifies a **RESTful API** for WSO2 **API Manager** - Store.\n\nPlease see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.1.66/components/apimgt/org.wso2.carbon.apimgt.rest.api.store/src/main/resources/store-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.\n",
         "contact": {
             "name": "WSO2",
             "url": "http://wso2.com/products/api-manager/",
@@ -136,7 +136,7 @@
                                 "type": "string"
                             },
                             "ETag": {
-                                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
+                                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests.\n",
                                 "type": "string"
                             },
                             "Last-Modified": {
@@ -149,7 +149,7 @@
                         }
                     },
                     "304": {
-                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"
+                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
                     },
                     "404": {
                         "description": "Not Found.\nRequested API does not exist.\n",
@@ -202,7 +202,7 @@
                                 "type": "string"
                             },
                             "ETag": {
-                                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
+                                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests.\n",
                                 "type": "string"
                             },
                             "Last-Modified": {
@@ -212,7 +212,7 @@
                         }
                     },
                     "304": {
-                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"
+                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
                     },
                     "404": {
                         "description": "Not Found.\nRequested API does not exist.\n",
@@ -234,9 +234,9 @@
                 "x-scope": "apim:subscribe",
                 "x-wso2-request": "GET https://127.0.0.1:9443/api/am/store/v0.11/apis/generate-sdk\n",
                 "x-wso2-curl": "curl https://127.0.0.1:9443/api/am/store/v0.11/apis/generate-sdk",
-                "x-wso2-response": "HTTP/1.1 200 OK \n Content-Disposition: attachment; filename=\"PizzaShackAPI_1.0.0_java.zip\"  \n Date: Wed, 12 Oct 2016 11:10:49 GMT \n Content-Type: application/zip \n Transfer-Encoding: chunked \n Server: WSO2 Carbon Server",
+                "x-wso2-response": "HTTP/1.1 200 OK \nContent-Disposition: attachment; filename=\"PizzaShackAPI_1.0.0_java.zip\"\nContent-Type: application/zip\n\n[zip content]",
                 "summary": "Generate SDK for an API\n",
-                "description": "This operation can be used to generate SDK for an API by providing the id of the API along with the preferred language.\n",
+                "description": "This operation can be used to generate SDK for an API by providing the id of the API along with the preferred language.\n\n`X-WSO2-Tenant` header can be used to retrive the generated SDK of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.\n\n**NOTE:**\n* This operation does not require an Authorization header by default. But in order to generate a restricted API's SDK, you need to provide Authorization header.\n",
                 "parameters": [
                     {
                         "$ref": "#/parameters/apiId-Q"
@@ -389,7 +389,7 @@
                                 "type": "string"
                             },
                             "ETag": {
-                                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
+                                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests.\n",
                                 "type": "string"
                             },
                             "Last-Modified": {
@@ -399,7 +399,7 @@
                         }
                     },
                     "304": {
-                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"
+                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
                     },
                     "404": {
                         "description": "Not Found.\nRequested Document does not exist.\n",
@@ -455,7 +455,7 @@
                                 "type": "string"
                             },
                             "ETag": {
-                                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
+                                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests.\n",
                                 "type": "string"
                             },
                             "Last-Modified": {
@@ -474,7 +474,7 @@
                         }
                     },
                     "304": {
-                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"
+                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
                     },
                     "404": {
                         "description": "Not Found.\nRequested Document does not exist.\n",
@@ -497,7 +497,7 @@
                 "x-wso2-curl": "curl https://127.0.0.1:9443/api/am/store/v0.11/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail > image.jpg",
                 "x-wso2-response": "HTTP/1.1 200 OK\r\nContent-Type: image/jpeg\r\n\r\n[image content]",
                 "summary": "Get thumbnail image",
-                "description": "This operation can be used to download a thumbnail image of an API.\n\n**NOTE:**\n* This operation does not require an Authorization header by default. But in order to see a restricted API's thumbnail, you need to provide Authorization header.        \n",
+                "description": "This operation can be used to download a thumbnail image of an API.\n\n`X-WSO2-Tenant` header can be used to retrive a thumbnail of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.\n\n**NOTE:**\n* This operation does not require an Authorization header by default. But in order to see a restricted API's thumbnail, you need to provide Authorization header.        \n",
                 "parameters": [
                     {
                         "$ref": "#/parameters/apiId"
@@ -527,7 +527,7 @@
                                 "type": "string"
                             },
                             "ETag": {
-                                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests (Will be supported in future).\n",
+                                "description": "Entity Tag of the response resource.\nUsed by caches, or in conditional requests.\n",
                                 "type": "string"
                             },
                             "Last-Modified": {
@@ -537,7 +537,7 @@
                         }
                     },
                     "304": {
-                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"
+                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
                     },
                     "404": {
                         "description": "Not Found.\nRequested Document does not exist.\n",
@@ -725,7 +725,7 @@
                                 "type": "string"
                             },
                             "ETag": {
-                                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
+                                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests.\n",
                                 "type": "string"
                             },
                             "Last-Modified": {
@@ -735,7 +735,7 @@
                         }
                     },
                     "304": {
-                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"
+                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
                     },
                     "404": {
                         "description": "Not Found.\nRequested application does not exist.\n",
@@ -800,7 +800,7 @@
                                 "type": "string"
                             },
                             "ETag": {
-                                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
+                                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests.\n",
                                 "type": "string"
                             },
                             "Last-Modified": {
@@ -822,7 +822,7 @@
                         }
                     },
                     "412": {
-                        "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met (Will be supported in future).\n",
+                        "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -861,7 +861,116 @@
                         }
                     },
                     "412": {
-                        "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met (Will be supported in future).\n",
+                        "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/applications/{applicationId}/keys/{keyType}": {
+            "get": {
+                "x-scope": "apim:subscribe",
+                "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/store/v0.11/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION\"",
+                "x-wso2-request": "GET https://127.0.0.1:9443/api/am/store/v0.11/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+                "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n {\n      \"consumerKey\": \"QwEtRHd4NJkcFuRUfAT5af8XEEoa\",\n      \"consumerSecret\": \"7Fairfeu321ENjOR9w2xgJl3i70a\",\n       \"supportedGrantTypes\": [\n        \"refresh_token\",\n        \"urn:ietf:params:oauth:grant-type:saml2-bearer\",\n        \"password\",\n        \"client_credentials\",\n        \"iwa:ntlm\"\n      ],\n      \"callbackUrl\": \"http://sample/com/callback\",\n      \"keyState\": \"COMPLETED\",\n      \"keyType\": \"PRODUCTION\"}\n",
+                "summary": "Get key details of a given type\n",
+                "description": "This operation can be used to retrieve key details of an individual application specifying the key type in the URI.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/applicationId"
+                    },
+                    {
+                        "$ref": "#/parameters/keyType"
+                    },
+                    {
+                        "$ref": "#/parameters/groupId"
+                    },
+                    {
+                        "$ref": "#/parameters/Accept"
+                    }
+                ],
+                "tags": [
+                    "Application (Individual)",
+                    "Application Keys"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nApplication key details returned.\n",
+                        "schema": {
+                            "$ref": "#/definitions/ApplicationKey"
+                        },
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found.\nRequested application does not exist.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "406": {
+                        "description": "Not Acceptable.\nThe requested media type is not supported\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "x-scope": "apim:subscribe",
+                "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"https://127.0.0.1:9443/api/am/store/v0.11/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524/keys/SANDBOX\"",
+                "x-wso2-request": "GET https://127.0.0.1:9443/api/am/store/v0.11/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/SANDBOX\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n{\n   \"supportedGrantTypes\": [\n     \"refresh_token\",\n     \"urn:ietf:params:oauth:grant-type:saml2-bearer\",\n     \"password\",\n     \"client_credentials\",\n     \"iwa:ntlm\"\n   ],\n   \"callbackUrl\": \"http://sample/com/callback\"\n }\n",
+                "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n {\n      \"consumerKey\": \"QwEtRHd4NJkcFuRUfAT5af8XEEoa\",\n      \"consumerSecret\": \"7Fairfeu321ENjOR9w2xgJl3i70a\",\n       \"supportedGrantTypes\": [\n        \"refresh_token\",\n        \"urn:ietf:params:oauth:grant-type:saml2-bearer\",\n        \"password\",\n        \"client_credentials\",\n        \"iwa:ntlm\"\n      ],\n      \"callbackUrl\": \"http://sample/com/callback\",\n      \"keyState\": \"COMPLETED\",\n      \"keyType\": \"PRODUCTION\"}\n",
+                "summary": "Update grant types and callback url of an application\n",
+                "description": "This operation can be used to update grant types and callback url of an application. (Consumer Key and Consumer Secret are ignored) Upon succesfull you will retrieve the updated key details as the response.\n",
+                "parameters": [
+                    {
+                        "$ref": "#/parameters/applicationId"
+                    },
+                    {
+                        "$ref": "#/parameters/keyType"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Grant types/Callback URL update request object\n",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ApplicationKey"
+                        }
+                    }
+                ],
+                "tags": [
+                    "Application (individual)",
+                    "Application Keys"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ok.\nGrant types or/and callback url is/are updated.\n",
+                        "schema": {
+                            "$ref": "#/definitions/ApplicationKey"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request.\nInvalid request or validation error\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found.\nThe resource to be updated does not exist.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "412": {
+                        "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -1064,64 +1173,66 @@
                 }
             }
         },
-      "/subscriptions/multiple": {
-        "post": {
-          "x-scope": "apim:subscribe",
-          "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST  -d @data.json \"https://127.0.0.1:9443/api/am/store/v0.11/subscriptions/multiple\"",
-          "x-wso2-request": "POST https://127.0.0.1:9443/api/am/store/v0.11/subscriptions/multiple\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n    \"tier\": \"Gold\",\n    \"apiIdentifier\": \"c43a325c-260b-4302-81cb-768eafaa3aed\",\n    \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\"\n}",
-          "x-wso2-response": "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/store/v0.11/subscriptions/multiple/5b65808c-cdf2-43e1-a695-de63e3ad0ae9\nContent-Type: application/json\n\n{\n   \"tier\": \"Gold\",\n   \"subscriptionId\": \"5b65808c-cdf2-43e1-a695-de63e3ad0ae9\",\n   \"apiIdentifier\": \"admin-PhoneVerification-2.0.0\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"status\": \"UNBLOCKED\"\n}",
-          "summary": "Add a new subscription\n",
-          "description": "This operation can be used to add a new subscription providing the id of the API and the application.\n",
-          "parameters": [
-            {
-              "in": "body",
-              "name": "body",
-              "description": "Subscription object that should to be added\n",
-              "required": true,
-              "schema": {
-                "$ref": "#/definitions/Subscription"
-              }
-            },
-            {
-              "$ref": "#/parameters/Content-Type"
-            }
-          ],
-          "tags": [
-            "Subscription (Multiple)"
-          ],
-          "responses": {
-            "201": {
-              "description": "Created.\nSuccessful response with the newly created object as entity in the body.\nLocation header contains URL of newly created entity.\n",
-              "schema": {
-                "$ref": "#/definitions/Subscription"
-              },
-              "headers": {
-                "Location": {
-                  "description": "Location to the newly created subscription.\n",
-                  "type": "string"
-                },
-                "Content-Type": {
-                  "description": "The content type of the body.\n",
-                  "type": "string"
-                },
-                "ETag": {
-                  "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
-                  "type": "string"
+        "/subscriptions/multiple": {
+            "post": {
+                "x-scope": "apim:subscribe",
+                "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X POST  -d @data.json \"https://127.0.0.1:9443/api/am/store/v0.11/subscriptions/multiple\"",
+                "x-wso2-request": "POST https://127.0.0.1:9443/api/am/store/v0.11/subscriptions/multiple\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n\n{\n    \"tier\": \"Gold\",\n    \"apiIdentifier\": \"c43a325c-260b-4302-81cb-768eafaa3aed\",\n    \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\"\n}",
+                "x-wso2-response": "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/store/v0.11/subscriptions/5b65808c-cdf2-43e1-a695-de63e3ad0ae9\nContent-Type: application/json\n\n{\n   \"tier\": \"Gold\",\n   \"subscriptionId\": \"5b65808c-cdf2-43e1-a695-de63e3ad0ae9\",\n   \"apiIdentifier\": \"admin-PhoneVerification-2.0.0\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"status\": \"UNBLOCKED\"\n}",
+                "summary": "Add new subscriptions\n",
+                "description": "This operation can be used to add a new subscriptions providing the ids of the APIs and the applications.\n",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Subscription objects that should to be added\n",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Subscription"
+                            }
+                        }
+                    },
+                    {
+                        "$ref": "#/parameters/Content-Type"
+                    }
+                ],
+                "tags": [
+                    "Subscription (Multitple)"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nSuccessful response with the newly created objects as entity in the body.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Subscription",
+                            "items": {
+                                "type": "array"
+                            }
+                        },
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            },
+                            "ETag": {
+                                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request.\nInvalid request or validation error.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "415": {
+                        "description": "Unsupported media type.\nThe entity of the request was in a not supported format.\n"
+                    }
                 }
-              }
-            },
-            "400": {
-              "description": "Bad Request.\nInvalid request or validation error.\n",
-              "schema": {
-                "$ref": "#/definitions/Error"
-              }
-            },
-            "415": {
-              "description": "Unsupported media type.\nThe entity of the request was in a not supported format.\n"
             }
-          }
-        }
-      },
+        },
         "/subscriptions/{subscriptionId}": {
             "get": {
                 "x-scope": "apim:subscribe",
@@ -1159,7 +1270,7 @@
                                 "type": "string"
                             },
                             "ETag": {
-                                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).\n",
+                                "description": "Entity Tag of the response resource. Used by caches, or in conditional requests.\n",
                                 "type": "string"
                             },
                             "Last-Modified": {
@@ -1169,7 +1280,7 @@
                         }
                     },
                     "304": {
-                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource (Will be supported in future).\n"
+                        "description": "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
                     },
                     "404": {
                         "description": "Not Found.\nRequested Subscription does not exist.\n",
@@ -1211,7 +1322,7 @@
                         }
                     },
                     "412": {
-                        "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met (Will be supported in future).\n",
+                        "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }
@@ -1225,7 +1336,7 @@
                 "x-wso2-request": "GET https://127.0.0.1:9443/api/am/store/v0.11/tiers/api\n",
                 "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"unitTime\": 60000,\n         \"tierPlan\": \"FREE\",\n         \"stopOnQuotaReach\": true,\n         \"tierLevel\": \"api\",\n         \"requestCount\": 1,\n         \"description\": \"Allows 1 request(s) per minute.\",\n         \"name\": \"Bronze\",\n         \"attributes\": {}\n      },\n            {\n         \"unitTime\": 60000,\n         \"tierPlan\": \"FREE\",\n         \"stopOnQuotaReach\": true,\n         \"tierLevel\": \"api\",\n         \"requestCount\": 20,\n         \"description\": \"Allows 20 request(s) per minute.\",\n         \"name\": \"Gold\",\n         \"attributes\": {}\n      },\n            {\n         \"unitTime\": 60000,\n         \"tierPlan\": \"FREE\",\n         \"stopOnQuotaReach\": true,\n         \"tierLevel\": \"api\",\n         \"requestCount\": 5,\n         \"description\": \"Allows 5 request(s) per minute.\",\n         \"name\": \"Silver\",\n         \"attributes\": {}\n      },\n            {\n         \"unitTime\": 0,\n         \"tierPlan\": null,\n         \"stopOnQuotaReach\": true,\n         \"tierLevel\": \"api\",\n         \"requestCount\": 0,\n         \"description\": \"Allows unlimited requests\",\n         \"name\": \"Unlimited\",\n         \"attributes\": {}\n      }\n   ],\n   \"count\": 4,\n   \"next\": \"\"\n}",
                 "summary": "Get available tiers\n",
-                "description": "This operation can be used to retrieve all the tiers available for the provided tier level. Tier level should be specified as a path parameter and should be one of `api` and `application`.\n\n**NOTE**:\n* API tiers are the ones that is available during subscription of an application to an API. Hence they are also called subscription tiers and are same as the subscription policies in Admin REST API.\n",
+                "description": "This operation can be used to retrieve all the tiers available for the provided tier level. Tier level should be specified as a path parameter and should be one of `api` and `application`.\n\n`X-WSO2-Tenant` header can be used to retrive tiers that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.\n\n**NOTE**:\n* API tiers are the ones that is available during subscription of an application to an API. Hence they are also called subscription tiers and are same as the subscription policies in Admin REST API.\n",
                 "parameters": [
                     {
                         "$ref": "#/parameters/limit"
@@ -1287,7 +1398,7 @@
                 "x-wso2-request": "GET https://127.0.0.1:9443/api/am/store/v0.11/tiers/api/Bronze\n",
                 "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"stopOnQuotaReach\": true,\n   \"tierLevel\": \"api\",\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}",
                 "summary": "Get details of a tier\n",
-                "description": "This operation can be used to retrieve details of a single tier by specifying the tier level and tier name.\n",
+                "description": "This operation can be used to retrieve details of a single tier by specifying the tier level and tier name.\n\n`X-WSO2-Tenant` header can be used to retrive tiers that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.\n",
                 "parameters": [
                     {
                         "$ref": "#/parameters/tierName"
@@ -1356,7 +1467,7 @@
                 "x-wso2-request": "GET https://127.0.0.1:9443/api/am/store/v0.11/tags\n",
                 "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"weight\": 1,\n         \"name\": \"mobile\"\n      },\n            {\n         \"weight\": 1,\n         \"name\": \"multimedia\"\n      },\n            {\n         \"weight\": 1,\n         \"name\": \"phone\"\n      }\n   ],\n   \"count\": 3,\n   \"next\": \"\"\n}",
                 "summary": "Get all tags\n",
-                "description": "This operation can be used to retrieve a list of tags that are already added to APIs.\n",
+                "description": "This operation can be used to retrieve a list of tags that are already added to APIs.\n\n`X-WSO2-Tenant` header can be used to retrive tags that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.\n\n**NOTE:**\n* This operation does not require an Authorization header by default. But in order to see a restricted API's tags, you need to provide Authorization header.\n",
                 "parameters": [
                     {
                         "$ref": "#/parameters/limit"
@@ -1424,14 +1535,14 @@
         "apiId": {
             "name": "apiId",
             "in": "path",
-            "description": "**API ID** consisting of the **UUID** of the API.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.\nShould be formatted as **provider-name-version**.\n",
+            "description": "**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.\nShould be formatted as **provider-name-version**.\n",
             "required": true,
             "type": "string"
         },
         "apiId-Q": {
             "name": "apiId",
             "in": "query",
-            "description": "**API ID** consisting of the **UUID** of the API.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.\n",
+            "description": "**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.\n",
             "required": true,
             "type": "string"
         },
@@ -1509,6 +1620,17 @@
             "default": 0,
             "type": "integer"
         },
+        "keyType": {
+            "name": "keyType",
+            "in": "path",
+            "description": "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox).\n",
+            "required": true,
+            "type": "string",
+            "enum": [
+                "PRODUCTION",
+                "SANDBOX"
+            ]
+        },
         "Accept": {
             "name": "Accept",
             "in": "header",
@@ -1527,13 +1649,13 @@
         "If-None-Match": {
             "name": "If-None-Match",
             "in": "header",
-            "description": "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n",
+            "description": "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n",
             "type": "string"
         },
         "If-Modified-Since": {
             "name": "If-Modified-Since",
             "in": "header",
-            "description": "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n",
+            "description": "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource (Will be supported in future). \n",
             "type": "string"
         },
         "If-Match": {
@@ -1545,7 +1667,7 @@
         "If-Unmodified-Since": {
             "name": "If-Unmodified-Since",
             "in": "header",
-            "description": "Validator for conditional requests; based on Last Modified header.\n",
+            "description": "Validator for conditional requests; based on Last Modified header (Will be supported in future).\n",
             "type": "string"
         }
     },
@@ -1607,6 +1729,10 @@
                 "status": {
                     "type": "string",
                     "example": "PUBLISHED"
+                },
+                "thumbnailUri": {
+                    "type": "string",
+                    "example": "/apis/01234567-0123-0123-0123-012345678901/thumbnail"
                 }
             }
         },
@@ -1628,18 +1754,22 @@
                 },
                 "name": {
                     "type": "string",
+                    "description": "Name of the API",
                     "example": "CalculatorAPI"
                 },
                 "description": {
                     "type": "string",
+                    "description": "A brief description about the API",
                     "example": "A calculator API that supports basic operations"
                 },
                 "context": {
                     "type": "string",
+                    "description": "A string that represents thecontext of the user's request",
                     "example": "CalculatorAPI"
                 },
                 "version": {
                     "type": "string",
+                    "description": "The version of the API",
                     "example": "1.0.0"
                 },
                 "provider": {
@@ -1650,7 +1780,7 @@
                 "apiDefinition": {
                     "description": "Swagger definition of the API which contains details about URI templates and scopes\n",
                     "type": "string",
-                    "example": "{\"paths\":{\"/substract\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}},\"/add\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}}},\"swagger\":\"2.0\",\"info\":{\"title\":\"CalculatorAPI\",\"version\":\"1.0.0\"}}"
+                    "example": "{\"paths\":{\"\\/substract\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}},\"\\/add\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}}},\"swagger\":\"2.0\",\"info\":{\"title\":\"CalculatorAPI\",\"version\":\"1.0.0\"}}"
                 },
                 "wsdlUri": {
                     "description": "WSDL URL if the API is based on a WSDL endpoint\n",
@@ -1659,6 +1789,7 @@
                 },
                 "status": {
                     "type": "string",
+                    "description": "This describes in which status of the lifecycle the API is.",
                     "example": "PUBLISHED"
                 },
                 "isDefaultVersion": {
@@ -1678,6 +1809,7 @@
                 },
                 "tags": {
                     "type": "array",
+                    "description": "Search keywords related to the API",
                     "items": {
                         "type": "string"
                     },
@@ -1688,6 +1820,7 @@
                 },
                 "tiers": {
                     "type": "array",
+                    "description": "The subscription tiers selected for the particular API",
                     "items": {
                         "type": "string"
                     },
@@ -2209,12 +2342,12 @@
             "properties": {
                 "consumerKey": {
                     "type": "string",
-                    "description": "Consumer key of the application",
+                    "description": "The consumer key associated with the application and identifying the client",
                     "example": "vYDoc9s7IgAFdkSyNDaswBX7ejoa"
                 },
                 "consumerSecret": {
                     "type": "string",
-                    "description": "Consumer secret of the application",
+                    "description": "The client secret that is used to authenticate the client with the authentication server",
                     "example": "TIDlOFkpzB7WjufO3OJUhy1fsvAa"
                 },
                 "supportedGrantTypes": {
@@ -2222,25 +2355,35 @@
                     "items": {
                         "type": "string"
                     },
-                    "description": "Supported grant types for the application",
+                    "description": "The grant types that are supported by the application",
                     "example": [
                         "client_credentials",
                         "password"
                     ]
                 },
+                "callbackUrl": {
+                    "type": "string",
+                    "description": "Callback URL",
+                    "example": "http://sample.com/callback/url"
+                },
                 "keyState": {
                     "type": "string",
-                    "description": "State of the key generation of the application",
+                    "description": "Describes the state of the key generation.",
                     "example": "APPROVED"
                 },
                 "keyType": {
-                    "description": "Key type",
+                    "description": "Describes to which endpoint the key belongs",
                     "type": "string",
                     "enum": [
                         "PRODUCTION",
                         "SANDBOX"
                     ],
                     "example": "PRODUCTION"
+                },
+                "groupId": {
+                    "type": "string",
+                    "description": "Application group id (if any).",
+                    "example": 2
                 },
                 "token": {
                     "$ref": "#/definitions/Token"
@@ -2266,6 +2409,17 @@
                 "validityTime": {
                     "type": "string",
                     "example": 3600
+                },
+                "supportedGrantTypes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "The grant types that are supported by the application",
+                    "example": [
+                        "client_credentials",
+                        "password"
+                    ]
                 },
                 "callbackUrl": {
                     "type": "string",

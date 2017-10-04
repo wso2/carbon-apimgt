@@ -3156,25 +3156,42 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                 String tokenScope,
                                                 String groupingId,
                                                 String jsonString) throws APIManagementException {
+        boolean tenantFlowStarted = false;
+        try {
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                tenantFlowStarted = true;
+            }
+            //Create OauthAppRequest object by passing json String.
+            OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, null, callbackUrl,
+                    tokenScope, jsonString);
 
-        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            oauthAppRequest.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
+
+            String consumerKey = apiMgtDAO.getConsumerKeyForApplicationKeyType(applicationName, userId, tokenType,
+                    groupingId);
+
+            oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
+            //get key manager instance.
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+            //call update method.
+
+            OAuthApplicationInfo updatedAppInfo = keyManager.updateApplication(oauthAppRequest);
+
+            JSONObject appLogObject = new JSONObject();
+            appLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, updatedAppInfo.getClientName());
+            appLogObject.put("Updated Oauth app with Call back URL", callbackUrl);
+            appLogObject.put("Updated Oauth app with grant types", jsonString);
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+                    APIConstants.AuditLogConstants.UPDATED, this.username);
+            return updatedAppInfo;
+        } finally {
+            if (tenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
-        //Create OauthAppRequest object by passing json String.
-        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, null, callbackUrl,
-                                                                                 tokenScope, jsonString);
-
-        oauthAppRequest.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
-
-        String consumerKey = apiMgtDAO.getConsumerKeyForApplicationKeyType(applicationName, userId, tokenType,
-                                                                           groupingId);
-
-        oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
-        //get key manager instant.
-        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
-        //call update method.
-        return keyManager.updateApplication(oauthAppRequest);
 
     }
 

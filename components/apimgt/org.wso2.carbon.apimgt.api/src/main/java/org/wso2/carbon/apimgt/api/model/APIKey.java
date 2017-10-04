@@ -28,7 +28,8 @@ public class APIKey {
     private String authUser;
     private String authorizedDomains;
     private String state;
-
+    private String callbackUrl;
+    private String grantTypes;
 
     public String getState() {
         return state;
@@ -105,5 +106,21 @@ public class APIKey {
 
     public void setAuthorizedDomains(String authorizedDomains) {
         this.authorizedDomains = authorizedDomains;
+    }
+
+    public String getCallbackUrl() {
+        return callbackUrl;
+    }
+
+    public void setCallbackUrl(String callbackUrl) {
+        this.callbackUrl = callbackUrl;
+    }
+
+    public String getGrantTypes() {
+        return grantTypes;
+    }
+
+    public void setGrantTypes(String grantTypes) {
+        this.grantTypes = grantTypes;
     }
 }

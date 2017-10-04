@@ -1291,4 +1291,7 @@ public final class APIConstants {
         HTTP, WS,
     }
 
+    public static final String JSON_GRANT_TYPES = "grant_types";
+    public static final String JSON_USERNAME = "username";
+
 }

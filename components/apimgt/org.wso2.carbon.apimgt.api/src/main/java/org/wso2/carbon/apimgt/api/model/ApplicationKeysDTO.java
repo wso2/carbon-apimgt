@@ -27,7 +27,8 @@ public class ApplicationKeysDTO {
     private String[] accessAllowDomains;
     private String validityTime;
     private String tokenScope;
-
+    private String grantTypes;
+    private String callbackUrl;
     
     public String getApplicationAccessToken() {
         return applicationAccessToken;
@@ -75,5 +76,21 @@ public class ApplicationKeysDTO {
 
     public void setTokenScope(String tokenScope) {
         this.tokenScope = tokenScope;
+    }
+
+    public String getGrantTypes() {
+        return grantTypes;
+    }
+
+    public void setGrantTypes(String grantTypes) {
+        this.grantTypes = grantTypes;
+    }
+
+    public String getCallbackUrl() {
+        return callbackUrl;
+    }
+
+    public void setCallbackUrl(String callbackUrl) {
+        this.callbackUrl = callbackUrl;
     }
 }

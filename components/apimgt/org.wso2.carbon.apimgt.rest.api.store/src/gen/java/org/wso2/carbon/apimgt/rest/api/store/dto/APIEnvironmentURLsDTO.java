@@ -15,10 +15,10 @@ public class APIEnvironmentURLsDTO  {
   
   
   
-  private String https = null;
-  
-  
   private String http = null;
+  
+  
+  private String https = null;
 
   private String lastUpdatedTime = null;
 
@@ -49,19 +49,6 @@ public class APIEnvironmentURLsDTO  {
 
   
   /**
-   * HTTPS environment URL
-   **/
-  @ApiModelProperty(value = "HTTPS environment URL")
-  @JsonProperty("https")
-  public String getHttps() {
-    return https;
-  }
-  public void setHttps(String https) {
-    this.https = https;
-  }
-
-  
-  /**
    * HTTP environment URL
    **/
   @ApiModelProperty(value = "HTTP environment URL")
@@ -74,14 +61,27 @@ public class APIEnvironmentURLsDTO  {
   }
 
   
+  /**
+   * HTTPS environment URL
+   **/
+  @ApiModelProperty(value = "HTTPS environment URL")
+  @JsonProperty("https")
+  public String getHttps() {
+    return https;
+  }
+  public void setHttps(String https) {
+    this.https = https;
+  }
+
+  
 
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIEnvironmentURLsDTO {\n");
     
-    sb.append("  https: ").append(https).append("\n");
     sb.append("  http: ").append(http).append("\n");
+    sb.append("  https: ").append(https).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

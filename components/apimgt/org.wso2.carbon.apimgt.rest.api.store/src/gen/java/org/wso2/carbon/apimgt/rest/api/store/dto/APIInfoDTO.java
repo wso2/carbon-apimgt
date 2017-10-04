@@ -34,12 +34,13 @@ public class APIInfoDTO  {
   
   
   private String status = null;
+  
+  
+  private String thumbnailUri = null;
 
   private String lastUpdatedTime = null;
 
   private String createdTime = null;
-
-  private String thumbnailUri  = null;
 
   /**
   * gets and sets the lastUpdatedTime for APIInfoDTO
@@ -149,7 +150,7 @@ public class APIInfoDTO  {
     this.status = status;
   }
 
-
+  
   /**
    **/
   @ApiModelProperty(value = "")
@@ -160,6 +161,8 @@ public class APIInfoDTO  {
   public void setThumbnailUri(String thumbnailUri) {
     this.thumbnailUri = thumbnailUri;
   }
+
+  
 
   @Override
   public String toString()  {
@@ -173,6 +176,7 @@ public class APIInfoDTO  {
     sb.append("  version: ").append(version).append("\n");
     sb.append("  provider: ").append(provider).append("\n");
     sb.append("  status: ").append(status).append("\n");
+    sb.append("  thumbnailUri: ").append(thumbnailUri).append("\n");
     sb.append("}\n");
     return sb.toString();
   }
