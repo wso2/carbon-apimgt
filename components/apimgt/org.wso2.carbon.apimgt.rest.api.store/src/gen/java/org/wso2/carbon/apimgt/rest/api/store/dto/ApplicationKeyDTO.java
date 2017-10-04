@@ -27,6 +27,9 @@ public class ApplicationKeyDTO  {
   private List<String> supportedGrantTypes = new ArrayList<String>();
   
   
+  private String callbackUrl = null;
+  
+  
   private String keyState = null;
   
   public enum KeyTypeEnum {
@@ -34,6 +37,9 @@ public class ApplicationKeyDTO  {
   };
   
   private KeyTypeEnum keyType = null;
+  
+  
+  private String groupId = null;
   
   
   private TokenDTO token = null;
@@ -67,9 +73,9 @@ public class ApplicationKeyDTO  {
 
   
   /**
-   * Consumer key of the application
+   * The consumer key associated with the application and identifying the client
    **/
-  @ApiModelProperty(value = "Consumer key of the application")
+  @ApiModelProperty(value = "The consumer key associated with the application and identifying the client")
   @JsonProperty("consumerKey")
   public String getConsumerKey() {
     return consumerKey;
@@ -80,9 +86,9 @@ public class ApplicationKeyDTO  {
 
   
   /**
-   * Consumer secret of the application
+   * The client secret that is used to authenticate the client with the authentication server
    **/
-  @ApiModelProperty(value = "Consumer secret of the application")
+  @ApiModelProperty(value = "The client secret that is used to authenticate the client with the authentication server")
   @JsonProperty("consumerSecret")
   public String getConsumerSecret() {
     return consumerSecret;
@@ -93,9 +99,9 @@ public class ApplicationKeyDTO  {
 
   
   /**
-   * Supported grant types for the application
+   * The grant types that are supported by the application
    **/
-  @ApiModelProperty(value = "Supported grant types for the application")
+  @ApiModelProperty(value = "The grant types that are supported by the application")
   @JsonProperty("supportedGrantTypes")
   public List<String> getSupportedGrantTypes() {
     return supportedGrantTypes;
@@ -106,9 +112,22 @@ public class ApplicationKeyDTO  {
 
   
   /**
-   * State of the key generation of the application
+   * Callback URL
    **/
-  @ApiModelProperty(value = "State of the key generation of the application")
+  @ApiModelProperty(value = "Callback URL")
+  @JsonProperty("callbackUrl")
+  public String getCallbackUrl() {
+    return callbackUrl;
+  }
+  public void setCallbackUrl(String callbackUrl) {
+    this.callbackUrl = callbackUrl;
+  }
+
+  
+  /**
+   * Describes the state of the key generation.
+   **/
+  @ApiModelProperty(value = "Describes the state of the key generation.")
   @JsonProperty("keyState")
   public String getKeyState() {
     return keyState;
@@ -119,15 +138,28 @@ public class ApplicationKeyDTO  {
 
   
   /**
-   * Key type
+   * Describes to which endpoint the key belongs
    **/
-  @ApiModelProperty(value = "Key type")
+  @ApiModelProperty(value = "Describes to which endpoint the key belongs")
   @JsonProperty("keyType")
   public KeyTypeEnum getKeyType() {
     return keyType;
   }
   public void setKeyType(KeyTypeEnum keyType) {
     this.keyType = keyType;
+  }
+
+  
+  /**
+   * Application group id (if any).
+   **/
+  @ApiModelProperty(value = "Application group id (if any).")
+  @JsonProperty("groupId")
+  public String getGroupId() {
+    return groupId;
+  }
+  public void setGroupId(String groupId) {
+    this.groupId = groupId;
   }
 
   
@@ -152,8 +184,10 @@ public class ApplicationKeyDTO  {
     sb.append("  consumerKey: ").append(consumerKey).append("\n");
     sb.append("  consumerSecret: ").append(consumerSecret).append("\n");
     sb.append("  supportedGrantTypes: ").append(supportedGrantTypes).append("\n");
+    sb.append("  callbackUrl: ").append(callbackUrl).append("\n");
     sb.append("  keyState: ").append(keyState).append("\n");
     sb.append("  keyType: ").append(keyType).append("\n");
+    sb.append("  groupId: ").append(groupId).append("\n");
     sb.append("  token: ").append(token).append("\n");
     sb.append("}\n");
     return sb.toString();

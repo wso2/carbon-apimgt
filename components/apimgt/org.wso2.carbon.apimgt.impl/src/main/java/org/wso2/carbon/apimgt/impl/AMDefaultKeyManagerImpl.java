@@ -182,6 +182,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             newAppInfo.setClientId(applicationInfo.getClientId());
             newAppInfo.setCallBackURL(applicationInfo.getCallBackURL());
             newAppInfo.setClientSecret(applicationInfo.getClientSecret());
+            newAppInfo.setJsonString(applicationInfo.getJsonString());
 
             return newAppInfo;
         } catch (Exception e) {

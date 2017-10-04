@@ -26,6 +26,9 @@ public class ApplicationKeyGenerateRequestDTO  {
   private String validityTime = null;
   
   
+  private List<String> supportedGrantTypes = new ArrayList<String>();
+  
+  
   private String callbackUrl = null;
   
   @NotNull
@@ -87,6 +90,19 @@ public class ApplicationKeyGenerateRequestDTO  {
 
   
   /**
+   * The grant types that are supported by the application
+   **/
+  @ApiModelProperty(value = "The grant types that are supported by the application")
+  @JsonProperty("supportedGrantTypes")
+  public List<String> getSupportedGrantTypes() {
+    return supportedGrantTypes;
+  }
+  public void setSupportedGrantTypes(List<String> supportedGrantTypes) {
+    this.supportedGrantTypes = supportedGrantTypes;
+  }
+
+  
+  /**
    * Callback URL
    **/
   @ApiModelProperty(value = "Callback URL")
@@ -133,6 +149,7 @@ public class ApplicationKeyGenerateRequestDTO  {
     
     sb.append("  keyType: ").append(keyType).append("\n");
     sb.append("  validityTime: ").append(validityTime).append("\n");
+    sb.append("  supportedGrantTypes: ").append(supportedGrantTypes).append("\n");
     sb.append("  callbackUrl: ").append(callbackUrl).append("\n");
     sb.append("  accessAllowDomains: ").append(accessAllowDomains).append("\n");
     sb.append("  scopes: ").append(scopes).append("\n");

@@ -7,13 +7,13 @@ info:
   title: "WSO2 API Manager - Store"
   description: |
     This specifies a **RESTful API** for WSO2 **API Manager** - Store.
-    
-    Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.0.4/components/apimgt/org.wso2.carbon.apimgt.rest.api.store/src/main/resources/store-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.
+
+    Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.1.66/components/apimgt/org.wso2.carbon.apimgt.rest.api.store/src/main/resources/store-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.
   contact:
     name: "WSO2"
     url: "http://wso2.com/products/api-manager/"
     email: "architecture@wso2.com"
-  license: 
+  license:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
@@ -22,7 +22,7 @@ info:
 ######################################################
 
 # The schemes supported by the API
-schemes: 
+schemes:
   - https
 
 # The domain of the API.
@@ -38,17 +38,17 @@ basePath: /api/am/store/v0.11
 # The actual media type must be specified in the Content-Type header field of the request.
 # The default is json, i.e. the Content-Type header is not needed to
 # be set, but supporting it serves extensibility.
-consumes: 
+consumes:
   - application/json
 
 # The following media types may be passed as output in message bodies of the API.
 # The media type(s) consumable by the requestor is specified in the Accept header field
-# of the corresponding request. 
-# The actual media type returned will be specfied in the Content-Type header field 
+# of the corresponding request.
+# The actual media type returned will be specfied in the Content-Type header field
 # of the of the response.
 # The default of the Accept header is json, i.e. there is not needed to
 # set the value, but supporting it serves extensibility.
-produces: 
+produces:
   - application/json
 
 x-wso2-security:
@@ -66,7 +66,7 @@ paths:
   /apis:
 
 #-----------------------------------------------------
-# Retrieving the list of all APIs qualifying under a given search condition  
+# Retrieving the list of all APIs qualifying under a given search condition
 #-----------------------------------------------------
     get:
       x-wso2-curl: "curl https://127.0.0.1:9443/api/am/store/v0.11/apis"
@@ -77,9 +77,9 @@ paths:
         Retrieve/Search APIs
       description: |
         This operation provides you a list of available APIs qualifying under a given search condition.
-        
+
         Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation.
-        
+
         This operation supports retriving APIs of other tenants. The required tenant domain need to be specified as a header `X-WSO2-Tenant`. If not specified super tenant's APIs will be retrieved. If you used an Authorization header, the user's tenant associated with the access token will be used.
 
         **NOTE:**
@@ -109,7 +109,7 @@ paths:
 
             If no advanced attribute modifier has been specified, search will match the
             given query string against API Name.
-            
+
           type: string
         - $ref : "#/parameters/Accept"
         - $ref : "#/parameters/If-None-Match"
@@ -158,9 +158,9 @@ paths:
         Get details of an API
       description: |
         Using this operation, you can retrieve complete details of a single API. You need to provide the Id of the API to retrive it.
-        
+
         `X-WSO2-Tenant` header can be used to retrive an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
-        
+
         **NOTE:**
         * This operation does not require an Authorization header by default. But if it is provided, it will be validated and checked for permissions of the user, hence you may be able to see APIs which are restricted for special permissions/roles. \n
       parameters:
@@ -183,7 +183,7 @@ paths:
               type: string
             ETag:
               description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+                Entity Tag of the response resource. Used by caches, or in conditional requests.
               type: string
             Last-Modified:
               description: |
@@ -195,7 +195,7 @@ paths:
         304:
           description: |
             Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+            Empty body because the client has already the latest version of the requested resource.
         404:
           description: |
             Not Found.
@@ -223,9 +223,9 @@ paths:
         Get swagger definition
       description: |
         You can use this operation to retrieve the swagger definition of an API.
-        
+
          `X-WSO2-Tenant` header can be used to retrive the swagger definition an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
-         
+
         **NOTE:**
         * This operation does not require an Authorization header by default. But in order to see a restricted API's swagger definition, you need to provide Authorization header.
       parameters:
@@ -248,7 +248,7 @@ paths:
               type: string
             ETag:
               description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+                Entity Tag of the response resource. Used by caches, or in conditional requests.
               type: string
             Last-Modified:
               description: |
@@ -258,7 +258,7 @@ paths:
         304:
           description: |
             Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+            Empty body because the client has already the latest version of the requested resource.
         404:
           description: |
             Not Found.
@@ -281,11 +281,16 @@ paths:
       x-wso2-request: |
         GET https://127.0.0.1:9443/api/am/store/v0.11/apis/generate-sdk
       x-wso2-curl: "curl https://127.0.0.1:9443/api/am/store/v0.11/apis/generate-sdk"
-      x-wso2-response: "HTTP/1.1 200 OK \n Content-Disposition: attachment; filename=\"PizzaShackAPI_1.0.0_java.zip\"  \n Date: Wed, 12 Oct 2016 11:10:49 GMT \n Content-Type: application/zip \n Transfer-Encoding: chunked \n Server: WSO2 Carbon Server"
+      x-wso2-response: "HTTP/1.1 200 OK \nContent-Disposition: attachment; filename=\"PizzaShackAPI_1.0.0_java.zip\"\nContent-Type: application/zip\n\n[zip content]"
       summary: |
         Generate SDK for an API
       description: |
         This operation can be used to generate SDK for an API by providing the id of the API along with the preferred language.
+
+        `X-WSO2-Tenant` header can be used to retrive the generated SDK of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
+
+        **NOTE:**
+        * This operation does not require an Authorization header by default. But in order to generate a restricted API's SDK, you need to provide Authorization header.
       parameters:
         - $ref: '#/parameters/apiId-Q'
         - $ref: '#/parameters/language'
@@ -338,9 +343,9 @@ paths:
         Get a list of documents of an API
       description: |
         This operation can be used to retrive a list of documents belonging to an API by providing the id of the API.
-        
+
         `X-WSO2-Tenant` header can be used to retrive documents of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
-        
+
         **NOTE:**
         * This operation does not require an Authorization header by default. But in order to see a restricted API's documents, you need to provide Authorization header.
       parameters:
@@ -402,11 +407,11 @@ paths:
         Get a document of an API
       description: |
         This operation can be used to retrieve a particular document's metadata associated with an API.
-        
+
         `X-WSO2-Tenant` header can be used to retrive a document of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
 
         **NOTE:**
-        * This operation does not require an Authorization header by default. But in order to see a restricted API's document, you need to provide Authorization header.        
+        * This operation does not require an Authorization header by default. But in order to see a restricted API's document, you need to provide Authorization header.
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/documentId'
@@ -431,7 +436,7 @@ paths:
             ETag:
               description: |
                 Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
+                Used by caches, or in conditional requests.
               type: string
             Last-Modified:
               description: |
@@ -441,7 +446,7 @@ paths:
         304:
           description: |
             Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+            Empty body because the client has already the latest version of the requested resource.
         404:
           description: |
             Not Found.
@@ -475,20 +480,20 @@ paths:
           Get the content of an API document
         description: |
           This operation can be used to retrive the content of an API's document.
-          
+
           The document can be of 3 types. In each cases responses are different.
-          
+
           1. **Inline type**:
              The content of the document will be retrieved in `text/plain` content type
-          2. **FILE type**: 
+          2. **FILE type**:
              The file will be downloaded with the related content type (eg. `application/pdf`)
           3. **URL type**:
               The client will recieve the URL of the document as the Location header with the response with - `303 See Other`
-          
+
           `X-WSO2-Tenant` header can be used to retrive the content of a document of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
 
           **NOTE:**
-          * This operation does not require an Authorization header by default. But in order to see a restricted API's document content, you need to provide Authorization header.        
+          * This operation does not require an Authorization header by default. But in order to see a restricted API's document content, you need to provide Authorization header.
         parameters:
           - $ref: '#/parameters/apiId'
           - $ref: '#/parameters/documentId'
@@ -511,7 +516,7 @@ paths:
               ETag:
                 description: |
                   Entity Tag of the response resource.
-                  Used by caches, or in conditional requests (Will be supported in future).
+                  Used by caches, or in conditional requests.
                 type: string
               Last-Modified:
                 description: |
@@ -530,7 +535,7 @@ paths:
           304:
             description: |
               Not Modified.
-              Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+              Empty body because the client has already the latest version of the requested resource.
           404:
             description: |
               Not Found.
@@ -560,9 +565,11 @@ paths:
       summary: Get thumbnail image
       description: |
         This operation can be used to download a thumbnail image of an API.
-        
+
+        `X-WSO2-Tenant` header can be used to retrive a thumbnail of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
+
         **NOTE:**
-        * This operation does not require an Authorization header by default. But in order to see a restricted API's thumbnail, you need to provide Authorization header.        
+        * This operation does not require an Authorization header by default. But in order to see a restricted API's thumbnail, you need to provide Authorization header.
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/requestedTenant'
@@ -584,7 +591,7 @@ paths:
             ETag:
               description: |
                 Entity Tag of the response resource.
-                Used by caches, or in conditional requests (Will be supported in future).
+                Used by caches, or in conditional requests.
               type: string
             Last-Modified:
               description: |
@@ -594,7 +601,7 @@ paths:
         304:
           description: |
             Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+            Empty body because the client has already the latest version of the requested resource.
         404:
           description: |
             Not Found.
@@ -784,7 +791,7 @@ paths:
               type: string
             ETag:
               description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+                Entity Tag of the response resource. Used by caches, or in conditional requests.
               type: string
             Last-Modified:
               description: |
@@ -794,7 +801,7 @@ paths:
         304:
           description: |
             Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+            Empty body because the client has already the latest version of the requested resource.
         404:
           description: |
             Not Found.
@@ -852,7 +859,7 @@ paths:
               type: string
             ETag:
               description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+                Entity Tag of the response resource. Used by caches, or in conditional requests.
               type: string
             Last-Modified:
               description: |
@@ -874,7 +881,7 @@ paths:
         412:
           description: |
             Precondition Failed.
-            The request has not been performed because one of the preconditions is not met (Will be supported in future).
+            The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
 
@@ -912,9 +919,125 @@ paths:
         412:
           description: |
             Precondition Failed.
-            The request has not been performed because one of the preconditions is not met (Will be supported in future).
+            The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
+
+######################################################
+# The "Application Keys of a Given Type" resource APIs
+######################################################
+  '/applications/{applicationId}/keys/{keyType}':
+
+#-----------------------------------------------------------
+# Retrieve key details of a given type (PRODUCTION/SANDBOX)
+#-----------------------------------------------------------
+    get:
+      x-scope: apim:subscribe
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://127.0.0.1:9443/api/am/store/v0.11/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION\""
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/store/v0.11/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/PRODUCTION
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n {\n      \"consumerKey\": \"QwEtRHd4NJkcFuRUfAT5af8XEEoa\",\n      \"consumerSecret\": \"7Fairfeu321ENjOR9w2xgJl3i70a\",\n       \"supportedGrantTypes\": [\n        \"refresh_token\",\n        \"urn:ietf:params:oauth:grant-type:saml2-bearer\",\n        \"password\",\n        \"client_credentials\",\n        \"iwa:ntlm\"\n      ],\n      \"callbackUrl\": \"http://sample/com/callback\",\n      \"keyState\": \"COMPLETED\",\n      \"keyType\": \"PRODUCTION\"}\n"
+      summary: |
+        Get key details of a given type
+      description: |
+        This operation can be used to retrieve key details of an individual application specifying the key type in the URI.
+      parameters:
+        - $ref: '#/parameters/applicationId'
+        - $ref: '#/parameters/keyType'
+        - $ref: '#/parameters/groupId'
+        - $ref: '#/parameters/Accept'
+      tags:
+        - Application (Individual)
+        - Application Keys
+      responses:
+        200:
+          description: |
+            OK.
+            Application key details returned.
+          schema:
+            $ref: '#/definitions/ApplicationKey'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        404:
+          description: |
+            Not Found.
+            Requested application does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+#-----------------------------------------------------
+# Update grant types and callback url of an application
+#-----------------------------------------------------
+    put:
+      x-scope: apim:subscribe
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -H \"Content-Type: application/json\" -X PUT -d @data.json \"https://127.0.0.1:9443/api/am/store/v0.11/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524/keys/SANDBOX\""
+      x-wso2-request: |
+        GET https://127.0.0.1:9443/api/am/store/v0.11/applications/896658a0-b4ee-4535-bbfa-806c894a4015/keys/SANDBOX
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+        {
+           "supportedGrantTypes": [
+             "refresh_token",
+             "urn:ietf:params:oauth:grant-type:saml2-bearer",
+             "password",
+             "client_credentials",
+             "iwa:ntlm"
+           ],
+           "callbackUrl": "http://sample/com/callback"
+         }
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n {\n      \"consumerKey\": \"QwEtRHd4NJkcFuRUfAT5af8XEEoa\",\n      \"consumerSecret\": \"7Fairfeu321ENjOR9w2xgJl3i70a\",\n       \"supportedGrantTypes\": [\n        \"refresh_token\",\n        \"urn:ietf:params:oauth:grant-type:saml2-bearer\",\n        \"password\",\n        \"client_credentials\",\n        \"iwa:ntlm\"\n      ],\n      \"callbackUrl\": \"http://sample/com/callback\",\n      \"keyState\": \"COMPLETED\",\n      \"keyType\": \"PRODUCTION\"}\n"
+      summary: |
+        Update grant types and callback url of an application
+      description: |
+        This operation can be used to update grant types and callback url of an application. (Consumer Key and Consumer Secret are ignored) Upon succesfull you will retrieve the updated key details as the response.
+      parameters:
+        - $ref: '#/parameters/applicationId'
+        - $ref: '#/parameters/keyType'
+        - in: body
+          name: body
+          description: |
+            Grant types/Callback URL update request object
+          required: true
+          schema:
+            $ref: '#/definitions/ApplicationKey'
+      tags:
+        - Application (individual)
+        - Application Keys
+      responses:
+        200:
+          description: |
+            Ok.
+            Grant types or/and callback url is/are updated.
+          schema:
+            $ref: '#/definitions/ApplicationKey'
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            The resource to be updated does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
 
 ######################################################
 # The "Generate Keys" Processing Function resource API
@@ -1007,13 +1130,13 @@ paths:
         Get all subscriptions
       description: |
         This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of
-        
+
         1. Retrieving applications which are subscibed to a specific API.
         `GET https://127.0.0.1:9443/api/am/store/v0.11/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`
-        
+
         2. Retrieving APIs which are subscribed by a specific application.
         `GET https://127.0.0.1:9443/api/am/store/v0.11/subscriptions?applicationId=c43a325c-260b-4302-81cb-768eafaa3aed`
-        
+
         **IMPORTANT:**
         * It is mandatory to provide either **apiId** or **applicationId**.
       parameters:
@@ -1131,9 +1254,9 @@ paths:
             Subscription objects that should to be added
           required: true
           schema:
-            $ref: '#/definitions/Subscription'
+            type: array
             items:
-              type: array
+              $ref: '#/definitions/Subscription'
         - $ref: '#/parameters/Content-Type'
       tags:
         - Subscription (Multitple)
@@ -1165,7 +1288,7 @@ paths:
           description: |
             Unsupported media type.
             The entity of the request was in a not supported format.
-            
+
 ######################################################
 # The "Individual Subscription" resource APIs
 ######################################################
@@ -1205,7 +1328,7 @@ paths:
               type: string
             ETag:
               description: |
-                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+                Entity Tag of the response resource. Used by caches, or in conditional requests.
               type: string
             Last-Modified:
               description: |
@@ -1214,7 +1337,7 @@ paths:
         '304':
           description: |
             Not Modified.
-            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+            Empty body because the client has already the latest version of the requested resource.
         '404':
           description: |
             Not Found.
@@ -1255,7 +1378,7 @@ paths:
         412:
           description: |
             Precondition Failed.
-            The request has not been performed because one of the preconditions is not met (Will be supported in future).
+            The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
 
@@ -1276,7 +1399,9 @@ paths:
         Get available tiers
       description: |
         This operation can be used to retrieve all the tiers available for the provided tier level. Tier level should be specified as a path parameter and should be one of `api` and `application`.
-        
+
+        `X-WSO2-Tenant` header can be used to retrive tiers that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
+
         **NOTE**:
         * API tiers are the ones that is available during subscription of an application to an API. Hence they are also called subscription tiers and are same as the subscription policies in Admin REST API.
       parameters:
@@ -1334,6 +1459,8 @@ paths:
         Get details of a tier
       description: |
         This operation can be used to retrieve details of a single tier by specifying the tier level and tier name.
+
+        `X-WSO2-Tenant` header can be used to retrive tiers that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
       parameters:
         - $ref: '#/parameters/tierName'
         - $ref: '#/parameters/tierLevel'
@@ -1399,6 +1526,11 @@ paths:
         Get all tags
       description: |
         This operation can be used to retrieve a list of tags that are already added to APIs.
+
+        `X-WSO2-Tenant` header can be used to retrive tags that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
+
+        **NOTE:**
+        * This operation does not require an Authorization header by default. But in order to see a restricted API's tags, you need to provide Authorization header.
       parameters:
         - $ref: '#/parameters/limit'
         - $ref: '#/parameters/offset'
@@ -1461,7 +1593,7 @@ parameters:
     name: apiId
     in: path
     description: |
-      **API ID** consisting of the **UUID** of the API.
+      **API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
       The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
       Should be formatted as **provider-name-version**.
     required: true
@@ -1473,7 +1605,7 @@ parameters:
     name: apiId
     in: query
     description: |
-      **API ID** consisting of the **UUID** of the API.
+      **API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
       The combination of the provider of the API, name of the API and the version is also accepted as a valid API I.
       Should be formatted as **provider-name-version**.
     required: true
@@ -1583,6 +1715,19 @@ parameters:
     default: 0
     type: integer
 
+# Application Key Type
+# Specified as part of the path expression
+  keyType:
+    name: keyType
+    in: path
+    description: |
+      **Application Key Type** standing for the type of the keys (i.e. Production or Sandbox).
+    required: true
+    type: string
+    enum:
+      - PRODUCTION
+      - SANDBOX
+
 # The HTTP Accept header
   Accept:
     name: Accept
@@ -1609,7 +1754,7 @@ parameters:
     in: header
     description: |
       Validator for conditional requests; based on the ETag of the formerly retrieved
-      variant of the resourec.
+      variant of the resource.
     type : string
 
 # The HTTP If-Modified-Since header
@@ -1619,7 +1764,7 @@ parameters:
     in: header
     description: |
       Validator for conditional requests; based on Last Modified header of the
-      formerly retrieved variant of the resource.
+      formerly retrieved variant of the resource (Will be supported in future).
     type: string
 
 # The HTTP If-Match header
@@ -1637,7 +1782,7 @@ parameters:
     name: If-Unmodified-Since
     in: header
     description: |
-      Validator for conditional requests; based on Last Modified header.
+      Validator for conditional requests; based on Last Modified header (Will be supported in future).
     type: string
 
 ######################################################
@@ -1702,6 +1847,9 @@ definitions:
       status:
         type: string
         example: PUBLISHED
+      thumbnailUri:
+        type: string
+        example: /apis/01234567-0123-0123-0123-012345678901/thumbnail
 
 #-----------------------------------------------------
 # The API resource
@@ -1723,15 +1871,19 @@ definitions:
         example: 01234567-0123-0123-0123-012345678901
       name:
         type: string
+        description: Name of the API
         example: CalculatorAPI
       description:
         type: string
+        description: A brief description about the API
         example: A calculator API that supports basic operations
       context:
         type: string
+        description: A string that represents thecontext of the user's request
         example: CalculatorAPI
       version:
         type: string
+        description: The version of the API
         example: 1.0.0
       provider:
         description: |
@@ -1742,7 +1894,7 @@ definitions:
         description: |
           Swagger definition of the API which contains details about URI templates and scopes
         type: string
-        example: "{\"paths\":{\"/substract\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}},\"/add\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}}},\"swagger\":\"2.0\",\"info\":{\"title\":\"CalculatorAPI\",\"version\":\"1.0.0\"}}"
+        example: "{\"paths\":{\"\\/substract\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}},\"\\/add\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":\"Unlimited\",\"parameters\":[{\"name\":\"x\",\"required\":true,\"type\":\"string\",\"in\":\"query\"},{\"name\":\"y\",\"required\":true,\"type\":\"string\",\"in\":\"query\"}],\"responses\":{\"200\":{}}}}},\"swagger\":\"2.0\",\"info\":{\"title\":\"CalculatorAPI\",\"version\":\"1.0.0\"}}"
       wsdlUri:
         description: |
           WSDL URL if the API is based on a WSDL endpoint
@@ -1750,6 +1902,7 @@ definitions:
         example: "http://www.webservicex.com/globalweather.asmx?wsdl"
       status:
         type: string
+        description: This describes in which status of the lifecycle the API is.
         example: PUBLISHED
       isDefaultVersion:
         type: boolean
@@ -1763,11 +1916,13 @@ definitions:
         example: ["http","https"]
       tags:
         type: array
+        description: Search keywords related to the API
         items:
           type: string
         example: ["substract","add"]
       tiers:
         type: array
+        description: The subscription tiers selected for the particular API
         items:
           type: string
         example: ["Unlimited"]
@@ -2244,29 +2399,37 @@ definitions:
     properties:
       consumerKey:
         type: string
-        description: Consumer key of the application
+        description: The consumer key associated with the application and identifying the client
         example: vYDoc9s7IgAFdkSyNDaswBX7ejoa
       consumerSecret:
         type: string
-        description: Consumer secret of the application
+        description: The client secret that is used to authenticate the client with the authentication server
         example: TIDlOFkpzB7WjufO3OJUhy1fsvAa
       supportedGrantTypes:
         type: array
         items:
           type: string
-        description: Supported grant types for the application
+        description: The grant types that are supported by the application
         example: ["client_credentials","password"]
+      callbackUrl:
+        type: string
+        description: Callback URL
+        example: "http://sample.com/callback/url"
       keyState:
         type: string
-        description: State of the key generation of the application
+        description: Describes the state of the key generation.
         example: APPROVED
       keyType:
-        description: Key type
+        description: Describes to which endpoint the key belongs
         type: string
         enum:
           - PRODUCTION
           - SANDBOX
         example: PRODUCTION
+      groupId:
+        type: string
+        description: Application group id (if any).
+        example: 02
       token:
         $ref: '#/definitions/Token'
 
@@ -2289,6 +2452,12 @@ definitions:
       validityTime:
         type: string
         example: 3600
+      supportedGrantTypes:
+        type: array
+        items:
+          type: string
+        description: The grant types that are supported by the application
+        example: ["client_credentials","password"]
       callbackUrl:
         type: string
         description: Callback URL

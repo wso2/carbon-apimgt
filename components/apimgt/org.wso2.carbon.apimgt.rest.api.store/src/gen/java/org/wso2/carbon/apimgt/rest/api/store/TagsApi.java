@@ -6,8 +6,8 @@ import org.wso2.carbon.apimgt.rest.api.store.factories.TagsApiServiceFactory;
 
 import io.swagger.annotations.ApiParam;
 
-import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TagListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
 
 import java.util.List;
 
@@ -30,7 +30,7 @@ public class TagsApi  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get all tags\n", notes = "This operation can be used to retrieve a list of tags that are already added to APIs.\n", response = TagListDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Get all tags\n", notes = "This operation can be used to retrieve a list of tags that are already added to APIs.\n\n`X-WSO2-Tenant` header can be used to retrive tags that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.\n\n**NOTE:**\n* This operation does not require an Authorization header by default. But in order to see a restricted API's tags, you need to provide Authorization header.\n", response = TagListDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nTag list is returned.\n"),
         
@@ -44,7 +44,7 @@ public class TagsApi  {
     @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset") Integer offset,
     @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be\n  retirieved from.\n"  )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,
     @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
     return delegate.tagsGet(limit,offset,xWSO2Tenant,accept,ifNoneMatch);
     }

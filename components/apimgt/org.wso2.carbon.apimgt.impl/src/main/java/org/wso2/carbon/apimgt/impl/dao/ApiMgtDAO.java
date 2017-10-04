@@ -132,8 +132,6 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-//import org.wso2.carbon.apimgt.impl.token.JWTGenerator;
-//import org.wso2.carbon.apimgt.impl.token.TokenGenerator;
 
 /**
  * This class represent the ApiMgtDAO.
@@ -2581,6 +2579,8 @@ public class ApiMgtDAO {
                 //apiKey.setAuthorizedDomains(authorizedDomains);
                 apiKey.setValidityPeriod(resultSet.getLong("VALIDITY_PERIOD") / 1000);
                 apiKey.setState(resultSet.getString("STATE"));
+                apiKey.setGrantTypes(resultSet.getString("GRANT_TYPES"));
+                apiKey.setCallbackUrl(resultSet.getString("CALLBACK_URL"));
 
                 // Load all the rows to in memory and build the scope string
                 List<String> scopes = new ArrayList<String>();
@@ -2656,7 +2656,8 @@ public class ApiMgtDAO {
                 apiKey.setAccessToken(accessToken);
                 apiKey.setType(resultSet.getString("TOKEN_TYPE"));
                 apiKey.setValidityPeriod(resultSet.getLong("VALIDITY_PERIOD") / 1000);
-
+                apiKey.setGrantTypes(resultSet.getString("GRANT_TYPES"));
+                apiKey.setCallbackUrl(resultSet.getString("CALLBACK_URL"));
                 // Load all the rows to in memory and build the scope string
                 List<String> scopes = new ArrayList<String>();
                 String tokenString = resultSet.getString("ACCESS_TOKEN");
