@@ -1,5 +1,6 @@
 /*
- *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
@@ -16,16 +17,15 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.apimgt.impl.util.test;
+package org.wso2.carbon.apimgt.impl.utils;
 
 import junit.framework.TestCase;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
-public class TierTest extends TestCase {
+public class APIUtilTierTest extends TestCase {
 
     /**
      * Test whether the APIUtil properly converts the billing plan and the custom attributes in the SubscriptionPolicy
