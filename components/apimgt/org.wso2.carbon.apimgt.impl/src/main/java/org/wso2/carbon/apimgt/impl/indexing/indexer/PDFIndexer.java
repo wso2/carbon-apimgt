@@ -16,6 +16,7 @@ import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
+import org.wso2.carbon.registry.indexing.AsyncIndexer;
 import org.wso2.carbon.registry.indexing.IndexingConstants;
 import org.wso2.carbon.registry.indexing.AsyncIndexer.File2Index;
 import org.wso2.carbon.registry.indexing.indexer.Indexer;
@@ -28,11 +29,11 @@ public class PDFIndexer implements Indexer {
 	public IndexDocument getIndexedDocument(File2Index fileData) throws SolrException {
         COSDocument cosDoc = null;
 		try {
-			PDFParser parser = new PDFParser(new ByteArrayInputStream(fileData.data));
+			PDFParser parser = getPdfParser(fileData);
 			parser.parse();
-			 cosDoc = parser.getDocument();
+			cosDoc = parser.getDocument();
 
-			PDFTextStripper stripper = new PDFTextStripper();
+			PDFTextStripper stripper = getPdfTextStripper();
 			String docText = stripper.getText(new PDDocument(cosDoc));
 
 			IndexDocument indexDoc = new IndexDocument(fileData.path, docText, null);
@@ -59,10 +60,18 @@ public class PDFIndexer implements Indexer {
                 try {
                     cosDoc.close();
                 } catch (IOException e) {
-                   log.error("Failed to close pdf doc stream ",e);
+                   log.error("Failed to close pdf doc stream ", e);
                 }
             }
         }
     }
+
+	protected PDFTextStripper getPdfTextStripper() throws IOException {
+		return new PDFTextStripper();
+	}
+
+	protected PDFParser getPdfParser(File2Index fileData) throws IOException {
+		return new PDFParser(new ByteArrayInputStream(fileData.data));
+	}
 
 }
