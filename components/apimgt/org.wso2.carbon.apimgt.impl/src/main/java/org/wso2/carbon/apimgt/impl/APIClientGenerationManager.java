@@ -24,6 +24,7 @@ import io.swagger.codegen.config.CodegenConfigurator;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -198,6 +199,18 @@ public class APIClientGenerationManager {
         return sdkDataMap;
     }
 
+    public void cleanTempDirectory(String tempDirectoryPath) {
+        if (StringUtils.isNotBlank(tempDirectoryPath)) {
+            try {
+                FileUtils.cleanDirectory(new File(tempDirectoryPath));
+            } catch (IOException e) {
+                // Ignore this exception since this temp directory is automatically deleted after a server
+                // restart. These temp files can be manually deleted if needed. Reference : APIMANAGER-4981
+                log.warn("Failed to clean temporary files at : " + tempDirectoryPath +
+                        " Delete those files manually or it will be cleared after a server restart.");
+            }
+        }
+    }
 
     /**
      * This method is used to retrieve the supported languages for SDK generation
