@@ -1522,22 +1522,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private Map<String, String> publishToGateway(API api) throws APIManagementException {
         Map<String, String> failedEnvironment;
-        APITemplateBuilder builder = null;
         String tenantDomain = null;
         if (api.getId().getProviderName().contains("AT")) {
             String provider = api.getId().getProviderName().replace("-AT-", "@");
             tenantDomain = MultitenantUtils.getTenantDomain( provider);
         }
 
-        try{
-            builder = getAPITemplateBuilder(api);
-        }catch(Exception e){
-            handleException("Error while publishing to Gateway ", e);
-        }
-
-
-        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        failedEnvironment = gatewayManager.publishToGateway(api, builder, tenantDomain);
+        failedEnvironment = publishToGateway(api, tenantDomain);
         if (log.isDebugEnabled()) {
             String logMessage = "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
                     + " published to gateway";
@@ -1576,8 +1567,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             tenantDomain = MultitenantUtils.getTenantDomain( provider);
         }
 
-        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        failedEnvironment = gatewayManager.removeFromGateway(api, tenantDomain);
+        failedEnvironment = removeFromGateway(api, tenantDomain);
         if (log.isDebugEnabled()) {
             String logMessage = "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
                     + " deleted from gateway";
@@ -2340,7 +2330,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param api API
      * @throws APIManagementException if failed to create API
      */
-    private void createAPI(API api) throws APIManagementException {
+    protected void createAPI(API api) throws APIManagementException {
         GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
 
         //Validate Transports
@@ -4852,5 +4842,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if(wfDTO != null && WorkflowStatus.CREATED == wfDTO.getStatus()){
             apiStateChangeWFExecutor.cleanUpPendingTask(wfDTO.getExternalWorkflowReference());
         }
+    }
+    
+    protected Map<String, String> publishToGateway(API api, String tenantDomain) throws APIManagementException {
+        APITemplateBuilder builder = getAPITemplateBuilder(api);
+
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        return gatewayManager.publishToGateway(api, builder, tenantDomain);
+    }
+
+    protected Map<String, String> removeFromGateway(API api, String tenantDomain) {
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        return gatewayManager.removeFromGateway(api, tenantDomain);
     }
 }
