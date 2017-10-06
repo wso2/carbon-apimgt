@@ -81,11 +81,9 @@ class Login extends Component {
 
         let loginPromise = this.authManager.authenticateUser(username, password, detailedValue);
         loginPromise.then((response) => {
-            debugger;
             this.setState({isLogin: AuthManager.getUser(), loading: false});
         }).catch((error) => {
-            debugger;
-                this.setState({messageOpen: true});
+                this.setState({ messageOpen: true });
                 this.setState({message: error});
                 console.log(error);
                 this.setState({loading: false});
@@ -142,8 +140,6 @@ class Login extends Component {
     }
 
     render() {
-        debugger;
-        console.log(this.state.env);
         const arrayies = this.state.env;
         const environmentLength = this.state.env.length;
         if (!this.state.isLogin) { // If not logged in, go to login page

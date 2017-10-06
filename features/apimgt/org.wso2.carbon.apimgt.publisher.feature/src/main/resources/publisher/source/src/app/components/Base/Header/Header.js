@@ -262,9 +262,6 @@ class Header extends React.Component {
                                         <Link to="/logout" style={{color: "#000", textDecoration: 'none'}}>Logout</Link>
                                     </MenuItem>
                                 </Menu>
-
-
-
                             </div>
                             :
                             <div></div> }
