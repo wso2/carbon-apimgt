@@ -16,17 +16,21 @@
 
 package org.wso2.carbon.apimgt.gateway;
 
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.Constants;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.config.Entry;
 import org.apache.synapse.config.SynapseConfiguration;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2SynapseEnvironment;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 
+import javax.xml.stream.XMLStreamException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -86,4 +90,21 @@ public class TestUtils {
         synCtx.setProperty(API_AUTH_CONTEXT, authenticationContext);
         return synCtx;
     }
+
+
+    public static MessageContext loadAPIThrottlingPolicyEntry(String policyDefinition, String policyKey, boolean
+            isDynamic, long version, MessageContext messageContext) throws XMLStreamException {
+        OMElement parsedPolicy = null;
+        parsedPolicy = AXIOMUtil.stringToOM(policyDefinition);
+        Entry entry = new Entry();
+        if(isDynamic) {
+            entry.setType(3);
+        }
+        entry.setVersion(version);
+        entry.setKey(policyKey);
+        entry.setValue(parsedPolicy);
+        messageContext.getConfiguration().getLocalRegistry().put(policyKey, entry);
+        return messageContext;
+    }
+
 }
