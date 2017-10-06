@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
@@ -65,13 +66,14 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         this.registryService = registryService;
     }
 
+    public AbstractAPIManagerWrapper(ApiMgtDAO apiMgtDAO) throws APIManagementException {
+        this.apiMgtDAO = apiMgtDAO;
+    }
+
     @Override protected GenericArtifactManager getGenericArtifactManager() throws APIManagementException {
         return genericArtifactManager;
     }
 
-    @Override protected GenericArtifactManager getNewGenericArtifactManager() {
-        return genericArtifactManager;
-    }
 
     @Override protected GenericArtifactManager getGenericArtifactManager(Registry registry) throws RegistryException {
         return genericArtifactManager;
@@ -117,6 +119,10 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
     }
 
     protected String getTenantDomain(APIIdentifier identifier) {
+        return "carbon.super";
+    }
+
+    protected String getTenantDomainFromUrl(String url) {
         return "carbon.super";
     }
 

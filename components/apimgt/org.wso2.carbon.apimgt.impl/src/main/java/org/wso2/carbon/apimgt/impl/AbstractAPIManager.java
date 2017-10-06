@@ -1038,7 +1038,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 String docPath = association.getDestinationPath();
 
                 Resource docResource = registry.get(docPath);
-                GenericArtifactManager artifactManager = getNewGenericArtifactManager();
+                GenericArtifactManager artifactManager = getGenericArtifactManager(registry);
                 GenericArtifact docArtifact = artifactManager.getGenericArtifact(docResource.getUUID());
                 Documentation doc = APIUtil.getDocumentation(docArtifact);
                 Date contentLastModifiedDate;
@@ -1058,10 +1058,6 @@ public abstract class AbstractAPIManager implements APIManager {
             handleException("Failed to get documentations for api " + apiId.getApiName(), e);
         }
         return documentationList;
-    }
-
-    protected GenericArtifactManager getNewGenericArtifactManager() throws RegistryException {
-        return getGenericArtifactManager(registry);
     }
 
     public List<Documentation> getAllDocumentation(APIIdentifier apiId, String loggedUsername) throws APIManagementException {
@@ -1201,10 +1197,8 @@ public abstract class AbstractAPIManager implements APIManager {
         boolean isTenantFlowStarted = false;
         try {
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                PrivilegedCarbonContext.startTenantFlow();
+                startTenantFlow(tenantDomain);
                 isTenantFlowStarted = true;
-
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
 
 	        /* If the API provider is a tenant, load tenant registry*/
@@ -1248,11 +1242,15 @@ public abstract class AbstractAPIManager implements APIManager {
     public boolean isContextExist(String context) throws APIManagementException {
         // Since we don't have tenant in the APIM table, we do the filtering using this hack
         if (context != null && context.startsWith("/t/"))
-            context = context.replace("/t/" + MultitenantUtils.getTenantDomainFromUrl(context), ""); //removing prefix
+            context = context.replace("/t/" + getTenantDomainFromUrl(context), ""); //removing prefix
         if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             context = "/t/" + tenantDomain + context;
         }
         return apiMgtDAO.isContextExist(context);
+    }
+
+    protected String getTenantDomainFromUrl(String url) {
+        return MultitenantUtils.getTenantDomainFromUrl(url);
     }
 
     public boolean isScopeKeyExist(String scopeKey, int tenantid) throws APIManagementException {
