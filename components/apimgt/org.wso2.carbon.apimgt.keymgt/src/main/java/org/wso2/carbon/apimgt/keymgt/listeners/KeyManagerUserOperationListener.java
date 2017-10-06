@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
@@ -42,7 +41,6 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Map;
 import java.util.Set;
@@ -71,18 +69,18 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
     }
 
     /**
-     * Deleting user from the identity database prerequisites. Remove pending aprroval requests for the user and remove
-     * the gateway key chache.
+     * Deleting user from the identity database prerequisites. Remove pending approval requests for the user and remove
+     * the gateway key cache.
      */
     @Override
     public boolean doPreDeleteUser(String username, UserStoreManager userStoreManager) {
 
         boolean isTenantFlowStarted = false;
-        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        ApiMgtDAO apiMgtDAO = getDAOInstance();
         try {
-            String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-            int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
-            Tenant tenant = APIKeyMgtDataHolder.getRealmService().getTenantManager().getTenant(tenantId);
+            String tenantDomain = getTenantDomain();
+            int tenantId = getTenantId();
+            Tenant tenant = getTenant(tenantId);
             if(tenant == null && MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)){
                 tenant = new org.wso2.carbon.user.core.tenant.Tenant();
                 tenant.setDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
@@ -104,8 +102,7 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
                 username = IdentityUtil.addDomainToName(username, userDomain);
             }
 
-            WorkflowExecutor userSignupWFExecutor = WorkflowExecutorFactory.getInstance().
-                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP);
+            WorkflowExecutor userSignupWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_USER_SIGNUP);
             String workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForUserSignup(username);
             userSignupWFExecutor.cleanUpPendingTask(workflowExtRef);
         } catch (WorkflowException e) {
@@ -123,39 +120,38 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
 
     @Override
     public boolean doPreUpdateRoleListOfUser(String username, String[] deletedRoles, String[] newRoles,
-            UserStoreManager userStoreManager) {
+                                             UserStoreManager userStoreManager) {
 
         return !isEnable() || removeGatewayKeyCache(username, userStoreManager);
     }
 
     @Override
     public boolean doPreUpdateUserListOfRole(String username, String[] deletedRoles, String[] newRoles,
-            UserStoreManager userStoreManager) {
+                                             UserStoreManager userStoreManager) {
 
         return !isEnable() || removeGatewayKeyCache(username, userStoreManager);
     }
 
     private boolean removeGatewayKeyCache(String username, UserStoreManager userStoreManager) {
 
-        String userStoreDomain = UserCoreUtil.getDomainName(userStoreManager.getRealmConfiguration());
-        String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+        String userStoreDomain = getUserStoreDomainName(userStoreManager);
+        String tenantDomain = getTenantDomain();
 
         username = UserCoreUtil.addDomainToName(username, userStoreDomain);
         username = UserCoreUtil.addTenantDomainToEntry(username, tenantDomain);
 
         //If the username is not case sensitive
-        if (!IdentityUtil.isUserStoreInUsernameCaseSensitive(username)) {
+        if (!isUserStoreInUsernameCaseSensitive(username)) {
             username = username.toLowerCase();
         }
 
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        APIManagerConfiguration config = getApiManagerConfiguration();
 
         if (config.getApiGatewayEnvironments().size() <= 0) {
             return true;
         }
 
-        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+        ApiMgtDAO apiMgtDAO = getDAOInstance();
         Set<String> activeTokens;
 
         try {
@@ -183,7 +179,7 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
                 log.debug("Going to remove tokens from the cache of the Gateway '" + environment.getName() + "'");
             }
             try {
-                APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
+                APIAuthenticationAdminClient client = getApiAuthenticationAdminClient(environment);
                 client.invalidateCachedTokens(activeTokens);
 
                 log.debug("Removed cached tokens of the Gateway.");
@@ -195,6 +191,43 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
         }
 
         return true;
+    }
+
+    protected APIAuthenticationAdminClient getApiAuthenticationAdminClient(Environment environment) throws AxisFault {
+        return new APIAuthenticationAdminClient(environment);
+    }
+
+    protected APIManagerConfiguration getApiManagerConfiguration() {
+        return ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+    }
+
+    protected boolean isUserStoreInUsernameCaseSensitive(String username) {
+        return IdentityUtil.isUserStoreInUsernameCaseSensitive(username);
+    }
+
+    protected String getUserStoreDomainName(UserStoreManager userStoreManager) {
+        return UserCoreUtil.getDomainName(userStoreManager.getRealmConfiguration());
+    }
+
+    protected WorkflowExecutor getWorkflowExecutor(String workflowType) throws WorkflowException {
+        return WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
+    }
+
+    protected Tenant getTenant(int tenantId) throws UserStoreException {
+        return APIKeyMgtDataHolder.getRealmService().getTenantManager().getTenant(tenantId);
+    }
+
+    protected int getTenantId() {
+        return PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+    }
+
+    protected String getTenantDomain() {
+        return PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+    }
+
+    protected ApiMgtDAO getDAOInstance() {
+        return ApiMgtDAO.getInstance();
     }
 
 }
