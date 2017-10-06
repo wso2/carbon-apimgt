@@ -77,8 +77,10 @@ public class APIThrottleHandlerTest {
                     "                        <throttle:UnitTime>60000</throttle:UnitTime>\n" +
                     "                        <wsp:Policy>\n" +
                     "                            <throttle:Attributes>\n" +
-                    "                                <throttle:x-wso2-BillingPlan>FREE</throttle:x-wso2-BillingPlan>\n" +
-                    "                                <throttle:x-wso2-StopOnQuotaReach>false</throttle:x-wso2-StopOnQuotaReach>\n" +
+                    "                                " +
+                    "<throttle:x-wso2-BillingPlan>FREE</throttle:x-wso2-BillingPlan>\n" +
+                    "                                " +
+                    "<throttle:x-wso2-StopOnQuotaReach>false</throttle:x-wso2-StopOnQuotaReach>\n" +
                     "                            </throttle:Attributes>\n" +
                     "                        </wsp:Policy>\n" +
                     "                    </wsp:Policy>\n" +
@@ -162,10 +164,10 @@ public class APIThrottleHandlerTest {
         apiThrottleHandler = new APIThrottleHandlerWrapper(timer, throttleContext, accessRateController,
                 roleBasedAccessController, applicationRoleBasedAccessController);
         ((Axis2MessageContext) messageContext).getAxis2MessageContext().setConfigurationContext(configurationContext);
-        TestUtils.loadAPIThrottlingPolicyEntry(String.format(THROTTLING_POLICY_DEFINITION, "ROLE", "GOLD"), THROTTLE_POLICY_KEY, true, 0,
-                messageContext);
-        TestUtils.loadAPIThrottlingPolicyEntry(String.format(THROTTLING_POLICY_DEFINITION, "ROLE", "GOLD"), THROTTLE_POLICY_RESOURCE_KEY, true, 0,
-                messageContext);
+        TestUtils.loadAPIThrottlingPolicyEntry(String.format(THROTTLING_POLICY_DEFINITION, "ROLE", "GOLD"),
+                THROTTLE_POLICY_KEY, true, 0, messageContext);
+        TestUtils.loadAPIThrottlingPolicyEntry(String.format(THROTTLING_POLICY_DEFINITION, "ROLE", "GOLD"),
+                THROTTLE_POLICY_RESOURCE_KEY, true, 0, messageContext);
         messageContext.setProperty(RESPONSE, "true");
         messageContext.setProperty(APIConstants.VERB_INFO_DTO, verbInfoDTO);
         apiThrottleHandler.setPolicyKey(THROTTLE_POLICY_KEY);
@@ -183,10 +185,10 @@ public class APIThrottleHandlerTest {
         apiThrottleHandler = new APIThrottleHandlerWrapper(timer, throttleContext, accessRateController,
                 roleBasedAccessController, applicationRoleBasedAccessController);
         ((Axis2MessageContext) messageContext).getAxis2MessageContext().setConfigurationContext(configurationContext);
-        TestUtils.loadAPIThrottlingPolicyEntry(String.format(THROTTLING_POLICY_DEFINITION, "ROLE", "GOLD"), THROTTLE_POLICY_KEY, true, 0,
-                messageContext);
-        TestUtils.loadAPIThrottlingPolicyEntry(String.format(THROTTLING_POLICY_DEFINITION, "ROLE", "GOLD"), THROTTLE_POLICY_RESOURCE_KEY, true, 0,
-                messageContext);
+        TestUtils.loadAPIThrottlingPolicyEntry(String.format(THROTTLING_POLICY_DEFINITION, "ROLE", "GOLD"),
+                THROTTLE_POLICY_KEY, true, 0, messageContext);
+        TestUtils.loadAPIThrottlingPolicyEntry(String.format(THROTTLING_POLICY_DEFINITION, "ROLE", "GOLD"),
+                THROTTLE_POLICY_RESOURCE_KEY, true, 0, messageContext);
         messageContext.setProperty(RESPONSE, "false");
         messageContext.setProperty(APIConstants.VERB_INFO_DTO, verbInfoDTO);
         apiThrottleHandler.setPolicyKey(THROTTLE_POLICY_KEY);
@@ -205,10 +207,10 @@ public class APIThrottleHandlerTest {
         apiThrottleHandler = new APIThrottleHandlerWrapper(timer, throttleContext, accessRateController,
                 roleBasedAccessController, applicationRoleBasedAccessController);
         ((Axis2MessageContext) messageContext).getAxis2MessageContext().setConfigurationContext(configurationContext);
-        TestUtils.loadAPIThrottlingPolicyEntry(String.format(THROTTLING_POLICY_DEFINITION, "ROLE", "GOLD"), THROTTLE_POLICY_KEY, true, 0,
-                messageContext);
-        TestUtils.loadAPIThrottlingPolicyEntry(String.format(THROTTLING_POLICY_DEFINITION, "ROLE", "GOLD"), THROTTLE_POLICY_RESOURCE_KEY, true, 0,
-                messageContext);
+        TestUtils.loadAPIThrottlingPolicyEntry(String.format(THROTTLING_POLICY_DEFINITION, "ROLE", "GOLD"),
+                THROTTLE_POLICY_KEY, true, 0, messageContext);
+        TestUtils.loadAPIThrottlingPolicyEntry(String.format(THROTTLING_POLICY_DEFINITION, "ROLE", "GOLD"),
+                THROTTLE_POLICY_RESOURCE_KEY, true, 0, messageContext);
         messageContext.setProperty(RESPONSE, "false");
         messageContext.setProperty(APIConstants.VERB_INFO_DTO, verbInfoDTO);
         apiThrottleHandler.setPolicyKey(THROTTLE_POLICY_KEY);
@@ -221,7 +223,8 @@ public class APIThrottleHandlerTest {
     }
 
     @Test
-    public void testMsgContinueWhenDomainBasedThrottlingAccessStateIsTrue() throws XMLStreamException, ThrottleException {
+    public void testMsgContinueWhenDomainBasedThrottlingAccessStateIsTrue() throws XMLStreamException,
+            ThrottleException {
         //Set concurrency count to be 1
         concurrentAccessController = new ConcurrentAccessController(100);
 
@@ -233,15 +236,15 @@ public class APIThrottleHandlerTest {
         ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty("REMOTE_ADDR", IP);
         ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty("REMOTE_HOST", domain);
         TestUtils.loadAPIThrottlingPolicyEntry(String.format(THROTTLING_POLICY_DEFINITION, "DOMAIN", domain),
-                THROTTLE_POLICY_KEY,true, 0,messageContext);
+                THROTTLE_POLICY_KEY, true, 0, messageContext);
         TestUtils.loadAPIThrottlingPolicyEntry(String.format(THROTTLING_POLICY_DEFINITION, "DOMAIN", domain),
-                THROTTLE_POLICY_RESOURCE_KEY, true, 0,messageContext);
+                THROTTLE_POLICY_RESOURCE_KEY, true, 0, messageContext);
         messageContext.setProperty(RESPONSE, "false");
         messageContext.setProperty(APIConstants.VERB_INFO_DTO, verbInfoDTO);
         apiThrottleHandler.setPolicyKey(THROTTLE_POLICY_KEY);
         apiThrottleHandler.setPolicyKeyResource(THROTTLE_POLICY_RESOURCE_KEY);
         apiThrottleHandler.setId(throttleID);
-       // Mockito.when(accessRateController.canAccess()).thenReturn(null);
+        // Mockito.when(accessRateController.canAccess()).thenReturn(null);
         //This request should be succeed since the concurrency level is not exceeded
         Assert.assertTrue(apiThrottleHandler.handleRequest(messageContext));
 
