@@ -80,10 +80,8 @@ class Login extends Component {
 
         let loginPromise = this.authManager.authenticateUser(username, password, detailedValue);
         loginPromise.then((response) => {
-            debugger;
             this.setState({isLogin: AuthManager.getUser(), loading: false});
         }).catch((error) => {
-            debugger;
                 this.setState({ messageOpen: true });
                 this.setState({message: error});
                 console.log(error);
@@ -131,8 +129,6 @@ class Login extends Component {
         this.setState({key:key})
     }
     render() {
-        debugger;
-        console.log(this.state.env);
         const arrayies = this.state.env;
         const environmentLength = this.state.env.length;
 
