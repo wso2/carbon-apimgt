@@ -50,7 +50,11 @@ public class WorkflowsApi implements Microservice  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get all the uncompleted Workflows", notes = "Get all uncompleted workflows entries ", response = WorkflowListDTO.class, tags={ "Workflows (Collection)", })
+    @io.swagger.annotations.ApiOperation(value = "Get all the uncompleted Workflows", notes = "Get all uncompleted workflows entries ", response = WorkflowListDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:workflow_view", description = "Workflow view")
+        })
+    }, tags={ "Workflows (Collection)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Workflows returned ", response = WorkflowListDTO.class),
         
@@ -59,19 +63,22 @@ public class WorkflowsApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = WorkflowListDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = WorkflowListDTO.class) })
-    public Response workflowsGet(@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
-,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
+    public Response workflowsGet(@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-,@ApiParam(value = "List all the uncompleted workflow tasks for the given type of workflows.  If not provided, list all the uncompleted tasks. ") @QueryParam("type") String type
+,@ApiParam(value = "Type of the worklfow ") @QueryParam("workflowType") String workflowType
 , @Context Request request)
     throws NotFoundException {
-        return delegate.workflowsGet(accept,ifNoneMatch,ifModifiedSince,type, request);
+        return delegate.workflowsGet(ifNoneMatch,ifModifiedSince,workflowType, request);
     }
     @GET
     @Path("/{workflowReferenceId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Retrieve workflow information", notes = "This operation can be used to retrieve a workflow task.  ", response = WorkflowDTO.class, tags={ "Workflows (Individual)", })
+    @io.swagger.annotations.ApiOperation(value = "Retrieve workflow information", notes = "This operation can be used to retrieve a workflow task.  ", response = WorkflowDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:workflow_view", description = "Workflow view")
+        })
+    }, tags={ "Workflows (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Workflow request information is returned. ", response = WorkflowDTO.class),
         
@@ -87,7 +94,11 @@ public class WorkflowsApi implements Microservice  {
     @Path("/{workflowReferenceId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Update workflow status", notes = "This operation can be used to approve or reject a workflow task. . ", response = WorkflowResponseDTO.class, tags={ "Workflows (Individual)", })
+    @io.swagger.annotations.ApiOperation(value = "Update workflow status", notes = "This operation can be used to approve or reject a workflow task. . ", response = WorkflowResponseDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:workflow_approve", description = "Workflow approve")
+        })
+    }, tags={ "Workflows (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Workflow request information is returned. ", response = WorkflowResponseDTO.class),
         
