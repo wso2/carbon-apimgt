@@ -69,7 +69,7 @@ public class NewAPIVersionEmailNotifier extends Notifier {
 
             emailProperties = getEmailProperties(notificationDTO);
             if (emailProperties != null) {
-                String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+                String tenantDomain = getTenantDomain();
                 String adapterName = NotifierConstants.ADAPTER_NAME + tenantDomain;
                 String message = notificationDTO.getMessage();
                 try {
@@ -79,16 +79,13 @@ public class NewAPIVersionEmailNotifier extends Notifier {
                             OutputEventAdapterConfiguration outputEventAdapterConfiguration =
                                     createOutputEventAdapterConfiguration(adapterName, NotifierConstants
                                             .EMAIL_ADAPTER_TYPE);
-                            ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create
-                                    (outputEventAdapterConfiguration);
-                            ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
-                                    .getOutputEventAdapterTypes();
+                            createOutputEventAdapterService(outputEventAdapterConfiguration);
+                            getOutputEventAdapterTypes();
                             adapterList.add(adapterName);
                         }
                     }
 
-                    ServiceReferenceHolder.getInstance().getOutputEventAdapterService().publish(adapterName,
-                            emailProperties, message);
+                    publishNotification(emailProperties, adapterName, message);
 
                     log.info("notification sent to Email Adapter ");
 
@@ -98,7 +95,7 @@ public class NewAPIVersionEmailNotifier extends Notifier {
             } else {
                 log.info("Empty email list. Please set subscriber's email addresses");
             }
-        }else {
+        } else {
             if (log.isDebugEnabled()) {
                 log.debug("No exiting Subscribers to send notifications for " + api.getApiName() + api.getVersion());
             }
@@ -119,18 +116,18 @@ public class NewAPIVersionEmailNotifier extends Notifier {
         String claimsRetrieverImplClass = (String) notificationDTO.getProperty(NotifierConstants
                 .CLAIMS_RETRIEVER_IMPL_CLASS);
         ClaimsRetriever claimsRetriever = null;
-        Set<String> emaiset = new HashSet<String>();
+        Set<String> emailset = new HashSet<String>();
 
         try {
 
             for (Subscriber subscriber : subscriberList) {
                 String tenantUserName = subscriber.getName();
-                claimsRetriever = (ClaimsRetriever) APIUtil.getClassForName(claimsRetrieverImplClass).newInstance();
+                claimsRetriever = getClaimsRetriever(claimsRetrieverImplClass);
                 claimsRetriever.init();
                 String email = claimsRetriever.getClaims(tenantUserName).get(NotifierConstants.EMAIL_CLAIM);
 
                 if (email != null && !email.isEmpty()) {
-                    emaiset.add(email);
+                    emailset.add(email);
                 }
             }
 
@@ -143,7 +140,7 @@ public class NewAPIVersionEmailNotifier extends Notifier {
         } catch (APIManagementException e) {
             throw new NotificationException("Error while retrieving Email Claims ", e);
         }
-        return emaiset;
+        return emailset;
     }
 
     /**
@@ -218,8 +215,7 @@ public class NewAPIVersionEmailNotifier extends Notifier {
         try {
             String template = (String) notificationDTO.getProperty(NotifierConstants.TEMPLATE_KEY);
             int tenantId = notificationDTO.getTenantID();
-            Registry registry = ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry
-                    (tenantId);
+            Registry registry = getConfigSystemRegistry(tenantId);
 
             if (registry.resourceExists(template)) {
                 if (log.isDebugEnabled()) {
@@ -247,4 +243,65 @@ public class NewAPIVersionEmailNotifier extends Notifier {
         notificationDTO.setMessage(content);
         return notificationDTO;
     }
+
+    /**
+     * @param tenantId tenant Id of the current tenant
+     * @return configuration registry
+     * @throws RegistryException
+     */
+    protected Registry getConfigSystemRegistry(int tenantId) throws RegistryException {
+        return ServiceReferenceHolder.getInstance().getRegistryService().getConfigSystemRegistry
+                (tenantId);
+    }
+
+    /**
+     * Load the class specified by the <code>claimsRetrieverImplClass</>
+     *
+     * @param claimsRetrieverImplClass
+     * @return class specified by <code>claimsRetrieverImplClass</code>
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     * @throws ClassNotFoundException
+     */
+    protected ClaimsRetriever getClaimsRetriever(String claimsRetrieverImplClass)
+            throws IllegalAccessException, InstantiationException, ClassNotFoundException {
+        return (ClaimsRetriever) APIUtil.getClassForName(claimsRetrieverImplClass).newInstance();
+    }
+
+    /**
+     * Publish the notification to selected emails
+     *
+     * @param emailProperties details of email notification
+     * @param adapterName output event adapter name
+     * @param message message to send in the notification
+     */
+    protected void publishNotification(Map<String, String> emailProperties, String adapterName, String message) {
+        ServiceReferenceHolder.getInstance().getOutputEventAdapterService().publish(adapterName,
+                emailProperties, message);
+    }
+
+    /**
+     * @return Retrieve tenant domain fot the current user
+     */
+    protected String getTenantDomain() {
+        return CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+    }
+
+    protected void getOutputEventAdapterTypes() {
+        ServiceReferenceHolder.getInstance().getOutputEventAdapterService()
+                .getOutputEventAdapterTypes();
+    }
+
+    /**
+     * Configure output adapter service
+     *
+     * @param outputEventAdapterConfiguration
+     * @throws OutputEventAdapterException
+     */
+    protected void createOutputEventAdapterService(OutputEventAdapterConfiguration outputEventAdapterConfiguration)
+            throws OutputEventAdapterException {
+        ServiceReferenceHolder.getInstance().getOutputEventAdapterService().create
+                (outputEventAdapterConfiguration);
+    }
+
 }
