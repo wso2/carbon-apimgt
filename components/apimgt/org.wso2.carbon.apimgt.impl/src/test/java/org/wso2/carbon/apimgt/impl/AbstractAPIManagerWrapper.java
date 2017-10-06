@@ -70,20 +70,18 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         this.apiMgtDAO = apiMgtDAO;
     }
 
-    @Override protected GenericArtifactManager getGenericArtifactManager() throws APIManagementException {
+    @Override
+    protected GenericArtifactManager getAPIGenericArtifactManager(Registry registry) throws APIManagementException {
         return genericArtifactManager;
     }
 
-
-    @Override protected GenericArtifactManager getGenericArtifactManager(Registry registry) throws RegistryException {
-        return genericArtifactManager;
-    }
-
-    @Override protected RegistryService getRegistryService() {
+    @Override
+    protected RegistryService getRegistryService() {
         return registryService;
     }
 
-    @Override protected TenantManager getTenantManager() {
+    @Override
+    protected TenantManager getTenantManager() {
         return tenantManager;
     }
 
