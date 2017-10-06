@@ -38,7 +38,7 @@ public class EnvironmentsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested API does not exist.\n") })
 
-    public Response environmentsGet(@ApiParam(value = "Will return environment list for the provided API.\n") @QueryParam("apiId") String apiId)
+    public Response environmentsGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.\nThe combination of the provider of the API, name of the API and the version is also accepted as a valid API I.\nShould be formatted as **provider-name-version**.\n",required=true) @QueryParam("apiId") @Encoded String apiId)
     {
     return delegate.environmentsGet(apiId);
     }

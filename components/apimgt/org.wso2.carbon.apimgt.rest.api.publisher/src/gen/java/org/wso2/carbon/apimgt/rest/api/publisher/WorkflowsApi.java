@@ -6,8 +6,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.factories.WorkflowsApiServiceFa
 
 import io.swagger.annotations.ApiParam;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
 
 import java.util.List;
 
@@ -30,7 +30,7 @@ public class WorkflowsApi  {
     @Path("/update-workflow-status")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Update workflow status", notes = "This operation can be used to approve or reject a workflow task. .\n", response = WorkflowDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Update workflow status", notes = "This operation can be used to approve or reject a workflow task.\n", response = WorkflowDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nWorkflow request information is returned.\n"),
         
@@ -38,7 +38,7 @@ public class WorkflowsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nWorkflow for the given reference in not found.\n") })
 
-    public Response workflowsUpdateWorkflowStatusPost(@ApiParam(value = "Workflow reference id\n",required=true) @QueryParam("workflowReferenceId") String workflowReferenceId,
+    public Response workflowsUpdateWorkflowStatusPost(@ApiParam(value = "Workflow reference id\n",required=true) @QueryParam("workflowReferenceId")  String workflowReferenceId,
     @ApiParam(value = "Workflow event that need to be updated\n" ,required=true ) WorkflowDTO body)
     {
     return delegate.workflowsUpdateWorkflowStatusPost(workflowReferenceId,body);
