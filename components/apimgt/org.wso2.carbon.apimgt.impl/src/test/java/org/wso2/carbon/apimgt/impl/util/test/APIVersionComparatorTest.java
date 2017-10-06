@@ -23,7 +23,6 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 
-
 public class APIVersionComparatorTest {
 
     private final String PROVIDER_NAME_1 = "provider1";
