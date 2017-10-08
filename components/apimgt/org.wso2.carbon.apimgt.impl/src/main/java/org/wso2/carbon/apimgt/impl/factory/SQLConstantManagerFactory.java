@@ -76,11 +76,11 @@ public class SQLConstantManagerFactory {
                 sqlConstantOracle = new SQLConstantOracle();
             }else{
                 log.error("Could not find DB type to load constants");
-                throw new APIManagementException("Error occurred while instantiating KeyManager implementation");
+                throw new APIManagementException("Error occurred while initializing SQL Constants Manager");
             }
         } catch (SQLException e) {
             log.error("Error occurred while initializeSQLConstantManager");
-            throw new APIManagementException("Error occurred while instantiating KeyManager implementation", e);
+            throw new APIManagementException("Error occurred while initializing SQL Constants Manager", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(null, connection, null);
         }
@@ -108,7 +108,9 @@ public class SQLConstantManagerFactory {
             } else if ("oracle".equals(dbType)) {
                 clazz = sqlConstantOracle.getClass();
             } else {
-                log.error("No DB type Found ");
+                String errorMsg = "No DB type Found";
+                log.error(errorMsg);
+                throw new APIManagementException(errorMsg);
             }
             Field field;
 
@@ -116,7 +118,7 @@ public class SQLConstantManagerFactory {
             field.setAccessible(true);
             sqlString = (String) field.get(sqlConstantsH2MySQL);
         }catch (IllegalAccessException e) {
-           log.error("Illegal Access attempt to sql constant class");
+            log.error("Illegal Access attempt to sql constant class");
             throw new APIManagementException("Illegal Access attempt to sql constant class", e);
         } catch (NoSuchFieldException e) {
             log.error("No such a field found in sql constant class" + sql);

@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -32,6 +33,10 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
+
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
 
 import java.util.UUID;
 
