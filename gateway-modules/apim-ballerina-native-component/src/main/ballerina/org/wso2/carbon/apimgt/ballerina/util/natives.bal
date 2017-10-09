@@ -28,3 +28,8 @@ native function parse (string value) (json);
 @doc:Param { value:"string: Current String value of ip" }
 @doc:Return { value:"int: integer value" }
 native function convertIpToLong (string value) (int );
+
+@doc:Description { value:"Return JSON files in a given folder"}
+@doc:Param { value:"string: Path of the folder" }
+@doc:Return { value:"string[]: array containing json file names" }
+native function listJSONFiles (string folderPath) (any );
