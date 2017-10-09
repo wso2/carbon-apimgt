@@ -63,6 +63,7 @@ public class ThriftAPIDataStoreTest {
         PowerMockito.mockStatic(ThriftKeyValidatorClientPool.class);
         thriftAPIDataStore = new ThriftAPIDataStore();
         apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
+        Whitebox.setInternalState(ThriftAPIDataStore.class, "clientPool", thriftKeyValidatorClientPool);
     }
 
     @Test
@@ -73,7 +74,6 @@ public class ThriftAPIDataStoreTest {
         apiKeyValidationInfoDTO.setAuthorized(true);
         PowerMockito.when(client.getAPIKeyData(apiContext, apiVersion, apiKey, requiredAuthenticationLevel,
                 clientDomain, matchingResource, httpVerb)).thenReturn(apiKeyValidationInfoDTO);
-        Whitebox.setInternalState(ThriftAPIDataStore.class, "clientPool", thriftKeyValidatorClientPool);
         Assert.assertNotNull(thriftAPIDataStore.getAPIKeyData(apiContext, apiVersion,
                 apiKey, requiredAuthenticationLevel, clientDomain, matchingResource, httpVerb));
 
@@ -88,7 +88,6 @@ public class ThriftAPIDataStoreTest {
         apiKeyValidationInfoDTO.setAuthorized(true);
         PowerMockito.when(client.getAPIKeyData(apiContext, apiVersion, apiKey, requiredAuthenticationLevel,
                 clientDomain, matchingResource, httpVerb)).thenReturn(apiKeyValidationInfoDTO);
-        Whitebox.setInternalState(ThriftAPIDataStore.class, "clientPool", thriftKeyValidatorClientPool);
         thriftAPIDataStore.getAPIKeyData(apiContext, apiVersion,
                 apiKey, requiredAuthenticationLevel, clientDomain, matchingResource, httpVerb);
     }
@@ -100,7 +99,6 @@ public class ThriftAPIDataStoreTest {
         when(ThriftKeyValidatorClientPool.getInstance()).thenReturn(thriftKeyValidatorClientPool);
         doThrow(new Exception()).when(thriftKeyValidatorClientPool).get();
         ThriftAPIDataStore thriftAPIDataStore = new ThriftAPIDataStore();
-        Whitebox.setInternalState(ThriftAPIDataStore.class, "clientPool", thriftKeyValidatorClientPool);
         thriftAPIDataStore.getAPIKeyData(apiContext, apiVersion, apiKey, requiredAuthenticationLevel, clientDomain,
                 matchingResource, httpVerb);
     }
@@ -110,7 +108,6 @@ public class ThriftAPIDataStoreTest {
         when(thriftKeyValidatorClientPool.get()).thenReturn(client);
         Mockito.doThrow(APISecurityException.class).when(client).getAPIKeyData(apiContext, apiVersion,
                 apiKey, requiredAuthenticationLevel, clientDomain, matchingResource, httpVerb);
-        Whitebox.setInternalState(ThriftAPIDataStore.class, "clientPool", thriftKeyValidatorClientPool);
         thriftAPIDataStore.getAPIKeyData(apiContext, apiVersion, apiKey, requiredAuthenticationLevel, clientDomain,
                 matchingResource, httpVerb);
     }
@@ -121,7 +118,6 @@ public class ThriftAPIDataStoreTest {
         Mockito.doThrow(APISecurityException.class).when(client).getAPIKeyData(apiContext, apiVersion,
                 apiKey, requiredAuthenticationLevel, clientDomain, matchingResource, httpVerb);
         doThrow(new Exception()).when(thriftKeyValidatorClientPool).release(client);
-        Whitebox.setInternalState(ThriftAPIDataStore.class, "clientPool", thriftKeyValidatorClientPool);
         //Should throw exception and discontinue the flow
         thriftAPIDataStore.getAPIKeyData(apiContext, apiVersion,
                 apiKey, requiredAuthenticationLevel, clientDomain, matchingResource, httpVerb);
@@ -133,7 +129,6 @@ public class ThriftAPIDataStoreTest {
         when(client.getAPIKeyData(apiContext, apiVersion, apiKey, requiredAuthenticationLevel,
                 clientDomain, matchingResource, httpVerb)).thenReturn(apiKeyValidationInfoDTO);
         doThrow(new Exception()).when(thriftKeyValidatorClientPool).release(client);
-        Whitebox.setInternalState(ThriftAPIDataStore.class, "clientPool", thriftKeyValidatorClientPool);
         //Should not throw exception and discontinue the flow
         Assert.assertNotNull(thriftAPIDataStore.getAPIKeyData(apiContext, apiVersion,
                 apiKey, requiredAuthenticationLevel, clientDomain, matchingResource, httpVerb));
@@ -144,7 +139,6 @@ public class ThriftAPIDataStoreTest {
         when(thriftKeyValidatorClientPool.get()).thenReturn(client);
         when(client.getAllURITemplates(apiContext, apiVersion)).thenReturn(new
                 ArrayList<URITemplate>());
-        Whitebox.setInternalState(ThriftAPIDataStore.class, "clientPool", thriftKeyValidatorClientPool);
         Assert.assertNotNull(thriftAPIDataStore.getAllURITemplates(apiContext, apiVersion));
     }
 
@@ -153,14 +147,12 @@ public class ThriftAPIDataStoreTest {
         when(thriftKeyValidatorClientPool.get()).thenReturn(null);
         when(client.getAllURITemplates(apiContext, apiVersion)).thenReturn(new
                 ArrayList<URITemplate>());
-        Whitebox.setInternalState(ThriftAPIDataStore.class, "clientPool", thriftKeyValidatorClientPool);
         thriftAPIDataStore.getAllURITemplates(apiContext, apiVersion);
     }
 
     @Test(expected = APISecurityException.class)
     public void testGetAllURITemplatesWhenFailedToRetrieveThriftClientFromPool() throws Exception {
         doThrow(new Exception()).when(thriftKeyValidatorClientPool).get();
-        Whitebox.setInternalState(ThriftAPIDataStore.class, "clientPool", thriftKeyValidatorClientPool);
         thriftAPIDataStore.getAllURITemplates(apiContext, apiVersion);
     }
 
@@ -168,7 +160,6 @@ public class ThriftAPIDataStoreTest {
     public void testGetAllURITemplatesWhenFailedToRetrieveAPIKeyDataFromKM() throws Exception {
         when(thriftKeyValidatorClientPool.get()).thenReturn(client);
         Mockito.doThrow(APISecurityException.class).when(client).getAllURITemplates(apiContext, apiVersion);
-        Whitebox.setInternalState(ThriftAPIDataStore.class, "clientPool", thriftKeyValidatorClientPool);
         thriftAPIDataStore.getAllURITemplates(apiContext, apiVersion);
     }
 
@@ -177,7 +168,6 @@ public class ThriftAPIDataStoreTest {
         when(thriftKeyValidatorClientPool.get()).thenReturn(client);
         when(client.getAllURITemplates(apiContext, apiVersion)).thenReturn(new ArrayList<URITemplate>());
         doThrow(new Exception()).when(thriftKeyValidatorClientPool).release(client);
-        Whitebox.setInternalState(ThriftAPIDataStore.class, "clientPool", thriftKeyValidatorClientPool);
         //Should not throw exception and discontinue the flow
         Assert.assertNotNull(thriftAPIDataStore.getAllURITemplates(apiContext, apiVersion));
     }
@@ -187,11 +177,9 @@ public class ThriftAPIDataStoreTest {
         when(thriftKeyValidatorClientPool.get()).thenReturn(client);
         Mockito.doThrow(APISecurityException.class).when(client).getAllURITemplates(apiContext, apiVersion);
         doThrow(new Exception()).when(thriftKeyValidatorClientPool).release(client);
-        Whitebox.setInternalState(ThriftAPIDataStore.class, "clientPool", thriftKeyValidatorClientPool);
         //Should throw exception and discontinue the flow
         thriftAPIDataStore.getAllURITemplates(apiContext, apiVersion);
     }
-
 
     @Test
     public void testCleanUp() throws Exception {
