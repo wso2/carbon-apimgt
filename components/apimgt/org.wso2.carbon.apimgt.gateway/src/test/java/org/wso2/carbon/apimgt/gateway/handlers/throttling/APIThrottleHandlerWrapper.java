@@ -48,14 +48,13 @@ public class APIThrottleHandlerWrapper extends APIThrottleHandler {
         return true;
     }
 
-
     @Override
     protected int resolveTenantId() {
         return -1234;
     }
 
     @Override
-    protected void setFaultPayload(MessageContext messageContext, String errorMessage, String
+    protected void setSOAPFault(MessageContext messageContext, String errorMessage, String
             errorDescription) {
     }
 

@@ -66,7 +66,6 @@ import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
 import javax.xml.stream.XMLStreamException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -300,7 +299,7 @@ public class APIThrottleHandler extends AbstractHandler {
         if (messageContext.isDoingPOX() || messageContext.isDoingGET()) {
             Utils.setFaultPayload(messageContext, getFaultPayload(errorCode, errorMessage, errorDescription));
         } else {
-            setFaultPayload(messageContext, errorMessage, errorDescription);
+            setSOAPFault(messageContext, errorMessage, errorDescription);
         }
 
         sendFault(messageContext, httpErrorCode);
@@ -818,8 +817,7 @@ public class APIThrottleHandler extends AbstractHandler {
             }
 
         } catch (ThrottleException e) {
-            log.warn("Exception occurred while performing role " +
-                    "based throttling", e);
+            log.warn("Exception occurred while performing role based throttling", e);
             synCtx.setProperty(APIThrottleConstants.THROTTLED_OUT_REASON, APIThrottleConstants.HARD_LIMIT_EXCEEDED);
             return false;
         }
@@ -1106,7 +1104,7 @@ public class APIThrottleHandler extends AbstractHandler {
         Utils.sendFault(messageContext, httpErrorCode);
     }
 
-    protected void setFaultPayload(MessageContext messageContext, String errorMessage, String errorDescription) {
+    protected void setSOAPFault(MessageContext messageContext, String errorMessage, String errorDescription) {
         Utils.setSOAPFault(messageContext, "Server", errorMessage, errorDescription);
     }
 
