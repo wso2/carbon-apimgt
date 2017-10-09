@@ -178,7 +178,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @param registry Registry instance to use
      * @throws RegistryException n error
      */
-    private void registerCustomQueries(UserRegistry registry, String username)
+    protected void registerCustomQueries(UserRegistry registry, String username)
             throws RegistryException, APIManagementException {
         String tagsQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/tag-summary";
         String latestAPIsQueryPath = RegistryConstants.QUERIES_COLLECTION_PATH + "/latest-apis";
