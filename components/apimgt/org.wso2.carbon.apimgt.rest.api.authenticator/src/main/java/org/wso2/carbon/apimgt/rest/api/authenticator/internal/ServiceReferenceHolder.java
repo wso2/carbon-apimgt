@@ -35,7 +35,7 @@ public class ServiceReferenceHolder {
     private static ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private ConfigProvider configProvider;
     private APIMAppConfigurations config = null;
-    private APIMConfigurations config_env = null;
+    private APIMConfigurations config1 = null;
 
     private ServiceReferenceHolder() {
 
@@ -71,7 +71,7 @@ public class ServiceReferenceHolder {
     public APIMConfigurations getAPIMConfiguration() {
         try {
             if (configProvider != null) {
-                config_env = configProvider.getConfigurationObject(APIMConfigurations.class);
+                config1 = configProvider.getConfigurationObject(APIMConfigurations.class);
             } else {
                 log.error("Configuration provider is null");
             }
@@ -79,14 +79,20 @@ public class ServiceReferenceHolder {
             log.error("error getting config : org.wso2.carbon.apimgt.core.internal.APIMConfiguration", e);
         }
 
-        if (config_env == null) {
-            config_env = new APIMConfigurations();
+        if (config1 == null) {
+            config1 = new APIMConfigurations();
             log.info("Setting default configurations...");
         }
 
-        return config_env;
+        return config1;
     }
 
+    /**
+     * This method is to get configuration map of a given namespace
+     *
+     * @param namespace namespace defined in deployment.yaml
+     * @return resource path to scope mapping
+     */
     /**
      * This method is to get configuration map of a given namespace
      *
