@@ -799,7 +799,7 @@ public class APIThrottleHandler extends AbstractHandler {
                     hardThrottleContext.setThrottleId(id + APIThrottleConstants.PRODUCTION_HARD_LIMIT);
                     info = roleBasedAccessController.canAccess(hardThrottleContext, throttleKey,
                             APIThrottleConstants.PRODUCTION_HARD_LIMIT);
-                } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(authContext.getApiKey())) {
+                } else if (APIConstants.API_KEY_TYPE_SANDBOX.equals(authContext.getKeyType())) {
                     hardThrottleContext.setThrottleId(id + APIThrottleConstants.SANDBOX_HARD_LIMIT);
                     info = roleBasedAccessController.canAccess(hardThrottleContext, throttleKey,
                             APIThrottleConstants.SANDBOX_HARD_LIMIT);
@@ -1064,51 +1064,6 @@ public class APIThrottleHandler extends AbstractHandler {
                 "                </throttle:Control>\n" +
                 "            </wsp:Policy>\n" +
                 " </wsp:Policy>\n";
-    }
-
-    private void logMessageDetails(MessageContext messageContext) {
-        //TODO: Hardcoded const should be moved to a common place which is visible to org.wso2.carbon.apimgt.gateway.handlers
-        String applicationName = (String) messageContext.getProperty(APIMgtGatewayConstants.APPLICATION_NAME);
-        String endUserName = (String) messageContext.getProperty(APIMgtGatewayConstants.END_USER_NAME);
-
-        //Do not change this log format since its using by some external apps
-        org.apache.axis2.context.MessageContext axisMC = getAxis2MessageContext((Axis2MessageContext) messageContext);
-        String logMessage = "";
-        if (applicationName != null) {
-            logMessage = " belonging to appName=" + applicationName;
-        }
-        if (endUserName != null) {
-            logMessage = logMessage + " userName=" + endUserName;
-        }
-        String logID = axisMC.getOptions().getMessageId();
-        if (logID != null) {
-            logMessage = logMessage + " transactionId=" + logID;
-        }
-        try {
-            String userAgent = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
-                    .TRANSPORT_HEADERS)).get(APIConstants.USER_AGENT);
-            if (userAgent != null) {
-                logMessage = logMessage + " with userAgent=" + userAgent;
-            }
-        } catch (Exception e) {
-            log.error("Error while getting User Agent for request", e);
-        }
-
-        long reqIncomingTimestamp = Long.parseLong((String) ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext().getProperty(APIMgtGatewayConstants.REQUEST_RECEIVED_TIME));
-        Date incomingReqTime = new Date(reqIncomingTimestamp);
-        logMessage = logMessage + " at requestTime=" + incomingReqTime;
-        //If gateway is fronted by hardware load balancer client ip should retrieve from x forward for header
-        String remoteIP = (String) ((TreeMap) axisMC.getProperty(org.apache.axis2.context.MessageContext
-                .TRANSPORT_HEADERS)).get(APIMgtGatewayConstants.X_FORWARDED_FOR);
-        if (remoteIP == null) {
-            remoteIP = (String) axisMC.getProperty(org.apache.axis2.context.MessageContext.REMOTE_ADDR);
-        }
-        //null check before add it to log message
-        if (remoteIP != null) {
-            logMessage = logMessage + " from clientIP=" + remoteIP;
-        }
-        log.debug("Message throttled out Details:" + logMessage);
     }
 
     public String getProductionUnitTime() {
