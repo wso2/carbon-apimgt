@@ -17,7 +17,6 @@
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.gateway.mediators.APIMgtCommonExecutionPublisher;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.AlertTypeDTO;
 
