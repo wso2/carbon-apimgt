@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.SubscriptionMappingU
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -152,6 +153,9 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                 RestApiUtil.handleInternalServerError("Error while getting subscriptions of the user " + username, e,
                         log);
             }
+        } catch (UnsupportedEncodingException e) {
+            String errorMessage = "Error while Decoding apiId" + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -223,6 +227,9 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                             "Error while adding the subscription API:" + subscriptionDTO.getApiIdentifier() + ", application:" + subscriptionDTO
                                     .getApplicationId() + ", tier:" + subscriptionDTO.getTier(), e, log);
                 }
+            } catch (UnsupportedEncodingException e) {
+                String errorMessage = "Error while Decoding apiId" + subscriptionDTO.getApiIdentifier();
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
         return Response.ok().entity(subscriptions).build();
@@ -286,7 +293,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             RestApiUtil.handleResourceAlreadyExistsError(
                     "Specified subscription already exists for API " + body.getApiIdentifier() + " for application "
                             + body.getApplicationId(), e, log);
-        } catch (APIManagementException | URISyntaxException e) {
+        } catch (APIManagementException | URISyntaxException | UnsupportedEncodingException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 //this happens when the specified API identifier does not exist
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, body.getApiIdentifier(), e, log);
@@ -327,7 +334,7 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             } else {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
             }
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | UnsupportedEncodingException e) {
             RestApiUtil.handleInternalServerError("Error while getting subscription with id " + subscriptionId, e, log);
         }
         return null;

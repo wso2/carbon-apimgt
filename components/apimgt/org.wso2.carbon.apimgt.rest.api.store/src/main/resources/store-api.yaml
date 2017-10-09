@@ -1598,6 +1598,7 @@ parameters:
       Should be formatted as **provider-name-version**.
     required: true
     type: string
+    x-encoded: true
 
 # API Identifier
 # Specified as part of the query string
@@ -1610,6 +1611,7 @@ parameters:
       Should be formatted as **provider-name-version**.
     required: true
     type: string
+    x-encoded: true
 
 # API Identifier
 # Specified as part of the path expression
