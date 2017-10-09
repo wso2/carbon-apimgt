@@ -36,8 +36,21 @@ function readFromJSONFile () (json) {
 
     string name = system:getEnv(Constants:GW_HOME);
     try {
+        system:println(name);
         files:File t = {path:name + "/microgateway/apiKeys.json"};
         files:open(t, "r");
+        system:println("my java check@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+
+        //files:File target = {path:"/microgateway"};
+        //system:println(files:exists(target));
+
+        string[] filenames = util:listJSONFiles("/home/sabeena/Documents/apim/testing");
+        if (filenames != null) {
+            system:println(filenames[0]);
+        }else{
+            system:println("null :/");
+        }
+        system:println("my java check@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         var content, n = files:read(t, 100000000);
         string strAPIData = blobs:toString(content, "utf-8");
         json apiData = util:parse(strAPIData);
