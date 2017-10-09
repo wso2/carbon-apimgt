@@ -30,8 +30,8 @@ import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.APIMConfigurationService;
+import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMAppConfigurations;
 import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMConfigurations;
-import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMStoreConfigurations;
 import org.wso2.carbon.apimgt.rest.api.authenticator.constants.AuthenticatorConstants;
 import org.wso2.carbon.apimgt.rest.api.authenticator.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.authenticator.internal.ServiceReferenceHolder;
@@ -280,7 +280,7 @@ public class AuthenticatorAPI implements Microservice {
         }
         String requestURL = (String) request.getProperty(AuthenticatorConstants.REQUEST_URL);
 
-        APIMStoreConfigurations storeConfigs = ServiceReferenceHolder.getInstance().getAPIMStoreConfiguration();
+        APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance().getAPIMAppConfiguration();
         AuthResponseBean authResponseBean = new AuthResponseBean();
         String grantType = KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE;
         try {
@@ -316,7 +316,7 @@ public class AuthenticatorAPI implements Microservice {
                     log.debug("Set cookies for " + appName + " application.");
                 }
                 // Redirect to the store/apis page (redirect URL)
-                URI targetURIForRedirection = new URI(storeConfigs.getApimBaseUrl() + appName);
+                URI targetURIForRedirection = new URI(appConfigs.getApimBaseUrl() + appName);
                 return Response.status(Response.Status.FOUND)
                         .header(HttpHeaders.LOCATION, targetURIForRedirection).entity(authResponseBean)
                         .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext,
