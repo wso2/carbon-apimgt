@@ -152,6 +152,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
@@ -1989,7 +1990,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             int tenantId;
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+                tenantId = getTenantId(tenantDomain);
             } catch (UserStoreException e) {
                 throw new APIManagementException("Error in retrieving Tenant Information while adding api :"
                         +api.getId().getApiName(),e);
@@ -2035,7 +2036,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             .NOTIFICATION_TYPE_NEW_VERSION);
                     notificationDTO.setTenantID(tenantId);
                     notificationDTO.setTenantDomain(tenantDomain);
-                    new NotificationExecutor().sendAsyncNotifications(notificationDTO);
+                    sendAsncNotification(notificationDTO);
 
                 }
             } catch (NotificationException e) {
@@ -4859,5 +4860,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     protected Map<String, String> removeFromGateway(API api, String tenantDomain) {
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         return gatewayManager.removeFromGateway(api, tenantDomain);
+    }
+    
+    protected int getTenantId(String tenantDomain) throws UserStoreException {
+        return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+    }
+    
+    protected void sendAsncNotification(NotificationDTO notificationDTO) throws NotificationException {
+        new NotificationExecutor().sendAsyncNotifications(notificationDTO);
+        
     }
 }

@@ -96,7 +96,7 @@ public class TestUtils {
         PowerMockito.when(amConfig.getFirstProperty(propertyName)).thenReturn(value);
     }
     
-    private static ServiceReferenceHolder getServiceReferenceHolder() {
+    public static ServiceReferenceHolder getServiceReferenceHolder() {
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         ServiceReferenceHolder sh = PowerMockito.mock(ServiceReferenceHolder.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);
