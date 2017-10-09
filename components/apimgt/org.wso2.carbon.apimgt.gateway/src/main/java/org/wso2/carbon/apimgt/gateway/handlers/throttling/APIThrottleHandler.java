@@ -834,7 +834,6 @@ public class APIThrottleHandler extends AbstractHandler {
         Entry entry = synCtx.getConfiguration().getEntryDefinition(policyKey);
         if (entry == null) {
             handleException("Cannot find throttling policy using key: " + policyKey);
-            return;
         }
         Object entryValue = null;
         boolean reCreate = false;
@@ -853,7 +852,6 @@ public class APIThrottleHandler extends AbstractHandler {
         if (reCreate || throttle == null) {
             if (entryValue == null || !(entryValue instanceof OMElement)) {
                 handleException("Unable to load throttling policy using key: " + policyKey);
-                return;
             }
             version = entry.getVersion();
 
@@ -877,7 +875,6 @@ public class APIThrottleHandler extends AbstractHandler {
                         Object resEntryValue = synCtx.getEntry(this.policyKeyResource);
                         if (resEntryValue == null || !(resEntryValue instanceof OMElement)) {
                             handleException("Unable to load throttling policy using key: " + this.policyKeyResource);
-                            return;
                         }
 
                         //create throttle for the resource level
