@@ -35,6 +35,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants.X_FORWARDED_FOR;
+
 public class TestUtils {
     private static final String API_AUTH_CONTEXT = "__API_AUTH_CONTEXT";
 
@@ -58,6 +60,10 @@ public class TestUtils {
                 new Axis2SynapseEnvironment(cfgCtx, synCfg));
         synCtx.setProperty(RESTConstants.REST_API_CONTEXT, context);
         synCtx.setProperty(RESTConstants.SYNAPSE_REST_API_VERSION, version);
+        Map map = new TreeMap();
+        map.put(X_FORWARDED_FOR, "127.0.0.1");
+        ((Axis2MessageContext) synCtx).getAxis2MessageContext()
+                .setProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS, map);
         return synCtx;
     }
 
@@ -90,7 +96,6 @@ public class TestUtils {
         synCtx.setProperty(API_AUTH_CONTEXT, authenticationContext);
         return synCtx;
     }
-
 
     public static MessageContext loadAPIThrottlingPolicyEntry(String policyDefinition, String policyKey, boolean
             isDynamic, long version, MessageContext messageContext) throws XMLStreamException {

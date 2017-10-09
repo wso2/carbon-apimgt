@@ -31,21 +31,11 @@ import org.wso2.carbon.metrics.manager.Timer;
 public class APIThrottleHandlerWrapper extends APIThrottleHandler {
     private Timer timer;
     private ThrottleContext throttleContext;
-    private AccessRateController accessRateController;
-    private RoleBasedAccessRateController roleBasedAccessController;
-    private RoleBasedAccessRateController applicationRoleBasedAccessController;
 
-
-
-    public APIThrottleHandlerWrapper(Timer timer, ThrottleContext throttleContext, AccessRateController
-            accessRateController, RoleBasedAccessRateController roleBasedAccessController,
-                                     RoleBasedAccessRateController applicationRoleBasedAccessController) {
+    public APIThrottleHandlerWrapper(Timer timer, ThrottleContext throttleContext) {
 
         this.timer = timer;
         this.throttleContext = throttleContext;
-        this.accessRateController = accessRateController;
-        this.applicationRoleBasedAccessController = applicationRoleBasedAccessController;
-        this.roleBasedAccessController = roleBasedAccessController;
     }
 
     @Override
@@ -57,6 +47,7 @@ public class APIThrottleHandlerWrapper extends APIThrottleHandler {
     protected boolean isClusteringEnabled() {
         return true;
     }
+
 
     @Override
     protected int resolveTenantId() {
