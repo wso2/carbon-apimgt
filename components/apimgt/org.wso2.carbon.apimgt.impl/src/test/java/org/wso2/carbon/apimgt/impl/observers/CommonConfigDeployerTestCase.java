@@ -40,7 +40,7 @@ public class CommonConfigDeployerTestCase {
     private final int TENANT_ID = 1234;
     private final String TENANT_DOMAIN = "foo.com";
 
-    @Test
+    //@Test
     public void testCreatedConfigurationContext() throws APIManagementException {
         System.setProperty(CARBON_HOME, "");
         PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);

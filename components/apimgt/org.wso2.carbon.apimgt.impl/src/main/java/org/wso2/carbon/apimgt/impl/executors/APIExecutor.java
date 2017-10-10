@@ -41,7 +41,6 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.handlers.RequestContext;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -52,13 +51,13 @@ import java.util.Set;
 
 /**
  * This class is an implementation of the
- * interface {@link Execution}
+ * interface {@link org.wso2.carbon.governance.registry.extensions.interfaces.Execution}
  * This class consists methods that will create, prototype, publish, block, deprecate and
  * retire  an API to API Manager.
  * <p/>
  * This executor used to publish a service to API store as a API.
  *
- * @see Execution
+ * @see org.wso2.carbon.governance.registry.extensions.interfaces.Execution
  */
 public class APIExecutor implements Execution {
 
@@ -85,8 +84,8 @@ public class APIExecutor implements Execution {
      */
     public boolean execute(RequestContext context, String currentState, String targetState) {
         boolean executed = false;
-        String user = getUsername();
-        String domain = getTenantDomain();
+        String user = PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
+        String domain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
      
         String userWithDomain = user;
         if(!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(domain)){
@@ -97,18 +96,20 @@ public class APIExecutor implements Execution {
 
         try {
             String tenantUserName = MultitenantUtils.getTenantAwareUsername(userWithDomain);
-            int tenantId = getTenantId(domain);
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(domain);
 
-            GenericArtifactManager artifactManager = getArtifactManager(context);
-            Registry registry = getGovernanceUserRegistry(tenantUserName, tenantId);
+            GenericArtifactManager artifactManager = APIUtil
+                    .getArtifactManager(context.getSystemRegistry(), APIConstants.API_KEY);
+            Registry registry = ServiceReferenceHolder.getInstance().
+                    getRegistryService().getGovernanceUserRegistry(tenantUserName, tenantId);
             Resource apiResource = context.getResource();
             String artifactId = apiResource.getUUID();
             if (artifactId == null) {
                 return executed;
             }
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
-            API api = getApi(apiArtifact);
-            APIProvider apiProvider = getApiProvider(userWithDomain);
+            API api = APIUtil.getAPI(apiArtifact);
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(userWithDomain);
 
             APIStatus oldStatus = APIUtil.getApiStatus(apiArtifact.getLifecycleState());
             APIStatus newStatus = APIUtil.getApiStatus(targetState);
@@ -185,7 +186,7 @@ public class APIExecutor implements Execution {
                                 versionComparator.compare(oldAPI, api) < 0 &&
                                 (oldAPI.getStatus().equals(APIStatus.PUBLISHED))) {
                             apiProvider.changeLifeCycleStatus(oldAPI.getId(), APIConstants.API_LC_ACTION_DEPRECATE);
-
+                            
                         }
                     }            
                 }            
@@ -209,36 +210,6 @@ public class APIExecutor implements Execution {
         }
         return executed;
     }
-
-    protected API getApi(GenericArtifact apiArtifact) throws APIManagementException {
-        return APIUtil.getAPI(apiArtifact);
-    }
-
-    protected APIProvider getApiProvider(String userWithDomain) throws APIManagementException {
-        return APIManagerFactory.getInstance().getAPIProvider(userWithDomain);
-    }
-
-    protected UserRegistry getGovernanceUserRegistry(String tenantUserName, int tenantId) throws RegistryException {
-        return ServiceReferenceHolder.getInstance().
-                getRegistryService().getGovernanceUserRegistry(tenantUserName, tenantId);
-    }
-
-    protected GenericArtifactManager getArtifactManager(RequestContext context)
-            throws APIManagementException, RegistryException {
-        return APIUtil
-                .getArtifactManager(context.getSystemRegistry(), APIConstants.API_KEY);
-    }
-
-    protected int getTenantId(String domain) throws UserStoreException {
-        return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(domain);
-    }
-
-    protected String getTenantDomain() {
-        return CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-    }
-
-    protected String getUsername() {
-        return PrivilegedCarbonContext.getThreadLocalCarbonContext().getUsername();
-    }
-
+    
+   
 }
