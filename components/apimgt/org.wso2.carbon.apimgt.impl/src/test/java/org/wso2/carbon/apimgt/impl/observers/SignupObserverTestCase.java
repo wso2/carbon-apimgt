@@ -67,5 +67,8 @@ public class SignupObserverTestCase {
                 .when(APIUtil.class, "createSelfSignUpRoles", Matchers.eq(1234));
         SignupObserver signupObserver = new SignupObserver();
         signupObserver.createdConfigurationContext(configurationContext);
+
+        PowerMockito.verifyStatic(APIUtil.class);
+        APIUtil.createSelfSignUpRoles(1234);
     }
 }
