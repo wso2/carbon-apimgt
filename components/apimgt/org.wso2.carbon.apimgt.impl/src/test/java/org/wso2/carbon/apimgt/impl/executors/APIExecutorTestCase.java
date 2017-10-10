@@ -102,7 +102,7 @@ public class APIExecutorTestCase {
         Mockito.when(apiProvider.propergateAPIStatusChangeToGateways(apiIdentifier, APIStatus.PUBLISHED))
                 .thenReturn(null);
         Mockito.when(apiProvider.updateAPIforStateChange(apiIdentifier, APIStatus.PUBLISHED, null)).thenReturn(true);
-        Mockito.when(userRegistry.get("/apimgt/applicationdata/provider/john/pizza-shack/1.0.0/api"))
+        Mockito.when(userRegistry.get("/apimgt/applicationdata/provider/john/pizza-shack/2.0.0/api"))
                 .thenReturn(resource);
 
         Mockito.when(api.getId()).thenReturn(apiIdentifier);
@@ -123,6 +123,7 @@ public class APIExecutorTestCase {
         PowerMockito.when(APIUtil.replaceEmailDomain(USER_NAME)).thenCallRealMethod();
         PowerMockito.when(APIUtil.getApiStatus("CREATED")).thenCallRealMethod();
         PowerMockito.when(APIUtil.getApiStatus("PUBLISHED")).thenCallRealMethod();
+        PowerMockito.when(APIUtil.getAPIPath(apiIdentifier)).thenCallRealMethod();
 
         Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
         Mockito.when(registryService.getGovernanceUserRegistry(USER_NAME,TENANT_ID)).thenReturn(userRegistry);
