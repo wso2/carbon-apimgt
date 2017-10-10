@@ -18,7 +18,6 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.ServiceDiscoverer;
-import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryConfigurations;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.ServiceDiscoveryException;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
@@ -27,7 +26,6 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,71 +33,27 @@ import java.util.Map;
 /**
  * Kubernetes and Openshift implementation of Service Discoverer
  */
-public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
+public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
+
+    private final Logger log  = LoggerFactory.getLogger(ServiceDiscovererKubernetes.class);
 
     private OpenShiftClient client;
-    private ServiceDiscoveryConfigurations config;
-    private final Logger log  = LoggerFactory.getLogger(KubernetesServiceDiscoverer.class);
-
-
     private String serviceAccountToken;
     private String caCertLocation;
-    private Boolean insidePod;
-    private String namespaceFilter;
-    private HashMap<String, String> criteriaFilter;
-
-    private List<Endpoint> servicesList;
+    private Boolean includeClusterIPs;
+    private Boolean includeExternalNameServices;
     private Boolean endpointsAvailable; //when false, will not look for NodePort urls for the remaining ports.
-    private int serviceEndpointIndex;
 
 
-    public static KubernetesServiceDiscoverer getInstance() throws ServiceDiscoveryException {
-        return new KubernetesServiceDiscoverer();
-    }
-
-    @Override
-    public Boolean isEnabled() {
-        return config.isServiceDiscoveryEnabled();
-    }
-
-    @Override
-    public void setNamespaceFilter() {
-        this.namespaceFilter = config.getCmsSpecificParameter("namespace");
-    }
-
-    @Override
-    public String getNamespaceFilter() {
-        return namespaceFilter;
-    }
-
-    @Override
-    public void setCriteriaFilter() throws ArrayIndexOutOfBoundsException {
-        String criteriaString = config.getCmsSpecificParameter("criteria");
-        if (criteriaString != null) {
-            String[] criteriaArray = criteriaString.split(",");
-            HashMap<String, String> criteriaMap = new HashMap<>();
-            for (String pair : criteriaArray) {
-                String[] entry = pair.split("=");
-                criteriaMap.put(entry[0].trim(), entry[1].trim());
-            }
-            this.criteriaFilter = criteriaMap;
-        }
-    }
-
-    @Override
-    public HashMap<String, String> getCriteriaFilter() {
-        return criteriaFilter;
-    }
-
-    private KubernetesServiceDiscoverer() throws ServiceDiscoveryException {
-        config = ServiceDiscoveryConfigBuilder.getServiceDiscoveryConfiguration();
-        serviceAccountToken = config.getSecurityParameter("serviceAccountToken");
-        caCertLocation = config.getSecurityParameter("caCertLocation");
-        insidePod = Boolean.parseBoolean(config.getCmsSpecificParameter("insidePod"));
+    public ServiceDiscovererKubernetes(HashMap<String, String> cmsSpecificParameters) throws ServiceDiscoveryException {
+        super(cmsSpecificParameters);
+        serviceAccountToken = this.cmsSpecificParameters.get("serviceAccountToken");
+        caCertLocation = this.cmsSpecificParameters.get("caCertLocation");
+        includeClusterIPs = Boolean.parseBoolean(this.cmsSpecificParameters.get("includeClusterIPs"));
+        includeExternalNameServices = Boolean.parseBoolean(this.cmsSpecificParameters
+                .get("includeExternalNameServices"));
         try {
-            setNamespaceFilter();
-            setCriteriaFilter();
-            this.client = new DefaultOpenShiftClient(buildConfig(config.getMasterUrl()));
+            this.client = new DefaultOpenShiftClient(buildConfig(this.cmsSpecificParameters.get("masterUrl")));
         } catch (KubernetesClientException e) {
             String msg = "Error occurred while creating Kubernetes client";
             log.error(msg, e);
@@ -109,8 +63,6 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
             log.error(msg, e);
             throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_INITIALIZING_SERVICE_DISCOVERY);
         }
-        servicesList = new ArrayList<>();
-        serviceEndpointIndex = 0;
     }
 
     private Config buildConfig(String masterUrl) throws ServiceDiscoveryException {
@@ -119,20 +71,15 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
         ConfigBuilder configBuilder = new ConfigBuilder().withMasterUrl(masterUrl)
                 .withCaCertFile(caCertLocation);
         Config config;
-        if (insidePod) {
-            log.debug("Using mounted service account token");
-            try {
-                String saMountedToken = IOUtils.toString(KubernetesServiceDiscoverer.class
-                        .getResourceAsStream("/var/run/secrets/kubernetes.io/serviceaccount/token"),
-                        "UTF-8");
-                config = configBuilder.withOauthToken(saMountedToken).build();
-            } catch (IOException e) {
-                String msg = "Token file not found";
-                log.error(msg, e);
-                throw new ServiceDiscoveryException(msg, e);
-            }
-        } else {
-            log.debug("Using externally stored service account token");
+        log.debug("Using mounted service account token");
+        try {
+            String saMountedToken = IOUtils.toString(ServiceDiscovererKubernetes.class
+                    .getResourceAsStream("/var/run/secrets/kubernetes.io/serviceaccount/token"),
+                    "UTF-8");
+            config = configBuilder.withOauthToken(saMountedToken).build();
+        } catch (IOException | NullPointerException e) {
+            log.info("Token not found in /var/run/secrets/kubernetes.io/serviceaccount/token.");
+            log.info("Using externally stored service account token");
             config = configBuilder.withOauthToken(serviceAccountToken).build();
         }
         return config;
@@ -153,7 +100,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
                 throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_TRYING_TO_DISCOVER_SERVICES);
             }
         }
-        return this.servicesList;
+        return servicesList;
     }
 
     @Override
@@ -169,7 +116,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
                 throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_TRYING_TO_DISCOVER_SERVICES);
             }
         }
-        return this.servicesList;
+        return servicesList;
     }
 
     @Override
@@ -190,7 +137,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
                 throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_TRYING_TO_DISCOVER_SERVICES);
             }
         }
-        return this.servicesList;
+        return servicesList;
     }
 
     @Override
@@ -211,7 +158,7 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
                 throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_TRYING_TO_DISCOVER_SERVICES);
             }
         }
-        return this.servicesList;
+        return servicesList;
     }
 
 
@@ -228,11 +175,11 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
                 if (protocol != null && (protocol.equals("http") || protocol.equals("https"))) {
                     int port = servicePort.getPort();
                     String namespace = service.getMetadata().getNamespace();
-                    if (insidePod) {
+                    if (includeClusterIPs) {
                         addClusterIPEndpoint(serviceSpec, serviceName, port, protocol, namespace, labels);
-                        if (serviceSpec.getType().equals("ExternalName")) {
-                            addExternalNameEndpoint(serviceSpec, serviceName, protocol, namespace, labels);
-                        }
+                    }
+                    if (includeExternalNameServices && serviceSpec.getType().equals("ExternalName")) {
+                        addExternalNameEndpoint(serviceSpec, serviceName, protocol, namespace, labels);
                     }
                     if (!serviceSpec.getType().equals("ClusterIP") && endpointsAvailable) {
                         addNodePortEndpoint(serviceName, servicePort, protocol, filterNamespace, namespace, labels);
@@ -374,21 +321,6 @@ public class KubernetesServiceDiscoverer implements ServiceDiscoverer {
         String endpointIndex = String.format("ds-%d", serviceEndpointIndex);
         return createEndpoint(endpointIndex, serviceName, endpointConfig,
                 1000L, portType, "{\"enabled\": false}", APIMgtConstants.GLOBAL_ENDPOINT);
-    }
-
-    private Endpoint createEndpoint(String id, String name, String endpointConfig, Long maxTps,
-                                    String type, String endpointSecurity, String applicableLevel) {
-        Endpoint.Builder endpointBuilder = new Endpoint.Builder();
-        endpointBuilder.id(id);
-        endpointBuilder.name(name);
-        endpointBuilder.endpointConfig(endpointConfig);
-        endpointBuilder.maxTps(maxTps);
-        endpointBuilder.type(type);
-        endpointBuilder.security(endpointSecurity);
-        endpointBuilder.applicableLevel(applicableLevel);
-
-        serviceEndpointIndex++;
-        return endpointBuilder.build();
     }
 
 

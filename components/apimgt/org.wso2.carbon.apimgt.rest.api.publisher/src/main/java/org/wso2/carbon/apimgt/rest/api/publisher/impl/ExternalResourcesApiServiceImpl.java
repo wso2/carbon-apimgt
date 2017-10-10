@@ -3,8 +3,10 @@ package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.ServiceDiscoverer;
+import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryConfigurations;
+import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryImplConfig;
 import org.wso2.carbon.apimgt.core.exception.ServiceDiscoveryException;
-import org.wso2.carbon.apimgt.core.impl.KubernetesServiceDiscoverer;
+import org.wso2.carbon.apimgt.core.impl.ServiceDiscoveryConfigBuilder;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
@@ -12,8 +14,11 @@ import org.wso2.carbon.apimgt.rest.api.publisher.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
+
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
@@ -37,16 +42,33 @@ public class ExternalResourcesApiServiceImpl extends ExternalResourcesApiService
                                                  Request request) throws NotFoundException {
         try{
             EndPointListDTO endPointListDTO = new EndPointListDTO();
-            ServiceDiscoverer serviceDiscoverer = KubernetesServiceDiscoverer.getInstance();
-            if (serviceDiscoverer.isEnabled()) {
+            ServiceDiscoveryConfigurations serviceDiscoveryConfig = ServiceDiscoveryConfigBuilder
+                    .getServiceDiscoveryConfiguration();
+            if (!serviceDiscoveryConfig.isServiceDiscoveryEnabled()) {
+                String errorMessage = "Service discovery is not enabled";
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+                log.error(errorMessage);
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
+            }
+            List<ServiceDiscoveryImplConfig> implConfigList = serviceDiscoveryConfig.getImplementationConfigs();
+            for (ServiceDiscoveryImplConfig implConfig : implConfigList) {
+                if (!implConfig.isEnabled()) {
+                    continue;
+                }
+                String implClassName = implConfig.getImplementationClass();
+                Class implClazz = ExternalResourcesApiServiceImpl.class.getClassLoader().loadClass(implClassName);
+                Constructor implConstructor = implClazz.getConstructor(HashMap.class);
+                ServiceDiscoverer serviceDiscoverer = (ServiceDiscoverer) implConstructor
+                        .newInstance(implConfig.getCmsSpecificParameters());
+
                 String namespaceFilter = serviceDiscoverer.getNamespaceFilter();
                 HashMap<String, String> criteriaFilter = serviceDiscoverer.getCriteriaFilter();
                 List<Endpoint> discoveredEndpointList;
-                if ( namespaceFilter ==null && criteriaFilter == null) {
+                if (namespaceFilter == null && criteriaFilter == null) {
                     discoveredEndpointList = serviceDiscoverer.listServices();
-                } else if ( namespaceFilter !=null && criteriaFilter != null) {
+                } else if (namespaceFilter != null && criteriaFilter != null) {
                     discoveredEndpointList = serviceDiscoverer.listServices(namespaceFilter, criteriaFilter);
-                } else if ( namespaceFilter != null ) {
+                } else if (namespaceFilter != null) {
                     discoveredEndpointList = serviceDiscoverer.listServices(namespaceFilter);
                 } else {
                     discoveredEndpointList = serviceDiscoverer.listServices(criteriaFilter);
@@ -57,6 +79,12 @@ public class ExternalResourcesApiServiceImpl extends ExternalResourcesApiService
             }
             endPointListDTO.setCount(endPointListDTO.getList().size());
             return Response.ok().entity(endPointListDTO).build();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+                NoSuchMethodException | InvocationTargetException e) {
+            String errorMessage = "Error while loading service discovery impl class";
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
         } catch (IOException e) {
             String errorMessage = "Error while Converting Endpoint Security Details in Endpoint";
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);

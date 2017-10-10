@@ -41,6 +41,8 @@ import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.configuration.models.NotificationConfigurations;
+import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryConfigurations;
+import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryImplConfig;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
@@ -98,6 +100,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.time.LocalDateTime;
@@ -2075,19 +2079,45 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public List<Endpoint> discoverServiceEndpoints() throws APIManagementException {
         List<Endpoint> discoveredEndpointList = null;
-        ServiceDiscoverer serviceDiscoverer = null;
         try {
-            serviceDiscoverer = KubernetesServiceDiscoverer.getInstance();
-            if (serviceDiscoverer.isEnabled()) {
-                discoveredEndpointList = serviceDiscoverer.listServices();
-            } else {
-                String msg = "Service Discovery is not Enabled in the configuration";
-                log.error(msg);
+            ServiceDiscoveryConfigurations serviceDiscoveryConfig = ServiceDiscoveryConfigBuilder
+                    .getServiceDiscoveryConfiguration();
+            if (!serviceDiscoveryConfig.isServiceDiscoveryEnabled()) {
+                log.error("Service Discovery not enabled");
+                return discoveredEndpointList;
+            }
+            List<ServiceDiscoveryImplConfig> implConfigList = serviceDiscoveryConfig.getImplementationConfigs();
+            for (ServiceDiscoveryImplConfig implConfig : implConfigList) {
+                if (!implConfig.isEnabled()) {
+                    continue;
+                }
+                String implClassName = implConfig.getImplementationClass();
+                Class implClazz = APIPublisherImpl.class.getClassLoader().loadClass(implClassName);
+                Constructor implConstructor = implClazz.getConstructor(HashMap.class);
+                ServiceDiscoverer serviceDiscoverer = (ServiceDiscoverer) implConstructor
+                        .newInstance(implConfig.getCmsSpecificParameters());
+
+                String namespaceFilter = serviceDiscoverer.getNamespaceFilter();
+                HashMap<String, String> criteriaFilter = serviceDiscoverer.getCriteriaFilter();
+                if (namespaceFilter == null && criteriaFilter == null) {
+                    discoveredEndpointList = serviceDiscoverer.listServices();
+                } else if (namespaceFilter != null && criteriaFilter != null) {
+                    discoveredEndpointList = serviceDiscoverer.listServices(namespaceFilter, criteriaFilter);
+                } else if (namespaceFilter != null) {
+                    discoveredEndpointList = serviceDiscoverer.listServices(namespaceFilter);
+                } else {
+                    discoveredEndpointList = serviceDiscoverer.listServices(criteriaFilter);
+                }
             }
         } catch (ServiceDiscoveryException e) {
             String msg = "Error while Discovering Service Endpoints";
             log.error(msg, e);
             throw new APIManagementException(msg, e, e.getErrorHandler());
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+                NoSuchMethodException | InvocationTargetException e) {
+            String msg = "Error while Loading Service Discovery Impl Class";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         }
         return discoveredEndpointList;
     }
