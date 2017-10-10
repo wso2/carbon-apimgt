@@ -28,7 +28,6 @@ import org.apache.synapse.commons.throttle.core.ThrottleContext;
 import org.apache.synapse.commons.throttle.core.ThrottleDataHolder;
 import org.apache.synapse.commons.throttle.core.ThrottleException;
 import org.apache.synapse.commons.throttle.core.ThrottleFactory;
-import org.apache.synapse.util.SynapseBinaryDataSource;
 import org.compass.core.util.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -217,8 +216,8 @@ public class ApplicationThrottleControllerTest {
         PowerMockito.when(registry.get(RESOURCE_PATH)).thenReturn(throttlingPolicyResource);
         PowerMockito.doThrow(new RegistryException("Error while retrieving resource content")).when
                 (throttlingPolicyResource).getContent();
-        Assert.notNull(ApplicationThrottleController.getApplicationThrottleContext(messageContext, throttleDataHolder,
-                applicationId, THROTTLE_POLICY_KEY));
+        ApplicationThrottleController.getApplicationThrottleContext(messageContext, throttleDataHolder,
+                applicationId, THROTTLE_POLICY_KEY);
     }
 
     @Test(expected = SynapseException.class)
@@ -235,8 +234,8 @@ public class ApplicationThrottleControllerTest {
         PowerMockito.when(XMLInputFactory.newInstance()).thenReturn(factory);
         PowerMockito.doThrow(new XMLStreamException()).when(factory).createXMLStreamReader((ByteArrayInputStream)
                 Mockito.anyObject());
-        Assert.notNull(ApplicationThrottleController.getApplicationThrottleContext(messageContext, throttleDataHolder,
-                applicationId, THROTTLE_POLICY_KEY));
+        ApplicationThrottleController.getApplicationThrottleContext(messageContext, throttleDataHolder,
+                applicationId, THROTTLE_POLICY_KEY);
     }
 
     @Test(expected = SynapseException.class)
@@ -253,8 +252,8 @@ public class ApplicationThrottleControllerTest {
         PowerMockito.when(XMLInputFactory.newInstance()).thenReturn(factory);
         PowerMockito.doThrow(new OMException()).when(factory).createXMLStreamReader((ByteArrayInputStream)
                 Mockito.anyObject());
-        Assert.notNull(ApplicationThrottleController.getApplicationThrottleContext(messageContext, throttleDataHolder,
-                applicationId, THROTTLE_POLICY_KEY));
+        ApplicationThrottleController.getApplicationThrottleContext(messageContext, throttleDataHolder,
+                applicationId, THROTTLE_POLICY_KEY);
     }
 
     @Test(expected = SynapseException.class)
@@ -266,8 +265,8 @@ public class ApplicationThrottleControllerTest {
         PowerMockito.when(registry.resourceExists(RESOURCE_PATH)).thenReturn(true);
         PowerMockito.when(registry.get(RESOURCE_PATH)).thenReturn(throttlingPolicyResource);
         PowerMockito.when(throttlingPolicyResource.getContent()).thenReturn(Mockito.anyInt());
-        Assert.notNull(ApplicationThrottleController.getApplicationThrottleContext(messageContext, throttleDataHolder,
-                applicationId, THROTTLE_POLICY_KEY));
+        ApplicationThrottleController.getApplicationThrottleContext(messageContext, throttleDataHolder,
+                applicationId, THROTTLE_POLICY_KEY);
     }
 
     @Test(expected = SynapseException.class)
@@ -279,8 +278,8 @@ public class ApplicationThrottleControllerTest {
         PowerMockito.when(registry.resourceExists(RESOURCE_PATH)).thenReturn(true);
         Collection collection = Mockito.mock(Collection.class);
         PowerMockito.when(registry.get(RESOURCE_PATH)).thenReturn(collection);
-        Assert.notNull(ApplicationThrottleController.getApplicationThrottleContext(messageContext, throttleDataHolder,
-                applicationId, THROTTLE_POLICY_KEY));
+        ApplicationThrottleController.getApplicationThrottleContext(messageContext, throttleDataHolder,
+                applicationId, THROTTLE_POLICY_KEY);
     }
 
     @Test(expected = SynapseException.class)
@@ -290,8 +289,8 @@ public class ApplicationThrottleControllerTest {
         PowerMockito.when(tenantManager.getTenantId(tenantDomain)).thenReturn(tenantID);
         PowerMockito.when(registryService.getGovernanceSystemRegistry(tenantID)).thenReturn(registry);
         PowerMockito.when(registry.resourceExists(RESOURCE_PATH)).thenReturn(true);
-        Assert.notNull(ApplicationThrottleController.getApplicationThrottleContext(messageContext, throttleDataHolder,
-                applicationId, null));
+        ApplicationThrottleController.getApplicationThrottleContext(messageContext, throttleDataHolder,
+                applicationId, null);
     }
 
     @Test(expected = SynapseException.class)
@@ -306,8 +305,8 @@ public class ApplicationThrottleControllerTest {
         PowerMockito.mockStatic(ThrottleFactory.class);
         PowerMockito.when(ThrottleFactory.createMediatorThrottle((Policy) Mockito.anyObject())).thenThrow(new
                 ThrottleException());
-        Assert.notNull(ApplicationThrottleController.getApplicationThrottleContext(messageContext, throttleDataHolder,
-                applicationId, THROTTLE_POLICY_KEY));
+        ApplicationThrottleController.getApplicationThrottleContext(messageContext, throttleDataHolder,
+                applicationId, THROTTLE_POLICY_KEY);
     }
 
     @Test(expected = SynapseException.class)
@@ -348,8 +347,6 @@ public class ApplicationThrottleControllerTest {
         PowerMockito.when(OMAbstractFactory.getOMFactory()).thenReturn(omFactory);
         Mockito.doThrow(IOException.class).when(omFactory).createOMText((DataHandler) Mockito.anyObject(), Mockito
                 .anyBoolean());
-
-
         ApplicationThrottleController.getApplicationThrottleContext(messageContext, throttleDataHolder,
                 applicationId, THROTTLE_POLICY_KEY);
     }
