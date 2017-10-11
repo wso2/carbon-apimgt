@@ -66,8 +66,6 @@ public class ThriftUtilsTest {
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         Whitebox.setInternalState(ThriftUtils.class, "thriftAuthClient", thriftAuthClient);
         thriftAuthClient = Mockito.mock(ThriftAuthClient.class);
-
-
     }
 
     @Test
@@ -86,8 +84,18 @@ public class ThriftUtilsTest {
         Mockito.when(serverConfiguration.getFirstProperty("Security.KeyStore.Password")).thenReturn(keyStorePassword);
         Mockito.when(serverConfiguration.getFirstProperty("WebContextRoot")).thenReturn("/");
         PowerMockito.whenNew(ThriftAuthClient.class).withAnyArguments().thenReturn(thriftAuthClient);
-        Mockito.when(thriftAuthClient.getSessionId(keyValidatorUsername, keyStorePassword)).thenReturn("12345");
-        ThriftUtils.getInstance();
+        Mockito.when(thriftAuthClient.getSessionId(Mockito.anyString(), Mockito.anyString())).thenReturn("12345");
+        ThriftUtils thriftUtils = ThriftUtils.getInstance();
+        Assert.assertEquals(thriftUtils.getPassword(), keyValidatorPassword);
+        Assert.assertEquals(thriftUtils.getUserName(), keyValidatorUsername);
+        Assert.assertEquals(thriftUtils.getRemoteServerIP(), thriftServerHost);
+        Assert.assertEquals(thriftUtils.getThriftPort(), Integer.parseInt(thriftClientPort));
+        Assert.assertEquals(thriftUtils.getSessionId(), "12345");
+        Assert.assertEquals(thriftUtils.reLogin(), "12345");
+        Assert.assertEquals(thriftUtils.getThriftClientConnectionTimeOut(), Integer.parseInt(connectionTimeout));
+        Assert.assertEquals(thriftUtils.getTrustStorePath(), keyStoreLocation);
+        Assert.assertEquals(thriftUtils.getTrustStorePassword(), keyStorePassword);
+        Assert.assertNotNull(thriftUtils.getThriftAuthClient());
     }
 
     @Test
