@@ -8169,7 +8169,7 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
 
             prepStmt = connection.prepareStatement(query);
-            prepStmt.setString(1, apiName);
+            prepStmt.setString(1, apiName.toLowerCase());
             prepStmt.setString(2, contextParam + '%');
             resultSet = prepStmt.executeQuery();
 
