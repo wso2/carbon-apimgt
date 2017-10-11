@@ -58,13 +58,10 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
 
             //Find the actual tenant domain on which the access token was cached. It is stored as a reference in
             //the super tenant cache.
-            String cachedTenantDomain = (String) Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
-                    getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME).get(revokedToken);
+            String cachedTenantDomain = getCachedTenantDomain(revokedToken);
 
             //Remove the super tenant cache entry.
-            Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
-                    getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME).remove(revokedToken);
-
+            removeCacheEntryFromGatewayCache(revokedToken);
             //Remove token from tenant cache.
             removeTokenFromTenantTokenCache(revokedToken, cachedTenantDomain);
 
@@ -74,12 +71,10 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
 
             //Find the actual tenant domain on which the access token was cached. It is stored as a reference in
             //the super tenant cache.
-            String cachedTenantDomain = (String) Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
-                    getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME).get(renewedToken);
+            String cachedTenantDomain = getCachedTenantDomain(renewedToken);
 
             //Remove the super tenant cache entry.
-            Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
-                    getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME).remove(renewedToken);
+            removeCacheEntryFromGatewayCache(renewedToken);
 
             //Remove token from tenant cache.
             removeTokenFromTenantTokenCache(renewedToken, cachedTenantDomain);
@@ -100,19 +95,14 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
                 log.debug("Going to remove cache entry " + accessToken + " from " + cachedTenantDomain + " domain");
             }
             try{
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().
-                        setTenantDomain(cachedTenantDomain, true);
-
-                //Remove the tenant cache entry.
-                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).
-                        getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME).remove(accessToken);
-
+                startTenantFlow(cachedTenantDomain);
+                //Remove the tenant cache entry.    
+                removeCacheEntryFromGatewayCache(accessToken);
                 if(log.isDebugEnabled()){
                     log.debug("Removed cache entry " + accessToken + " from " + cachedTenantDomain + " domain");
                 }
             }finally{
-                PrivilegedCarbonContext.endTenantFlow();
+            	endTenantFlow();
             }
         }
     }
@@ -124,5 +114,25 @@ public class APIManagerCacheExtensionHandler extends AbstractHandler {
     public boolean handleResponse(MessageContext messageContext) {
         clearCacheForAccessToken(messageContext);
         return mediate(messageContext, DIRECTION_OUT);
+    }    
+    
+    protected void startTenantFlow(String tenantDomain) {
+		PrivilegedCarbonContext.startTenantFlow();
+		PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);		
     }
+
+    protected void endTenantFlow() {
+		PrivilegedCarbonContext.endTenantFlow();		
+    }
+
+    protected void removeCacheEntryFromGatewayCache(String key) {
+		Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME)
+				.remove(key);		
+    }
+
+    protected String getCachedTenantDomain(String token) {
+		return (String) Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+				.getCache(APIConstants.GATEWAY_TOKEN_CACHE_NAME).get(token);
+    }
+
 }
