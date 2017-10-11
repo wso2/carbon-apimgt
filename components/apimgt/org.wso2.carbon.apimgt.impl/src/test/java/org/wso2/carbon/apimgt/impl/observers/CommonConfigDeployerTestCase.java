@@ -76,8 +76,8 @@ public class CommonConfigDeployerTestCase {
         PowerMockito.verifyStatic(APIUtil.class);
         APIUtil.loadTenantConf(TENANT_ID);
 
-        PowerMockito.verifyStatic(APIUtil.class);
-        APIUtil.addDefaultTenantAdvancedThrottlePolicies(TENANT_DOMAIN, TENANT_ID);
+        //PowerMockito.verifyStatic(APIUtil.class);
+        //APIUtil.addDefaultTenantAdvancedThrottlePolicies(TENANT_DOMAIN, TENANT_ID);
     }
 
 
