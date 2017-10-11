@@ -31,9 +31,6 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.regex.Pattern;
-
-import static org.apache.synapse.transport.nhttp.NhttpConstants.REST_URL_POSTFIX;
 
 /**
  * ThrottleConditionEvaluatorTest test cases
