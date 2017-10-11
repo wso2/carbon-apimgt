@@ -46,7 +46,6 @@ import org.wso2.carbon.apimgt.impl.ApiMgtDAOMockCreator;
 import org.wso2.carbon.apimgt.impl.ServiceReferenceHolderMockCreator;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,7 +58,7 @@ import java.util.Set;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({LogFactory.class, ApiMgtDAO.class, ServiceReferenceHolder.class, APIManagerConfigurationService.class, APIManagerConfiguration.class, PrivilegedCarbonContext.class})
+@PrepareForTest({LogFactory.class, ApiMgtDAO.class, ServiceReferenceHolder.class, APIManagerConfigurationService.class, APIManagerConfiguration.class})
 public class APIUtilTierTest {
     private final String[] validTierNames = {"Gold", "Silver", "Bronze", "Platinum", "Medium", "100PerMinute", "50PerMinute", APIConstants.UNLIMITED_TIER};
     private final String[] tiersReturned = {"policy1", "gold", APIConstants.UNLIMITED_TIER};
@@ -68,10 +67,6 @@ public class APIUtilTierTest {
     @BeforeClass
     public static void setup() throws IOException {
         System.setProperty("carbon.home", "");
-        //String tenantConfPath =  "test" + File.pathSeparatorChar + "resources" +File.pathSeparator +
-        //"org" + File.pathSeparator + "wso2" + File.pathSeparator + "carbon" + File.pathSeparator +
-        //        "apimgt" + File.pathSeparator + "impl" + File.pathSeparator + "utils" + File.pathSeparator + "tenant-conf.json";
-        //tenantConf = IOUtils.toString(APIUtilTierTest.class.getClassLoader().getResourceAsStream(tenantConfPath), "UTF-8");
 
         File siteConfFile = new File(Thread.currentThread().getContextClassLoader().
                 getResource("tenant-conf.json").getFile());
@@ -225,12 +220,6 @@ public class APIUtilTierTest {
 
         ApplicationPolicy[] policies = generateAppPolicies(tiersReturned);
         Mockito.when(apiMgtDAO.getApplicationPolicies(tenantId)).thenReturn(policies);
-
-        PrivilegedCarbonContext carbonContext = Mockito.mock(PrivilegedCarbonContext.class);
-        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
-        //Mockito.when(PrivilegedCarbonContext.startTenantFlow().thenReturn(log);
-        PowerMockito.doNothing().when(PrivilegedCarbonContext.class, "startTenantFlow");
-        PowerMockito.doReturn(carbonContext).when(PrivilegedCarbonContext.class, "getThreadLocalCarbonContext");
 
         Map<String, Tier> tiersFromPolicies = APIUtil.getTiersFromPolicies(policyLevel, tenantId);
 
