@@ -31,17 +31,18 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.base.ServerConfiguration;
 
 /**
  * ThriftAuthClient test cases
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServerConfiguration.class, ServiceReferenceHolder.class, ThriftUtils.class})
+@PrepareForTest({ServerConfiguration.class, ThriftUtils.class})
 public class ThriftUtilsTest {
 
     private ServerConfiguration serverConfiguration;
-    private ServiceReferenceHolder serviceReferenceHolder;
     private APIManagerConfiguration config;
     private String keyValidationURL = "https://localhost:9443/services";
     private String thriftServerHost = "localhost";
@@ -57,13 +58,11 @@ public class ThriftUtilsTest {
     @Before
     public void init() {
         PowerMockito.mockStatic(ServerConfiguration.class);
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
         serverConfiguration = Mockito.mock(ServerConfiguration.class);
-        serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         config = Mockito.mock(APIManagerConfiguration.class);
-        PowerMockito.when(serviceReferenceHolder.getAPIManagerConfiguration()).thenReturn(config);
+        APIManagerConfigurationService apiManagerConfigurationService = new APIManagerConfigurationServiceImpl(config);
+        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(apiManagerConfigurationService);
         PowerMockito.when(ServerConfiguration.getInstance()).thenReturn(serverConfiguration);
-        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         Whitebox.setInternalState(ThriftUtils.class, "thriftAuthClient", thriftAuthClient);
         thriftAuthClient = Mockito.mock(ThriftAuthClient.class);
     }
