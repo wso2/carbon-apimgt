@@ -19,6 +19,21 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.core.tenant.TenantManager;
+
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -38,5 +53,53 @@ public class TestUtils {
     protected static APIIdentifier getUniqueAPIIdentifier() {
         return new APIIdentifier(UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID()
                  .toString());
+    }
+    
+    public static void mockRegistryAndUserRealm(int tenantId) throws UserStoreException, RegistryException {
+        ServiceReferenceHolder sh = getServiceReferenceHolder();
+        
+        RealmService realmService = Mockito.mock(RealmService.class);
+        TenantManager tm = Mockito.mock(TenantManager.class);
+        
+        PowerMockito.when(sh.getRealmService()).thenReturn(realmService);
+        PowerMockito.when(realmService.getTenantManager()).thenReturn(tm);
+        
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        PowerMockito.when(sh.getRegistryService()).thenReturn(registryService);
+        
+        UserRegistry userReg = Mockito.mock(UserRegistry.class);
+        PowerMockito.when(registryService.getGovernanceUserRegistry()).thenReturn(userReg);
+        
+        UserRegistry systemReg = Mockito.mock(UserRegistry.class);
+        PowerMockito.when(registryService.getConfigSystemRegistry()).thenReturn(systemReg);
+        
+        UserRealm userRealm = Mockito.mock(UserRealm.class);
+        UserRealm bootstrapRealm = Mockito.mock(UserRealm.class);
+        
+        PowerMockito.when(systemReg.getUserRealm()).thenReturn(userRealm);        
+        PowerMockito.doNothing().when(ServiceReferenceHolder.class); 
+        ServiceReferenceHolder.setUserRealm(userRealm);
+        
+        PowerMockito.when(realmService.getBootstrapRealm()).thenReturn(bootstrapRealm);
+        ServiceReferenceHolder.setUserRealm(bootstrapRealm);
+        
+        PowerMockito.when(tm.getTenantId("carbon.super")).thenReturn(tenantId);
+    }
+    
+    public static void mockAPIMConfiguration(String propertyName, String value) {
+        ServiceReferenceHolder sh = getServiceReferenceHolder();
+        APIManagerConfigurationService amConfigService = Mockito.mock(APIManagerConfigurationService.class);
+        APIManagerConfiguration amConfig = Mockito.mock(APIManagerConfiguration.class);
+        
+        PowerMockito.when(sh.getAPIManagerConfigurationService()).thenReturn(amConfigService);
+        PowerMockito.when(amConfigService.getAPIManagerConfiguration()).thenReturn(amConfig);
+        PowerMockito.when(amConfig.getFirstProperty(propertyName)).thenReturn(value);
+    }
+    
+    private static ServiceReferenceHolder getServiceReferenceHolder() {
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        ServiceReferenceHolder sh = PowerMockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);
+        return sh;
     }
 }

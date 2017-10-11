@@ -30,6 +30,8 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,12 +46,15 @@ public class SubscriptionMappingUtil {
      * @param subscription SubscribedAPI object
      * @return SubscriptionDTO corresponds to SubscribedAPI object
      */
-    public static SubscriptionDTO fromSubscriptionToDTO(SubscribedAPI subscription) {
+    public static SubscriptionDTO fromSubscriptionToDTO(SubscribedAPI subscription) throws UnsupportedEncodingException {
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setSubscriptionId(subscription.getUUID());
         APIIdentifier apiId = subscription.getApiId();
-        APIIdentifier apiIdEmailReplacedBack = new APIIdentifier(
-                APIUtil.replaceEmailDomainBack(apiId.getProviderName()), apiId.getApiName(), apiId.getVersion());
+        APIIdentifier apiIdEmailReplacedBack = new APIIdentifier(APIUtil.replaceEmailDomainBack(apiId.getProviderName
+                ()).replace(RestApiConstants.API_ID_DELIMITER, RestApiConstants.URL_ENCODED_API_ID_DELIMITER),
+                URLEncoder.encode(apiId.getApiName(), RestApiConstants.CHARSET).replace(RestApiConstants
+                        .API_ID_DELIMITER, RestApiConstants.URL_ENCODED_API_ID_DELIMITER),apiId.getVersion().
+                replace(RestApiConstants.API_ID_DELIMITER, RestApiConstants.URL_ENCODED_API_ID_DELIMITER));
         subscriptionDTO.setApiIdentifier(apiIdEmailReplacedBack.toString());
         subscriptionDTO.setApplicationId(subscription.getApplication().getUUID());
         subscriptionDTO.setStatus(SubscriptionDTO.StatusEnum.valueOf(subscription.getSubStatus()));
@@ -67,7 +72,7 @@ public class SubscriptionMappingUtil {
      * @throws APIManagementException
      */
     public static SubscribedAPI fromDTOToSubscription(SubscriptionDTO subscriptionDTO, String username,
-            String requestedTenantDomain) throws APIManagementException {
+            String requestedTenantDomain) throws APIManagementException, UnsupportedEncodingException {
 
         APIIdentifier apiIdentifier = APIMappingUtil
                 .getAPIIdentifierFromApiIdOrUUID(subscriptionDTO.getApiIdentifier(), requestedTenantDomain);
@@ -86,7 +91,7 @@ public class SubscriptionMappingUtil {
      * @return SubscriptionListDTO object containing SubscriptionDTOs
      */
     public static SubscriptionListDTO fromSubscriptionListToDTO(List<SubscribedAPI> subscriptions, Integer limit,
-            Integer offset) {
+            Integer offset) throws UnsupportedEncodingException {
 
         SubscriptionListDTO subscriptionListDTO = new SubscriptionListDTO();
         List<SubscriptionDTO> subscriptionDTOs = subscriptionListDTO.getList();

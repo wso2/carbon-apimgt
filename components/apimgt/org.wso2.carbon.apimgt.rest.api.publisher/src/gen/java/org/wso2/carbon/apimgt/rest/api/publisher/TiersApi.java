@@ -6,8 +6,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.factories.TiersApiServiceFactor
 
 import io.swagger.annotations.ApiParam;
 
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierPermissionDTO;
 
@@ -40,11 +40,11 @@ public class TiersApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
 
-    public Response tiersTierLevelGet(@ApiParam(value = "List API or Application or Resource type tiers.\n",required=true, allowableValues="{values=[api, application, resource]}" ) @PathParam("tierLevel") String tierLevel,
-    @ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit") Integer limit,
-    @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset") Integer offset,
+    public Response tiersTierLevelGet(@ApiParam(value = "List API or Application or Resource type tiers.\n",required=true, allowableValues="{values=[api, application, resource]}" ) @PathParam("tierLevel")  String tierLevel,
+    @ApiParam(value = "Maximum size of resource array to return.\n", defaultValue="25") @QueryParam("limit")  Integer limit,
+    @ApiParam(value = "Starting point within the complete list of items qualified.\n", defaultValue="0") @QueryParam("offset")  Integer offset,
     @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource (Will be supported in future).\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
     {
     return delegate.tiersTierLevelGet(tierLevel,limit,offset,accept,ifNoneMatch);
     }
@@ -61,7 +61,7 @@ public class TiersApi  {
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type.\nThe entity of the request was in a not supported format.\n") })
 
     public Response tiersTierLevelPost(@ApiParam(value = "Tier object that should to be added\n" ,required=true ) TierDTO body,
-    @ApiParam(value = "List API or Application or Resource type tiers.\n",required=true, allowableValues="{values=[api, application, resource]}" ) @PathParam("tierLevel") String tierLevel,
+    @ApiParam(value = "List API or Application or Resource type tiers.\n",required=true, allowableValues="{values=[api]}" ) @PathParam("tierLevel")  String tierLevel,
     @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType)
     {
     return delegate.tiersTierLevelPost(body,tierLevel,contentType);
@@ -78,10 +78,10 @@ public class TiersApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response tiersTierLevelTierNameDelete(@ApiParam(value = "Tier name\n",required=true ) @PathParam("tierName") String tierName,
-    @ApiParam(value = "List API or Application or Resource type tiers.\n",required=true, allowableValues="{values=[api, application, resource]}" ) @PathParam("tierLevel") String tierLevel,
-    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    public Response tiersTierLevelTierNameDelete(@ApiParam(value = "Tier name\n",required=true ) @PathParam("tierName")  String tierName,
+    @ApiParam(value = "List API or Application or Resource type tiers.\n",required=true, allowableValues="{values=[api]}" ) @PathParam("tierLevel")  String tierLevel,
+    @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future).\n"  )@HeaderParam("If-Match") String ifMatch,
+    @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future).\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
     return delegate.tiersTierLevelTierNameDelete(tierName,tierLevel,ifMatch,ifUnmodifiedSince);
     }
@@ -89,7 +89,7 @@ public class TiersApi  {
     @Path("/{tierLevel}/{tierName}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get details of a tier", notes = "This operation can be used to retrieve details of a single tier by specifying the tier level and tier name.\n", response = TierDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Get details of a tier", notes = "This operation can be used to retrieve details of a single tier by specifying the tier level and tier name.\nNote that the scope of the API is mandatory while retreiving the access token with the following cURL command : `curl -k -d \\\"grant_type=password&username=username&password=password&scope=apim:tier_view\\\" -H \\\"Authorization: Basic <token>\\\" https://127.0.0.1:8243/token`.\nYou will receive the access token as the response, for example `\"access_token\":\"8644c013-7ff1-3217-b150-d7b92cae6be7\"`.\n", response = TierDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nTier returned\n"),
         
@@ -99,11 +99,11 @@ public class TiersApi  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported.\n") })
 
-    public Response tiersTierLevelTierNameGet(@ApiParam(value = "Tier name\n",required=true ) @PathParam("tierName") String tierName,
-    @ApiParam(value = "List API or Application or Resource type tiers.\n",required=true, allowableValues="{values=[api, application, resource]}" ) @PathParam("tierLevel") String tierLevel,
+    public Response tiersTierLevelTierNameGet(@ApiParam(value = "Tier name\n",required=true ) @PathParam("tierName")  String tierName,
+    @ApiParam(value = "List API or Application or Resource type tiers.\n",required=true, allowableValues="{values=[api, application, resource]}" ) @PathParam("tierLevel")  String tierLevel,
     @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resourec.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource.\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource (Will be supported in future).\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
+    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource (Will be supported in future).\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
     {
     return delegate.tiersTierLevelTierNameGet(tierName,tierLevel,accept,ifNoneMatch,ifModifiedSince);
     }
@@ -121,12 +121,12 @@ public class TiersApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response tiersTierLevelTierNamePut(@ApiParam(value = "Tier name\n",required=true ) @PathParam("tierName") String tierName,
+    public Response tiersTierLevelTierNamePut(@ApiParam(value = "Tier name\n",required=true ) @PathParam("tierName")  String tierName,
     @ApiParam(value = "Tier object that needs to be modified\n" ,required=true ) TierDTO body,
-    @ApiParam(value = "List API or Application or Resource type tiers.\n",required=true, allowableValues="{values=[api, application, resource]}" ) @PathParam("tierLevel") String tierLevel,
+    @ApiParam(value = "List API or Application or Resource type tiers.\n",required=true, allowableValues="{values=[api]}" ) @PathParam("tierLevel")  String tierLevel,
     @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType,
-    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future).\n"  )@HeaderParam("If-Match") String ifMatch,
+    @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future).\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
     {
     return delegate.tiersTierLevelTierNamePut(tierName,body,tierLevel,contentType,ifMatch,ifUnmodifiedSince);
     }
@@ -146,10 +146,10 @@ public class TiersApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response tiersUpdatePermissionPost(@ApiParam(value = "Name of the tier\n",required=true) @QueryParam("tierName") String tierName,
-    @ApiParam(value = "List API or Application or Resource type tiers.\n",required=true, allowableValues="{values=[api, application, resource]}") @QueryParam("tierLevel") String tierLevel,
-    @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
-    @ApiParam(value = "Validator for conditional requests; based on Last Modified header.\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince,
+    public Response tiersUpdatePermissionPost(@ApiParam(value = "Name of the tier\n",required=true) @QueryParam("tierName")  String tierName,
+    @ApiParam(value = "List API or Application or Resource type tiers.\n",required=true, allowableValues="{values=[api, application, resource]}") @QueryParam("tierLevel")  String tierLevel,
+    @ApiParam(value = "Validator for conditional requests; based on ETag (Will be supported in future).\n"  )@HeaderParam("If-Match") String ifMatch,
+    @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future).\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince,
     @ApiParam(value = ""  ) TierPermissionDTO permissions)
     {
     return delegate.tiersUpdatePermissionPost(tierName,tierLevel,ifMatch,ifUnmodifiedSince,permissions);

@@ -31,7 +31,11 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
@@ -39,6 +43,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -71,8 +76,18 @@ public class RestAPIStoreUtils {
             //if groupId is null or empty, it is not a shared app 
             if (StringUtils.isEmpty(application.getGroupId())) {
                 //if the application is not shared, its subscriber and the current logged in user must be same
-                if (application.getSubscriber() != null && application.getSubscriber().getName().equals(username)) {
-                    return true;
+                if (application.getSubscriber() != null) {
+                    if (application.getSubscriber().getName().equals(username)) {
+                        return true;
+                    } else if (application.getSubscriber().getName().toLowerCase().equals(username.toLowerCase())) {
+                        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
+                                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                        String comparisonConfig = configuration
+                                .getFirstProperty(APIConstants.API_STORE_FORCE_CI_COMPARISIONS);
+                        if (StringUtils.isNotEmpty(comparisonConfig) && Boolean.valueOf(comparisonConfig)) {
+                            return true;
+                        }
+                    }
                 }
             } else {
                 String userGroupId = RestApiUtil.getLoggedInUserGroupId();
@@ -132,7 +147,7 @@ public class RestAPIStoreUtils {
         //this is just to check whether the user has access to the api or the api exists. 
         try {
             APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | UnsupportedEncodingException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 String message =
                         "user " + username + " failed to access the API " + apiId + " due to an authorization failure";
@@ -329,7 +344,7 @@ public class RestAPIStoreUtils {
             if (api != null) {
                 return api.getLastUpdated() != null ? String.valueOf(api.getLastUpdated().getTime()) : api.getCreatedTime();
             }
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | UnsupportedEncodingException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
@@ -362,7 +377,7 @@ public class RestAPIStoreUtils {
                     return swaggerDefinitionTimeStamps.get("CREATED_TIME");
                 }
             }
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | UnsupportedEncodingException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
@@ -385,7 +400,7 @@ public class RestAPIStoreUtils {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             APIIdentifier apiIdentifier = getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
             return apiConsumer.getThumbnailLastUpdatedTime(apiIdentifier);
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | UnsupportedEncodingException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
             } else {

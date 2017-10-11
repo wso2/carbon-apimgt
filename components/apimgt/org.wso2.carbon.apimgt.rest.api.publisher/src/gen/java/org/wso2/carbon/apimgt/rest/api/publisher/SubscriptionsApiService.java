@@ -5,7 +5,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ExtendedSubscriptionDTO;
 
 import java.util.List;
 

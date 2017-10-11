@@ -62,6 +62,8 @@ public final class RestApiConstants {
     public static final String APPLICATIONID_PARAM = "{applicationId}";
     public static final String DOCUMENTID_PARAM = "{documentId}";
     public static final String API_VERSION_PARAM="{version}";
+    public static final String URL_ENCODED_API_ID_DELIMITER = "%2D";
+    public static final String CHARSET = "UTF-8";
 
     //todo better to take from cxf level
     public static final String RESOURCE_PATH_APIS = "/apis";
