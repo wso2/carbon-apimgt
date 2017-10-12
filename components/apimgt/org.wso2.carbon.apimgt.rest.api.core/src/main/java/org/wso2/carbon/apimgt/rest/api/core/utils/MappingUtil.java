@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.rest.api.core.dto.BlockingConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.BlockingConditionListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.CredentialsDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.EndPointDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.GoogleAnalyticsTrackingInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.JWTInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.KeyManagerInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.LabelDTO;
@@ -185,6 +186,8 @@ public class MappingUtil {
         registrationSummaryDTO.setAnalyticsInfo(toAnalyticsDTO(registrationSummary));
         registrationSummaryDTO.setJwTInfo(toJWTInfoDTO(registrationSummary));
         registrationSummaryDTO.setThrottlingInfo(toThrottlingInfoDTO(registrationSummary));
+        registrationSummaryDTO.setGoogleAnalyticsTrackingInfo(toGoogleAnalyticsTrackingInfoDTO(registrationSummary
+                .getGoogleAnalyticsTrackingInfo()));
         return registrationSummaryDTO;
     }
 
@@ -256,6 +259,14 @@ public class MappingUtil {
                 .getCredentials().getPassword());
         throttlingInfoDTO.setCredentials(throttlingServerCredentials);
         return throttlingInfoDTO;
+    }
+
+    private static GoogleAnalyticsTrackingInfoDTO toGoogleAnalyticsTrackingInfoDTO(RegistrationSummary.GoogleAnalyticsTrackingInfo
+                                                                                           googleAnalyticsTrackingInfo){
+        GoogleAnalyticsTrackingInfoDTO googleAnalyticsTrackingInfoDTO = new GoogleAnalyticsTrackingInfoDTO();
+        googleAnalyticsTrackingInfoDTO.setEnabled(googleAnalyticsTrackingInfo.isEnabled());
+        googleAnalyticsTrackingInfoDTO.setTrackingID(googleAnalyticsTrackingInfo.getTrackingCode());
+        return googleAnalyticsTrackingInfoDTO;
     }
 
     /**

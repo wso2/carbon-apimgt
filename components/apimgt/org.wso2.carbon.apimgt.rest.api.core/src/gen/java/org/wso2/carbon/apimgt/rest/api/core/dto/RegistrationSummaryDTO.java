@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.wso2.carbon.apimgt.rest.api.core.dto.AnalyticsInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.GoogleAnalyticsTrackingInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.JWTInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.KeyManagerInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.ThrottlingInfoDTO;
@@ -26,6 +27,9 @@ public class RegistrationSummaryDTO   {
 
   @JsonProperty("ThrottlingInfo")
   private ThrottlingInfoDTO throttlingInfo = null;
+
+  @JsonProperty("GoogleAnalyticsTrackingInfo")
+  private GoogleAnalyticsTrackingInfoDTO googleAnalyticsTrackingInfo = null;
 
   public RegistrationSummaryDTO keyManagerInfo(KeyManagerInfoDTO keyManagerInfo) {
     this.keyManagerInfo = keyManagerInfo;
@@ -99,6 +103,24 @@ public class RegistrationSummaryDTO   {
     this.throttlingInfo = throttlingInfo;
   }
 
+  public RegistrationSummaryDTO googleAnalyticsTrackingInfo(GoogleAnalyticsTrackingInfoDTO googleAnalyticsTrackingInfo) {
+    this.googleAnalyticsTrackingInfo = googleAnalyticsTrackingInfo;
+    return this;
+  }
+
+   /**
+   * Get googleAnalyticsTrackingInfo
+   * @return googleAnalyticsTrackingInfo
+  **/
+  @ApiModelProperty(value = "")
+  public GoogleAnalyticsTrackingInfoDTO getGoogleAnalyticsTrackingInfo() {
+    return googleAnalyticsTrackingInfo;
+  }
+
+  public void setGoogleAnalyticsTrackingInfo(GoogleAnalyticsTrackingInfoDTO googleAnalyticsTrackingInfo) {
+    this.googleAnalyticsTrackingInfo = googleAnalyticsTrackingInfo;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -112,12 +134,13 @@ public class RegistrationSummaryDTO   {
     return Objects.equals(this.keyManagerInfo, registrationSummary.keyManagerInfo) &&
         Objects.equals(this.jwTInfo, registrationSummary.jwTInfo) &&
         Objects.equals(this.analyticsInfo, registrationSummary.analyticsInfo) &&
-        Objects.equals(this.throttlingInfo, registrationSummary.throttlingInfo);
+        Objects.equals(this.throttlingInfo, registrationSummary.throttlingInfo) &&
+        Objects.equals(this.googleAnalyticsTrackingInfo, registrationSummary.googleAnalyticsTrackingInfo);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(keyManagerInfo, jwTInfo, analyticsInfo, throttlingInfo);
+    return Objects.hash(keyManagerInfo, jwTInfo, analyticsInfo, throttlingInfo, googleAnalyticsTrackingInfo);
   }
 
   @Override
@@ -129,6 +152,7 @@ public class RegistrationSummaryDTO   {
     sb.append("    jwTInfo: ").append(toIndentedString(jwTInfo)).append("\n");
     sb.append("    analyticsInfo: ").append(toIndentedString(analyticsInfo)).append("\n");
     sb.append("    throttlingInfo: ").append(toIndentedString(throttlingInfo)).append("\n");
+    sb.append("    googleAnalyticsTrackingInfo: ").append(toIndentedString(googleAnalyticsTrackingInfo)).append("\n");
     sb.append("}");
     return sb.toString();
   }

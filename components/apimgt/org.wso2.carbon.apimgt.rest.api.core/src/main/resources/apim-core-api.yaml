@@ -906,6 +906,8 @@ definitions:
         $ref: '#/definitions/AnalyticsInfo'
       ThrottlingInfo:
         $ref: '#/definitions/ThrottlingInfo'
+      GoogleAnalyticsTrackingInfo:
+        $ref: '#/definitions/GoogleAnalyticsTrackingInfo'
 
 #-----------------------------------------------------
 # The API List resource
@@ -1125,6 +1127,20 @@ definitions:
         example:
       credentials:
         $ref: '#/definitions/Credentials'
+
+#-----------------------------------------------------
+# Google Analytics tracking information
+#-----------------------------------------------------
+  GoogleAnalyticsTrackingInfo:
+    title: Google Analytics tracking information
+    properties:
+      enabled:
+        type: boolean
+        example: true
+      trackingID:
+        type: string
+        example: UA-XXXXXXXX-X
+
 #-----------------------------------------------------
 # Credential information
 #-----------------------------------------------------
