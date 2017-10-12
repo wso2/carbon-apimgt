@@ -33,3 +33,8 @@ native function convertIpToLong (string value) (int );
 @doc:Param { value:"string: Path of the folder" }
 @doc:Return { value:"string[]: array containing json file names" }
 native function listJSONFiles (string folderPath) (any );
+
+@doc:Description { value:"Returns an array of keys contained in the specified JSON."}
+@doc:Param { value:"json: A JSON object" }
+@doc:Return { value:"string[]: A string array of keys contained in the specified JSON" }
+native function getKeys(json j) (string[]);

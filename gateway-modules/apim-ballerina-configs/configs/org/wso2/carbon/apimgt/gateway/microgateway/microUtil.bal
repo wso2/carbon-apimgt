@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.gateway.microgateway;
 import ballerina.lang.errors;
 import ballerina.lang.system;
+import ballerina.lang.strings;
 import ballerina.lang.jsons;
 import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.gateway.holders as holders;
@@ -31,30 +32,35 @@ function loadConfigs () {
     }
 }
 
-function readFromJSONFile () (json) {
+function isSwaggerFile (json apiData) (boolean) {
+    //returns true if it's a swagger file
+
+    try {
+        string swagger = jsons:getString(apiData,"$.swagger");
+    } catch (errors:Error error) {
+        return false;
+    }
+    return true;
+}
+
+function readFromJSONFile (string filePath) (json) {
+    //******************have to check whether it is a swagger file or not
     //to read from the json data file, return the apiList
+    //returns null if the json file is not a swagger file, else return the swagger file
+    //returns an error if any error occured while reading the json file.
 
     string name = system:getEnv(Constants:GW_HOME);
     try {
-        system:println(name);
-        files:File t = {path:name + "/microgateway/apiKeys.json"};
+        //system:println(name);
+        files:File t = {path:name + "/microgateway/" + filePath};
+        //files:File t = {path:"/home/sabeena/Documents/apim/testing/" + filePath};
         files:open(t, "r");
-        system:println("my java check@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
 
-        //files:File target = {path:"/microgateway"};
-        //system:println(files:exists(target));
-
-        string[] filenames = util:listJSONFiles("/home/sabeena/Documents/apim/testing");
-        if (filenames != null) {
-            system:println(filenames[0]);
-        }else{
-            system:println("null :/");
-        }
-        system:println("my java check@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         var content, n = files:read(t, 100000000);
         string strAPIData = blobs:toString(content, "utf-8");
         json apiData = util:parse(strAPIData);
-        return apiData.apis;
+
+        return apiData;
     } catch (errors:Error err) {
         system:println("ERROR: " + err.msg);
         return null;
@@ -62,154 +68,209 @@ function readFromJSONFile () (json) {
     return null;
 }
 
-function buildAPIDTO (json api) (dto:APIDTO, errors:Error) {
+function buildAPIDTO (json apiData) (dto:APIDTO) {
     //build the APIDto, to be passed to the API cache
-
-    if (api.name != null && api.version != null && api.context != null && api.securityScheme != null) {
-        dto:APIDTO APIDTO = {};
-        APIDTO.name, err = (string)api.name;
-        APIDTO.version, err = (string)api.version;
-        APIDTO.context, err = (string)api.context;
-        if(api.lifeCycleStatus != null){
-            APIDTO.lifeCycleStatus,err = (string)api.lifeCycleStatus;
-        } else {
-            APIDTO.lifeCycleStatus = "PUBLISHED";
-        }
-        APIDTO.securityScheme = jsons:getInt(api, "$.securityScheme");
-        return APIDTO,null;
-    } else {
-        errors:Error error = {msg:"Prime attribute missing for the API"};
-        return null,error;
+    dto:APIDTO APIDTO = {};
+    try {
+        APIDTO.name = jsons:getString(apiData, "$.info.title");
+        APIDTO.version = jsons:getString(apiData, "$.info.version");
+        APIDTO.context = jsons:getString(apiData, "$.basePath");
+        APIDTO.lifeCycleStatus = "PUBLISHED";
+        APIDTO.securityScheme = 2;
+        system:println(APIDTO);
+    } catch (errors:Error error) {
+        system:println("WARNING " + err.msg);
+        return null;
     }
-
+    return APIDTO;
 }
 
 function loadOfflineAPIs () {
     //load apis for the offline gateway
 
-    json apiList = readFromJSONFile();
-
-    if (apiList != null) {
-        int index = 0;
-        int count = jsons:getInt(apiList, "$.length()");
-
-        while (index<count) {
-            var api,error = buildAPIDTO(apiList[index]);
-            if (error == null) {
+    string name = system:getEnv(Constants:GW_HOME);
+    string[] filenames = util:listJSONFiles(name+"/microgateway");
+    int index = 0;
+    try {
+        int count = filenames.length;
+        while (index < count) {
+            var apiData = readFromJSONFile(filenames[index]);
+            if (isSwaggerFile(apiData)) { // if the json file is only a swagger json
+                var api = buildAPIDTO(apiData);
                 holders:putIntoAPICache(api);
-                retrieveOfflineResources(api.context, api.version);
-            } else {
-                system:println("ERROR: " + error.msg);
+                retrieveOfflineResources(apiData);
             }
-            index = index+1;
+            index = index + 1;
         }
+    } catch (errors:Error error) {
+        system:println("ERROR : No APIs found! : " + err.msg);
     }
 }
 
-function buildSubscriptionDto (json api,json app,string env) (dto:SubscriptionDto,errors:Error) {
-    //build the subscriptionDto from the json file
+function buildResourceDto (string url, json res, string authType) (dto:ResourceDto) {
+    //build the APIDto, to be passed to the API cache
 
-    if (api.name != null && api.context != null && api.version != null) {
-        dto:SubscriptionDto subscriptionDto = {};
-        subscriptionDto.apiName, err = (string)api.name;
-        subscriptionDto.apiContext, err = (string)api.context;
-        subscriptionDto.apiVersion, err = (string)api.version;
-        if (env == Constants:SANDBOX) {
-            subscriptionDto.consumerKey, err = (string)app.sandbox;
-        } else if (env == Constants:PRODUCTION){
-            subscriptionDto.consumerKey, err = (string)app.production;
-        }
-        subscriptionDto.applicationName, err = (string)app.name;
-        subscriptionDto.keyEnvType = env;
-        subscriptionDto.status = "ACTIVE";
-        return subscriptionDto,null;
-    } else {
-        errors:Error error = {msg:"Subscription Details missing!"};
-        return null,error;
+    dto:ResourceDto  resourceDto = {};
+    resourceDto.uriTemplate = url;
+    resourceDto.httpVerb = strings:toUpperCase(jsons:getString(res,"$.operationId"));
+    resourceDto.authType = authType;
+    //try{
+    //    jsons:getJson(res,"$.security");
+    //    resourceDto.authType = "Any";
+    //} catch (errors:Error error) {
+    //    resourceDto.authType = "None";
+    //}
+    //if (jsons:getJson(res,"$.security") != null) {
+    //    resourceDto.authType = "Any";
+    //} else {
+    //    resourceDto.authType = "None";
+    //}
+    system:println(resourceDto);
+    return resourceDto;
+}
+
+function retrieveOfflineResources (json apiData) {
+    //put the resourceDtos of the given api into the cache
+
+    string apiContext = jsons:getString(apiData,"$.basePath");
+    string apiVersion = jsons:getString(apiData,"$.info.version");
+    string authType;
+    try {
+        jsons:getString(apiData,"$.security");
+        authType = "Any";
+    } catch (errors:Error error) {
+        authType = "None";
     }
 
+    //if (jsons:getJson(apiData,"$.paths") != null) {
+
+    json paths = jsons:getJson(apiData,"$.paths");
+    string[] pathNames = util:getKeys(paths);
+    int i = 0;
+    int pathsCount = pathNames.length;
+
+    while (i < pathsCount) {
+        //system:println(urls[index]); // "/"
+        json resources = jsons:getJson(paths,"$."+ pathNames[i]);
+        string[] resourceNames = util:getKeys(resources); // urls
+        int j = 0;
+        int rescount = resourceNames.length;
+        while (j < rescount) {
+            json res = jsons:getJson(resources, "$." + resourceNames[j]);
+            dto:ResourceDto resDto = buildResourceDto(pathNames[i], res, authType);
+            holders:putIntoResourceCache(apiContext, apiVersion, resDto);
+            j = j + 1;
+        }
+        i = i + 1;
+    }
+    //}
+}
+
+function buildSubscriptionDto (json apiData, json app, string env) (dto:SubscriptionDto) {
+    //build the subscriptionDto from the json file
+
+    dto:SubscriptionDto subscriptionDto = {};
+    subscriptionDto.apiName = jsons:getString(apiData,"$.info.title");
+    subscriptionDto.apiVersion = jsons:getString(apiData,"$.info.version");
+    subscriptionDto.apiContext = jsons:getString(apiData,"$.basePath");
+    if (env == Constants:SANDBOX) {
+        subscriptionDto.consumerKey, err = (string) app.sandbox;
+    } else if (env == Constants:PRODUCTION){
+        subscriptionDto.consumerKey, err = (string) app.production;
+    }
+    subscriptionDto.keyEnvType = env;
+    subscriptionDto.status = "ACTIVE";
+    return subscriptionDto;
 }
 
 function retrieveOfflineSubscriptions () (boolean) {
     //put the subscriptionDtos into the subscription cache
 
-    json apiList = readFromJSONFile();
-    if(apiList != null){
-        int noOfAPIs = jsons:getInt(apiList, "$.length()");
-        int i = 0;
-        while(i < noOfAPIs) {
-            int j = 0;
-            json apps = apiList[i].apps;
-            int noOfApps = jsons:getInt(apps,"$.length()");
-            while (j<noOfApps){
-                if(apps[j].sandbox != null){
-                    var subs,error = buildSubscriptionDto(apiList[i],apps[j],Constants:SANDBOX);
-                    if(error == null){
-                        holders:putIntoSubscriptionCache(subs);
-                    }else{
-                        system:println("WARNING: " + error.msg);
+    string name = system:getEnv(Constants:GW_HOME);
+    string[] filenames = util:listJSONFiles(name + "/microgateway");
+    int index = 0;
+    if (filenames != null) {
+        int count = filenames.length;
+        while (index < count) {
+            json apiData = readFromJSONFile(filenames[index]);
+            if (isSwaggerFile(apiData)) {
+                try {
+                    json security = jsons:getJson(apiData, "$.security");
+                    //int secCount = jsons:getInt(security, "$.length()");
+                    json apps = security[0].api_key;
+                    int noOfApps = jsons:getInt(apps, "$.length()");
+                    int j = 0;
+                    while (j < noOfApps) {
+                        if (apps[j].sandbox != null) {
+                            dto:SubscriptionDto subs = buildSubscriptionDto(apiData, apps[j], Constants:SANDBOX);
+                            system:println("subs");
+                            system:println(subs);
+                            holders:putIntoSubscriptionCache(subs);
+                        }
+                        if (apps[j].production != null) {
+                            dto:SubscriptionDto subs = buildSubscriptionDto(apiData, apps[j], Constants:PRODUCTION);
+                            system:println("subs");
+                            system:println(subs);
+                            holders:putIntoSubscriptionCache(subs);
+                        }
+                        j = j + 1;
                     }
+
+                } catch (errors:Error error) {
+                    system:println(error.msg);
                 }
 
-                if(apps[j].production != null){
-                    var subs,error = buildSubscriptionDto(apiList[i],apps[j],Constants:PRODUCTION);
-                    if(error == null){
-                        holders:putIntoSubscriptionCache(subs);
-                    }else{
-                        system:println("WARNING: " + error.msg);
-                    }
-                }
-                j = j + 1;
+                //json apps = security[0].api_key;
+                //system:println("apps");
+                //system:println(apps);
+                //int noOfApps = jsons:getInt(apps, "$.length()");
             }
-            i = i + 1;
+            //    json paths = jsons:getJson(apiData, "$.paths");
+            //
+            //    string[] pathNames = util:getKeys(paths);
+            //    int i = 0;
+            //    int pathsCount = pathNames.length;
+            //
+            //    while (i < pathsCount) {
+            //        json resources = jsons:getJson(paths, "$." + pathNames[i]);
+            //        string[] resourceNames = util:getKeys(resources); // urls
+            //
+            //        json res = jsons:getJson(resources, "$." + resourceNames[0]);
+            //        try {
+            //            json sec = jsons:getJson(res, "$.security");
+            //            system:println("sec");
+            //            system:println(sec);
+            //            json apps = sec[0].api_key;
+            //            system:println("apps");
+            //            system:println(apps);
+            //            int noOfApps = jsons:getInt(apps, "$.length()");
+            //            int j = 0;
+            //            while (j < noOfApps) {
+            //                if (apps[j].sandbox != null) {
+            //                    dto:SubscriptionDto subs = buildSubscriptionDto(apiData, Constants:SANDBOX);
+            //                    system:println("subs");
+            //                    system:println(subs);
+            //                    holders:putIntoSubscriptionCache(subs);
+            //                }
+            //                if (apps[j].production != null) {
+            //                    dto:SubscriptionDto subs = buildSubscriptionDto(apiData, apps[j], Constants:PRODUCTION);
+            //                    system:println("subs");
+            //                    system:println(subs);
+            //                    holders:putIntoSubscriptionCache(subs);
+            //                }
+            //                j = j + 1;
+            //            }
+            //        } catch (errors:Error err) {
+            //            system:println("No sercurity found : " + err.msg);
+            //        }
+            //        i = i + 1;
+            //    }
+            //}
+            index = index+1;
         }
         return true;
     }else{
+        system:println("No APIs found.");
         return false;
-    }
-
-}
-
-function findResources (string apiContext, string apiVersion) (json, errors:Error) {
-    //to find out the resources of that particular api
-
-    json apiList = readFromJSONFile();
-    json resources;
-    int i = 0;
-    int count = jsons:getInt(apiList, "$.length()");
-    string context;
-    string version;
-
-    while (i < count) {
-        context, err = (string)apiList[i].context;
-        version, err = (string)apiList[i].version;
-        if (context == apiContext && version == apiVersion) {
-            resources = apiList[i].resources;
-            if (resources == null) {
-                errors:Error error = {msg:"Resources not found for the API"};
-                return null,error;
-            }
-            break;
-        }
-        i = i + 1;
-    }
-    return resources,null;
-}
-
-function retrieveOfflineResources (string apiContext, string apiVersion) {
-    //put the resourceDtos of the given api to the cache
-
-    var resources, error = findResources(apiContext, apiVersion);
-    if (error == null){
-        int length = jsons:getInt(resources, "$.length()");
-        int j = 0;
-        while (j < length) {
-            json resource1 = resources[j];
-            var res, _ = <dto:ResourceDto>resource1;
-            holders:putIntoResourceCache(apiContext, apiVersion, res);
-            j = j + 1;
-        }
-    } else {
-        system:println("WARNING: " + error.msg);
     }
 }
