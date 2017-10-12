@@ -5,6 +5,7 @@ struct GatewayConfDTO {
     JWTInfoDTO jwtInfo;
     AnalyticsInfoDTO analyticsInfo;
     ThrottlingInfoDTO throttlingInfo;
+    GAnalyticsTrackingInfoDTO gAnalyticsTrackingInfo;
 }
 
 struct KeyManagerInfoDTO {
@@ -34,6 +35,11 @@ struct ThrottlingInfoDTO {
     string serverURL;
     string authServerURL;
     CredentialsDTO credentials;
+}
+
+struct GAnalyticsTrackingInfoDTO {
+    boolean enabled;
+    string trackingID;
 }
 
 struct CredentialsDTO {

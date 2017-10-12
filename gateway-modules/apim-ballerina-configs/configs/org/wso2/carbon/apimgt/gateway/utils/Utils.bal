@@ -258,6 +258,13 @@ function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO) {
     throttlingInfoDTO.credentials = throttlingServerCredentialsDTO;
     gatewayConf.throttlingInfo = throttlingInfoDTO;
 
+    //Extract Google Analytics Tracking information and populate GAnalyticsTrackingInfoDTO
+    json googleAnalyticsTrackingInfo = conf.googleAnalyticsTrackingInfo;
+    dto:GAnalyticsTrackingInfoDTO gAnalyticsTrackingInfoDTO = {};
+    gAnalyticsTrackingInfoDTO.enabled, err = (boolean)googleAnalyticsTrackingInfo.enabled;
+    gAnalyticsTrackingInfoDTO.trackingID, err = (string)googleAnalyticsTrackingInfo.trackingID;
+    gatewayConf.gAnalyticsTrackingInfo = gAnalyticsTrackingInfoDTO;
+
     return gatewayConf;
 }
 
