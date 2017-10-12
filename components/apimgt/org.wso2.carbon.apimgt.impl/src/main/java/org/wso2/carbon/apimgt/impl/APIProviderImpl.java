@@ -821,9 +821,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void updateAPI(API api) throws APIManagementException, FaultGatewaysException {
 
     	boolean isValid = isAPIUpdateValid(api);
-    	if(!isValid){
-    		throw new APIManagementException(" User doesn't have permission for update");
-    	}
+        if (!isValid) {
+            throw new APIManagementException(" User doesn't have permission for update");
+        }
 
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
         API oldApi = getAPI(api.getId());
@@ -843,9 +843,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     if (!api.isDefaultVersion()) {// default api tick is removed
                         // todo: if it is ok, these two variables can be put to the top of the function to remove
                         // duplication
-                        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                        String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+                        String gatewayType = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                                getAPIManagerConfiguration().getFirstProperty(APIConstants.API_GATEWAY_TYPE);
                         if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
                             removeDefaultAPIFromGateway(api);
                         }
