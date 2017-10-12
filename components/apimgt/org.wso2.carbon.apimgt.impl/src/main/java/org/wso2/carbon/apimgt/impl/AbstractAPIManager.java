@@ -1972,7 +1972,9 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
             }
         } catch (RegistryException e) {
-            handleException("Error while obtaining registry objects", e);
+            String msg = "Error while obtaining registry objects";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         }
         return null;
     }
@@ -2157,7 +2159,9 @@ public abstract class AbstractAPIManager implements APIManager {
                     }
                 }
             } catch (RegistryException e) {
-                handleException("Failed to delete specific mediation policy ", e);
+                String msg = "Failed to delete specific mediation policy ";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
             }
         }
         return false;
@@ -2178,7 +2182,9 @@ public abstract class AbstractAPIManager implements APIManager {
                 value = true;
             }
         } catch (RegistryException e) {
-            handleException("Error while obtaining registry objects", e);
+            String msg = "Error while obtaining registry objects";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         }
         return value;
     }
@@ -2357,7 +2363,9 @@ public abstract class AbstractAPIManager implements APIManager {
                 return lastModifiedTime == null ? String.valueOf(res.getCreatedTime().getTime()) : String.valueOf(lastModifiedTime.getTime());
             }
         } catch (RegistryException e) {
-            handleException("Error while loading API icon from the registry", e);
+            String msg = "Error while loading API icon from the registry";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         }
         return null;
 

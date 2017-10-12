@@ -1543,6 +1543,145 @@ public class AbstractAPIManagerTestCase {
         abstractAPIManager.getAllApiSpecificMediationPolicies(identifier);// covers exception which is only logged
     }
 
+    @Test
+    public void testGetMediationNameFromConfig() throws Exception {
+        String mediationPolicyContent =
+                "<inSequence>\n" + "   <property name=\"ClientApiNonBlocking\"\n" + "           value=\"true\"\n"
+                        + "           scope=\"axis2\"\n" + "           action=\"remove\"/>\n" + "   <send>\n"
+                        + "      <endpoint name=\"FileEpr\">\n"
+                        + "         <address uri=\"vfs:file:////home/test/file-out\"/>\n" + "      </endpoint>\n"
+                        + "   </send>\n" + "</inSequen>";
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(null, null, null, null);
+        Assert.assertNull(abstractAPIManager.getMediationNameFromConfig(mediationPolicyContent));
+        mediationPolicyContent =
+                "<sequence>\n" + "\t<name>policy1</name>\n" + "   <property name=\"ClientApiNonBlocking\"\n"
+                        + "           value=\"true\"\n" + "           scope=\"axis2\"\n"
+                        + "           action=\"remove\"/>\n" + "   <send>\n" + "      <endpoint name=\"FileEpr\">\n"
+                        + "         <address uri=\"vfs:file:////home/shammi/file-out\"/>\n" + "      </endpoint>\n"
+                        + "   </send>\n" + "</sequence>";
+        Assert.assertEquals(abstractAPIManager.getMediationNameFromConfig(mediationPolicyContent), "policy1.xml");
+
+    }
+
+    @Test
+    public void testGetApiSpecificMediationPolicy()
+            throws RegistryException, APIManagementException, IOException, XMLStreamException {
+        String parentCollectionPath = "config/mediation/";
+
+        parentCollectionPath = parentCollectionPath.substring(0, parentCollectionPath.lastIndexOf("/"));
+        Collection parentCollection = new CollectionImpl();
+        parentCollection.setChildren(new String[] {
+                parentCollectionPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT,
+                parentCollectionPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT,
+                parentCollectionPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN, });
+        Collection childCollection = new CollectionImpl();
+        childCollection.setChildren(new String[] { "mediation1" });
+        Mockito.when(registry.get(parentCollectionPath)).thenThrow(RegistryException.class)
+                .thenReturn(null, parentCollection);
+        Mockito.when(registry.get(
+                parentCollectionPath + RegistryConstants.PATH_SEPARATOR + APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN))
+                .thenReturn(childCollection);
+
+        Resource resource = new ResourceImpl("api/mediation/policy1", new ResourceDO());
+        resource.setUUID(SAMPLE_RESOURCE_ID);
+
+        String mediationPolicyContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                + "<sequence xmlns=\"http://ws.apache.org/ns/synapse\" name=\"default-endpoint\">\n</sequence>";
+        resource.setContent(mediationPolicyContent);
+        Mockito.when(registry.get("mediation1")).thenReturn(resource);
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
+        try {
+            abstractAPIManager.getApiSpecificMediationPolicy(parentCollectionPath, SAMPLE_RESOURCE_ID);
+            Assert.fail("Registry exception not thrown for error scenario");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Error while obtaining registry objects"));
+        }
+        Assert.assertNull(abstractAPIManager.getApiSpecificMediationPolicy(parentCollectionPath, SAMPLE_RESOURCE_ID));
+        Assert.assertEquals(
+                abstractAPIManager.getApiSpecificMediationPolicy(parentCollectionPath, SAMPLE_RESOURCE_ID).getName(),
+                "default-endpoint");
+        PowerMockito.mockStatic(IOUtils.class);
+        PowerMockito.mockStatic(AXIOMUtil.class);
+        PowerMockito.when(IOUtils.toString((InputStream) Mockito.any(), Mockito.anyString()))
+                .thenThrow(IOException.class).thenReturn(mediationPolicyContent);
+        PowerMockito.when(AXIOMUtil.stringToOM(Mockito.anyString())).thenThrow(XMLStreamException.class);
+
+        try {
+            abstractAPIManager.getApiSpecificMediationPolicy(parentCollectionPath, SAMPLE_RESOURCE_ID);
+            Assert.fail("IO exception not thrown for error scenario");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Error occurred while converting content stream into string"));
+        }
+        try {
+            abstractAPIManager.getApiSpecificMediationPolicy(parentCollectionPath, SAMPLE_RESOURCE_ID);
+            Assert.fail("XMLStream exception  not thrown for error scenario");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(
+                    e.getMessage().contains("Error occurred while getting omElement out of mediation content"));
+        }
+        resource.setContent(null);
+        try {
+            abstractAPIManager.getApiSpecificMediationPolicy(parentCollectionPath, SAMPLE_RESOURCE_ID);
+            Assert.fail("Registry exception not thrown for error scenario");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Error occurred while accessing content stream of mediation"));
+        }
+    }
+
+    @Test
+    public void testDeleteApiSpecificMediationPolicy() throws RegistryException, APIManagementException {
+        String resourcePath = "config/mediation/";
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapperExtended(null, null, registry, null);
+        Mockito.when(registry.resourceExists(Mockito.anyString())).thenReturn(true, false, true, false);
+        Mockito.doThrow(RegistryException.class).doNothing().when(registry).delete(Mockito.anyString());
+        try {
+            abstractAPIManager.deleteApiSpecificMediationPolicy(resourcePath, SAMPLE_RESOURCE_ID);
+            Assert.fail("Registry exception not thrown for error scenario");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Failed to delete specific mediation policy"));
+        }
+        Assert.assertFalse(abstractAPIManager.deleteApiSpecificMediationPolicy(resourcePath, SAMPLE_RESOURCE_ID));
+        Assert.assertTrue(abstractAPIManager.deleteApiSpecificMediationPolicy(resourcePath, SAMPLE_RESOURCE_ID));
+    }
+
+    @Test
+    public void testCheckIfResourceExists() throws APIManagementException, RegistryException {
+        String resourcePath = "config/mediation/";
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
+        Mockito.when(registry.resourceExists(Mockito.anyString())).thenThrow(RegistryException.class)
+                .thenReturn(false, true);
+        try {
+            abstractAPIManager.checkIfResourceExists(resourcePath);
+            Assert.fail("Registry exception not thrown for error scenario");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Error while obtaining registry objects"));
+        }
+        Assert.assertFalse(abstractAPIManager.checkIfResourceExists(resourcePath));
+        Assert.assertTrue(abstractAPIManager.checkIfResourceExists(resourcePath));
+    }
+
+    @Test
+    public void testGetThumbnailLastUpdatedTime()
+            throws APIManagementException, org.wso2.carbon.user.api.UserStoreException, RegistryException {
+        APIIdentifier identifier = new APIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
+        Mockito.when(registry.resourceExists(Mockito.anyString())).thenReturn(true, false, true);
+        ResourceDO resourceDO = new ResourceDO();
+        resourceDO.setLastUpdatedOn(34579002);
+        Resource resource = new ResourceImpl("test/", resourceDO);
+
+        Mockito.when(registry.get(Mockito.anyString())).thenThrow(RegistryException.class).thenReturn(resource);
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(registry);
+
+        try {
+            abstractAPIManager.getThumbnailLastUpdatedTime(identifier);
+            Assert.fail("Registry exception not thrown for error scenario");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Error while loading API icon from the registry"));
+        }
+        Assert.assertNull(abstractAPIManager.getThumbnailLastUpdatedTime(identifier));
+        Assert.assertEquals(abstractAPIManager.getThumbnailLastUpdatedTime(identifier), "34579002");
+    }
+
     private static void setFinalStatic(Field field, Object newValue) throws Exception {
         field.setAccessible(true);
         Field modifiersField = Field.class.getDeclaredField("modifiers");
