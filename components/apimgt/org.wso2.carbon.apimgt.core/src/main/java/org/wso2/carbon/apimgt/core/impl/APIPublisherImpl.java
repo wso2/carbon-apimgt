@@ -100,8 +100,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.time.LocalDateTime;
@@ -2078,7 +2076,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public List<Endpoint> discoverServiceEndpoints() throws APIManagementException {
-        List<Endpoint> discoveredEndpointList = null;
+        List<Endpoint> discoveredEndpointList = new ArrayList();
         try {
             ServiceDiscoveryConfigurations serviceDiscoveryConfig = ServiceDiscoveryConfigBuilder
                     .getServiceDiscoveryConfiguration();
@@ -2087,34 +2085,36 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 return discoveredEndpointList;
             }
             List<ServiceDiscoveryImplConfig> implConfigList = serviceDiscoveryConfig.getImplementationConfigs();
+            List<Endpoint> subDiscoveredEndpointList;
             for (ServiceDiscoveryImplConfig implConfig : implConfigList) {
                 if (!implConfig.isEnabled()) {
                     continue;
                 }
                 String implClassName = implConfig.getImplementationClass();
                 Class implClazz = APIPublisherImpl.class.getClassLoader().loadClass(implClassName);
-                Constructor implConstructor = implClazz.getConstructor(HashMap.class);
-                ServiceDiscoverer serviceDiscoverer = (ServiceDiscoverer) implConstructor
-                        .newInstance(implConfig.getCmsSpecificParameters());
+                ServiceDiscoverer serviceDiscoverer = (ServiceDiscoverer) implClazz.newInstance();
+                serviceDiscoverer.init(implConfig.getCmsSpecificParameters());
 
                 String namespaceFilter = serviceDiscoverer.getNamespaceFilter();
                 HashMap<String, String> criteriaFilter = serviceDiscoverer.getCriteriaFilter();
                 if (namespaceFilter == null && criteriaFilter == null) {
-                    discoveredEndpointList = serviceDiscoverer.listServices();
+                    subDiscoveredEndpointList = serviceDiscoverer.listServices();
                 } else if (namespaceFilter != null && criteriaFilter != null) {
-                    discoveredEndpointList = serviceDiscoverer.listServices(namespaceFilter, criteriaFilter);
+                    subDiscoveredEndpointList = serviceDiscoverer.listServices(namespaceFilter, criteriaFilter);
                 } else if (namespaceFilter != null) {
-                    discoveredEndpointList = serviceDiscoverer.listServices(namespaceFilter);
+                    subDiscoveredEndpointList = serviceDiscoverer.listServices(namespaceFilter);
                 } else {
-                    discoveredEndpointList = serviceDiscoverer.listServices(criteriaFilter);
+                    subDiscoveredEndpointList = serviceDiscoverer.listServices(criteriaFilter);
+                }
+                if (subDiscoveredEndpointList != null) {
+                    discoveredEndpointList.addAll(subDiscoveredEndpointList);
                 }
             }
         } catch (ServiceDiscoveryException e) {
             String msg = "Error while Discovering Service Endpoints";
             log.error(msg, e);
             throw new APIManagementException(msg, e, e.getErrorHandler());
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
-                NoSuchMethodException | InvocationTargetException e) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             String msg = "Error while Loading Service Discovery Impl Class";
             log.error(msg, e);
             throw new APIManagementException(msg, e);

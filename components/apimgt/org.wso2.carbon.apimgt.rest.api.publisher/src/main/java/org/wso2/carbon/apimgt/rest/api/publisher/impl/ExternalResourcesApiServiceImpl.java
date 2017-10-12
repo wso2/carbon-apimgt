@@ -14,8 +14,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -34,7 +32,7 @@ public class ExternalResourcesApiServiceImpl extends ExternalResourcesApiService
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header
      * @param request         msf4j request object
-     * @return A list of service endpoints avaliable in the cluster
+     * @return A list of service endpoints available in the cluster
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
@@ -57,9 +55,8 @@ public class ExternalResourcesApiServiceImpl extends ExternalResourcesApiService
                 }
                 String implClassName = implConfig.getImplementationClass();
                 Class implClazz = ExternalResourcesApiServiceImpl.class.getClassLoader().loadClass(implClassName);
-                Constructor implConstructor = implClazz.getConstructor(HashMap.class);
-                ServiceDiscoverer serviceDiscoverer = (ServiceDiscoverer) implConstructor
-                        .newInstance(implConfig.getCmsSpecificParameters());
+                ServiceDiscoverer serviceDiscoverer = (ServiceDiscoverer) implClazz.newInstance();
+                serviceDiscoverer.init(implConfig.getCmsSpecificParameters());
 
                 String namespaceFilter = serviceDiscoverer.getNamespaceFilter();
                 HashMap<String, String> criteriaFilter = serviceDiscoverer.getCriteriaFilter();
@@ -79,8 +76,7 @@ public class ExternalResourcesApiServiceImpl extends ExternalResourcesApiService
             }
             endPointListDTO.setCount(endPointListDTO.getList().size());
             return Response.ok().entity(endPointListDTO).build();
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
-                NoSuchMethodException | InvocationTargetException e) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             String errorMessage = "Error while loading service discovery impl class";
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
             log.error(errorMessage, e);

@@ -8,21 +8,20 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * This interface allows discovering services in a cluster using a URL given in a config file
- * and filtering by namespace and criteria.
- * Can be used to implement discovery in clusters such as Kubernetes or OpenShift.
+ * This interface allows discovering services in a cluster using a set of cms specific parameters
+ * while filtering by namespace and/or criteria as needed.
  */
 public abstract class ServiceDiscoverer {
 
     protected HashMap<String, String> cmsSpecificParameters;
-    protected String namespaceFilter;
-    protected HashMap<String, String> criteriaFilter;
+    private String namespaceFilter;
+    private HashMap<String, String> criteriaFilter;
 
     protected int serviceEndpointIndex;
     protected List<Endpoint> servicesList;
 
 
-    public ServiceDiscoverer(HashMap<String, String> cmsSpecificParameters) {
+    public void init(HashMap<String, String> cmsSpecificParameters) throws ServiceDiscoveryException {
         this.cmsSpecificParameters = cmsSpecificParameters;
         this.namespaceFilter = this.cmsSpecificParameters.get("namespace");
         String criteriaString = this.cmsSpecificParameters.get("criteria");
@@ -39,23 +38,13 @@ public abstract class ServiceDiscoverer {
         serviceEndpointIndex = 0;
     }
 
-    public String getNamespaceFilter() {
-        return namespaceFilter;
-    };
-
-    public HashMap<String, String> getCriteriaFilter() {
-        return criteriaFilter;
-    };
-
     /**
      * To get list of endpoints without any filtering.
      *
      * @return List of Endpoints
      * @throws ServiceDiscoveryException If an error occurs while listing
      */
-    public List<Endpoint> listServices() throws ServiceDiscoveryException {
-        return servicesList;
-    };
+    public abstract List<Endpoint> listServices() throws ServiceDiscoveryException;
 
     /**
      * To get list of endpoints, with a specific namespace.
@@ -64,9 +53,7 @@ public abstract class ServiceDiscoverer {
      * @return List of Endpoints with the specified namespace
      * @throws ServiceDiscoveryException If an error occurs while listing
      */
-    public List<Endpoint> listServices(String namespace) throws ServiceDiscoveryException {
-        return servicesList;
-    };
+    public abstract List<Endpoint> listServices(String namespace) throws ServiceDiscoveryException;
 
     /**
      * To get list of endpoints, with a specific criteria.
@@ -75,9 +62,7 @@ public abstract class ServiceDiscoverer {
      * @return List of Endpoints with the specified criteria
      * @throws ServiceDiscoveryException If an error occurs while listing
      */
-    public List<Endpoint> listServices(HashMap<String, String> criteria) throws ServiceDiscoveryException {
-        return servicesList;
-    };
+    public abstract List<Endpoint> listServices(HashMap<String, String> criteria) throws ServiceDiscoveryException;
 
     /**
      * To get list of endpoints, with a specific namespace and a criteria.
@@ -87,10 +72,8 @@ public abstract class ServiceDiscoverer {
      * @return List of Endpoints with the specified namespace and criteria
      * @throws ServiceDiscoveryException If an error occurs while listing
      */
-    public List<Endpoint> listServices(String namespace, HashMap<String, String> criteria)
-            throws ServiceDiscoveryException {
-        return servicesList;
-    };
+    public abstract List<Endpoint> listServices(String namespace, HashMap<String, String> criteria)
+            throws ServiceDiscoveryException;
 
     protected Endpoint createEndpoint(String id, String name, String endpointConfig, Long maxTps,
                                     String type, String endpointSecurity, String applicableLevel) {
@@ -105,6 +88,15 @@ public abstract class ServiceDiscoverer {
 
         serviceEndpointIndex++;
         return endpointBuilder.build();
+    }
+
+
+    public String getNamespaceFilter() {
+        return namespaceFilter;
+    }
+
+    public HashMap<String, String> getCriteriaFilter() {
+        return criteriaFilter;
     }
 
 }

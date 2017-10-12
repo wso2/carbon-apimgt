@@ -45,8 +45,9 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
     private Boolean endpointsAvailable; //when false, will not look for NodePort urls for the remaining ports.
 
 
-    public ServiceDiscovererKubernetes(HashMap<String, String> cmsSpecificParameters) throws ServiceDiscoveryException {
-        super(cmsSpecificParameters);
+    @Override
+    public void init(HashMap<String, String> cmsSpecificParameters) throws ServiceDiscoveryException {
+        super.init(cmsSpecificParameters);
         serviceAccountToken = this.cmsSpecificParameters.get("serviceAccountToken");
         caCertLocation = this.cmsSpecificParameters.get("caCertLocation");
         includeClusterIPs = Boolean.parseBoolean(this.cmsSpecificParameters.get("includeClusterIPs"));
