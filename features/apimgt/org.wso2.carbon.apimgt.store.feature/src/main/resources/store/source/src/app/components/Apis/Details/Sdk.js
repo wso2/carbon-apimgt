@@ -28,6 +28,7 @@ import InfoOutline from 'material-ui-icons/InfoOutline';
 import JSFileDownload from 'js-file-download';
 import Paper from 'material-ui/Paper';
 import SubHeader from 'material-ui/List/ListSubheader';
+import TextField from 'material-ui/TextField';
 import Typography from 'material-ui/Typography';
 
 class Sdk extends React.Component {
@@ -35,11 +36,14 @@ class Sdk extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            sdkLanguages: null
+            sdkLanguages: null,
+            items: null
         };
         this.api_uuid = this.props.match.params.api_uuid;
+        this.filter_threshold = 5;
         this.getSdkForApi = this.getSdkForApi.bind(this);
         this.handleClick = this.handleClick.bind(this);
+        this.handleChange = this.handleChange.bind(this);
     }
 
     componentDidMount() {
@@ -53,6 +57,7 @@ class Sdk extends React.Component {
                     return;
                 }
                 this.setState({sdkLanguages : response.obj});
+                this.setState({items: response.obj});
             }
         ).catch(
             error => {
@@ -103,14 +108,40 @@ class Sdk extends React.Component {
         this.getSdkForApi(apiId,language);
     }
 
+    //Handle the change event of the Search input field
+    handleChange = event => {
+        var updatedList = this.state.sdkLanguages;
+        updatedList = updatedList.filter(function(item){
+            return item.toLowerCase().search(
+                event.target.value.toLowerCase()) !== -1;
+        });
+        this.setState({items: updatedList});
+    };
+
     render(){
-        const language_list = this.state.sdkLanguages;
+        const language_list = this.state.items;
 
         return (
             language_list ?
-                <Grid container style={{marginTop:"10px"}}>
+                <Grid container style={{marginTop:"10px"}} >
                     <Grid item xs={12} sm={6} md={9} lg={9} xl={10}>
-                        <Grid container justify="left" spacing="24">
+                        {
+                            this.state.sdkLanguages.length >= this.filter_threshold ?
+                                <Grid item style={{textAlign:"center"}}>
+                                    <TextField
+                                        id="search"
+                                        label="Search SDK"
+                                        type="text"
+                                        margin="normal"
+                                        name="searchSdk"
+                                        onChange={this.handleChange}
+                                    />
+                                </Grid>
+                                :
+                                ""
+                        }
+
+                        <Grid container justify="flex-start" spacing={Number(24)}>
                             {language_list.map((language, index) => (
                                 <Grid key={index} item>
                                     <div style={{width:"auto", textAlign:"center"}}>
@@ -119,6 +150,7 @@ class Sdk extends React.Component {
                                             <Divider/>
                                             <CardMedia
                                                 title={language.toString().toUpperCase()}
+                                                src={"/store/public/images/sdks/"+new String(language)+".svg"}
                                             >
                                                 <img alt={language} src={"/store/public/images/sdks/"+new String(language)+".svg"} style={{width:"100px",height:"100px",margin:"15px"}}/>
                                             </CardMedia>
