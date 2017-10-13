@@ -20,11 +20,15 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +40,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.ServiceReferenceHolderMockCreator;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.utils.CarbonUtils;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({LogFactory.class, ServiceReferenceHolder.class, SSLSocketFactory.class, CarbonUtils.class})
@@ -170,4 +178,42 @@ public class APIUtilTest {
         Assert.assertNotNull(client);
     }
     */
+
+    @Test
+    public void testIsValidURL() throws Exception {
+        String validURL = "http://fsdfsfd.sda";
+
+        Assert.assertTrue(APIUtil.isValidURL(validURL));
+
+        String invalidURL = "sadafvsdfwef";
+
+        Assert.assertFalse(APIUtil.isValidURL(invalidURL));
+        Assert.assertFalse(APIUtil.isValidURL(null));
+    }
+
+    @Test
+    public void testGetRESTAPIScopesFromConfig() throws Exception {
+        File siteConfFile = new File(Thread.currentThread().getContextClassLoader().
+                getResource("tenant-conf.json").getFile());
+
+        String tenantConfValue = FileUtils.readFileToString(siteConfFile);
+
+        JSONParser parser = new JSONParser();
+        JSONObject json = (JSONObject) parser.parse(tenantConfValue);
+        JSONObject restapiScopes = (JSONObject) json.get("RESTAPIScopes");
+
+        Map<String, String> expectedScopes = new HashMap<String, String>();
+        JSONArray scopes = (JSONArray) restapiScopes.get("Scope");
+
+        for (Object scopeObj : scopes) {
+            JSONObject scope = (JSONObject) scopeObj;
+            String name = (String) scope.get("Name");
+            String roles = (String) scope.get("Roles");
+            expectedScopes.put(name, roles);
+        }
+
+        Map<String, String> restapiScopesFromConfig = APIUtil.getRESTAPIScopesFromConfig(restapiScopes);
+
+        Assert.assertEquals(expectedScopes, restapiScopesFromConfig);
+    }
 }
