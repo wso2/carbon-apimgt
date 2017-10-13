@@ -20,8 +20,8 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.engine.AxisConfiguration;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
@@ -30,18 +30,20 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.impl.ServiceReferenceHolderMockCreator;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.utils.ConfigurationContextService;
-import org.apache.axis2.description.TransportInDescription;
+import org.wso2.carbon.utils.CarbonUtils;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceReferenceHolder.class, SSLSocketFactory.class})
+@PrepareForTest({LogFactory.class, ServiceReferenceHolder.class, SSLSocketFactory.class, CarbonUtils.class})
+@PowerMockIgnore("javax.net.ssl.*")
 public class APIUtilTest {
 
     @Test
-    public void testGetAPINamefromRESTAPI() {
+    public void testGetAPINamefromRESTAPI() throws Exception {
         String restAPI = "admin--map";
         String apiName = APIUtil.getAPINamefromRESTAPI(restAPI);
 
@@ -49,7 +51,7 @@ public class APIUtilTest {
     }
 
     @Test
-    public void testGetAPIProviderFromRESTAPI() {
+    public void testGetAPIProviderFromRESTAPI() throws Exception {
         String restAPI = "admin--map";
         String providerName = APIUtil.getAPIProviderFromRESTAPI(restAPI, null);
 
@@ -66,24 +68,17 @@ public class APIUtilTest {
     }
 
     @Test
-    public void testGetHttpClient() {
+    public void testGetHttpClient() throws Exception {
+        Log log = Mockito.mock(Log.class);
+        PowerMockito.mockStatic(LogFactory.class);
+        Mockito.when(LogFactory.getLog(Mockito.any(Class.class))).thenReturn(log);
 
-        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-        SSLSocketFactory sslSocketFactory = Mockito.mock(SSLSocketFactory.class);
-        ConfigurationContextService contextService = Mockito.mock(ConfigurationContextService.class);
-        ConfigurationContext configurationContext = Mockito.mock(ConfigurationContext.class);
-        AxisConfiguration axisConfiguration = Mockito.mock(AxisConfiguration.class);
-        TransportInDescription transportInDescription = Mockito.mock(TransportInDescription.class);
-
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        SSLSocketFactory socketFactory = Mockito.mock(SSLSocketFactory.class);
         PowerMockito.mockStatic(SSLSocketFactory.class);
+        Mockito.when(SSLSocketFactory.getSocketFactory()).thenReturn(socketFactory);
 
-        PowerMockito.when(serviceReferenceHolder.getContextService()).thenReturn(contextService);
-        PowerMockito.when(SSLSocketFactory.getSocketFactory()).thenReturn(sslSocketFactory);
-        Mockito.when(contextService.getServerConfigContext()).thenReturn(configurationContext);
-        Mockito.when(configurationContext.getAxisConfiguration()).thenReturn(axisConfiguration);
-        Mockito.when(axisConfiguration.getTransportIn(Mockito.anyString())).thenReturn(transportInDescription);
-        Mockito.when(transportInDescription.getParameter(Mockito.anyString())).thenReturn(null);
+        ServiceReferenceHolderMockCreator holderMockCreator = new ServiceReferenceHolderMockCreator(1);
+        ServiceReferenceHolderMockCreator.initContextService();
 
         HttpClient client = APIUtil.getHttpClient(3244, "http");
 
@@ -108,31 +103,71 @@ public class APIUtilTest {
     }
 
     @Test
-    public void testGetHttpClientIgnoreHostNameVerify() {
+    public void testGetHttpClientIgnoreHostNameVerify() throws Exception {
+        Log log = Mockito.mock(Log.class);
+        PowerMockito.mockStatic(LogFactory.class);
+        Mockito.when(LogFactory.getLog(Mockito.any(Class.class))).thenReturn(log);
+
+        SSLSocketFactory socketFactory = Mockito.mock(SSLSocketFactory.class);
+        PowerMockito.mockStatic(SSLSocketFactory.class);
+        Mockito.when(SSLSocketFactory.getSocketFactory()).thenReturn(socketFactory);
+
+        ServiceReferenceHolderMockCreator holderMockCreator = new ServiceReferenceHolderMockCreator(1);
+        ServiceReferenceHolderMockCreator.initContextService();
+        
+        System.setProperty("org.wso2.ignoreHostnameVerification", "true");
+        HttpClient client = APIUtil.getHttpClient(3244, "https");
+
+        Assert.assertNotNull(client);
+    }
+
+    /*
+    @Test
+    public void testGetHttpClientSSLVerifyClient() throws Exception {
+        System.setProperty("carbon.home", "");
+
+        Log log = Mockito.mock(Log.class);
+        PowerMockito.mockStatic(LogFactory.class);
+        Mockito.when(LogFactory.getLog(Mockito.any(Class.class))).thenReturn(log);
+
+        SSLSocketFactory socketFactory = Mockito.mock(SSLSocketFactory.class);
+        PowerMockito.mockStatic(SSLSocketFactory.class);
+        Mockito.when(SSLSocketFactory.getSocketFactory()).thenReturn(socketFactory);
+
+        ServiceReferenceHolderMockCreator holderMockCreator = new ServiceReferenceHolderMockCreator(1);
+        ServiceReferenceHolderMockCreator.initContextService();
+
+        TransportInDescription transportInDescription = holderMockCreator.getConfigurationContextServiceMockCreator().
+                getContextMockCreator().getConfigurationMockCreator().getTransportInDescription();
+
+        Parameter sslVerifyClient = Mockito.mock(Parameter.class);
+        Mockito.when(transportInDescription.getParameter(APIConstants.SSL_VERIFY_CLIENT)).thenReturn(sslVerifyClient);
+        Mockito.when(sslVerifyClient.getValue()).thenReturn(APIConstants.SSL_VERIFY_CLIENT_STATUS_REQUIRE);
 
         System.setProperty("org.wso2.ignoreHostnameVerification", "true");
 
-        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-        SSLSocketFactory sslSocketFactory = Mockito.mock(SSLSocketFactory.class);
-        ConfigurationContextService contextService = Mockito.mock(ConfigurationContextService.class);
-        ConfigurationContext configurationContext = Mockito.mock(ConfigurationContext.class);
-        AxisConfiguration axisConfiguration = Mockito.mock(AxisConfiguration.class);
-        TransportInDescription transportInDescription = Mockito.mock(TransportInDescription.class);
+        File keyStore = new File(Thread.currentThread().getContextClassLoader().
+                getResource("wso2carbon.jks").getFile());
 
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        PowerMockito.mockStatic(SSLSocketFactory.class);
+        ServerConfiguration serverConfiguration = Mockito.mock(ServerConfiguration.class);
+        PowerMockito.mockStatic(CarbonUtils.class);
+        Mockito.when(CarbonUtils.getServerConfiguration()).thenReturn(serverConfiguration);
 
-        PowerMockito.when(serviceReferenceHolder.getContextService()).thenReturn(contextService);
-        PowerMockito.when(SSLSocketFactory.getSocketFactory()).thenReturn(sslSocketFactory);
-        Mockito.when(contextService.getServerConfigContext()).thenReturn(configurationContext);
-        Mockito.when(configurationContext.getAxisConfiguration()).thenReturn(axisConfiguration);
-        Mockito.when(axisConfiguration.getTransportIn(Mockito.anyString())).thenReturn(transportInDescription);
-        Mockito.when(transportInDescription.getParameter(Mockito.anyString())).thenReturn(null);
+        Mockito.when(serverConfiguration.getFirstProperty("Security.KeyStore.Location")).
+                thenReturn(keyStore.getAbsolutePath());
+        Mockito.when(serverConfiguration.getFirstProperty("Security.KeyStore.Password")).
+                thenReturn("wso2carbon");
+
+        InputStream inputStream = new FileInputStream(keyStore.getAbsolutePath());
+        KeyStore keystore = KeyStore.getInstance("JKS");
+        char[] pwd = "wso2carbon".toCharArray();
+        keystore.load(inputStream, pwd);
+        SSLContext sslcontext = SSLContexts.custom().loadTrustMaterial(keystore).useSSL().build();
+        SSLContext.setDefault(sslcontext);
 
         HttpClient client = APIUtil.getHttpClient(3244, "https");
 
         Assert.assertNotNull(client);
-
-
     }
+    */
 }
