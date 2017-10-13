@@ -20,11 +20,24 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import org.apache.axis2.context.ConfigurationContext;
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.utils.ConfigurationContextService;
+import org.apache.axis2.description.TransportInDescription;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ServiceReferenceHolder.class, SSLSocketFactory.class})
 public class APIUtilTest {
 
     @Test
@@ -54,6 +67,24 @@ public class APIUtilTest {
 
     @Test
     public void testGetHttpClient() {
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        SSLSocketFactory sslSocketFactory = Mockito.mock(SSLSocketFactory.class);
+        ConfigurationContextService contextService = Mockito.mock(ConfigurationContextService.class);
+        ConfigurationContext configurationContext = Mockito.mock(ConfigurationContext.class);
+        AxisConfiguration axisConfiguration = Mockito.mock(AxisConfiguration.class);
+        TransportInDescription transportInDescription = Mockito.mock(TransportInDescription.class);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(SSLSocketFactory.class);
+
+        PowerMockito.when(serviceReferenceHolder.getContextService()).thenReturn(contextService);
+        PowerMockito.when(SSLSocketFactory.getSocketFactory()).thenReturn(sslSocketFactory);
+        Mockito.when(contextService.getServerConfigContext()).thenReturn(configurationContext);
+        Mockito.when(configurationContext.getAxisConfiguration()).thenReturn(axisConfiguration);
+        Mockito.when(axisConfiguration.getTransportIn(Mockito.anyString())).thenReturn(transportInDescription);
+        Mockito.when(transportInDescription.getParameter(Mockito.anyString())).thenReturn(null);
+
         HttpClient client = APIUtil.getHttpClient(3244, "http");
 
         Assert.assertNotNull(client);
@@ -78,7 +109,26 @@ public class APIUtilTest {
 
     @Test
     public void testGetHttpClientIgnoreHostNameVerify() {
+
         System.setProperty("org.wso2.ignoreHostnameVerification", "true");
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        SSLSocketFactory sslSocketFactory = Mockito.mock(SSLSocketFactory.class);
+        ConfigurationContextService contextService = Mockito.mock(ConfigurationContextService.class);
+        ConfigurationContext configurationContext = Mockito.mock(ConfigurationContext.class);
+        AxisConfiguration axisConfiguration = Mockito.mock(AxisConfiguration.class);
+        TransportInDescription transportInDescription = Mockito.mock(TransportInDescription.class);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(SSLSocketFactory.class);
+
+        PowerMockito.when(serviceReferenceHolder.getContextService()).thenReturn(contextService);
+        PowerMockito.when(SSLSocketFactory.getSocketFactory()).thenReturn(sslSocketFactory);
+        Mockito.when(contextService.getServerConfigContext()).thenReturn(configurationContext);
+        Mockito.when(configurationContext.getAxisConfiguration()).thenReturn(axisConfiguration);
+        Mockito.when(axisConfiguration.getTransportIn(Mockito.anyString())).thenReturn(transportInDescription);
+        Mockito.when(transportInDescription.getParameter(Mockito.anyString())).thenReturn(null);
+
         HttpClient client = APIUtil.getHttpClient(3244, "https");
 
         Assert.assertNotNull(client);
