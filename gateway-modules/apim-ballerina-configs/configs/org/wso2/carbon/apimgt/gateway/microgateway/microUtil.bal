@@ -166,19 +166,20 @@ function retrieveOfflineResources (json apiData) {
     //}
 }
 
-function buildSubscriptionDto (json apiData, json app, string env) (dto:SubscriptionDto) {
+function buildSubscriptionDto (json apiData, json apiKey) (dto:SubscriptionDto) {
     //build the subscriptionDto from the json file
 
     dto:SubscriptionDto subscriptionDto = {};
     subscriptionDto.apiName = jsons:getString(apiData,"$.info.title");
     subscriptionDto.apiVersion = jsons:getString(apiData,"$.info.version");
     subscriptionDto.apiContext = jsons:getString(apiData,"$.basePath");
-    if (env == Constants:SANDBOX) {
-        subscriptionDto.consumerKey, err = (string) app.sandbox;
-    } else if (env == Constants:PRODUCTION){
-        subscriptionDto.consumerKey, err = (string) app.production;
-    }
-    subscriptionDto.keyEnvType = env;
+    subscriptionDto.consumerKey, err = (string) apiKey;
+    //if (env == Constants:SANDBOX) {
+    //    subscriptionDto.consumerKey, err = (string) app.sandbox;
+    //} else if (env == Constants:PRODUCTION){
+    //    subscriptionDto.consumerKey, err = (string) app.production;
+    //}
+    subscriptionDto.keyEnvType = "PRODUCTION";
     subscriptionDto.status = "ACTIVE";
     return subscriptionDto;
 }
@@ -186,8 +187,9 @@ function buildSubscriptionDto (json apiData, json app, string env) (dto:Subscrip
 function retrieveOfflineSubscriptions () (boolean) {
     //put the subscriptionDtos into the subscription cache
 
-    string name = system:getEnv(Constants:GW_HOME);
-    string[] filenames = util:listJSONFiles(name + "/microgateway");
+    string gw_home = system:getEnv(Constants:GW_HOME);
+    string[] filenames = util:listJSONFiles(gw_home + "/microgateway");
+
     int index = 0;
     if (filenames != null) {
         int count = filenames.length;
@@ -201,21 +203,10 @@ function retrieveOfflineSubscriptions () (boolean) {
                     int noOfApps = jsons:getInt(apps, "$.length()");
                     int j = 0;
                     while (j < noOfApps) {
-                        if (apps[j].sandbox != null) {
-                            dto:SubscriptionDto subs = buildSubscriptionDto(apiData, apps[j], Constants:SANDBOX);
-                            system:println("subs");
-                            system:println(subs);
-                            holders:putIntoSubscriptionCache(subs);
-                        }
-                        if (apps[j].production != null) {
-                            dto:SubscriptionDto subs = buildSubscriptionDto(apiData, apps[j], Constants:PRODUCTION);
-                            system:println("subs");
-                            system:println(subs);
-                            holders:putIntoSubscriptionCache(subs);
-                        }
+                        dto:SubscriptionDto subs = buildSubscriptionDto(apiData, apps[j]);
+                        holders:putIntoSubscriptionCache(subs);
                         j = j + 1;
                     }
-
                 } catch (errors:Error error) {
                     system:println(error.msg);
                 }
