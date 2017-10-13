@@ -151,4 +151,8 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         // Do Nothing
     }
 
+    protected String getTenantAwareUsername(String username){
+        return "admin";
+    }
+
 }

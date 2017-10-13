@@ -133,7 +133,7 @@ public abstract class AbstractAPIManager implements APIManager {
                 ServiceReferenceHolder.setUserRealm((ServiceReferenceHolder.getInstance().getRealmService().getBootstrapRealm()));
             } else {
                 String tenantDomainName = MultitenantUtils.getTenantDomain(username);
-                String tenantUserName = MultitenantUtils.getTenantAwareUsername(username);
+                String tenantUserName = getTenantAwareUsername(username);
                 int tenantId = getTenantManager().getTenantId(tenantDomainName);
                 this.tenantId = tenantId;
                 this.tenantDomain = tenantDomainName;
@@ -313,7 +313,7 @@ public abstract class AbstractAPIManager implements APIManager {
             for (GenericArtifact artifact : artifacts) {
                 API api = null;
                 try {
-                    api = getApi(artifact);
+                    api = APIUtil.getAPI(artifact);
                 } catch (APIManagementException e) {
                     //log and continue since we want to load the rest of the APIs.
                     log.error("Error while loading API " + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME), e);
@@ -348,13 +348,12 @@ public abstract class AbstractAPIManager implements APIManager {
             int apiTenantId = getTenantManager()
                     .getTenantId(apiTenantDomain);
             if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(apiTenantDomain)) {
-                loadTenantRegistry(apiTenantId);
+                APIUtil.loadTenantRegistry(apiTenantId);
             }
 
             if (this.tenantDomain == null || !this.tenantDomain.equals(apiTenantDomain)) { //cross tenant scenario
                 registry = getRegistryService().getGovernanceUserRegistry(
-                        MultitenantUtils.getTenantAwareUsername(
-                                APIUtil.replaceEmailDomainBack(identifier.getProviderName())), apiTenantId);
+                        getTenantAwareUsername(APIUtil.replaceEmailDomainBack(identifier.getProviderName())), apiTenantId);
             } else {
                 registry = this.registry;
             }
@@ -366,7 +365,7 @@ public abstract class AbstractAPIManager implements APIManager {
             }
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(artifactId);
 
-            API api = getApiForPublishing(registry, apiArtifact);
+            API api = APIUtil.getAPIForPublishing(apiArtifact, registry);
 
             //check for API visibility
             if (APIConstants.API_GLOBAL_VISIBILITY.equals(api.getVisibility())) { //global api
@@ -388,6 +387,10 @@ public abstract class AbstractAPIManager implements APIManager {
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
+    }
+
+    protected String getTenantAwareUsername(String username) {
+        return MultitenantUtils.getTenantAwareUsername(username);
     }
 
     protected String getTenantDomain(APIIdentifier identifier) {
@@ -435,9 +438,9 @@ public abstract class AbstractAPIManager implements APIManager {
             if (apiArtifact != null) {
                 return getApiForPublishing(registry, apiArtifact);
             } else {
-                handleResourceNotFoundException(
-                        "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist");
-                return null;
+                String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
+                log.error(msg);
+                throw new APIMgtResourceNotFoundException(msg);
             }
         } catch (RegistryException e) {
             String msg = "Failed to get API";
@@ -484,8 +487,9 @@ public abstract class AbstractAPIManager implements APIManager {
             if (apiArtifact != null) {
                 return getApiInformation(registry, apiArtifact);
             } else {
-                handleResourceNotFoundException(
-                        "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist");
+                String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
+                log.error(msg);
+                throw new APIMgtResourceNotFoundException(msg);
             }
         } catch (RegistryException e) {
             String msg = "Failed to get API with uuid " + uuid;
@@ -496,7 +500,6 @@ public abstract class AbstractAPIManager implements APIManager {
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
-        return null;
     }
 
     protected API getApiInformation(Registry registry, GovernanceArtifact apiArtifact) throws APIManagementException {
@@ -578,13 +581,13 @@ public abstract class AbstractAPIManager implements APIManager {
                 int id = getTenantManager()
                         .getTenantId(tenantDomain);
                 // explicitly load the tenant's registry
-                loadTenantRegistry(id);
+                APIUtil.loadTenantRegistry(id);
                 passRegistry = getRegistryService()
                         .getGovernanceSystemRegistry(id);
             } else {
                 if (this.tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(this.tenantDomain)) {
                     // explicitly load the tenant's registry
-                    loadTenantRegistry(MultitenantConstants.SUPER_TENANT_ID);
+                    APIUtil.loadTenantRegistry(MultitenantConstants.SUPER_TENANT_ID);
                     passRegistry = getRegistryService().getGovernanceUserRegistry(
                             identifier.getProviderName(), MultitenantConstants.SUPER_TENANT_ID);
                 } else {
