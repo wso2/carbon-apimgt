@@ -36,7 +36,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 public class KeyTemplateRetrieverTest {
     @Rule
     public WireMockRule wireMockRule;
-    public static WireMockConfiguration wireMockConfiguration = new WireMockConfiguration();
+    public static WireMockConfiguration wireMockConfiguration = new WireMockConfiguration().port(8084);
 
     @Test
     public void run() throws Exception {
@@ -56,7 +56,7 @@ public class KeyTemplateRetrieverTest {
         blockCondition.setUsername("admin");
         blockCondition.setPassword("admin");
         blockCondition.setEnabled(true);
-        blockCondition.setServiceUrl("http://localhost:" + wireMockConfiguration.portNumber() + "/throttle/data/v1");
+        blockCondition.setServiceUrl("http://localhost:8084/throttle/data/v1");
         ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
         throttleProperties.setBlockCondition(blockCondition);
         KeyTemplateRetriever keyTemplateRetriever = new KeyTemplateRetrieverWrapper(throttleProperties,
