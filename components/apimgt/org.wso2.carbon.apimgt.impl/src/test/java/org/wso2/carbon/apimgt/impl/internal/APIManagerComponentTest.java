@@ -28,14 +28,28 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
+import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.util.APIManagerComponentWrapper;
+import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
+import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.registry.api.Registry;
+import org.wso2.carbon.registry.core.utils.AuthorizationUtils;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
+import org.wso2.carbon.user.api.AuthorizationManager;
+import org.wso2.carbon.user.api.UserRealm;
+import org.wso2.carbon.user.core.service.RealmService;
 
 import java.io.FileNotFoundException;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ APIUtil.class })
+@PrepareForTest({ APIUtil.class, APIManagerComponent.class, ServiceReferenceHolder.class, AuthorizationUtils.class,
+                        RegistryUtils.class, APIMgtDBUtil.class, KeyManagerHolder.class,
+                        SQLConstantManagerFactory.class })
 public class APIManagerComponentTest {
 
     @Before
@@ -44,27 +58,85 @@ public class APIManagerComponentTest {
     }
 
     @Test
-    public void testShouldNotContinueWhenConfigurationUnAvailable() throws Exception {
+    public void testShouldActivateWhenAllPrerequisitesMet() throws Exception {
+        PowerMockito.mockStatic(APIMgtDBUtil.class);
         PowerMockito.mockStatic(APIUtil.class);
-        PowerMockito.doNothing().when(APIUtil.class, "loadTenantExternalStoreConfig", Mockito.anyInt());
+        PowerMockito.mockStatic(AuthorizationUtils.class);
+        PowerMockito.mockStatic(KeyManagerHolder.class);
+        PowerMockito.mockStatic(RegistryUtils.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(SQLConstantManagerFactory.class);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         ComponentContext componentContext = Mockito.mock(ComponentContext.class);
         BundleContext bundleContext = Mockito.mock(BundleContext.class);
         APIManagerConfiguration configuration = Mockito.mock(APIManagerConfiguration.class);
+        APIManagerConfigurationService configurationService = Mockito.mock(APIManagerConfigurationService.class);
+        AuthorizationManager authManager = Mockito.mock(AuthorizationManager.class);
         Registry registry = Mockito.mock(Registry.class);
+        RealmService realmService = Mockito.mock(RealmService.class);
+        UserRealm userRealm = Mockito.mock(UserRealm.class);
+        OutputEventAdapterService adapterService = Mockito.mock(OutputEventAdapterService.class);
+        ThrottleProperties throttleProperties = new ThrottleProperties();
+        throttleProperties.addJMSPublisherParameter("url", "jms://localhost");
+
+        Mockito.doNothing().when(configuration).load(Mockito.anyString());
+        Mockito.doNothing().when(authManager)
+                .authorizeRole(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+        Mockito.doNothing().when(adapterService).create(null);
         Mockito.when(componentContext.getBundleContext()).thenReturn(bundleContext);
         Mockito.when(registry.resourceExists(Mockito.anyString())).thenReturn(true);
-        Mockito.when(configuration.getFirstProperty(Mockito.anyString())).thenThrow(FileNotFoundException.class);
+        Mockito.when(configuration.getFirstProperty(Mockito.anyString())).thenReturn("").thenReturn(null);
+        Mockito.when(bundleContext.registerService("", CommonConfigDeployer.class, null)).thenReturn(null);
+        Mockito.when(authManager.isRoleAuthorized(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(true);
+        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(configurationService);
+        Mockito.when(serviceReferenceHolder.getOutputEventAdapterService()).thenReturn(adapterService);
+        Mockito.when(configurationService.getAPIManagerConfiguration()).thenReturn(configuration);
+        Mockito.when(realmService.getTenantUserRealm(Mockito.anyInt())).thenReturn(userRealm);
+        Mockito.when(userRealm.getAuthorizationManager()).thenReturn(authManager);
+        Mockito.when(configuration.getThrottleProperties()).thenReturn(throttleProperties);
+        PowerMockito.doNothing().when(APIMgtDBUtil.class, "initialize");
+        PowerMockito.doNothing().when(APIUtil.class, "loadTenantExternalStoreConfig", Mockito.anyInt());
+        PowerMockito.doNothing().when(AuthorizationUtils.class ,"addAuthorizeRoleListener",
+                Mockito.anyInt(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+        PowerMockito.doNothing().when(KeyManagerHolder.class, "initializeKeyManager", configuration);
+        PowerMockito.doNothing().when(SQLConstantManagerFactory.class, "initializeSQLConstantManager");
+        PowerMockito.when(APIUtil.getMountedPath(null, "")).thenReturn("");
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        PowerMockito.when(RegistryUtils.getAbsolutePath(null, null)).thenReturn("");
+        PowerMockito.whenNew(APIManagerConfiguration.class).withAnyArguments().thenReturn(configuration);
 
         APIManagerComponent apiManagerComponent = new APIManagerComponentWrapper(registry);
         try {
             apiManagerComponent.activate(componentContext);
         } catch (FileNotFoundException f) {
-            // Exception thrown hear means that method was continued without the configuration file
+            // Exception thrown here means that method was continued without the configuration file
             Assert.fail("Should not throw an exception");
         }
     }
 
+    @Test
+    public void testShouldNotContinueWhenConfigurationUnAvailable() throws Exception {
+        PowerMockito.mockStatic(APIUtil.class);
+        ComponentContext componentContext = Mockito.mock(ComponentContext.class);
+        BundleContext bundleContext = Mockito.mock(BundleContext.class);
+        APIManagerConfiguration configuration = Mockito.mock(APIManagerConfiguration.class);
+        Registry registry = Mockito.mock(Registry.class);
 
+        Mockito.when(componentContext.getBundleContext()).thenReturn(bundleContext);
+        Mockito.when(registry.resourceExists(Mockito.anyString())).thenReturn(true);
+        Mockito.when(configuration.getFirstProperty(Mockito.anyString())).thenThrow(FileNotFoundException.class);
+        PowerMockito.doNothing().when(APIUtil.class, "loadTenantExternalStoreConfig", Mockito.anyInt());
+
+        APIManagerComponent apiManagerComponent = new APIManagerComponentWrapper(registry);
+        try {
+            apiManagerComponent.activate(componentContext);
+        } catch (FileNotFoundException f) {
+            // Exception thrown here means that method was continued without the configuration file
+            Assert.fail("Should not throw an exception");
+        }
+    }
 
     @After
     public void destroy() {
