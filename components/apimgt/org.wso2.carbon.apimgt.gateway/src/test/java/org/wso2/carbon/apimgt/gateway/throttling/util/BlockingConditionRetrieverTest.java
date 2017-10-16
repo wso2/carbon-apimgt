@@ -17,33 +17,40 @@
 */
 package org.wso2.carbon.apimgt.gateway.throttling.util;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.entity.BasicHttpEntity;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.BDDMockito;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import java.io.ByteArrayInputStream;
 
+@RunWith (PowerMockRunner.class)
+@PrepareForTest({APIUtil.class})
 public class BlockingConditionRetrieverTest {
-    @Rule
-    public WireMockRule wireMockRule;
-    public static WireMockConfiguration wireMockConfiguration = new WireMockConfiguration().port(8083);
-
     @Test
     public void run() throws Exception {
-        wireMockRule = new WireMockRule(wireMockConfiguration);
-        wireMockRule.stubFor(WireMock.get(urlEqualTo("/throttle/data/v1/block"))
-                .withBasicAuth("admin", "admin").willReturn(aResponse()
-                        .withStatus(200).withHeader("Content-Type", "application/json")
-                        .withBody("{\"api\":[\"/pizzashack/1.0.0\"],\"application\":[\"admin:DefaultApplication\"]," +
-                                "\"ip\":[\"carbon.super:carbon.super:127.0.0.1\"],\"user\":[\"admin\"]," +
-                                "\"custom\":[]}")));
-        wireMockRule.start();
+        String content = "{\"api\":[\"/pizzashack/1.0.0\"],\"application\":[\"admin:DefaultApplication\"]," +
+                "\"ip\":[\"carbon.super:carbon.super:127.0.0.1\"],\"user\":[\"admin\"]," +
+                "\"custom\":[]}";
+        PowerMockito.mockStatic(APIUtil.class);
+        HttpClient httpClient = Mockito.mock(HttpClient.class);
+        HttpResponse httpResponse = Mockito.mock(HttpResponse.class);
+        BasicHttpEntity httpEntity = new BasicHttpEntity();
+        httpEntity.setContent(new ByteArrayInputStream(content.getBytes()));
+        Mockito.when(httpResponse.getEntity()).thenReturn(httpEntity);
+        Mockito.when(httpClient.execute(Mockito.any(HttpGet.class))).thenReturn(httpResponse);
+        BDDMockito.given(APIUtil.getHttpClient(Mockito.anyInt(),Mockito.anyString())).willReturn(httpClient);
         ThrottleProperties throttleProperties = new ThrottleProperties();
         ThrottleProperties.BlockCondition blockCondition = new ThrottleProperties.BlockCondition();
         blockCondition.setUsername("admin");
@@ -56,8 +63,6 @@ public class BlockingConditionRetrieverTest {
                 (throttleProperties,
                 throttleDataHolder);
         blockingConditionRetriever.run();
-        wireMockRule.resetAll();
-        wireMockRule.stop();
         Assert.assertTrue(throttleDataHolder.isRequestBlocked("/pizzashack/1.0.0", "admin:DefaultApplication",
                 "admin", "127.0.0.1"));
     }

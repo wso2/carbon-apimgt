@@ -18,25 +18,28 @@
 
 package org.wso2.carbon.apimgt.gateway.throttling.util;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import com.github.tomakehurst.wiremock.junit.WireMockRule;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.entity.BasicHttpEntity;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.BDDMockito;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({APIUtil.class})
 public class KeyTemplateRetrieverTest {
-    @Rule
-    public WireMockRule wireMockRule;
-    public static WireMockConfiguration wireMockConfiguration = new WireMockConfiguration().port(8084);
 
     @Test
     public void run() throws Exception {
@@ -44,13 +47,16 @@ public class KeyTemplateRetrieverTest {
         map.put("$userId","$userId");
         map.put("$apiContext","$apiContext");
         map.put("$apiVersion","$apiVersion");
+        String content = "[\"$userId\",\"$apiContext\",\"$apiVersion\"]";
+        PowerMockito.mockStatic(APIUtil.class);
+        HttpClient httpClient = Mockito.mock(HttpClient.class);
+        HttpResponse httpResponse = Mockito.mock(HttpResponse.class);
+        BasicHttpEntity httpEntity = new BasicHttpEntity();
+        httpEntity.setContent(new ByteArrayInputStream(content.getBytes()));
+        Mockito.when(httpResponse.getEntity()).thenReturn(httpEntity);
+        Mockito.when(httpClient.execute(Mockito.any(HttpGet.class))).thenReturn(httpResponse);
+        BDDMockito.given(APIUtil.getHttpClient(Mockito.anyInt(),Mockito.anyString())).willReturn(httpClient);
 
-        wireMockRule = new WireMockRule(wireMockConfiguration);
-        wireMockRule.stubFor(WireMock.get(urlEqualTo("/throttle/data/v1/keyTemplates"))
-                .withBasicAuth("admin", "admin").willReturn(aResponse()
-                        .withStatus(201).withHeader("Content-Type", "application/json")
-                        .withBody("[\"$userId\",\"$apiContext\",\"$apiVersion\"]")));
-        wireMockRule.start();
         ThrottleProperties throttleProperties = new ThrottleProperties();
         ThrottleProperties.BlockCondition blockCondition = new ThrottleProperties.BlockCondition();
         blockCondition.setUsername("admin");
@@ -62,12 +68,8 @@ public class KeyTemplateRetrieverTest {
         KeyTemplateRetriever keyTemplateRetriever = new KeyTemplateRetrieverWrapper(throttleProperties,
                 throttleDataHolder);
         keyTemplateRetriever.run();
-        wireMockRule.resetAll();
-        wireMockRule.stop();
         Map<String,String> keyTemplateMap = throttleDataHolder.getKeyTemplateMap();
         Assert.assertNotNull(keyTemplateMap);
         Assert.assertEquals(map,keyTemplateMap);
-        // Check KeyTemplateRetrieving for
-        //keyTemplateRetriever.run();
     }
 }
