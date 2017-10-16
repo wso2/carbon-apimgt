@@ -72,11 +72,14 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
+import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.jdbc.dataobjects.ResourceDO;
+import org.wso2.carbon.registry.core.jdbc.realm.RegistryAuthorizationManager;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -101,7 +104,8 @@ import static org.wso2.carbon.utils.ServerConstants.CARBON_HOME;
 
 @RunWith (PowerMockRunner.class)
 @PrepareForTest ({APIUtil.class, MultitenantUtils.class, PrivilegedCarbonContext.class, ServiceReferenceHolder.class,
-        GovernanceUtils.class, PaginationContext.class, IOUtils.class, AXIOMUtil.class })
+        GovernanceUtils.class, PaginationContext.class, IOUtils.class, AXIOMUtil.class, RegistryUtils.class ,
+        AbstractAPIManager.class})
 public class AbstractAPIManagerTestCase {
 
     public static final String SAMPLE_API_NAME = "test";
@@ -136,6 +140,44 @@ public class AbstractAPIManagerTestCase {
         tenantManager = Mockito.mock(TenantManager.class);
         apiDefinitionFromSwagger20 = Mockito.mock(APIDefinitionFromSwagger20.class);
 
+    }
+
+    @Test
+    public void testConstructor() throws Exception {
+
+        ServiceReferenceHolderMockCreator holderMockCreator = new ServiceReferenceHolderMockCreator(1);
+        ServiceReferenceHolderMockCreator.initContextService();
+        holderMockCreator.initRegistryServiceMockCreator(false, new Object());
+        RegistryAuthorizationManager registryAuthorizationManager = Mockito.mock(RegistryAuthorizationManager.class);
+        Mockito.doThrow(UserStoreException.class).doNothing().when(registryAuthorizationManager)
+                .authorizeRole(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
+        PowerMockito.whenNew(RegistryAuthorizationManager.class).withAnyArguments()
+                .thenReturn(registryAuthorizationManager);
+        PowerMockito.mockStatic(RegistryUtils.class);
+        BDDMockito.when(RegistryUtils.getAbsolutePath((RegistryContext) Mockito.any(), Mockito.anyString()))
+                .thenReturn("/test");
+        try {
+            new AbstractAPIManager(null) {
+
+            };
+            Assert.fail("User store exception not thrown for error scenario");
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Error while setting the permissions"));
+        }
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManager(null) {
+
+        };
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
+        PowerMockito.mockStatic(MultitenantUtils.class);
+        BDDMockito.when(MultitenantUtils.getTenantDomain(Mockito.anyString())).thenReturn(SAMPLE_TENANT_DOMAIN_1);
+        String userName = "admin";
+        abstractAPIManager = new AbstractAPIManager(userName) {
+
+        };
+        Mockito.verify(
+                holderMockCreator.getRegistryServiceMockCreator().getMock().getConfigSystemRegistry(Mockito.anyInt()),
+                Mockito.atLeastOnce());
     }
 
     @Test

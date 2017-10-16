@@ -165,9 +165,13 @@ public abstract class AbstractAPIManager implements APIManager {
             ServiceReferenceHolder.setUserRealm(getRegistryService().getConfigSystemRegistry().getUserRealm());
             registerCustomQueries(configRegistry, username);
         } catch (RegistryException e) {
-            handleException("Error while obtaining registry objects", e);
+            String msg = "Error while obtaining registry objects";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            handleException("Error while getting user registry for user:" + username, e);
+            String msg = "Error while getting user registry for user:" + username;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         }
 
     }
@@ -194,7 +198,9 @@ public abstract class AbstractAPIManager implements APIManager {
                 authorizationManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
 
             } catch (UserStoreException e) {
-                handleException("Error while setting the permissions", e);
+                String msg = "Error while setting the permissions";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
             }
         } else if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             int tenantId;
@@ -204,7 +210,9 @@ public abstract class AbstractAPIManager implements APIManager {
                         getTenantUserRealm(tenantId).getAuthorizationManager();
                 authManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, path, ActionConstants.GET);
             } catch (org.wso2.carbon.user.api.UserStoreException e) {
-                handleException("Error while setting the permissions", e);
+                String msg = "Error while setting the permissions";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
             }
 
         }
