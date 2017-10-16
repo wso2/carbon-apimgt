@@ -256,6 +256,11 @@
                         <artifactId>commonmark</artifactId>
                         <version>${atlassian.commonmark.version}</version>
                     </dependency>
+                    <dependency>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-annotations</artifactId>
+                        <version>${com.fasterxml.jackson.core.version}</version>
+                    </dependency>
                 </dependencies>
             </plugin>
             <!-- End of REST API documentation generation -->
