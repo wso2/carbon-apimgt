@@ -16,7 +16,7 @@
     <APIUsageTracking>
         <Enabled>false</Enabled>
         <ThriftPort>7612</ThriftPort>
-        <BAMServerURL>https://localhost:9444/</BAMServerURL>
+        <BAMServerURL>https://localh22ost:9444/</BAMServerURL>
         <BAMUsername>admin</BAMUsername>
         <BAMPassword>admin</BAMPassword>
     </APIUsageTracking>
