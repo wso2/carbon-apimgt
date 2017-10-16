@@ -22,7 +22,7 @@ import AuthManager from '../../../data/AuthManager.js';
 import ConfigManager from '../../../data/ConfigManager.js';
 import qs from 'qs'
 import {Layout, Menu, Icon, Dropdown, Button} from 'antd';
-import { Select } from 'antd';
+import {Select} from 'antd';
 
 const SubMenu = Menu.SubMenu;
 const MenuItemGroup = Menu.ItemGroup;
@@ -49,17 +49,17 @@ const ComposeHeader = (props) => {
                 className='custom-menu'
                 theme="light"
             >
-                <Dropdown style={{float:"right"}} overlay={<Menu>
+                <Dropdown style={{float: "right"}} overlay={<Menu>
 
                     {JSON.parse(localStorage.getItem("environmentSC")).map(environment => <Menu.Item
                         key={environment.env}>{environment.env}</Menu.Item>)}
                 </Menu>}>
                     <a className="ant-dropdown-link" href="#">
-                        {localStorage.getItem("correctvalue")} <Icon type="down" />
+                        {localStorage.getItem("correctvalue")} <Icon type="down"/>
                     </a>
                 </Dropdown>
                 <SubMenu
-                    title={<span><Icon type="down"/>{ AuthManager.getUser() ? AuthManager.getUser().name : ""}</span>}>
+                    title={<span><Icon type="down"/>{AuthManager.getUser() ? AuthManager.getUser().name : ""}</span>}>
                     <Menu.Item key="setting:2"><Icon type="user"/>Profile</Menu.Item>
                     <Menu.Item key="setting:1">
                         <Link to={{pathname: '/logout', search: params}}><Icon type="logout"/>Logout</Link>
@@ -78,15 +78,13 @@ const ComposeHeader = (props) => {
                     </Menu.Item>
                 </SubMenu>
 
- </SubMenu>
+                {localStorage.getItem("currentEnv") != 'default' &&
+                <SubMenu title={<span><Icon type="setting"/>{localStorage
+                    .getItem("currentEnv")}</span>}>
+                    {this.state.availableEnv.map(environment => <Menu.Item onSelect={this.handleClick}
+                                                                           key={environment.env}>{environment.env}</Menu.Item>)}
 
-                    {localStorage.getItem("currentEnv") != 'default' &&
-                    <SubMenu title={<span><Icon type="setting"/>{localStorage
-                        .getItem("currentEnv")}</span>}>
-                        {this.state.availableEnv.map(environment => <Menu.Item onSelect={this.handleClick}
-                            key={environment.env}>{environment.env}</Menu.Item>)}
-
-                    </SubMenu>
+                </SubMenu>}
 
             </Menu>
         </Header>

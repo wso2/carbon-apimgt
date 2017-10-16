@@ -46,7 +46,7 @@ class Login extends Component {
             password: '',
             validate: false,
             messageOpen: false,
-            message: ''
+            message: '',
             env: [],
             anchorEl: undefined,
             open: false,
