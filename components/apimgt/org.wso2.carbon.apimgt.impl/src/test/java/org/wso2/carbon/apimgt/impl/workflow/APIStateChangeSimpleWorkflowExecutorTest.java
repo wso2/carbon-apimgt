@@ -46,7 +46,7 @@ public class APIStateChangeSimpleWorkflowExecutorTest {
         try {
             Assert.assertNotNull(apiStateChangeSimpleWorkflowExecutor.execute(workflowDTO));
         } catch (WorkflowException e) {
-            Assert.fail("Unexpected WorkflowException occurred while executing AM_API_STATE workflow");
+            Assert.fail("Unexpected WorkflowException occurred while executing API state change simple workflow");
         }
     }
 
