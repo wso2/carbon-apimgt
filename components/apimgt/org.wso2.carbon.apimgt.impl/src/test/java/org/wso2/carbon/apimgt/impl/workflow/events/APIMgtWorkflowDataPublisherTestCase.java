@@ -73,7 +73,6 @@ public class APIMgtWorkflowDataPublisherTestCase {
         DataPublisher dataPublisher = Mockito.mock(DataPublisher.class);
         new APIMgtWorkflowDataPublisher();
         APIMgtWorkflowDataPublisher.addDataPublisher("foo.com", dataPublisher);
-        ;
         DataPublisher dataPublisherFromMap = APIMgtWorkflowDataPublisher.getDataPublisher("foo.com");
         Assert.assertNotNull(dataPublisherFromMap);
     }
