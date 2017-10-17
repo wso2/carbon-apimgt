@@ -45,8 +45,10 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.ApiMgtDAOMockCreator;
 import org.wso2.carbon.apimgt.impl.ServiceReferenceHolderMockCreator;
+import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.base.MultitenantConstants;
 
 import java.io.File;
@@ -62,7 +64,7 @@ import static org.mockito.Matchers.eq;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({LogFactory.class, ApiMgtDAO.class, ServiceReferenceHolder.class, APIManagerConfigurationService.class, APIManagerConfiguration.class})
+@PrepareForTest({LogFactory.class, ApiMgtDAO.class, ServiceReferenceHolder.class, APIManagerConfigurationService.class, APIManagerConfiguration.class, ThrottlePolicyDeploymentManager.class, ThrottlePolicyTemplateBuilder.class, APIUtil.class})
 public class APIUtilTierTest {
     private final String[] validTierNames = {"Gold", "Silver", "Bronze", "Platinum", "Medium", "100PerMinute", "50PerMinute", APIConstants.UNLIMITED_TIER};
     private final String[] tiersReturned = {"policy1", "gold", APIConstants.UNLIMITED_TIER};
@@ -274,10 +276,10 @@ public class APIUtilTierTest {
                 APIConstants.DEFAULT_APP_POLICY_TWENTY_REQ_PER_MIN,
                 APIConstants.DEFAULT_APP_POLICY_TEN_REQ_PER_MIN, APIConstants.DEFAULT_APP_POLICY_UNLIMITED};
 
-        for (String appPolicy : appPolicies) {
+        for (String policy : appPolicies) {
             Mockito.when(
                     apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_APP), eq(MultitenantConstants.SUPER_TENANT_ID),
-                            eq(appPolicy))).thenReturn(false);
+                            eq(policy))).thenReturn(false);
         }
 
         try {
@@ -300,10 +302,10 @@ public class APIUtilTierTest {
 
 
         // If policy added already
-        for (String appPolicy : appPolicies) {
+        for (String policy : appPolicies) {
             Mockito.when(
                     apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_APP), eq(MultitenantConstants.SUPER_TENANT_ID),
-                            eq(appPolicy))).thenReturn(true);
+                            eq(policy))).thenReturn(true);
         }
 
         try {
@@ -323,10 +325,10 @@ public class APIUtilTierTest {
                 APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED,
                 APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
 
-        for (String appPolicy : subPolicies) {
+        for (String policy : subPolicies) {
             Mockito.when(
                     apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_SUB), eq(MultitenantConstants.SUPER_TENANT_ID),
-                            eq(appPolicy))).thenReturn(false);
+                            eq(policy))).thenReturn(false);
         }
 
         try {
@@ -347,10 +349,10 @@ public class APIUtilTierTest {
                 APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED,
                 APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
 
-        for (String appPolicy : subPolicies) {
+        for (String policy : subPolicies) {
             Mockito.when(
                     apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_SUB), eq(MultitenantConstants.SUPER_TENANT_ID),
-                            eq(appPolicy))).thenReturn(true);
+                            eq(policy))).thenReturn(true);
         }
 
         try {
@@ -370,10 +372,10 @@ public class APIUtilTierTest {
                 APIConstants.DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN,
                 APIConstants.DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN, APIConstants.DEFAULT_API_POLICY_UNLIMITED};
 
-        for (String appPolicy : apiPolicies) {
+        for (String policy : apiPolicies) {
             Mockito.when(
                     apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_API), eq(MultitenantConstants.SUPER_TENANT_ID),
-                            eq(appPolicy))).thenReturn(false);
+                            eq(policy))).thenReturn(false);
         }
 
         try {
@@ -393,10 +395,10 @@ public class APIUtilTierTest {
                 APIConstants.DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN,
                 APIConstants.DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN, APIConstants.DEFAULT_API_POLICY_UNLIMITED};
 
-        for (String appPolicy : apiPolicies) {
+        for (String policy : apiPolicies) {
             Mockito.when(
                     apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_API), eq(MultitenantConstants.SUPER_TENANT_ID),
-                            eq(appPolicy))).thenReturn(true);
+                            eq(policy))).thenReturn(true);
         }
 
         try {
@@ -405,6 +407,194 @@ public class APIUtilTierTest {
         } catch (APIManagementException e) {
             Assert.assertTrue("Exception thrown", false);
         }
+    }
+
+    @Test
+    public void testAddDefaultTenantAdvancedThrottlePoliciesAppLevel() throws Exception {
+        int tenantId = 1;
+        String tenantDomain = "test.com";
+
+        ApiMgtDAOMockCreator daoMockHolder = new ApiMgtDAOMockCreator(tenantId);
+        ApiMgtDAO apiMgtDAO = daoMockHolder.getMock();
+
+        ThrottlePolicyTemplateBuilder templateBuilder = Mockito.mock(ThrottlePolicyTemplateBuilder.class);
+        PowerMockito.whenNew(ThrottlePolicyTemplateBuilder.class).withNoArguments().thenReturn(templateBuilder);
+
+        String[] appPolicies = new String[]{APIConstants.DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN,
+                APIConstants.DEFAULT_APP_POLICY_TWENTY_REQ_PER_MIN,
+                APIConstants.DEFAULT_APP_POLICY_TEN_REQ_PER_MIN, APIConstants.DEFAULT_APP_POLICY_UNLIMITED};
+
+        for (String policy : appPolicies) {
+            Mockito.when(
+                    apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_APP), eq(tenantId),
+                            eq(policy))).thenReturn(false);
+            Mockito.when(
+                    apiMgtDAO.isPolicyDeployed(eq(PolicyConstants.POLICY_LEVEL_APP), eq(tenantId),
+                            eq(policy))).thenReturn(false);
+        }
+
+        APIUtil.addDefaultTenantAdvancedThrottlePolicies(tenantDomain, tenantId);
+        Mockito.verify(apiMgtDAO, Mockito.times(appPolicies.length)).
+                addApplicationPolicy(Mockito.any(ApplicationPolicy.class));
+        Mockito.verify(apiMgtDAO, Mockito.times(appPolicies.length)).
+                setPolicyDeploymentStatus(eq(PolicyConstants.POLICY_LEVEL_APP), Mockito.anyString(), eq(tenantId), eq(true));
+    }
+
+
+    @Test
+    public void testAddDefaultTenantAdvancedThrottlePoliciesAppLevelAlreadyAdded() throws Exception {
+        int tenantId = 1;
+        String tenantDomain = "test.com";
+
+        ApiMgtDAOMockCreator daoMockHolder = new ApiMgtDAOMockCreator(tenantId);
+        ApiMgtDAO apiMgtDAO = daoMockHolder.getMock();
+
+        ThrottlePolicyTemplateBuilder templateBuilder = Mockito.mock(ThrottlePolicyTemplateBuilder.class);
+        PowerMockito.whenNew(ThrottlePolicyTemplateBuilder.class).withNoArguments().thenReturn(templateBuilder);
+
+        String[] appPolicies = new String[]{APIConstants.DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN,
+                APIConstants.DEFAULT_APP_POLICY_TWENTY_REQ_PER_MIN,
+                APIConstants.DEFAULT_APP_POLICY_TEN_REQ_PER_MIN, APIConstants.DEFAULT_APP_POLICY_UNLIMITED};
+
+        for (String policy : appPolicies) {
+            Mockito.when(
+                    apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_APP), eq(tenantId),
+                            eq(policy))).thenReturn(true);
+            Mockito.when(
+                    apiMgtDAO.isPolicyDeployed(eq(PolicyConstants.POLICY_LEVEL_APP), eq(tenantId),
+                            eq(policy))).thenReturn(true);
+        }
+
+        APIUtil.addDefaultTenantAdvancedThrottlePolicies(tenantDomain, tenantId);
+        Mockito.verify(apiMgtDAO, Mockito.never()).
+                addApplicationPolicy(Mockito.any(ApplicationPolicy.class));
+        Mockito.verify(apiMgtDAO, Mockito.never()).
+                setPolicyDeploymentStatus(eq(PolicyConstants.POLICY_LEVEL_APP), Mockito.anyString(), eq(tenantId), eq(true));
+    }
+
+
+    @Test
+    public void testAddDefaultTenantAdvancedThrottlePoliciesSubLevel() throws Exception {
+        int tenantId = 1;
+        String tenantDomain = "test.com";
+
+        ApiMgtDAOMockCreator daoMockHolder = new ApiMgtDAOMockCreator(tenantId);
+        ApiMgtDAO apiMgtDAO = daoMockHolder.getMock();
+
+        ThrottlePolicyTemplateBuilder templateBuilder = Mockito.mock(ThrottlePolicyTemplateBuilder.class);
+        PowerMockito.whenNew(ThrottlePolicyTemplateBuilder.class).withNoArguments().thenReturn(templateBuilder);
+
+        String[] policies = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD, APIConstants.DEFAULT_SUB_POLICY_SILVER,
+                APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED,
+                APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
+
+        for (String policy : policies) {
+            Mockito.when(
+                    apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_SUB), eq(tenantId),
+                            eq(policy))).thenReturn(false);
+            Mockito.when(
+                    apiMgtDAO.isPolicyDeployed(eq(PolicyConstants.POLICY_LEVEL_SUB), eq(tenantId),
+                            eq(policy))).thenReturn(false);
+        }
+
+        APIUtil.addDefaultTenantAdvancedThrottlePolicies(tenantDomain, tenantId);
+        Mockito.verify(apiMgtDAO, Mockito.times(policies.length)).
+                addSubscriptionPolicy(Mockito.any(SubscriptionPolicy.class));
+        Mockito.verify(apiMgtDAO, Mockito.times(policies.length)).
+                setPolicyDeploymentStatus(eq(PolicyConstants.POLICY_LEVEL_SUB), Mockito.anyString(), eq(tenantId), eq(true));
+    }
+
+    @Test
+    public void testAddDefaultTenantAdvancedThrottlePoliciesSubLevelAlreadyAdded() throws Exception {
+        int tenantId = 1;
+        String tenantDomain = "test.com";
+
+        ApiMgtDAOMockCreator daoMockHolder = new ApiMgtDAOMockCreator(tenantId);
+        ApiMgtDAO apiMgtDAO = daoMockHolder.getMock();
+
+        ThrottlePolicyTemplateBuilder templateBuilder = Mockito.mock(ThrottlePolicyTemplateBuilder.class);
+        PowerMockito.whenNew(ThrottlePolicyTemplateBuilder.class).withNoArguments().thenReturn(templateBuilder);
+
+        String[] policies = new String[]{APIConstants.DEFAULT_SUB_POLICY_GOLD, APIConstants.DEFAULT_SUB_POLICY_SILVER,
+                APIConstants.DEFAULT_SUB_POLICY_BRONZE, APIConstants.DEFAULT_SUB_POLICY_UNAUTHENTICATED,
+                APIConstants.DEFAULT_SUB_POLICY_UNLIMITED};
+
+        for (String policy : policies) {
+            Mockito.when(
+                    apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_SUB), eq(tenantId),
+                            eq(policy))).thenReturn(true);
+            Mockito.when(
+                    apiMgtDAO.isPolicyDeployed(eq(PolicyConstants.POLICY_LEVEL_SUB), eq(tenantId),
+                            eq(policy))).thenReturn(true);
+        }
+
+        APIUtil.addDefaultTenantAdvancedThrottlePolicies(tenantDomain, tenantId);
+        Mockito.verify(apiMgtDAO, Mockito.never()).
+                addSubscriptionPolicy(Mockito.any(SubscriptionPolicy.class));
+        Mockito.verify(apiMgtDAO, Mockito.never()).
+                setPolicyDeploymentStatus(eq(PolicyConstants.POLICY_LEVEL_SUB), Mockito.anyString(), eq(tenantId), eq(true));
+    }
+
+    @Test
+    public void testAddDefaultTenantAdvancedThrottlePoliciesApiLevel() throws Exception {
+        int tenantId = 1;
+        String tenantDomain = "test.com";
+
+        ApiMgtDAOMockCreator daoMockHolder = new ApiMgtDAOMockCreator(tenantId);
+        ApiMgtDAO apiMgtDAO = daoMockHolder.getMock();
+
+        ThrottlePolicyTemplateBuilder templateBuilder = Mockito.mock(ThrottlePolicyTemplateBuilder.class);
+        PowerMockito.whenNew(ThrottlePolicyTemplateBuilder.class).withNoArguments().thenReturn(templateBuilder);
+
+        String[] policies = new String[]{APIConstants.DEFAULT_API_POLICY_FIFTY_THOUSAND_REQ_PER_MIN,
+                APIConstants.DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN,
+                APIConstants.DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN, APIConstants.DEFAULT_API_POLICY_UNLIMITED};
+
+        for (String policy : policies) {
+            Mockito.when(
+                    apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_API), eq(tenantId),
+                            eq(policy))).thenReturn(false);
+            Mockito.when(
+                    apiMgtDAO.isPolicyDeployed(eq(PolicyConstants.POLICY_LEVEL_API), eq(tenantId),
+                            eq(policy))).thenReturn(false);
+        }
+
+        APIUtil.addDefaultTenantAdvancedThrottlePolicies(tenantDomain, tenantId);
+        Mockito.verify(apiMgtDAO, Mockito.times(policies.length)).
+                addAPIPolicy(Mockito.any(APIPolicy.class));
+        Mockito.verify(apiMgtDAO, Mockito.times(policies.length)).
+                setPolicyDeploymentStatus(eq(PolicyConstants.POLICY_LEVEL_API), Mockito.anyString(), eq(tenantId), eq(true));
+    }
+
+    @Test
+    public void testAddDefaultTenantAdvancedThrottlePoliciesApiLevelAlreadyAdded() throws Exception {
+        int tenantId = 1;
+        String tenantDomain = "test.com";
+
+        ApiMgtDAOMockCreator daoMockHolder = new ApiMgtDAOMockCreator(tenantId);
+        ApiMgtDAO apiMgtDAO = daoMockHolder.getMock();
+
+        ThrottlePolicyTemplateBuilder templateBuilder = Mockito.mock(ThrottlePolicyTemplateBuilder.class);
+        PowerMockito.whenNew(ThrottlePolicyTemplateBuilder.class).withNoArguments().thenReturn(templateBuilder);
+
+        String[] policies = new String[]{APIConstants.DEFAULT_API_POLICY_FIFTY_THOUSAND_REQ_PER_MIN,
+                APIConstants.DEFAULT_API_POLICY_TWENTY_THOUSAND_REQ_PER_MIN,
+                APIConstants.DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN, APIConstants.DEFAULT_API_POLICY_UNLIMITED};
+
+        for (String policy : policies) {
+            Mockito.when(
+                    apiMgtDAO.isPolicyExist(eq(PolicyConstants.POLICY_LEVEL_API), eq(tenantId),
+                            eq(policy))).thenReturn(true);
+            Mockito.when(
+                    apiMgtDAO.isPolicyDeployed(eq(PolicyConstants.POLICY_LEVEL_API), eq(tenantId),
+                            eq(policy))).thenReturn(true);
+        }
+
+        APIUtil.addDefaultTenantAdvancedThrottlePolicies(tenantDomain, tenantId);
+        Mockito.verify(apiMgtDAO, Mockito.never()).
+                addAPIPolicy(Mockito.any(APIPolicy.class));
+        Mockito.verify(apiMgtDAO, Mockito.never()).
+                setPolicyDeploymentStatus(eq(PolicyConstants.POLICY_LEVEL_API), Mockito.anyString(), eq(tenantId), eq(true));
     }
 
     private SubscriptionPolicy[] generateSubscriptionPolicies(String[] policyNames) {
