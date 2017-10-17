@@ -42,7 +42,9 @@
                         idpURL = site.ssoConfiguration.identityProviderLogoutURL ;
                             if(idpURL == null){
                                 idpURL = site.ssoConfiguration.identityProviderURL ;
-                                log.debug(idpURL);
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Identity Provider logout URL: " + idpURL);
+                                }
                             }
                 }else{
                         if (log.isDebugEnabled()) {
