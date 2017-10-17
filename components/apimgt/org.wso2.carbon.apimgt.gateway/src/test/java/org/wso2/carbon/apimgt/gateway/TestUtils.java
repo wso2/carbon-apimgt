@@ -79,7 +79,7 @@ public class TestUtils {
         synCtx.setProperty(RESTConstants.REST_API_CONTEXT, context);
         synCtx.setProperty(RESTConstants.SYNAPSE_REST_API_VERSION, version);
         AuthenticationContext authenticationContext = new AuthenticationContext();
-        authenticationContext.setUsername("sanjeewa");
+        authenticationContext.setUsername("testuser");
         authenticationContext.setApiKey("123456789");
         authenticationContext.setApplicationId("123");
         authenticationContext.setApplicationName("test-app");
