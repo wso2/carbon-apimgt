@@ -114,7 +114,7 @@ public class APIMgtWorkflowDataPublisher {
 
     public boolean publishEvent(WorkflowDTO workflowDTO) {
 
-        if (!enabled) {
+        if (!enabled|| skipEventReceiverConnection) {
             return true;
         }
 
