@@ -68,7 +68,6 @@ console.log("working")
                     return new Swagger(argsv);
                 }
             );
-        debugger;
 
         this._client = this._client.then((Swagger)=>{
             Swagger.http.credentials = 'include';

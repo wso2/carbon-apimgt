@@ -31,8 +31,6 @@ import org.wso2.carbon.kernel.configprovider.ConfigProvider;
  * Class used to activate store/publisher application configuration loading.
  */
 @Component(
-        //TODO: From Ravindu's Code
-        //name = "org.wso2.carbon.apimgt.authenticator",
         name = "org.wso2.carbon.apimgt.rest.api.authenticator",
         immediate = true
 )
