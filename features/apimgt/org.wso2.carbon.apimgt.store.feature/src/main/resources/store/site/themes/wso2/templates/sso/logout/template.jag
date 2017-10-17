@@ -41,8 +41,8 @@
                         idpURL = site.ssoConfiguration.identityProviderLogoutURL ;
                         if(idpURL == null){
                             idpURL = site.ssoConfiguration.identityProviderURL ;
-                        	log.debug(idpURL);
-                   		}
+                            log.debug(idpURL);
+                        }
                 } else {
                         if (log.isDebugEnabled()) {
                             log.debug("doing logout request");
