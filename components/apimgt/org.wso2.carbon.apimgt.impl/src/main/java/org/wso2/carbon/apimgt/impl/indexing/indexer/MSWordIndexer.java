@@ -36,14 +36,14 @@ public class MSWordIndexer implements Indexer {
                 WordExtractor msWord2003Extractor = new WordExtractor(fs);
                 wordText = msWord2003Extractor.getText();
 
-            }catch (OfficeXmlFileException e){
+            } catch (OfficeXmlFileException e){
                 //if 2003 extraction failed, try with MSWord 2007 document files extractor
                 XWPFDocument doc = new XWPFDocument(new ByteArrayInputStream(fileData.data));
 
                 XWPFWordExtractor msWord2007Extractor = new XWPFWordExtractor(doc);
                 wordText = msWord2007Extractor.getText();
 
-            }catch (Exception e){
+            } catch (Exception e){
                 //The reason for not throwing an exception is that since this is an indexer that runs in the background
                 //throwing an exception might lead to adverse behaviors in the client side and might lead to
                 //other files not being indexed
