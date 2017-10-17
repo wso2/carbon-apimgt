@@ -37,8 +37,8 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 @PrepareForTest({ApiMgtDAO.class})
 public class SubscriptionCreationSimpleWorkflowExecutorTest {
 
-    public SubscriptionCreationSimpleWorkflowExecutor subscriptionCreationSimpleWorkflowExecutor;
-    public ApiMgtDAO apiMgtDAO;
+    private SubscriptionCreationSimpleWorkflowExecutor subscriptionCreationSimpleWorkflowExecutor;
+    private ApiMgtDAO apiMgtDAO;
 
     @Before
     public void init() {
@@ -73,7 +73,7 @@ public class SubscriptionCreationSimpleWorkflowExecutorTest {
             PowerMockito.doThrow(new APIManagementException("Could not complete subscription creation workflow"))
                     .when(apiMgtDAO).updateSubscriptionStatus(1, "UNBLOCKED");
             subscriptionCreationSimpleWorkflowExecutor.execute(workflowDTO);
-            Assert.fail("Expected WorkflowException occurred is not thrown when subscription creation simple workflow" +
+            Assert.fail("Expected WorkflowException is not thrown when subscription creation simple workflow" +
                     " execution failed");
         } catch (WorkflowException e) {
             Assert.assertTrue(e.getMessage().contains("Could not complete subscription creation workflow"));

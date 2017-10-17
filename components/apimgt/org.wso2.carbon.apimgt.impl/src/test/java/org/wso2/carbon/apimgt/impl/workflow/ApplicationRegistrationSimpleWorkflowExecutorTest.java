@@ -44,7 +44,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 public class ApplicationRegistrationSimpleWorkflowExecutorTest {
 
     private ApplicationRegistrationSimpleWorkflowExecutor applicationRegistrationSimpleWorkflowExecutor;
-    public ApiMgtDAO apiMgtDAO;
+    private ApiMgtDAO apiMgtDAO;
     private ApplicationRegistrationWorkflowDTO workflowDTO;
     private Application application;
     private KeyManager keyManager;
@@ -73,7 +73,6 @@ public class ApplicationRegistrationSimpleWorkflowExecutorTest {
 
     @Test
     public void testExecutingApplicationRegistrationWorkFlow() throws APIManagementException {
-
         PowerMockito.doNothing().when(apiMgtDAO).createApplicationRegistrationEntry(workflowDTO, false);
         Mockito.when(keyManager.createApplication(oAuthAppRequest)).thenReturn(oAuthApplicationInfo);
         try {
@@ -86,12 +85,11 @@ public class ApplicationRegistrationSimpleWorkflowExecutorTest {
 
     @Test
     public void testFailureWhileExecutingApplicationRegistrationWorkFlow() throws APIManagementException {
-
         PowerMockito.doNothing().when(apiMgtDAO).createApplicationRegistrationEntry(workflowDTO, false);
         Mockito.when(keyManager.createApplication(oAuthAppRequest)).thenThrow(new APIManagementException(""));
         try {
             applicationRegistrationSimpleWorkflowExecutor.execute(workflowDTO);
-            Assert.fail("Unexpected WorkflowException occurred while executing application registration simple " +
+            Assert.fail("Expected WorkflowException is not thrown while executing application registration simple " +
                     "workflow");
         } catch (WorkflowException e) {
            Assert.assertTrue(e.getMessage().contains("Error occurred when updating the status of the Application " +

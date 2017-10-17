@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
  */
 public class APIStateChangeSimpleWorkflowExecutorTest {
 
-    public APIStateChangeSimpleWorkflowExecutor apiStateChangeSimpleWorkflowExecutor;
+    private APIStateChangeSimpleWorkflowExecutor apiStateChangeSimpleWorkflowExecutor;
 
     @Before
     public void init() {

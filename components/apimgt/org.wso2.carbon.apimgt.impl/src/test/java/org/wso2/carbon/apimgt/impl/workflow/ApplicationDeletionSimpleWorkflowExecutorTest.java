@@ -40,7 +40,7 @@ import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 public class ApplicationDeletionSimpleWorkflowExecutorTest {
 
     private ApplicationDeletionSimpleWorkflowExecutor applicationDeletionSimpleWorkflowExecutor;
-    public ApiMgtDAO apiMgtDAO;
+    private ApiMgtDAO apiMgtDAO;
     private ApplicationWorkflowDTO workflowDTO;
     private Application application;
 
@@ -63,7 +63,6 @@ public class ApplicationDeletionSimpleWorkflowExecutorTest {
 
     @Test
     public void testExecutingApplicationDeletionWorkFlow() throws APIManagementException {
-
         PowerMockito.doNothing().when(apiMgtDAO).deleteApplication(application);
         try {
             Assert.assertNotNull(applicationDeletionSimpleWorkflowExecutor.execute(workflowDTO));
@@ -79,7 +78,7 @@ public class ApplicationDeletionSimpleWorkflowExecutorTest {
                 .when(apiMgtDAO).deleteApplication(application);
         try {
             applicationDeletionSimpleWorkflowExecutor.execute(workflowDTO);
-            Assert.fail("Expected WorkflowException occurred is not thrown when application deletion simple workflow" +
+            Assert.fail("Expected WorkflowException is not thrown when application deletion simple workflow" +
                     " execution failed");
         } catch (WorkflowException e) {
             Assert.assertTrue(e.getMessage().contains("Could not complete application deletion workflow"));
@@ -89,7 +88,7 @@ public class ApplicationDeletionSimpleWorkflowExecutorTest {
         Mockito.doThrow(APIManagementException.class).when(apiMgtDAO).deleteApplication(application);
         try {
             applicationDeletionSimpleWorkflowExecutor.execute(workflowDTO);
-            Assert.fail("Expected WorkflowException occurred is not thrown when application deletion simple workflow" +
+            Assert.fail("Expected WorkflowException is not thrown when application deletion simple workflow" +
                     " execution failed");
         } catch (WorkflowException e) {
             Assert.assertTrue(e.getMessage().contains("Couldn't complete simple application deletion workflow for " +
