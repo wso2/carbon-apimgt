@@ -4042,6 +4042,10 @@ public class APIProviderHostObject extends ScriptableObject {
 
             try {
                 if (fileHostObject != null && fileHostObject.getJavaScriptFile().getLength() != 0) {
+                    String extension  = FilenameUtils.getExtension(fileHostObject.getJavaScriptFile().getName());
+                    if (extension.contains("exe")) {
+                        throw new APIManagementException("File type .exe is not supported!");
+                    }
                     ResourceFile resourceFile = new ResourceFile(fileHostObject.getInputStream(),
                                          fileHostObject.getJavaScriptFile().getContentType());
                     String filePath = APIUtil.getDocumentationFilePath(apiId, fileHostObject.getName());
