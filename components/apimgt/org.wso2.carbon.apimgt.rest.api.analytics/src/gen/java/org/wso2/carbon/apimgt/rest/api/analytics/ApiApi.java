@@ -21,6 +21,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -44,6 +45,7 @@ import javax.ws.rs.core.Response;
 public class ApiApi implements Microservice  {
    private final ApiApiService delegate = ApiApiServiceFactory.getApiApi();
 
+    @OPTIONS
     @GET
     @Path("/count-over-time")
     @Consumes({ "application/json" })
@@ -62,10 +64,11 @@ public class ApiApi implements Microservice  {
     public Response apiCountOverTimeGet(@ApiParam(value = "Defines the starting timestamp of the interval ",required=true) @QueryParam("startTime") String startTime
 ,@ApiParam(value = "Defines the ending timestamp of the interval ",required=true) @QueryParam("endTime") String endTime
 ,@ApiParam(value = "application/api creator name. In case of any creator is not provided all the details will be provided ") @QueryParam("createdBy") String createdBy
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.apiCountOverTimeGet(startTime,endTime,createdBy, request);
+        return delegate.apiCountOverTimeGet(startTime,endTime,createdBy,request);
     }
+    @OPTIONS
     @GET
     @Path("/list")
     @Consumes({ "application/json" })
@@ -84,10 +87,11 @@ public class ApiApi implements Microservice  {
     public Response apiListGet(@ApiParam(value = "Defines the starting timestamp of the interval ",required=true) @QueryParam("startTime") String startTime
 ,@ApiParam(value = "Defines the ending timestamp of the interval ",required=true) @QueryParam("endTime") String endTime
 ,@ApiParam(value = "application/api creator name. In case of any creator is not provided all the details will be provided ") @QueryParam("createdBy") String createdBy
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.apiListGet(startTime,endTime,createdBy, request);
+        return delegate.apiListGet(startTime,endTime,createdBy,request);
     }
+    @OPTIONS
     @GET
     @Path("/subscriber-count-by-api")
     @Consumes({ "application/json" })
@@ -106,8 +110,8 @@ public class ApiApi implements Microservice  {
     public Response apiSubscriberCountByApiGet(@ApiParam(value = "Defines the starting timestamp of the interval ",required=true) @QueryParam("startTime") String startTime
 ,@ApiParam(value = "Defines the ending timestamp of the interval ",required=true) @QueryParam("endTime") String endTime
 ,@ApiParam(value = "UUID of the API. ") @QueryParam("apiId") String apiId
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.apiSubscriberCountByApiGet(startTime,endTime,apiId, request);
+        return delegate.apiSubscriberCountByApiGet(startTime,endTime,apiId,request);
     }
 }

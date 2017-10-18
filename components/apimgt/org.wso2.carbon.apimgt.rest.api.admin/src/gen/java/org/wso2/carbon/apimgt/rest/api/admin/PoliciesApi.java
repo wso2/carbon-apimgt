@@ -27,6 +27,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -50,6 +51,7 @@ import javax.ws.rs.core.Response;
 public class PoliciesApi implements Microservice  {
    private final PoliciesApiService delegate = PoliciesApiServiceFactory.getPoliciesApi();
 
+    @OPTIONS
     @GET
     @Path("/throttling/advanced")
     @Consumes({ "application/json" })
@@ -67,10 +69,11 @@ public class PoliciesApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = AdvancedThrottlePolicyListDTO.class) })
     public Response policiesThrottlingAdvancedGet(@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingAdvancedGet(ifNoneMatch,ifModifiedSince, request);
+        return delegate.policiesThrottlingAdvancedGet(ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @DELETE
     @Path("/throttling/advanced/{id}")
     @Consumes({ "application/json" })
@@ -89,10 +92,11 @@ public class PoliciesApi implements Microservice  {
     public Response policiesThrottlingAdvancedIdDelete(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("id") String id
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingAdvancedIdDelete(id,ifMatch,ifUnmodifiedSince, request);
+        return delegate.policiesThrottlingAdvancedIdDelete(id,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/throttling/advanced/{id}")
     @Consumes({ "application/json" })
@@ -113,10 +117,11 @@ public class PoliciesApi implements Microservice  {
     public Response policiesThrottlingAdvancedIdGet(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("id") String id
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingAdvancedIdGet(id,ifNoneMatch,ifModifiedSince, request);
+        return delegate.policiesThrottlingAdvancedIdGet(id,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @PUT
     @Path("/throttling/advanced/{id}")
     @Consumes({ "application/json" })
@@ -138,10 +143,11 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Policy object that needs to be modified " ,required=true) AdvancedThrottlePolicyDTO body
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingAdvancedIdPut(id,body,ifMatch,ifUnmodifiedSince, request);
+        return delegate.policiesThrottlingAdvancedIdPut(id,body,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @POST
     @Path("/throttling/advanced")
     @Consumes({ "application/json" })
@@ -158,10 +164,11 @@ public class PoliciesApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = AdvancedThrottlePolicyDTO.class) })
     public Response policiesThrottlingAdvancedPost(@ApiParam(value = "Advanced level policy object that should to be added " ,required=true) AdvancedThrottlePolicyDTO body
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingAdvancedPost(body, request);
+        return delegate.policiesThrottlingAdvancedPost(body,request);
     }
+    @OPTIONS
     @GET
     @Path("/throttling/application")
     @Consumes({ "application/json" })
@@ -179,10 +186,11 @@ public class PoliciesApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = ApplicationThrottlePolicyListDTO.class) })
     public Response policiesThrottlingApplicationGet(@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingApplicationGet(ifNoneMatch,ifModifiedSince, request);
+        return delegate.policiesThrottlingApplicationGet(ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @DELETE
     @Path("/throttling/application/{id}")
     @Consumes({ "application/json" })
@@ -201,10 +209,11 @@ public class PoliciesApi implements Microservice  {
     public Response policiesThrottlingApplicationIdDelete(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("id") String id
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingApplicationIdDelete(id,ifMatch,ifUnmodifiedSince, request);
+        return delegate.policiesThrottlingApplicationIdDelete(id,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/throttling/application/{id}")
     @Consumes({ "application/json" })
@@ -225,10 +234,11 @@ public class PoliciesApi implements Microservice  {
     public Response policiesThrottlingApplicationIdGet(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("id") String id
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingApplicationIdGet(id,ifNoneMatch,ifModifiedSince, request);
+        return delegate.policiesThrottlingApplicationIdGet(id,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @PUT
     @Path("/throttling/application/{id}")
     @Consumes({ "application/json" })
@@ -250,10 +260,11 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Policy object that needs to be modified " ,required=true) ApplicationThrottlePolicyDTO body
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingApplicationIdPut(id,body,ifMatch,ifUnmodifiedSince, request);
+        return delegate.policiesThrottlingApplicationIdPut(id,body,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @POST
     @Path("/throttling/application")
     @Consumes({ "application/json" })
@@ -270,10 +281,11 @@ public class PoliciesApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = ApplicationThrottlePolicyDTO.class) })
     public Response policiesThrottlingApplicationPost(@ApiParam(value = "Application level policy object that should to be added " ,required=true) ApplicationThrottlePolicyDTO body
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingApplicationPost(body, request);
+        return delegate.policiesThrottlingApplicationPost(body,request);
     }
+    @OPTIONS
     @GET
     @Path("/throttling/custom")
     @Consumes({ "application/json" })
@@ -291,10 +303,11 @@ public class PoliciesApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = CustomRuleListDTO.class) })
     public Response policiesThrottlingCustomGet(@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingCustomGet(ifNoneMatch,ifModifiedSince, request);
+        return delegate.policiesThrottlingCustomGet(ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @POST
     @Path("/throttling/custom")
     @Consumes({ "application/json" })
@@ -311,10 +324,11 @@ public class PoliciesApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = CustomRuleDTO.class) })
     public Response policiesThrottlingCustomPost(@ApiParam(value = "Custom Rule object that should to be added " ,required=true) CustomRuleDTO body
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingCustomPost(body, request);
+        return delegate.policiesThrottlingCustomPost(body,request);
     }
+    @OPTIONS
     @DELETE
     @Path("/throttling/custom/{ruleId}")
     @Consumes({ "application/json" })
@@ -333,10 +347,11 @@ public class PoliciesApi implements Microservice  {
     public Response policiesThrottlingCustomRuleIdDelete(@ApiParam(value = "Custom rule UUID ",required=true) @PathParam("ruleId") String ruleId
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingCustomRuleIdDelete(ruleId,ifMatch,ifUnmodifiedSince, request);
+        return delegate.policiesThrottlingCustomRuleIdDelete(ruleId,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/throttling/custom/{ruleId}")
     @Consumes({ "application/json" })
@@ -357,10 +372,11 @@ public class PoliciesApi implements Microservice  {
     public Response policiesThrottlingCustomRuleIdGet(@ApiParam(value = "Custom rule UUID ",required=true) @PathParam("ruleId") String ruleId
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingCustomRuleIdGet(ruleId,ifNoneMatch,ifModifiedSince, request);
+        return delegate.policiesThrottlingCustomRuleIdGet(ruleId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @PUT
     @Path("/throttling/custom/{ruleId}")
     @Consumes({ "application/json" })
@@ -382,10 +398,11 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Policy object that needs to be modified " ,required=true) CustomRuleDTO body
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingCustomRuleIdPut(ruleId,body,ifMatch,ifUnmodifiedSince, request);
+        return delegate.policiesThrottlingCustomRuleIdPut(ruleId,body,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/throttling/subscription")
     @Consumes({ "application/json" })
@@ -403,10 +420,11 @@ public class PoliciesApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = SubscriptionThrottlePolicyListDTO.class) })
     public Response policiesThrottlingSubscriptionGet(@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingSubscriptionGet(ifNoneMatch,ifModifiedSince, request);
+        return delegate.policiesThrottlingSubscriptionGet(ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @DELETE
     @Path("/throttling/subscription/{id}")
     @Consumes({ "application/json" })
@@ -425,10 +443,11 @@ public class PoliciesApi implements Microservice  {
     public Response policiesThrottlingSubscriptionIdDelete(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("id") String id
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingSubscriptionIdDelete(id,ifMatch,ifUnmodifiedSince, request);
+        return delegate.policiesThrottlingSubscriptionIdDelete(id,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/throttling/subscription/{id}")
     @Consumes({ "application/json" })
@@ -449,10 +468,11 @@ public class PoliciesApi implements Microservice  {
     public Response policiesThrottlingSubscriptionIdGet(@ApiParam(value = "Thorttle policy UUID ",required=true) @PathParam("id") String id
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingSubscriptionIdGet(id,ifNoneMatch,ifModifiedSince, request);
+        return delegate.policiesThrottlingSubscriptionIdGet(id,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @PUT
     @Path("/throttling/subscription/{id}")
     @Consumes({ "application/json" })
@@ -474,10 +494,11 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Policy object that needs to be modified " ,required=true) SubscriptionThrottlePolicyDTO body
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingSubscriptionIdPut(id,body,ifMatch,ifUnmodifiedSince, request);
+        return delegate.policiesThrottlingSubscriptionIdPut(id,body,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @POST
     @Path("/throttling/subscription")
     @Consumes({ "application/json" })
@@ -494,8 +515,8 @@ public class PoliciesApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = SubscriptionThrottlePolicyDTO.class) })
     public Response policiesThrottlingSubscriptionPost(@ApiParam(value = "Subscripion level policy object that should to be added " ,required=true) SubscriptionThrottlePolicyDTO body
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesThrottlingSubscriptionPost(body, request);
+        return delegate.policiesThrottlingSubscriptionPost(body,request);
     }
 }

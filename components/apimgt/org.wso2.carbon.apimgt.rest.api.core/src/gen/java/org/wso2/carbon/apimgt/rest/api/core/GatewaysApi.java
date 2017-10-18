@@ -21,6 +21,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -44,6 +45,7 @@ import javax.ws.rs.core.Response;
 public class GatewaysApi implements Microservice  {
    private final GatewaysApiService delegate = GatewaysApiServiceFactory.getGatewaysApi();
 
+    @OPTIONS
     @POST
     @Path("/register")
     @Consumes({ "application/json" })
@@ -57,8 +59,8 @@ public class GatewaysApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was in a not supported format. ", response = RegistrationSummaryDTO.class) })
     public Response gatewaysRegisterPost(@ApiParam(value = "Register object that needs to be added " ,required=true) RegistrationDTO body
 ,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.gatewaysRegisterPost(body,contentType, request);
+        return delegate.gatewaysRegisterPost(body,contentType,request);
     }
 }

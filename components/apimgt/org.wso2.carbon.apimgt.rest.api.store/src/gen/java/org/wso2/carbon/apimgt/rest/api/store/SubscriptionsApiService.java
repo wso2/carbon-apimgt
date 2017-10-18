@@ -27,15 +27,15 @@ public abstract class SubscriptionsApiService {
  ,Integer offset
  ,Integer limit
  ,String ifNoneMatch
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
     public abstract Response subscriptionsPost(SubscriptionDTO body
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
     public abstract Response subscriptionsSubscriptionIdDelete(String subscriptionId
  ,String ifMatch
  ,String ifUnmodifiedSince
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
     public abstract Response subscriptionsSubscriptionIdGet(String subscriptionId
  ,String ifNoneMatch
  ,String ifModifiedSince
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
 }

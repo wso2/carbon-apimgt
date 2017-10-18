@@ -20,6 +20,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -43,6 +44,7 @@ import javax.ws.rs.core.Response;
 public class EndpointsApi implements Microservice  {
    private final EndpointsApiService delegate = EndpointsApiServiceFactory.getEndpointsApi();
 
+    @OPTIONS
     @GET
     @Path("/{endpointId}/gateway-config")
     @Consumes({ "application/json" })
@@ -58,10 +60,11 @@ public class EndpointsApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = void.class) })
     public Response endpointsEndpointIdGatewayConfigGet(@ApiParam(value = "The UUID of an Endpoint ",required=true) @PathParam("endpointId") String endpointId
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.endpointsEndpointIdGatewayConfigGet(endpointId,accept, request);
+        return delegate.endpointsEndpointIdGatewayConfigGet(endpointId,accept,request);
     }
+    @OPTIONS
     @GET
     
     @Consumes({ "application/json" })
@@ -73,8 +76,8 @@ public class EndpointsApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = EndpointListDTO.class) })
     public Response endpointsGet(@ApiParam(value = "Number of entities that should be retrieved. ") @QueryParam("limit") Integer limit
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.endpointsGet(limit,accept, request);
+        return delegate.endpointsGet(limit,accept,request);
     }
 }

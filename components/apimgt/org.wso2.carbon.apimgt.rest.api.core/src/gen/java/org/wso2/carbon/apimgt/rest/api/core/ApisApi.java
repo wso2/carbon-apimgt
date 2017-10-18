@@ -20,6 +20,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -43,6 +44,7 @@ import javax.ws.rs.core.Response;
 public class ApisApi implements Microservice  {
    private final ApisApiService delegate = ApisApiServiceFactory.getApisApi();
 
+    @OPTIONS
     @GET
     @Path("/{apiId}/gateway-config")
     @Consumes({ "application/json" })
@@ -58,10 +60,11 @@ public class ApisApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = void.class) })
     public Response apisApiIdGatewayConfigGet(@ApiParam(value = "The UUID of an API ",required=true) @PathParam("apiId") String apiId
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.apisApiIdGatewayConfigGet(apiId,accept, request);
+        return delegate.apisApiIdGatewayConfigGet(apiId,accept,request);
     }
+    @OPTIONS
     @GET
     
     @Consumes({ "application/json" })
@@ -73,8 +76,8 @@ public class ApisApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = APIListDTO.class) })
     public Response apisGet(@ApiParam(value = "Comma seperated gateway labels ") @QueryParam("labels") String labels
 ,@ApiParam(value = "Lifecycle status ") @QueryParam("status") String status
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.apisGet(labels,status, request);
+        return delegate.apisGet(labels,status,request);
     }
 }

@@ -22,6 +22,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -45,6 +46,7 @@ import javax.ws.rs.core.Response;
 public class SubscriptionsApi implements Microservice  {
    private final SubscriptionsApiService delegate = SubscriptionsApiServiceFactory.getSubscriptionsApi();
 
+    @OPTIONS
     @GET
     
     @Consumes({ "application/json" })
@@ -66,10 +68,11 @@ public class SubscriptionsApi implements Microservice  {
 ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
 ,@ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.subscriptionsGet(apiId,applicationId,apiType,offset,limit,ifNoneMatch, request);
+        return delegate.subscriptionsGet(apiId,applicationId,apiType,offset,limit,ifNoneMatch,request);
     }
+    @OPTIONS
     @POST
     
     @Consumes({ "application/json" })
@@ -88,10 +91,11 @@ public class SubscriptionsApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = SubscriptionDTO.class) })
     public Response subscriptionsPost(@ApiParam(value = "Subscription object that should to be added " ,required=true) SubscriptionDTO body
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.subscriptionsPost(body, request);
+        return delegate.subscriptionsPost(body,request);
     }
+    @OPTIONS
     @DELETE
     @Path("/{subscriptionId}")
     @Consumes({ "application/json" })
@@ -112,10 +116,11 @@ public class SubscriptionsApi implements Microservice  {
     public Response subscriptionsSubscriptionIdDelete(@ApiParam(value = "Subscription Id ",required=true) @PathParam("subscriptionId") String subscriptionId
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.subscriptionsSubscriptionIdDelete(subscriptionId,ifMatch,ifUnmodifiedSince, request);
+        return delegate.subscriptionsSubscriptionIdDelete(subscriptionId,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{subscriptionId}")
     @Consumes({ "application/json" })
@@ -134,8 +139,8 @@ public class SubscriptionsApi implements Microservice  {
     public Response subscriptionsSubscriptionIdGet(@ApiParam(value = "Subscription Id ",required=true) @PathParam("subscriptionId") String subscriptionId
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.subscriptionsSubscriptionIdGet(subscriptionId,ifNoneMatch,ifModifiedSince, request);
+        return delegate.subscriptionsSubscriptionIdGet(subscriptionId,ifNoneMatch,ifModifiedSince,request);
     }
 }

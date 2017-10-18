@@ -101,6 +101,7 @@
                 <version>1.0-SNAPSHOT</version>
                 <configuration>
                     <inputSpec>${project.basedir}/src/main/resources/apim-core-api.yaml</inputSpec>
+                    <autoEnableOptions>true</autoEnableOptions>
                 </configuration>
             </plugin>-->
             <plugin>

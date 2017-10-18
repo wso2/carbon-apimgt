@@ -21,6 +21,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -44,6 +45,7 @@ import javax.ws.rs.core.Response;
 public class BlacklistApi implements Microservice  {
    private final BlacklistApiService delegate = BlacklistApiServiceFactory.getBlacklistApi();
 
+    @OPTIONS
     @DELETE
     @Path("/{conditionId}")
     @Consumes({ "application/json" })
@@ -62,10 +64,11 @@ public class BlacklistApi implements Microservice  {
     public Response blacklistConditionIdDelete(@ApiParam(value = "Blocking condition identifier ",required=true) @PathParam("conditionId") String conditionId
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.blacklistConditionIdDelete(conditionId,ifMatch,ifUnmodifiedSince, request);
+        return delegate.blacklistConditionIdDelete(conditionId,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{conditionId}")
     @Consumes({ "application/json" })
@@ -86,10 +89,11 @@ public class BlacklistApi implements Microservice  {
     public Response blacklistConditionIdGet(@ApiParam(value = "Blocking condition identifier ",required=true) @PathParam("conditionId") String conditionId
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.blacklistConditionIdGet(conditionId,ifNoneMatch,ifModifiedSince, request);
+        return delegate.blacklistConditionIdGet(conditionId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @PUT
     @Path("/{conditionId}")
     @Consumes({ "application/json" })
@@ -111,10 +115,11 @@ public class BlacklistApi implements Microservice  {
 ,@ApiParam(value = "Blacklist condition object that needs to be modified " ,required=true) BlockingConditionDTO body
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.blacklistConditionIdPut(conditionId,body,ifMatch,ifUnmodifiedSince, request);
+        return delegate.blacklistConditionIdPut(conditionId,body,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     
     @Consumes({ "application/json" })
@@ -132,10 +137,11 @@ public class BlacklistApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = BlockingConditionListDTO.class) })
     public Response blacklistGet(@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.blacklistGet(ifNoneMatch,ifModifiedSince, request);
+        return delegate.blacklistGet(ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @POST
     
     @Consumes({ "application/json" })
@@ -152,8 +158,8 @@ public class BlacklistApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = BlockingConditionDTO.class) })
     public Response blacklistPost(@ApiParam(value = "Blocking condition object that should to be added " ,required=true) BlockingConditionDTO body
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.blacklistPost(body, request);
+        return delegate.blacklistPost(body,request);
     }
 }

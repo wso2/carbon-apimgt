@@ -21,6 +21,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -44,6 +45,7 @@ import javax.ws.rs.core.Response;
 public class SelfSignupApi implements Microservice  {
    private final SelfSignupApiService delegate = SelfSignupApiServiceFactory.getSelfSignupApi();
 
+    @OPTIONS
     @POST
     
     @Consumes({ "application/json" })
@@ -60,8 +62,8 @@ public class SelfSignupApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = UserDTO.class) })
     public Response selfSignupPost(@ApiParam(value = "User object to represent the new user " ,required=true) UserDTO body
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.selfSignupPost(body, request);
+        return delegate.selfSignupPost(body,request);
     }
 }

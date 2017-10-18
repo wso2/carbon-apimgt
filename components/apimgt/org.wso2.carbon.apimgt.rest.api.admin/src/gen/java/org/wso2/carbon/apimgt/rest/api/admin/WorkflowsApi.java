@@ -23,6 +23,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -46,6 +47,7 @@ import javax.ws.rs.core.Response;
 public class WorkflowsApi implements Microservice  {
    private final WorkflowsApiService delegate = WorkflowsApiServiceFactory.getWorkflowsApi();
 
+    @OPTIONS
     @GET
     
     @Consumes({ "application/json" })
@@ -66,10 +68,11 @@ public class WorkflowsApi implements Microservice  {
     public Response workflowsGet(@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
 ,@ApiParam(value = "Type of the worklfow ") @QueryParam("workflowType") String workflowType
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.workflowsGet(ifNoneMatch,ifModifiedSince,workflowType, request);
+        return delegate.workflowsGet(ifNoneMatch,ifModifiedSince,workflowType,request);
     }
+    @OPTIONS
     @GET
     @Path("/{workflowReferenceId}")
     @Consumes({ "application/json" })
@@ -86,10 +89,11 @@ public class WorkflowsApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Workflow for the given reference in not found. ", response = WorkflowDTO.class) })
     public Response workflowsWorkflowReferenceIdGet(@ApiParam(value = "Workflow reference id ",required=true) @PathParam("workflowReferenceId") String workflowReferenceId
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.workflowsWorkflowReferenceIdGet(workflowReferenceId, request);
+        return delegate.workflowsWorkflowReferenceIdGet(workflowReferenceId,request);
     }
+    @OPTIONS
     @PUT
     @Path("/{workflowReferenceId}")
     @Consumes({ "application/json" })
@@ -107,8 +111,8 @@ public class WorkflowsApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Workflow for the given reference in not found. ", response = WorkflowResponseDTO.class) })
     public Response workflowsWorkflowReferenceIdPut(@ApiParam(value = "Workflow reference id ",required=true) @PathParam("workflowReferenceId") String workflowReferenceId
 ,@ApiParam(value = "Workflow event that need to be updated " ,required=true) WorkflowRequestDTO body
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.workflowsWorkflowReferenceIdPut(workflowReferenceId,body, request);
+        return delegate.workflowsWorkflowReferenceIdPut(workflowReferenceId,body,request);
     }
 }

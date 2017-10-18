@@ -20,6 +20,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -43,6 +44,7 @@ import javax.ws.rs.core.Response;
 public class ExportApi implements Microservice  {
    private final ExportApiService delegate = ExportApiServiceFactory.getExportApi();
 
+    @OPTIONS
     @GET
     @Path("/policies/throttle")
     @Consumes({ "application/json" })
@@ -57,8 +59,8 @@ public class ExportApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = File.class) })
     public Response exportPoliciesThrottleGet(@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.exportPoliciesThrottleGet(accept, request);
+        return delegate.exportPoliciesThrottleGet(accept,request);
     }
 }

@@ -20,6 +20,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -43,6 +44,7 @@ import javax.ws.rs.core.Response;
 public class ResourcesApi implements Microservice  {
    private final ResourcesApiService delegate = ResourcesApiServiceFactory.getResourcesApi();
 
+    @OPTIONS
     @GET
     
     @Consumes({ "application/json" })
@@ -59,8 +61,8 @@ public class ResourcesApi implements Microservice  {
     public Response resourcesGet(@ApiParam(value = "Context of the API. ") @QueryParam("apiContext") String apiContext
 ,@ApiParam(value = "Version of the API. ") @QueryParam("apiVersion") String apiVersion
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.resourcesGet(apiContext,apiVersion,accept, request);
+        return delegate.resourcesGet(apiContext,apiVersion,accept,request);
     }
 }

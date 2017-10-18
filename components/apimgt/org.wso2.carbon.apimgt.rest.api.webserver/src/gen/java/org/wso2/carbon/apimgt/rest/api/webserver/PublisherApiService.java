@@ -22,5 +22,5 @@ public abstract class PublisherApiService {
     public abstract Response publisherGet(String accept
  ,String ifNoneMatch
  ,String ifModifiedSince
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
 }

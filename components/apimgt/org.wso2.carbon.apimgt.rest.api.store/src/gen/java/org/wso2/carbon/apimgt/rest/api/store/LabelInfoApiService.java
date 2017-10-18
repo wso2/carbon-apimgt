@@ -22,5 +22,5 @@ public abstract class LabelInfoApiService {
     public abstract Response labelInfoGet(String labels
  ,String ifNoneMatch
  ,String ifModifiedSince
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
 }
