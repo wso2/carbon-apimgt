@@ -113,23 +113,18 @@ public class APIMgtWorkflowDataPublisher {
     }
 
     public boolean publishEvent(WorkflowDTO workflowDTO) {
-        try {
-            if (!enabled || skipEventReceiverConnection) {
-                return true;
-            }
 
-            if (workflowDTO != null) {
-                try {
+        if (!enabled|| skipEventReceiverConnection) {
+            return true;
+        }
 
-                    dataPublisher.publish(getStreamID(), System.currentTimeMillis(), new Object[]{"external"},
-                            null, (Object[]) createPayload(workflowDTO));
-                } catch (Exception e) {
-                    log.error("Error while publishing workflow event" +
-                              workflowDTO.getWorkflowReference(), e);
-                }
+        if (workflowDTO != null) {
+            try {
+                dataPublisher.publish(getStreamID(), System.currentTimeMillis(), new Object[] { "external" }, null,
+                        (Object[]) createPayload(workflowDTO));
+            } catch (Exception e) {
+                log.error("Error while publishing workflow event" + workflowDTO.getWorkflowReference(), e);
             }
-        } catch (Exception e) {
-            log.error("Cannot publish workflow event. " + e.getMessage(), e);
         }
         return true;
     }
