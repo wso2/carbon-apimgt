@@ -18,9 +18,18 @@
 package org.wso2.carbon.apimgt.hostobjects.util;
 
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.deser.DefaultDeserializationContext;
 import io.swagger.models.*;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
+
+import java.io.File;
 
 public class JsonSerializationTest {
 
@@ -53,5 +62,83 @@ public class JsonSerializationTest {
         Swagger rebuilt = Json.mapper().readValue(swaggerJson, Swagger.class);
         Assert.assertEquals(rebuilt.getPath("/health").getGet().getResponses().get("200"), expectedResponse);
 
+    }
+
+    @Test
+    public void testDeserializePetStoreFile() throws Exception {
+        String path =
+                "src" + File.separator + "test" + File.separator + "resources" + File.separator + "swagger"
+                        + File.separator + "Pet.json";
+        JsonParser jsonParser = new JsonFactory().createParser(new File(path));
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(new File(path));
+        JsonNode jsonNode = root;
+        ObjectCodec objectCodec = Mockito.mock(ObjectCodec.class);
+        Mockito.when(objectCodec.readTree(jsonParser)).thenReturn(jsonNode);
+        jsonParser.setCodec(objectCodec);
+        PropertyDeserializer propertyDeserializer = new PropertyDeserializer();
+        DefaultDeserializationContext deserializationContext = Mockito.mock(DefaultDeserializationContext.class);
+        Assert.assertNotNull(propertyDeserializer.propertyFromNode(jsonNode));
+        propertyDeserializer.deserialize(jsonParser, deserializationContext);
+        propertyDeserializer.getXml(jsonNode);
+    }
+
+    @Test
+    public void testDeserializeModel() throws Exception {
+        String path =
+                "src" + File.separator + "test" + File.separator + "resources" + File.separator + "swagger"
+                        + File.separator + "Pet.json";
+        JsonParser jsonParser = new JsonFactory().createParser(new File(path));
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(new File(path));
+        JsonNode jsonNode = root;
+        ObjectCodec objectCodec = Mockito.mock(ObjectCodec.class);
+        Mockito.when(objectCodec.readTree(jsonParser)).thenReturn(jsonNode);
+        jsonParser.setCodec(objectCodec);
+        ModelDeserializer modelDeserializer = new ModelDeserializer();
+        DefaultDeserializationContext deserializationContext = Mockito.mock(DefaultDeserializationContext.class);
+        Assert.assertNotNull(modelDeserializer.deserialize(jsonParser, deserializationContext));
+    }
+
+    @Test
+    public void testDeserializeParameter() throws Exception {
+        String path =
+                "src" + File.separator + "test" + File.separator + "resources" + File.separator + "swagger"
+                        + File.separator + "Pet.json";
+        JsonParser jsonParser = new JsonFactory().createParser(new File(path));
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(new File(path));
+        JsonNode jsonNode = root;
+        ObjectCodec objectCodec = Mockito.mock(ObjectCodec.class);
+        Mockito.when(objectCodec.readTree(jsonParser)).thenReturn(jsonNode);
+        jsonParser.setCodec(objectCodec);
+        ParameterDeserializer parameterDeserializer = new ParameterDeserializer();
+        DefaultDeserializationContext deserializationContext = Mockito.mock(DefaultDeserializationContext.class);
+        try {
+            parameterDeserializer.deserialize(jsonParser, deserializationContext);
+        }catch (JsonProcessingException e){
+            Assert.assertFalse(true);
+        }
+    }
+
+    @Test
+    public void testDeserializeSecurityDef() throws Exception {
+        String path =
+                "src" + File.separator + "test" + File.separator + "resources" + File.separator + "swagger"
+                        + File.separator + "Pet.json";
+        JsonParser jsonParser = new JsonFactory().createParser(new File(path));
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.readTree(new File(path));
+        JsonNode jsonNode = root;
+        ObjectCodec objectCodec = Mockito.mock(ObjectCodec.class);
+        Mockito.when(objectCodec.readTree(jsonParser)).thenReturn(jsonNode);
+        jsonParser.setCodec(objectCodec);
+        SecurityDefinitionDeserializer securityDefinitionDeserializer = new SecurityDefinitionDeserializer();
+        DefaultDeserializationContext deserializationContext = Mockito.mock(DefaultDeserializationContext.class);
+        try {
+            securityDefinitionDeserializer.deserialize(jsonParser, deserializationContext);
+        }catch (JsonProcessingException e){
+            Assert.assertFalse(true);
+        }
     }
 }
