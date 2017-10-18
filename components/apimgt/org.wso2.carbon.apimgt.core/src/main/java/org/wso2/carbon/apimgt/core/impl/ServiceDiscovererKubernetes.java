@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.core.impl;
 
 import io.fabric8.kubernetes.api.model.EndpointAddress;
@@ -17,29 +35,32 @@ import io.fabric8.openshift.client.OpenShiftClient;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.api.ServiceDiscoverer;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.ServiceDiscoveryException;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.FileEncryptionUtil;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Kubernetes and Openshift implementation of Service Discoverer
+ * Kubernetes and OpenShift implementation of Service Discoverer
  */
 public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
 
     private final Logger log  = LoggerFactory.getLogger(ServiceDiscovererKubernetes.class);
 
     private OpenShiftClient client;
-    private String serviceAccountToken;
     private String caCertLocation;
+    private String saTokenFileName;
     private Boolean includeClusterIPs;
     private Boolean includeExternalNameServices;
     private Boolean endpointsAvailable; //when false, will not look for NodePort urls for the remaining ports.
@@ -48,7 +69,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
     @Override
     public void init(HashMap<String, String> cmsSpecificParameters) throws ServiceDiscoveryException {
         super.init(cmsSpecificParameters);
-        serviceAccountToken = this.cmsSpecificParameters.get("serviceAccountToken");
+        saTokenFileName = this.cmsSpecificParameters.get("serviceAccountTokenFile");
         caCertLocation = this.cmsSpecificParameters.get("caCertLocation");
         includeClusterIPs = Boolean.parseBoolean(this.cmsSpecificParameters.get("includeClusterIPs"));
         includeExternalNameServices = Boolean.parseBoolean(this.cmsSpecificParameters
@@ -70,7 +91,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
         System.setProperty("kubernetes.auth.tryKubeConfig", "false");
         System.setProperty("kubernetes.auth.tryServiceAccount", "true");
         ConfigBuilder configBuilder = new ConfigBuilder().withMasterUrl(masterUrl)
-                .withCaCertFile(caCertLocation);
+                .withCaCertFile(Paths.get(caCertLocation).toString());
         Config config;
         log.debug("Using mounted service account token");
         try {
@@ -81,11 +102,25 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
         } catch (IOException | NullPointerException e) {
             log.info("Token not found in /var/run/secrets/kubernetes.io/serviceaccount/token.");
             log.info("Using externally stored service account token");
-            config = configBuilder.withOauthToken(serviceAccountToken).build();
+            config = configBuilder.withOauthToken(resolveToken()).build();
         }
         return config;
     }
 
+    private String resolveToken() throws ServiceDiscoveryException {
+        String token;
+        String encryptedFilesDir = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
+                .getFileEncryptionConfigurations().getDestinationDirectory();
+        try {
+            token = FileEncryptionUtil.readFromEncryptedFile(
+                    Paths.get(encryptedFilesDir + "/encrypted" + saTokenFileName));
+        } catch (APIManagementException e) {
+            String msg = "Error occurred while resolving externally stored token";
+            log.error(msg, e);
+            throw new ServiceDiscoveryException(msg, e);
+        }
+        return token;
+    }
 
 
     @Override
@@ -307,7 +342,6 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
         }
     }
 
-
     private Endpoint constructEndpoint(String serviceName, String namespace, String portType,
                                                  String urlType, URL url, String labels) {
         //todo check if empty
@@ -323,7 +357,6 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
         return createEndpoint(endpointIndex, serviceName, endpointConfig,
                 1000L, portType, "{\"enabled\": false}", APIMgtConstants.GLOBAL_ENDPOINT);
     }
-
 
     private Endpoints findEndpoint(String filterNamespace, String serviceName) {
         Endpoints endpoint;
@@ -352,4 +385,5 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
         }
         return pod;
     }
+
 }

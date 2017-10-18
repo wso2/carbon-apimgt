@@ -36,7 +36,6 @@ import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
-import org.wso2.carbon.apimgt.core.api.ServiceDiscoverer;
 import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
@@ -2087,10 +2086,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             List<ServiceDiscoveryImplConfig> implConfigList = serviceDiscoveryConfig.getImplementationConfigs();
             List<Endpoint> subDiscoveredEndpointList;
             for (ServiceDiscoveryImplConfig implConfig : implConfigList) {
-                if (!implConfig.isEnabled()) {
-                    continue;
-                }
-                String implClassName = implConfig.getImplementationClass();
+                String implClassName = implConfig.getImplClass();
                 Class implClazz = APIPublisherImpl.class.getClassLoader().loadClass(implClassName);
                 ServiceDiscoverer serviceDiscoverer = (ServiceDiscoverer) implClazz.newInstance();
                 serviceDiscoverer.init(implConfig.getCmsSpecificParameters());

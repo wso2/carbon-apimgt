@@ -91,6 +91,17 @@ public class APIMConfigurations {
     @Element(description = "SDK Generation Language Configurations")
     private SdkLanguageConfigurations sdkLanguageConfigurations = new SdkLanguageConfigurations();
 
+    @Element(description = "SDK Generation Language Configurations")
+    private FileEncryptionConfigurations fileEncryptionConfigurations = new FileEncryptionConfigurations();
+
+    public FileEncryptionConfigurations getFileEncryptionConfigurations() {
+        return fileEncryptionConfigurations;
+    }
+
+    public void setFileEncryptionConfigurations(FileEncryptionConfigurations fileEncryptionConfigurations) {
+        this.fileEncryptionConfigurations = fileEncryptionConfigurations;
+    }
+
     public SdkLanguageConfigurations getSdkLanguageConfigurations() {
         return sdkLanguageConfigurations;
     }

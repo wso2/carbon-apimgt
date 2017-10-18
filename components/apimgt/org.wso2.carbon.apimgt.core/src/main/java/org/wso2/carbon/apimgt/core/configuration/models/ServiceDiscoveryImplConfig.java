@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.core.configuration.models;
 
 
@@ -13,55 +31,26 @@ import java.util.HashMap;
 @Configuration(description = "Container Management System specific Service Discovery configurations")
 public class ServiceDiscoveryImplConfig {
 
-    @Element(description = "enable specified service discovery")
-    private Boolean cmsWiseEnabled = true;
-
     @Element(description = "service discovery implementation class")
-    private String implementationClass = APIMgtConstants.ServiceDiscoveryConstants.
-            KUBERNETES_SERVICE_DISCOVERER;
-
+    private String implClass = APIMgtConstants.ServiceDiscoveryConstants.KUBERNETES_SERVICE_DISCOVERER;
     @Element(description = "container management system specific properties")
     private HashMap<String, String> cmsSpecificParameters = new HashMap<>();
 
-    public ServiceDiscoveryImplConfig() {
 
+    public ServiceDiscoveryImplConfig() {
         cmsSpecificParameters.put("masterUrl", "https://192.168.99.100:8443/");
         cmsSpecificParameters.put("includeClusterIPs", "false");
         cmsSpecificParameters.put("includeExternalNameServices", "false");
-
-        String serviceAccountToken = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlc" +
-                "m5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2Ui" +
-                "OiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6InNlcnZpY2U" +
-                "tZGlzY292ZXJ5LXNhLXRva2VuLTJnNGJnIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aW" +
-                "NlLWFjY291bnQubmFtZSI6InNlcnZpY2UtZGlzY292ZXJ5LXNhIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlY" +
-                "WNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiMjRjMjRjOTgtOTgyYi0xMWU3LWI2MjYtMDgwMDI3NTVm" +
-                "MDgxIiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmRlZmF1bHQ6c2VydmljZS1kaXNjb3Zlcnktc2E" +
-                "ifQ.OkAfoETwdbeH-ARM3mRMR24oqUahfvP3gLw-QqzqY446jHMkmnfh71yYPI8X_pdwA7de1WCPSw3Plci" +
-                "NlEhzC-Zv5w7itpmEWoB-80SsEAa07g1g713TpSqlv3oL0-98zTF8RyyyFez_5hwBP6XsbRKLv0B3cSPbI3" +
-                "ByZCIcfHlThkenUarb1RGDtcS8RmcpPD-hpzsD44Jy9wMs9y_bhkCltv911EXxbqD2vlg6je4LUp0s2Zze-" +
-                "IsDXS9PwzYZo4J33I3OxrenONJjBWV2LdOwi_HXJNOT8iVCV_jtXxzZ8123A8CEjmdalpceulGNfS5S7OF-A" +
-                "g7GHwiHH33jGA";
-        cmsSpecificParameters.put("serviceAccountToken", serviceAccountToken);
-
-        String caCertLocation = System.getProperty("user.dir") + "/resources/security/ca.crt";
-        cmsSpecificParameters.put("caCertLocation", caCertLocation);
+        cmsSpecificParameters.put("serviceAccountTokenFile", "KubernetesToken");
+        cmsSpecificParameters.put("caCertLocation", "/resources/security/ca.crt");
     }
 
-
-    public Boolean isEnabled() {
-        return cmsWiseEnabled;
+    public String getImplClass() {
+        return implClass;
     }
 
-    public void setEnabled(Boolean enabled) {
-        this.cmsWiseEnabled = enabled;
-    }
-
-    public String getImplementationClass() {
-        return implementationClass;
-    }
-
-    public void setImplementationClass(String implementationClass) {
-        this.implementationClass = implementationClass;
+    public void setImplClass(String implClass) {
+        this.implClass = implClass;
     }
 
     public HashMap<String, String> getCmsSpecificParameters() {

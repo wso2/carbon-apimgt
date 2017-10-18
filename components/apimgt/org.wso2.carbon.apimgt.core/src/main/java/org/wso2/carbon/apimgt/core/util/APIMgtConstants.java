@@ -519,4 +519,12 @@ public class APIMgtConstants {
         public static final String KUBERNETES_SERVICE_DISCOVERER =
                 "org.wso2.carbon.apimgt.core.impl.ServiceDiscovererKubernetes";
     }
+
+    /**
+     * Encryption related constants
+     */
+    public static class EncryptionConstants {
+        public static final String AES = "AES";
+        public static final String ENCRYPTED_AES_KEY = "wso2.carbon.apimgt.encryption.aeskey";
+    }
 }
