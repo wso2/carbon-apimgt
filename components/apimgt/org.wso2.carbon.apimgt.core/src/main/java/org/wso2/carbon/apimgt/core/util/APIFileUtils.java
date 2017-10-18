@@ -605,6 +605,24 @@ public class APIFileUtils {
              FileOutputStream outputStream = new FileOutputStream(destinationFile)) {
             IOUtils.copy(inputStream, outputStream);
         }
+
+        /**
+         * write the given Application details to file system
+         *
+         * @param application {@link Application} object to be exported
+         * @param exportLocation file system location to write the API definition
+         * @throws APIMgtDAOException if an error occurs while writing the API definition
+         */
+        public static void exportApplicationDetailsToFileSystem(FileApplication application, String exportLocation)
+        throws APIMgtDAOException {
+            String applicationFileLocation = exportLocation + File.separator + APIMgtConstants.APIFileUtilConstants
+                    .API_DEFINITION_FILE_PREFIX + api.getId() + APIMgtConstants.APIFileUtilConstants.JSON_EXTENSION;
+            APIFileUtils.writeObjectAsJsonToFile(api, apiFileLocation);
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully saved API definition for api: " + api.getName() + ", version: "
+                        + api.getVersion());
+            }
+        }
     }
 
 }

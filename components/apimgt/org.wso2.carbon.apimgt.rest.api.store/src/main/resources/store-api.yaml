@@ -2157,6 +2157,71 @@ paths:
 
 
 ######################################################
+# Export Application Resource API
+######################################################
+  /export/applications:
+
+    get:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
+      x-scope: apim:subscribe
+      produces:
+        - application/zip
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\"
+      https://localhost:9292/api/am/store/v1.0/export/applications?query=xxx > exported-applications.zip"
+      x-wso2-request: |
+        GET https://127.0.0.1:9292/api/am/store/v1.0/export/applications?query=xxx
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\n Connection: keep-alive\n  Content-Disposition: attachment;
+       filename=\"exported-applications.zip\"\n  Content-Type: application/zip"
+      summary: Export information related to an Application.
+      description: |
+        This operation can be used to export information related to a perticular application.
+      parameters:
+        - name: query
+          in: query
+          description: |
+            Application Search Query
+          required: true
+          type: string
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+      tags:
+        - Export Configuration
+      responses:
+        200:
+          description: |
+            OK.
+            Export Configuration returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            type: file
+        404:
+          description: |
+            Not Found.
+            Requested API does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+######################################################
 # The "Subscription Collection" resource APIs
 ######################################################
   /subscriptions:
