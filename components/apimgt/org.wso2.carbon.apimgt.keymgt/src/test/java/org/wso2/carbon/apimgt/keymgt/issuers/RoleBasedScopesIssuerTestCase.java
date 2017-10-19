@@ -43,6 +43,14 @@ import java.util.Map;
 
 public class RoleBasedScopesIssuerTestCase {
 
+    private ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+    private RealmService realmService = Mockito.mock(RealmService.class);
+    private CacheManager cacheManager = Mockito.mock(CacheManager.class);
+    private TenantManager tenantManager = Mockito.mock(TenantManager.class);
+    private Cache cache = Mockito.mock(Cache.class);
+    private DefaultRealm defaultRealm = Mockito.mock(DefaultRealm.class);
+    private AbstractUserStoreManager abstractUserStoreManager = Mockito.mock(AbstractUserStoreManager.class);
+
     @Test
     public void testGetPrefix() throws Exception {
 
@@ -86,14 +94,6 @@ public class RoleBasedScopesIssuerTestCase {
     @Test
     public void testGetScopes() throws Exception {
 
-        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
-        RealmService realmService = Mockito.mock(RealmService.class);
-        CacheManager cacheManager = Mockito.mock(CacheManager.class);
-        TenantManager tenantManager = Mockito.mock(TenantManager.class);
-        Cache cache = Mockito.mock(Cache.class);
-        DefaultRealm defaultRealm = Mockito.mock(DefaultRealm.class);
-        AbstractUserStoreManager abstractUserStoreManager = Mockito.mock(AbstractUserStoreManager.class);
-
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1234);
@@ -124,14 +124,6 @@ public class RoleBasedScopesIssuerTestCase {
 
     @Test
     public void testGetScopesWhenRestAPIScopesOfCurrentTenantIsNotNull() throws Exception {
-
-        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
-        RealmService realmService = Mockito.mock(RealmService.class);
-        CacheManager cacheManager = Mockito.mock(CacheManager.class);
-        TenantManager tenantManager = Mockito.mock(TenantManager.class);
-        Cache cache = Mockito.mock(Cache.class);
-        DefaultRealm defaultRealm = Mockito.mock(DefaultRealm.class);
-        AbstractUserStoreManager abstractUserStoreManager = Mockito.mock(AbstractUserStoreManager.class);
 
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
@@ -167,14 +159,6 @@ public class RoleBasedScopesIssuerTestCase {
     @Test
     public void testGetScopesWhenAppScopesIsEmpty() throws Exception {
 
-        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
-        RealmService realmService = Mockito.mock(RealmService.class);
-        CacheManager cacheManager = Mockito.mock(CacheManager.class);
-        TenantManager tenantManager = Mockito.mock(TenantManager.class);
-        Cache cache = Mockito.mock(Cache.class);
-        DefaultRealm defaultRealm = Mockito.mock(DefaultRealm.class);
-        AbstractUserStoreManager abstractUserStoreManager = Mockito.mock(AbstractUserStoreManager.class);
-
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1234);
@@ -207,14 +191,6 @@ public class RoleBasedScopesIssuerTestCase {
 
     @Test
     public void testGetScopesWhenTenantISZero() throws Exception {
-
-        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
-        RealmService realmService = Mockito.mock(RealmService.class);
-        CacheManager cacheManager = Mockito.mock(CacheManager.class);
-        TenantManager tenantManager = Mockito.mock(TenantManager.class);
-        Cache cache = Mockito.mock(Cache.class);
-        DefaultRealm defaultRealm = Mockito.mock(DefaultRealm.class);
-        AbstractUserStoreManager abstractUserStoreManager = Mockito.mock(AbstractUserStoreManager.class);
 
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
@@ -250,14 +226,6 @@ public class RoleBasedScopesIssuerTestCase {
     @Test
     public void testGetScopesWhenTenantISMinusOne() throws Exception {
 
-        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
-        RealmService realmService = Mockito.mock(RealmService.class);
-        CacheManager cacheManager = Mockito.mock(CacheManager.class);
-        TenantManager tenantManager = Mockito.mock(TenantManager.class);
-        Cache cache = Mockito.mock(Cache.class);
-        DefaultRealm defaultRealm = Mockito.mock(DefaultRealm.class);
-        AbstractUserStoreManager abstractUserStoreManager = Mockito.mock(AbstractUserStoreManager.class);
-
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1);
@@ -291,14 +259,6 @@ public class RoleBasedScopesIssuerTestCase {
 
     @Test
     public void testGetScopesForGrantType() throws Exception {
-
-        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
-        RealmService realmService = Mockito.mock(RealmService.class);
-        CacheManager cacheManager = Mockito.mock(CacheManager.class);
-        TenantManager tenantManager = Mockito.mock(TenantManager.class);
-        Cache cache = Mockito.mock(Cache.class);
-        DefaultRealm defaultRealm = Mockito.mock(DefaultRealm.class);
-        AbstractUserStoreManager abstractUserStoreManager = Mockito.mock(AbstractUserStoreManager.class);
 
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
@@ -335,14 +295,6 @@ public class RoleBasedScopesIssuerTestCase {
 
     @Test
     public void testGetScopesForGrantTypeWhenSAML2NotEnabled() throws Exception {
-
-        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
-        RealmService realmService = Mockito.mock(RealmService.class);
-        CacheManager cacheManager = Mockito.mock(CacheManager.class);
-        TenantManager tenantManager = Mockito.mock(TenantManager.class);
-        Cache cache = Mockito.mock(Cache.class);
-        DefaultRealm defaultRealm = Mockito.mock(DefaultRealm.class);
-        AbstractUserStoreManager abstractUserStoreManager = Mockito.mock(AbstractUserStoreManager.class);
 
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
@@ -381,12 +333,6 @@ public class RoleBasedScopesIssuerTestCase {
     @Test
     public void testGetScopesForUserStoreException() throws Exception {
 
-        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
-        RealmService realmService = Mockito.mock(RealmService.class);
-        CacheManager cacheManager = Mockito.mock(CacheManager.class);
-        TenantManager tenantManager = Mockito.mock(TenantManager.class);
-        Cache cache = Mockito.mock(Cache.class);
-
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.doThrow(UserStoreException.class).when(tenantManager).getTenantId(Mockito.anyString());
@@ -415,14 +361,6 @@ public class RoleBasedScopesIssuerTestCase {
 
     @Test
     public void testGetScopesForRoles() throws Exception {
-
-        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
-        RealmService realmService = Mockito.mock(RealmService.class);
-        CacheManager cacheManager = Mockito.mock(CacheManager.class);
-        TenantManager tenantManager = Mockito.mock(TenantManager.class);
-        Cache cache = Mockito.mock(Cache.class);
-        DefaultRealm defaultRealm = Mockito.mock(DefaultRealm.class);
-        AbstractUserStoreManager abstractUserStoreManager = Mockito.mock(AbstractUserStoreManager.class);
 
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
@@ -460,14 +398,6 @@ public class RoleBasedScopesIssuerTestCase {
     @Test
     public void testGetScopesForRolesWhenRestAPIScopesNotNull() throws Exception {
 
-        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
-        RealmService realmService = Mockito.mock(RealmService.class);
-        CacheManager cacheManager = Mockito.mock(CacheManager.class);
-        TenantManager tenantManager = Mockito.mock(TenantManager.class);
-        Cache cache = Mockito.mock(Cache.class);
-        DefaultRealm defaultRealm = Mockito.mock(DefaultRealm.class);
-        AbstractUserStoreManager abstractUserStoreManager = Mockito.mock(AbstractUserStoreManager.class);
-
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1234);
@@ -504,14 +434,6 @@ public class RoleBasedScopesIssuerTestCase {
     @Test
     public void testGetScopesForAppScopes() throws Exception {
 
-        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
-        RealmService realmService = Mockito.mock(RealmService.class);
-        CacheManager cacheManager = Mockito.mock(CacheManager.class);
-        TenantManager tenantManager = Mockito.mock(TenantManager.class);
-        Cache cache = Mockito.mock(Cache.class);
-        DefaultRealm defaultRealm = Mockito.mock(DefaultRealm.class);
-        AbstractUserStoreManager abstractUserStoreManager = Mockito.mock(AbstractUserStoreManager.class);
-
         Mockito.when(cacheManager.getCache(Mockito.anyString())).thenReturn(cache);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId(Mockito.anyString())).thenReturn(-1234);
@@ -547,9 +469,6 @@ public class RoleBasedScopesIssuerTestCase {
     @Test
     public void testGetScopesHandleException() throws Exception {
 
-        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
-        RealmService realmService = Mockito.mock(RealmService.class);
-        CacheManager cacheManager = Mockito.mock(CacheManager.class);
         Mockito.doThrow(APIManagementException.class).when(apiMgtDAO).getScopeRolesOfApplication(Mockito.anyString());
         OAuth2AccessTokenReqDTO tokenDTO = new OAuth2AccessTokenReqDTO();
         tokenDTO.setClientId("clientId");
