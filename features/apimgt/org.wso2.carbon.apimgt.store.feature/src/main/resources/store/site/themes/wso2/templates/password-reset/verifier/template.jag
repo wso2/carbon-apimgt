@@ -1,0 +1,163 @@
+<% jagg.template("password-reset/verifier", function(inputs, outputs, jagg) { %>
+
+<script src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile('js/jquery.validate.password.js'))%>"></script>
+<!--<div class="container content-starter">
+   <div class="row">
+      <div class="col-lg-12">
+         <h1>Change Password</h1>
+         <div class="helper_text" id="helper_text">
+            <p>Please enter your new credentials.</p>
+         </div>
+      </div>
+   </div>
+</div>
+<% jagg.includeBlock("page/messages", null); %>
+<div class="container content-section-wrapper" id="form_div">
+   <div class="row">
+      <div class="col-lg-12 content-section">
+         <form method='post' name="inputData" class='form-horizontal' id='userForm' action="javascript:doSubmit()"
+         role="form">
+            <input type="hidden" name="confirmationKey" id="confirmationKey" value="<%=outputs.confirmationKey%>" />
+            <input type="hidden" name="username" id="username" value="<%=outputs.username%>" />
+            <div class="form-group">
+               <label for="username" class="col-sm-2 control-label">Username</label>
+               <div class="col-sm-8">
+                  <input type="text" disabled id="email" name="email" class="required" value="<%=outputs.username%>" />
+               </div>
+            </div>
+            <div class="form-group">
+               <label for="password" class="col-sm-2 control-label">New Password</label>
+               <div class="col-sm-8">
+                  <input type="password" id="password" name="password" class="required password"  />
+                  <div class="row-fluid">
+                     <div class="span6">
+                        <div class="span6">
+                           <div class="password-meter" style="display:none;">
+                              <div class="password-meter-message"></div>
+                              <div class="password-meter-bg">
+                                 <div class="password-meter-bar"></div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="help-block" id="password-help" style="display:none">
+                           Password must contain:
+                           <ul class="list1">
+                              <li class="fa fa-times gray">A minimum of 8 characters</li>
+                           </ul>
+                           At least three of the following types of characters:
+                           <ul class="list2">
+                              <li class="fa fa-times gray">Uppercase letters</li>
+                              <li class="fa fa-times gray">Lowercase letters</li>
+                              <li class="fa fa-times gray">Numbers</li>
+                              <li class="fa fa-times gray">Special characters (such as @ and !)</li>
+                           </ul>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+            <div class="form-group">
+               <label for="password2" class="col-sm-2 control-label">Confirm Password</label>
+               <div class="col-sm-8">
+                  <input type="password" id="password2" name="password2" class="required password_match"  />
+               </div>
+            </div>
+            <div class="form-group">
+               <label for="empty"  class="col-sm-2 control-label"></label>
+               <div class="col-sm-8">
+                  <input id="submitbtn" type='submit' value='Reset Password' class='btn btn-primary'/>
+                  <i class="fa fa-spinner fa-spin fa-4x" id="spinner" style="display:none; margin-left: 10px;"></i>
+               </div>
+            </div>
+         </form>
+      </div>
+   </div>
+</div>-->
+
+<div class="page-content-wrapper">
+    <div class="container-fluid ">
+        <div class="container">
+            <div class="login-form-wrapper">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3">
+                        <div class="brand-container add-margin-bottom-5x">
+                            <div class="row">
+                                <div class="col-xs-6 col-sm-3 col-md-9 col-lg-9 center-block float-remove-sm float-remove-xs pull-right-md pull-right-lg">
+                                    <img class="img-responsive brand-spacer" alt="store_logo" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/logo-white.png"))%>">
+                                </div>
+                            </div>
+                            <h2 class="text-center-sm text-center-xs text-center-md text-right"><%=i18n.localize("API Store")%></h2>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-9 col-lg-9 login">
+                        <div class="data-container">
+                            <form class="form-horizontal" id="userForm" autocomplete="off" method="post" action="javascript:doSubmit()">
+                                <h3><%=i18n.localize("Change Password")%></h3>
+                                <div class="alert alert-danger" role="alert" id="loginErrorMsg" style="display:none">
+
+				                </div>
+				                <div class="helper_text" id="helper_text">
+                                    <p>Please enter your new credentials.
+                                    </p>
+                                 </div>
+                                <input type="hidden" name="confirmationKey" id="confirmationKey" value="<%=outputs.confirmationKey%>" />
+                                <input type="hidden" name="username" id="username" value="<%=outputs.username%>" />
+                                <div class="form-group">
+                                   <label for="username" class="col-sm-2 control-label">Username</label>
+                                   <div class="col-sm-8">
+                                      <input type="text" disabled id="email" name="email" class="required" value="<%=outputs.username%>" />
+                                   </div>
+                                </div>
+                                <div class="form-group">
+                                   <label for="password" class="col-sm-2 control-label">New Password</label>
+                                   <div class="col-sm-8">
+                                      <input type="password" id="password" name="password" class="required password"  />
+                                      <div class="row-fluid">
+                                         <div class="span6">
+                                            <div class="span6">
+                                               <div class="password-meter" style="display:none;">
+                                                  <div class="password-meter-message"></div>
+                                                  <div class="password-meter-bg">
+                                                     <div class="password-meter-bar"></div>
+                                                  </div>
+                                               </div>
+                                            </div>
+                                            <div class="help-block" id="password-help" style="display:none">
+                                               Password must contain:
+                                               <ul class="list1">
+                                                  <li class="fa fa-times gray">A minimum of 8 characters</li>
+                                               </ul>
+                                               At least three of the following types of characters:
+                                               <ul class="list2">
+                                                  <li class="fa fa-times gray">Uppercase letters</li>
+                                                  <li class="fa fa-times gray">Lowercase letters</li>
+                                                  <li class="fa fa-times gray">Numbers</li>
+                                                  <li class="fa fa-times gray">Special characters (such as @ and !)</li>
+                                               </ul>
+                                            </div>
+                                         </div>
+                                      </div>
+                                   </div>
+                                </div>
+                                <div class="form-group">
+                                   <label for="password2" class="col-sm-2 control-label">Confirm Password</label>
+                                   <div class="col-sm-8">
+                                      <input type="password" id="password2" name="password2" class="required matchPasswords"  />
+                                   </div>
+                                </div>
+                                <div class="form-group">
+                                   <label for="empty"  class="col-sm-2 control-label"></label>
+                                   <div class="col-sm-8">
+                                      <input id="submitbtn" type='submit' value='Reset Password' class='btn btn-primary'/>
+                                      <i class="fa fa-spinner fa-spin fa-4x" id="spinner" style="display:none; margin-left: 10px;"></i>
+                                   </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<% }); %>

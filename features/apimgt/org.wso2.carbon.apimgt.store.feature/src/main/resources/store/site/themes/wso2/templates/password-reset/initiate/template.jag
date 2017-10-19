@@ -1,0 +1,53 @@
+<% jagg.template("password-reset/initiate", function (inputs, outputs, jagg) { %>
+
+ <div class="page-content-wrapper">
+    <div class="container-fluid ">
+        <div class="container">
+            <div class="login-form-wrapper">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3">
+                        <div class="brand-container add-margin-bottom-5x">
+                            <div class="row">
+                                <div class="col-xs-6 col-sm-3 col-md-9 col-lg-9 center-block float-remove-sm float-remove-xs pull-right-md pull-right-lg">
+                                    <img class="img-responsive brand-spacer" alt="store_logo" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("images/logo-white.png"))%>">
+                                </div>
+                            </div>
+                            <h2 class="text-center-sm text-center-xs text-center-md text-right"><%=i18n.localize("API Store")%></h2>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-9 col-lg-9 login">
+                        <div class="data-container">
+                            <form class="form-horizontal" id="userForm" autocomplete="off" method="post" action="javascript:doSubmit()">
+                                <h3><%=i18n.localize("Password Reset")%></h3>
+                                <div class="alert alert-danger" role="alert" id="loginErrorMsg" style="display:none">
+
+				                </div>
+				                <div class="helper_text" id="helper_text">
+                                    <p>Please enter your username below to reset your account credentials.
+                                       You will get an email notification soon with the link to reset your password.
+                                       </br>You can still login using your old credentials till you reset the password.
+                                    </p>
+                                 </div>
+                                <div class="form-group">
+                                    <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
+                                        <div class="input-group input-wrap">
+                                            <input type="text" id="email" name="email" title="<%=i18n.localize("Username")%>" class="required" placeholder="<%=i18n.localize("Username")%>"  />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
+                                        <input type="submit" id="submitbtn" value="<%=i18n.localize("Request Password Change")%>" class="btn btn-default btn-primary add-margin-right-2x"/>
+                                        <i class="fa fa-spinner fa-spin fa-4x" id="spinner" style="display:none; margin-left: 10px;"></i>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <%
+}); %>

@@ -1,0 +1,48 @@
+<%
+include("/jagg/jagg.jag");
+include("header.jag");
+var site = require("/site/conf/site.json");
+
+var i18n = require("i18n");
+var localeResourcesBasePath="/site/conf/locales/jaggery/";
+i18n.init(request,localeResourcesBasePath);
+
+(function () {
+    var user = jagg.getUser();
+    if (!user && site.ssoConfiguration.enabled == "true" && site.ssoConfiguration.idpInit == "true") {
+        //There is already a redirection applied to idpInitSSOURL (in site.conf) from sso/fiter.
+        //So we should not do another redirection; just return from this.  
+        return;
+    }
+    if (!user) {
+        response.sendRedirect(getRedirectPathForNonAuthenticatedUser());
+        return;
+    }
+
+    jagg.render({
+        "name":"page/base",
+        "inputs":{
+            "title":"Configure Alerts",
+            "header":{
+                "name":"menu/primary"
+            },
+            "body":[
+                {
+                    "name":"layout/extended",
+                    "inputs":{
+                        "middle":{
+                            "name":"configure-alerts/edit"
+                        }
+                    }
+                }
+            ],
+            "footer":[
+                {
+                    "name":"footer"
+                }
+            ]
+        }
+    });
+}());
+
+%>

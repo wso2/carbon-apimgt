@@ -1,0 +1,494 @@
+<div class="main-content">
+    <h1><a name="Subscription Policies (Collection)"></a>Subscription Policies (Collection)</h1>
+
+            <hr/>
+            <h3 class="operation-heading"><a name="throttlingPoliciesSubscriptionGet"></a>Get all Subscription level throttle policies <br><small>GET https://apis.wso2.com/api/am/admin/v0.11/throttling/policies/subscription</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to retrieve all Subscription level throttle policies.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:tier_view</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:tier_view' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-throttlingPoliciesSubscriptionGet">
+                <h4 class="section-heading">
+                    Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+
+                <div id="request-throttlingPoliciesSubscriptionGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/admin/v0.11/throttling/policies/subscription
+Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122
+</code></div>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-throttlingPoliciesSubscriptionGet">
+                <h4 class="section-heading">
+                    Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+                <div id="response-throttlingPoliciesSubscriptionGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  &quot;count&quot;: 5,
+  &quot;list&quot;: [
+    {
+      &quot;policyId&quot;: &quot;6fac9345-6e49-4a31-813b-3d520e09e38b&quot;,
+      &quot;policyName&quot;: &quot;Gold&quot;,
+      &quot;displayName&quot;: &quot;Gold&quot;,
+      &quot;description&quot;: &quot;Allows 5000 requests per minute&quot;,
+      &quot;isDeployed&quot;: true,
+      &quot;defaultLimit&quot;: {
+        &quot;type&quot;: &quot;RequestCountLimit&quot;,
+        &quot;timeUnit&quot;: &quot;min&quot;,
+        &quot;unitTime&quot;: 1,
+        &quot;requestCount&quot;: 5000
+      },
+      &quot;rateLimitCount&quot;: 0,
+      &quot;rateLimitTimeUnit&quot;: null,
+      &quot;customAttributes&quot;: [],
+      &quot;stopOnQuotaReach&quot;: true,
+      &quot;billingPlan&quot;: &quot;FREE&quot;
+    },
+    {
+      &quot;policyId&quot;: &quot;851bf1b4-19da-4019-949a-9b371f53c8d6&quot;,
+      &quot;policyName&quot;: &quot;Silver&quot;,
+      &quot;displayName&quot;: &quot;Silver&quot;,
+      &quot;description&quot;: &quot;Allows 2000 requests per minute&quot;,
+      &quot;isDeployed&quot;: true,
+      &quot;defaultLimit&quot;: {
+        &quot;type&quot;: &quot;RequestCountLimit&quot;,
+        &quot;timeUnit&quot;: &quot;min&quot;,
+        &quot;unitTime&quot;: 1,
+        &quot;requestCount&quot;: 2000
+      },
+      &quot;rateLimitCount&quot;: 0,
+      &quot;rateLimitTimeUnit&quot;: null,
+      &quot;customAttributes&quot;: [],
+      &quot;stopOnQuotaReach&quot;: true,
+      &quot;billingPlan&quot;: &quot;FREE&quot;
+    },
+    {
+      &quot;policyId&quot;: &quot;f0b88e6e-cb02-46d6-9c7c-6204729b39f2&quot;,
+      &quot;policyName&quot;: &quot;Bronze&quot;,
+      &quot;displayName&quot;: &quot;Bronze&quot;,
+      &quot;description&quot;: &quot;Allows 1000 requests per minute&quot;,
+      &quot;isDeployed&quot;: true,
+      &quot;defaultLimit&quot;: {
+        &quot;type&quot;: &quot;RequestCountLimit&quot;,
+        &quot;timeUnit&quot;: &quot;min&quot;,
+        &quot;unitTime&quot;: 1,
+        &quot;requestCount&quot;: 1000
+      },
+      &quot;rateLimitCount&quot;: 0,
+      &quot;rateLimitTimeUnit&quot;: null,
+      &quot;customAttributes&quot;: [],
+      &quot;stopOnQuotaReach&quot;: true,
+      &quot;billingPlan&quot;: &quot;FREE&quot;
+    },
+    {
+      &quot;policyId&quot;: &quot;880bd267-4b14-4248-ac35-37c52546851f&quot;,
+      &quot;policyName&quot;: &quot;Unauthenticated&quot;,
+      &quot;displayName&quot;: &quot;Unauthenticated&quot;,
+      &quot;description&quot;: &quot;Allows 500 request(s) per minute&quot;,
+      &quot;isDeployed&quot;: true,
+      &quot;defaultLimit&quot;: {
+        &quot;type&quot;: &quot;RequestCountLimit&quot;,
+        &quot;timeUnit&quot;: &quot;min&quot;,
+        &quot;unitTime&quot;: 1,
+        &quot;requestCount&quot;: 500
+      },
+      &quot;rateLimitCount&quot;: 0,
+      &quot;rateLimitTimeUnit&quot;: null,
+      &quot;customAttributes&quot;: [],
+      &quot;stopOnQuotaReach&quot;: true,
+      &quot;billingPlan&quot;: &quot;FREE&quot;
+    },
+    {
+      &quot;policyId&quot;: &quot;c61f9682-a5f5-4991-b8f9-ea0f44147a5a&quot;,
+      &quot;policyName&quot;: &quot;Unlimited&quot;,
+      &quot;displayName&quot;: &quot;Unlimited&quot;,
+      &quot;description&quot;: &quot;Allows unlimited requests&quot;,
+      &quot;isDeployed&quot;: true,
+      &quot;defaultLimit&quot;: {
+        &quot;type&quot;: &quot;RequestCountLimit&quot;,
+        &quot;timeUnit&quot;: &quot;min&quot;,
+        &quot;unitTime&quot;: 1,
+        &quot;requestCount&quot;: 2147483647
+      },
+      &quot;rateLimitCount&quot;: 0,
+      &quot;rateLimitTimeUnit&quot;: null,
+      &quot;customAttributes&quot;: [],
+      &quot;stopOnQuotaReach&quot;: true,
+      &quot;billingPlan&quot;: &quot;FREE&quot;
+    }
+  ]
+}</code></div>
+
+            <h4 class="section-heading">Sample CURL</h4>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122&quot; https://localhost:9443/api/am/admin/v0.11/throttling/policies/subscription</code></div>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>Accept</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Media types acceptable for the response. Default is application/json.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked">application/json</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resourec.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Modified-Since</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
+formerly retrieved variant of the resource.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Policies returned </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#SubscriptionThrottlePolicyList">SubscriptionThrottlePolicyList</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">304</p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h3 class="operation-heading"><a name="throttlingPoliciesSubscriptionPost"></a>Add a Subscription level throttle policy <br><small>POST https://apis.wso2.com/api/am/admin/v0.11/throttling/policies/subscription</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to add a Subscription level throttle policy specifying the details of the policy in the payload.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:tier_manage</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:tier_manage' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-throttlingPoliciesSubscriptionPost">
+                <h4 class="section-heading">
+                    Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+
+                <div id="request-throttlingPoliciesSubscriptionPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/admin/v0.11/throttling/policies/subscription
+Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122
+Content-Type: application/json
+
+{
+    &quot;policyName&quot;: &quot;Platinum&quot;,
+    &quot;displayName&quot;: &quot;Platinum&quot;,
+    &quot;description&quot;: &quot;Allows 4000 requests per minute&quot;,
+    &quot;defaultLimit&quot;:          {
+       &quot;type&quot;: &quot;RequestCountLimit&quot;,
+       &quot;timeUnit&quot;: &quot;min&quot;,
+       &quot;unitTime&quot;: 1,
+       &quot;requestCount&quot;: 4000
+    },
+    &quot;rateLimitCount&quot;: -1,
+    &quot;rateLimitTimeUnit&quot;: &quot;NA&quot;,
+    &quot;customAttributes&quot;:          [
+                   {
+          &quot;name&quot;: &quot;attr1&quot;,
+          &quot;value&quot;: &quot;123&quot;
+       },
+                   {
+          &quot;name&quot;: &quot;attr2&quot;,
+          &quot;value&quot;: &quot;12&quot;
+       }
+    ],
+    &quot;stopOnQuotaReach&quot;: true,
+    &quot;billingPlan&quot;: &quot;COMMERCIAL&quot;
+}</code></div>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-throttlingPoliciesSubscriptionPost">
+                <h4 class="section-heading">
+                    Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+                <div id="response-throttlingPoliciesSubscriptionPost" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
+Location: https://localhost:9443/api/am/admin/v0.11/throttling/policies/subscription/6dd9fc11-bbe1-4daf-aee5-06a4d0e44476
+Content-Type: application/json
+
+{
+  &quot;policyId&quot;: &quot;6dd9fc11-bbe1-4daf-aee5-06a4d0e44476&quot;,
+  &quot;policyName&quot;: &quot;Platinum&quot;,
+  &quot;displayName&quot;: &quot;Platinum&quot;,
+  &quot;description&quot;: &quot;Allows 4000 requests per minute&quot;,
+  &quot;isDeployed&quot;: true,
+  &quot;defaultLimit&quot;: {
+    &quot;type&quot;: &quot;RequestCountLimit&quot;,
+    &quot;timeUnit&quot;: &quot;min&quot;,
+    &quot;unitTime&quot;: 1,
+    &quot;requestCount&quot;: 4000
+  },
+  &quot;rateLimitCount&quot;: -1,
+  &quot;rateLimitTimeUnit&quot;: &quot;NA&quot;,
+  &quot;customAttributes&quot;: [
+    {
+      &quot;name&quot;: &quot;attr1&quot;,
+      &quot;value&quot;: &quot;123&quot;
+    },
+    {
+      &quot;name&quot;: &quot;attr2&quot;,
+      &quot;value&quot;: &quot;12&quot;
+    }
+  ],
+  &quot;stopOnQuotaReach&quot;: true,
+  &quot;billingPlan&quot;: &quot;COMMERCIAL&quot;
+}</code></div>
+
+            <h4 class="section-heading">Sample CURL</h4>
+                <div class="pre"><code class="bash">curl -k -X POST -H &quot;Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122&quot; -H &quot;Content-Type: application/json&quot; https://localhost:9443/api/am/admin/v0.11/throttling/policies/subscription -d @data.json</code></div>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            
+                            <span class="param-in">Body </span>
+                        </td>
+                        <td class="param-name">
+                            <p>body</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Subscripion level policy object that should to be added
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                SubscriptionThrottlePolicy
+                                    (<a href="#!/models#SubscriptionThrottlePolicy">SubscriptionThrottlePolicy</a>)
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>Content-Type</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Media type of the entity in the body. Default is application/json.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked">application/json</p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">201</p></td>
+                        <td class="parameter"><p class="marked">Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#SubscriptionThrottlePolicy">SubscriptionThrottlePolicy</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">415</p></td>
+                        <td class="parameter"><p class="marked">Unsupported media type. The entity of the request was in a not supported format. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+</div>

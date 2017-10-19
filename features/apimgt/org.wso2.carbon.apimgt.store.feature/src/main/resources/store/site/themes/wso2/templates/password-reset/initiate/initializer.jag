@@ -1,0 +1,13 @@
+<%
+jagg.initializer("password-reset/initiate", {
+    preInitialize: function () {
+        //custom CSS
+        jagg.addHeaderCSS("password-reset/initiate","password.reset.initiate.css",
+                'templates/password-reset/initiate/css/initiate.css');
+
+        //custom JS
+        jagg.addFooterJS("password-reset/initiate", "password.reset.initiate.js",
+                "templates/password-reset/initiate/js/initiate.js");
+    }
+});
+%>

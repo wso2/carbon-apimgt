@@ -1,0 +1,31 @@
+<%
+include("/jagg/jagg.jag");
+var site = require("/site/conf/site.json");
+var i18n = require("i18n");
+var localeResourcesBasePath="/site/conf/locales/jaggery/";
+i18n.init(request,localeResourcesBasePath);
+include("header.jag");
+(function () {
+
+    jagg.render({
+        "name":"page/base",
+        "inputs":{
+            "title":"WSO2 API Management",
+            "pagePath":"/site/pages/initiate.jag",
+            "body":[
+                {
+                    "name":"password-reset/initiate",
+                    "inputs":{
+                        "title":"Forget Password",
+                        "middle":[
+                            {
+                                "name":"password-reset/initiate"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    });
+}());
+%>

@@ -1,0 +1,22 @@
+<%
+include("/jagg/jagg.jag");
+include("/jagg/constants.jag");
+var log = new Log();
+(function () {
+    var result,
+            action = request.getParameter("action"),
+            mod = jagg.module("password-reset"),
+            site = require("/site/conf/site.json");
+
+
+
+    if (action == "verifyPasswordResetConfirmationCode") {
+        var confirm = request.getParameter("confirm");
+        var id = request.getParameter("id");
+        result = mod.verifyPasswordResetConfirmationCode(confirm, id);
+        print(result);
+    } else {
+        throw new Error("No action specified");
+    }
+}());
+%>

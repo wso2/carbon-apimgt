@@ -1,0 +1,108 @@
+<%
+include("/jagg/jagg.jag");
+(function () {
+    var site = require("/site/conf/site.json");
+    var ssoEnabled = site.ssoConfiguration.enabled;
+    response.contentType = "application/json; charset=UTF-8";
+    var mod, obj, result, username , apiName, apiVersion, provider,
+            msg = require("/site/conf/ui-messages.jag"),
+            action = request.getParameter("action"),
+            user = jagg.getUser();
+
+    var validation = {
+        "action": { type: "safetext"},
+        "start":{ type:"number"},
+        "end":{type:"number"},
+        "app":{type:"name"}
+    };
+
+    var validation_errors = jagg.validateInputs(validation);
+
+    if(validation_errors != true){
+        print({
+            error:true,
+            message: msg.error.invalidInputs(validation_errors)
+        });
+    } else if (action == "generateSDK"){
+        if (!user) {
+            if(!ssoEnabled){
+                print({
+                    error:true,
+                    message:msg.error.loginRequired(action)
+                });
+            }
+            return;
+        }
+
+        //which sdk user wants to generate
+        if(request.getParameter('language')!=null){
+            language = request.getParameter('language');
+        }
+        else {
+            language=null;
+        }
+
+        if (request.getParameter('apiName') != null) {
+            apiName = request.getParameter('apiName');
+        }
+        else {
+            apiName = null;
+        }
+        if (request.getParameter('apiVersion') != null) {
+            apiVersion = request.getParameter('apiVersion');
+        }
+        else {
+            apiVersion = null;
+        }
+        if (request.getParameter('apiProvider') != null) {
+            apiProvider = request.getParameter('apiProvider');
+        }
+        else {
+            apiProvider = null;
+        }
+
+        var apiResult = jagg.module("api").getAPIDescription({
+            name:apiName,
+            version:apiVersion,
+            provider:apiProvider
+        }, user.username);
+
+        if (apiResult.error) {
+            print({
+                error:true,
+                message:msg.error.forbidAction(action)
+            });
+            return;
+        }
+        
+        mod = jagg.module("sdk");
+        result = mod.generateClientSDK(language, apiName, apiVersion, apiProvider);
+
+        if (result.error) {
+            obj = {
+                error:result.error,
+                message:result.message
+            };
+        } else {
+            var file = new File("file:///" + result.zipFilePath);
+            file.open("r");
+            response.contentType = "application/force-download";
+            response.addHeader("Content-Disposition","attachment; filename = \"" + result.zipFileName + "\"");
+            print(file.getStream());
+            file.close();
+            file.del();
+            mod.cleanTempDirectory(result.tempDirectoryPath);
+            obj = {
+                error:false,
+                message:"SDK generation completed."
+            };
+        }
+        print(obj);
+    } else {
+        print({
+            error:true,
+            message:msg.error.invalidAction(action)
+        });
+    }
+}());
+%>

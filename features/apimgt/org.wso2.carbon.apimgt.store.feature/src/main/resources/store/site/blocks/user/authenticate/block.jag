@@ -1,0 +1,7 @@
+<%
+jagg.block("user/authenticate", {
+    initialize:function (data) {
+    }
+
+});
+%>

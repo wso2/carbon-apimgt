@@ -1,0 +1,101 @@
+<% jagg.template("tiers", function(inputs, outputs, jagg) { %>
+	<%
+		var tiers = outputs.tiers; 
+		var tierPermissions = outputs.tierPermissions;
+	%>
+	<div id="tiers">
+		<div class="page-header">
+                <h2><%=i18n.localize("tierPermissions")%></h2>
+        </div>
+        <div class = "col-sm-12">
+        		<table class="table table-striped table-hover table-bordered display data-table">
+        			<thead>
+        				<tr>
+        					<th class="tierSpecialCell"><%=i18n.localize("tiers")%></th>
+        					<th class="appSpecialCell"><%=i18n.localize("permissions")%></th>
+        				</tr>
+        			</thead>
+        			<tbody id="tiers">
+        			<%
+        			
+        			
+        				for (i = 0; i < tierPermissions.length; i++) {
+        					var permissionsDefined = false, denied = false, roleList = "", roleArray, defaultRole, i;
+        				
+        					if (tierPermissions[i].permissionType == 'deny') {
+        							denied = true;
+        					}
+        					roleArray = tierPermissions[i].roles;
+        					if (roleArray.length > 0) {
+        						roleList = roleArray[0];
+        					}
+        					for (var a = 1; a < roleArray.length; a ++) {
+        						roleList = roleList + "," + roleArray[a];
+        					}
+        					
+        				
+        				
+        				var radioInputName = "permissionType" + i; 
+        				var roleInputName = "roles" + i;
+        				var tierInputName = "tier" + i;
+        				var statusUpdateMsgName = "statusUpdateMsg" +i;
+                        var tierPermissionBtn = "tierPermission" + i;
+        			%>
+                         <tr>
+	        					<td><%=tierPermissions[i].tierDisplayName%></td>
+	        					<td>
+	        					<div>
+		        					<div id="radiodev" class="form-inline">
+		        					<% if (denied) {%>
+		        						<label class="radio-inline">
+			        						<input type="radio"  name="<%=radioInputName%>" value="allow" id="y"/>
+			       							<%=i18n.localize("Allow")%>
+			       						</label>
+			       						<label class="radio-inline">
+			       							<input type="radio" name="<%=radioInputName%>" value="deny" id="z" checked/>
+			        						<%=i18n.localize("Deny")%>
+			        					</label>
+		        					 <%} else {
+		        					 	
+		        					 %>
+		        					 	<label class="radio-inline">
+		        					 		<input type="radio"  name="<%=radioInputName%>" value="allow" id="y" checked/>
+			       							<%=i18n.localize("Allow")%>
+			       						</label>
+			       						<label class="radio-inline">
+			       							<input type="radio" name="<%=radioInputName%>" value="deny" id="z"/>
+			        						<%=i18n.localize("Deny")%>
+			        					</label>
+		        					 <%}%>
+		        					 </div>
+		        					 <div class="form-inline">
+		        					 	<label class="control-label" for="roles" id="rolesLabel" name="rolesLabel">Roles:</label>
+                                        <input type="text" class="input rolesInput form-control"  id="<%=roleInputName%>" name="<%=roleInputName%>" value="<%=roleList%>" data-role="tagsinput"/>
+		        					 	<label class="errorTier errorMsg" id="errorTier<%=String(i)%>"style="display:none;">This field is required.</label>
+                                        <label class="errorTier errorMsg" id="errorTierRoles<%=String(i)%>"style="display:none;">Invalid role name[s]</label>
+		        					 	<p class="help-block" id="rolesHelp"><%=i18n.localize("Type a role and Enter")%></p>
+		        					 </div>
+	        					</div>
+		                	
+		                		
+	                        	
+		            			
+		            			
+		            			<div class="form-actions" id="saveButtons">
+                    				<div class="form-group">
+                                        <button type="submit" id="addNewAPIButton" name="addNewAPIButton" onclick="updatePermissions('<%=tiers[i].tierName%>', <%=i%>, '<%=tierPermissionBtn%>' )" class="btn btn-primary has-spinner <%=tierPermissionBtn%>"><%=i18n.localize("Update Permissions")%></button>
+                                    </div>
+                				</div>
+                				
+                				<div class="alert alert-success" id="<%=statusUpdateMsgName%>" style="display:none;">
+        							<%=i18n.localize("Successfully updated tier permissions.")%>
+     							</div>
+        					</td>
+        					</tr>
+                      <%}
+        			%>
+        			</tbody>
+        		</table>
+        </div>
+	</div>
+<%});%>

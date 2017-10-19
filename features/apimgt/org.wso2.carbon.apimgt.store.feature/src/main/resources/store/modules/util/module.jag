@@ -1,0 +1,16 @@
+<%
+jagg.module("util", {
+    validatePassword: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").validatePassword.apply(this, arguments);
+    },
+    getJsonFromFile: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").getJsonFromFile.apply(this, arguments);
+    },
+    isSessionAuthenticated: function() {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").isSessionAuthenticated.apply(this, arguments);
+    },
+    getUsernameWithTenantDomain: function () {
+        return jagg.require(jagg.getModulesDir() + "util/util.jag").getUsernameWithTenantDomain.apply(this, arguments);
+    }
+});
+%>

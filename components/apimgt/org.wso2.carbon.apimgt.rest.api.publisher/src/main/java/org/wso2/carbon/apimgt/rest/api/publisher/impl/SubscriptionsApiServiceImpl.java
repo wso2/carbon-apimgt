@@ -1,253 +1,211 @@
+/*
+ *
+ *  Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.api.APIPublisher;
-import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
-import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.exception.GatewayException;
-import org.wso2.carbon.apimgt.core.models.Subscription;
-import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
-import org.wso2.carbon.apimgt.core.util.ETagUtils;
-import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.SubscriptionsApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ExtendedSubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
-import org.wso2.msf4j.Request;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.SubscriptionMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import java.util.HashMap;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
+import javax.ws.rs.core.Response;
 
-@javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
-        "2016-11-01T13:47:43.416+05:30")
+
+/** This is the service implementation class for Publisher subscriptions related operations
+ * 
+ */
 public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
-    private static final Logger log = LoggerFactory.getLogger(SubscriptionsApiService.class);
 
-    /**
-     * Block an existing subscription
-     *
-     * @param subscriptionId    ID of the subscription
-     * @param blockState        Subscription block state
-     * @param ifMatch           If-Match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param request           ms4j request object
-     * @return Updated subscription DTO as the response
-     * @throws NotFoundException When the particular resource does not exist in the system
+    private static final Log log = LogFactory.getLog(SubscriptionsApiService.class);
+
+    /** Retieves all subscriptions or retrieves subscriptions for a given API Id
+     * 
+     * @param apiId API identifier
+     * @param limit max number of objects returns
+     * @param offset starting index
+     * @param accept accepted media type of the client
+     * @param ifNoneMatch If-None-Match header value
+     * @return Response object containing resulted subscriptions
      */
     @Override
-    public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String blockState, String ifMatch,
-                                                       String ifUnmodifiedSince, Request request) throws
-            NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername(request);
-        try {
-            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            Subscription subscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
-            if (subscription == null) {
-                String errorMessage = "Subscription not found : " + subscriptionId;
-                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
-                        ExceptionCodes.SUBSCRIPTION_NOT_FOUND);
-                HashMap<String, String> paramList = new HashMap<String, String>();
-                paramList.put(APIMgtConstants.ExceptionsConstants.SUBSCRIPTION_ID, subscriptionId);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-                log.error(errorMessage, e);
-                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-            } else if (subscription.getStatus().equals(APIMgtConstants.SubscriptionStatus.REJECTED)
-                    || subscription.getStatus().equals(APIMgtConstants.SubscriptionStatus.ON_HOLD)) {
-                String errorMessage = "Cannot update subcription from " + subscription.getStatus() + "to " +
-                        blockState;
-                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
-                        ExceptionCodes.SUBSCRIPTION_STATE_INVALID);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
-                log.error(errorMessage, e);
-                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-            }
-            apiPublisher.updateSubscriptionStatus(subscriptionId, APIMgtConstants.SubscriptionStatus.valueOf
-                    (blockState));
-            Subscription newSubscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
-            SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(newSubscription);
-            return Response.ok().entity(subscriptionDTO).build();
-        } catch (GatewayException e) {
-            String errorMessage = "Failed to block subscription :" + subscriptionId + " in gateway";
-            log.error(errorMessage, e);
-            return Response.status(Response.Status.ACCEPTED).build();
-        }
-        catch (APIManagementException e) {
-            String errorMessage = "Error while blocking the subscription " + subscriptionId;
-            HashMap<String, String> paramList = new HashMap<String, String>();
-            paramList.put(APIMgtConstants.ExceptionsConstants.SUBSCRIPTION_ID, subscriptionId);
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-            log.error(errorMessage, e);
-            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-        }
-    }
+    public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String accept,
+            String ifNoneMatch) {
 
-    /**
-     * Retrieve all subscriptions for a particular API
-     *
-     * @param apiId       ID of the API
-     * @param limit       Maximum subscriptions to return
-     * @param offset      Starting position of the pagination
-     * @param ifNoneMatch If-Match header value
-     * @param request     ms4j request object
-     * @return List of qualifying subscriptions DTOs as the response
-     * @throws NotFoundException When the particular resource does not exist in the system
-     */
-    @Override
-    public Response subscriptionsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch,
-            Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername(request);
-        List<Subscription> subscriptionList;
+        //pre-processing
+        //setting default limit and offset if they are null
+        limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
+        offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+
+        String username = RestApiUtil.getLoggedInUsername();
+        String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         try {
-            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            if (StringUtils.isNotEmpty(apiId)) {
-                subscriptionList = apiPublisher.getSubscriptionsByAPI(apiId);
-                SubscriptionListDTO subscriptionListDTO = MappingUtil.fromSubscriptionListToDTO(subscriptionList, limit,
-                        offset);
-                return Response.ok().entity(subscriptionListDTO).build();
+            APIProvider apiProvider = RestApiUtil.getProvider(username);
+            SubscriptionListDTO subscriptionListDTO;
+            if (apiId != null) {
+                APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
+                List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiIdentifier);
+                subscriptionListDTO = SubscriptionMappingUtil.fromSubscriptionListToDTO(apiUsages, limit, offset);
+                SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, apiId, "", limit, offset,
+                        apiUsages.size());
             } else {
-                RestApiUtil.handleBadRequest("API ID can not be null", log);
+                UserApplicationAPIUsage[] allApiUsage = apiProvider.getAllAPIUsageByProvider(username);
+                subscriptionListDTO = SubscriptionMappingUtil.fromUserApplicationAPIUsageArrayToDTO(allApiUsage, limit,
+                        offset);
+                SubscriptionMappingUtil.setPaginationParams(subscriptionListDTO, "", "", limit, offset,
+                        allApiUsage.length);
             }
-
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while retrieving subscriptions of API " + apiId;
-            HashMap<String, String> paramList = new HashMap<String, String>();
-            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-            log.error(errorMessage, e);
-            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            return Response.ok().entity(subscriptionListDTO).build();
+        } catch (APIManagementException | UnsupportedEncodingException e) {
+            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
+            // existence of the resource
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String msg = "Error while retrieving subscriptions of API " + apiId;
+                RestApiUtil.handleInternalServerError(msg, e, log);
+            }
         }
         return null;
     }
 
     /**
-     * Retrieves a single subscription
-     *
-     * @param subscriptionId  ID of the subscription
-     * @param ifNoneMatch     If-Match header value
-     * @param ifModifiedSince If-Modified-Since value
-     * @param request         ms4j request object
-     * @return Requested subscription details
-     * @throws NotFoundException When the particular resource does not exist in the system
+     * Blocks a subscription 
+     * 
+     * @param subscriptionId Subscription identifier
+     * @param blockState block state; either BLOCKED or PROD_ONLY_BLOCKED
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return 200 response if successfully blocked the subscription
      */
     @Override
-    public Response subscriptionsSubscriptionIdGet(String subscriptionId, String ifNoneMatch,
-            String ifModifiedSince, Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername(request);
+    public Response subscriptionsBlockSubscriptionPost(String subscriptionId, String blockState, String ifMatch,
+            String ifUnmodifiedSince) {
+        String username = RestApiUtil.getLoggedInUsername();
+        APIProvider apiProvider;
         try {
-            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            String existingFingerprint = subscriptionsSubscriptionIdGetFingerprint(subscriptionId, ifNoneMatch,
-                    ifModifiedSince, request);
-            if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
-                    .contains(existingFingerprint)) {
-                return Response.notModified().build();
+            apiProvider = RestApiUtil.getProvider(username);
+
+            //validates the subscriptionId if it exists
+            SubscribedAPI currentSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);
+            if (currentSubscription == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
             }
 
-            Subscription subscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
-            if (subscription == null) {
-                String errorMessage = "Subscription not found : " + subscriptionId;
-                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
-                        ExceptionCodes.SUBSCRIPTION_NOT_FOUND);
-                HashMap<String, String> paramList = new HashMap<String, String>();
-                paramList.put(APIMgtConstants.ExceptionsConstants.SUBSCRIPTION_ID, subscriptionId);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-                log.error(errorMessage, e);
-                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-            }
-            SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(subscription);
-            return Response.ok().header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").entity(subscriptionDTO)
-                    .build();
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while getting the subscription " + subscriptionId;
-            HashMap<String, String> paramList = new HashMap<String, String>();
-            paramList.put(APIMgtConstants.ExceptionsConstants.SUBSCRIPTION_ID, subscriptionId);
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-            log.error(errorMessage, e);
-            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-        }
-    }
+            SubscribedAPI subscribedAPI = new SubscribedAPI(subscriptionId);
+            subscribedAPI.setSubStatus(blockState);
+            apiProvider.updateSubscription(subscribedAPI);
 
-    /**
-     * Retrieve the fingerprint of the subscription
-     *
-     * @param subscriptionId  ID of the subscription
-     * @param ifNoneMatch     If-Match header value
-     * @param ifModifiedSince If-Modified-Since value
-     * @param request         ms4j request object
-     * @return Fingerprint of the subscription
-     */
-    public String subscriptionsSubscriptionIdGetFingerprint(String subscriptionId, String ifNoneMatch,
-            String ifModifiedSince, Request request) {
-        String username = RestApiUtil.getLoggedInUsername(request);
-        try {
-            String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
-                    .getLastUpdatedTimeOfSubscription(subscriptionId);
-            return ETagUtils.generateETag(lastUpdatedTime);
-        } catch (APIManagementException e) {
-            //gives a warning and let it continue the execution
-            String errorMessage = "Error while retrieving last updated time of subscription " + subscriptionId;
-            log.error(errorMessage, e);
-            return null;
-        }
-    }
-
-    /**
-     * @param subscriptionId    ID of the subscription
-     * @param ifMatch           If-Match header value
-     * @param ifUnmodifiedSince If-Modified-Since value
-     * @param request           ms4j request object
-     * @return ms4j request object
-     * @throws NotFoundException When the particular resource does not exist in the system
-     */
-    @Override
-    public Response subscriptionsUnblockSubscriptionPost(String subscriptionId, String ifMatch, String
-            ifUnmodifiedSince, Request request) throws
-            NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername(request);
-        try {
-            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            Subscription subscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
-            if (subscription == null) {
-                String errorMessage = "Subscription not found : " + subscriptionId;
-                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
-                        ExceptionCodes.SUBSCRIPTION_NOT_FOUND);
-                HashMap<String, String> paramList = new HashMap<String, String>();
-                paramList.put(APIMgtConstants.ExceptionsConstants.SUBSCRIPTION_ID, subscriptionId);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-                log.error(errorMessage, e);
-                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-            } else if (subscription.getStatus().equals(APIMgtConstants.SubscriptionStatus.REJECTED)
-                    || subscription.getStatus().equals(APIMgtConstants.SubscriptionStatus.ON_HOLD)) {
-                String errorMessage = "Cannot update subcription from " + subscription.getStatus() + "to " +
-                        APIMgtConstants.SubscriptionStatus.ACTIVE;
-                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
-                        ExceptionCodes.SUBSCRIPTION_STATE_INVALID);
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
-                log.error(errorMessage, e);
-                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
-            }
-            apiPublisher.updateSubscriptionStatus(subscriptionId, APIMgtConstants.SubscriptionStatus.ACTIVE);
-            Subscription newSubscription = apiPublisher.getSubscriptionByUUID(subscriptionId);
-            SubscriptionDTO subscriptionDTO = MappingUtil.fromSubscription(newSubscription);
+            SubscribedAPI updatedSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);
+            SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(updatedSubscription);
             return Response.ok().entity(subscriptionDTO).build();
-        } catch (GatewayException e) {
-            String errorMessage = "Failed to unblock subscription :" + subscriptionId + " in gateway";
-            log.error(errorMessage, e);
-            return Response.status(Response.Status.ACCEPTED).build();
-        } catch (APIManagementException e) {
-            String errorMessage = "Error while unblocking the subscription " + subscriptionId;
-            HashMap<String, String> paramList = new HashMap<String, String>();
-            paramList.put(APIMgtConstants.ExceptionsConstants.SUBSCRIPTION_ID, subscriptionId);
-            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
-            log.error(errorMessage, e);
-            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (APIManagementException | UnsupportedEncodingException e) {
+            String msg = "Error while blocking the subscription " + subscriptionId;
+            RestApiUtil.handleInternalServerError(msg, e, log);
         }
+        return null;
+    }
+
+    /**
+     * Unblocks a subscription
+     * 
+     * @param subscriptionId subscription identifier
+     * @param ifMatch If-Match header value
+     * @param ifUnmodifiedSince If-Unmodified-Since header value
+     * @return 200 response if successfully unblocked the subscription
+     */
+    @Override
+    public Response subscriptionsUnblockSubscriptionPost(String subscriptionId, String ifMatch,
+            String ifUnmodifiedSince) {
+        String username = RestApiUtil.getLoggedInUsername();
+        APIProvider apiProvider;
+        try {
+            apiProvider = RestApiUtil.getProvider(username);
+
+            //validates the subscriptionId if it exists
+            SubscribedAPI currentSubscription = apiProvider.getSubscriptionByUUID(subscriptionId);
+            if (currentSubscription == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
+            }
+
+            SubscribedAPI subscribedAPI = new SubscribedAPI(subscriptionId);
+            subscribedAPI.setSubStatus(APIConstants.SubscriptionStatus.UNBLOCKED);
+            apiProvider.updateSubscription(subscribedAPI);
+
+            SubscribedAPI updatedSubscribedAPI = apiProvider.getSubscriptionByUUID(subscriptionId);
+            SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(updatedSubscribedAPI);
+            return Response.ok().entity(subscriptionDTO).build();
+        } catch (APIManagementException | UnsupportedEncodingException e) {
+            String msg = "Error while unblocking the subscription " + subscriptionId;
+            RestApiUtil.handleInternalServerError(msg, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Gets a subscription by identifier
+     *
+     * @param subscriptionId  subscription identifier
+     * @param accept          Accept header value
+     * @param ifNoneMatch     If-None-Match header value
+     * @param ifModifiedSince If-Modified-Since header value
+     * @return matched subscription as a SubscriptionDTO
+     */
+    @Override
+    public Response subscriptionsSubscriptionIdGet(String subscriptionId, String accept, String ifNoneMatch,
+            String ifModifiedSince) {
+        String username = RestApiUtil.getLoggedInUsername();
+        APIProvider apiProvider;
+        try {
+            apiProvider = RestApiUtil.getProvider(username);
+            SubscribedAPI subscribedAPI = apiProvider.getSubscriptionByUUID(subscriptionId);
+            if (subscribedAPI != null) {
+                String externalWorkflowRefId = null;
+                try {
+                    externalWorkflowRefId = apiProvider.getExternalWorkflowReferenceId(subscribedAPI.getSubscriptionId());
+                } catch (APIManagementException e) {
+                    // need not fail if querying workflow reference id throws and error; log and continue
+                    log.error("Error while retrieving external workflow reference for subscription id: " +
+                            subscriptionId, e);
+                }
+                ExtendedSubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.
+                        fromSubscriptionToExtendedSubscriptionDTO(subscribedAPI, externalWorkflowRefId);
+                return Response.ok().entity(subscriptionDTO).build();
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
+            }
+        } catch (APIManagementException | UnsupportedEncodingException e) {
+            String msg = "Error while getting the subscription " + subscriptionId;
+            RestApiUtil.handleInternalServerError(msg, e, log);
+        }
+        return null;
     }
 }

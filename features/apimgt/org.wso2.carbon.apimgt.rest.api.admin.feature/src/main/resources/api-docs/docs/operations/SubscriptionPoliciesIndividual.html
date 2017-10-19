@@ -1,0 +1,710 @@
+<div class="main-content">
+    <h1><a name="Subscription Policies (Individual)"></a>Subscription Policies (Individual)</h1>
+
+            <hr/>
+            <h3 class="operation-heading"><a name="throttlingPoliciesSubscriptionPolicyIdDelete"></a>Delete a Subscription level throttle policy <br><small>DELETE https://apis.wso2.com/api/am/admin/v0.11/throttling/policies/subscription/{policyId}</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to delete a Subscription level throttle policy specifying the id of the policy as a path paramter.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:tier_manage</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:tier_manage' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-throttlingPoliciesSubscriptionPolicyIdDelete">
+                <h4 class="section-heading">
+                    Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+
+                <div id="request-throttlingPoliciesSubscriptionPolicyIdDelete"class="pre collapse in"><code class="json">DELETE https://localhost:9443/api/am/admin/v0.11/throttling/policies/subscription/3cc8902e-f7c7-49dc-987b-b146e9bd8ee8
+Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122
+Content-Type: application/json
+</code></div>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-throttlingPoliciesSubscriptionPolicyIdDelete">
+                <h4 class="section-heading">
+                    Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+                <div id="response-throttlingPoliciesSubscriptionPolicyIdDelete" class="pre collapse in"><code class="json">HTTP/1.1 200 OK</code></div>
+
+            <h4 class="section-heading">Sample CURL</h4>
+                <div class="pre"><code class="bash">curl -k -X DELETE -H &quot;Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122&quot; -H &quot;Content-Type: application/json&quot; https://localhost:9443/api/am/admin/v0.11/throttling/policies/subscription/3cc8902e-f7c7-49dc-987b-b146e9bd8ee8</code></div>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>policyId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Thorttle policy UUID
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on ETag.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Unmodified-Since</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Resource successfully deleted. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Resource to be deleted does not exist. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">412</p></td>
+                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met (Will be supported in future). </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h3 class="operation-heading"><a name="throttlingPoliciesSubscriptionPolicyIdGet"></a>Retrieve a Subscription Policy <br><small>GET https://apis.wso2.com/api/am/admin/v0.11/throttling/policies/subscription/{policyId}</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to retrieve a single Subscription Policy providing the id of policy as a path parameter.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:tier_view</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:tier_view' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-throttlingPoliciesSubscriptionPolicyIdGet">
+                <h4 class="section-heading">
+                    Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+
+                <div id="request-throttlingPoliciesSubscriptionPolicyIdGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/admin/v0.11/throttling/policies/subscription/6dd9fc11-bbe1-4daf-aee5-06a4d0e44476
+Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122
+</code></div>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-throttlingPoliciesSubscriptionPolicyIdGet">
+                <h4 class="section-heading">
+                    Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+                <div id="response-throttlingPoliciesSubscriptionPolicyIdGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  &quot;policyId&quot;: &quot;6dd9fc11-bbe1-4daf-aee5-06a4d0e44476&quot;,
+  &quot;policyName&quot;: &quot;Platinum&quot;,
+  &quot;displayName&quot;: &quot;Platinum&quot;,
+  &quot;description&quot;: &quot;Allows 4000 requests per minute&quot;,
+  &quot;isDeployed&quot;: true,
+  &quot;defaultLimit&quot;: {
+    &quot;type&quot;: &quot;RequestCountLimit&quot;,
+    &quot;timeUnit&quot;: &quot;min&quot;,
+    &quot;unitTime&quot;: 1,
+    &quot;requestCount&quot;: 4000
+  },
+  &quot;rateLimitCount&quot;: -1,
+  &quot;rateLimitTimeUnit&quot;: &quot;NA&quot;,
+  &quot;customAttributes&quot;: [
+    {
+      &quot;name&quot;: &quot;attr1&quot;,
+      &quot;value&quot;: &quot;123&quot;
+    },
+    {
+      &quot;name&quot;: &quot;attr2&quot;,
+      &quot;value&quot;: &quot;12&quot;
+    }
+  ],
+  &quot;stopOnQuotaReach&quot;: true,
+  &quot;billingPlan&quot;: &quot;COMMERCIAL&quot;
+}</code></div>
+
+            <h4 class="section-heading">Sample CURL</h4>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122&quot; https://localhost:9443/api/am/admin/v0.11/throttling/policies/subscription/6dd9fc11-bbe1-4daf-aee5-06a4d0e44476</code></div>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>policyId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Thorttle policy UUID
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resourec.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Modified-Since</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
+formerly retrieved variant of the resource.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Policy returned </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#SubscriptionThrottlePolicy">SubscriptionThrottlePolicy</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">304</p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested Policy does not exist. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h3 class="operation-heading"><a name="throttlingPoliciesSubscriptionPolicyIdPut"></a>Update a Subscription level throttle policy <br><small>PUT https://apis.wso2.com/api/am/admin/v0.11/throttling/policies/subscription/{policyId}</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to update a Subscription level throttle policy.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:tier_manage</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:tier_manage' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-throttlingPoliciesSubscriptionPolicyIdPut">
+                <h4 class="section-heading">
+                    Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+
+                <div id="request-throttlingPoliciesSubscriptionPolicyIdPut"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/admin/v0.11/throttling/policies/subscription/6dd9fc11-bbe1-4daf-aee5-06a4d0e44476
+Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122
+Content-Type: application/json
+
+{
+    &quot;policyName&quot;: &quot;Platinum&quot;,
+    &quot;displayName&quot;: &quot;Platinum&quot;,
+    &quot;description&quot;: &quot;Allows 10000 requests per minute&quot;,
+    &quot;defaultLimit&quot;:          {
+       &quot;type&quot;: &quot;RequestCountLimit&quot;,
+       &quot;timeUnit&quot;: &quot;min&quot;,
+       &quot;unitTime&quot;: 1,
+       &quot;requestCount&quot;: 10000
+    },
+    &quot;isDeployed&quot;: true,
+    &quot;rateLimitCount&quot;: -1,
+    &quot;rateLimitTimeUnit&quot;: &quot;NA&quot;,
+    &quot;customAttributes&quot;:          [
+                   {
+          &quot;name&quot;: &quot;attr&quot;,
+          &quot;value&quot;: &quot;123&quot;
+       },
+                   {
+          &quot;name&quot;: &quot;attr1&quot;,
+          &quot;value&quot;: &quot;456&quot;
+       }
+    ],
+    &quot;stopOnQuotaReach&quot;: true,
+    &quot;billingPlan&quot;: &quot;COMMERCIAL&quot;
+}</code></div>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-throttlingPoliciesSubscriptionPolicyIdPut">
+                <h4 class="section-heading">
+                    Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+                <div id="response-throttlingPoliciesSubscriptionPolicyIdPut" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  &quot;policyId&quot;: &quot;6dd9fc11-bbe1-4daf-aee5-06a4d0e44476&quot;,
+  &quot;policyName&quot;: &quot;Platinum&quot;,
+  &quot;displayName&quot;: &quot;Platinum&quot;,
+  &quot;description&quot;: &quot;Allows 10000 requests per minute&quot;,
+  &quot;isDeployed&quot;: true,
+  &quot;defaultLimit&quot;: {
+    &quot;type&quot;: &quot;RequestCountLimit&quot;,
+    &quot;timeUnit&quot;: &quot;min&quot;,
+    &quot;unitTime&quot;: 1,
+    &quot;requestCount&quot;: 10000
+  },
+  &quot;rateLimitCount&quot;: -1,
+  &quot;rateLimitTimeUnit&quot;: &quot;NA&quot;,
+  &quot;customAttributes&quot;: [
+    {
+      &quot;name&quot;: &quot;attr&quot;,
+      &quot;value&quot;: &quot;123&quot;
+    },
+    {
+      &quot;name&quot;: &quot;attr1&quot;,
+      &quot;value&quot;: &quot;456&quot;
+    }
+  ],
+  &quot;stopOnQuotaReach&quot;: true,
+  &quot;billingPlan&quot;: &quot;COMMERCIAL&quot;
+}</code></div>
+
+            <h4 class="section-heading">Sample CURL</h4>
+                <div class="pre"><code class="bash">curl -k -X PUT -H &quot;Authorization: Bearer 0d63e133-7ad6-3aeb-9ca9-9299e0708122&quot; -H &quot;Content-Type: application/json&quot; https://localhost:9443/api/am/admin/v0.11/throttling/policies/subscription/6dd9fc11-bbe1-4daf-aee5-06a4d0e44476 -d @data.json</code></div>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>policyId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Thorttle policy UUID
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            
+                            <span class="param-in">Body </span>
+                        </td>
+                        <td class="param-name">
+                            <p>body</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Policy object that needs to be modified
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                SubscriptionThrottlePolicy
+                                    (<a href="#!/models#SubscriptionThrottlePolicy">SubscriptionThrottlePolicy</a>)
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>Content-Type</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Media type of the entity in the body. Default is application/json.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked">application/json</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on ETag.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Unmodified-Since</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Policy updated. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#SubscriptionThrottlePolicy">SubscriptionThrottlePolicy</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. The resource to be updated does not exist. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">412</p></td>
+                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met (Will be supported in future). </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+</div>

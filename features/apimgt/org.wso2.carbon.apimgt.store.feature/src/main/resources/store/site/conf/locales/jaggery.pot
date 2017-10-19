@@ -1,0 +1,1713 @@
+# #-#-#-#-#  jaggery.pot (PACKAGE VERSION)  #-#-#-#-#
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"#-#-#-#-#  jaggery.pot (PACKAGE VERSION)  #-#-#-#-#\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-07-15 16:47+0530\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"#-#-#-#-#  dynamic.po (i18next-conv)  #-#-#-#-#\n"
+"Project-Id-Version: i18next-conv\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"POT-Creation-Date: 2016-07-11T11:38:05.277Z\n"
+"PO-Revision-Date: 2016-07-11T11:38:05.277Z\n"
+"Language: en\n"
+
+#: site/themes/wso2/templates/manage-alerts/template.jag:6
+#: site/themes/wso2/templates/menu/primary/template.jag:20
+#: site/themes/wso2/templates/menu/primary/template.jag:35
+#: site/themes/wso2/templates/menu/primary/template.jag:48
+#: site/themes/wso2/templates/menu/primary/template.jag:58
+msgid "Manage Alert Types"
+msgstr ""
+
+#: site/themes/wso2/templates/manage-alerts/template.jag:36
+msgid "_Desc"
+msgstr ""
+
+#: site/themes/wso2/templates/manage-alerts/template.jag:44
+#: site/themes/wso2/templates/api/overview/template.jag:118
+msgid "Email"
+msgstr ""
+
+#: site/themes/wso2/templates/manage-alerts/template.jag:58
+#: site/themes/wso2/templates/subscription/subscription-authapp/subscription-authapp-credentials/template.jag:53
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:50
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:146
+#: site/themes/wso2/templates/application/application-keys/template.jag:193
+msgid "Save"
+msgstr ""
+
+#: site/themes/wso2/templates/manage-alerts/template.jag:59
+#: site/themes/wso2/templates/subscription/subscription-authapp/subscription-authapp-credentials/template.jag:56
+#: site/themes/wso2/templates/forum/forum-new/template.jag:28
+#: site/themes/wso2/templates/forum/forum-new/template.jag:29
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:53
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:147
+#: site/themes/wso2/templates/user/sign-up/template.jag:147
+#: site/themes/wso2/templates/application/application-keys/template.jag:194
+#: site/themes/wso2/templates/application/application-add/template.jag:93
+msgid "Cancel"
+msgstr ""
+
+#: site/themes/wso2/templates/manage-alerts/template.jag:60
+#: site/themes/wso2/templates/subscription/subscribed-apis/template.jag:27
+#: site/themes/wso2/templates/subscription/subscribed-apis/template.jag:32
+msgid "Unsubscribe"
+msgstr ""
+
+#: site/themes/wso2/templates/manage-alerts/template.jag:66
+msgid "Not Configured"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/faultCount/template.jag:3
+msgid "Faulty Invocations per Application"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/faultCount/template.jag:15
+#: site/themes/wso2/templates/stats/topUsers/template.jag:14
+#: site/themes/wso2/templates/stats/perAppAPICount/template.jag:13
+msgid "Hour"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/faultCount/template.jag:16
+#: site/themes/wso2/templates/stats/topUsers/template.jag:15
+#: site/themes/wso2/templates/stats/perAppAPICount/template.jag:14
+msgid "Day"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/faultCount/template.jag:18
+#: site/themes/wso2/templates/stats/topUsers/template.jag:17
+#: site/themes/wso2/templates/stats/perAppAPICount/template.jag:15
+msgid "Week"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/faultCount/template.jag:19
+#: site/themes/wso2/templates/stats/topUsers/template.jag:18
+#: site/themes/wso2/templates/stats/perAppAPICount/template.jag:16
+msgid "Month"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/faultCount/template.jag:37
+#: site/themes/wso2/templates/stats/apiCallType/template.jag:35
+msgid "Application Name"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/faultCount/template.jag:38
+#: site/themes/wso2/templates/stats/apiCallType/template.jag:36
+#: site/themes/wso2/templates/subscription/subscribed-apis/template.jag:17
+#: site/themes/wso2/templates/api/api-listing-tag-wise/template.jag:40
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:150
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:168
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:206
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:224
+msgid "API Name"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/faultCount/template.jag:39
+msgid "Faulty API Invocation Count"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/faultCount/template.jag:46
+msgid "No Data Available."
+msgstr ""
+
+#: site/themes/wso2/templates/stats/topUsers/template.jag:3
+#: site/themes/wso2/templates/stats/topUsers/template.jag:43
+msgid "Top Users For Applications"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/topUsers/template.jag:28
+msgid "Registered Users For Applications"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/apiCallType/template.jag:3
+msgid "API Usage from Resource Path"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/apiCallType/template.jag:37
+#: site/themes/wso2/templates/menu/primary/template.jag:18
+#: site/themes/wso2/templates/menu/primary/template.jag:33
+#: site/themes/wso2/templates/menu/primary/template.jag:46
+#: site/themes/wso2/templates/menu/primary/template.jag:56
+msgid "Resource Usage"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/perAppAPICount/template.jag:3
+msgid "API Usage per Application"
+msgstr ""
+
+#: site/themes/wso2/templates/tag/tag-cloud/template.jag:4
+#: site/themes/wso2/templates/api/api-info/template.jag:90
+msgid "Tags"
+msgstr ""
+
+#: site/themes/wso2/templates/tag/tag-cloud/template.jag:21
+msgid "No tags to display."
+msgstr ""
+
+#. @todo api should have image and provider
+#. @todo api status should be displayed in
+#: site/themes/wso2/templates/subscription/subscribed-apis/template.jag:8
+msgid "No Subscriptions"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscribed-apis/template.jag:9
+msgid ""
+"This application has not yet been subscribed to an API. To subscribe, select "
+"an API from "
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscribed-apis/template.jag:10
+msgid "API listing page"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscribed-apis/template.jag:10
+msgid " and subscribe to it with an app."
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscribed-apis/template.jag:18
+msgid "Subscription Tier"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscribed-apis/template.jag:19
+#: site/themes/wso2/templates/application/application-view/template.jag:37
+msgid "Status"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscribed-apis/template.jag:20
+#: site/themes/wso2/templates/application/application-list/template.jag:21
+msgid "Actions"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscribed-apis/template.jag:38
+#: site/themes/wso2/templates/subscription/subscribed-apis/template.jag:53
+msgid "API browse"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscribed-apis/template.jag:41
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:85
+#: site/themes/wso2/templates/api/top-rated/template.jag:19
+#: site/themes/wso2/templates/api/recently-added/template.jag:24
+#: site/themes/wso2/templates/api/provider-apis/template.jag:45
+#: site/themes/wso2/templates/api/widget/template.jag:46
+#: site/themes/wso2/templates/api/widget/template.jag:47
+#: site/themes/wso2/templates/api/api-listing-tag-wise/template.jag:45
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:155
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:211
+msgid "API Thumbnail"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscribed-apis/template.jag:47
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:80
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:98
+#: site/themes/wso2/templates/api/documentation/template.jag:57
+#: site/themes/wso2/templates/api/top-rated/template.jag:18
+#: site/themes/wso2/templates/api/recently-added/template.jag:30
+#: site/themes/wso2/templates/api/provider-apis/template.jag:40
+#: site/themes/wso2/templates/application/application-list/template.jag:17
+#: site/themes/wso2/templates/application/application-edit/template.jag:46
+#: site/themes/wso2/templates/application/application-add/template.jag:41
+msgid "Name"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-authapp/subscription-authapp-credentials/template.jag:28
+msgid "Token endpoint authentication method:"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-authapp/subscription-authapp-credentials/template.jag:32
+msgid "Client Secret over HTTP Basic"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-authapp/subscription-authapp-credentials/template.jag:35
+msgid "Client Secret over HTTP POST"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-authapp/subscription-authapp-credentials/template.jag:38
+msgid "Client Secret via symmetrically-signed JWT assertion"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-authapp/subscription-authapp-credentials/template.jag:41
+msgid "Asymmetrically-signed JWT assertion"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-authapp/subscription-authapp-credentials/template.jag:44
+msgid "No authentication"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:28
+msgid "keysPro"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:64
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:316
+msgid "consumerKey"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:83
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:335
+msgid "consumerSecret"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:103
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:355
+msgid "scope"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:124
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:373
+msgid "accessToken"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:125
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:374
+msgid "generating"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:157
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:204
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:405
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:449
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:736
+msgid "selectScopes"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:161
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:274
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:408
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:520
+msgid "timeWarn"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:163
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:410
+msgid "regenerate"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:176
+msgid "prodKeyCreatedMsg"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:178
+msgid "prodKeyRejectedMsg"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:180
+msgid "prodKeyApprovedMsg"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:186
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:432
+msgid "generateKey"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:192
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:194
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:437
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:439
+msgid "cleanUpSubscriptions"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:201
+msgid "prodKeyMsg"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:305
+msgid "keysSand"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:422
+msgid "sandboxKeyCreatedMsg"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:424
+msgid "sandboxKeyRejectedMsg"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:426
+msgid "sandboxKeyApprovedMsg"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:446
+msgid "sandboxKeyMsg"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:554
+msgid "api"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:555
+msgid "apiOwner"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:556
+msgid "subscriptionStatus"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:557
+msgid "subscription"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:558
+msgid "actions"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:587
+#: site/themes/wso2/templates/api/api-info/template.jag:113
+msgid "apiThumb"
+msgstr ""
+
+msgid "deprecated"
+msgstr "DEPRECATED"
+
+msgid "retired"
+msgstr "RETIRED"
+
+msgid "blocked"
+msgstr "BLOCKED"
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:613
+msgid "prodBlocked"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/template.jag:615
+msgid "rejected"
+msgstr ""
+
+#: site/themes/wso2/templates/comment/comment-list/template.jag:17
+msgid "Posted By"
+msgstr ""
+
+#: site/themes/wso2/templates/comment/comment-list/template.jag:17
+msgid "on"
+msgstr ""
+
+#: site/themes/wso2/templates/comment/comment-list/template.jag:23
+msgid "No comments yet"
+msgstr ""
+
+#: site/themes/wso2/templates/comment/comment-add/template.jag:5
+msgid "Comment exceeds character limit"
+msgstr ""
+
+#: site/themes/wso2/templates/comment/comment-add/template.jag:9
+#: site/themes/wso2/templates/application/application-add/template.jag:92
+msgid "Add"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:6
+msgid "Usage Summary"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:22
+msgid "January"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:24
+msgid "February"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:26
+msgid "March"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:28
+msgid "April"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:30
+msgid "May"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:32
+msgid "June"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:34
+msgid "July"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:36
+msgid "August"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:38
+msgid "September"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:40
+msgid "October"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:42
+msgid "November"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:44
+msgid "December"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:46
+msgid "Generate"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:48
+msgid "No usage details available for the user: "
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:48
+msgid "(for provided month)."
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:55
+#: site/themes/wso2/templates/billing/template.jag:71
+msgid "API"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:56
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:99
+#: site/themes/wso2/templates/api/provider-apis/template.jag:58
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:169
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:225
+msgid "Version"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:57
+msgid "Invocations"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:63
+msgid "Billing Summary"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:65
+msgid "Billing Scheme"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:65
+msgid "No. of API Invocations"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:72
+msgid "Total Invocations"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:73
+msgid "Rate"
+msgstr ""
+
+#: site/themes/wso2/templates/billing/template.jag:74
+msgid "Charge[$]"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:40
+msgid "Prototyped APIs"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:49
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:66
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:91
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:94
+#: site/themes/wso2/templates/menu/primary/template.jag:9
+#: site/themes/wso2/templates/menu/primary/template.jag:25
+#: site/themes/wso2/templates/menu/primary/template.jag:40
+#: site/themes/wso2/templates/menu/primary/template.jag:61
+#: site/blocks/menu/primary/block.jag:28
+msgid "APIs"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:88
+#: site/themes/wso2/templates/api/recently-added/template.jag:34
+#: site/themes/wso2/templates/api/provider-apis/template.jag:48
+#: site/themes/wso2/templates/api/api-listing-tag-wise/template.jag:48
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:158
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:214
+msgid "Browse APIs"
+msgstr ""
+
+#. cp 14, 15 ...
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:138
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:145
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:147
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:148
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:149
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:151
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:152
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:153
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:156
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:160
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:161
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:162
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:166
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:170
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:171
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:172
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:179
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:180
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:181
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:184
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:188
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:189
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:190
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:194
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:198
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:199
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:200
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:209
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:279
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:280
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:281
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:283
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:284
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:285
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:288
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:292
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:293
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:294
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:298
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:302
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:303
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:304
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:311
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:312
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:313
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:316
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:320
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:321
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:322
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:326
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:330
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:331
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:332
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:341
+msgid "Pagination"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:222
+msgid "No Prototyped APIs available"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-listing-prototyped/template.jag:226
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:356
+msgid "No matching results"
+msgstr ""
+
+#: site/themes/wso2/templates/api/overview/template.jag:40
+msgid "Production Endpoints"
+msgstr ""
+
+#: site/themes/wso2/templates/api/overview/template.jag:43
+msgid "Sandbox Endpoints"
+msgstr ""
+
+#: site/themes/wso2/templates/api/overview/template.jag:45
+msgid "Production and Sandbox Endpoints"
+msgstr ""
+
+#. @todo: param_string
+#: site/themes/wso2/templates/api/overview/template.jag:51
+msgid "URLs"
+msgstr ""
+
+#: site/themes/wso2/templates/api/overview/template.jag:61
+#: site/themes/wso2/templates/api/overview/template.jag:122
+#: site/themes/wso2/templates/application/application-keys/template.jag:57
+#: site/themes/wso2/templates/application/application-keys/template.jag:68
+#: site/themes/wso2/templates/application/application-keys/template.jag:85
+#: site/themes/wso2/templates/application/application-keys/template.jag:91
+#: site/themes/wso2/templates/application/application-keys/template.jag:103
+msgid "Copy"
+msgstr ""
+
+#: site/themes/wso2/templates/api/overview/template.jag:79
+msgid "Download WSDL"
+msgstr ""
+
+#: site/themes/wso2/templates/api/overview/template.jag:83
+#: site/themes/wso2/templates/api/overview/template.jag:85
+msgid "WADL"
+msgstr ""
+
+#: site/themes/wso2/templates/api/overview/template.jag:90
+#: site/themes/wso2/templates/forum/forum-new/template.jag:21
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:39
+#: site/themes/wso2/templates/application/application-view/template.jag:50
+#: site/themes/wso2/templates/application/application-add/template.jag:84
+msgid "Description"
+msgstr ""
+
+#: site/themes/wso2/templates/api/overview/template.jag:97
+msgid "Business Information"
+msgstr ""
+
+#: site/themes/wso2/templates/api/overview/template.jag:99
+#: site/themes/wso2/templates/api/overview/template.jag:101
+msgid "Business Owner"
+msgstr ""
+
+#: site/themes/wso2/templates/api/overview/template.jag:107
+#: site/themes/wso2/templates/api/overview/template.jag:109
+msgid "Technical Owner"
+msgstr ""
+
+#: site/themes/wso2/templates/api/overview/template.jag:114
+msgid "Share"
+msgstr ""
+
+#: site/themes/wso2/templates/api/overview/template.jag:116
+msgid "Social Sites"
+msgstr ""
+
+#: site/themes/wso2/templates/api/overview/template.jag:117
+msgid "Embed"
+msgstr ""
+
+#: site/themes/wso2/templates/api/overview/template.jag:142
+msgid "Comments"
+msgstr ""
+
+#: site/themes/wso2/templates/api/swagger/template.jag:231
+msgid "Please subscribe to the API to generate an access token."
+msgstr ""
+
+#: site/themes/wso2/templates/api/swagger/template.jag:231
+#: site/themes/wso2/templates/api/swagger/template.jag:236
+msgid "If you already have an access token, please provide it below."
+msgstr ""
+
+#: site/themes/wso2/templates/api/swagger/template.jag:236
+msgid ""
+"You require an access token to try the API. Please login and subscribe to "
+"the API to generate an access token."
+msgstr ""
+
+#: site/themes/wso2/templates/api/swagger/template.jag:241
+msgid "Warning!"
+msgstr ""
+
+#: site/themes/wso2/templates/api/swagger/template.jag:242
+msgid ""
+"The selected application does not have an access token for the selected "
+"environment. Please go to the subscription page and generate an access token "
+"first."
+msgstr ""
+
+#: site/themes/wso2/templates/api/documentation/template.jag:58
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:129
+msgid "Summary"
+msgstr ""
+
+#: site/themes/wso2/templates/api/documentation/template.jag:78
+msgid "Inline Documentation"
+msgstr ""
+
+#: site/themes/wso2/templates/api/documentation/template.jag:82
+#: site/themes/wso2/templates/api/documentation/template.jag:88
+#: site/themes/wso2/templates/api/documentation/template.jag:90
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:132
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:137
+msgid "View Content"
+msgstr ""
+
+#: site/themes/wso2/templates/api/documentation/template.jag:85
+msgid "Download Document"
+msgstr ""
+
+#: site/themes/wso2/templates/api/documentation/template.jag:85
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:134
+msgid "Download"
+msgstr ""
+
+#: site/themes/wso2/templates/api/documentation/template.jag:88
+#: site/themes/wso2/templates/api/documentation/template.jag:90
+msgid "Document Content"
+msgstr ""
+
+#: site/themes/wso2/templates/api/documentation/template.jag:111
+msgid "No Documents Found"
+msgstr ""
+
+#: site/themes/wso2/templates/api/documentation/template.jag:112
+msgid "No documents have been associated with this API so far."
+msgstr ""
+
+#: site/themes/wso2/templates/api/documentation/view/template.jag:10
+msgid "No document content has been added yet."
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/template.jag:89
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:68
+msgid "List APIs"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/template.jag:89
+#: site/themes/wso2/templates/api/api-listing-tag-wise/template.jag:19
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:68
+msgid "APIs groups"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/template.jag:126
+msgid "Version:"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/template.jag:132
+msgid "By:"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/template.jag:138
+msgid "Updated:"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/template.jag:144
+msgid "Status:"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/template.jag:151
+msgid "Rating:"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/template.jag:194
+#: site/themes/wso2/templates/menu/primary/template.jag:10
+#: site/themes/wso2/templates/menu/primary/template.jag:24
+#: site/themes/wso2/templates/menu/primary/template.jag:41
+#: site/themes/wso2/templates/menu/primary/template.jag:62
+#: site/themes/wso2/templates/application/application-list/template.jag:3
+#: site/pages/application-edit.jag:26 site/pages/applications.jag:20
+#: site/pages/applications.jag:26 site/pages/application.jag:26
+#: site/pages/application-add.jag:20 site/pages/application-add.jag:26
+msgid "Applications"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/template.jag:197
+msgid "Select Application..."
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/template.jag:199
+msgid "New Application..."
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/template.jag:200
+#: site/blocks/menu/primary/block.jag:37
+msgid "My Applications"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/template.jag:220
+msgid "Tiers"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/template.jag:262
+msgid "Subscribe"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/template.jag:264
+msgid "You may not be entitled to any of the available tiers"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/template.jag:285
+#: site/themes/wso2/templates/api/api-info/template.jag:310
+msgid "Visit Publisher Store"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/template.jag:322
+msgid "No API available with the name -"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/template.jag:322
+msgid "or the user is not authorized to view the API."
+msgstr ""
+
+#: site/themes/wso2/templates/api/recently-added/template.jag:11
+msgid "Recently Added APIs"
+msgstr ""
+
+#: site/themes/wso2/templates/api/provider-apis/template.jag:10
+msgid "More APIs from"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:277
+msgid "Active Page"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-listing-all/template.jag:352
+msgid "No APIs published yet"
+msgstr ""
+
+#: site/themes/wso2/templates/api/tenant-stores-listing/template.jag:16
+msgid "API Stores available on this server"
+msgstr ""
+
+#: site/themes/wso2/templates/api/tenant-stores-listing/template.jag:28
+msgid "Visit Store"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/header/template.jag:31
+msgid "API Store Home"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/header/template.jag:32
+#: site/themes/wso2/templates/user/login/template.jag:15
+msgid "API Store"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/header/template.jag:44
+#: site/themes/wso2/templates/menu/header/template.jag:54
+#: site/themes/wso2/templates/menu/header/template.jag:132
+#: site/themes/wso2/templates/menu/header/template.jag:137
+#: site/themes/wso2/templates/menu/header/template.jag:142
+msgid "Go to"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/header/template.jag:44
+msgid "'s API Store"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/header/template.jag:49
+#: site/themes/wso2/templates/menu/header/template.jag:54
+#: site/themes/wso2/templates/menu/header/template.jag:137
+#: site/themes/wso2/templates/menu/header/template.jag:142
+msgid "Public API Store"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/header/template.jag:67
+msgid "Themes"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/header/template.jag:92
+msgid "Dark"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/header/template.jag:116
+#: site/themes/wso2/templates/user/user-info/template.jag:17
+msgid "My Account"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/header/template.jag:119
+msgid "Sign Out"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/header/template.jag:127
+#: site/themes/wso2/templates/menu/header/template.jag:132
+msgid "s API Store"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/header/template.jag:149
+#: site/themes/wso2/templates/menu/header/template.jag:154
+msgid "Sign-up"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/header/template.jag:164
+#: site/themes/wso2/templates/user/login/template.jag:42
+#: site/pages/login.jag:14
+msgid "Sign In"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/actions/template.jag:17
+msgid "Toggle navigation"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/actions/template.jag:30
+#: site/themes/wso2/templates/menu/actions/template.jag:35
+#: site/themes/wso2/templates/application/application-add/template.jag:22
+msgid "Add Application"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/actions/template.jag:40
+#: site/themes/wso2/templates/menu/actions/template.jag:45
+#: site/themes/wso2/templates/menu/actions/template.jag:50
+#: site/themes/wso2/templates/menu/actions/template.jag:55
+msgid "Application List"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/actions/template.jag:59
+#: site/themes/wso2/templates/menu/actions/template.jag:64
+#: site/themes/wso2/templates/application/application-list/template.jag:46
+msgid "Edit"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/actions/template.jag:86
+#: site/themes/wso2/templates/menu/actions/template.jag:91
+#: site/themes/wso2/templates/forum/forum-new/template.jag:11
+#: site/themes/wso2/templates/forum/forum-list/template.jag:40
+#: site/themes/wso2/templates/forum/forum-list/template.jag:41
+msgid "Create New Topic"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/actions/template.jag:96
+#: site/themes/wso2/templates/menu/actions/template.jag:98
+#: site/themes/wso2/templates/menu/actions/template.jag:99
+#: site/themes/wso2/templates/menu/actions/template.jag:101
+#: site/themes/wso2/templates/menu/actions/template.jag:107
+#: site/themes/wso2/templates/user/login/template.jag:43
+msgid "Go Back"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/actions/template.jag:109
+msgid "forum.topic.list"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/actions/template.jag:110
+#: site/themes/wso2/templates/menu/actions/template.jag:112
+msgid "Topic List"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/primary/template.jag:12
+#: site/themes/wso2/templates/menu/primary/template.jag:27
+#: site/themes/wso2/templates/menu/primary/template.jag:39
+#: site/themes/wso2/templates/menu/primary/template.jag:64
+#: site/themes/wso2/templates/forum/forum-list/template.jag:26
+#: site/blocks/api/api-info/block.jag:133
+#: site/blocks/api/api-info/block.jag:189
+#: site/blocks/menu/primary/block.jag:47
+msgid "Forum"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/primary/template.jag:14
+#: site/themes/wso2/templates/menu/primary/template.jag:29
+#: site/themes/wso2/templates/menu/primary/template.jag:42
+#: site/themes/wso2/templates/menu/primary/template.jag:52
+msgid "Statistics "
+msgstr ""
+
+#: site/themes/wso2/templates/menu/primary/template.jag:16
+#: site/themes/wso2/templates/menu/primary/template.jag:31
+#: site/themes/wso2/templates/menu/primary/template.jag:44
+#: site/themes/wso2/templates/menu/primary/template.jag:54
+#: site/themes/wso2/templates/menu/primary/template.jag:104
+msgid "API Usage"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/primary/template.jag:17
+#: site/themes/wso2/templates/menu/primary/template.jag:32
+#: site/themes/wso2/templates/menu/primary/template.jag:45
+#: site/themes/wso2/templates/menu/primary/template.jag:55
+msgid "Top Users"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/primary/template.jag:19
+#: site/themes/wso2/templates/menu/primary/template.jag:34
+#: site/themes/wso2/templates/menu/primary/template.jag:47
+#: site/themes/wso2/templates/menu/primary/template.jag:57
+msgid "Faulty Invocations"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/primary/template.jag:91
+msgid " Statistics "
+msgstr ""
+
+#: site/themes/wso2/templates/menu/primary/template.jag:99
+msgid "API Subscriptions"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/primary/template.jag:109
+msgid "API Response Times"
+msgstr ""
+
+#: site/themes/wso2/templates/menu/primary/template.jag:114
+msgid "API Last Access Times"
+msgstr ""
+
+#: site/themes/wso2/templates/forum/forum-new/template.jag:18
+#: site/themes/wso2/templates/forum/forum-new/template.jag:19
+msgid "Subject"
+msgstr ""
+
+#: site/themes/wso2/templates/forum/forum-new/template.jag:25
+#: site/themes/wso2/templates/forum/forum-new/template.jag:26
+msgid "Create"
+msgstr ""
+
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:29
+msgid "Forum Topic"
+msgstr ""
+
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:76
+msgid "Add Reply"
+msgstr ""
+
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:80
+msgid "Reply to Thread"
+msgstr ""
+
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:90
+#: site/themes/wso2/templates/forum/forum-list/template.jag:73
+msgid "Replies"
+msgstr ""
+
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:97
+msgid "Reply Successfully Added"
+msgstr ""
+
+#: site/themes/wso2/templates/forum/forum-topic/template.jag:140
+#: site/themes/wso2/templates/forum/forum-list/template.jag:72
+msgid "By"
+msgstr ""
+
+#: site/themes/wso2/templates/forum/forum-list/template.jag:34
+msgid "Search Forum"
+msgstr ""
+
+#: site/themes/wso2/templates/forum/forum-list/template.jag:36
+#: site/themes/wso2/templates/search/api-search/template.jag:35
+#: site/themes/wso2/templates/search/api-search/template.jag:37
+msgid "Search"
+msgstr ""
+
+#: site/themes/wso2/templates/forum/forum-list/template.jag:55
+msgid "No topics found."
+msgstr ""
+
+#: site/themes/wso2/templates/forum/forum-list/template.jag:56
+msgid "There are no forum topics available."
+msgstr ""
+
+#: site/themes/wso2/templates/forum/forum-list/template.jag:71
+msgid "Topic"
+msgstr ""
+
+#: site/themes/wso2/templates/forum/forum-list/template.jag:89
+msgid "Delete Comment"
+msgstr ""
+
+#. selected type text
+#: site/themes/wso2/templates/search/api-search/template.jag:11
+#: site/themes/wso2/templates/search/api-search/template.jag:30
+msgid "All"
+msgstr ""
+
+#: site/themes/wso2/templates/search/api-search/template.jag:14
+#: site/themes/wso2/templates/search/api-search/template.jag:31
+msgid "Production"
+msgstr ""
+
+#: site/themes/wso2/templates/search/api-search/template.jag:18
+#: site/themes/wso2/templates/search/api-search/template.jag:32
+msgid "Prototyped"
+msgstr ""
+
+#: site/themes/wso2/templates/search/api-search/template.jag:28
+msgid "Category"
+msgstr ""
+
+#: site/themes/wso2/templates/search/api-search/template.jag:42
+#: site/themes/wso2/templates/search/api-search/template.jag:44
+#: site/themes/wso2/templates/search/api-search/template.jag:92
+msgid "Search Options"
+msgstr ""
+
+#: site/themes/wso2/templates/search/api-search/template.jag:50
+#: site/themes/wso2/templates/search/api-search/template.jag:78
+msgid "By API Name [Default]"
+msgstr ""
+
+#: site/themes/wso2/templates/search/api-search/template.jag:51
+#: site/themes/wso2/templates/search/api-search/template.jag:79
+msgid "By API Provider [ Syntax - provider:xxxx ]  or"
+msgstr ""
+
+#: site/themes/wso2/templates/search/api-search/template.jag:52
+#: site/themes/wso2/templates/search/api-search/template.jag:80
+msgid "By API Version [ Syntax - version:xxxx ]  or"
+msgstr ""
+
+#: site/themes/wso2/templates/search/api-search/template.jag:53
+#: site/themes/wso2/templates/search/api-search/template.jag:81
+msgid "By Context [ Syntax - context:xxxx ]  or"
+msgstr ""
+
+#: site/themes/wso2/templates/search/api-search/template.jag:54
+#: site/themes/wso2/templates/search/api-search/template.jag:82
+msgid "By Description [ Syntax - description:xxxx ] or"
+msgstr ""
+
+#: site/themes/wso2/templates/search/api-search/template.jag:55
+msgid "By Tags [ Syntax - tags:xxxx ] or"
+msgstr ""
+
+#: site/themes/wso2/templates/search/api-search/template.jag:56
+#: site/themes/wso2/templates/search/api-search/template.jag:83
+msgid "By Sub-Context [ Syntax - subcontext:xxxx ] or"
+msgstr ""
+
+#: site/themes/wso2/templates/search/api-search/template.jag:57
+#: site/themes/wso2/templates/search/api-search/template.jag:84
+msgid "By Documentation Content [ Syntax - doc:xxxx ]"
+msgstr ""
+
+#: site/themes/wso2/templates/search/api-search/template.jag:70
+#: site/themes/wso2/templates/search/api-search/template.jag:71
+msgid "searchAPI"
+msgstr ""
+
+#: site/themes/wso2/templates/sso/filter/template.jag:92
+msgid ""
+"You are now redirected to Identity. If the redirection fails, please click "
+"the POST button."
+msgstr ""
+
+#: site/themes/wso2/templates/sso/filter/template.jag:106
+msgid "POST"
+msgstr ""
+
+#: site/themes/wso2/templates/user/sign-up/template.jag:38
+#: site/themes/wso2/templates/user/login/template.jag:28
+msgid "Username"
+msgstr ""
+
+#: site/themes/wso2/templates/user/sign-up/template.jag:40
+msgid "Please enter at lease 5 characters"
+msgstr ""
+
+#: site/themes/wso2/templates/user/sign-up/template.jag:51
+#: site/themes/wso2/templates/user/login/template.jag:35
+msgid "Password"
+msgstr ""
+
+#: site/themes/wso2/templates/user/sign-up/template.jag:53
+#: site/themes/wso2/templates/user/user-info/template.jag:36
+msgid "Enter a more secure password"
+msgstr ""
+
+#: site/themes/wso2/templates/user/sign-up/template.jag:56
+#: site/themes/wso2/templates/user/user-info/template.jag:39
+msgid "For a more secure password:"
+msgstr ""
+
+#: site/themes/wso2/templates/user/sign-up/template.jag:58
+#: site/themes/wso2/templates/user/user-info/template.jag:41
+msgid "Use 6 to 30 characters"
+msgstr ""
+
+#: site/themes/wso2/templates/user/sign-up/template.jag:59
+#: site/themes/wso2/templates/user/user-info/template.jag:42
+msgid "Use both letters and numbers"
+msgstr ""
+
+#: site/themes/wso2/templates/user/sign-up/template.jag:60
+#: site/themes/wso2/templates/user/user-info/template.jag:43
+msgid "Add special characters (such as @, ?, #)"
+msgstr ""
+
+#: site/themes/wso2/templates/user/sign-up/template.jag:61
+#: site/themes/wso2/templates/user/user-info/template.jag:44
+msgid "Mix uppercase and lowercase letters"
+msgstr ""
+
+#: site/themes/wso2/templates/user/sign-up/template.jag:68
+#: site/themes/wso2/templates/user/user-info/template.jag:60
+msgid "Re-type Password"
+msgstr ""
+
+#: site/themes/wso2/templates/user/sign-up/template.jag:70
+msgid "Confirm Password"
+msgstr ""
+
+#: site/themes/wso2/templates/user/sign-up/template.jag:97
+msgid "Please enter a valid email."
+msgstr ""
+
+#: site/themes/wso2/templates/user/sign-up/template.jag:106
+msgid "View Additional Details"
+msgstr ""
+
+#: site/themes/wso2/templates/user/sign-up/template.jag:146
+msgid "Sign Up"
+msgstr ""
+
+#: site/themes/wso2/templates/user/login/template.jag:21
+msgid "Sign in to your account"
+msgstr ""
+
+#: site/themes/wso2/templates/user/user-info/template.jag:20
+msgid "Change Password"
+msgstr ""
+
+#: site/themes/wso2/templates/user/user-info/template.jag:24
+msgid "Current Password"
+msgstr ""
+
+#: site/themes/wso2/templates/user/user-info/template.jag:34
+msgid "New Password"
+msgstr ""
+
+#: site/themes/wso2/templates/user/user-info/template.jag:61
+msgid "Password did not match"
+msgstr ""
+
+#: site/themes/wso2/templates/user/user-info/template.jag:67
+msgid "Submit"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-list/template.jag:5
+#: site/themes/wso2/templates/application/application-add/template.jag:24
+msgid ""
+"An application is a logical collection of APIs. Applications allow you to "
+"use a single access token to invoke a collection of APIs and to subscribe to "
+"one API multiple times with different SLA levels. The DefaultApplication is "
+"pre-created and allows unlimited access by default."
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-list/template.jag:9
+msgid "No Applications"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-list/template.jag:10
+msgid ""
+"No applications yet. Click Add Applications in the action bar to add an "
+"application."
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-list/template.jag:18
+msgid "Tier"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-list/template.jag:19
+msgid "Workflow Status"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-list/template.jag:20
+#: site/themes/wso2/templates/application/application-view/template.jag:25
+msgid "Subscriptions"
+msgstr ""
+
+#. @todo view link
+#. @todo edit only if active
+#. @todo groupId inform if check
+#: site/themes/wso2/templates/application/application-list/template.jag:38
+msgid "View"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-list/template.jag:54
+msgid "Delete"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-edit/template.jag:30
+msgid "Edit Application"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-edit/template.jag:34
+#: site/themes/wso2/templates/application/application-add/template.jag:28
+#: site/pages/application.jag:20
+msgid "Application"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-edit/template.jag:34
+#: site/themes/wso2/templates/application/application-add/template.jag:28
+msgid "Successfully added!"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-edit/template.jag:38
+msgid "Congratulations! Your application creation request for -"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-edit/template.jag:38
+msgid "has been submitted and is now awaiting approval."
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-edit/template.jag:55
+#: site/themes/wso2/templates/application/application-add/template.jag:50
+msgid "Throttling Tier"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-edit/template.jag:57
+#: site/themes/wso2/templates/application/application-view/template.jag:43
+#: site/themes/wso2/templates/application/application-add/template.jag:52
+msgid "Per Token Quota"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-edit/template.jag:84
+#: site/themes/wso2/templates/application/application-view/template.jag:46
+#: site/themes/wso2/templates/application/application-add/template.jag:79
+msgid ""
+"This feature allows you to assign an API request quota per access token. "
+"Allocated quota will be shared among all the subscribed APIs of the "
+"application."
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:22
+msgid "Callback URL"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:30
+msgid "Grant Types"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:31
+msgid ""
+"The application can use the following grant types to generate Access Tokens. "
+"Based on the application requirement, you can enable or disable grant types "
+"for this application."
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:50
+msgid "Hide Keys"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:50
+msgid "Show Keys"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:53
+#: site/themes/wso2/templates/application/application-keys/template.jag:55
+#: site/themes/wso2/templates/application/application-keys/template.jag:185
+#: site/themes/wso2/templates/application/application-keys/template.jag:186
+msgid "Consumer Key"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:64
+#: site/themes/wso2/templates/application/application-keys/template.jag:66
+#: site/themes/wso2/templates/application/application-keys/template.jag:189
+#: site/themes/wso2/templates/application/application-keys/template.jag:190
+msgid "Consumer Secret"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:77
+msgid "Update"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:82
+msgid "Generating Access Tokens"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:83
+msgid ""
+"The following cURL command shows how to generate an access token using the "
+"Password Grant type."
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:89
+msgid ""
+"In a similar manner, you can generate an access token using the Client "
+"Credential grant type with the following cURL command."
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:98
+msgid "Generate a Test Access Token"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:99
+#: site/themes/wso2/templates/application/application-keys/template.jag:101
+msgid "Access Token"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:110
+msgid "Above token has a validity period of"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:110
+msgid "seconds."
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:112
+msgid "And the token has"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:112
+msgid "scopes."
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:117
+msgid "Scopes"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:125
+msgid "Validity period"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:128
+#: site/themes/wso2/templates/application/application-keys/template.jag:170
+msgid "Seconds"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:131
+#: site/themes/wso2/templates/application/application-keys/template.jag:174
+msgid "Generating"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:131
+msgid "Re-generate"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:140
+msgid "Info"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:139
+msgid "A request to register this application has been sent."
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:144
+#: site/themes/wso2/templates/application/application-keys/template.jag:161
+msgid "No Keys Found"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:145
+msgid "This application has been rejected from generating keys."
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:147
+#: site/themes/wso2/templates/application/application-keys/template.jag:148
+msgid ""
+"Error! You have partially created keys. Please click the Clean Up button and "
+"try again."
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:159
+msgid "No keys are generated for this type in this application."
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:167
+msgid "Access token validity period"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:174
+msgid "Generate keys"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:200
+msgid "Map Existing OAuth Keys"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:201
+msgid ""
+"If you already have an OAuth application registered with the IdP, you can "
+"use those keys without generating one."
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-keys/template.jag:203
+msgid "Provide Keys"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-view/template.jag:21
+msgid "Details"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-view/template.jag:23
+msgid "Production Keys"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-view/template.jag:24
+msgid "Sandbox Keys"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-view/template.jag:27
+msgid "SDKs"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-view/template.jag:39
+msgid "INACTIVE"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-view/template.jag:52
+msgid "Not Given"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-view/template.jag:119
+msgid "Download client-side SDK for your applications."
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-view/template.jag:133
+msgid "No SDK configured"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-add/template.jag:32
+msgid "Congratulations! Your application creation request for - "
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-add/template.jag:32
+msgid " has been submitted and is now awaiting approval."
+msgstr ""
+
+#: site/blocks/api/api-info/block.jag:92
+#: site/blocks/api/api-info/block.jag:160
+#: site/blocks/api/api-info/block.jag:218
+#: site/blocks/api/api-info/block.jag:268
+#: site/blocks/api/api-info/block.jag:309
+msgid "Overview"
+msgstr ""
+
+#: site/blocks/api/api-info/block.jag:104
+#: site/blocks/api/api-info/block.jag:230
+msgid "API Console"
+msgstr ""
+
+#: site/blocks/api/api-info/block.jag:116
+#: site/blocks/api/api-info/block.jag:172
+#: site/blocks/api/api-info/block.jag:242
+#: site/blocks/api/api-info/block.jag:280
+msgid "Documentation"
+msgstr ""
+
+#: site/blocks/menu/primary/block.jag:32
+msgid ""
+"Browse the latest versions of published APIs, make subscriptions and "
+"generate API keys."
+msgstr ""
+
+#: site/blocks/menu/primary/block.jag:41
+msgid ""
+"Browse and create applications. Applications are required to make API "
+"subscriptions and consume them."
+msgstr ""
+
+#: site/blocks/menu/primary/block.jag:51
+msgid "forum"
+msgstr ""
+
+#: site/pages/forum.jag:53 site/pages/forum.jag:59
+msgid "API Forum"
+msgstr ""
+
+#: site/pages/application-edit.jag:20
+msgid "Application Edit"
+msgstr ""
+
+#: site/pages/doc-viewer.jag:23
+msgid "Document Viewer"
+msgstr ""
+
+msgid "public"
+msgstr "Public"
+
+msgid "private"
+msgstr "Visible to my Domain"
+
+msgid "restricted"
+msgstr "Restricted by roles"
+
+msgid "controlled"
+msgstr "Restricted by tenants"
+
+msgid "roles"
+msgstr "Visible to Roles"
+
+msgid "tenants"
+msgstr "Visible to Tenants"
+
+msgid "created"
+msgstr "CREATED"
+
+msgid "published"
+msgstr "PUBLISHED"
+
+msgctxt "Desc"
+msgid "abnormalBackendTime"
+msgstr ""
+"This alert type should get triggered if there is a sudden increase in the "
+"backend time corresponding to a particular API resource. These alerts could "
+"be treated as an indication of a slow backend.In technical terms, if the "
+"backend time of a particular API resource (eg: GET /calc/1.0/numbers) of a "
+"tenant lies outside the Xth percentile value, we will send an alert out. "
+"Default percentile value is 95%. Here, we safely assume that the "
+"corresponding backend time of an API resource follows a normal distribution. "
+"Percentile value gets calculated daily by default. "
+
+msgctxt "Desc"
+msgid "abnormalResponseTime"
+msgstr ""
+"This alert type should get triggered if there is a sudden increase in the "
+"response time of a particular API resource. These alerts could be treated as "
+"an indication of a slow WSO2 API Manager runtime or a slow backend. "
+
+msgctxt "Desc"
+msgid "abnormalRequestsPerMin"
+msgstr ""
+"This alert type should get triggered if there is a sudden spike or a drop in "
+"the request count within a period of one minute by default for a particular "
+"API resource. These alerts could be treated as an indication of a possible "
+"high traffic or suspicious act or possible malfunction of the client "
+"application etc."
+
+msgctxt "Desc"
+msgid "RequestPatternChanged"
+msgstr ""
+"This alert type should get triggered if there is a change in the resource "
+"access pattern of a user of a particular Application. These alerts could be "
+"treated as an indication of a suspicious activity made by a user over your "
+"application."
+
+msgctxt "Desc"
+msgid "UnusualIPAccessAlert"
+msgstr ""
+"This alert type should get triggered if there is either a change in the "
+"request source IP for a particular API of an application or if the request "
+"is from an IP used before a time period of 30 days (default). These alerts "
+"could be treated as an indication of a suspicious activity made by a user "
+"over an API of an application. "
+
+msgctxt "Desc"
+msgid "AbnormalRefreshAlert"
+msgstr ""
+"This alert type should get triggered if there is a change in the pattern of "
+"renewing access tokens of an application by a user. These alerts could be "
+"treated as an indication of a stolen access token."
+
+msgctxt "Desc"
+msgid "FrequentTierHittingAlert"
+msgstr ""
+"This alert type should get triggered if at least one of the two cases below "
+"are satisfied; if a particular application gets throttled out for hitting "
+"the subscribed tier limit of that application, more than 10 times (by "
+"default) within a day (by default) or if a particular user of an "
+"application, gets throttled out for hitting the subscribed tier limit of a "
+"particular API, more than 10 times (by default) within a day (by default)"
+
+msgctxt "Desc"
+msgid "AbnormalTierUsage"
+msgstr ""
+"This alert should get triggered if there is a drastic reduction in API usage "
+"for a given API for a given user. These types of alerts should be treated as "
+"an indication of a failure of the application  using the altered API."
+
+msgctxt "Desc"
+msgid "healthAvailabilityPerMin"
+msgstr ""
+"This alert type should get triggered if at least one of the three cases "
+"below are satisfied; Response time of an API > Response time upper "
+"percentile of that particular API or Request Count of an API per minute > "
+"Request count per minute lower percentile or Response status code >= 500 (By "
+"Default) AND Response status code < 600 (By Default)"
+
+msgid "abnormalResponseTime"
+msgstr "Abnormal Response Time"
+
+msgid "abnormalBackendTime"
+msgstr "Abnormal Backend Time"
+
+msgid "abnormalRequestsPerMin"
+msgstr "Abnormal Requests Per Minute"
+
+msgid "RequestPatternChanged"
+msgstr "Request Pattern Changed"
+
+msgid "UnusualIPAccessAlert"
+msgstr "Unusual IP Access Alert"
+
+msgid "AbnormalRefreshAlert"
+msgstr "Abnormal Refresh Alert"
+
+msgid "FrequentTierHittingAlert"
+msgstr "Frequent Tier Hitting Alert"
+
+msgid "AbnormalTierUsage"
+msgstr "Abnormal Tier Usage"
+
+msgid "healthAvailabilityPerMin"
+msgstr "Health Availability Per Minute"
+
+msgid "Please enable statistics to see this page"
+msgstr "Please configure API Manager Analytics to enable alerts."

@@ -1,0 +1,209 @@
+<% jagg.template("configure-alerts/domain/manage", function(inputs, outputs, jagg) { %>
+<%
+    var configurations = outputs.configurationInfo;
+    var templates = outputs.templates;
+    var domainName = encode.forUriComponent(request.getParameter("domainName"));
+    %>
+
+<link href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("css/custom.css"))%>" rel="stylesheet">
+<div id='tier-add-container' class="row-fluid"  style="display:inline">
+   <!-- alert types configurations -->
+    <div class="row">
+        <div class="container col-md-12">
+            <h2><%=i18n.localize("Alert Configurations")%></h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="container col-md-12 marg-top-20">
+            <br class="c-both"/>
+             <% if (templates != null && templates.length > 0) { %>
+
+            <table class="table table-bordered" id="tblConfigs">
+                <thead>
+                    <tr>
+                        <th><%=i18n.localize("Scenario Type")%></th>
+                        <th><%=i18n.localize("Description")%></th>
+                        <th><%=i18n.localize("Status")%></th>
+                        <th colspan="2" class="tcenter"><%=i18n.localize("Actions")%></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <%for (var i in templates) {%>
+                        <% if(templates[i].getType() != "APIM_GEO_LOCATION_STATS") {   %>
+                            <tr>
+                                <td>
+                                    <%=templates[i].getType()%>
+                                </td>
+                                <%
+                                    var existingConfig = null;
+                                    for (var j in configurations) {
+
+                                        if (configurations[j].getType().trim() == templates[i].getType().trim()) {
+                                            existingConfig = configurations[j];
+                                            break;
+                                        }
+                                    }
+
+                                if (existingConfig) {
+                                %>
+                                <td><%=existingConfig.getDescription()%></td>
+                                <td><%=i18n.localize("Active")%></td>
+                                <td class="tcenter">
+                                    <a onclick="deleteConfiguration('<%=existingConfig.getDomain()%>','<%=existingConfig.getName()%>')">
+                                        <i class="glyphicon glyphicon-remove"></i>
+                                        <%=i18n.localize("Deactivate")%>
+                                    </a>
+                                    &nbsp; &nbsp;
+                                    <a href="<%=jagg.url('/alerts-domain-edit?domainName='+existingConfig.getDomain()+"&configurationName="+ existingConfig.getName() +"&templateType="+existingConfig.getType()+"&mode=edit")%>">
+                                        <i class="fw fw-edit"></i>
+                                        <%=i18n.localize("Edit")%>
+                                    </a>
+                                </td>
+
+                                <% } else { %>
+                                <!--  need to show configuration and activate -->
+
+                                <td><%=templates[i].getDescription()%></td>
+                               <td><%=i18n.localize("Inactive")%></td>
+                               <td class="tcenter">
+                                    <a href="<%=jagg.url('/alerts-domain-edit?domainName='+ domainName +"&configurationName="+ templates[i].getType() +"&templateType="+templates[i].getType()+"&mode=edit")%>">
+                                        <i class="fw fw-activate"></i>
+                                        <%=i18n.localize("Activate")%></a></td>
+
+                                <% } %>
+                            </tr>
+                        <% }
+                    }
+                } else {
+                %>
+
+                    <table class="styledLeft">
+                        <tbody>
+                        <tr>
+                            <td class="formRaw">
+                                <table id="noEventReceiverInputTable" class="normal-nopadding" style="width:100%">
+                                    <tbody>
+                                    <tr>
+                                        <td class="leftCol-med" colspan="2"><%=i18n.localize("No Configurations to be listed")%>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                 <% } %>
+            </tbody>
+        </table>
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="container col-md-12">
+            <h2><%=i18n.localize("GEO Location configurations")%></h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="container col-md-12 marg-top-20">
+            <br class="c-both"/>
+             <% if (templates != null && templates.length > 0) { %>
+
+            <table class="table table-bordered" id="tblConfigs">
+                <thead>
+                    <tr>
+                        <th><%=i18n.localize("Scenario Type")%></th>
+                        <th><%=i18n.localize("Description")%></th>
+                        <th><%=i18n.localize("Status")%></th>
+                        <th colspan="2" class="tcenter"><%=i18n.localize("Actions")%></th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    <%for (var i in templates) {%>
+                        <% if(templates[i].getType() == "APIM_GEO_LOCATION_STATS") {   %>
+                            <tr>
+                                <td>
+                                    <%=templates[i].getType()%>
+                                </td>
+                                <td><%=templates[i].getDescription()%></td>
+                                <%
+                                var existingConfig = null;
+                                for (var j in configurations) {
+
+            if (configurations[j].getType().trim() == templates[i].getType().trim()) {
+                existingConfig = configurations[j];
+                break;
+            }
+        }
+
+                                if (existingConfig) {
+                                    %>
+                                <td><%=i18n.localize("Active")%></td>
+                                <td class="tcenter">
+                                    <a onclick="deleteConfiguration('<%=existingConfig.getDomain()%>','<%=existingConfig.getName()%>')">
+                                        <i class="glyphicon glyphicon-remove"></i>
+                                        <%=i18n.localize("Deactivate")%>
+                                    </a>
+                                    &nbsp; &nbsp;
+                                    <a href="<%=jagg.url('/alerts-domain-edit?domainName='+existingConfig.getDomain()+"&configurationName="+ existingConfig.getName() +"&templateType="+existingConfig.getType()+"&mode=edit")%>">
+                                        <i class="fw fw-edit"></i>
+                                        <%=i18n.localize("Edit")%>
+                                    </a>
+                                </td>
+
+                                <% } else { %>
+                                <!--  need to show configuration and activate -->
+                               <td><%=i18n.localize("Inactive")%></td>
+                               <td class="tcenter">
+                                    <a href="<%=jagg.url('/alerts-domain-edit?domainName='+ domainName +"&configurationName="+ templates[i].getType() +"&templateType="+templates[i].getType()+"&mode=edit")%>">
+                                        <i class="fw fw-activate"></i>
+                                        <%=i18n.localize("Activate")%></a></td>
+
+                                <% } %>
+                            </tr>
+                        <% }
+                            }
+                    } else {
+
+                    %>
+
+                    <table class="styledLeft">
+                        <tbody>
+                        <tr>
+                            <td class="formRaw">
+                                <table id="noEventReceiverInputTable" class="normal-nopadding" style="width:100%">
+                                    <tbody>
+                                    <tr>
+                                        <td class="leftCol-med" colspan="2"><%=i18n.localize("No Configurations to be listed")%>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        </tbody>
+
+
+                    </table>
+                 <% } %>
+                    </tbody>
+                </table>
+
+                </div>
+            </div>
+
+    <div class="row pad-bot-50">
+    <div class="container col-md-8">
+    &nbsp;
+    </div>
+    <div class="container col-md-4">
+    &nbsp;
+    </div>
+    <br class="c-both "/>
+    </div>
+
+</div>
+
+
+<%});%>

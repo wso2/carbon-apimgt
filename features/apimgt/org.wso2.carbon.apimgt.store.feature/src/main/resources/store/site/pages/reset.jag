@@ -1,0 +1,43 @@
+<%
+include("/jagg/jagg.jag");
+var site = require("/site/conf/site.json");
+//include("/site/pages/header.jag");
+var request_tenant = jagg.getTenantDomain();
+var log = new Log("site.pages.password-verifier.jag");
+var i18n = require("i18n");
+var localeResourcesBasePath="/site/conf/locales/jaggery/";
+i18n.init(request,localeResourcesBasePath);
+var encoder = Packages.org.wso2.carbon.ui.util.CharacterEncoder;
+var utils = jagg.module("util");
+
+(function () {
+    var inputsObj = {};
+    inputsObj.confirm = encoder.getSafeText(request.getParameter("confirmation"));
+    var userId = encoder.getSafeText(request.getParameter("id"));
+    var tenantDomain = encoder.getSafeText(request.getParameter("tenantdomain"));
+
+    inputsObj.id = utils.getUsernameWithTenantDomain(userId, tenantDomain);
+
+    jagg.render({
+        "name": "page/base",
+        "inputs": {
+            "title": "WSO2 API Store",
+            "pagePath": "/site/pages/reset.jag",
+            "body": [
+                {
+                    "name": "password-reset/reset",
+                    "inputs": {
+                        "title": "Password Reset Link",
+                        "middle": [
+                            {
+                                "name": "password-reset/reset",
+                                "inputs": inputsObj
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    });
+}());
+%>

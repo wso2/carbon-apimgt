@@ -1,885 +1,537 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_businessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_corsConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_endpointDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_operationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIBusinessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APICorsConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIEndpointSecurityDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
-import java.util.Objects;
 
-/**
- * APIDTO
- */
-public class APIDTO   {
-  @JsonProperty("id")
+import io.swagger.annotations.*;
+import com.fasterxml.jackson.annotation.*;
+
+import javax.validation.constraints.NotNull;
+
+
+
+
+
+@ApiModel(description = "")
+public class APIDTO  {
+  
+  
+  
   private String id = null;
-
-  @JsonProperty("name")
+  
+  @NotNull
   private String name = null;
-
-  @JsonProperty("description")
+  
+  
   private String description = null;
-
-  @JsonProperty("context")
+  
+  @NotNull
   private String context = null;
-
-  @JsonProperty("version")
+  
+  @NotNull
   private String version = null;
-
-  @JsonProperty("provider")
+  
+  
   private String provider = null;
-
-  @JsonProperty("wsdlUri")
+  
+  
+  private String apiDefinition = null;
+  
+  
   private String wsdlUri = null;
-
-  @JsonProperty("lifeCycleStatus")
-  private String lifeCycleStatus = null;
-
-  @JsonProperty("workflowStatus")
-  private String workflowStatus = null;
-
-  @JsonProperty("createdTime")
-  private String createdTime = null;
-
-  @JsonProperty("apiPolicy")
-  private String apiPolicy = null;
-
-  @JsonProperty("lastUpdatedTime")
-  private String lastUpdatedTime = null;
-
-  @JsonProperty("responseCaching")
+  
+  
+  private String status = null;
+  
+  
   private String responseCaching = null;
-
-  @JsonProperty("cacheTimeout")
+  
+  
   private Integer cacheTimeout = null;
-
-  @JsonProperty("destinationStatsEnabled")
+  
+  
   private String destinationStatsEnabled = null;
-
-  @JsonProperty("isDefaultVersion")
+  
+  @NotNull
   private Boolean isDefaultVersion = null;
-
-  @JsonProperty("transport")
+  
+  public enum TypeEnum {
+     HTTP,  WS, 
+  };
+  @NotNull
+  private TypeEnum type = TypeEnum.HTTP;
+  
+  @NotNull
   private List<String> transport = new ArrayList<String>();
-
-  @JsonProperty("tags")
+  
+  
   private List<String> tags = new ArrayList<String>();
-
-  @JsonProperty("labels")
-  private List<String> labels = new ArrayList<String>();
-
-  @JsonProperty("policies")
-  private List<String> policies = new ArrayList<String>();
-
-  /**
-   * Gets or Sets visibility
-   */
+  
+  @NotNull
+  private List<String> tiers = new ArrayList<String>();
+  
+  
+  private APIMaxTpsDTO maxTps = null;
+  
+  
+  private String thumbnailUri = null;
+  
   public enum VisibilityEnum {
-    PUBLIC("PUBLIC"),
-    
-    PRIVATE("PRIVATE"),
-    
-    RESTRICTED("RESTRICTED"),
-    
-    CONTROLLED("CONTROLLED");
-
-    private String value;
-
-    VisibilityEnum(String value) {
-      this.value = value;
-    }
-
-    @Override
-    @JsonValue
-    public String toString() {
-      return String.valueOf(value);
-    }
-
-    @JsonCreator
-    public static VisibilityEnum fromValue(String text) {
-      for (VisibilityEnum b : VisibilityEnum.values()) {
-        if (String.valueOf(b.value).equals(text)) {
-          return b;
-        }
-      }
-      return null;
-    }
-  }
-
-  @JsonProperty("visibility")
+     PUBLIC,  PRIVATE,  RESTRICTED,  CONTROLLED, 
+  };
+  @NotNull
   private VisibilityEnum visibility = null;
-
-  @JsonProperty("visibleRoles")
+  
+  
   private List<String> visibleRoles = new ArrayList<String>();
-
-  @JsonProperty("permission")
-  private String permission = null;
-
-  @JsonProperty("userPermissionsForApi")
-  private List<String> userPermissionsForApi = new ArrayList<String>();
-
-  @JsonProperty("visibleTenants")
+  
+  
   private List<String> visibleTenants = new ArrayList<String>();
-
-  @JsonProperty("gatewayEnvironments")
+  
+  @NotNull
+  private String endpointConfig = null;
+  
+  
+  private APIEndpointSecurityDTO endpointSecurity = null;
+  
+  
   private String gatewayEnvironments = null;
-
-  @JsonProperty("sequences")
+  
+  
   private List<SequenceDTO> sequences = new ArrayList<SequenceDTO>();
+  
+  public enum SubscriptionAvailabilityEnum {
+     current_tenant,  all_tenants,  specific_tenants, 
+  };
+  
+  private SubscriptionAvailabilityEnum subscriptionAvailability = null;
+  
+  
+  private List<String> subscriptionAvailableTenants = new ArrayList<String>();
+  
+  
+  private APIBusinessInformationDTO businessInformation = null;
+  
+  
+  private APICorsConfigurationDTO corsConfiguration = null;
 
-  @JsonProperty("businessInformation")
-  private API_businessInformationDTO businessInformation = null;
-
-  @JsonProperty("corsConfiguration")
-  private API_corsConfigurationDTO corsConfiguration = null;
-
-  @JsonProperty("endpoint")
-  private List<API_endpointDTO> endpoint = new ArrayList<API_endpointDTO>();
-
-  @JsonProperty("securityScheme")
-  private List<String> securityScheme = new ArrayList<String>();
-
-  @JsonProperty("operations")
-  private List<API_operationsDTO> operations = new ArrayList<API_operationsDTO>();
-
-  public APIDTO id(String id) {
-    this.id = id;
-    return this;
-  }
-
-   /**
-   * UUID of the api registry artifact 
-   * @return id
-  **/
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the api registry artifact ")
+  
+  /**
+   * UUID of the api registry artifact\n
+   **/
+  @ApiModelProperty(value = "UUID of the api registry artifact\n")
+  @JsonProperty("id")
   public String getId() {
     return id;
   }
-
   public void setId(String id) {
     this.id = id;
   }
 
-  public APIDTO name(String name) {
-    this.name = name;
-    return this;
-  }
-
-   /**
-   * Get name
-   * @return name
-  **/
-  @ApiModelProperty(example = "CalculatorAPI", required = true, value = "")
+  
+  /**
+   * Name of the API
+   **/
+  @ApiModelProperty(required = true, value = "Name of the API")
+  @JsonProperty("name")
   public String getName() {
     return name;
   }
-
   public void setName(String name) {
     this.name = name;
   }
 
-  public APIDTO description(String description) {
-    this.description = description;
-    return this;
-  }
-
-   /**
-   * Get description
-   * @return description
-  **/
-  @ApiModelProperty(example = "A calculator API that supports basic operations", value = "")
+  
+  /**
+   * A brief description about the API
+   **/
+  @ApiModelProperty(value = "A brief description about the API")
+  @JsonProperty("description")
   public String getDescription() {
     return description;
   }
-
   public void setDescription(String description) {
     this.description = description;
   }
 
-  public APIDTO context(String context) {
-    this.context = context;
-    return this;
-  }
-
-   /**
-   * Get context
-   * @return context
-  **/
-  @ApiModelProperty(example = "CalculatorAPI", required = true, value = "")
+  
+  /**
+   * A string that represents the context of the user's request
+   **/
+  @ApiModelProperty(required = true, value = "A string that represents the context of the user's request")
+  @JsonProperty("context")
   public String getContext() {
     return context;
   }
-
   public void setContext(String context) {
     this.context = context;
   }
 
-  public APIDTO version(String version) {
-    this.version = version;
-    return this;
-  }
-
-   /**
-   * Get version
-   * @return version
-  **/
-  @ApiModelProperty(example = "1.0.0", required = true, value = "")
+  
+  /**
+   * The version of the API
+   **/
+  @ApiModelProperty(required = true, value = "The version of the API")
+  @JsonProperty("version")
   public String getVersion() {
     return version;
   }
-
   public void setVersion(String version) {
     this.version = version;
   }
 
-  public APIDTO provider(String provider) {
-    this.provider = provider;
-    return this;
-  }
-
-   /**
-   * If the provider value is not given user invoking the api will be used as the provider. 
-   * @return provider
-  **/
-  @ApiModelProperty(example = "admin", value = "If the provider value is not given user invoking the api will be used as the provider. ")
+  
+  /**
+   * If the provider value is not given user invoking the api will be used as the provider.\n
+   **/
+  @ApiModelProperty(value = "If the provider value is not given user invoking the api will be used as the provider.\n")
+  @JsonProperty("provider")
   public String getProvider() {
     return provider;
   }
-
   public void setProvider(String provider) {
     this.provider = provider;
   }
 
-  public APIDTO wsdlUri(String wsdlUri) {
-    this.wsdlUri = wsdlUri;
-    return this;
+  
+  /**
+   * Swagger definition of the API which contains details about URI templates and scopes\n
+   **/
+  @ApiModelProperty(value = "Swagger definition of the API which contains details about URI templates and scopes\n")
+  @JsonProperty("apiDefinition")
+  public String getApiDefinition() {
+    return apiDefinition;
+  }
+  public void setApiDefinition(String apiDefinition) {
+    this.apiDefinition = apiDefinition;
   }
 
-   /**
-   * WSDL URL if the API is based on a WSDL endpoint 
-   * @return wsdlUri
-  **/
-  @ApiModelProperty(example = "http://www.webservicex.com/globalweather.asmx?wsdl", value = "WSDL URL if the API is based on a WSDL endpoint ")
+  
+  /**
+   * WSDL URL if the API is based on a WSDL endpoint\n
+   **/
+  @ApiModelProperty(value = "WSDL URL if the API is based on a WSDL endpoint\n")
+  @JsonProperty("wsdlUri")
   public String getWsdlUri() {
     return wsdlUri;
   }
-
   public void setWsdlUri(String wsdlUri) {
     this.wsdlUri = wsdlUri;
   }
 
-  public APIDTO lifeCycleStatus(String lifeCycleStatus) {
-    this.lifeCycleStatus = lifeCycleStatus;
-    return this;
+  
+  /**
+   * This describes in which status of the lifecycle the API is
+   **/
+  @ApiModelProperty(value = "This describes in which status of the lifecycle the API is")
+  @JsonProperty("status")
+  public String getStatus() {
+    return status;
+  }
+  public void setStatus(String status) {
+    this.status = status;
   }
 
-   /**
-   * Get lifeCycleStatus
-   * @return lifeCycleStatus
-  **/
-  @ApiModelProperty(example = "CREATED", value = "")
-  public String getLifeCycleStatus() {
-    return lifeCycleStatus;
-  }
-
-  public void setLifeCycleStatus(String lifeCycleStatus) {
-    this.lifeCycleStatus = lifeCycleStatus;
-  }
-
-  public APIDTO workflowStatus(String workflowStatus) {
-    this.workflowStatus = workflowStatus;
-    return this;
-  }
-
-   /**
-   * Get workflowStatus
-   * @return workflowStatus
-  **/
-  @ApiModelProperty(example = "APPROVED", value = "")
-  public String getWorkflowStatus() {
-    return workflowStatus;
-  }
-
-  public void setWorkflowStatus(String workflowStatus) {
-    this.workflowStatus = workflowStatus;
-  }
-
-  public APIDTO createdTime(String createdTime) {
-    this.createdTime = createdTime;
-    return this;
-  }
-
-   /**
-   * Get createdTime
-   * @return createdTime
-  **/
-  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
-  public String getCreatedTime() {
-    return createdTime;
-  }
-
-  public void setCreatedTime(String createdTime) {
-    this.createdTime = createdTime;
-  }
-
-  public APIDTO apiPolicy(String apiPolicy) {
-    this.apiPolicy = apiPolicy;
-    return this;
-  }
-
-   /**
-   * Get apiPolicy
-   * @return apiPolicy
-  **/
-  @ApiModelProperty(example = "UNLIMITED", value = "")
-  public String getApiPolicy() {
-    return apiPolicy;
-  }
-
-  public void setApiPolicy(String apiPolicy) {
-    this.apiPolicy = apiPolicy;
-  }
-
-  public APIDTO lastUpdatedTime(String lastUpdatedTime) {
-    this.lastUpdatedTime = lastUpdatedTime;
-    return this;
-  }
-
-   /**
-   * Get lastUpdatedTime
-   * @return lastUpdatedTime
-  **/
-  @ApiModelProperty(example = "2017-02-20T13:57:16.229+0000", value = "")
-  public String getLastUpdatedTime() {
-    return lastUpdatedTime;
-  }
-
-  public void setLastUpdatedTime(String lastUpdatedTime) {
-    this.lastUpdatedTime = lastUpdatedTime;
-  }
-
-  public APIDTO responseCaching(String responseCaching) {
-    this.responseCaching = responseCaching;
-    return this;
-  }
-
-   /**
-   * Get responseCaching
-   * @return responseCaching
-  **/
-  @ApiModelProperty(example = "Disabled", value = "")
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("responseCaching")
   public String getResponseCaching() {
     return responseCaching;
   }
-
   public void setResponseCaching(String responseCaching) {
     this.responseCaching = responseCaching;
   }
 
-  public APIDTO cacheTimeout(Integer cacheTimeout) {
-    this.cacheTimeout = cacheTimeout;
-    return this;
-  }
-
-   /**
-   * Get cacheTimeout
-   * @return cacheTimeout
-  **/
-  @ApiModelProperty(example = "300", value = "")
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("cacheTimeout")
   public Integer getCacheTimeout() {
     return cacheTimeout;
   }
-
   public void setCacheTimeout(Integer cacheTimeout) {
     this.cacheTimeout = cacheTimeout;
   }
 
-  public APIDTO destinationStatsEnabled(String destinationStatsEnabled) {
-    this.destinationStatsEnabled = destinationStatsEnabled;
-    return this;
-  }
-
-   /**
-   * Get destinationStatsEnabled
-   * @return destinationStatsEnabled
-  **/
-  @ApiModelProperty(example = "Disabled", value = "")
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("destinationStatsEnabled")
   public String getDestinationStatsEnabled() {
     return destinationStatsEnabled;
   }
-
   public void setDestinationStatsEnabled(String destinationStatsEnabled) {
     this.destinationStatsEnabled = destinationStatsEnabled;
   }
 
-  public APIDTO isDefaultVersion(Boolean isDefaultVersion) {
-    this.isDefaultVersion = isDefaultVersion;
-    return this;
-  }
-
-   /**
-   * Get isDefaultVersion
-   * @return isDefaultVersion
-  **/
-  @ApiModelProperty(example = "false", required = true, value = "")
+  
+  /**
+   **/
+  @ApiModelProperty(required = true, value = "")
+  @JsonProperty("isDefaultVersion")
   public Boolean getIsDefaultVersion() {
     return isDefaultVersion;
   }
-
   public void setIsDefaultVersion(Boolean isDefaultVersion) {
     this.isDefaultVersion = isDefaultVersion;
   }
 
-  public APIDTO transport(List<String> transport) {
-    this.transport = transport;
-    return this;
+  
+  /**
+   **/
+  @ApiModelProperty(required = true, value = "")
+  @JsonProperty("type")
+  public TypeEnum getType() {
+    return type;
+  }
+  public void setType(TypeEnum type) {
+    this.type = type;
   }
 
-  public APIDTO addTransportItem(String transportItem) {
-    this.transport.add(transportItem);
-    return this;
-  }
-
-   /**
-   * Supported transports for the API (http and/or https). 
-   * @return transport
-  **/
-  @ApiModelProperty(example = "[&quot;http&quot;,&quot;https&quot;]", required = true, value = "Supported transports for the API (http and/or https). ")
+  
+  /**
+   * Supported transports for the API (http and/or https).\n
+   **/
+  @ApiModelProperty(required = true, value = "Supported transports for the API (http and/or https).\n")
+  @JsonProperty("transport")
   public List<String> getTransport() {
     return transport;
   }
-
   public void setTransport(List<String> transport) {
     this.transport = transport;
   }
 
-  public APIDTO tags(List<String> tags) {
-    this.tags = tags;
-    return this;
-  }
-
-  public APIDTO addTagsItem(String tagsItem) {
-    this.tags.add(tagsItem);
-    return this;
-  }
-
-   /**
-   * Get tags
-   * @return tags
-  **/
-  @ApiModelProperty(example = "[&quot;substract&quot;,&quot;add&quot;]", value = "")
+  
+  /**
+   * Search keywords related to the API
+   **/
+  @ApiModelProperty(value = "Search keywords related to the API")
+  @JsonProperty("tags")
   public List<String> getTags() {
     return tags;
   }
-
   public void setTags(List<String> tags) {
     this.tags = tags;
   }
 
-  public APIDTO labels(List<String> labels) {
-    this.labels = labels;
-    return this;
+  
+  /**
+   * The subscription tiers selected for the particular API
+   **/
+  @ApiModelProperty(required = true, value = "The subscription tiers selected for the particular API")
+  @JsonProperty("tiers")
+  public List<String> getTiers() {
+    return tiers;
+  }
+  public void setTiers(List<String> tiers) {
+    this.tiers = tiers;
   }
 
-  public APIDTO addLabelsItem(String labelsItem) {
-    this.labels.add(labelsItem);
-    return this;
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("maxTps")
+  public APIMaxTpsDTO getMaxTps() {
+    return maxTps;
+  }
+  public void setMaxTps(APIMaxTpsDTO maxTps) {
+    this.maxTps = maxTps;
   }
 
-   /**
-   * Get labels
-   * @return labels
-  **/
-  @ApiModelProperty(example = "[&quot;public&quot;,&quot;private&quot;]", value = "")
-  public List<String> getLabels() {
-    return labels;
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("thumbnailUri")
+  public String getThumbnailUri() {
+    return thumbnailUri;
+  }
+  public void setThumbnailUri(String thumbnailUri) {
+    this.thumbnailUri = thumbnailUri;
   }
 
-  public void setLabels(List<String> labels) {
-    this.labels = labels;
-  }
-
-  public APIDTO policies(List<String> policies) {
-    this.policies = policies;
-    return this;
-  }
-
-  public APIDTO addPoliciesItem(String policiesItem) {
-    this.policies.add(policiesItem);
-    return this;
-  }
-
-   /**
-   * Get policies
-   * @return policies
-  **/
-  @ApiModelProperty(example = "[&quot;Unlimited&quot;]", required = true, value = "")
-  public List<String> getPolicies() {
-    return policies;
-  }
-
-  public void setPolicies(List<String> policies) {
-    this.policies = policies;
-  }
-
-  public APIDTO visibility(VisibilityEnum visibility) {
-    this.visibility = visibility;
-    return this;
-  }
-
-   /**
-   * Get visibility
-   * @return visibility
-  **/
-  @ApiModelProperty(example = "PUBLIC", required = true, value = "")
+  
+  /**
+   **/
+  @ApiModelProperty(required = true, value = "")
+  @JsonProperty("visibility")
   public VisibilityEnum getVisibility() {
     return visibility;
   }
-
   public void setVisibility(VisibilityEnum visibility) {
     this.visibility = visibility;
   }
 
-  public APIDTO visibleRoles(List<String> visibleRoles) {
-    this.visibleRoles = visibleRoles;
-    return this;
-  }
-
-  public APIDTO addVisibleRolesItem(String visibleRolesItem) {
-    this.visibleRoles.add(visibleRolesItem);
-    return this;
-  }
-
-   /**
-   * Get visibleRoles
-   * @return visibleRoles
-  **/
-  @ApiModelProperty(example = "[]", value = "")
+  
+  /**
+   * The user roles that are able to access the API
+   **/
+  @ApiModelProperty(value = "The user roles that are able to access the API")
+  @JsonProperty("visibleRoles")
   public List<String> getVisibleRoles() {
     return visibleRoles;
   }
-
   public void setVisibleRoles(List<String> visibleRoles) {
     this.visibleRoles = visibleRoles;
   }
 
-  public APIDTO permission(String permission) {
-    this.permission = permission;
-    return this;
-  }
-
-   /**
-   * Get permission
-   * @return permission
-  **/
-  @ApiModelProperty(example = "[{&quot;groupId&quot; : 1000, &quot;permission&quot; : [&quot;READ&quot;,&quot;UPDATE&quot;]},{&quot;groupId&quot; : 1001, &quot;permission&quot; : [&quot;READ&quot;,&quot;UPDATE&quot;]}]", value = "")
-  public String getPermission() {
-    return permission;
-  }
-
-  public void setPermission(String permission) {
-    this.permission = permission;
-  }
-
-  public APIDTO userPermissionsForApi(List<String> userPermissionsForApi) {
-    this.userPermissionsForApi = userPermissionsForApi;
-    return this;
-  }
-
-  public APIDTO addUserPermissionsForApiItem(String userPermissionsForApiItem) {
-    this.userPermissionsForApi.add(userPermissionsForApiItem);
-    return this;
-  }
-
-   /**
-   * LoggedIn user permissions for the API 
-   * @return userPermissionsForApi
-  **/
-  @ApiModelProperty(example = "[&quot;READ&quot;,&quot;UPDATE&quot;]", value = "LoggedIn user permissions for the API ")
-  public List<String> getUserPermissionsForApi() {
-    return userPermissionsForApi;
-  }
-
-  public void setUserPermissionsForApi(List<String> userPermissionsForApi) {
-    this.userPermissionsForApi = userPermissionsForApi;
-  }
-
-  public APIDTO visibleTenants(List<String> visibleTenants) {
-    this.visibleTenants = visibleTenants;
-    return this;
-  }
-
-  public APIDTO addVisibleTenantsItem(String visibleTenantsItem) {
-    this.visibleTenants.add(visibleTenantsItem);
-    return this;
-  }
-
-   /**
-   * Get visibleTenants
-   * @return visibleTenants
-  **/
-  @ApiModelProperty(example = "[]", value = "")
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("visibleTenants")
   public List<String> getVisibleTenants() {
     return visibleTenants;
   }
-
   public void setVisibleTenants(List<String> visibleTenants) {
     this.visibleTenants = visibleTenants;
   }
 
-  public APIDTO gatewayEnvironments(String gatewayEnvironments) {
-    this.gatewayEnvironments = gatewayEnvironments;
-    return this;
+  
+  /**
+   **/
+  @ApiModelProperty(required = true, value = "")
+  @JsonProperty("endpointConfig")
+  public String getEndpointConfig() {
+    return endpointConfig;
+  }
+  public void setEndpointConfig(String endpointConfig) {
+    this.endpointConfig = endpointConfig;
   }
 
-   /**
-   * Comma separated list of gateway environments. 
-   * @return gatewayEnvironments
-  **/
-  @ApiModelProperty(example = "Production and Sandbox", value = "Comma separated list of gateway environments. ")
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("endpointSecurity")
+  public APIEndpointSecurityDTO getEndpointSecurity() {
+    return endpointSecurity;
+  }
+  public void setEndpointSecurity(APIEndpointSecurityDTO endpointSecurity) {
+    this.endpointSecurity = endpointSecurity;
+  }
+
+  
+  /**
+   * Comma separated list of gateway environments.\n
+   **/
+  @ApiModelProperty(value = "Comma separated list of gateway environments.\n")
+  @JsonProperty("gatewayEnvironments")
   public String getGatewayEnvironments() {
     return gatewayEnvironments;
   }
-
   public void setGatewayEnvironments(String gatewayEnvironments) {
     this.gatewayEnvironments = gatewayEnvironments;
   }
 
-  public APIDTO sequences(List<SequenceDTO> sequences) {
-    this.sequences = sequences;
-    return this;
-  }
-
-  public APIDTO addSequencesItem(SequenceDTO sequencesItem) {
-    this.sequences.add(sequencesItem);
-    return this;
-  }
-
-   /**
-   * Get sequences
-   * @return sequences
-  **/
-  @ApiModelProperty(example = "[]", value = "")
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("sequences")
   public List<SequenceDTO> getSequences() {
     return sequences;
   }
-
   public void setSequences(List<SequenceDTO> sequences) {
     this.sequences = sequences;
   }
 
-  public APIDTO businessInformation(API_businessInformationDTO businessInformation) {
-    this.businessInformation = businessInformation;
-    return this;
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("subscriptionAvailability")
+  public SubscriptionAvailabilityEnum getSubscriptionAvailability() {
+    return subscriptionAvailability;
+  }
+  public void setSubscriptionAvailability(SubscriptionAvailabilityEnum subscriptionAvailability) {
+    this.subscriptionAvailability = subscriptionAvailability;
   }
 
-   /**
-   * Get businessInformation
-   * @return businessInformation
-  **/
+  
+  /**
+   **/
   @ApiModelProperty(value = "")
-  public API_businessInformationDTO getBusinessInformation() {
+  @JsonProperty("subscriptionAvailableTenants")
+  public List<String> getSubscriptionAvailableTenants() {
+    return subscriptionAvailableTenants;
+  }
+  public void setSubscriptionAvailableTenants(List<String> subscriptionAvailableTenants) {
+    this.subscriptionAvailableTenants = subscriptionAvailableTenants;
+  }
+
+  
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("businessInformation")
+  public APIBusinessInformationDTO getBusinessInformation() {
     return businessInformation;
   }
-
-  public void setBusinessInformation(API_businessInformationDTO businessInformation) {
+  public void setBusinessInformation(APIBusinessInformationDTO businessInformation) {
     this.businessInformation = businessInformation;
   }
 
-  public APIDTO corsConfiguration(API_corsConfigurationDTO corsConfiguration) {
-    this.corsConfiguration = corsConfiguration;
-    return this;
-  }
-
-   /**
-   * Get corsConfiguration
-   * @return corsConfiguration
-  **/
+  
+  /**
+   **/
   @ApiModelProperty(value = "")
-  public API_corsConfigurationDTO getCorsConfiguration() {
+  @JsonProperty("corsConfiguration")
+  public APICorsConfigurationDTO getCorsConfiguration() {
     return corsConfiguration;
   }
-
-  public void setCorsConfiguration(API_corsConfigurationDTO corsConfiguration) {
+  public void setCorsConfiguration(APICorsConfigurationDTO corsConfiguration) {
     this.corsConfiguration = corsConfiguration;
   }
 
-  public APIDTO endpoint(List<API_endpointDTO> endpoint) {
-    this.endpoint = endpoint;
-    return this;
-  }
-
-  public APIDTO addEndpointItem(API_endpointDTO endpointItem) {
-    this.endpoint.add(endpointItem);
-    return this;
-  }
-
-   /**
-   * Get endpoint
-   * @return endpoint
-  **/
-  @ApiModelProperty(value = "")
-  public List<API_endpointDTO> getEndpoint() {
-    return endpoint;
-  }
-
-  public void setEndpoint(List<API_endpointDTO> endpoint) {
-    this.endpoint = endpoint;
-  }
-
-  public APIDTO securityScheme(List<String> securityScheme) {
-    this.securityScheme = securityScheme;
-    return this;
-  }
-
-  public APIDTO addSecuritySchemeItem(String securitySchemeItem) {
-    this.securityScheme.add(securitySchemeItem);
-    return this;
-  }
-
-   /**
-   * Get securityScheme
-   * @return securityScheme
-  **/
-  @ApiModelProperty(value = "")
-  public List<String> getSecurityScheme() {
-    return securityScheme;
-  }
-
-  public void setSecurityScheme(List<String> securityScheme) {
-    this.securityScheme = securityScheme;
-  }
-
-  public APIDTO operations(List<API_operationsDTO> operations) {
-    this.operations = operations;
-    return this;
-  }
-
-  public APIDTO addOperationsItem(API_operationsDTO operationsItem) {
-    this.operations.add(operationsItem);
-    return this;
-  }
-
-   /**
-   * Get operations
-   * @return operations
-  **/
-  @ApiModelProperty(value = "")
-  public List<API_operationsDTO> getOperations() {
-    return operations;
-  }
-
-  public void setOperations(List<API_operationsDTO> operations) {
-    this.operations = operations;
-  }
-
+  
 
   @Override
-  public boolean equals(java.lang.Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    APIDTO API = (APIDTO) o;
-    return Objects.equals(this.id, API.id) &&
-        Objects.equals(this.name, API.name) &&
-        Objects.equals(this.description, API.description) &&
-        Objects.equals(this.context, API.context) &&
-        Objects.equals(this.version, API.version) &&
-        Objects.equals(this.provider, API.provider) &&
-        Objects.equals(this.wsdlUri, API.wsdlUri) &&
-        Objects.equals(this.lifeCycleStatus, API.lifeCycleStatus) &&
-        Objects.equals(this.workflowStatus, API.workflowStatus) &&
-        Objects.equals(this.createdTime, API.createdTime) &&
-        Objects.equals(this.apiPolicy, API.apiPolicy) &&
-        Objects.equals(this.lastUpdatedTime, API.lastUpdatedTime) &&
-        Objects.equals(this.responseCaching, API.responseCaching) &&
-        Objects.equals(this.cacheTimeout, API.cacheTimeout) &&
-        Objects.equals(this.destinationStatsEnabled, API.destinationStatsEnabled) &&
-        Objects.equals(this.isDefaultVersion, API.isDefaultVersion) &&
-        Objects.equals(this.transport, API.transport) &&
-        Objects.equals(this.tags, API.tags) &&
-        Objects.equals(this.labels, API.labels) &&
-        Objects.equals(this.policies, API.policies) &&
-        Objects.equals(this.visibility, API.visibility) &&
-        Objects.equals(this.visibleRoles, API.visibleRoles) &&
-        Objects.equals(this.permission, API.permission) &&
-        Objects.equals(this.userPermissionsForApi, API.userPermissionsForApi) &&
-        Objects.equals(this.visibleTenants, API.visibleTenants) &&
-        Objects.equals(this.gatewayEnvironments, API.gatewayEnvironments) &&
-        Objects.equals(this.sequences, API.sequences) &&
-        Objects.equals(this.businessInformation, API.businessInformation) &&
-        Objects.equals(this.corsConfiguration, API.corsConfiguration) &&
-        Objects.equals(this.endpoint, API.endpoint) &&
-        Objects.equals(this.securityScheme, API.securityScheme) &&
-        Objects.equals(this.operations, API.operations);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, workflowStatus, createdTime, apiPolicy, lastUpdatedTime, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, labels, policies, visibility, visibleRoles, permission, userPermissionsForApi, visibleTenants, gatewayEnvironments, sequences, businessInformation, corsConfiguration, endpoint, securityScheme, operations);
-  }
-
-  @Override
-  public String toString() {
+  public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIDTO {\n");
     
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("    context: ").append(toIndentedString(context)).append("\n");
-    sb.append("    version: ").append(toIndentedString(version)).append("\n");
-    sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
-    sb.append("    wsdlUri: ").append(toIndentedString(wsdlUri)).append("\n");
-    sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
-    sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
-    sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
-    sb.append("    apiPolicy: ").append(toIndentedString(apiPolicy)).append("\n");
-    sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
-    sb.append("    responseCaching: ").append(toIndentedString(responseCaching)).append("\n");
-    sb.append("    cacheTimeout: ").append(toIndentedString(cacheTimeout)).append("\n");
-    sb.append("    destinationStatsEnabled: ").append(toIndentedString(destinationStatsEnabled)).append("\n");
-    sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
-    sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
-    sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
-    sb.append("    labels: ").append(toIndentedString(labels)).append("\n");
-    sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
-    sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
-    sb.append("    visibleRoles: ").append(toIndentedString(visibleRoles)).append("\n");
-    sb.append("    permission: ").append(toIndentedString(permission)).append("\n");
-    sb.append("    userPermissionsForApi: ").append(toIndentedString(userPermissionsForApi)).append("\n");
-    sb.append("    visibleTenants: ").append(toIndentedString(visibleTenants)).append("\n");
-    sb.append("    gatewayEnvironments: ").append(toIndentedString(gatewayEnvironments)).append("\n");
-    sb.append("    sequences: ").append(toIndentedString(sequences)).append("\n");
-    sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
-    sb.append("    corsConfiguration: ").append(toIndentedString(corsConfiguration)).append("\n");
-    sb.append("    endpoint: ").append(toIndentedString(endpoint)).append("\n");
-    sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
-    sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
-    sb.append("}");
+    sb.append("  id: ").append(id).append("\n");
+    sb.append("  name: ").append(name).append("\n");
+    sb.append("  description: ").append(description).append("\n");
+    sb.append("  context: ").append(context).append("\n");
+    sb.append("  version: ").append(version).append("\n");
+    sb.append("  provider: ").append(provider).append("\n");
+    sb.append("  apiDefinition: ").append(apiDefinition).append("\n");
+    sb.append("  wsdlUri: ").append(wsdlUri).append("\n");
+    sb.append("  status: ").append(status).append("\n");
+    sb.append("  responseCaching: ").append(responseCaching).append("\n");
+    sb.append("  cacheTimeout: ").append(cacheTimeout).append("\n");
+    sb.append("  destinationStatsEnabled: ").append(destinationStatsEnabled).append("\n");
+    sb.append("  isDefaultVersion: ").append(isDefaultVersion).append("\n");
+    sb.append("  type: ").append(type).append("\n");
+    sb.append("  transport: ").append(transport).append("\n");
+    sb.append("  tags: ").append(tags).append("\n");
+    sb.append("  tiers: ").append(tiers).append("\n");
+    sb.append("  maxTps: ").append(maxTps).append("\n");
+    sb.append("  thumbnailUri: ").append(thumbnailUri).append("\n");
+    sb.append("  visibility: ").append(visibility).append("\n");
+    sb.append("  visibleRoles: ").append(visibleRoles).append("\n");
+    sb.append("  visibleTenants: ").append(visibleTenants).append("\n");
+    sb.append("  endpointConfig: ").append(endpointConfig).append("\n");
+    sb.append("  endpointSecurity: ").append(endpointSecurity).append("\n");
+    sb.append("  gatewayEnvironments: ").append(gatewayEnvironments).append("\n");
+    sb.append("  sequences: ").append(sequences).append("\n");
+    sb.append("  subscriptionAvailability: ").append(subscriptionAvailability).append("\n");
+    sb.append("  subscriptionAvailableTenants: ").append(subscriptionAvailableTenants).append("\n");
+    sb.append("  businessInformation: ").append(businessInformation).append("\n");
+    sb.append("  corsConfiguration: ").append(corsConfiguration).append("\n");
+    sb.append("}\n");
     return sb.toString();
   }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(java.lang.Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
 }
-

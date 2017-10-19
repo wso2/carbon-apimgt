@@ -1,0 +1,126 @@
+<% jagg.template("application-task", function(inputs, outputs, jagg) {
+var tasks=outputs.tasks;
+%>
+<div id="listing">
+    <div class="page-header">
+        <h2><%=i18n.localize("Approval Tasks")%></h2>
+    </div>
+
+
+        <%
+if(tasks!=null && tasks!='null'){
+    var length = tasks.length;
+    var itemsPerPage = site.tasksPerPage; //reduce this number to preview the pagination
+
+    var currentPage = 1;
+    var numberOfPages = parseInt(length / itemsPerPage);
+
+    if (length % itemsPerPage != 0) {
+    numberOfPages++;
+    }
+
+    if (request.getParameter('page') != null && request.getParameter('page') != 'null') {
+    currentPage = parseInt(request.getParameter('page'));
+    }
+    var from = (currentPage - 1)*itemsPerPage;
+    var to = currentPage*itemsPerPage;
+    if(currentPage == numberOfPages){
+    to = length%(itemsPerPage*currentPage);
+    if(to == 0){
+    to=itemsPerPage*currentPage;
+    }
+    }
+    if(length==0){
+    to=0;
+    }
+    if(tasks.length==0){%>
+    <div class="message message-info">
+		<h4><i class="icon fw fw-info"></i><%=i18n.localize("No tasks assigned to the login user or no connectivity with BPS engine.")%></h4>
+	  </div>
+
+  <%}else if(currentPage > numberOfPages){
+                var previousPage = currentPage-1;
+                var redirectUrl = "/admin/tasks?page="+previousPage+"&task=application";
+                response.sendRedirect(redirectUrl);
+          }
+else{
+%>
+            <table id="appreg-tasks" class="table table-responsive table-striped">
+                <thead>
+                 <tr>
+                    <th><%=i18n.localize("ID")%></th>
+                    <th><%=i18n.localize("Description")%></th>
+                    <th><%=i18n.localize("Status")%></th>
+                    <th class="date-time-col"><%=i18n.localize("Created On")%></th>
+                    <th class="manage-col"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <%for(var i=from;i<to;i++){%>
+                <tr>
+                    <td><%=tasks[i].id%></td>
+
+<td id="desc<%=String(i)%>"><%=tasks[i].presentationSubject%></td>
+<td id="status<%=String(i)%>"><%=tasks[i].status%></td>
+<td><%=tasks[i].createdTime%></td>
+ <td class="col-sm-3">                        
+ 				<div class="form-group form-inline">                      
+ 
+ 						<%if((tasks[i].status=="RESERVED")){%>
+ 								<div class="col-sm-2">
+                             		<button class="btn js_startBtn" id="js_startBtn<%=String(i)%>" data="<%=tasks[i].id%>" iteration="<%=String(i)%>"><%=i18n.localize("Start")%></button>
+                             	</div>
+                             	<div class="col-sm-6" style="display: none" >
+		                             <select id="js_stateDropDown<%=String(i)%>" class="form-control js_stateDropDown pull-left">
+		                              <option value="APPROVED"><%=i18n.localize("Approve")%></option>
+		                              <option value="REJECTED"><%=i18n.localize("Reject")%></option>
+		                             </select>
+	                         	</div>
+	                         	<div class="col-sm-4">
+                             		<button class="btn js_completeBtn pull-left" id="js_completeBtn<%=String(i)%>" style="display: none" data="<%=tasks[i].id%>" iteration="<%=String(i)%>"><%=i18n.localize("Complete")%></button>
+                             	</div>
+                              <%}else if (tasks[i].status=='COMPLETED'){%>
+                              	<label>Completed</label>
+                              <%}else if(tasks[i].status=='IN_PROGRESS'){%>
+                               <div class="col-sm-6">
+	                              <select id="js_stateDropDown<%=String(i)%>" class="form-control js_stateDropDown pull-left">
+	                               <option value="APPROVED"><%=i18n.localize("Approve")%></option>
+	                               <option value="REJECTED"><%=i18n.localize("Reject")%></option>
+	                              </select>
+	                          </div>
+	                          <div class="col-sm-4">
+                              	<button class="btn js_completeBtn pull-left" id="js_completeBtn<%=String(i)%>" data="<%=tasks[i].id%>" iteration="<%=String(i)%>"><%=i18n.localize("Complete")%></button>
+                              </div>
+                              <div class="col-sm-2"></div>
+                              <%}else if (tasks[i].status=='READY'){%>
+                              <div class="col-sm-2">
+                              	<button class="btn js_assignBtn pull-left" id="js_assignBtn<%=String(i)%>" data="<%=tasks[i].id%>" iteration="<%=String(i)%>"><%=i18n.localize("Assign To Me")%></button>
+                              	<button class="btn js_startBtn pull-left" id="js_startBtn<%=String(i)%>" style="display: none" data="<%=tasks[i].id%>" iteration="<%=String(i)%>"><%=i18n.localize("Start")%></button>
+                              	</div>
+                              <div class="col-sm-6" style="display: none">
+	                              <select id="js_stateDropDown<%=String(i)%>" class="form-control js_stateDropDown pull-left" style="margin-right: 6px;">
+		                              <option value="APPROVED"><%=i18n.localize("Approve")%></option>
+		                              <option value="REJECTED"><%=i18n.localize("Reject")%></option>
+	                              </select>
+	                          </div>
+	                          <div class="col-sm-4">
+                              	<button class="btn js_completeBtn pull-left" id="js_completeBtn<%=String(i)%>" style="display: none" data="<%=tasks[i].id%>" iteration="<%=String(i)%>"><%=i18n.localize("Complete")%></button>
+                              </div>
+                               <%}%>
+                               </div>
+</td>
+                </tr>  <%}%>
+                </tbody>
+            </table>
+            <%}}else{%>
+    <div class="message message-info">
+				<h4><i class="icon fw fw-info"></i><%=i18n.localize("No tasks assigned to the login user or no connectivity with BPS engine.")%></h4>
+				</div> 
+            <%}%>
+              <!--START Pagination links-->
+              <% jagg.includeBlock("paginator", {currentPage:currentPage,numberOfPages:numberOfPages,taskType:"application"}); %>
+              <!--END Pagination links-->
+        </div>
+    </div>
+</div>
+<% }); %>

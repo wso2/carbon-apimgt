@@ -1,0 +1,166 @@
+<% jagg.template("forum/forum-topic", function(inputs, outputs, jagg) {
+
+%>
+
+  <div id="forum_topic_details_page">
+    <div id="forum_topic_title_bar" class="title-section"></div>
+    <div id="forum_topic_content" class="white-wrapper add-padding-3x"></div>
+  </div>
+
+<!-- STRAT : Handlebars templates -->
+
+<script id="fourm_topic_title_template" type="text/x-handlebars-template">
+
+  <div class="page-header">
+      <h2 id="forum_topic_subject_lable" class="word-break">
+        <span>{{ replies.topic.0.subject}}</span>
+        <%if(jagg.getUser()){%>
+            {{#if_creator replies.topic.0.topicOwner replies.topic.0.user}}
+                <a title="forum edit" class="fw-stack" id="forum_edit_topic_icon" data-id="{{ topicId }}" style="font-size:12px">
+                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+                    <i class="fw fw-edit fw-stack-1x"></i>
+                </a>
+            {{/if_creator}}
+          <%}%>
+      </h2>
+  </div>
+
+  <div style="display: none">
+    <div class="page-header"><h2 class="word-break"><%=i18n.localize('Forum Topic')%></h2></div>
+    <input id="forum_topic_subject_edit_input" title="forum_topic_subject_edit" type="text" class="form-control" value="{{ replies.topic.0.subject}}"></input>
+  </div>
+
+</script>
+
+
+<script id="forum_topic_details_template" type="text/x-handlebars-template">
+
+  <div id="forum_topic_view_block">
+  <h4><%=i18n.localize('Description')%></h4>
+    <div id="forum_topic_description" class="forum-description word-break">
+      {{# html_sanitize replies.topic.0.description }}{{/html_sanitize}}
+    </div>
+  </div>
+
+  <div id="forum_topic_edit_block" style="display: none">
+    <div id="forum_topic_description_edit_block" class="topic_description_edit">
+      <div id="forum_topic_description_edit_editor" data-id="{{ replies.topic.0.topicId}}"></div>
+      <div class="edit-topic-form-actions add-margin-top-2x">
+        <a id="forum_save_updated_topic_button" class="btn btn-primary" title="edit forum">
+          <%=i18n.localize("Save")%>
+        </a>
+        <a id="forum_cancel_topic_edit_button" class="btn btn-secondary">
+          <%=i18n.localize( 'Cancel')%>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div id="forum_topic_rating_block" class="row add-margin-top-5x">
+    <div class="col-xs-4 col-sm-4 col-md-1 col-lg-1">
+        <div class="average-rating">
+            <%=parseFloat(inputs.averageRating).toFixed(1)%>
+        </div>
+    </div>
+    <div class="user_rating col-xs-8 col-sm-8 col-md-11 col-lg-11">
+        Your Rating : <span class="your_rating"><%if(inputs.userRating){%><%= inputs.userRating %>/5<%}else{ %>N/A<%} %></span><br>
+        <input class="rating-tooltip-manual rate_save" type="hidden" value="<%= inputs.userRating %>"> <a class="remove_rating" title="remove_rating"><i class="fa fa-times-circle"></i></a>
+    </div>
+  </div>
+
+  <div id="forum_replies_block" class="add-padding-top-5x"></div>
+<%if(jagg.getUser()){%>
+
+  <div class="forum_form add-reply add-padding-top-5x">
+    <div>
+      <label><strong><h4><%=i18n.localize('Add Reply')%></h4></strong></label>
+    </div>
+    <div id="forum_reply_editor"></div>
+    <div class="add-margin-top-2x">
+        <a id="forum_add_reply_button" class="btn btn-primary" title="<%=i18n.localize('Reply to Thread')%>"  ><%=i18n.localize('Reply to Thread')%></a>
+    </div>
+  </div>
+
+  <%}%>
+</script>
+
+<script id="forum_replies_list_template" type="text/x-handlebars-template">
+
+  <div id="forum_replies_list" style="display: none;">
+    <div class="replies-list-title"><h4><%=i18n.localize('Replies')%></h4></div>
+
+        <div id="forum_reply_added_block" style="display: none;" class="comment-container">
+            <div class="comment-box">
+              <div class="comment-body">
+                  <span class="tip tip-down"></span>
+                  <div class="comment-message">
+                      <span class="successfully-added"><strong><%=i18n.localize('Reply Successfully Added')%></strong></span>
+                      <span id="forum_reply_content_temp" class="comment-text word-break"></span>
+                  </div>
+              </div>
+              <div id="forum_reply_info_temp" class="comment-extra"></div>
+            </div>
+        </div>
+
+        <div id="no_topic_msg" class="message message-info" style="display:none;">
+            <h4><i class="icon fw fw-info"></i>No replies found.</h4>
+            <p>You can start adding replies below</p>
+        </div>
+
+        {{#each replies.replies}}
+
+        <div class="comment-container comment-container-dyn" id="forum_reply_content_cell_{{ replyId }}" data-id="{{ replyId }}">
+
+        <%if(jagg.getUser()){%>
+          {{#if_creator createdBy user}}
+          <div class="forum-edit-delete">
+            <a class="forum_edit_reply_icon btn add-padding-1x" data-id="{{ replyId }}" title="Edit this post">
+                <span class="fw-stack" style="font-size:10px">
+                    <i class="fw fw-edit fw-stack-1x"></i>
+                     <i class="fw fw-circle-outline fw-stack-2x"></i>
+                </span>
+            </a>
+            <a class="forum_delete_reply_icon btn add-padding-1x" data-id="{{ replyId }}" title="Delete post">
+                <span class="fw-stack" style="font-size:10px">
+                    <i class="fw fw-delete fw-stack-1x"></i>
+                     <i class="fw fw-circle-outline fw-stack-2x"></i>
+                </span>
+            </a>
+          </div>
+          {{/if_creator}}
+        <%}%>
+
+            <div class="comment-box">
+                <div class="comment-body">
+                    <span class="tip tip-down"></span>
+                    <div class="comment-message">
+                        <span class="comment-text word-break">{{# html_sanitize  reply }}{{/ html_sanitize }}</span>
+                    </div>
+                </div>
+                <div class="comment-extra">Posted <%=i18n.localize( 'By')%><strong> {{ createdBy }}</strong> on <span class="dateFull">{{ date }}, {{ timeStamp }}</span></div>
+            </div>
+        </div>
+        <div id="forum_reply_edit_cell_{{ replyId }}" class="forum-reply-edit-block" style="display: none;" data-id="{{ replyId }}">
+            <div id="forum_reply_edit_editor_{{ replyId }}" data-id="{{ replyId }}"></div>
+            <div class="forum-reply-actions add-margin-top-2x">
+                <a class="btn btn-primary forum_save_updated_reply_button" data-id="{{ replyId }}" title="<%=i18n.localize( 'Save')%>"><%=i18n.localize( 'Save')%></a>
+                <a class="btn btn-secondary forum_cancel_reply_edit_button" data-id="{{ replyId }}" title="<%=i18n.localize( 'Cancel')%>"><%=i18n.localize( 'Cancel')%></a>
+            </div>
+        </div>
+        {{/each}}
+    <ul id="forum_replies_paginator" class="col-sm-6 pull-right"></ul>
+    <div><!-- clearfix -->
+  </div>
+
+
+</script>
+
+<!-- END : Handlebars templates -->
+
+<!-- TODO : Revice this temp code -->
+<script>
+	var context = '<%=jagg.getSiteContext()%>',theme = '<%=jagg.getUserTheme().base%>', topicId = '<%=inputs.topicId%>';
+  var existingRating = 3;
+</script>
+
+<% }); %>

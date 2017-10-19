@@ -1,0 +1,100 @@
+<%
+include("/jagg/jagg.jag");
+include("/jagg/constants.jag");
+var log = new Log();
+(function () {
+    var mod, obj, result,
+            action = request.getParameter("action"),
+            mod = jagg.module("user/authenticate"),
+            site = require("/site/conf/site.json");
+
+    if (action == "login") {
+        var userName = request.getParameter("userName");
+        var password = request.getParameter("password");
+        try {
+            result = mod.login(userName, password);
+            var Jresult = parse(result);
+            var cookie = Jresult.cookie;
+
+            var parsedJSON = eval('(' + result + ')');
+            var errorStatus = parsedJSON.error;
+            if (errorStatus === 'false') {
+                print('true');
+            }
+            else {
+                print('false');
+            }
+        } catch (e) {
+            throw "Error while login " + e.message;
+        }
+    }else if (action == "validatePassword") {
+        var userName = request.getParameter("userName");
+        var password = request.getParameter("password");
+        try {
+            result = mod.validatePassword(userName, password);
+            if (result != null) {
+                print(result);
+            } else {
+                throw "Error while checking the password validity.";
+            }
+        } catch (e) {
+            throw "Error while checking the password validity. " + e.message;
+        }
+    } else if (action == "logout") {
+        try {
+            result=mod.logout();
+            var parsedJSON = eval('('+result+')');
+            var errorStatus=parsedJSON.error;
+            if(errorStatus === "false"){
+                print('true');
+            }
+            else{
+                print('false');
+            }
+
+        } catch (e) {
+            log.error("Error while logout user" + e.message);
+            throw "Error while logout user";
+        }
+    } else if (action === "loginWithSAMLToken") {
+        var samlToken = request.getParameter("samlToken");
+        try {
+            result = mod.loginWithSAMLToken(samlToken);
+            if(!result.error){
+                print(true)
+            } else {
+                log.warn("Authentication failure while login with saml token");
+                log.warn(result.message);
+                print(false);
+            }
+        } catch (e) {
+            var errResponseMessage = "Error occurred while login with saml token";
+            log.error(errResponseMessage);
+            log.error(e);
+            throw errResponseMessage;
+        }
+    } else if (action == "getSectoken") {
+        var email = request.getParameter("email");
+        var password = request.getParameter("password");
+        var managerModule = jagg.module("manager");
+        var username = managerModule.getUserNameFromEmail(email);
+        if (session.get("TENANT_DOMAIN") != null || typeof session.get("TENANT_DOMAIN") != "undefined") {
+            var sectoken = mod.getSectoken(username, password, session.get("TENANT_DOMAIN"));
+            var secTokenPayload = {};
+            secTokenPayload.error = false;
+            secTokenPayload.sectoken = sectoken;
+            print(secTokenPayload);
+        } else {
+            var errorResponseMessage = "Error occurred while retrieving sectoken.";
+            log.error(errorResponseMessage);
+            var errorPayload = {};
+            errorPayload.error = true;
+            errorPayload.message = errorResponseMessage;
+            print(errorPayload);
+        }
+    } else {
+        throw new Error("No action specified");
+    }
+
+}());
+%>

@@ -1,0 +1,12 @@
+<% jagg.template("password-reset/reset", function(inputs, outputs, jagg) {
+   %>
+
+<div class="wrapper">
+   <article class="start">
+      <div class="alert alert-error error" id="registerError"><% jagg.includeBlock("page/messages", null); %></div>
+      <input type="hidden" name="confirm" id="confirm" value="<%=outputs.confirm%>"/>
+      <input type="hidden" name="id" id="id" value="<%=outputs.id%>"/>
+   </article>
+</div>
+
+<% }); %>

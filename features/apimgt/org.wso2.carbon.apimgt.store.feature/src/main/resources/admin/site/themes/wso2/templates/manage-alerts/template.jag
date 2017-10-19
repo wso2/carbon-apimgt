@@ -1,0 +1,75 @@
+<% jagg.template("manage-alerts", function(inputs, outputs, jagg) { %>
+
+		<div id="col-sm-12">
+        <div id="manageAlerts">
+			<div class="page-header">
+				<h2><%=i18n.localize("Manage Alert Types")%></h2>
+			</div>
+			<div class="control-group">
+               <%
+                var error = outputs.alertTypesInformations.error;
+                if(error == false){
+                    var allAlertType = outputs.alertTypesInformations.allAlertTypeJson;
+                    var savedAlertTypes = outputs.alertTypesInformations.savedAlertTypeJson;
+                    %>
+                        <form class="form-horizontal">
+                    <%
+                    for (var key in allAlertType) {
+                        if (allAlertType.hasOwnProperty(key)) {
+                            var isChecked;
+                            for (var savedAlertTypesKey in savedAlertTypes) {
+                                if (savedAlertTypes.hasOwnProperty(savedAlertTypesKey)) {
+
+                                    if(savedAlertTypes[savedAlertTypesKey] == key){
+                                        isChecked = "checked";
+                                        break;
+                                    }else{
+                                        isChecked = "";
+                                    }
+                                }
+                            }
+                           %>
+                            <div class="form-group">
+                                <label class="col-sm-1"><input type="checkbox"  id="<%=allAlertType[key]%>" value="<%=encode.forHtml(key)%>" <%=encode.forHtml(isChecked) %>></label>
+                                <div class="col-sm-10">
+                                  <p class=""><strong><%=i18n.localize(encode.forHtml(allAlertType[key]))%></strong></p>
+                                  <p><%= i18n.localize(encode.forHtml(allAlertType[key]) + "_Desc") %></p>
+                                </div>
+                            </div>
+                           <%
+                        }
+                    }
+                    %>
+                        <div class="form-group">
+                                <label class="col-sm-1 email"><p class=""><strong>Email: </strong></p></label>
+                                <%
+                                    var savedEmailList ="";
+                                    if(outputs.emailList.allSavedEmailListJson[0] != null){
+                                        var savedEmailList = outputs.emailList.allSavedEmailListJson.toString();
+                                    }
+
+                                %>
+                                <div class="col-sm-10">
+                                    <input id="tokenfield" type="text" value="<%=encode.forHtml(savedEmailList)%>" data-role="tagsinput" />
+				    <p class="help-block" id="rolesHelp"><%=i18n.localize("Type an Email and press Enter")%></p>
+                                </div>
+                        </div>
+                        </form>
+                            <div class="" id="saveButtons">
+                                <button type="submit" class="btn btn-primary " id="saveBtn" ><%=i18n.localize("Save")%></button>
+                                <button type="submit" class="btn btn-primary " id="cancelBtn" ><%=i18n.localize("Cancel")%></button>
+                                <button type="submit" class="btn btn-primary " style="display: none" id="unsubscribeBtn" ><%=i18n.localize("Unsubscribe")%></button>
+                            </div>
+                    <%
+                }else{
+                    %>
+                    <div class="alert alert-danger" id="loginError">
+                        <span id="loginErrorSpan"><%=encode.forHtml(outputs.alertTypesInformations.message) %></span>
+                    </div>
+                    <%
+                }
+                %>
+        </div>
+    </div>
+    </div>
+<%});%>

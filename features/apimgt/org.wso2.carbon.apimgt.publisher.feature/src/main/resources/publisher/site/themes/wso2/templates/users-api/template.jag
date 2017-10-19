@@ -1,0 +1,155 @@
+<% jagg.template("users-api", function(inputs, outputs, jagg) { %>
+
+<link type="text/css" rel="stylesheet" href="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/nvd3/css/nv.d3.css"))%>"/>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/nvd3/js/d3.v3.js"))%>"></script>
+<script type="text/javascript" src="<%=jagg.getAbsoluteUrl(jagg.getThemeFile("libs/nvd3/js/nv.d3.js"))%>"></script>
+
+<% var api=outputs.api;
+   var subs = jagg.module("subscription");
+   var result = subs.getSubscribersOfAPI(api);
+   var subscribers = result.subscribers;
+   var itemsPerPage = 10; //reduce this number to preview the pagination
+   var currentPage = 1;
+   var numberOfPages;
+
+%>
+  <div class="row" id="usageSummary" style="display:none;">
+    <div class="col-sm-12">
+        <h3><%=i18n.localize("Usage Summary")%></h3>
+        <table class="table table-bordered">
+          <tbody id="usageTable">
+        </table>
+    </div>
+</div>
+	
+   		<div class="page-header add-margin-top-4x">
+			<p class="lead"><%=i18n.localize("Active Subscriptions")%></p>
+		</div>
+
+		<% if(subscribers != null && subscribers.length > 0) { %>
+		<table
+			class="table table-striped table-hover table-bordered display data-table">
+			<thead>
+				<tr>
+					<th class="span4"><%=i18n.localize("Name")%></th>
+					<th><%=i18n.localize("Date of User Registration")%></th>
+					<!--<th>Actions</th> -->
+				</tr>
+			</thead>
+			<tbody id="userList">
+				<%
+        var i, subscriber;
+        if(subscribers!=null){
+        var length = subscribers.length;
+        numberOfPages = parseInt(length / itemsPerPage);
+        if (length % itemsPerPage != 0) {
+        numberOfPages++;
+        }
+        if (request.getParameter('page') != null) {
+        currentPage = parseInt(request.getParameter('page'));
+        if((currentPage-1)*itemsPerPage == length){
+        if(String(currentPage)=='1'){%>
+				<script>
+        window.location.href = "<%=jagg.getAbsoluteUrl("/site/pages/item-info.jag")%>";
+        </script>
+				<%}else{
+        currentPage = currentPage - 1;
+        %>
+				<script>
+        window.location.href = "<%=jagg.getAbsoluteUrl("/site/pages/item-info.jag")%>" +"?name="+"<%=api.name%>"+"&version="+"<%=api.version%>"+"&provider="+"<%=api.provider%>"+"&page="+"<%=String(currentPage)%>";
+        </script>
+				<%
+        } }  }
+        var from = (currentPage - 1)*itemsPerPage;
+        var to = currentPage*itemsPerPage;
+        if(currentPage == numberOfPages){
+        to = length%(itemsPerPage*currentPage);
+        if(to == 0){
+        to=itemsPerPage*currentPage;
+        }
+        }
+        if(length==0){
+        to=0;
+        %>
+				<tr>
+					<td colspan="3"><%=i18n.localize("No active subscribers")%></td>
+				</tr>
+				<%}}%>
+				<%for(i = from; i < to; i++) {
+        subscriber = subscribers[i];
+        %>
+				<tr>
+					<td><i class="glyphicon glyphicon-user" title="user">&nbsp;</i><%=subscriber.username%></td>
+					<td class="dateFull"><%=subscriber.subscribedDate%></td>
+					<!--<td><i class="glyphicon glyphicon-edit" title="stats"></i> <a href="#" title="stats">Stats</a>
+        <i class="glyphicon glyphicon-trash" title="revoke"> </i> <a href="#">Revoke Access</a>
+        <i class="glyphicon glyphicon-ban-circle" title="block"></i> <a href="#" title="block">Block</a>-->
+					</td>
+				</tr>
+				<%}%>
+
+
+			</tbody>
+		</table>
+
+		<% jagg.includeBlock("paginator", {currentPage:currentPage,numberOfPages:numberOfPages}); %>
+		<%} else { %>
+			<div class="message message-info">
+				<h4><i class="icon fw fw-info" title="No Stats"></i><%=i18n.localize("No Data Available.")%></h4>
+			</div>
+		<%} %>
+
+
+
+    <div id="usageByCurrentSubscribersSpinner" class="center-wrapper">
+        <i id="icon-spinner" class="fw fw-loader5 fw-4x"></i>
+    </div>
+
+    <div class="row add-margin-top-5x">
+        <div id="usageByCurrentSubscribersNoData"></div>
+        <div class="col-sm-6">
+            <h4><%=i18n.localize("Usage by Current Subscribers")%> (v-<%= encode.forHtml(request.getParameter("version"))%>)</h4>
+            <table class="table table-striped table-hover table-bordered display data-table" id="userVersionTable" style="display:none">
+                  <thead>
+                  <tr>
+                    <th><%=i18n.localize("Subscriber")%></th>
+                    <th><%=i18n.localize("Number of API calls")%></th>
+                  </tr>
+                  </thead>
+            </table>
+        </div>
+        <div class="col-sm-6">
+            <div id="userVersionChart"></div>
+        </div>
+    </div>
+
+
+    <div id="usageByCurrentSubscribersAcrossAllSpinner" class="center-wrapper">
+            <i id="icon-spinner" class="fw fw-loader5 fw-4x"></i>
+    </div>
+
+    <div class="row">
+        <div id="usageByCurrentSubscribersAcrossAllNoData"></div>
+        <div class="col-sm-6">
+            <h4><%=i18n.localize("Usage by Current Subscribers (Across All Versions)")%></h4>
+            <table class="table table-striped table-hover table-bordered display data-table" id="userTable" style="display:none">
+              <thead>
+              <tr>
+                <th><%=i18n.localize("Subscriber")%></th>
+                <th><%=i18n.localize("Number of API calls")%></th>
+              </tr>
+              </thead>
+            </table>
+        </div>
+        <div class="col-sm-6">
+            <div id="userChart"></div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+<% }); %>

@@ -1,0 +1,403 @@
+<% jagg.template("life-cycles", function(inputs, outputs, jagg) {
+if(outputs.isPublishPermitted){
+        var api = outputs.api;
+        var oldExist = outputs.oldExist;
+        var lcs = outputs.lcs;
+        var lcData = outputs.lcData;
+        var publishedInExternalStores = outputs.publishedInExternalStores;
+        var i,resCount,rowNums = [];
+        var lcStatus = outputs.lcStatus;
+        var wfStatus = outputs.wfStatus;
+
+ %>
+
+<script type="text/javascript">
+$(document).ready(function() {
+// call when page load to display message if the API is published to external stores and status is not published
+checkExternalStores('<%=lcStatus%>');
+});
+
+
+function setChecklistItemVal(element,order) {
+    if ($(element).is(":checked") == false) {
+        $(element).attr('value', false);
+    }
+    else {
+        $(element).attr('value', true);
+    }
+    var apiName=$("#name").val();
+    var version=$("#apiVersion").val();
+    var provider=$("#provider").val();
+    var value= $(element).val();
+    jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", { action:"setCheckListItemVal",provider:provider,name:apiName,version:version,order:order,value:value },
+               function (result) {
+                  if (!result.error) {
+
+                     setTimeout(function(){
+                            location = ''
+                     },1000)
+                  } else {
+                    if (result.message == "AuthenticateError") {
+                       jagg.showLogin();
+                    } else {
+                           jagg.message({content:result.message,type:"error"});
+                    }
+                }
+              },"json");
+
+};
+function updateStatus(status) {
+    var apiName = $("#name").val();
+    var version = $("#apiVersion").val();
+    var provider = $("#provider").val();
+    var isSetDeprecation = $("#itemDiv1").val();
+    $(".modal-footer").html("");
+    if (status == 'Deprecate') {
+        var messageContent = i18n.t("Once the API is deprecated; you can only retire the API as the next step.Are you sure you want to deprecate the API") + " - " + apiName + " - " + version + "?";
+        var messageTitle = i18n.t("Change Lifecycle status");
+        jagg.message({
+            content: messageContent,
+            type: "confirm",
+            title: messageTitle,
+            anotherDialog: true,
+            okCallback: function() {
+                $('#messageModal').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                $(".modal-header .close").hide();
+                $(".modal-footer").html("");
+                $(".modal-title").html(i18n.t("Please wait"));
+                $(".modal-body").addClass("loadingButton");
+                $(".modal-body").css({
+                    "margin-left": 25
+                }); //todo param_string
+                $(".modal-body").html(i18n.t("Changing the API lifecycle status") + " : " + apiName + " - " + version);
+                jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", {
+                        action: "updateStatus",
+                        provider: provider,
+                        name: apiName,
+                        version: version,
+                        status: status
+                    },
+                    function(result) {
+                        if (!result.error) {
+                            var jsonPayload = result.status.workflowResponse.jsonPayload;
+
+                            if (result.status.stateChangeStatus == 'REJECTED') {
+                                showWorkflowRejectedMessage();
+                            } else if (jsonPayload != null && jsonPayload != "") {
+                                var apiInfo = {};
+                                apiInfo.provider = provider;
+                                apiInfo.name = apiName;
+                                apiInfo.version = version;
+                                handleWorkflowRedirection(jsonPayload, apiInfo);
+                            } else {
+                                ///test
+                                $('#statusUpdateMsg').show();
+                                setTimeout(function() {
+                                    location = ''
+                                }, 1000)
+                            }
+                        } else {
+                            if (result.message == "AuthenticateError") {
+                                jagg.showLogin();
+                            } else {
+                                jagg.message({
+                                    content: result.message,
+                                    type: "error"
+                                });
+                            }
+                        }
+                    }, "json");
+
+            },
+            cancelCallback: function() {
+                $('#messageModal').modal('hide');
+                $(".modal-footer").html("");
+            }
+        });
+    } else if (isSetDeprecation === 'true') {
+
+        var messageContent = i18n.t("All the previous versions of the API will be deprecated. Continue?");
+        var messageTitle = i18n.t("Change Lifecycle status");
+
+        jagg.message({
+            content: messageContent,
+            type: "confirm",
+            title: messageTitle,
+            anotherDialog: true,
+            okCallback: function() {
+                $('#messageModal').modal({
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                $(".modal-header .close").hide();
+                $(".modal-footer").html("");
+                $(".modal-title").html(i18n.t("Please wait"));
+                $(".modal-body").addClass("loadingButton");
+                $(".modal-body").css({
+                    "margin-left": 25
+                }); //todo param_string
+                $(".modal-body").html(i18n.t("Changing the API lifecycle status") + " : " + apiName + " - " + version);
+
+                jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", {
+                    action: "updateStatus",
+                    provider: provider,
+                    name: apiName,
+                    version: version,
+                    status: status
+                }, function(result) {
+                    if (!result.error) {
+                        var jsonPayload = result.status.workflowResponse.jsonPayload;
+
+                        if (result.status.stateChangeStatus == 'REJECTED') {
+                            showWorkflowRejectedMessage();
+                        } else if (jsonPayload != null && jsonPayload != "") {
+                            var apiInfo = {};
+                            apiInfo.provider = provider;
+                            apiInfo.name = apiName;
+                            apiInfo.version = version;
+                            handleWorkflowRedirection(jsonPayload, apiInfo);
+                        } else {
+                            ///test
+                            $('#statusUpdateMsg').show();
+                            setTimeout(function() {
+                                location = ''
+                            }, 1000)
+                        }
+                    } else {
+                        if (result.message == "AuthenticateError") {
+                            jagg.showLogin();
+                        } else {
+                            jagg.message({
+                                content: result.message,
+                                type: "error"
+                            });
+                        }
+                    }
+                }, "json");
+            },
+            cancelCallback: function() {
+                $('#messageModal').modal('hide');
+                $(".modal-footer").html("");
+            }
+        });
+    } else {
+        jagg.post("/site/blocks/life-cycles/ajax/life-cycles.jag", {
+                action: "updateStatus",
+                provider: provider,
+                name: apiName,
+                version: version,
+                status: status
+            },
+            function(result) {
+                if (!result.error) {
+                    var jsonPayload = result.status.workflowResponse.jsonPayload;
+
+                    if (result.status.stateChangeStatus == 'REJECTED') {
+                        showWorkflowRejectedMessage();
+                    } else if (jsonPayload != null && jsonPayload != "") {
+                        var apiInfo = {};
+                        apiInfo.provider = provider;
+                        apiInfo.name = apiName;
+                        apiInfo.version = version;
+                        handleWorkflowRedirection(jsonPayload, apiInfo);
+                    } else {
+                        ///test
+                        $('#statusUpdateMsg').show();
+                        setTimeout(function() {
+                            location = ''
+                        }, 1000)
+                    }
+                } else {
+                    if (result.message == "AuthenticateError") {
+                        jagg.showLogin();
+                    } else {
+                        jagg.message({
+                            content: result.message,
+                            type: "error"
+                        });
+                    }
+                }
+            }, "json");
+    }
+};
+
+var initOf_state = '<%=lcStatus%>';
+// java script variable to store the status
+var publishedInExternalStores=<%=publishedInExternalStores%>;
+</script>
+
+<div class="alert alert-error" id="statusAPIError" style="display:none">
+    <span id="statusErrorSpan"></span>
+</div>
+<div class="alert alert-success add-margin-bottom-2x" id="statusUpdateMsg" style="display:none;">
+     <%=i18n.localize("Successfully updated the API status.")%>
+</div>
+ <form class="form-horizontal lifecycle-state">
+    <div class="well remove-padding-top remove-padding-bottom">
+     <input type="hidden" name="action" id="action" value="updateStatus"/>
+     <input type="hidden" name="name" id="name" value="<%=api.name%>"/>
+     <input type="hidden" name="version" id="apiVersion" value="<%=api.version%>"/>
+     <input type="hidden" name="provider" id="provider" value="<%=api.provider%>"/>
+     <div class="alert alert-warning" id="removeFromExternalStoresMsg" style="display:none;">
+        <span class="badge badge-warning">!</span> <%=i18n.localize("This API is not PUBLISHED. Please remove from external stores.")%>
+     </div>
+    <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-4 col-md-3 col-lg-2 text-center-xs" name="state"><h4><%=i18n.localize("Current State")%>:</h4></label>
+            <div class="controls col-xs-12 col-sm-8 col-md-9 col-lg-10 text-center-xs">
+                <h4><p class="form-control-static" name="stateValue"><strong><%=i18n.localize(lcStatus,lcStatus)%></strong></p></h4>
+             </div>
+    </div>
+  <%  if(wfStatus != null && wfStatus.status == 'CREATED') {%> 
+     <div class="message message-info">
+                    <h4><i class="icon fw fw-info"></i><%=wfStatus.workflowDescription%></h4>
+     </div>  
+     <div id="deletePendingTasks">
+                <a onclick="deletePendingTasks('<%=api.name%>', '<%=api.version%>', '<%=api.provider%>')" href="#" title="<%=i18n.localize("Delete Task")%>" class="btn btn-primary  btn-sm padding-reduce-on-grid-view">
+                    <i class=" glyphicon glyphicon-plus-sign" title="<%=i18n.localize("Delete Task")%>"></i>
+                    <%=i18n.localize("Delete Task")%>
+                </a>
+    </div>
+  <% }else {%>   
+    </div>
+
+                 <%for (var j=0;j<lcData.items.length;j++){
+                 var item=lcData.items[j];
+                 var itemName=item.name;
+                 var isVisible=item.isVisible;
+                 var itemValue=item.value;
+                 var itemOrder=item.order;
+                 var state=item.lifeCycleStatus;
+                 %>
+                 <% if(isVisible=="true"){%>
+                      <%if(((state!="Created") && (state!="Prototyped"))||(state=="Created" && oldExist)||(state=="Prototyped" && oldExist)){%>
+                      <div class="form-group">
+                         <label class="control-label col-sm-3"></label>
+                       <label class="checkbox col-sm-3" id="itemsDivfromLCXML<%=String(j)%>">
+                            <input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>>
+                              <span class="helper"><%=i18n.localize(itemName, itemName)%></span>
+                       </label>
+                     </div>
+                    <%}else{%>
+                        <%if((itemName == i18n.localize("Requires Re-Subscription"))||(itemName  == i18n.localize("Deprecate Old Versions"))){
+                                continue;
+                        }else{%>
+                            <div class="form-group">
+                               <label class="control-label col-sm-3"></label>
+                                   <label class="checkbox col-sm-3" id="itemsDivfromLCXML<%=String(j)%>">
+                                    <input type="checkbox" id="itemDiv<%=String(j)%>" name="itemDiv" onChange="setChecklistItemVal(itemDiv<%=String(j)%>,<%=itemOrder%>)" value="<%=itemValue%>" <%if(itemValue=="true"){%>checked<%}%>>
+                                    <span class="helper"><%=i18n.localize(itemName, itemName)%></span>
+                                </label>
+                              </div>
+                        <%}
+                 <%}}}%>
+
+    <div class="form-actions">
+        <div class="btn-group btn-group-justified" role="group" aria-label="btn">
+
+       <% for (var i=0;i<lcData.nextStates.length;i++) { //todo: param_string
+           var next = lcData.nextStates[i].toLowerCase();
+
+            if(lcStatus=="CREATED"){
+               if(lcData.nextStates[i].toLowerCase().indexOf("prototype") > -1){ %>
+               <div class="btn-group" role="group">
+                    <input type="button" id="actionButton<%=String(i)%>" <%if( api.endpointConfig == "" || api.endpointConfig == null){%>disabled<%}%> class="btn btn-secondary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next, next)%>"/>
+                </div>
+               <%} else if (lcData.nextStates[i].toLowerCase().indexOf("publish") > -1) {%>
+               <div class="btn-group" role="group">
+                    <input type="button" id="actionButton<%=String(i)%>" <%if(api.availableTiers == null || api.availableTiers == ""){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next, next)%>"/>
+                </div>
+               <%} else {%>
+               <div class="btn-group" role="group">
+                    <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next)%>"/>
+                </div>
+               <%}
+            } else if(lcStatus=="PROTOTYPED") {%>
+               <% if (lcData.nextStates[i].toLowerCase().indexOf("prototype") == -1) {%>
+               <%if(lcData.nextStates[i].toLowerCase().indexOf("prototype") > -1){ %>
+               <div class="btn-group" role="group">
+                    <input type="button" id="actionButton<%=String(i)%>" <%if( api.endpointConfig == "" || api.endpointConfig == null){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next,next)%>"/>
+                </div>
+               <%} else if (lcData.nextStates[i].toLowerCase().indexOf("publish") > -1) {%>
+               <div class="btn-group" role="group">
+                    <input type="button" id="actionButton<%=String(i)%>" <%if(api.availableTiers == null || api.availableTiers == ""){%>disabled<%}%> class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next,next)%>"/>
+                </div>
+               <%} else {%>
+               <div class="btn-group" role="group">
+                    <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next,next)%>"/>
+                </div>
+               <%}}
+            } else if(lcStatus=="PUBLISHED") {%>
+               <% if (lcData.nextStates[i].toLowerCase().indexOf("publish") == -1) {%>
+               <div class="btn-group" role="group">
+                    <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next,next)%>"/>
+                </div>
+               <%}%>
+            <%} else {%>
+                <div class="btn-group" role="group">
+                    <input type="button" id="actionButton<%=String(i)%>" class="btn btn-primary" onclick="updateStatus('<%=lcData.nextStates[i]%>')"  value="<%=i18n.localize(next,next)%>"/>
+                </div>
+            <%}
+
+        }%>
+
+       </div>
+
+</form>
+        <div id="lifecycle-rendering-area" class="lifecycle-rendering-area add-margin-top-4x add-margin-bottom-4x">
+            <svg width=900 height=500><g/></svg>
+        </div> 
+        <% } %>
+        <div class="page-header">
+            <h4 class="lead"><%=i18n.localize("Lifecycle History")%></h4>
+        </div>
+        <%if(lcs!=null){
+                var length = lcs.length;
+                if (length == 0) {
+                %>
+                <span class="label label-info"><%=i18n.localize("No Lifecycle history can be found for this API.")%></span>
+         <%}%>
+
+        <table class="lifeCycleTable" id="lifeCycleTable">
+            <thead>
+            </thead>
+            <tbody>
+            <%for(var j=0;j<length;j++){
+            var lc=lcs[j];
+            var path = jagg.getMappedUrl("/apis") + "?query=provider:" + lc.username;
+            %>
+            <tr>
+            <td><i class="glyphicon glyphicon-info-sign" title="date"></i> <b><span class="dateFull"><%=lc.date%></span></b> </td><td>&nbsp;&nbsp;&nbsp; <i class="glyphicon glyphicon-user" title="user"></i>&nbsp;<a href="<%=path%>" title="user"><%=lc.username%></a>
+            <%if(lc.oldStatus==""){%><%=i18n.localize("created the API.")%> <%}else{ /*todo param_string*/%>
+            <%=i18n.localize("changed the API status from")%>  '<%=i18n.localize(lc.oldStatus,lc.oldStatus)%>' to '<%=i18n.localize(lc.newStatus,lc.newStatus)%>'.
+            <%}%>
+            </td>
+            </tr>
+            <%}%>
+            </tbody>
+        </table>
+        <%}%>
+</div>
+<script type="text/javascript">
+function hideMsg() {
+    $('#statusUpdateMsg').hide("fast");
+};
+
+// function to show / hide external stores message
+var checkExternalStores=function(status){
+  if(status !== 'PUBLISHED' && publishedInExternalStores==true){
+    $('#removeFromExternalStoresMsg').show();
+  }else{
+    $('#removeFromExternalStoresMsg').hide();
+  }
+    if (status !== 'PUBLISHED') {
+        $('#externalAPIStoresTab').hide();
+    }else{
+        $('#externalAPIStoresTab').show();
+    }
+}
+
+ </script>
+<% }}); %>

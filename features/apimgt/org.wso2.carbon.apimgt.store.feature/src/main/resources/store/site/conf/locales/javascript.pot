@@ -1,0 +1,495 @@
+# #-#-#-#-#  javascript.pot (PACKAGE VERSION)  #-#-#-#-#
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"#-#-#-#-#  javascript.pot (PACKAGE VERSION)  #-#-#-#-#\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-07-15 16:47+0530\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"#-#-#-#-#  dynamic.po (i18next-conv)  #-#-#-#-#\n"
+"Project-Id-Version: i18next-conv\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"POT-Creation-Date: 2016-07-11T11:38:05.277Z\n"
+"PO-Revision-Date: 2016-07-11T11:38:05.277Z\n"
+"Language: en\n"
+
+#: site/themes/wso2/templates/manage-alerts/js/manage-alerts.js:15
+#: site/themes/wso2/templates/manage-alerts/js/manage-alerts.js:35
+msgid "Successfully saved"
+msgstr ""
+
+#: site/themes/wso2/templates/manage-alerts/js/manage-alerts.js:102
+msgid "Could not save. You have entered an invalid email address."
+msgstr ""
+
+#: site/themes/wso2/templates/manage-alerts/js/manage-alerts.js:121
+msgid "Please enter at least one email address"
+msgstr ""
+
+#: site/themes/wso2/templates/manage-alerts/js/manage-alerts.js:124
+msgid "Please select at least one alert type"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/js/stats.js:4
+msgid "Not Configured"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/js/stats.js:6
+msgid "WSO2 wiki documentation on APIM Analytics"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/js/stats.js:7
+msgid "Refer our documentation to configure API Manager Analytics correctly"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/js/stats.js:15
+msgid "Data Publishing Enabled"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/js/stats.js:16
+msgid "Generate Some traffic to see statistics"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/topUsers/js/stats.js:112
+msgid "Application Name: "
+msgstr ""
+
+#: site/themes/wso2/templates/stats/topUsers/js/stats.js:112
+msgid "User"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/topUsers/js/stats.js:112
+msgid "Number of API Calls"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/topUsers/js/stats.js:139
+msgid "No Data Available."
+msgstr ""
+
+#: site/themes/wso2/templates/stats/topUsers/js/stats.js:208
+#: site/themes/wso2/templates/stats/topUsers/js/stats.js:537
+msgid "No Data Found ... "
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:137
+#: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:175
+msgid "Please wait.."
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:210
+#: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:218
+msgid ""
+"The period after which the token will expire after generation. A negative "
+"value ensures that the token never expires."
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:225
+#: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:232
+msgid ""
+"Specify list of domains that are permitted to send requests to the Gateway "
+"through this application."
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:318
+#: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:433
+#: site/themes/wso2/templates/api/api-info/js/api-info.js:17
+msgid "Please wait..."
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:485
+#: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:491
+msgid " Show Keys "
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:539
+#: site/themes/wso2/templates/forum/js/forum-list.js:278
+#: site/themes/wso2/templates/forum/js/forum-list.js:581
+#: site/themes/wso2/templates/application/application-list/js/application.js:135
+#: site/themes/wso2/templates/application/application-list/js/application.js:137
+#: site/themes/wso2/templates/application/application-list/js/application.js:139
+msgid "Confirm Delete"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:540
+msgid "Are you sure you want to unsubscribe from "
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:541
+#: site/themes/wso2/templates/forum/js/forum-list.js:279
+#: site/themes/wso2/templates/forum/js/forum-list.js:582
+#: site/themes/wso2/templates/forum/js/forum-list.js:583
+#: site/themes/wso2/templates/application/application-list/js/application.js:142
+msgid "Yes"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list/js/subscription-list.js:542
+#: site/themes/wso2/templates/forum/js/forum-list.js:280
+#: site/themes/wso2/templates/application/application-list/js/application.js:143
+msgid "No"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/js/authapp.js:32
+#: site/themes/wso2/templates/subscription/subscription-list-element/js/authapp.js:39
+#: site/themes/wso2/templates/subscription/subscription-list-element/js/authapp.js:48
+#: site/themes/wso2/templates/subscription/subscription-list-element/js/authapp.js:216
+#: site/themes/wso2/templates/subscription/subscription-list-element/js/authapp.js:305
+#: site/themes/wso2/templates/subscription/subscription-list-element/js/authapp.js:312
+#: site/themes/wso2/templates/subscription/subscription-list-element/js/authapp.js:321
+#: site/themes/wso2/templates/subscription/subscription-list-element/js/authapp.js:486
+msgid "Remove"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/js/authapp.js:164
+#: site/themes/wso2/templates/subscription/subscription-list-element/js/authapp.js:431
+msgid "Callback URLs cannot be empty"
+msgstr ""
+
+#: site/themes/wso2/templates/subscription/subscription-list-element/js/authapp.js:179
+#: site/themes/wso2/templates/subscription/subscription-list-element/js/authapp.js:448
+msgid "Do you want to delete this sandbox auth app from OIDC"
+msgstr ""
+
+#: site/themes/wso2/templates/page/base/js/jagg.js:161
+msgid ""
+"- your session has expired due to an extended period of inactivity. You will "
+"need to re-authenticate to access the requested information. "
+msgstr ""
+
+#: site/themes/wso2/templates/page/base/js/jagg.js:167
+msgid "Username and Password fields are empty."
+msgstr ""
+
+#: site/themes/wso2/templates/comment/comment-add/js/comment-add.js:48
+#: site/themes/wso2/templates/comment/comment-add/js/comment-add.js:51
+#: site/themes/wso2/templates/ui/validation/custom-validation.js:25
+#: site/themes/wso2/templates/application/application-edit/js/application-edit.js:53
+#: site/themes/wso2/templates/application/application-add/js/application-add.js:65
+msgid "Characters left: "
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/js/api-info.js:12
+msgid "Please select an application before subscribing"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/js/api-info.js:33
+msgid "Subscription Rejected"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/js/api-info.js:34
+msgid ""
+"Your subscription has been rejected, since it does not satisfy the "
+"authentication requirements. Please contact the API publisher for more "
+"information."
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/js/api-info.js:35
+#: site/themes/wso2/templates/api/api-info/js/api-info.js:65
+msgid "OK"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/js/api-info.js:66
+msgid "Cancel Subscription"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/js/api-info.js:102
+msgid "Subscription Successful"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/js/api-info.js:105
+msgid "Subscription Awaiting Approval"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/js/api-info.js:106
+msgid ""
+"Your subscription request has been submitted and is now awaiting approval."
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/js/api-info.js:109
+msgid "You have successfully subscribed to the API."
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/js/api-info.js:111
+msgid "View Subscriptions"
+msgstr ""
+
+#: site/themes/wso2/templates/api/api-info/js/api-info.js:112
+msgid "Stay on this page"
+msgstr ""
+
+#: site/themes/wso2/templates/forum/js/forum-list.js:237
+#: site/themes/wso2/templates/forum/js/forum-list.js:367
+msgid "The topic subject cannot be empty."
+msgstr ""
+
+#: site/themes/wso2/templates/forum/js/forum-list.js:245
+#: site/themes/wso2/templates/forum/js/forum-list.js:376
+msgid "The topic description cannot be empty."
+msgstr ""
+
+#: site/themes/wso2/templates/forum/js/forum-list.js:277
+msgid "Do you want to remove the topic "
+msgstr ""
+
+#: site/themes/wso2/templates/forum/js/forum-list.js:399
+msgid "Cannot edit the topic. "
+msgstr ""
+
+#: site/themes/wso2/templates/forum/js/forum-list.js:440
+#: site/themes/wso2/templates/forum/js/forum-list.js:526
+msgid "Reply cannot be empty."
+msgstr ""
+
+#: site/themes/wso2/templates/forum/js/forum-list.js:549
+msgid "Cannot edit the reply. "
+msgstr ""
+
+#: site/themes/wso2/templates/forum/js/forum-list.js:580
+msgid "Do you want to remove this reply?"
+msgstr ""
+
+#: site/themes/wso2/templates/forum/js/forum-list.js:596
+msgid "Cannot delete the reply. "
+msgstr ""
+
+#: site/themes/wso2/templates/ui/validation/custom-validation.js:5
+#: site/themes/wso2/templates/application/application-edit/js/application-edit.js:16
+#: site/themes/wso2/templates/application/application-add/js/application-add.js:16
+msgid "The Name contains one or more illegal characters"
+msgstr ""
+
+#: site/themes/wso2/templates/ui/validation/custom-validation.js:10
+msgid "Invalid Password"
+msgstr ""
+
+#: site/themes/wso2/templates/ui/validation/custom-validation.js:15
+msgid "Invalid email address"
+msgstr ""
+
+#: site/themes/wso2/templates/ui/validation/custom-validation.js:20
+msgid "Input contains one or more illegal characters"
+msgstr ""
+
+#: site/themes/wso2/templates/user/sign-up/js/sign-up.js:4
+msgid "The passwords you entered do not match."
+msgstr ""
+
+#: site/themes/wso2/templates/user/sign-up/js/sign-up.js:8
+msgid "The name contains white spaces."
+msgstr ""
+
+#: site/themes/wso2/templates/user/sign-up/js/sign-up.js:40
+msgid "User account awaiting Administrator approval."
+msgstr ""
+
+#: site/themes/wso2/templates/user/sign-up/js/sign-up.js:46
+msgid ""
+"User added successfully. You can now sign into the API store using the new "
+"user account."
+msgstr ""
+
+#: site/themes/wso2/templates/user/login/js/login.js:20
+msgid "Error!"
+msgstr ""
+
+#: site/themes/wso2/templates/user/user-info/js/user-info.js:30
+msgid ""
+"User password changed successfully. You can now sign in to the API store "
+"using the new password."
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-list/js/application.js:26
+#: site/themes/wso2/templates/application/application-list/js/application.js:101
+msgid "This field is required."
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-list/js/application.js:28
+#: site/themes/wso2/templates/application/application-list/js/application.js:103
+msgid "Name exceeds the character limit (70)"
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-list/js/application.js:30
+#: site/themes/wso2/templates/application/application-list/js/application.js:32
+#: site/themes/wso2/templates/application/application-list/js/application.js:51
+#: site/themes/wso2/templates/application/application-list/js/application.js:53
+#: site/themes/wso2/templates/application/application-list/js/application.js:105
+#: site/themes/wso2/templates/application/application-list/js/application.js:107
+msgid "Name contains one or more illegal characters "
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-list/js/application.js:136
+msgid "This application is subscribed to "
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-list/js/application.js:137
+msgid " APIs. "
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-list/js/application.js:137
+msgid ""
+"? This will cancel all the existing subscriptions and keys associated with "
+"the application. "
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-list/js/application.js:140
+msgid "Are you sure you want to remove the application "
+msgstr ""
+
+#: site/themes/wso2/templates/application/application-add/js/application-add.js:46
+msgid "Return to API detail page?"
+msgstr ""
+
+msgid "public"
+msgstr "Public"
+
+msgid "private"
+msgstr "Visible to my Domain"
+
+msgid "restricted"
+msgstr "Restricted by roles"
+
+msgid "controlled"
+msgstr "Restricted by tenants"
+
+msgid "roles"
+msgstr "Visible to Roles"
+
+msgid "tenants"
+msgstr "Visible to Tenants"
+
+msgid "created"
+msgstr "CREATED"
+
+msgid "published"
+msgstr "PUBLISHED"
+
+msgid "blocked"
+msgstr "BLOCKED"
+
+msgid "deprecated"
+msgstr "DEPRECATED"
+
+msgid "retired"
+msgstr "RETIRED"
+
+msgctxt "Desc"
+msgid "abnormalBackendTime"
+msgstr ""
+"This alert type should get triggered if there is a sudden increase in the "
+"backend time corresponding to a particular API resource. These alerts could "
+"be treated as an indication of a slow backend.In technical terms, if the "
+"backend time of a particular API resource (eg: GET /calc/1.0/numbers) of a "
+"tenant lies outside the Xth percentile value, we will send an alert out. "
+"Default percentile value is 95%. Here, we safely assume that the "
+"corresponding backend time of an API resource follows a normal distribution. "
+"Percentile value gets calculated daily by default. "
+
+msgctxt "Desc"
+msgid "abnormalResponseTime"
+msgstr ""
+"This alert type should get triggered if there is a sudden increase in the "
+"response time of a particular API resource. These alerts could be treated as "
+"an indication of a slow WSO2 API Manager runtime or a slow backend. "
+
+msgctxt "Desc"
+msgid "abnormalRequestsPerMin"
+msgstr ""
+"This alert type should get triggered if there is a sudden spike or a drop in "
+"the request count within a period of one minute by default for a particular "
+"API resource. These alerts could be treated as an indication of a possible "
+"high traffic or suspicious act or possible malfunction of the client "
+"application etc."
+
+msgctxt "Desc"
+msgid "RequestPatternChanged"
+msgstr ""
+"This alert type should get triggered if there is a change in the resource "
+"access pattern of a user of a particular Application. These alerts could be "
+"treated as an indication of a suspicious activity made by a user over your "
+"application."
+
+msgctxt "Desc"
+msgid "UnusualIPAccessAlert"
+msgstr ""
+"This alert type should get triggered if there is either a change in the "
+"request source IP for a particular API of an application or if the request "
+"is from an IP used before a time period of 30 days (default). These alerts "
+"could be treated as an indication of a suspicious activity made by a user "
+"over an API of an application. "
+
+msgctxt "Desc"
+msgid "AbnormalRefreshAlert"
+msgstr ""
+"This alert type should get triggered if there is a change in the pattern of "
+"renewing access tokens of an application by a user. These alerts could be "
+"treated as an indication of a stolen access token."
+
+msgctxt "Desc"
+msgid "FrequentTierHittingAlert"
+msgstr ""
+"This alert type should get triggered if at least one of the two cases below "
+"are satisfied; if a particular application gets throttled out for hitting "
+"the subscribed tier limit of that application, more than 10 times (by "
+"default) within a day (by default) or if a particular user of an "
+"application, gets throttled out for hitting the subscribed tier limit of a "
+"particular API, more than 10 times (by default) within a day (by default)"
+
+msgctxt "Desc"
+msgid "AbnormalTierUsage"
+msgstr ""
+"This alert should get triggered if there is a drastic reduction in API usage "
+"for a given API for a given user. These types of alerts should be treated as "
+"an indication of a failure of the application  using the altered API."
+
+msgctxt "Desc"
+msgid "healthAvailabilityPerMin"
+msgstr ""
+"This alert type should get triggered if at least one of the three cases "
+"below are satisfied; Response time of an API > Response time upper "
+"percentile of that particular API or Request Count of an API per minute > "
+"Request count per minute lower percentile or Response status code >= 500 (By "
+"Default) AND Response status code < 600 (By Default)"
+
+msgid "abnormalResponseTime"
+msgstr "Abnormal Response Time"
+
+msgid "abnormalBackendTime"
+msgstr "Abnormal Backend Time"
+
+msgid "abnormalRequestsPerMin"
+msgstr "Abnormal Requests Per Minute"
+
+msgid "RequestPatternChanged"
+msgstr "Request Pattern Changed"
+
+msgid "UnusualIPAccessAlert"
+msgstr "Unusual IP Access Alert"
+
+msgid "AbnormalRefreshAlert"
+msgstr "Abnormal Refresh Alert"
+
+msgid "FrequentTierHittingAlert"
+msgstr "Frequent Tier Hitting Alert"
+
+msgid "AbnormalTierUsage"
+msgstr "Abnormal Tier Usage"
+
+msgid "healthAvailabilityPerMin"
+msgstr "Health Availability Per Minute"
+
+msgid "Please enable statistics to see this page"
+msgstr "Please configure API Manager Analytics to enable alerts."

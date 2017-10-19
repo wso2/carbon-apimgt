@@ -1,0 +1,68 @@
+<% jagg.template("api/provider-apis", function(inputs, outputs, jagg) {%>
+<%  
+    var owner="";
+    if(outputs.apiBizOwner != null) { owner = outputs.apiBizOwner }
+    else if(outputs.apiOwner != null){ owner =outputs.apiOwner }
+
+%>
+<%if(outputs.apiOwner!=null && outputs.apis && outputs.apis.length > 0){%>
+<div class="page-header add-margin-top-4x">
+  <h2 class="truncate-children"><span><%=i18n.localize("More APIs from")%>  '<%= owner %>'</span></h2>
+</div>
+  <div class="page-content">
+  	<div class="row">
+    <%
+    var urlPrefix;
+    var tenant=request_tenant;
+    urlPrefix = jagg.getTenantURLPrefix("&");
+
+    var i, api, path,apis = outputs.apis, thumbURL;
+    if(apis!=null && apis.length > 0){
+        length = apis.length;
+        for(i = 0; i < length; i++) {
+            api = apis[i];
+            thumbURL = api.thumbURL;
+            if(thumbURL && thumbURL.indexOf("images/") == 0) {
+                thumbURL = null;
+            } else {
+                thumbURL = jagg.getRegistryPath(thumbURL);
+            }
+            path = jagg.getMappedUrl("/site/pages/item-info.jag") + "?name=" + api.name + "&version=" + api.version +
+                   "&provider=" + api.provider+ urlPrefix;
+    %>
+    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-2">
+    			<div class="white-wrapper">
+                                <div class="thumbnail icon">
+                                	<% if(thumbURL == null) { %>
+                                		<div class="square-element setbgcolor">
+											<div class="api-name-icon"></div>
+											<div style="display: none">
+												<a href="" title="<%=i18n.localize("Name")%>" class="api-name"><%=api.name%></a>
+											</div>
+										</div> 
+                                    <% } else { %>
+                                    	<div class="square-element">
+                                    		<img class="" src="<%=thumbURL%>" alt="<%=i18n.localize("API Thumbnail")%>">
+                                    	</div>
+                                    <% } %>
+                                     <a href="<%=path%>" title="<%=i18n.localize("Browse APIs")%>">
+                                     	<div class="after">                                       
+		                                    <span class="fw-stack fw-lg">
+		                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+		                                    <i class="fw fw-view fw-stack-1x"></i>
+		                                    </span>		                                        
+		                                    </div>
+		                               </a>
+                                </div>
+                                <div class="add-padding-2x app-data ">
+                                    <h4 class="truncate"><a href="<%=path%>" title="<%=i18n.localize("Version")%>"><%=api.name%>-<%=api.version%></a></h4>
+                                    <input type="hidden" class="rating recent_rating" disabled="disabled" value="<%=encode.forHtmlAttribute(api.rating)%>" />
+                                </div>
+                            </div>
+               </div>
+    <%  }} %>
+    </div>
+  </div>
+
+<%}%>
+<% }); %>

@@ -1,0 +1,103 @@
+<% jagg.template("api/recently-added", function(inputs, outputs, jagg) { %>
+<% 
+
+   var theme = jagg.getUserTheme().base;
+   var themePath = jagg.url('/site/themes/'+theme+"/");
+   var registryPath = jagg.getRegistryPath("");
+   var urlPrefix = jagg.getTenantURLPrefix("&");
+%>
+
+<div class="page-header">
+    <h2><%=i18n.localize("Recently Added APIs")%></h2>
+</div>
+
+<div  class="page-content">
+    <div id="recently-added" class="row">
+    <script id="recently-added-template" type="text/x-handlebars-template">
+    {{#each apis}}
+
+<div class="col-xs-6 col-sm-4 col-md-3 col-lg-2">
+                            <div class="white-wrapper add-margin-bottom-4x">
+                                <div class="thumbnail icon">
+									{{#if thumbnailurl}}
+										<div class="square-element">
+                                    		<img class="" src="{{ thumbnailurl }}" alt="<%=i18n.localize("API Thumbnail")%>">
+                                    	</div>										                               		
+									{{else}}     
+                                    	<div class="square-element setbgcolor">
+											<div class="api-name-icon"></div>
+											<div style="display: none">
+												<a title="<%=i18n.localize("Name")%>" href="" class="api-name">{{ name }}</a>
+											</div>
+										</div> 
+									{{/if}}
+									<a href="<%=jagg.getMappedUrl("/site/pages/item-info.jag")%>?name={{ name }}&version={{ version }}&provider={{ provider }}<%=urlPrefix%>" title="<%=i18n.localize("Browse APIs")%>">
+                                    	<div class="after">                                        
+                                    		<span class="fw-stack fw-lg">
+                                    			<i class="fw fw-circle-outline fw-stack-2x"></i>
+                                    			<i class="fw fw-view fw-stack-1x"></i>
+                                    		</span>                                        
+                                    	</div>
+									</a>
+                                </div>
+                                <div class="add-padding-2x app-data ">
+                                    <h4 class="truncate"><a title="API Browse" href="<%=jagg.getMappedUrl("/site/pages/item-info.jag")%>?name={{ name }}&version={{ version }}&provider={{ provider }}<%=urlPrefix%>">{{ name }}-{{ version }}</a></h4>
+                                    <h5 class="truncate" title="{{ displayOwner }}" data-toggle="tooltip" data-placement="bottom">{{ displayOwner }}</h5>
+									<input type="hidden" class="rating recent_rating" disabled="disabled" value="{{ rates }}" />
+                                </div>
+                            </div>
+                        </div>
+    {{/each}}   
+  </script>  
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+  $(function(){
+    jagg.post("/site/blocks/api/recently-added/ajax/list.jag", {
+      action:"getRecentlyAddedAPIs",
+      limit:5 
+    }, function (result) {
+         if (result.error == false) {
+          for(var i = 0; i < result.apis.length;i++){
+            if(/^images\//.test(result.apis[i].thumbnailurl)){
+              result.apis[i].thumbnailurl = null;
+            }
+            else{
+              result.apis[i].thumbnailurl = "<%= registryPath %>"+result.apis[i].thumbnailurl;
+            }
+            if(result.apis[i].isAdvertiseOnly != null && result.apis[i].isAdvertiseOnly){
+              result.apis[i].displayOwner = result.apis[i].owner;
+            }
+            else if(result.apis[i].businessOwner != null && result.apis[i].businessOwner.trim() != "") {
+              result.apis[i].displayOwner = result.apis[i].businessOwner;
+            }
+            else{
+              result.apis[i].displayOwner = result.apis[i].provider;
+            }
+          } 
+          var source   = $("#recently-added-template").html();
+          var template = Handlebars.compile(source);
+          $("#recently-added").html(template(result));
+          $(".recent_rating").rating();
+          $(".setbgcolor").generateBgcolor({
+              definite:true
+          });
+
+          $(".api-name-icon").each(function() {
+              var elem = $(this).next().children(".api-name");
+              $(this).nametoChar({
+                  nameElement: elem
+              });
+          });
+
+         } else {
+             jagg.message({content:result.message,type:"error"});
+         }
+    }, "json");
+  });
+
+</script>
+<% }); %>

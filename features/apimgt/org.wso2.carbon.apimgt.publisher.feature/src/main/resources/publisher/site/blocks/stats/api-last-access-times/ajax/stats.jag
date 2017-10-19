@@ -1,0 +1,93 @@
+<%
+include("/jagg/jagg.jag");
+
+(function () {
+    response.contentType = "application/json; charset=UTF-8";
+    var mod, obj, result,
+            action = request.getParameter("action"),
+            site = require("/site/conf/site.json"),
+            msg = require("/site/conf/ui-messages.jag")
+    allProviders = "__all_providers__";
+    if (jagg.getUser() == null) {
+        print({
+            error: true,
+            message: 'timeout'
+        });
+    } else {
+        if (action === "getProviderAPIVersionUserLastAccess") {
+            mod = jagg.module("statistics");
+            var currentLocation = request.getParameter("currentLocation");
+            var mode = request.getParameter("mode");
+            var from = request.getParameter("fromDate");
+            var to = request.getParameter("toDate");
+            var apiFilter = request.getParameter("apiFilter");
+            var limit = request.getParameter("length");
+
+            var provider;
+
+            if (mode != null && mode == "browse") {
+                provider = request.getParameter("provider");
+            } else {
+                provider = jagg.getUser().username;
+            }
+
+            var splitValues = provider.split("@");
+            var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+            if (currentLocation != null && currentLocation.indexOf("all-statistics") >= 0 && (!apiFilter || (apiFilter != "myAPIs"))) {
+                if (MultitenantUtils.isEmailUserName() && 3 <= splitValues.length) { //email-username
+                    provider = allProviders + "@" + splitValues[1] + "@" +  MultitenantUtils.getTenantDomain(provider);
+                } else {
+                    provider = allProviders + '@' + MultitenantUtils.getTenantDomain(provider);
+                }
+            }
+
+            result = mod.getProviderAPIVersionUserLastAccess(provider, from, to, limit);
+
+            if (result.error == "true") {
+                obj = {
+                    error: result.error,
+                    message: msg.error.backendError(action)
+                };
+            } else {
+                obj = {
+                    error: false,
+                    draw: new Date(),
+                    recordsTotal: result.usage.length,
+                    recordsFiltered: result.usage.length,
+                    data: result.usage
+                }
+            }
+            print(obj);
+
+        } else if (action === "getFirstAccessTime") {
+            mod = jagg.module("statistics");
+            var provider = jagg.getUser().username;
+            var currentLocation = request.getParameter("currentLocation");
+            if (currentLocation.indexOf("all-statistics") >= 0) {
+                result = mod.getFirstAccessTime(allProviders);
+            } else {
+                result = mod.getFirstAccessTime(provider);
+            }
+            if (result.error == "true") {
+                obj = {
+                    error: result.error,
+                    message: msg.error.backendError(action)
+                };
+            } else {
+                obj = {
+                    error: false,
+                    usage: result.usage
+                }
+            }
+            print(obj);
+
+        } 
+        else {
+            print({
+                error: true,
+                message: msg.error.invalidAction(action)
+            });
+        }
+    }
+}());
+%>
