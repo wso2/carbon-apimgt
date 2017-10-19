@@ -1,6 +1,0 @@
-<%
-jagg.block("stats/api-user-agent-usage", {
-    initializer:function (data) {
-    }
-});
-%>

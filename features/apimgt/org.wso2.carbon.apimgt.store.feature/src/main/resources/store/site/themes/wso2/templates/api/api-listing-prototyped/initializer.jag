@@ -1,8 +1,0 @@
-<%
-jagg.initializer("api/api-listing-prototyped", {
-
-    preInitialize:function () {
-        jagg.addFooterJS("api/api-listing-prototyped", "common-js", "js/common.js");
-    }
-});
-%>

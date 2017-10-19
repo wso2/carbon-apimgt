@@ -1,0 +1,40 @@
+###################################  macros  #######################################
+##
+###generate key
+#macro( getKey )##
+###str:concat(resourceKey,'_default')##
+resourceKey##
+#end
+###generate rule
+#macro( getRule $policy)
+resource_${policy.getPolicyName()}_default##
+#end
+
+@App:name('#getRule($policy)')
+@App:description('ExecutionPlan for #getRule($policy)')
+
+@source(type='inMemory', topic='apim', @map(type='passThrough'))
+define stream RequestStream (messageID string, appKey string, appTier string, subscriptionKey string, apiKey string, apiTier string, subscriptionTier string, resourceKey string, resourceTier string, userId string,  apiContext string, apiVersion string, appTenant string, apiTenant string, appId string, apiName string, propertiesMap string);
+
+@sink(type='jms', @map(type='text'),
+factory.initial='org.apache.activemq.jndi.ActiveMQInitialContextFactory', provider.url='tcp://localhost:61616', destination='TEST.FOO', connection.factory.type='topic',
+connection.factory.jndi.name='TopicConnectionFactory')
+define stream GlobalThrottleStream (throttleKey string, isThrottled bool, expiryTimeStamp long);
+
+FROM RequestStream
+SELECT messageID, (resourceTier == '${policy.getPolicyName()}'$condition) AS isEligible, #getKey() AS throttleKey, propertiesMap
+INSERT INTO EligibilityStream;
+
+#if($quotaPolicy != "")
+FROM EligibilityStream[isEligible==true]#throttler:timeBatch($quotaPolicy.getLimit().getUnitTime() $quotaPolicy.getLimit().getTimeUnit(), 0)
+#if($quotaPolicy.getType() == $REQUEST_COUNT_TYPE)
+select throttleKey, (count(messageID) >= $quotaPolicy.getLimit().getRequestCount()) as isThrottled, expiryTimeStamp group by throttleKey
+#else
+select throttleKey, (sum(cast(map:get(propertiesMap,'messageSize'),'long')) >= $quotaPolicy.getLimit().getStandardDataAmount()) as isThrottled, expiryTimeStamp group by throttleKey
+#end
+INSERT ALL EVENTS into ResultStream;
+#end
+
+from ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled)
+select *
+insert into GlobalThrottleStream;

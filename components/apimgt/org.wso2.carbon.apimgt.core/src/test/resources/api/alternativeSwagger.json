@@ -1,0 +1,58 @@
+{
+  "swagger": "2.0",
+  "info":    {
+    "version": "1.0.0",
+    "title": "aaa1",
+    "contact": {}
+  },
+  "paths": {"/*":    {
+    "get":       {
+      "operationId": "get_star_",
+      "parameters": [],
+      "responses": {"200": {"description": "OK"}}
+    },
+    "head":       {
+      "operationId": "head_star_",
+      "parameters": [],
+      "responses": {"200": {"description": "OK"}}
+    },
+    "post":       {
+      "operationId": "post_star_",
+      "parameters": [         {
+        "in": "body",
+        "name": "Payload",
+        "description": "Request Body",
+        "required": false,
+        "schema": {"properties": {"payload": {"type": "string"}}}
+      }],
+      "responses": {"200": {"description": "OK"}}
+    },
+    "put":       {
+      "operationId": "put_star_",
+      "parameters": [         {
+        "in": "body",
+        "name": "Payload",
+        "description": "Request Body",
+        "required": false,
+        "schema": {"properties": {"payload": {"type": "string"}}}
+      }],
+      "responses": {"200": {"description": "OK"}}
+    },
+    "delete":       {
+      "operationId": "delete_star_",
+      "parameters": [],
+      "responses": {"200": {"description": "OK"}}
+    },
+    "patch":       {
+      "operationId": "patch_star_",
+      "parameters": [         {
+        "in": "body",
+        "name": "Payload",
+        "description": "Request Body",
+        "required": false,
+        "schema": {"properties": {"payload": {"type": "string"}}}
+      }],
+      "responses": {"200": {"description": "OK"}}
+    }
+  }}
+}

@@ -1,5 +1,0 @@
-<% jagg.template("layout/custom", function(inputs, outputs, jagg) { %>
-<div class="container-fluid">
-    <% jagg.includeBlocks(outputs.middle); %>
-</div>
-<% }); %>

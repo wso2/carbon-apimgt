@@ -1,82 +1,168 @@
 package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
-import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.BandwidthLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.RequestCountLimitDTO;
+import java.util.Objects;
 
-import javax.validation.constraints.NotNull;
+/**
+ * ThrottleLimitDTO
+ */
+public class ThrottleLimitDTO   {
+  @JsonProperty("bandwidthLimit")
+  private BandwidthLimitDTO bandwidthLimit = null;
 
+  @JsonProperty("requestCountLimit")
+  private RequestCountLimitDTO requestCountLimit = null;
 
+  @JsonProperty("type")
+  private String type = null;
 
-
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type", visible = true)
-@JsonSubTypes({
-    @JsonSubTypes.Type(value = org.wso2.carbon.apimgt.rest.api.admin.dto.RequestCountLimitDTO.class, name = "RequestCountLimit"),
-    @JsonSubTypes.Type(value = org.wso2.carbon.apimgt.rest.api.admin.dto.BandwidthLimitDTO.class, name = "BandwidthLimit"),
-})
-@ApiModel(description = "")
-public class ThrottleLimitDTO  {
-  
-  
-  public enum TypeEnum {
-     RequestCountLimit,  BandwidthLimit, 
-  };
-  @NotNull
-  private TypeEnum type = null;
-  
-  @NotNull
+  @JsonProperty("timeUnit")
   private String timeUnit = null;
-  
-  @NotNull
+
+  @JsonProperty("unitTime")
   private Integer unitTime = null;
 
-  
-  /**
-   **/
-  @ApiModelProperty(required = true, value = "")
-  @JsonProperty("type")
-  public TypeEnum getType() {
+  public ThrottleLimitDTO bandwidthLimit(BandwidthLimitDTO bandwidthLimit) {
+    this.bandwidthLimit = bandwidthLimit;
+    return this;
+  }
+
+   /**
+   * Get bandwidthLimit
+   * @return bandwidthLimit
+  **/
+  @ApiModelProperty(value = "")
+  public BandwidthLimitDTO getBandwidthLimit() {
+    return bandwidthLimit;
+  }
+
+  public void setBandwidthLimit(BandwidthLimitDTO bandwidthLimit) {
+    this.bandwidthLimit = bandwidthLimit;
+  }
+
+  public ThrottleLimitDTO requestCountLimit(RequestCountLimitDTO requestCountLimit) {
+    this.requestCountLimit = requestCountLimit;
+    return this;
+  }
+
+   /**
+   * Get requestCountLimit
+   * @return requestCountLimit
+  **/
+  @ApiModelProperty(value = "")
+  public RequestCountLimitDTO getRequestCountLimit() {
+    return requestCountLimit;
+  }
+
+  public void setRequestCountLimit(RequestCountLimitDTO requestCountLimit) {
+    this.requestCountLimit = requestCountLimit;
+  }
+
+  public ThrottleLimitDTO type(String type) {
+    this.type = type;
+    return this;
+  }
+
+   /**
+   * BandwidthLimit and RequestCountLimit are the supported values. 
+   * @return type
+  **/
+  @ApiModelProperty(required = true, value = "BandwidthLimit and RequestCountLimit are the supported values. ")
+  public String getType() {
     return type;
   }
-  public void setType(TypeEnum type) {
+
+  public void setType(String type) {
     this.type = type;
   }
 
-  
-  /**
-   **/
+  public ThrottleLimitDTO timeUnit(String timeUnit) {
+    this.timeUnit = timeUnit;
+    return this;
+  }
+
+   /**
+   * Get timeUnit
+   * @return timeUnit
+  **/
   @ApiModelProperty(required = true, value = "")
-  @JsonProperty("timeUnit")
   public String getTimeUnit() {
     return timeUnit;
   }
+
   public void setTimeUnit(String timeUnit) {
     this.timeUnit = timeUnit;
   }
 
-  
-  /**
-   **/
+  public ThrottleLimitDTO unitTime(Integer unitTime) {
+    this.unitTime = unitTime;
+    return this;
+  }
+
+   /**
+   * Get unitTime
+   * @return unitTime
+  **/
   @ApiModelProperty(required = true, value = "")
-  @JsonProperty("unitTime")
   public Integer getUnitTime() {
     return unitTime;
   }
+
   public void setUnitTime(Integer unitTime) {
     this.unitTime = unitTime;
   }
 
-  
 
   @Override
-  public String toString()  {
+  public boolean equals(java.lang.Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    ThrottleLimitDTO throttleLimit = (ThrottleLimitDTO) o;
+    return Objects.equals(this.bandwidthLimit, throttleLimit.bandwidthLimit) &&
+        Objects.equals(this.requestCountLimit, throttleLimit.requestCountLimit) &&
+        Objects.equals(this.type, throttleLimit.type) &&
+        Objects.equals(this.timeUnit, throttleLimit.timeUnit) &&
+        Objects.equals(this.unitTime, throttleLimit.unitTime);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(bandwidthLimit, requestCountLimit, type, timeUnit, unitTime);
+  }
+
+  @Override
+  public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class ThrottleLimitDTO {\n");
     
-    sb.append("  type: ").append(type).append("\n");
-    sb.append("  timeUnit: ").append(timeUnit).append("\n");
-    sb.append("  unitTime: ").append(unitTime).append("\n");
-    sb.append("}\n");
+    sb.append("    bandwidthLimit: ").append(toIndentedString(bandwidthLimit)).append("\n");
+    sb.append("    requestCountLimit: ").append(toIndentedString(requestCountLimit)).append("\n");
+    sb.append("    type: ").append(toIndentedString(type)).append("\n");
+    sb.append("    timeUnit: ").append(toIndentedString(timeUnit)).append("\n");
+    sb.append("    unitTime: ").append(toIndentedString(unitTime)).append("\n");
+    sb.append("}");
     return sb.toString();
   }
+
+  /**
+   * Convert the given object to string with each line indented by 4 spaces
+   * (except the first line).
+   */
+  private String toIndentedString(java.lang.Object o) {
+    if (o == null) {
+      return "null";
+    }
+    return o.toString().replace("\n", "\n    ");
+  }
 }
+

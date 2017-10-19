@@ -1,7 +1,0 @@
-<%
-jagg.initializer("configure-alerts/domain/edit", {
-    preInitialize:function () {
-        jagg.addHeaderJS("configure-alerts/domain/edit", "jagg", "templates/configure-alerts/domain/edit/js/edit.js");
-    }
-});
-%>

@@ -1,8 +1,0 @@
-<%
-jagg.block("stats/api-throttledtime", {
-    initializer:function (data) {
-
-    }
-
-});
-%>

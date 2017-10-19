@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ /*
+  ~ *  Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+  ~ *
+  ~ *  WSO2 Inc. licenses this file to you under the Apache License,
+  ~ *  Version 2.0 (the "License"); you may not use this file except
+  ~ *  in compliance with the License.
+  ~ *  You may obtain a copy of the License at
+  ~ *
+  ~ *    http://www.apache.org/licenses/LICENSE-2.0
+  ~ *
+  ~ * Unless required by applicable law or agreed to in writing,
+  ~ * software distributed under the License is distributed on an
+  ~ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+  ~ * KIND, either express or implied.  See the License for the
+  ~ * specific language governing permissions and limitations
+  ~ * under the License.
+  ~ *
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>carbon-apimgt</artifactId>
+        <groupId>org.wso2.carbon.apimgt</groupId>
+        <version>7.0.37-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>coverage-reports</artifactId>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>jacoco-dependency-ant</id>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <phase>process-test-resources</phase>
+                        <inherited>false</inherited>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.jacoco</groupId>
+                                    <artifactId>org.jacoco.ant</artifactId>
+                                    <version>${jacoco.version}</version>
+                                </artifactItem>
+                            </artifactItems>
+                            <stripVersion>true</stripVersion>
+                            <outputDirectory>${basedir}/target/jacoco-jars</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <echo message="Generating JaCoCo Reports" />
+                                <taskdef name="report" classname="org.jacoco.ant.ReportTask">
+                                    <classpath path="${basedir}/target/jacoco-jars/org.jacoco.ant.jar" />
+                                </taskdef>
+                                <mkdir dir="${basedir}/target/coverage-report" />
+                                <report>
+                                    <executiondata>
+                                        <fileset dir="${build.directory.module.apimgt.core}/coverage-reports">
+                                            <include name="aggregate.exec" />
+                                        </fileset>
+                                    </executiondata>
+                                    <structure name="carbon-apimgt code coverage">
+                                        <group name="carbon-apimgt-coverage">
+                                            <classfiles>
+                                                <fileset dir="${classes.directory.module.apimgt.core}" />
+                                            </classfiles>
+                                            <sourcefiles encoding="UTF-8">
+                                                <fileset dir="${sources.directory.module.apimgt.core}" />
+                                            </sourcefiles>
+                                        </group>
+                                    </structure>
+                                    <html destdir="${basedir}/target/coverage-report/html" />
+                                    <xml destfile="${basedir}/target/coverage-report/coverage-report.xml" />
+                                    <csv destfile="${basedir}/target/coverage-report/coverage-report.csv" />
+                                </report>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>org.jacoco.ant</artifactId>
+                        <version>${jacoco.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+
+    <properties>
+        <build.directory.module.apimgt.core>../components/apimgt/org.wso2.carbon.apimgt.core/target</build.directory.module.apimgt.core>
+        <build.directory.module.apimgt.gateway.extension>../components/apimgt/org.wso2.carbon.apimgt.gateway.extension/target</build.directory.module.apimgt.gateway.extension>
+        <build.directory.module.apimgt.indexing>../components/apimgt/org.wso2.carbon.apimgt.indexing/target</build.directory.module.apimgt.indexing>
+        <build.directory.module.apimgt.keymanager>../components/apimgt/org.wso2.carbon.apimgt.keymanager/target</build.directory.module.apimgt.keymanager>
+        <buid.directory.module.apimgt.api.admin>../components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/target</buid.directory.module.apimgt.api.admin>
+        <build.directory.module.apimgt.api.commons>../components/apimgt/org.wso2.carbon.apimgt.rest.api.commons/target</build.directory.module.apimgt.api.commons>
+        <build.directory.module.apimgt.api.publisher>../components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/target</build.directory.module.apimgt.api.publisher>
+        <buld.directory.module.apimgt.api.store>../components/apimgt/org.wso2.carbon.apimgt.rest.api.store/target</buld.directory.module.apimgt.api.store>
+        <build.directory.module.web.services.authenticatior>../components/web/services/org.wso2.carbon.apimgt.authenticator/target</build.directory.module.web.services.authenticatior>
+
+        <classes.directory.module.apimgt.core>../components/apimgt/org.wso2.carbon.apimgt.core/target/classes</classes.directory.module.apimgt.core>
+        <classes.directory.module.apimgt.gateway.extension>../components/apimgt/org.wso2.carbon.apimgt.gateway.extension/target/classes</classes.directory.module.apimgt.gateway.extension>
+        <classes.directory.module.apimgt.indexing>../components/apimgt/org.wso2.carbon.apimgt.indexing/target/classes</classes.directory.module.apimgt.indexing>
+        <classes.directory.module.apimgt.keymanager>../components/apimgt/org.wso2.carbon.apimgt.keymanager/target/classes</classes.directory.module.apimgt.keymanager>
+        <classes.directory.module.apimgt.api.admin>../components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/target/classes</classes.directory.module.apimgt.api.admin>
+        <classes.directory.module.apimgt.api.commons>../components/apimgt/org.wso2.carbon.apimgt.rest.api.commons/target/classes</classes.directory.module.apimgt.api.commons>
+        <classes.directory.module.apimgt.api.publisher>../components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/target/classes</classes.directory.module.apimgt.api.publisher>
+        <classes.directory.module.apimgt.api.store>../components/apimgt/org.wso2.carbon.apimgt.rest.api.store/target/classes</classes.directory.module.apimgt.api.store>
+        <classes.directory.module.web.services.authenticatior>../components/web/services/org.wso2.carbon.apimgt.authenticator/target/classes</classes.directory.module.web.services.authenticatior>
+
+
+        <sources.directory.module.apimgt.core>../components/apimgt/org.wso2.carbon.apimgt.core/src/main/java</sources.directory.module.apimgt.core>
+        <sources.directory.module.apimgt.gateway.extension>../components/apimgt/org.wso2.carbon.apimgt.gateway.extension/src/main/java</sources.directory.module.apimgt.gateway.extension>
+        <sources.directory.module.apimgt.indexing>../components/apimgt/org.wso2.carbon.apimgt.indexing/src/main/java</sources.directory.module.apimgt.indexing>
+        <sources.directory.module.apimgt.keymanager>../components/apimgt/org.wso2.carbon.apimgt.keymanager/src/main/java</sources.directory.module.apimgt.keymanager>
+        <sources.directory.module.apimgt.api.admin>../components/apimgt/org.wso2.carbon.apimgt.rest.api.admin/src/main/java</sources.directory.module.apimgt.api.admin>
+        <sources.directory.module.apimgt.api.commons>../components/apimgt/org.wso2.carbon.apimgt.rest.api.commons/src/main/java</sources.directory.module.apimgt.api.commons>
+        <sources.directory.module.apimgt.api.publisher>../components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/src/main/java</sources.directory.module.apimgt.api.publisher>
+        <sources.directory.module.apimgt.api.store>../components/apimgt/org.wso2.carbon.apimgt.rest.api.store/src/main/java</sources.directory.module.apimgt.api.store>
+        <sources.directory.module.web.services.authenticatior>../components/web/services/org.wso2.carbon.apimgt.authenticator/src/main/java</sources.directory.module.web.services.authenticatior>
+
+    </properties>
+
+</project>
