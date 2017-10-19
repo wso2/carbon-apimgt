@@ -135,6 +135,7 @@ public class UserSignUpWSWorkflowExecutorTest {
     public void testExecutingUserSignUpWorkflow() throws Exception {
         userSignUpWSWorkflowExecutor.setUsername(username);
         userSignUpWSWorkflowExecutor.setPassword(password.toCharArray());
+        userSignUpWSWorkflowExecutor.setContentType("text/xml");
         PowerMockito.doNothing().when(apiMgtDAO).addWorkflowEntry(workflowDTO);
         try {
             Assert.assertNotNull(userSignUpWSWorkflowExecutor.execute(workflowDTO));
@@ -360,11 +361,13 @@ public class UserSignUpWSWorkflowExecutorTest {
         PowerMockito.when(AXIOMUtil.stringToOM(Mockito.anyString())).thenThrow(new XMLStreamException("Error " +
                 "converting String to OMElement"));
         try {
-            userSignUpWSWorkflowExecutor.execute(workflowDTO);
+            userSignUpWSWorkflowExecutor.cleanUpPendingTask(workflowDTO.getWorkflowReference());
             Assert.fail("Expected WorkflowException has not occurred while executing user sign up workflow");
         } catch (WorkflowException e) {
-            Assert.assertEquals(e.getMessage(), "Error converting String to OMElement");
+            Assert.assertTrue(e.getMessage().contains("Error converting String to OMElement"));
         }
+
+
     }
 }
 
