@@ -28,11 +28,13 @@ import org.wso2.carbon.user.api.UserStoreException;
 
 public class ServiceReferenceHolderMockCreator {
     private ConfigurationServiceMockCreator configurationServiceMockCreator = new ConfigurationServiceMockCreator();
+    private static ConfigurationContextServiceMockCreator configurationContextServiceMockCreator =
+            new ConfigurationContextServiceMockCreator();
     private ServiceReferenceHolder serviceReferenceHolder;
     private RealmServiceMockCreator realmServiceMockCreator;
     private RegistryServiceMockCreator registryServiceMockCreator;
 
-    ServiceReferenceHolderMockCreator(int tenantId) throws RegistryException, UserStoreException {
+    public ServiceReferenceHolderMockCreator(int tenantId) throws RegistryException, UserStoreException {
         serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         realmServiceMockCreator = new RealmServiceMockCreator(tenantId);
 
@@ -45,13 +47,23 @@ public class ServiceReferenceHolderMockCreator {
         Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
     }
 
-    ServiceReferenceHolder getMock() {
+    public ServiceReferenceHolder getMock() {
         return serviceReferenceHolder;
     }
 
     public void initRegistryServiceMockCreator(boolean isResourceExists, Object content) throws RegistryException {
         registryServiceMockCreator = new RegistryServiceMockCreator(isResourceExists, content);
         Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryServiceMockCreator.getMock());
+    }
+
+    public static void initContextService() {
+        //PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getContextService()).
+                thenReturn(configurationContextServiceMockCreator.getMock());
+    }
+
+    public ConfigurationContextServiceMockCreator getConfigurationContextServiceMockCreator() {
+        return configurationContextServiceMockCreator;
     }
 
 }

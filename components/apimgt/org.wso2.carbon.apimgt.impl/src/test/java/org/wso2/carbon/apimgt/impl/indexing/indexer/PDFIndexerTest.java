@@ -52,7 +52,7 @@ public class PDFIndexerTest {
         Mockito.when(pdfTextStripper.getText(new PDDocument())).thenReturn("");
         PDFIndexer pdfIndexer = new PDFIndexerWrapper(parser, pdfTextStripper);
 
-        // should return the the default media type when media type is not defined in file2Index
+        // should return the default media type when media type is not defined in file2Index
         IndexDocument pdf = pdfIndexer.getIndexedDocument(file2Index);
         if (!"application/pdf".equals(pdf.getFields().get(MEDIA_TYPE).get(0))) {
             Assert.fail();
