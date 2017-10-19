@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import org.apache.axiom.om.OMElement;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -214,6 +215,21 @@ public class APIUtilTest {
 
         Assert.assertFalse(APIUtil.isValidURL(invalidURL));
         Assert.assertFalse(APIUtil.isValidURL(null));
+    }
+
+    @Test
+    public void testgGetUserNameWithTenantSuffix() throws Exception {
+        String plainUserName = "john";
+
+        String userNameWithTenantSuffix = APIUtil.getUserNameWithTenantSuffix(plainUserName);
+
+        Assert.assertEquals("john@carbon.super", userNameWithTenantSuffix);
+
+        String userNameWithDomain = "john@smith.com";
+
+        userNameWithTenantSuffix = APIUtil.getUserNameWithTenantSuffix(userNameWithDomain);
+
+        Assert.assertEquals("john@smith.com", userNameWithTenantSuffix);
     }
 
     @Test
@@ -638,6 +654,318 @@ public class APIUtilTest {
         String actualUUID = APIUtil.getMediationSequenceUuid("sample", 1, "custom", apiIdentifier);
 
         Assert.assertEquals(expectedUUID, actualUUID);
+        sampleSequence.close();
+    }
+
+    @Test
+    public void testIsPerAPISequence() throws Exception {
+        APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+
+        String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+        String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "in" + RegistryConstants.PATH_SEPARATOR;
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        Mockito.when(registryService.getGovernanceSystemRegistry(eq(1))).thenReturn(registry);
+        Mockito.when(registry.resourceExists(eq(path))).thenReturn(true);
+
+        Collection collection = Mockito.mock(Collection.class);
+        Mockito.when(registry.get(eq(path))).thenReturn(collection);
+
+        String[] childPaths = {"test"};
+        Mockito.when(collection.getChildren()).thenReturn(childPaths);
+
+        InputStream sampleSequence = new FileInputStream(Thread.currentThread().getContextClassLoader().
+                        getResource("sampleSequence.xml").getFile());
+        Resource resource = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(eq("test"))).thenReturn(resource);
+        Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
+
+        boolean isPerAPiSequence = APIUtil.isPerAPISequence("sample", 1, apiIdentifier, "in");
+
+        Assert.assertTrue(isPerAPiSequence);
+    }
+
+    @Test
+    public void testIsPerAPISequenceResourceMissing() throws Exception {
+        APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+
+        String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+        String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "in" + RegistryConstants.PATH_SEPARATOR;
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        Mockito.when(registryService.getGovernanceSystemRegistry(eq(1))).thenReturn(registry);
+        Mockito.when(registry.resourceExists(eq(path))).thenReturn(false);
+
+        boolean isPerAPiSequence = APIUtil.isPerAPISequence("sample", 1, apiIdentifier, "in");
+
+        Assert.assertFalse(isPerAPiSequence);
+    }
+
+    @Test
+    public void testIsPerAPISequenceSequenceMissing() throws Exception {
+        APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+
+        String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+        String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "in" + RegistryConstants.PATH_SEPARATOR;
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        Mockito.when(registryService.getGovernanceSystemRegistry(eq(1))).thenReturn(registry);
+        Mockito.when(registry.resourceExists(eq(path))).thenReturn(true);
+        Mockito.when(registry.get(eq(path))).thenReturn(null);
+
+        boolean isPerAPiSequence = APIUtil.isPerAPISequence("sample", 1, apiIdentifier, "in");
+
+        Assert.assertFalse(isPerAPiSequence);
+    }
+
+    @Test
+    public void testIsPerAPISequenceNoPathsInCollection() throws Exception {
+        APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+
+        String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+        String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "in" + RegistryConstants.PATH_SEPARATOR;
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        Mockito.when(registryService.getGovernanceSystemRegistry(eq(1))).thenReturn(registry);
+        Mockito.when(registry.resourceExists(eq(path))).thenReturn(false);
+
+        Collection collection = Mockito.mock(Collection.class);
+        Mockito.when(registry.get(eq(path))).thenReturn(collection);
+
+        String[] childPaths = {};
+        Mockito.when(collection.getChildren()).thenReturn(childPaths);
+
+        boolean isPerAPiSequence = APIUtil.isPerAPISequence("sample", 1, apiIdentifier, "in");
+
+        Assert.assertFalse(isPerAPiSequence);
+    }
+
+
+    @Test
+    public void testGetCustomInSequence() throws Exception {
+        APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        Mockito.when(registryService.getGovernanceSystemRegistry(eq(1))).thenReturn(registry);
+
+        Collection collection = Mockito.mock(Collection.class);
+        String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+        String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "in" + RegistryConstants.PATH_SEPARATOR;
+
+        Mockito.when(registry.get(eq(path))).thenReturn(collection);
+
+        String[] childPaths = {"test"};
+        Mockito.when(collection.getChildren()).thenReturn(childPaths);
+
+        InputStream sampleSequence = new FileInputStream(Thread.currentThread().getContextClassLoader().
+                getResource("sampleSequence.xml").getFile());
+
+        Resource resource = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(eq("test"))).thenReturn(resource);
+        Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
+
+
+        OMElement customSequence = APIUtil.getCustomSequence("sample", 1, "in", apiIdentifier);
+
+        Assert.assertNotNull(customSequence);
+        sampleSequence.close();
+    }
+
+    @Test
+    public void testGetCustomOutSequence() throws Exception {
+        APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        Mockito.when(registryService.getGovernanceSystemRegistry(eq(1))).thenReturn(registry);
+
+        Collection collection = Mockito.mock(Collection.class);
+        String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+        String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "out" + RegistryConstants.PATH_SEPARATOR;
+
+        Mockito.when(registry.get(eq(path))).thenReturn(collection);
+
+        String[] childPaths = {"test"};
+        Mockito.when(collection.getChildren()).thenReturn(childPaths);
+
+        InputStream sampleSequence = new FileInputStream(Thread.currentThread().getContextClassLoader().
+                getResource("sampleSequence.xml").getFile());
+
+        Resource resource = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(eq("test"))).thenReturn(resource);
+        Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
+
+
+        OMElement customSequence = APIUtil.getCustomSequence("sample", 1, "out", apiIdentifier);
+
+        Assert.assertNotNull(customSequence);
+        sampleSequence.close();
+    }
+
+    @Test
+    public void testGetCustomFaultSequence() throws Exception {
+        APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        Mockito.when(registryService.getGovernanceSystemRegistry(eq(1))).thenReturn(registry);
+
+        Collection collection = Mockito.mock(Collection.class);
+        String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+        String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "fault" + RegistryConstants.PATH_SEPARATOR;
+
+        Mockito.when(registry.get(eq(path))).thenReturn(collection);
+
+        String[] childPaths = {"test"};
+        Mockito.when(collection.getChildren()).thenReturn(childPaths);
+
+        InputStream sampleSequence = new FileInputStream(Thread.currentThread().getContextClassLoader().
+                getResource("sampleSequence.xml").getFile());
+
+        Resource resource = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(eq("test"))).thenReturn(resource);
+        Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
+
+
+        OMElement customSequence = APIUtil.getCustomSequence("sample", 1, "fault", apiIdentifier);
+
+        Assert.assertNotNull(customSequence);
+        sampleSequence.close();
+    }
+
+    @Test
+    public void testGetCustomSequenceNotFound() throws Exception {
+        APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        Mockito.when(registryService.getGovernanceSystemRegistry(eq(1))).thenReturn(registry);
+
+        Collection collection = Mockito.mock(Collection.class);
+        String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+        String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "custom" + RegistryConstants.PATH_SEPARATOR;
+
+        Mockito.when(registry.get(eq(path))).thenReturn(null, collection);
+
+        String[] childPaths = {"test"};
+        Mockito.when(collection.getChildren()).thenReturn(childPaths);
+
+        String expectedUUID = UUID.randomUUID().toString();
+
+        InputStream sampleSequence = new FileInputStream(Thread.currentThread().getContextClassLoader().
+                getResource("sampleSequence.xml").getFile());
+
+        Resource resource = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(eq("test"))).thenReturn(resource);
+        Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
+        Mockito.when(resource.getUUID()).thenReturn(expectedUUID);
+
+
+        OMElement customSequence = APIUtil.getCustomSequence("sample", 1, "custom", apiIdentifier);
+
+        Assert.assertNotNull(customSequence);
+        sampleSequence.close();
+    }
+
+    @Test
+    public void testGetCustomSequenceNull() throws Exception {
+        APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        Mockito.when(registryService.getGovernanceSystemRegistry(eq(1))).thenReturn(registry);
+
+        Collection collection = Mockito.mock(Collection.class);
+        String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+        String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "custom" + RegistryConstants.PATH_SEPARATOR;
+
+        Mockito.when(registry.get(eq(path))).thenReturn(null, null);
+
+        String[] childPaths = {"test"};
+        Mockito.when(collection.getChildren()).thenReturn(childPaths);
+
+        String expectedUUID = UUID.randomUUID().toString();
+
+        InputStream sampleSequence = new FileInputStream(Thread.currentThread().getContextClassLoader().
+                getResource("sampleSequence.xml").getFile());
+
+        Resource resource = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(eq("test"))).thenReturn(resource);
+        Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
+        Mockito.when(resource.getUUID()).thenReturn(expectedUUID);
+
+
+        OMElement customSequence = APIUtil.getCustomSequence("sample", 1, "custom", apiIdentifier);
+
+        Assert.assertNull(customSequence);
         sampleSequence.close();
     }
 
