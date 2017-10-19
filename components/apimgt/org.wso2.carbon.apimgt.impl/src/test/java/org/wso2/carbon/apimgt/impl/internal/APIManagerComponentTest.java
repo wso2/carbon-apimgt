@@ -16,10 +16,7 @@
 
 package org.wso2.carbon.apimgt.impl.internal;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.osgi.framework.BundleContext;
@@ -52,8 +49,8 @@ import java.io.FileNotFoundException;
                         SQLConstantManagerFactory.class })
 public class APIManagerComponentTest {
 
-    @Before
-    public void setup() {
+    @BeforeClass
+    public static void setup() {
         System.setProperty("carbon.home", "");
     }
 
@@ -138,8 +135,10 @@ public class APIManagerComponentTest {
         }
     }
 
-    @After
-    public void destroy() {
+
+
+    @AfterClass
+    public static void destroy() {
         System.clearProperty("carbon.home");
     }
 }
