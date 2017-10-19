@@ -36,18 +36,16 @@ public class ApplicationImportExportManager {
      * @return {@link Application} instance
      * @throws APIManagementException if an error occurs while retrieving Application details
      */
-    public Application getApplicationDeatails(Integer limit, Integer offset, String query, String username) throws
+    public Application getApplicationDetails(Integer limit, Integer offset, String query, String username) throws
     APIManagementException {
         //Set<Application> applicationDetails = new HashSet<>();
         //return applicationDetails;
 
         Application application = apiStore.getApplication(query,username);
         if (application == null ){
-            //no applications available
+            log.error("No applications found matching the provided applicationId");
         }
         return application;
-
-
 
     }
 
