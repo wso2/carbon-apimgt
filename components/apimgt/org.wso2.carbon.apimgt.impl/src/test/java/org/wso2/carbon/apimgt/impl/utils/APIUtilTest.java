@@ -37,16 +37,41 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.ServiceReferenceHolderMockCreator;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import static org.mockito.Matchers.eq;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({LogFactory.class, ServiceReferenceHolder.class, SSLSocketFactory.class, CarbonUtils.class})
+@PrepareForTest({LogFactory.class, ServiceReferenceHolder.class, SSLSocketFactory.class, CarbonUtils.class, GovernanceUtils.class})
 @PowerMockIgnore("javax.net.ssl.*")
 public class APIUtilTest {
 
@@ -216,4 +241,441 @@ public class APIUtilTest {
 
         Assert.assertEquals(expectedScopes, restapiScopesFromConfig);
     }
+
+    @Test
+    public void testIsSandboxEndpointsExists() throws Exception {
+        API api = Mockito.mock(API.class);
+
+        JSONObject sandboxEndpoints = new JSONObject();
+        sandboxEndpoints.put("url", "https:\\/\\/localhost:9443\\/am\\/sample\\/pizzashack\\/v1\\/api\\/");
+        sandboxEndpoints.put("config", null);
+
+        JSONObject root = new JSONObject();
+        root.put("sandbox_endpoints", sandboxEndpoints);
+        root.put("endpoint_type", "http");
+        
+        Mockito.when(api.getEndpointConfig()).thenReturn(root.toJSONString());
+
+        Assert.assertTrue("Cannot find sandbox endpoint", APIUtil.isSandboxEndpointsExists(api));
+    }
+
+    @Test
+    public void testIsSandboxEndpointsNotExists() throws Exception {
+        API api = Mockito.mock(API.class);
+
+        JSONObject productionEndpoints = new JSONObject();
+        productionEndpoints.put("url", "https:\\/\\/localhost:9443\\/am\\/sample\\/pizzashack\\/v1\\/api\\/");
+        productionEndpoints.put("config", null);
+
+        JSONObject root = new JSONObject();
+        root.put("production_endpoints", productionEndpoints);
+        root.put("endpoint_type", "http");
+
+        Mockito.when(api.getEndpointConfig()).thenReturn(root.toJSONString());
+
+        Assert.assertFalse("Unexpected sandbox endpoint found", APIUtil.isSandboxEndpointsExists(api));
+    }
+
+    @Test
+    public void testIsProductionEndpointsExists() throws Exception {
+        API api = Mockito.mock(API.class);
+
+        JSONObject productionEndpoints = new JSONObject();
+        productionEndpoints.put("url", "https:\\/\\/localhost:9443\\/am\\/sample\\/pizzashack\\/v1\\/api\\/");
+        productionEndpoints.put("config", null);
+
+        JSONObject root = new JSONObject();
+        root.put("production_endpoints", productionEndpoints);
+        root.put("endpoint_type", "http");
+
+        Mockito.when(api.getEndpointConfig()).thenReturn(root.toJSONString());
+
+        Assert.assertTrue("Cannot find production endpoint", APIUtil.isProductionEndpointsExists(api));
+    }
+
+    @Test
+    public void testIsProductionEndpointsNotExists() throws Exception {
+        API api = Mockito.mock(API.class);
+
+        JSONObject sandboxEndpoints = new JSONObject();
+        sandboxEndpoints.put("url", "https:\\/\\/localhost:9443\\/am\\/sample\\/pizzashack\\/v1\\/api\\/");
+        sandboxEndpoints.put("config", null);
+
+        JSONObject root = new JSONObject();
+        root.put("sandbox_endpoints", sandboxEndpoints);
+        root.put("endpoint_type", "http");
+
+        Mockito.when(api.getEndpointConfig()).thenReturn(root.toJSONString());
+
+        Assert.assertFalse("Unexpected production endpoint found", APIUtil.isProductionEndpointsExists(api));
+    }
+
+    @Test
+    public void testIsProductionSandboxEndpointsExists() throws Exception {
+        API api = Mockito.mock(API.class);
+
+        JSONObject productionEndpoints = new JSONObject();
+        productionEndpoints.put("url", "https:\\/\\/localhost:9443\\/am\\/sample\\/pizzashack\\/v1\\/api\\/");
+        productionEndpoints.put("config", null);
+
+        JSONObject sandboxEndpoints = new JSONObject();
+        sandboxEndpoints.put("url", "https:\\/\\/localhost:9443\\/am\\/sample\\/pizzashack\\/v1\\/api\\/");
+        sandboxEndpoints.put("config", null);
+
+        JSONObject root = new JSONObject();
+        root.put("production_endpoints", productionEndpoints);
+        root.put("sandbox_endpoints", sandboxEndpoints);
+        root.put("endpoint_type", "http");
+
+        Mockito.when(api.getEndpointConfig()).thenReturn(root.toJSONString());
+
+        Assert.assertTrue("Cannot find production endpoint", APIUtil.isProductionEndpointsExists(api));
+        Assert.assertTrue("Cannot find sandbox endpoint", APIUtil.isSandboxEndpointsExists(api));
+    }
+
+    @Test
+    public void testIsProductionEndpointsInvalidJSON() throws Exception {
+        Log log = Mockito.mock(Log.class);
+        PowerMockito.mockStatic(LogFactory.class);
+        Mockito.when(LogFactory.getLog(Mockito.any(Class.class))).thenReturn(log);
+
+        API api = Mockito.mock(API.class);
+
+        Mockito.when(api.getEndpointConfig()).thenReturn("</SomeXML>");
+
+        Assert.assertFalse("Unexpected production endpoint found", APIUtil.isProductionEndpointsExists(api));
+
+        JSONObject productionEndpoints = new JSONObject();
+        productionEndpoints.put("url", "https:\\/\\/localhost:9443\\/am\\/sample\\/pizzashack\\/v1\\/api\\/");
+        productionEndpoints.put("config", null);
+        JSONArray jsonArray = new JSONArray();
+        jsonArray.add(productionEndpoints);
+
+        Mockito.when(api.getEndpointConfig()).thenReturn(jsonArray.toJSONString());
+
+        Assert.assertFalse("Unexpected production endpoint found", APIUtil.isProductionEndpointsExists(api));
+    }
+
+    @Test
+    public void testIsSandboxEndpointsInvalidJSON() throws Exception {
+        Log log = Mockito.mock(Log.class);
+        PowerMockito.mockStatic(LogFactory.class);
+        Mockito.when(LogFactory.getLog(Mockito.any(Class.class))).thenReturn(log);
+
+        API api = Mockito.mock(API.class);
+
+        Mockito.when(api.getEndpointConfig()).thenReturn("</SomeXML>");
+
+        Assert.assertFalse("Unexpected sandbox endpoint found", APIUtil.isSandboxEndpointsExists(api));
+
+        JSONObject sandboxEndpoints = new JSONObject();
+        sandboxEndpoints.put("url", "https:\\/\\/localhost:9443\\/am\\/sample\\/pizzashack\\/v1\\/api\\/");
+        sandboxEndpoints.put("config", null);
+        JSONArray jsonArray = new JSONArray();
+        jsonArray.add(sandboxEndpoints);
+
+        Mockito.when(api.getEndpointConfig()).thenReturn(jsonArray.toJSONString());
+
+        Assert.assertFalse("Unexpected sandbox endpoint found", APIUtil.isSandboxEndpointsExists(api));
+    }
+
+    @Test
+    public void testGetAPIInformation() throws Exception {
+        GovernanceArtifact artifact = Mockito.mock(GovernanceArtifact.class);
+        Registry registry = Mockito.mock(Registry.class);
+        Resource resource = Mockito.mock(Resource.class);
+
+        API expectedAPI = getUniqueAPI();
+
+        String artifactPath = "";
+        PowerMockito.mockStatic(GovernanceUtils.class);
+        Mockito.when(GovernanceUtils.getArtifactPath(registry, expectedAPI.getUUID())).thenReturn(artifactPath);
+        Mockito.when(registry.get(artifactPath)).thenReturn(resource);
+        Mockito.when(resource.getLastModified()).thenReturn(expectedAPI.getLastUpdated());
+
+        DateFormat df = new SimpleDateFormat("E MMM dd HH:mm:ss zzz yyyy");
+        Date createdTime = df.parse(expectedAPI.getCreatedTime());
+        Mockito.when(resource.getCreatedTime()).thenReturn(createdTime);
+
+        ServiceReferenceHolderMockCreator holderMockCreator = new ServiceReferenceHolderMockCreator(1);
+        APIManagerConfiguration apimConfiguration = holderMockCreator.getConfigurationServiceMockCreator().
+                getConfigurationMockCreator().getMock();
+
+        CORSConfiguration corsConfiguration = expectedAPI.getCorsConfiguration();
+
+        Mockito.when(apimConfiguration.getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS)).
+                thenReturn(corsConfiguration.getAccessControlAllowHeaders().toString());
+        Mockito.when(apimConfiguration.getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS)).
+                thenReturn(corsConfiguration.getAccessControlAllowMethods().toString());
+        Mockito.when(apimConfiguration.getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN)).
+                thenReturn(corsConfiguration.getAccessControlAllowOrigins().toString());
+
+
+        Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER)).
+                thenReturn(expectedAPI.getId().getProviderName());
+        Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)).
+                thenReturn(expectedAPI.getId().getApiName());
+        Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_VERSION)).
+                thenReturn(expectedAPI.getId().getVersion());
+        Mockito.when(artifact.getId()).thenReturn(expectedAPI.getUUID());
+
+        API api = APIUtil.getAPIInformation(artifact, registry);
+
+        Assert.assertEquals(expectedAPI.getId(), api.getId());
+        Assert.assertEquals(expectedAPI.getUUID(), api.getUUID());
+
+        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_NAME);
+        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_VERSION);
+        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_THUMBNAIL_URL);
+        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_STATUS);
+        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_CONTEXT);
+        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
+        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
+        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_VISIBLE_TENANTS);
+        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS);
+        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE);
+        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE);
+        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_FAULTSEQUENCE);
+        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION);
+        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_REDIRECT_URL);
+        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_BUSS_OWNER);
+        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_OWNER);
+        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_ADVERTISE_ONLY);
+        Mockito.verify(artifact, Mockito.atLeastOnce()).getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
+    }
+
+
+    @Test
+    public void testGetMediationSequenceUuidInSequence() throws Exception {
+        APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        Mockito.when(registryService.getGovernanceSystemRegistry(eq(1))).thenReturn(registry);
+
+        Collection collection = Mockito.mock(Collection.class);
+        String path = APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator + APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN;
+        Mockito.when(registry.get(eq(path))).thenReturn(collection);
+
+        String[] childPaths = {"test"};
+        Mockito.when(collection.getChildren()).thenReturn(childPaths);
+
+        String expectedUUID = UUID.randomUUID().toString();
+
+        InputStream sampleSequence = new FileInputStream(Thread.currentThread().getContextClassLoader().
+                getResource("sampleSequence.xml").getFile());
+
+        Resource resource = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(eq("test"))).thenReturn(resource);
+        Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
+        Mockito.when(resource.getUUID()).thenReturn(expectedUUID);
+
+
+        String actualUUID = APIUtil.getMediationSequenceUuid("sample", 1, "in", apiIdentifier);
+
+        Assert.assertEquals(expectedUUID, actualUUID);
+        sampleSequence.close();
+    }
+
+    @Test
+    public void testGetMediationSequenceUuidOutSequence() throws Exception {
+        APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        Mockito.when(registryService.getGovernanceSystemRegistry(eq(1))).thenReturn(registry);
+
+        Collection collection = Mockito.mock(Collection.class);
+        String path = APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator + APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT;
+        Mockito.when(registry.get(eq(path))).thenReturn(collection);
+
+        String[] childPaths = {"test"};
+        Mockito.when(collection.getChildren()).thenReturn(childPaths);
+
+        String expectedUUID = UUID.randomUUID().toString();
+
+        InputStream sampleSequence = new FileInputStream(Thread.currentThread().getContextClassLoader().
+                getResource("sampleSequence.xml").getFile());
+
+        Resource resource = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(eq("test"))).thenReturn(resource);
+        Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
+        Mockito.when(resource.getUUID()).thenReturn(expectedUUID);
+
+
+        String actualUUID = APIUtil.getMediationSequenceUuid("sample", 1, "out", apiIdentifier);
+
+        Assert.assertEquals(expectedUUID, actualUUID);
+        sampleSequence.close();
+    }
+
+    @Test
+    public void testGetMediationSequenceUuidFaultSequence() throws Exception {
+        APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        Mockito.when(registryService.getGovernanceSystemRegistry(eq(1))).thenReturn(registry);
+
+        Collection collection = Mockito.mock(Collection.class);
+        String path = APIConstants.API_CUSTOM_SEQUENCE_LOCATION + File.separator + APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT;
+        Mockito.when(registry.get(eq(path))).thenReturn(collection);
+
+        String[] childPaths = {"test"};
+        Mockito.when(collection.getChildren()).thenReturn(childPaths);
+
+        String expectedUUID = UUID.randomUUID().toString();
+
+        InputStream sampleSequence = new FileInputStream(Thread.currentThread().getContextClassLoader().
+                getResource("sampleSequence.xml").getFile());
+
+        Resource resource = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(eq("test"))).thenReturn(resource);
+        Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
+        Mockito.when(resource.getUUID()).thenReturn(expectedUUID);
+
+
+        String actualUUID = APIUtil.getMediationSequenceUuid("sample", 1, "fault", apiIdentifier);
+
+        Assert.assertEquals(expectedUUID, actualUUID);
+        sampleSequence.close();
+    }
+
+
+    @Test
+    public void testGetMediationSequenceUuidCustomSequence() throws Exception {
+        APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        Mockito.when(registryService.getGovernanceSystemRegistry(eq(1))).thenReturn(registry);
+
+        Collection collection = Mockito.mock(Collection.class);
+        String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+        String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "custom" + RegistryConstants.PATH_SEPARATOR;
+
+        Mockito.when(registry.get(eq(path))).thenReturn(collection);
+
+        String[] childPaths = {"test"};
+        Mockito.when(collection.getChildren()).thenReturn(childPaths);
+
+        String expectedUUID = UUID.randomUUID().toString();
+
+        InputStream sampleSequence = new FileInputStream(Thread.currentThread().getContextClassLoader().
+                getResource("sampleSequence.xml").getFile());
+
+        Resource resource = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(eq("test"))).thenReturn(resource);
+        Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
+        Mockito.when(resource.getUUID()).thenReturn(expectedUUID);
+
+
+        String actualUUID = APIUtil.getMediationSequenceUuid("sample", 1, "custom", apiIdentifier);
+
+        Assert.assertEquals(expectedUUID, actualUUID);
+        sampleSequence.close();
+    }
+
+
+    @Test
+    public void testGetMediationSequenceUuidCustomSequenceNotFound() throws Exception {
+        APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        Mockito.when(registryService.getGovernanceSystemRegistry(eq(1))).thenReturn(registry);
+
+        Collection collection = Mockito.mock(Collection.class);
+        String artifactPath = APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
+                apiIdentifier.getApiName() + RegistryConstants.PATH_SEPARATOR + apiIdentifier.getVersion();
+        String path = artifactPath + RegistryConstants.PATH_SEPARATOR + "custom" + RegistryConstants.PATH_SEPARATOR;
+
+        Mockito.when(registry.get(eq(path))).thenReturn(null, collection);
+
+        String[] childPaths = {"test"};
+        Mockito.when(collection.getChildren()).thenReturn(childPaths);
+
+        String expectedUUID = UUID.randomUUID().toString();
+
+        InputStream sampleSequence = new FileInputStream(Thread.currentThread().getContextClassLoader().
+                getResource("sampleSequence.xml").getFile());
+
+        Resource resource = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(eq("test"))).thenReturn(resource);
+        Mockito.when(resource.getContentStream()).thenReturn(sampleSequence);
+        Mockito.when(resource.getUUID()).thenReturn(expectedUUID);
+
+
+        String actualUUID = APIUtil.getMediationSequenceUuid("sample", 1, "custom", apiIdentifier);
+
+        Assert.assertEquals(expectedUUID, actualUUID);
+        sampleSequence.close();
+    }
+
+
+    private API getUniqueAPI() {
+        APIIdentifier apiIdentifier = new APIIdentifier(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+                UUID.randomUUID().toString());
+        API api = new API(apiIdentifier);
+        api.setStatus(APIStatus.CREATED);
+        api.setContext(UUID.randomUUID().toString());
+
+        Set<String> environments = new HashSet<String>();
+        environments.add(UUID.randomUUID().toString());
+
+        api.setEnvironments(environments);
+        api.setUUID(UUID.randomUUID().toString());
+        api.setThumbnailUrl(UUID.randomUUID().toString());
+        api.setVisibility(UUID.randomUUID().toString());
+        api.setVisibleRoles(UUID.randomUUID().toString());
+        api.setVisibleTenants(UUID.randomUUID().toString());
+        api.setTransports(UUID.randomUUID().toString());
+        api.setInSequence(UUID.randomUUID().toString());
+        api.setOutSequence(UUID.randomUUID().toString());
+        api.setFaultSequence(UUID.randomUUID().toString());
+        api.setDescription(UUID.randomUUID().toString());
+        api.setRedirectURL(UUID.randomUUID().toString());
+        api.setBusinessOwner(UUID.randomUUID().toString());
+        api.setApiOwner(UUID.randomUUID().toString());
+        api.setAdvertiseOnly(true);
+
+        CORSConfiguration corsConfiguration = new CORSConfiguration(true, Arrays.asList("*"),
+                true, Arrays.asList("*"), Arrays.asList("*"));
+
+        api.setCorsConfiguration(corsConfiguration);
+        api.setLastUpdated(new Date());
+        api.setCreatedTime(new Date().toString());
+
+        return api;
+    }
+
 }

@@ -34,7 +34,7 @@ public class ConfigurationMockCreator {
         Mockito.when(configuration.getThrottleProperties()).thenReturn(throttleProperties);
     }
 
-    APIManagerConfiguration getMock() {
+    public APIManagerConfiguration getMock() {
         return configuration;
     }
 }
