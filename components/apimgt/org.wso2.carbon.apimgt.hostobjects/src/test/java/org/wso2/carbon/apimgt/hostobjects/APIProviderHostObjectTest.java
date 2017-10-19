@@ -22,7 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
-import org.wso2.carbon.apimgt.api.APIManagementException;
+
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
