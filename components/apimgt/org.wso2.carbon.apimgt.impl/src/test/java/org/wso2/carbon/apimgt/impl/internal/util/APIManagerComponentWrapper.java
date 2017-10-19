@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.notification.util;
+package org.wso2.carbon.apimgt.impl.internal.util;
 
-import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
-import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
+import org.wso2.carbon.registry.api.Registry;
 
-public class NotificationExecutorWrapper extends NotificationExecutor {
-    Registry registry;
+public class APIManagerComponentWrapper extends APIManagerComponent {
+    private Registry registry;
 
-    public NotificationExecutorWrapper(Registry registry) {
+    public APIManagerComponentWrapper(Registry registry) {
         this.registry = registry;
     }
 
     @Override
-    protected Registry getRegistry(int tenantId) {
-        return registry;
+    protected Registry getRegistry() {
+        return this.registry;
     }
 }
