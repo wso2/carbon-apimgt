@@ -345,7 +345,7 @@ public class UserSignUpWSWorkflowExecutorTest {
     @Test
     public void testFailuresToCleanUpPendingTasks() throws AxisFault, XMLStreamException {
 
-        //Test failure to cleaning up pending tasks when AxisFault has been thrown while sending the message out
+        //Test failure to clean up pending tasks when AxisFault has been thrown while sending the message out
         PowerMockito.doThrow(new AxisFault("Error sending out message")).when(serviceClient).fireAndForget(
                 (OMElement) Mockito.anyObject());
         try{
