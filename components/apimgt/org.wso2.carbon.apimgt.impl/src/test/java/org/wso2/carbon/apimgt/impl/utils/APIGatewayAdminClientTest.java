@@ -33,9 +33,11 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.transport.http.HTTPConstants;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -91,6 +93,8 @@ public class APIGatewayAdminClientTest {
                 .withArguments(Mockito.any(ConfigurationContext.class), Mockito.anyString())
                 .thenReturn(apiGatewayAdminStub);
         APIGatewayAdminClient client = new APIGatewayAdminClient(null, environment);
+        Assert.assertNotNull(client);
+        Mockito.verify(apiGatewayAdminStub, times(2))._getServiceClient();
     }
 
     @Test(expected = AxisFault.class)
@@ -124,6 +128,8 @@ public class APIGatewayAdminClientTest {
         APIIdentifier identifier = new APIIdentifier("P1_API1_v1.0.0");
         API api = new API(identifier);
         client.setSecureVaultProperty(api, null);
+        Mockito.verify(apiGatewayAdminStub, times(1))
+                .doEncryption(Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
     }
 
     @Test
@@ -240,10 +246,9 @@ public class APIGatewayAdminClientTest {
         client.updateApi(apiTemplateBuilder, "", identifier);
         client.updateApi(apiTemplateBuilder, null, identifier);
         client.updateApi(apiTemplateBuilder, MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, identifier);
+        client.updateApi(apiTemplateBuilder, "tenant", identifier);
         Mockito.verify(apiGatewayAdminStub, times(3))
                 .updateApi(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
-        client.updateApi(apiTemplateBuilder, "tenant", identifier);
-
         Mockito.verify(apiGatewayAdminStub, times(1))
                 .updateApiForTenant(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString(),
                         Mockito.anyString());
