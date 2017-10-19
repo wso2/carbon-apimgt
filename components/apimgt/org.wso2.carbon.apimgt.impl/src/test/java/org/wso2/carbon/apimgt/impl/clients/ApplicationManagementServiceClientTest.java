@@ -93,16 +93,16 @@ public class ApplicationManagementServiceClientTest {
         ApplicationManagementServiceClientWrapper.setServiceStub(serviceStub);
         try {
             new ApplicationManagementServiceClientWrapper();
-            Assert.fail();
+            Assert.fail("APIManagementException is expected here");
         } catch (APIManagementException e) {
-            // APIManagementException is expected here
+            Assert.assertTrue(e.getMessage().contains("OAuth admin service stub"));
         }
 
         try {
             new ApplicationManagementServiceClientWrapper();
-            Assert.fail();
+            Assert.fail("APIManagementException is expected here");
         } catch (APIManagementException e) {
-            // APIManagementException is expected here
+            Assert.assertTrue(e.getMessage().contains("connection details"));
         }
     }
 
@@ -141,7 +141,7 @@ public class ApplicationManagementServiceClientTest {
         }
     }
 
-    @Test
+    @Test(expected = Exception.class)
     public void testShouldRetrieveApplication() throws Exception {
         PowerMockito.mockStatic(Util.class);
 
@@ -159,12 +159,8 @@ public class ApplicationManagementServiceClientTest {
         ApplicationManagementServiceClientWrapper client = new ApplicationManagementServiceClientWrapper();
         client.getApplication(APP_NAME, USERNAME);
 
-        try {
-            client.getApplication(APP_NAME, USERNAME);
-            Assert.fail("Exception is expected.");
-        } catch (Exception e) {
-            // Exception is expected here
-        }
+        client.getApplication(APP_NAME, USERNAME);
+        Assert.fail("Exception is expected.");
     }
 
     @Test
@@ -271,7 +267,7 @@ public class ApplicationManagementServiceClientTest {
         }
     }
 
-    @Test
+    @Test(expected = Exception.class)
     public void testShouldRetrieveFederatedIdentityProvider() throws Exception {
         PowerMockito.mockStatic(Util.class);
 
@@ -289,15 +285,11 @@ public class ApplicationManagementServiceClientTest {
         ApplicationManagementServiceClientWrapper client = new ApplicationManagementServiceClientWrapper();
         client.getFederatedIdentityProvider(USERNAME, USERNAME);
 
-        try {
-            client.getFederatedIdentityProvider(USERNAME, USERNAME);
-            Assert.fail("Exception is expected.");
-        } catch (Exception e) {
-            // Exception is expected here
-        }
+        client.getFederatedIdentityProvider(USERNAME, USERNAME);
+        Assert.fail("Exception is expected.");
     }
 
-    @Test
+    @Test(expected = Exception.class)
     public void testShouldRetrieveAllRequestPathAuthenticators() throws Exception {
         PowerMockito.mockStatic(Util.class);
 
@@ -315,15 +307,11 @@ public class ApplicationManagementServiceClientTest {
         ApplicationManagementServiceClientWrapper client = new ApplicationManagementServiceClientWrapper();
         client.getAllRequestPathAuthenticators(USERNAME);
 
-        try {
-            client.getAllRequestPathAuthenticators(USERNAME);
-            Assert.fail("Exception is expected.");
-        } catch (Exception e) {
-            // Exception is expected here
-        }
+        client.getAllRequestPathAuthenticators(USERNAME);
+        Assert.fail("Exception is expected.");
     }
 
-    @Test
+    @Test(expected = Exception.class)
     public void testShouldRetrieveAllLocalAuthenticators() throws Exception {
         PowerMockito.mockStatic(Util.class);
 
@@ -341,15 +329,11 @@ public class ApplicationManagementServiceClientTest {
         ApplicationManagementServiceClientWrapper client = new ApplicationManagementServiceClientWrapper();
         client.getAllLocalAuthenticators(USERNAME);
 
-        try {
-            client.getAllLocalAuthenticators(USERNAME);
-            Assert.fail("Exception is expected.");
-        } catch (Exception e) {
-            // Exception is expected here
-        }
+        client.getAllLocalAuthenticators(USERNAME);
+        Assert.fail("Exception is expected.");
     }
 
-    @Test
+    @Test(expected = Exception.class)
     public void testShouldRetrieveAllFederatedIdentityProvider() throws Exception {
         PowerMockito.mockStatic(Util.class);
 
@@ -367,15 +351,11 @@ public class ApplicationManagementServiceClientTest {
         ApplicationManagementServiceClientWrapper client = new ApplicationManagementServiceClientWrapper();
         client.getAllFederatedIdentityProvider(USERNAME);
 
-        try {
-            client.getAllFederatedIdentityProvider(USERNAME);
-            Assert.fail("Exception is expected.");
-        } catch (Exception e) {
-            // Exception is expected here
-        }
+        client.getAllFederatedIdentityProvider(USERNAME);
+        Assert.fail("Exception is expected.");
     }
 
-    @Test
+    @Test(expected = Exception.class)
     public void testShouldRetrieveAllClaimUris() throws Exception {
         PowerMockito.mockStatic(Util.class);
 
@@ -393,12 +373,8 @@ public class ApplicationManagementServiceClientTest {
         ApplicationManagementServiceClientWrapper client = new ApplicationManagementServiceClientWrapper();
         client.getAllClaimUris(USERNAME);
 
-        try {
-            client.getAllClaimUris(USERNAME);
-            Assert.fail("Exception is expected.");
-        } catch (Exception e) {
-            // Exception is expected here
-        }
+        client.getAllClaimUris(USERNAME);
+        Assert.fail("Exception is expected.");
     }
 
 }

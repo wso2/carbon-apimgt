@@ -117,15 +117,11 @@ public class OAuthAdminClientTest {
         OAuthAdminClientWrapper client = new OAuthAdminClientWrapper();
         OAuthConsumerAppDTO appData = client.getOAuthApplicationData(CONSUMER_KEY, USERNAME);
 
-        if (appData == null) {
-            Assert.fail("Application DTO cannot be empty.");
-        }
+        Assert.assertNotNull("Application DTO cannot be null.", appData);
 
 
         OAuthConsumerAppDTO appDataByName = client.getOAuthApplicationDataByAppName(CONSUMER_KEY, USERNAME);
-        if (appDataByName == null) {
-            Assert.fail("Application DTO cannot be empty.");
-        }
+        Assert.assertNotNull("Application DTO cannot be null.", appDataByName);
     }
 
     @Test
