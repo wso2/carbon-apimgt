@@ -80,12 +80,13 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
     }
 
     @Override
-    protected GenericArtifactManager getAPIGenericArtifactManager(Registry registry) throws APIManagementException {
+    protected GenericArtifactManager getAPIGenericArtifactManager(Registry registry, String keyType) throws
+            APIManagementException {
         return genericArtifactManager;
     }
 
     @Override
-    protected GenericArtifactManager getAPIGenericArtifactManagerFromUtil(Registry registry) throws
+    protected GenericArtifactManager getAPIGenericArtifactManagerFromUtil(Registry registry, String keyType) throws
             APIManagementException {
         return genericArtifactManager;
     }
