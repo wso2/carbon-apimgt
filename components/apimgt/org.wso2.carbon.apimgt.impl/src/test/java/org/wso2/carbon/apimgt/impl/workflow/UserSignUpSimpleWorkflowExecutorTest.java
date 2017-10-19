@@ -158,7 +158,7 @@ public class UserSignUpSimpleWorkflowExecutorTest {
         //Test failure to complete workflow execution when AuthManager server url is not configured
         try {
             userSignUpSimpleWorkflowExecutor.execute(workflowDTO);
-            Assert.fail("Expected WorkflowException has not been thrown when signup role is not existing");
+            Assert.fail("Expected WorkflowException has not been thrown auth manager URL is not found");
         } catch (WorkflowException e) {
             Assert.assertEquals(e.getMessage(), "Error while assigning role to user");
         }
@@ -169,7 +169,7 @@ public class UserSignUpSimpleWorkflowExecutorTest {
         //Test failure to complete workflow execution when tenant admin credentials are not found
         try {
             userSignUpSimpleWorkflowExecutor.execute(workflowDTO);
-            Assert.fail("Expected WorkflowException has not been thrown when signup role is not existing");
+            Assert.fail("Expected WorkflowException has not been thrown when admin credentials are not found");
         } catch (WorkflowException e) {
             Assert.assertEquals(e.getMessage(), "Error while assigning role to user");
         }
@@ -178,7 +178,8 @@ public class UserSignUpSimpleWorkflowExecutorTest {
         userRegistrationConfigDTO.setAdminUserName("admin");
         userRegistrationConfigDTO.setAdminPassword("admin");
 
-        //Test failure to complete workflow execution, when error has been updating user with signup roles
+        //Test failure to complete workflow execution, when error has been occurred while updating user with signup
+        // roles
         Mockito.when(userAdminStub.getRolesOfUser(username, "*", -1)).thenThrow(new RemoteException());
         try {
             userSignUpSimpleWorkflowExecutor.execute(workflowDTO);
@@ -201,7 +202,7 @@ public class UserSignUpSimpleWorkflowExecutorTest {
                 ("Error occurred while retrieving signup configuration"));
         try {
             userSignUpSimpleWorkflowExecutor.execute(workflowDTO);
-            Assert.fail("Expected WorkflowException has not been thrown when signup role is not existing");
+            Assert.fail("Expected WorkflowException has not been thrown retrieving sign up configuration");
         } catch (WorkflowException e) {
             Assert.assertEquals(e.getMessage(), "Error while accessing signup configuration");
         }
