@@ -33,6 +33,21 @@ public class RegistryServiceMockCreator {
         registryMockCreator = new UserRegistryMockCreator(isResourceExists, content);
 
         Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(registryMockCreator.getMock());
+        Mockito.when(registryService.getConfigSystemRegistry()).thenReturn(registryMockCreator.getMock());
+        Mockito.when(registryService.getGovernanceSystemRegistry()).thenReturn(registryMockCreator.getMock());
+    }
+
+    public RegistryServiceMockCreator(boolean isResourceExists, Object content, int tenantId) throws RegistryException {
+        registryService = Mockito.mock(RegistryService.class);
+        registryMockCreator = new UserRegistryMockCreator(isResourceExists, content);
+
+        Mockito.when(registryService.getConfigSystemRegistry(Mockito.anyInt())).thenReturn(registryMockCreator.getMock());
+        Mockito.when(registryService.getConfigSystemRegistry()).thenReturn(registryMockCreator.getMock());
+        Mockito.when(registryService.getGovernanceSystemRegistry(tenantId)).thenReturn(registryMockCreator.getMock());
+    }
+
+    public UserRegistryMockCreator getRegistryMockCreator() {
+        return registryMockCreator;
     }
 
     RegistryService getMock() {

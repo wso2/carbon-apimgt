@@ -32,7 +32,7 @@ public class ResourceMockCreator {
         Mockito.when(resource.getContent()).thenReturn(content);
     }
 
-    Resource getMock() {
+    public Resource getMock() {
         return resource;
     }
 }

@@ -34,4 +34,8 @@ public class ConfigurationServiceMockCreator {
     APIManagerConfigurationService getMock() {
         return configurationService;
     }
+
+    public ConfigurationMockCreator getConfigurationMockCreator() {
+        return configurationMockCreator;
+    }
 }
