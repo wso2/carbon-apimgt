@@ -89,7 +89,8 @@ public class WSO2APIPublisherTestCase {
         Mockito.doReturn(httpResponse).when(defaultHttpClient).execute(Mockito.any(HttpPost.class), Mockito.any(HttpContext.class));
         Mockito.doReturn(entity).when(httpResponse).getEntity();
         PowerMockito.mockStatic(EntityUtils.class);
-        PowerMockito.when(EntityUtils.toString((HttpEntity)Mockito.anyObject(), Mockito.anyString())).thenReturn("{\"error\" : true, \"message\" : \"Login failed. Please recheck the username and password and try again..\"}");
+        PowerMockito.when(EntityUtils.toString((HttpEntity) Mockito.anyObject(), Mockito.anyString()))
+                .thenReturn("{\"error\" : true, \"message\" : \"Login failed. Please recheck the username and password and try again..\"}");
         try {
             wso2APIPublisher.publishToStore(api, store);
             Assert.fail("APIManagement exception not thrown for error scenario");
@@ -122,7 +123,7 @@ public class WSO2APIPublisherTestCase {
         Mockito.doReturn(httpResponse).when(defaultHttpClient).execute(Mockito.any(HttpPost.class), Mockito.any(HttpContext.class));
         Mockito.doReturn(entity).when(httpResponse).getEntity();
         PowerMockito.mockStatic(EntityUtils.class);
-        PowerMockito.when(EntityUtils.toString((HttpEntity)Mockito.anyObject(), Mockito.anyString())).thenReturn("{\"error\" : false}");
+        PowerMockito.when(EntityUtils.toString((HttpEntity) Mockito.anyObject(), Mockito.anyString())).thenReturn("{\"error\" : false}");
         ServerConfiguration serverConfig = Mockito.mock(ServerConfiguration.class);
         PowerMockito.mockStatic(CarbonUtils.class);
         PowerMockito.when(CarbonUtils.getServerConfiguration()).thenReturn(serverConfig);
@@ -170,7 +171,7 @@ public class WSO2APIPublisherTestCase {
         Mockito.doReturn(httpResponse).when(defaultHttpClient).execute(Mockito.any(HttpPost.class), Mockito.any(HttpContext.class));
         Mockito.doReturn(entity).when(httpResponse).getEntity();
         PowerMockito.mockStatic(EntityUtils.class);
-        PowerMockito.when(EntityUtils.toString((HttpEntity)Mockito.anyObject(), Mockito.anyString())).thenReturn("{\"error\" : false}");
+        PowerMockito.when(EntityUtils.toString((HttpEntity) Mockito.anyObject(), Mockito.anyString())).thenReturn("{\"error\" : false}");
         ServerConfiguration serverConfig = Mockito.mock(ServerConfiguration.class);
         PowerMockito.mockStatic(CarbonUtils.class);
         PowerMockito.when(CarbonUtils.getServerConfiguration()).thenReturn(serverConfig);
@@ -194,7 +195,7 @@ public class WSO2APIPublisherTestCase {
         PowerMockito.when(file.exists()).thenReturn(true);
         PowerMockito.mockStatic(FileUtils.class);
         PowerMockito.doNothing().when(FileUtils.class);
-        FileUtils.copyURLToFile((URL)Mockito.anyObject(),(File) Mockito.anyObject());
+        FileUtils.copyURLToFile((URL) Mockito.anyObject(), (File) Mockito.anyObject());
         RealmService realmService = Mockito.mock(RealmService.class);
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         TenantManager tenantManager = Mockito.mock(TenantManager.class);
@@ -204,7 +205,8 @@ public class WSO2APIPublisherTestCase {
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORES_STORE_URL)).thenReturn("http://localhost:9292/redirect");
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORES_STORE_URL))
+                .thenReturn("http://localhost:9292/redirect");
         boolean published = wso2APIPublisher.publishToStore(api, store);
         Assert.assertTrue(published);
     }
@@ -242,7 +244,7 @@ public class WSO2APIPublisherTestCase {
         Mockito.doReturn(httpResponse).when(defaultHttpClient).execute(Mockito.any(HttpPost.class), Mockito.any(HttpContext.class));
         Mockito.doReturn(entity).when(httpResponse).getEntity();
         PowerMockito.mockStatic(EntityUtils.class);
-        PowerMockito.when(EntityUtils.toString((HttpEntity)Mockito.anyObject(), Mockito.anyString())).thenReturn("{\"error\" : false}");
+        PowerMockito.when(EntityUtils.toString((HttpEntity) Mockito.anyObject(), Mockito.anyString())).thenReturn("{\"error\" : false}");
         boolean deleted = wso2APIPublisher.deleteFromStore(identifier, store);
         Assert.assertTrue(deleted);
     }
@@ -281,7 +283,7 @@ public class WSO2APIPublisherTestCase {
         Mockito.doReturn(httpResponse).when(defaultHttpClient).execute(Mockito.any(HttpPost.class), Mockito.any(HttpContext.class));
         Mockito.doReturn(entity).when(httpResponse).getEntity();
         PowerMockito.mockStatic(EntityUtils.class);
-        PowerMockito.when(EntityUtils.toString((HttpEntity)Mockito.anyObject(), Mockito.anyString())).thenReturn("{\"error\" : false}");
+        PowerMockito.when(EntityUtils.toString((HttpEntity) Mockito.anyObject(), Mockito.anyString())).thenReturn("{\"error\" : false}");
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
@@ -294,7 +296,8 @@ public class WSO2APIPublisherTestCase {
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
         APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
         Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORES_STORE_URL)).thenReturn("http://localhost:9292/redirect");
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.EXTERNAL_API_STORES + "." + APIConstants.EXTERNAL_API_STORES_STORE_URL))
+                .thenReturn("http://localhost:9292/redirect");
         boolean updated = wso2APIPublisher.updateToStore(api, store);
         Assert.assertTrue(updated);
     }
@@ -334,7 +337,7 @@ public class WSO2APIPublisherTestCase {
         Mockito.doReturn(httpResponse).when(defaultHttpClient).execute(Mockito.any(HttpPost.class), Mockito.any(HttpContext.class));
         Mockito.doReturn(entity).when(httpResponse).getEntity();
         PowerMockito.mockStatic(EntityUtils.class);
-        PowerMockito.when(EntityUtils.toString((HttpEntity)Mockito.anyObject(), Mockito.anyString())).thenReturn("{\"error\" : false}");
+        PowerMockito.when(EntityUtils.toString((HttpEntity) Mockito.anyObject(), Mockito.anyString())).thenReturn("{\"error\" : false}");
         boolean available = wso2APIPublisher.isAPIAvailable(api, store);
         Assert.assertTrue(available);
     }
@@ -375,7 +378,7 @@ public class WSO2APIPublisherTestCase {
         Mockito.doReturn(httpResponse).when(defaultHttpClient).execute(Mockito.any(HttpPost.class), Mockito.any(HttpContext.class));
         Mockito.doReturn(entity).when(httpResponse).getEntity();
         PowerMockito.mockStatic(EntityUtils.class);
-        PowerMockito.when(EntityUtils.toString((HttpEntity)Mockito.anyObject(), Mockito.anyString())).thenReturn("{\"error\" : false}");
+        PowerMockito.when(EntityUtils.toString((HttpEntity) Mockito.anyObject(), Mockito.anyString())).thenReturn("{\"error\" : false}");
         boolean published = wso2APIPublisher.createVersionedAPIToStore(api, store, version);
         Assert.assertTrue(published);
     }
