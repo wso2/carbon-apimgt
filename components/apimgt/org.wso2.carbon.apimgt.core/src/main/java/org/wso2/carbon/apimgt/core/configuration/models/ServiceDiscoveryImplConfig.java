@@ -41,7 +41,8 @@ public class ServiceDiscoveryImplConfig {
         cmsSpecificParameters.put("masterUrl", "https://192.168.99.100:8443/");
         cmsSpecificParameters.put("includeClusterIPs", "false");
         cmsSpecificParameters.put("includeExternalNameServices", "false");
-        cmsSpecificParameters.put("serviceAccountTokenFile", "KubernetesToken");
+        cmsSpecificParameters.put("podMountedSATokenFile", "/var/run/secrets/kubernetes.io/serviceaccount/token");
+        cmsSpecificParameters.put("externalSATokenFile", "KubernetesToken");
         cmsSpecificParameters.put("caCertLocation", "/resources/security/ca.crt");
     }
 

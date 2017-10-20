@@ -32,18 +32,18 @@ import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.ServiceDiscoveryException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.FileEncryptionUtil;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -59,8 +59,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
     private final Logger log  = LoggerFactory.getLogger(ServiceDiscovererKubernetes.class);
 
     private OpenShiftClient client;
-    private String caCertLocation;
-    private String saTokenFileName;
+    private HashMap<String, String> implConfig;
     private Boolean includeClusterIPs;
     private Boolean includeExternalNameServices;
     private Boolean endpointsAvailable; //when false, will not look for NodePort urls for the remaining ports.
@@ -69,13 +68,11 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
     @Override
     public void init(HashMap<String, String> cmsSpecificParameters) throws ServiceDiscoveryException {
         super.init(cmsSpecificParameters);
-        saTokenFileName = this.cmsSpecificParameters.get("serviceAccountTokenFile");
-        caCertLocation = this.cmsSpecificParameters.get("caCertLocation");
-        includeClusterIPs = Boolean.parseBoolean(this.cmsSpecificParameters.get("includeClusterIPs"));
-        includeExternalNameServices = Boolean.parseBoolean(this.cmsSpecificParameters
-                .get("includeExternalNameServices"));
+        this.implConfig = cmsSpecificParameters;
+        includeClusterIPs = Boolean.parseBoolean(implConfig.get("includeClusterIPs"));
+        includeExternalNameServices = Boolean.parseBoolean(implConfig.get("includeExternalNameServices"));
         try {
-            this.client = new DefaultOpenShiftClient(buildConfig(this.cmsSpecificParameters.get("masterUrl")));
+            this.client = new DefaultOpenShiftClient(buildConfig());
         } catch (KubernetesClientException e) {
             String msg = "Error occurred while creating Kubernetes client";
             log.error(msg, e);
@@ -87,20 +84,18 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
         }
     }
 
-    private Config buildConfig(String masterUrl) throws ServiceDiscoveryException {
+    private Config buildConfig() throws ServiceDiscoveryException {
         System.setProperty("kubernetes.auth.tryKubeConfig", "false");
         System.setProperty("kubernetes.auth.tryServiceAccount", "true");
-        ConfigBuilder configBuilder = new ConfigBuilder().withMasterUrl(masterUrl)
-                .withCaCertFile(Paths.get(caCertLocation).toString());
+        ConfigBuilder configBuilder = new ConfigBuilder().withMasterUrl(implConfig.get("masterUrl"))
+                .withCaCertFile(Paths.get(implConfig.get("caCertLocation")).toString());
         Config config;
         log.debug("Using mounted service account token");
         try {
-            String saMountedToken = IOUtils.toString(ServiceDiscovererKubernetes.class
-                    .getResourceAsStream("/var/run/secrets/kubernetes.io/serviceaccount/token"),
-                    "UTF-8");
+            String saMountedToken = APIFileUtils.readFileContentAsText(implConfig.get("podMountedSATokenFile"));
             config = configBuilder.withOauthToken(saMountedToken).build();
-        } catch (IOException | NullPointerException e) {
-            log.info("Token not found in /var/run/secrets/kubernetes.io/serviceaccount/token.");
+        } catch (APIMgtDAOException | NullPointerException e) {
+            log.error("Error while building config with pod mounted token");
             log.info("Using externally stored service account token");
             config = configBuilder.withOauthToken(resolveToken()).build();
         }
@@ -113,7 +108,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
                 .getFileEncryptionConfigurations().getDestinationDirectory();
         try {
             token = FileEncryptionUtil.readFromEncryptedFile(
-                    Paths.get(encryptedFilesDir + "/encrypted" + saTokenFileName));
+                    Paths.get(encryptedFilesDir + "/encrypted" + implConfig.get("serviceAccountTokenFile")));
         } catch (APIManagementException e) {
             String msg = "Error occurred while resolving externally stored token";
             log.error(msg, e);
