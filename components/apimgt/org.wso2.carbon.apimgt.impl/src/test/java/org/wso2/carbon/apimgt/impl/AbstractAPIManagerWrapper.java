@@ -70,8 +70,24 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         this.apiMgtDAO = apiMgtDAO;
     }
 
+    public AbstractAPIManagerWrapper(GenericArtifactManager genericArtifactManager, RegistryService registryService,
+            Registry registry, TenantManager tenantManager, ApiMgtDAO apiMgtDAO) throws APIManagementException {
+        this.genericArtifactManager = genericArtifactManager;
+        this.registry = registry;
+        this.tenantManager = tenantManager;
+        this.registryService = registryService;
+        this.apiMgtDAO = apiMgtDAO;
+    }
+
     @Override
-    protected GenericArtifactManager getAPIGenericArtifactManager(Registry registry) throws APIManagementException {
+    protected GenericArtifactManager getAPIGenericArtifactManager(Registry registry, String keyType) throws
+            APIManagementException {
+        return genericArtifactManager;
+    }
+
+    @Override
+    protected GenericArtifactManager getAPIGenericArtifactManagerFromUtil(Registry registry, String keyType) throws
+            APIManagementException {
         return genericArtifactManager;
     }
 
@@ -120,6 +136,10 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
         return "carbon.super";
     }
 
+    protected String getTenantDomain(String username) {
+        return "carbon.super";
+    }
+
     protected String getTenantDomainFromUrl(String url) {
         return "carbon.super";
     }
@@ -130,6 +150,10 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
 
     protected void endTenantFlow() {
         // Do Nothing
+    }
+
+    protected String getTenantAwareUsername(String username){
+        return "admin";
     }
 
 }
