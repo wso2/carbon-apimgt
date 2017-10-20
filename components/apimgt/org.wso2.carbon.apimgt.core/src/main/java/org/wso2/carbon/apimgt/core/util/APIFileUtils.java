@@ -28,9 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.FileApi;
+import org.wso2.carbon.apimgt.core.models.FileApplication;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -611,11 +611,11 @@ public class APIFileUtils {
     /**
      * write the given Application details to file system
      *
-     * @param application    {@link Application} object to be exported
+     * @param application    {@link FileApplication} object to be exported
      * @param exportLocation file system location to write the Application Details
      * @throws APIMgtDAOException if an error occurs while writing the Application Details
      */
-    public static void exportApplicationDetailsToFileSystem(Application application, String exportLocation)
+    public static void exportApplicationDetailsToFileSystem(FileApplication application, String exportLocation)
             throws APIMgtDAOException {
         String applicationFileLocation = exportLocation + File.separator + application.getName() +
                 APIMgtConstants.APIFileUtilConstants.JSON_EXTENSION;

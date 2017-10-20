@@ -7,6 +7,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtEntityImportExportException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.models.FileApplication;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 
 import java.io.File;
@@ -45,7 +46,7 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
             APIFileUtils.createDirectory(applicationExportDirectory);
 
             //export application details
-            APIFileUtils.exportApplicationDetailsToFileSystem(exportApplication, applicationExportDirectory);
+            APIFileUtils.exportApplicationDetailsToFileSystem(new FileApplication(exportApplication), applicationExportDirectory);
 
         } catch (APIMgtDAOException e) {
 
