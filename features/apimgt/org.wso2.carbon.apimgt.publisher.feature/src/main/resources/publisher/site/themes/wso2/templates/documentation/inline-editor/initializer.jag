@@ -2,8 +2,9 @@
 jagg.initializer("documentation/inline-editor", {
 
     preInitialize:function () {
-        jagg.addHeaderJS("documentation/inline-editor", "tinymice", "libs/tinymce/tinymce.min.js");
-        jagg.addHeaderJS("documentation/inline-editor", "jagg", "templates/documentation/inline-editor/js/inline.js");
+        jagg.addHeaderJS("documentation/inline-editor", "dist", "libs/summernote/summernote.js");
+        jagg.addHeaderJS("documentation/inline-editor", "inline", "templates/documentation/inline-editor/js/inline.js");
+        jagg.addHeaderCSS("documentation/inline-editor", "dist", "libs/summernote/summernote.css");
     }
 
 });

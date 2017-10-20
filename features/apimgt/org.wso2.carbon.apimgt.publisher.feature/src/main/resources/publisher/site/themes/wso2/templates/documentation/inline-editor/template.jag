@@ -35,7 +35,7 @@ var docName = "<%= encode.forJavaScript(request.getParameter("docName"))%>";
                 </div>
 
                 <div class="col-md-8">
-                    <textarea id="inlineEditor" style="width:100%;height:500px;"></textarea>
+                    <div id="summernote"></div>
                 </div>
                 <div class="col-md-3">
                     <table class="table table-bordered table-striped">
