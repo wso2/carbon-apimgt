@@ -24,11 +24,14 @@ import org.apache.velocity.VelocityContext;
 import org.junit.Assert;
 import org.mockito.Mockito;
 import org.junit.Test;
+import org.powermock.api.mockito.PowerMockito;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 public class SecurityConfigContextTest {
 
