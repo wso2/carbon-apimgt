@@ -262,7 +262,7 @@ public class UserSignUpWSWorkflowExecutorTest {
                 String[]{Mockito.anyString()});
         try {
             userSignUpWSWorkflowExecutor.complete(workflowDTO);
-            Assert.fail("Expected WorkflowException has not been occ while signup user role update failed");
+            Assert.fail("Expected WorkflowException has not been thrown when signup user role update failed");
         } catch (WorkflowException e) {
             Assert.assertEquals(e.getMessage(), "Error while assigning role to user");
         }
@@ -327,7 +327,7 @@ public class UserSignUpWSWorkflowExecutorTest {
         Mockito.doThrow(new AxisFault("Error occurred while deleting user")).when(userAdminStub).deleteUser(Mockito
                 .anyString());
         try {
-           userSignUpWSWorkflowExecutor.complete(workflowDTO);
+            userSignUpWSWorkflowExecutor.complete(workflowDTO);
             Assert.fail("Expected WorkflowException has not been thrown when user deletion failed");
         } catch (WorkflowException e) {
             Assert.assertEquals(e.getMessage(), "Error while deleting the user");
@@ -335,10 +335,10 @@ public class UserSignUpWSWorkflowExecutorTest {
     }
 
     @Test
-    public void testCleaningUpPendingTasks(){
-        try{
-           userSignUpWSWorkflowExecutor.cleanUpPendingTask(workflowDTO.getWorkflowReference());
-        }catch (WorkflowException e){
+    public void testCleaningUpPendingTasks() {
+        try {
+            userSignUpWSWorkflowExecutor.cleanUpPendingTask(workflowDTO.getWorkflowReference());
+        } catch (WorkflowException e) {
             Assert.fail("Unexpected WorkflowException occurred while cleaning up pending tasks");
         }
     }
@@ -349,10 +349,10 @@ public class UserSignUpWSWorkflowExecutorTest {
         //Test failure to clean up pending tasks when AxisFault has been thrown while sending the message out
         PowerMockito.doThrow(new AxisFault("Error sending out message")).when(serviceClient).fireAndForget(
                 (OMElement) Mockito.anyObject());
-        try{
+        try {
             userSignUpWSWorkflowExecutor.cleanUpPendingTask(workflowDTO.getWorkflowReference());
             Assert.fail("Expected WorkflowException has not occurred while executing user sign up workflow");
-        }catch (WorkflowException e){
+        } catch (WorkflowException e) {
             Assert.assertTrue(e.getMessage().contains("Error sending out message"));
         }
 
@@ -366,8 +366,6 @@ public class UserSignUpWSWorkflowExecutorTest {
         } catch (WorkflowException e) {
             Assert.assertTrue(e.getMessage().contains("Error converting String to OMElement"));
         }
-
-
     }
 }
 
