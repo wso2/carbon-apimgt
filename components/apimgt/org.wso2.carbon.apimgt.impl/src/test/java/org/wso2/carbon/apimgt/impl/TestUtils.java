@@ -55,7 +55,8 @@ public class TestUtils {
                  .toString());
     }
     
-    public static void mockRegistryAndUserRealm(int tenantId) throws UserStoreException, RegistryException {
+    public static ServiceReferenceHolder mockRegistryAndUserRealm(int tenantId) throws UserStoreException, 
+                                                                                                    RegistryException {
         ServiceReferenceHolder sh = getServiceReferenceHolder();
         
         RealmService realmService = Mockito.mock(RealmService.class);
@@ -84,10 +85,12 @@ public class TestUtils {
         ServiceReferenceHolder.setUserRealm(bootstrapRealm);
         
         PowerMockito.when(tm.getTenantId("carbon.super")).thenReturn(tenantId);
+        return sh;
     }
     
-    public static void mockAPIMConfiguration(String propertyName, String value) {
-        ServiceReferenceHolder sh = getServiceReferenceHolder();
+    public static void mockAPIMConfiguration(String propertyName, String value) throws RegistryException, 
+                                                                                        UserStoreException{
+        ServiceReferenceHolder sh = mockRegistryAndUserRealm(-1234);
         APIManagerConfigurationService amConfigService = Mockito.mock(APIManagerConfigurationService.class);
         APIManagerConfiguration amConfig = Mockito.mock(APIManagerConfiguration.class);
         
@@ -96,7 +99,7 @@ public class TestUtils {
         PowerMockito.when(amConfig.getFirstProperty(propertyName)).thenReturn(value);
     }
     
-    private static ServiceReferenceHolder getServiceReferenceHolder() {
+    public static ServiceReferenceHolder getServiceReferenceHolder() {
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         ServiceReferenceHolder sh = PowerMockito.mock(ServiceReferenceHolder.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);
