@@ -525,6 +525,6 @@ public class APIMgtConstants {
      */
     public static class EncryptionConstants {
         public static final String AES = "AES";
-        public static final String ENCRYPTED_AES_KEY = "wso2.carbon.apimgt.encryption.aeskey";
+        public static final String ENCRYPTED_AES_KEY_FILE = "AESKeyFile";
     }
 }

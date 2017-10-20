@@ -5,14 +5,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.configuration.models.FileEncryptionConfigurations;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
-import org.wso2.carbon.secvault.MasterKeyReader;
-import org.wso2.carbon.secvault.SecureVaultConstants;
-import org.wso2.carbon.secvault.SecureVaultUtils;
-import org.wso2.carbon.secvault.exception.SecureVaultException;
-import org.wso2.carbon.secvault.internal.SecureVaultDataHolder;
-import org.wso2.carbon.secvault.model.SecretRepositoryConfiguration;
-import org.wso2.carbon.secvault.repository.DefaultSecretRepository;
+import org.wso2.carbon.kernel.securevault.SecureVault;
+import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
+import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -23,7 +20,6 @@ import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
-import java.util.Properties;
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
@@ -42,35 +38,20 @@ public class FileEncryptionUtil {
 
 
     private static FileEncryptionConfigurations config;
-    private static DefaultSecretRepository defaultSecretRepository;
-    private static Path secretPropertiesFilePath;
-    private static Properties secretsProperties;
+    private static String aesKeyFileLocation;
+    private static SecureVault secureVault;
     private static Cipher aesCipher;
 
     public static void init() throws APIManagementException {
         try {
             config = ServiceReferenceHolder.getInstance().getAPIMConfiguration().getFileEncryptionConfigurations();
-
-            SecureVaultDataHolder secureVaultDataHolder = SecureVaultDataHolder.getInstance();
-            SecretRepositoryConfiguration secretRepositoryConfig = secureVaultDataHolder.getSecureVaultConfiguration()
-                    .orElseThrow(() -> new APIManagementException("Error in getting secure vault configuration"))
-                    .getSecretRepositoryConfig();
-            MasterKeyReader masterKeyReader = secureVaultDataHolder.getMasterKeyReader()
-                    .orElseThrow(() -> new APIManagementException("Error in getting secure vault configuration"));
-            defaultSecretRepository = new DefaultSecretRepository();
-            defaultSecretRepository.init(secretRepositoryConfig, masterKeyReader);
-
-            secretPropertiesFilePath = Paths.get(secretRepositoryConfig
-                    .getParameter(SecureVaultConstants.SECRET_PROPERTIES_CONFIG_PROPERTY)
-                    .orElseThrow(() -> new SecureVaultException("Secret properties path not found")));
-            secretsProperties = SecureVaultUtils.loadSecretFile(secretPropertiesFilePath);
-
+            aesKeyFileLocation = config.getDestinationDirectory() + "/" + EncryptionConstants.ENCRYPTED_AES_KEY_FILE;
+            secureVault = ServiceReferenceHolder.getInstance().getSecureVault();
+            if (secureVault == null) {
+                throw new APIManagementException("Secure vault OSGi service cannot be accessed");
+            }
             aesCipher = Cipher.getInstance(EncryptionConstants.AES);
             createAndStoreAESKey();
-        } catch (APIManagementException | SecureVaultException e) {
-            String msg = "Error occurred while initializing File Encryption";
-            log.error(msg, e);
-            throw new APIManagementException(msg);
         } catch (NoSuchPaddingException | NoSuchAlgorithmException e) {
             String msg = "Error occurred while initializing AES cipher for File Encryption";
             log.error(msg, e);
@@ -85,28 +66,33 @@ public class FileEncryptionUtil {
             byte[] aesKey = kgen.generateKey().getEncoded();
 
             //store key => encrypt -> encode -> string
-            byte[] encryptedKeyBytes = SecureVaultUtils.base64Encode(defaultSecretRepository.encrypt(aesKey));
+            byte[] encryptedKeyBytes = SecureVaultUtils.base64Encode(secureVault.encrypt(aesKey));
             String encryptedKeyString = new String(SecureVaultUtils.toChars(encryptedKeyBytes));
-            secretsProperties.setProperty(EncryptionConstants.ENCRYPTED_AES_KEY,
-                    SecureVaultConstants.CIPHER_TEXT + " " + encryptedKeyString);
-            SecureVaultUtils.updateSecretFile(secretPropertiesFilePath, secretsProperties);
+            APIFileUtils.createDirectory(aesKeyFileLocation);
+            APIFileUtils.writeToFile(aesKeyFileLocation, encryptedKeyString);
             log.debug("AES key successfully created and stored");
         } catch (NoSuchAlgorithmException e) {
             String msg = "Error while creating AES key";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
-        } catch (SecureVaultException | NullPointerException e) {
+        } catch (SecureVaultException | NullPointerException | APIMgtDAOException e) {
             String msg = "Error while storing created AES key";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
     }
 
-    private static byte[] getAESKey() throws SecureVaultException {
-        String encryptedAesKeyStr = secretsProperties.getProperty(EncryptionConstants.ENCRYPTED_AES_KEY)
-                .trim().split(SecureVaultConstants.SPACE)[1];
-        byte[] encryptedAesKeyB = SecureVaultUtils.base64Decode(SecureVaultUtils.toBytes(encryptedAesKeyStr));
-        return defaultSecretRepository.decrypt(encryptedAesKeyB);
+    private static byte[] getAESKey() throws SecureVaultException, APIManagementException {
+        byte[] encryptedAesKeyB;
+        try {
+            String encryptedAesKeyStr = APIFileUtils.readFileContentAsText(aesKeyFileLocation);
+            encryptedAesKeyB = SecureVaultUtils.base64Decode(SecureVaultUtils.toBytes(encryptedAesKeyStr));
+        } catch (APIMgtDAOException e) {
+            String msg = "Error while retrieving stored AES key";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return secureVault.decrypt(encryptedAesKeyB);
     }
 
     public static void encryptFile(Path inputFilePath, Path outputFilePath) throws APIManagementException {
@@ -115,7 +101,7 @@ public class FileEncryptionUtil {
             SecretKeySpec aesKeySpec = new SecretKeySpec(getAESKey(), EncryptionConstants.AES);
             aesCipher.init(Cipher.ENCRYPT_MODE, aesKeySpec);
 
-            InputStream inputStream = getResourceAsStream(inputFilePath);
+            InputStream inputStream = APIFileUtils.readFileContentAsStream(inputFilePath.toString());
             CipherOutputStream cipherOutStream = new CipherOutputStream(
                     new FileOutputStream(outputFilePath.toString()), aesCipher);
             IOUtils.copy(inputStream, cipherOutStream);
@@ -124,7 +110,7 @@ public class FileEncryptionUtil {
         } catch (IOException | InvalidKeyException | SecureVaultException e) {
             String msg = "Error while encrypting file using AES key";
             log.error(msg, e);
-            throw new APIManagementException(msg);
+            throw new APIManagementException(msg, e);
         }
     }
 
@@ -134,7 +120,8 @@ public class FileEncryptionUtil {
             SecretKeySpec aesKeySpec = new SecretKeySpec(getAESKey(), EncryptionConstants.AES);
             aesCipher.init(Cipher.DECRYPT_MODE, aesKeySpec);
 
-            CipherInputStream cipherInStream = new CipherInputStream(getResourceAsStream(inputFilePath), aesCipher);
+            CipherInputStream cipherInStream = new CipherInputStream(
+                    APIFileUtils.readFileContentAsStream(inputFilePath.toString()), aesCipher);
             ByteArrayOutputStream byteArrayOutStream = new ByteArrayOutputStream();
             IOUtils.copy(cipherInStream, byteArrayOutStream);
             byte[] outByteArray = byteArrayOutStream.toByteArray();
@@ -157,7 +144,4 @@ public class FileEncryptionUtil {
         }
     }
 
-    private static InputStream getResourceAsStream(Path path) {
-        return FileEncryptionUtil.class.getResourceAsStream(path.toString());
-    }
 }

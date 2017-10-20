@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
+import org.wso2.carbon.kernel.securevault.SecureVault;
 
 import java.util.Map;
 
@@ -32,6 +33,7 @@ public class ServiceReferenceHolder {
     private static final Logger log = LoggerFactory.getLogger(ServiceReferenceHolder.class);
     private static ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private ConfigProvider configProvider;
+    private SecureVault secureVault;
     private APIMConfigurations config = null;
 
     private ServiceReferenceHolder() {
@@ -82,5 +84,13 @@ public class ServiceReferenceHolder {
                     "org.wso2.carbon.apimgt.core.internal.APIMConfiguration", e);
         }
         return null;
+    }
+
+    public SecureVault getSecureVault() {
+        return secureVault;
+    }
+
+    public void setSecureVault(SecureVault secureVault) {
+        this.secureVault = secureVault;
     }
 }

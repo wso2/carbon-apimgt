@@ -24,6 +24,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.kernel.configprovider.ConfigProvider;
+import org.wso2.carbon.kernel.securevault.SecureVault;
 
 /**
  * Class used to activate configuration loading
@@ -40,8 +41,11 @@ public class ConfigurationActivator {
      *
      * @param configProvider the ConfigProvider service that is registered as a service.
      */
-    @Reference(name = "carbon.config.provider", service = ConfigProvider.class,
-            cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.DYNAMIC,
+    @Reference(
+            name = "carbon.config.provider",
+            service = ConfigProvider.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
             unbind = "unregisterConfigProvider")
     protected void registerConfigProvider(ConfigProvider configProvider) {
         ServiceReferenceHolder.getInstance().setConfigProvider(configProvider);
@@ -55,5 +59,32 @@ public class ConfigurationActivator {
      */
     protected void unregisterConfigProvider(ConfigProvider configProvider) {
         ServiceReferenceHolder.getInstance().setConfigProvider(null);
+    }
+
+    /**
+     * Get the SecureVault service.
+     * This is the bind method that gets called for SecureVault service registration,
+     * which is registered by the 5.2.0-m3 kernel at org.wso2.carbon.kernel.internal.securevault.SecureVaultComponent
+     *
+     * @param secureVault the ConfigProvider service that is registered as a service.
+     */
+    @Reference(
+            name = "org.wso2.carbon.kernel.securevault.SecureVault",
+            service = SecureVault.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unregisterSecureVault"
+    )
+    protected void registerSecureVault(SecureVault secureVault) {
+        ServiceReferenceHolder.getInstance().setSecureVault(secureVault);
+    }
+
+    /**
+     * This is the unbind method, which gets called for ConfigProvider instance un-registrations.
+     *
+     * @param secureVault the ConfigProvider service that get unregistered.
+     */
+    protected void unregisterSecureVault(SecureVault secureVault) {
+        ServiceReferenceHolder.getInstance().setSecureVault(null);
     }
 }
