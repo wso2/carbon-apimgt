@@ -21,6 +21,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -44,6 +45,7 @@ import javax.ws.rs.core.Response;
 public class ImportApi implements Microservice  {
    private final ImportApiService delegate = ImportApiServiceFactory.getImportApi();
 
+    @OPTIONS
     @POST
     @Path("/apis")
     @Consumes({ "multipart/form-data" })
@@ -65,10 +67,11 @@ public class ImportApi implements Microservice  {
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FileInfo fileDetail
 ,@ApiParam(value = "If defined, updates the existing provider of each API with the specified provider. This is to cater scenarios where the current API provider does not exist in the environment that the API is imported to. ") @QueryParam("provider") String provider
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.importApisPost(fileInputStream, fileDetail,provider, request);
+        return delegate.importApisPost(fileInputStream, fileDetail,provider,request);
     }
+    @OPTIONS
     @PUT
     @Path("/apis")
     @Consumes({ "multipart/form-data" })
@@ -90,8 +93,8 @@ public class ImportApi implements Microservice  {
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FileInfo fileDetail
 ,@ApiParam(value = "If defined, updates the existing provider of each API with the specified provider. This is to cater scenarios where the current API provider does not exist in the environment that the API is imported to. ") @QueryParam("provider") String provider
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.importApisPut(fileInputStream, fileDetail,provider, request);
+        return delegate.importApisPut(fileInputStream, fileDetail,provider,request);
     }
 }

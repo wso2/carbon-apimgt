@@ -21,6 +21,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -44,6 +45,7 @@ import javax.ws.rs.core.Response;
 public class PoliciesApi implements Microservice  {
    private final PoliciesApiService delegate = PoliciesApiServiceFactory.getPoliciesApi();
 
+    @OPTIONS
     @GET
     @Path("/{tierLevel}")
     @Consumes({ "application/json" })
@@ -63,10 +65,11 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
 ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesTierLevelGet(tierLevel,limit,offset,ifNoneMatch, request);
+        return delegate.policiesTierLevelGet(tierLevel,limit,offset,ifNoneMatch,request);
     }
+    @OPTIONS
     @GET
     @Path("/{tierLevel}/{tierName}")
     @Consumes({ "application/json" })
@@ -88,8 +91,8 @@ public class PoliciesApi implements Microservice  {
 ,@ApiParam(value = "List API or Application or Resource type policies. ",required=true, allowableValues="api, application, resource") @PathParam("tierLevel") String tierLevel
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.policiesTierLevelTierNameGet(tierName,tierLevel,ifNoneMatch,ifModifiedSince, request);
+        return delegate.policiesTierLevelTierNameGet(tierName,tierLevel,ifNoneMatch,ifModifiedSince,request);
     }
 }

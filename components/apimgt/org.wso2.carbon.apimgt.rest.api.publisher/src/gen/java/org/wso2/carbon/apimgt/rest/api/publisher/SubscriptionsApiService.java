@@ -24,18 +24,18 @@ public abstract class SubscriptionsApiService {
  ,String blockState
  ,String ifMatch
  ,String ifUnmodifiedSince
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
     public abstract Response subscriptionsGet(String apiId
  ,Integer limit
  ,Integer offset
  ,String ifNoneMatch
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
     public abstract Response subscriptionsSubscriptionIdGet(String subscriptionId
  ,String ifNoneMatch
  ,String ifModifiedSince
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
     public abstract Response subscriptionsUnblockSubscriptionPost(String subscriptionId
  ,String ifMatch
  ,String ifUnmodifiedSince
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
 }
