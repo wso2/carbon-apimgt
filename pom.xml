@@ -1051,11 +1051,13 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+
             <dependency>
                 <groupId>org.reflections</groupId>
                 <artifactId>reflections</artifactId>
                 <version>${reflection.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-validator</artifactId>
@@ -1453,6 +1455,7 @@
         <version.snake.yaml>1.17</version.snake.yaml>
         <wsdl4j.version>1.6.2.wso2v4</wsdl4j.version>
         <slf4j.test.version>1.7.7</slf4j.test.version>
+        <reflection.version>0.9.11</reflection.version>
         <jacoco.version>0.7.9</jacoco.version>
         <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
 
