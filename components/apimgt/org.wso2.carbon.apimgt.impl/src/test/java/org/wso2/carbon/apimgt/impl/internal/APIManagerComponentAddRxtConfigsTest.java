@@ -81,6 +81,7 @@ public class APIManagerComponentAddRxtConfigsTest {
             apiManagerComponent.activate(componentContext);
             Assert.fail("IndexOutOfBoundsException is expected");
         } catch (IndexOutOfBoundsException e) {
+            Assert.assertTrue(true);
         } catch (Exception e) {
             Assert.fail("Unexpected exception was thrown");
         }
