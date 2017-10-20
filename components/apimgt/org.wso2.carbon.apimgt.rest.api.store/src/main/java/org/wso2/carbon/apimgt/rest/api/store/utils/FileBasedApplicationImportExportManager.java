@@ -7,7 +7,6 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtEntityImportExportException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.FileApplication;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 
 import java.io.File;
@@ -39,15 +38,14 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
         }
 
         Application exportApplication = application;
-        String applicationExportDirectory = "exported-application";
+        String applicationExportDirectory = applicationArtifactBaseDirectoryPath;
 
         try {
             //create directory per application
             APIFileUtils.createDirectory(applicationExportDirectory);
 
             //export application details
-            APIFileUtils.exportApplicationDetailsToFileSystem(new FileApplication(exportApplication),
-                    exportDirectoryName);
+            APIFileUtils.exportApplicationDetailsToFileSystem(exportApplication, applicationExportDirectory);
 
         } catch (APIMgtDAOException e) {
 
@@ -70,7 +68,7 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
                 throw new APIMgtEntityImportExportException(errorMsg, ExceptionCodes.APPLICATION_EXPORT_ERROR);
             }
         } catch (APIMgtDAOException e) {
-            String errorMsg = "Unable to find API definitions at: " + applicationArtifactBaseDirectoryPath;
+            String errorMsg = "Unable to find Application Details at: " + applicationArtifactBaseDirectoryPath;
             log.error(errorMsg, e);
             throw new APIMgtEntityImportExportException(errorMsg, ExceptionCodes.APPLICATION_IMPORT_ERROR);
         }
