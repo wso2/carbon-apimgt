@@ -557,11 +557,9 @@ public class APIManagerComponent {
 
     private void configureJMSPublisher() {
         OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
-
         adapterConfiguration.setName(APIConstants.BLOCKING_EVENT_PUBLISHER);
         adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
         adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_FORMAT);
-
 
         if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService() != null) {
             APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
