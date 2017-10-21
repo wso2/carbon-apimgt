@@ -59,8 +59,7 @@ public class BlockingConditionRetriever extends TimerTask {
     private BlockConditionsDTO retrieveBlockConditionsData() {
 
         try {
-            ThrottleProperties.BlockCondition blockConditionRetrieverConfiguration = ServiceReferenceHolder
-                    .getInstance().getThrottleProperties().getBlockCondition();
+            ThrottleProperties.BlockCondition blockConditionRetrieverConfiguration = getThrottleProperties().getBlockCondition();
             String url = blockConditionRetrieverConfiguration.getServiceUrl() + "/block";
             byte[] credentials = Base64.encodeBase64((blockConditionRetrieverConfiguration.getUsername() + ":" +
                                                       blockConditionRetrieverConfiguration.getPassword()).getBytes
@@ -101,6 +100,11 @@ public class BlockingConditionRetriever extends TimerTask {
         return null;
     }
 
+    protected ThrottleProperties getThrottleProperties() {
+        return ServiceReferenceHolder
+                .getInstance().getThrottleProperties();
+    }
+
     public void loadBlockingConditionsFromWebService() {
         BlockConditionsDTO blockConditionsDTO = retrieveBlockConditionsData();
         if (blockConditionsDTO != null) {
@@ -118,7 +122,6 @@ public class BlockingConditionRetriever extends TimerTask {
 
     public void startWebServiceThrottleDataRetriever() {
 
-        new Timer().schedule(this, ServiceReferenceHolder
-                .getInstance().getThrottleProperties().getBlockCondition().getInitDelay());
+        new Timer().schedule(this, getThrottleProperties().getBlockCondition().getInitDelay());
     }
 }
