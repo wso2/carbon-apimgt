@@ -25,7 +25,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.core.APIManagerErrorConstants;
-import org.wso2.carbon.apimgt.core.authenticate.APITokenValidator;
 import org.wso2.carbon.apimgt.core.gateway.APITokenAuthenticator;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;

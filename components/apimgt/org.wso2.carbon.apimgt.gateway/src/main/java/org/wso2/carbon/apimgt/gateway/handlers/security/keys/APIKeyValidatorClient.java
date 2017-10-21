@@ -218,12 +218,12 @@ public class APIKeyValidatorClient {
         return template;
     }
 
-    private String getAxis2ClientXmlLocation() {
+    protected String getAxis2ClientXmlLocation() {
         String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" +
                 ".clientAxis2XmlLocation");
         return axis2ClientXml;
     }
-    private String getClientRepoLocation() {
+    protected String getClientRepoLocation() {
         String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" +
                 ".ClientRepositoryLocation");
         return axis2ClientXml;

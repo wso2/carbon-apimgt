@@ -27,6 +27,6 @@ public class APITokenValidator {
     public APIKeyValidationInfoDTO validateKey(String context, String version, String accessToken,
                                                String requiredAuthenticationLevel) throws APIManagementException {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-        return apiMgtDAO.validateKey(context, version, accessToken, requiredAuthenticationLevel);
+        return null;
     }
 }

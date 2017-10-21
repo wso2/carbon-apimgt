@@ -71,7 +71,6 @@ import org.wso2.carbon.apimgt.impl.dto.APIKeyInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
@@ -569,6 +568,11 @@ public class APIMgtDAOTest extends TestCase {
 
         policy.setPipelines(pipelines);
         apiMgtDAO.updateAPIPolicy(policy);
+        APIPolicy apiPolicy = apiMgtDAO.getAPIPolicy(policyName,-1234);
+        assertNotNull(apiPolicy);
+        List<Pipeline> pipelineList = apiPolicy.getPipelines();
+        assertNotNull(pipelineList);
+        assertEquals(pipelineList.size(),pipelines.size());
     }
 
     public void testDeletePolicy() throws APIManagementException {
@@ -716,7 +720,6 @@ public class APIMgtDAOTest extends TestCase {
         policy.setDefaultQuotaPolicy(defaultQuotaPolicy);
 
         List<Pipeline> pipelines;
-        Pipeline p;
         QuotaPolicy quotaPolicy;
         List<Condition> condition;
         BandwidthLimit bandwidthLimit;
@@ -725,7 +728,7 @@ public class APIMgtDAOTest extends TestCase {
 
 
         ///////////pipeline item 1 start//////
-        p = new Pipeline();
+        Pipeline p1 = new Pipeline();
 
         quotaPolicy = new QuotaPolicy();
         quotaPolicy.setType(PolicyConstants.BANDWIDTH_TYPE);
@@ -742,6 +745,7 @@ public class APIMgtDAOTest extends TestCase {
         condition.add(verbCond);
 
         IPCondition ipCondition = new IPCondition(PolicyConstants.IP_SPECIFIC_TYPE);
+        ipCondition.setSpecificIP("127.0.0.1");
         condition.add(ipCondition);
 
 
@@ -750,13 +754,13 @@ public class APIMgtDAOTest extends TestCase {
         dateRangeCondition.setEndingDate("2016-01-31");
         condition.add(dateRangeCondition);
 
-        p.setQuotaPolicy(quotaPolicy);
-        p.setConditions(condition);
-        pipelines.add(p);
+        p1.setQuotaPolicy(quotaPolicy);
+        p1.setConditions(condition);
+        pipelines.add(p1);
         ///////////pipeline item 1 end//////
 
         ///////////pipeline item 2 start//////
-        p = new Pipeline();
+        Pipeline p2 = new Pipeline();
 
         quotaPolicy = new QuotaPolicy();
         quotaPolicy.setType("requestCount");
@@ -766,45 +770,49 @@ public class APIMgtDAOTest extends TestCase {
         requestCountLimit.setRequestCount(1000);
         quotaPolicy.setLimit(requestCountLimit);
 
-        condition = new ArrayList<Condition>();
+        List<Condition> condition2 = new ArrayList<Condition>();
 
         DateCondition dateCondition = new DateCondition();
         dateCondition.setSpecificDate("2016-01-02");
-        condition.add(dateCondition);
+        condition2.add(dateCondition);
 
         HeaderCondition headerCondition1 = new HeaderCondition();
         headerCondition1.setHeader("User-Agent");
         headerCondition1.setValue("Firefox");
-        condition.add(headerCondition1);
+        condition2.add(headerCondition1);
 
         HeaderCondition headerCondition2 = new HeaderCondition();
         headerCondition2.setHeader("Accept-Ranges");
         headerCondition2.setValue("bytes");
-        condition.add(headerCondition2);
+        condition2.add(headerCondition2);
 
         QueryParameterCondition queryParameterCondition1 = new QueryParameterCondition();
         queryParameterCondition1.setParameter("test1");
         queryParameterCondition1.setValue("testValue1");
-        condition.add(queryParameterCondition1);
+        condition2.add(queryParameterCondition1);
 
         QueryParameterCondition queryParameterCondition2 = new QueryParameterCondition();
         queryParameterCondition2.setParameter("test2");
         queryParameterCondition2.setValue("testValue2");
-        condition.add(queryParameterCondition2);
+        condition2.add(queryParameterCondition2);
 
         JWTClaimsCondition jwtClaimsCondition1 = new JWTClaimsCondition();
         jwtClaimsCondition1.setClaimUrl("test_url");
         jwtClaimsCondition1.setAttribute("test_attribute");
-        condition.add(jwtClaimsCondition1);
+        condition2.add(jwtClaimsCondition1);
 
         JWTClaimsCondition jwtClaimsCondition2 = new JWTClaimsCondition();
         jwtClaimsCondition2.setClaimUrl("test_url");
         jwtClaimsCondition2.setAttribute("test_attribute");
-        condition.add(jwtClaimsCondition2);
+        condition2.add(jwtClaimsCondition2);
 
-        p.setQuotaPolicy(quotaPolicy);
-        p.setConditions(condition);
-        pipelines.add(p);
+        IPCondition ipRangeCondition = new IPCondition(PolicyConstants.IP_RANGE_TYPE);
+        ipCondition.setStartingIP("127.0.0.1");
+        ipCondition.setEndingIP("127.0.0.12");
+        condition2.add(ipRangeCondition);
+        p2.setQuotaPolicy(quotaPolicy);
+        p2.setConditions(condition2);
+        pipelines.add(p2);
         ///////////pipeline item 2 end//////
 
         policy.setPipelines(pipelines);
@@ -1061,6 +1069,8 @@ public class APIMgtDAOTest extends TestCase {
         assertEquals(retrievedPolicy.getRateLimitTimeUnit(), retrievedPolicyFromUUID.getRateLimitTimeUnit());
         retrievedPolicyFromUUID.setCustomAttributes(customAttributes.getBytes());
         apiMgtDAO.updateSubscriptionPolicy(retrievedPolicyFromUUID);
+        retrievedPolicyFromUUID.setPolicyName(null);
+        apiMgtDAO.updateSubscriptionPolicy(retrievedPolicyFromUUID);
         SubscriptionPolicy[] subscriptionPolicies = apiMgtDAO.getSubscriptionPolicies(-1234);
         apiMgtDAO.updateThrottleTierPermissions(subscriptionPolicy.getPolicyName(), "allow", "internal/everyone",
                 -1234);
@@ -1121,6 +1131,8 @@ public class APIMgtDAOTest extends TestCase {
         assertTrue(apiMgtDAO.getGlobalPolicies(-1234).length > 0);
         assertTrue(apiMgtDAO.getGlobalPolicyKeyTemplates(-1234).contains("$user"));
         apiMgtDAO.updateGlobalPolicy(globalPolicy);
+        retrievedFromUUID.setPolicyName(null);
+        apiMgtDAO.updateGlobalPolicy(retrievedFromUUID);
         apiMgtDAO.setPolicyDeploymentStatus(PolicyConstants.POLICY_LEVEL_GLOBAL, globalPolicy.getPolicyName(), -1234,
                 true);
         assertTrue(apiMgtDAO.isPolicyDeployed(PolicyConstants.POLICY_LEVEL_GLOBAL, -1234, globalPolicy.getPolicyName
