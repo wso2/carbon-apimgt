@@ -62,7 +62,6 @@ public class APIKeyValidatorClient {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                                            "Required connection details for the key management server not provided");
         }
-
         try {
             ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem
                     (getClientRepoLocation(),getAxis2ClientXmlLocation());
