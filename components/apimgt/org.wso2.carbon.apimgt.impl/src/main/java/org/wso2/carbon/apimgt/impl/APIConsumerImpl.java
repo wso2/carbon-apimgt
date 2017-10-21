@@ -3114,7 +3114,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 	}
 
 	public String getScopesByToken(String accessToken) throws APIManagementException {
-		return apiMgtDAO.getScopesByToken(accessToken);
+		return null;
 	}
 
 	public Set<Scope> getScopesByScopeKeys(String scopeKeys, int tenantId)

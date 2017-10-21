@@ -281,4 +281,88 @@ public class URITemplate implements Serializable{
     public void setApplicableLevel(String applicableLevel) {
         this.applicableLevel = applicableLevel;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        URITemplate that = (URITemplate) o;
+
+        if (!uriTemplate.equals(that.uriTemplate)) {
+            return false;
+        }
+        if (resourceURI != null ? !resourceURI.equals(that.resourceURI) : that.resourceURI != null) {
+            return false;
+        }
+        if (resourceSandboxURI != null ? !resourceSandboxURI.equals(that.resourceSandboxURI) : that
+                .resourceSandboxURI != null) {
+            return false;
+        }
+        if (!httpVerb.equals(that.httpVerb)) {
+            return false;
+        }
+        if (!authType.equals(that.authType)) {
+            return false;
+        }
+        if (!httpVerbs.equals(that.httpVerbs)) {
+            return false;
+        }
+        if (!authTypes.equals(that.authTypes)) {
+            return false;
+        }
+        if (throttlingConditions != null ? !throttlingConditions.equals(that.throttlingConditions) : that
+                .throttlingConditions != null) {
+            return false;
+        }
+        if (applicableLevel != null ? !applicableLevel.equals(that.applicableLevel) : that.applicableLevel != null) {
+            return false;
+        }
+        if (!throttlingTier.equals(that.throttlingTier)) {
+            return false;
+        }
+        if (!throttlingTiers.equals(that.throttlingTiers)) {
+            return false;
+        }
+        if (scope != null ? !scope.equals(that.scope) : that.scope != null) {
+            return false;
+        }
+        if (mediationScript != null ? !mediationScript.equals(that.mediationScript) : that.mediationScript != null) {
+            return false;
+        }
+        if (scopes != null ? !scopes.equals(that.scopes) : that.scopes != null) {
+            return false;
+        }
+        if (mediationScripts != null ? !mediationScripts.equals(that.mediationScripts) : that.mediationScripts !=
+                null) {
+            return false;
+        }
+        // Probably incorrect - comparing Object[] arrays with Arrays.equals
+        return Arrays.equals(conditionGroups, that.conditionGroups);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = uriTemplate.hashCode();
+        result = 31 * result + (resourceURI != null ? resourceURI.hashCode() : 0);
+        result = 31 * result + (resourceSandboxURI != null ? resourceSandboxURI.hashCode() : 0);
+        result = 31 * result + httpVerb.hashCode();
+        result = 31 * result + authType.hashCode();
+        result = 31 * result + httpVerbs.hashCode();
+        result = 31 * result + authTypes.hashCode();
+        result = 31 * result + (throttlingConditions != null ? throttlingConditions.hashCode() : 0);
+        result = 31 * result + (applicableLevel != null ? applicableLevel.hashCode() : 0);
+        result = 31 * result + throttlingTier.hashCode();
+        result = 31 * result + throttlingTiers.hashCode();
+        result = 31 * result + (scope != null ? scope.hashCode() : 0);
+        result = 31 * result + (mediationScript != null ? mediationScript.hashCode() : 0);
+        result = 31 * result + (scopes != null ? scopes.hashCode() : 0);
+        result = 31 * result + (mediationScripts != null ? mediationScripts.hashCode() : 0);
+        result = 31 * result + Arrays.hashCode(conditionGroups);
+        return result;
+    }
 }

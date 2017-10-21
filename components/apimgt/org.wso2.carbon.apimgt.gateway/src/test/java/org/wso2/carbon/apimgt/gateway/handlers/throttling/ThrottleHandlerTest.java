@@ -36,8 +36,6 @@ import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Test cases for for ThrottleHandler
@@ -45,7 +43,6 @@ import java.util.Map;
 public class ThrottleHandlerTest {
     private Timer timer;
     private Timer.Context context;
-    private ThrottleDataHolder throttleDataHolder;
     private ThrottleConditionEvaluator throttleEvaluator;
     private AccessInformation accessInformation;
     private ConditionGroupDTO conditionGroupDTO;
@@ -67,7 +64,6 @@ public class ThrottleHandlerTest {
         timer = Mockito.mock(Timer.class);
         timer = Mockito.mock(Timer.class);
         context = Mockito.mock(Timer.Context.class);
-        throttleDataHolder = Mockito.mock(ThrottleDataHolder.class);
         throttleEvaluator = Mockito.mock(ThrottleConditionEvaluator.class);
         accessInformation = Mockito.mock(AccessInformation.class);
         Mockito.when(timer.start()).thenReturn(context);
@@ -88,6 +84,8 @@ public class ThrottleHandlerTest {
 
     @Test
     public void testDoNotThrottleWhenMsgIsAResponseAndAuthCtxNotAvailable() {
+        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator);
 
         MessageContext messageContext = TestUtils.getMessageContext(apiContext, apiVersion);
@@ -97,6 +95,8 @@ public class ThrottleHandlerTest {
 
     @Test
     public void testSubscriptionLevelThrottlingInitWhenThrottleCtxIsNull() {
+        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator);
 
         MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
@@ -107,6 +107,8 @@ public class ThrottleHandlerTest {
 
     @Test
     public void testSubscriptionLevelThrottlingInitialization() {
+        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator);
 
         MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
@@ -120,22 +122,28 @@ public class ThrottleHandlerTest {
 
     @Test
     public void testMsgThrottleOutWhenBlockingConditionsAreSatisfied() {
+        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator);
 
         MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
         ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(org.apache.axis2.context
                 .MessageContext.TRANSPORT_HEADERS);
-        Mockito.when(throttleDataHolder.isBlockingConditionsPresent()).thenReturn(true);
+        throttleDataHolder.addIplockingCondition("carbon.super:127.0.0.1", "127.0.0.1");
         AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty
                 (API_AUTH_CONTEXT);
-        Mockito.when(throttleDataHolder.isRequestBlocked(apiContext, authenticationContext
-                .getSubscriber() + ":" + authenticationContext.getApplicationName(), authenticationContext
-                .getUsername(), "carbon.super" + ":" + "127.0.0.1")).thenReturn(true);
+//        Mockito.when(throttleDataHolder.isRequestBlocked(apiContext, authenticationContext
+//                .getSubscriber() + ":" + authenticationContext.getApplicationName(), authenticationContext
+//                .getUsername(), "carbon.super" + ":" + "127.0.0.1")).thenReturn(true);
         Assert.assertFalse(throttleHandler.handleRequest(messageContext));
+        throttleDataHolder.removeIpBlockingCondition("carbon.super:127.0.0.1");
+        Assert.assertTrue(throttleHandler.handleRequest(messageContext));
     }
 
     @Test
     public void testMsgThrottleContinueWhenAPITierIsNotAvailable() {
+        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator);
 
         MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
@@ -149,12 +157,15 @@ public class ThrottleHandlerTest {
 
     @Test
     public void testMsgDoContinueWhenAllThrottlingLevelsAreNotThrolled() {
+        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator);
         MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
         messageContext.setProperty(VERB_INFO_DTO, verbInfoDTO);
         ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(org.apache.axis2.context
                 .MessageContext.TRANSPORT_HEADERS);
-        AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty(API_AUTH_CONTEXT);
+        AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty
+                (API_AUTH_CONTEXT);
         authenticationContext.setApiTier(throttlingTier);
         messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
         //Should continue the message flow if API level, application level, resource level, subscription level,
@@ -164,13 +175,16 @@ public class ThrottleHandlerTest {
 
     @Test
     public void testMsgDoThrottleWhenUserLevelThrottlingIsTriggerred() {
+        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator);
         MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
         verbInfoDTO.setApplicableLevel("userLevel");
         messageContext.setProperty(VERB_INFO_DTO, verbInfoDTO);
         ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(org.apache.axis2.context
                 .MessageContext.TRANSPORT_HEADERS);
-        AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty(API_AUTH_CONTEXT);
+        AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty
+                (API_AUTH_CONTEXT);
         authenticationContext.setApiTier(throttlingTier);
         messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
         //Should continue the message flow, when user level throttling is triggered and not exceeded
@@ -180,6 +194,8 @@ public class ThrottleHandlerTest {
 
     @Test
     public void testMsgThrottleOutWhenAPILevelIsThrottled() {
+        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator);
         MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
         //Set conditional group
@@ -187,15 +203,16 @@ public class ThrottleHandlerTest {
         messageContext.setProperty(VERB_INFO_DTO, verbInfoDTO);
         ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(org.apache.axis2.context
                 .MessageContext.TRANSPORT_HEADERS);
-        AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty(API_AUTH_CONTEXT);
+        AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty
+                (API_AUTH_CONTEXT);
         authenticationContext.setApiTier(throttlingTier);
         messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
         ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
         matchingConditions.add(conditionGroupDTO);
 
         String combinedResourceLevelThrottleKey = apiLevelThrottleKey + conditionGroupDTO.getConditionGroupId();
-        Mockito.when(throttleDataHolder.isAPIThrottled(apiLevelThrottleKey)).thenReturn(true);
-        Mockito.when(throttleDataHolder.isThrottled(combinedResourceLevelThrottleKey)).thenReturn(true);
+        throttleDataHolder.addThrottledAPIKey(apiLevelThrottleKey, System.currentTimeMillis() + 10000);
+        throttleDataHolder.addThrottleData(combinedResourceLevelThrottleKey, System.currentTimeMillis() + 10000);
         Mockito.when(throttleEvaluator.getApplicableConditions(messageContext, authenticationContext,
                 conditionGroupDTOs)).thenReturn(matchingConditions);
 
@@ -205,12 +222,15 @@ public class ThrottleHandlerTest {
 
     @Test
     public void testMsgThrottleOutWhenResourceLevelIsThrottled() {
+        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator);
         MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
         messageContext.setProperty(VERB_INFO_DTO, verbInfoDTO);
         ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(org.apache.axis2.context
                 .MessageContext.TRANSPORT_HEADERS);
-        AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty(API_AUTH_CONTEXT);
+        AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty
+                (API_AUTH_CONTEXT);
         authenticationContext.setApiTier("Unlimited");
         messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
 
@@ -218,9 +238,9 @@ public class ThrottleHandlerTest {
         ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
         matchingConditions.add(conditionGroupDTO);
         String combinedResourceLevelThrottleKey = resourceLevelThrottleKey + conditionGroupDTO.getConditionGroupId();
+        throttleDataHolder.addThrottledAPIKey(resourceLevelThrottleKey, System.currentTimeMillis() + 10000);
+        throttleDataHolder.addThrottleData(combinedResourceLevelThrottleKey, System.currentTimeMillis() + 10000);
 
-        Mockito.when(throttleDataHolder.isAPIThrottled(resourceLevelThrottleKey)).thenReturn(true);
-        Mockito.when(throttleDataHolder.isThrottled(combinedResourceLevelThrottleKey)).thenReturn(true);
         Mockito.when(throttleEvaluator.getApplicableConditions(messageContext, authenticationContext,
                 conditionGroupDTOs)).thenReturn(matchingConditions);
 
@@ -231,12 +251,15 @@ public class ThrottleHandlerTest {
 
     @Test
     public void testMsgThrottleOutWhenSubscriptionLevelIsThrottledAndStopOnQuotaReachIsEnabled() {
+        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator);
         MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
         messageContext.setProperty(VERB_INFO_DTO, verbInfoDTO);
         ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(org.apache.axis2.context
                 .MessageContext.TRANSPORT_HEADERS);
-        AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty(API_AUTH_CONTEXT);
+        AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty
+                (API_AUTH_CONTEXT);
         authenticationContext.setApiTier(throttlingTier);
         authenticationContext.setStopOnQuotaReach(true);
         messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
@@ -246,7 +269,7 @@ public class ThrottleHandlerTest {
         matchingConditions.add(conditionGroupDTO);
         String subscriptionLevelThrottleKey = authenticationContext.getApplicationId() + ":" + apiContext + ":"
                 + apiVersion;
-        Mockito.when(throttleDataHolder.isThrottled(subscriptionLevelThrottleKey)).thenReturn(true);
+        throttleDataHolder.addThrottleData(subscriptionLevelThrottleKey, System.currentTimeMillis() + 10000);
         //Should throttle out and discontinue message flow, when subscription level is throttled out
         //and stop on quota reach is enabled
         Assert.assertFalse(throttleHandler.handleRequest(messageContext));
@@ -255,12 +278,15 @@ public class ThrottleHandlerTest {
 
     @Test
     public void testMsgContinueWhenSubscriptionLevelIsThrottledAndStopOnQuotaReachIsDisabled() {
+        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator);
         MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
         messageContext.setProperty(VERB_INFO_DTO, verbInfoDTO);
         ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(org.apache.axis2.context
                 .MessageContext.TRANSPORT_HEADERS);
-        AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty(API_AUTH_CONTEXT);
+        AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty
+                (API_AUTH_CONTEXT);
         authenticationContext.setApiTier(throttlingTier);
         //Set stopOnQuota
         authenticationContext.setStopOnQuotaReach(false);
@@ -272,7 +298,7 @@ public class ThrottleHandlerTest {
         String subscriptionLevelThrottleKey = authenticationContext.getApplicationId() + ":" + apiContext + ":"
                 + apiVersion;
         //Set subscription level throttled out
-        Mockito.when(throttleDataHolder.isThrottled(subscriptionLevelThrottleKey)).thenReturn(true);
+        throttleDataHolder.addThrottleData(subscriptionLevelThrottleKey, System.currentTimeMillis() + 10000);
         //Though subscription level is throttled out, should continue the message flow, if stop on quota reach is
         //disabled
         Assert.assertTrue(throttleHandler.handleRequest(messageContext));
@@ -280,12 +306,15 @@ public class ThrottleHandlerTest {
 
     @Test
     public void testMsgThrottleOutWhenApplicationLevelIsThrottled() {
+        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator);
         MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
         messageContext.setProperty(VERB_INFO_DTO, verbInfoDTO);
         ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(org.apache.axis2.context
                 .MessageContext.TRANSPORT_HEADERS);
-        AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty(API_AUTH_CONTEXT);
+        AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty
+                (API_AUTH_CONTEXT);
         authenticationContext.setApiTier(throttlingTier);
         messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
         verbInfoDTO.setConditionGroups(conditionGroupDTOs);
@@ -294,13 +323,16 @@ public class ThrottleHandlerTest {
         String applicationLevelThrottleKey = authenticationContext.getApplicationId() + ":" + authenticationContext
                 .getUsername();
         //Set application level throttled out
-        Mockito.when(throttleDataHolder.isThrottled(applicationLevelThrottleKey)).thenReturn(true);
+        throttleDataHolder.addThrottleData(applicationLevelThrottleKey, System.currentTimeMillis() + 10000);
+
         //Should discontinue message flow, when application level is throttled
         Assert.assertFalse(throttleHandler.handleRequest(messageContext));
     }
 
     @Test
     public void testMsgThrottleOutWhenProductionHardThrottlingLimitsThrottled() {
+        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator,
                 accessInformation);
         throttleHandler.setProductionMaxCount("100");
@@ -321,16 +353,6 @@ public class ThrottleHandlerTest {
         verbInfoDTO.setConditionGroups(conditionGroupDTOs);
         ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
         matchingConditions.add(conditionGroupDTO);
-        String subscriptionLevelThrottleKey = authenticationContext.getApplicationId() + ":" + apiContext + ":"
-                + apiVersion;
-        String applicationLevelThrottleKey = authenticationContext.getApplicationId() + ":" + authenticationContext
-                .getUsername();
-        String combinedResourceLevelThrottleKey = resourceLevelThrottleKey + conditionGroupDTO.getConditionGroupId();
-
-        Mockito.when(throttleDataHolder.isThrottled(combinedResourceLevelThrottleKey)).thenReturn(false);
-        Mockito.when(throttleDataHolder.isThrottled(subscriptionLevelThrottleKey)).thenReturn(false);
-        Mockito.when(throttleDataHolder.isThrottled(applicationLevelThrottleKey)).thenReturn(false);
-        Mockito.when(throttleDataHolder.isKeyTemplatesPresent()).thenReturn(false);
         Mockito.when(accessInformation.isAccessAllowed()).thenReturn(false);
 
         //Should discontinue message flow if PRODUCTION hard throttling limits are exceeded
@@ -339,6 +361,8 @@ public class ThrottleHandlerTest {
 
     @Test
     public void testMsgThrottleOutWhenSandBoxHardThrottlingLimitsThrottled() {
+        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator,
                 accessInformation);
         throttleHandler.setSandboxMaxCount("100");
@@ -364,11 +388,11 @@ public class ThrottleHandlerTest {
         String applicationLevelThrottleKey = authenticationContext.getApplicationId() + ":" + authenticationContext
                 .getUsername();
         String combinedResourceLevelThrottleKey = resourceLevelThrottleKey + conditionGroupDTO.getConditionGroupId();
-        Mockito.when(throttleDataHolder.isThrottled(combinedResourceLevelThrottleKey)).thenReturn(false);
-        Mockito.when(throttleDataHolder.isThrottled(subscriptionLevelThrottleKey)).thenReturn(false);
-        Mockito.when(throttleDataHolder.isThrottled(applicationLevelThrottleKey)).thenReturn(false);
-        Mockito.when(throttleDataHolder.isKeyTemplatesPresent()).thenReturn(false);
-        Mockito.when(accessInformation.isAccessAllowed()).thenReturn(false);
+//        Mockito.when(throttleDataHolder.isThrottled(combinedResourceLevelThrottleKey)).thenReturn(false);
+//        Mockito.when(throttleDataHolder.isThrottled(subscriptionLevelThrottleKey)).thenReturn(false);
+//        Mockito.when(throttleDataHolder.isThrottled(applicationLevelThrottleKey)).thenReturn(false);
+//        Mockito.when(throttleDataHolder.isKeyTemplatesPresent()).thenReturn(false);
+//        Mockito.when(accessInformation.isAccessAllowed()).thenReturn(false);
 
         //Should discontinue message flow if SANDBOX hard throttling limits are exceeded
         Assert.assertFalse(throttleHandler.handleRequest(messageContext));
@@ -377,6 +401,8 @@ public class ThrottleHandlerTest {
 
     @Test
     public void testMsgThrottleOutWhenHardThrottlingFailedWithThrottleException() {
+        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator,
                 accessInformation);
         throttleHandler.setProductionMaxCount("100");
@@ -396,15 +422,7 @@ public class ThrottleHandlerTest {
         verbInfoDTO.setConditionGroups(conditionGroupDTOs);
         ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
         matchingConditions.add(conditionGroupDTO);
-        String subscriptionLevelThrottleKey = authenticationContext.getApplicationId() + ":" + apiContext + ":"
-                + apiVersion;
-        String applicationLevelThrottleKey = authenticationContext.getApplicationId() + ":" + authenticationContext
-                .getUsername();
-        String combinedResourceLevelThrottleKey = resourceLevelThrottleKey + conditionGroupDTO.getConditionGroupId();
-        Mockito.when(throttleDataHolder.isThrottled(combinedResourceLevelThrottleKey)).thenReturn(false);
-        Mockito.when(throttleDataHolder.isThrottled(subscriptionLevelThrottleKey)).thenReturn(false);
-        Mockito.when(throttleDataHolder.isThrottled(applicationLevelThrottleKey)).thenReturn(false);
-        Mockito.when(throttleDataHolder.isKeyTemplatesPresent()).thenReturn(false);
+
 
         //Throw ThrottleException while retrieving access information
         Mockito.doThrow(ThrottleException.class).when(accessInformation).isAccessAllowed();
@@ -415,6 +433,8 @@ public class ThrottleHandlerTest {
 
     @Test
     public void testMsgThrottleOutWhenCustomThrottlingLimitExceeded() {
+        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator,
                 accessInformation);
         throttleHandler.setProductionMaxCount("100");
@@ -432,28 +452,20 @@ public class ThrottleHandlerTest {
 
         verbInfoDTO.setConditionGroups(conditionGroupDTOs);
         ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
-        matchingConditions.add(conditionGroupDTO);
-        String subscriptionLevelThrottleKey = authenticationContext.getApplicationId() + ":" + apiContext + ":"
-                + apiVersion;
-        String applicationLevelThrottleKey = authenticationContext.getApplicationId() + ":" + authenticationContext
-                .getUsername();
-        String combinedResourceLevelThrottleKey = resourceLevelThrottleKey + conditionGroupDTO.getConditionGroupId();
-        Mockito.when(throttleDataHolder.isThrottled(combinedResourceLevelThrottleKey)).thenReturn(false);
-        Mockito.when(throttleDataHolder.isThrottled(subscriptionLevelThrottleKey)).thenReturn(false);
-        Mockito.when(throttleDataHolder.isThrottled(applicationLevelThrottleKey)).thenReturn(false);
-        Mockito.when(throttleDataHolder.isKeyTemplatesPresent()).thenReturn(true);
         Mockito.when(accessInformation.isAccessAllowed()).thenReturn(false);
-        Map<String, String> keyTemplateMap = new HashMap<>();
-        keyTemplateMap.put("testKeyTemplate", "testKeyTemplateValue");
-        Mockito.when(throttleDataHolder.getKeyTemplateMap()).thenReturn(keyTemplateMap);
-        Mockito.when(throttleDataHolder.isThrottled("testKeyTemplate")).thenReturn(true);
-
-        //Should discontinue message flow, if custom throttling limit is exceeded
+        matchingConditions.add(conditionGroupDTO);
+        throttleDataHolder.addKeyTemplate("$user", "$user");
+        throttleDataHolder.addKeyTemplate("testKeyTemplate", "testKeyTemplateValue");
+        throttleDataHolder.addThrottleData("testKeyTemplate", System.currentTimeMillis() + 10000);
         Assert.assertFalse(throttleHandler.handleRequest(messageContext));
+        throttleDataHolder.removeKeyTemplate("testKeyTemplate");
+        Assert.assertTrue(throttleHandler.handleRequest(messageContext));
     }
 
     @Test
     public void testMsgThrottleOutWhenHittingSubscriptionLevelSpike() {
+        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator,
                 accessInformation);
         throttleHandler.setSandboxMaxCount("100");
@@ -476,23 +488,46 @@ public class ThrottleHandlerTest {
         verbInfoDTO.setConditionGroups(conditionGroupDTOs);
         ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
         matchingConditions.add(conditionGroupDTO);
-        String subscriptionLevelThrottleKey = authenticationContext.getApplicationId() + ":" + apiContext + ":"
-                + apiVersion;
-        String applicationLevelThrottleKey = authenticationContext.getApplicationId() + ":" + authenticationContext
-                .getUsername();
-        String combinedResourceLevelThrottleKey = resourceLevelThrottleKey + conditionGroupDTO.getConditionGroupId();
-        Mockito.when(throttleDataHolder.isThrottled(combinedResourceLevelThrottleKey)).thenReturn(false);
-        Mockito.when(throttleDataHolder.isThrottled(subscriptionLevelThrottleKey)).thenReturn(false);
-        Mockito.when(throttleDataHolder.isThrottled(applicationLevelThrottleKey)).thenReturn(false);
-        Mockito.when(throttleDataHolder.isKeyTemplatesPresent()).thenReturn(true);
+        throttleDataHolder.addKeyTemplate("$user", "$user");
         Mockito.when(accessInformation.isAccessAllowed()).thenReturn(false);
         Assert.assertFalse(throttleHandler.handleRequest(messageContext));
     }
 
     @Test
     public void testHandleResponse() {
+        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+
         ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator);
         MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
         Assert.assertTrue(throttleHandler.handleResponse(messageContext));
     }
+
+    @Test
+    public void testCheckForStaledThrottleData() {
+        ThrottleDataHolder throttleDataHolder = new ThrottleDataHolder();
+
+        ThrottleHandler throttleHandler = new ThrottlingHandlerWrapper(timer, throttleDataHolder, throttleEvaluator,
+                accessInformation);
+        throttleHandler.setProductionMaxCount("100");
+        SynapseEnvironment synapseEnvironment = Mockito.mock(SynapseEnvironment.class);
+        throttleHandler.init(synapseEnvironment);
+        MessageContext messageContext = TestUtils.getMessageContextWithAuthContext(apiContext, apiVersion);
+        messageContext.setProperty(VERB_INFO_DTO, verbInfoDTO);
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(org.apache.axis2.context
+                .MessageContext.TRANSPORT_HEADERS);
+        AuthenticationContext authenticationContext = (AuthenticationContext) messageContext.getProperty
+                (API_AUTH_CONTEXT);
+        authenticationContext.setApiTier(throttlingTier);
+        authenticationContext.setSpikeArrestLimit(0);
+        messageContext.setProperty(API_AUTH_CONTEXT, authenticationContext);
+
+        verbInfoDTO.setConditionGroups(conditionGroupDTOs);
+        ArrayList<ConditionGroupDTO> matchingConditions = new ArrayList<>();
+        Mockito.when(accessInformation.isAccessAllowed()).thenReturn(false);
+        matchingConditions.add(conditionGroupDTO);
+        throttleDataHolder.addKeyTemplate("testKeyTemplate", "testKeyTemplateValue");
+        throttleDataHolder.addThrottleData("testKeyTemplate", System.currentTimeMillis() - 10000);
+        Assert.assertTrue(throttleHandler.handleRequest(messageContext));
+    }
+
 }

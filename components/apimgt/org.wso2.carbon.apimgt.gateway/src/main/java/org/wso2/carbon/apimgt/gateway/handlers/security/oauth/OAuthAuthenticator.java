@@ -265,10 +265,6 @@ public class OAuthAuthenticator implements Authenticator {
             return null;
         }
 
-        if (authHeader.startsWith("OAuth ") || authHeader.startsWith("oauth ")) {
-            authHeader = authHeader.substring(authHeader.indexOf('o'));
-        }
-
         String[] headers = authHeader.split(oauthHeaderSplitter);
         if (headers != null) {
             for (int i = 0; i < headers.length; i++) {
@@ -302,7 +298,7 @@ public class OAuthAuthenticator implements Authenticator {
     }
 
     protected void initOAuthParams() {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        APIManagerConfiguration config = getApiManagerConfiguration();
         String value = config.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE);
         if (value != null) {
             removeOAuthHeadersFromOutMessage = Boolean.parseBoolean(value);
@@ -311,6 +307,10 @@ public class OAuthAuthenticator implements Authenticator {
         if (value != null) {
             setSecurityContextHeader(value);
         }
+    }
+
+    protected APIManagerConfiguration getApiManagerConfiguration() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
     }
 
     public String getChallengeString() {

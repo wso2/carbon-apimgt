@@ -1,3 +1,20 @@
+/*
+*  Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+*
+*  WSO2 Inc. licenses this file to you under the Apache License,
+*  Version 2.0 (the "License"); you may not use this file except
+*  in compliance with the License.
+*  You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing,
+* software distributed under the License is distributed on an
+* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+* KIND, either express or implied.  See the License for the
+* specific language governing permissions and limitations
+* under the License.
+*/
 package org.wso2.carbon.apimgt.gateway.service;
 
 import org.apache.axiom.om.OMAbstractFactory;
@@ -237,7 +254,7 @@ public class APIGatewayAdminTest {
         RESTAPIAdminClient restapiAdminClient = Mockito.mock(RESTAPIAdminClient.class);
         SequenceAdminServiceClient sequenceAdminServiceClient = Mockito.mock(SequenceAdminServiceClient.class);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, sequenceAdminServiceClient);
-        apiGatewayAdmin.deleteSequenceForTenant("name",tenantDomain);
+        apiGatewayAdmin.deleteSequenceForTenant("name", tenantDomain);
     }
 
     @Test
@@ -248,7 +265,7 @@ public class APIGatewayAdminTest {
         OMElement test1 = fac.createOMElement("test1", "", "");
         Mockito.when(sequenceAdminServiceClient.getSequence(name)).thenReturn(test1);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, sequenceAdminServiceClient);
-        Assert.assertEquals(apiGatewayAdmin.getSequence(name),test1);
+        Assert.assertEquals(apiGatewayAdmin.getSequence(name), test1);
     }
 
     @Test
@@ -257,9 +274,9 @@ public class APIGatewayAdminTest {
         SequenceAdminServiceClient sequenceAdminServiceClient = Mockito.mock(SequenceAdminServiceClient.class);
         OMFactory fac = OMAbstractFactory.getOMFactory();
         OMElement test1 = fac.createOMElement("test1", "", "");
-        Mockito.when(sequenceAdminServiceClient.getSequenceForTenant(name,tenantDomain)).thenReturn(test1);
+        Mockito.when(sequenceAdminServiceClient.getSequenceForTenant(name, tenantDomain)).thenReturn(test1);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, sequenceAdminServiceClient);
-        Assert.assertEquals(apiGatewayAdmin.getSequenceForTenant(name,tenantDomain),test1);
+        Assert.assertEquals(apiGatewayAdmin.getSequenceForTenant(name, tenantDomain), test1);
     }
 
     @Test
@@ -268,16 +285,16 @@ public class APIGatewayAdminTest {
         SequenceAdminServiceClient sequenceAdminServiceClient = Mockito.mock(SequenceAdminServiceClient.class);
         Mockito.when(sequenceAdminServiceClient.isExistingSequence(name)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, sequenceAdminServiceClient);
-        Assert.assertEquals(apiGatewayAdmin.isExistingSequence(name),true);
+        Assert.assertEquals(apiGatewayAdmin.isExistingSequence(name), true);
     }
 
     @Test
     public void isExistingSequenceForTenant() throws Exception {
         RESTAPIAdminClient restapiAdminClient = Mockito.mock(RESTAPIAdminClient.class);
         SequenceAdminServiceClient sequenceAdminServiceClient = Mockito.mock(SequenceAdminServiceClient.class);
-        Mockito.when(sequenceAdminServiceClient.isExistingSequenceForTenant(name,tenantDomain)).thenReturn(true);
+        Mockito.when(sequenceAdminServiceClient.isExistingSequenceForTenant(name, tenantDomain)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, sequenceAdminServiceClient);
-        Assert.assertEquals(apiGatewayAdmin.isExistingSequenceForTenant(name,tenantDomain),true);
+        Assert.assertEquals(apiGatewayAdmin.isExistingSequenceForTenant(name, tenantDomain), true);
     }
 
     @Test
@@ -286,10 +303,10 @@ public class APIGatewayAdminTest {
         SequenceAdminServiceClient sequenceAdminServiceClient = Mockito.mock(SequenceAdminServiceClient.class);
         MediationSecurityAdminServiceClient mediationSecurityAdminServiceClient = Mockito.mock
                 (MediationSecurityAdminServiceClient.class);
-        Mockito.when(sequenceAdminServiceClient.isExistingSequenceForTenant(name,tenantDomain)).thenReturn(true);
+        Mockito.when(sequenceAdminServiceClient.isExistingSequenceForTenant(name, tenantDomain)).thenReturn(true);
         APIGatewayAdmin apiGatewayAdmin = new APIGatewayAdminWrapper(restapiAdminClient, sequenceAdminServiceClient,
                 mediationSecurityAdminServiceClient);
         Mockito.when(mediationSecurityAdminServiceClient.doEncryption("abcde")).thenReturn("defg===");
-        Assert.assertEquals(apiGatewayAdmin.doEncryption(tenantDomain,"wso2carbon","abcde"),"defg===");
+        Assert.assertEquals(apiGatewayAdmin.doEncryption(tenantDomain, "wso2carbon", "abcde"), "defg===");
     }
 }

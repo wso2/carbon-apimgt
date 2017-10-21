@@ -13,21 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package org.wso2.carbon.apimgt.gateway.handlers.security.oauth;
 
-import org.wso2.carbon.apimgt.gateway.handlers.security.TestAPIKeyValidator;
 
-public class TestAuthenticator extends OAuthAuthenticator {
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 
-    public TestAuthenticator() { //TestAPIKeyValidator testAPIKeyValidator
-        super();
-       // this.keyValidator = testAPIKeyValidator;
+public class OauthAuthenticatorWrapper extends OAuthAuthenticator{
+    private APIManagerConfiguration apiManagerConfiguration;
+
+    public OauthAuthenticatorWrapper(APIManagerConfiguration apiManagerConfiguration) {
+        this.apiManagerConfiguration = apiManagerConfiguration;
     }
 
     @Override
-    protected void initOAuthParams() {
-
+    protected APIManagerConfiguration getApiManagerConfiguration() {
+        return apiManagerConfiguration;
     }
-
 }
