@@ -20,8 +20,8 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.gateway.mediators.APIMgtCommonExecutionPublisher;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.publisher.dto.FaultPublisherDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -34,14 +34,14 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
     public boolean mediate(MessageContext messageContext) {
         super.mediate(messageContext);
         if (publisher == null) {
-            this.initializeDataPublisher();
+            initDataPublisher();
         }
         try {
             if (!enabled) {
                 return true;
             }
             long requestTime = Long.parseLong((String) messageContext.getProperty(APIMgtGatewayConstants.
-                                                                         REQUEST_START_TIME));
+                    REQUEST_START_TIME));
             FaultPublisherDTO faultPublisherDTO = new FaultPublisherDTO();
             faultPublisherDTO.setConsumerKey((String) messageContext.getProperty(
                     APIMgtGatewayConstants.CONSUMER_KEY));
@@ -66,11 +66,11 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
                     APIMgtGatewayConstants.USER_ID));
             faultPublisherDTO.setHostName((String) messageContext.getProperty(
                     APIMgtGatewayConstants.HOST_NAME));
-            String apiPublisher=(String) messageContext.getProperty(
+            String apiPublisher = (String) messageContext.getProperty(
                     APIMgtGatewayConstants.API_PUBLISHER);
             if (apiPublisher == null) {
                 String fullRequestPath = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
-                String tenantDomain = MultitenantUtils.getTenantDomainFromRequestURL(fullRequestPath);
+                String tenantDomain = getTenantDomainFromRequestURL(fullRequestPath);
                 String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
                 apiPublisher = APIUtil.getAPIProviderFromRESTAPI(apiVersion, tenantDomain);
             }
@@ -90,6 +90,14 @@ public class APIMgtFaultHandler extends APIMgtCommonExecutionPublisher {
             log.error("Cannot publish event. " + e.getMessage(), e);
         }
         return true; // Should never stop the message flow
+    }
+
+    protected String getTenantDomainFromRequestURL(String fullRequestPath) {
+        return MultitenantUtils.getTenantDomainFromRequestURL(fullRequestPath);
+    }
+
+    protected void initDataPublisher() {
+        this.initializeDataPublisher();
     }
 
     public boolean isContentAware() {

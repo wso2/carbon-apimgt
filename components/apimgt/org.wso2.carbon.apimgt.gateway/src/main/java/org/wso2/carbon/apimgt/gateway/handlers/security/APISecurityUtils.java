@@ -70,9 +70,7 @@ public class APISecurityUtils {
         if (keyValidatorClientType == null) {
             synchronized (APISecurityUtils.class) {
                 if (keyValidatorClientType == null) {
-                    APIManagerConfiguration apiMgtConfig =
-                            ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
-                    keyValidatorClientType = apiMgtConfig.getFirstProperty(APIConstants.API_KEY_VALIDATOR_CLIENT_TYPE);
+                    getAPIKeyValidatorClientType();
                     if (keyValidatorClientType == null) {
                         //default to WSClient
                         keyValidatorClientType = APIConstants.API_KEY_VALIDATOR_WS_CLIENT;
@@ -82,5 +80,11 @@ public class APISecurityUtils {
             }
         }
         return keyValidatorClientType;
+    }
+
+    protected static void getAPIKeyValidatorClientType() {
+        APIManagerConfiguration apiMgtConfig =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        keyValidatorClientType = apiMgtConfig.getFirstProperty(APIConstants.API_KEY_VALIDATOR_CLIENT_TYPE);
     }
 }

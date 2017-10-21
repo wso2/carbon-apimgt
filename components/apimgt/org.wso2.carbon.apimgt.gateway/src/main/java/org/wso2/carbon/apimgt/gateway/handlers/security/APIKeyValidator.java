@@ -238,13 +238,11 @@ public class APIKeyValidator {
                     //Add the tenant domain as a reference to the super tenant cache so we know from which tenant cache
                     //to remove the entry when the need occurs to clear this particular cache entry.
                     try {
-                        PrivilegedCarbonContext.startTenantFlow();
-                        PrivilegedCarbonContext.getThreadLocalCarbonContext().
-                                setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                        startTenantFlow();
 
                         getGatewayTokenCache().put(apiKey, tenantDomain);
                     } finally {
-                        PrivilegedCarbonContext.endTenantFlow();
+                        endTenantFlow();
                     }
                 }
             }
@@ -258,6 +256,16 @@ public class APIKeyValidator {
         }
 
 
+    }
+
+    protected void endTenantFlow() {
+        PrivilegedCarbonContext.endTenantFlow();
+    }
+
+    protected void startTenantFlow() {
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().
+                setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
     }
 
     protected String getTenantDomain() {
@@ -413,12 +421,12 @@ public class APIKeyValidator {
             //Cache hit
             if (verb != null) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Found resource in Cache for key: ".concat(resourceCacheKey));
+                    log.debug("Found resource in Cache for key: " + resourceCacheKey);
                 }
                 return verb;
             }
             if (log.isDebugEnabled()) {
-                log.debug("Resource not found in cache for key: ".concat(resourceCacheKey));
+                log.debug("Resource not found in cache for key: " + resourceCacheKey);
             }
         }
         String resourceString = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
@@ -713,6 +721,9 @@ public class APIKeyValidator {
         return null;
     }
 
+    public void setGatewayAPIResourceValidationEnabled(boolean gatewayAPIResourceValidationEnabled) {
+        isGatewayAPIResourceValidationEnabled = gatewayAPIResourceValidationEnabled;
+    }
 
     protected ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion)
             throws APISecurityException {
