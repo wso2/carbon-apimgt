@@ -18,22 +18,16 @@
 
 package org.wso2.carbon.apimgt.interceptor.handler;
 
-import java.util.Enumeration;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.description.AxisService;
 import org.apache.axis2.description.Parameter;
 import org.apache.axis2.handlers.AbstractHandler;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.core.APIManagerErrorConstants;
-import org.wso2.carbon.apimgt.core.authenticate.APITokenValidator;
 import org.wso2.carbon.apimgt.core.gateway.APITokenAuthenticator;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -43,6 +37,9 @@ import org.wso2.carbon.apimgt.interceptor.UsageStatConfiguration;
 import org.wso2.carbon.apimgt.interceptor.utils.APIManagerInterceptorConstant;
 import org.wso2.carbon.apimgt.interceptor.utils.APIManagetInterceptorUtils;
 import org.wso2.carbon.apimgt.interceptor.valve.APIFaultException;
+
+import java.util.Enumeration;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Axis2 handler to intercept all incoming requests for axis services and do

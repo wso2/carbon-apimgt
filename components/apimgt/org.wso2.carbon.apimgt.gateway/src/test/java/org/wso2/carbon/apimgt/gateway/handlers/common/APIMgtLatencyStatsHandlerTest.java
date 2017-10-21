@@ -86,5 +86,18 @@ public class APIMgtLatencyStatsHandlerTest {
         Assert.assertTrue(Long.valueOf((Long) synCtx.getProperty(APIMgtGatewayConstants.BACKEND_REQUEST_END_TIME)) <=
                 System.currentTimeMillis());
     }
+    @Test
+    public void handleResponseWhileAnalyticDisable() throws Exception {
+        PowerMockito.mockStatic(APIUtil.class);
+        BDDMockito.given(APIUtil.isAnalyticsEnabled()).willReturn(false);
+        SynapseConfiguration synCfg = new SynapseConfiguration();
+        org.apache.axis2.context.MessageContext axisMsgCtx = new org.apache.axis2.context.MessageContext();
+        AxisConfiguration axisConfig = new AxisConfiguration();
+        ConfigurationContext cfgCtx = new ConfigurationContext(axisConfig);
+        MessageContext synCtx = new Axis2MessageContext(axisMsgCtx, synCfg,
+                new Axis2SynapseEnvironment(cfgCtx, synCfg));
+        APIMgtLatencyStatsHandler apiMgtLatencyStatsHandler = new APIMgtLatencyStatsHandler();
+        apiMgtLatencyStatsHandler.handleResponse(synCtx);
+    }
 
 }

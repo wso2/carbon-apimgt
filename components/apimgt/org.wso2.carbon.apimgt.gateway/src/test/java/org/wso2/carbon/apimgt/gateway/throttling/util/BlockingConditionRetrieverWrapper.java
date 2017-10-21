@@ -18,6 +18,26 @@
 
 package org.wso2.carbon.apimgt.gateway.throttling.util;
 
-public class BlockingConditionRetrieverWrapper extends BlockingConditionRetriever{
+import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 
+public class BlockingConditionRetrieverWrapper extends BlockingConditionRetriever {
+    private ThrottleProperties throttleProperties;
+    private ThrottleDataHolder throttleDataHolder;
+
+    public BlockingConditionRetrieverWrapper(ThrottleProperties throttleProperties, ThrottleDataHolder
+            throttleDataHolder) {
+        this.throttleProperties = throttleProperties;
+        this.throttleDataHolder = throttleDataHolder;
+    }
+
+    @Override
+    protected ThrottleProperties getThrottleProperties() {
+        return throttleProperties;
+    }
+
+    @Override
+    protected ThrottleDataHolder getThrottleDataHolder() {
+        return throttleDataHolder;
+    }
 }
