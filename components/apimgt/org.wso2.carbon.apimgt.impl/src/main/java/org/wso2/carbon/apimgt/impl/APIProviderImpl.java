@@ -246,7 +246,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
         } catch (RegistryException e) {
-            handleException("Failed to get APIs for provider : " + providerId, e);
+            String msg = "Failed to get APIs for provider : " + providerId;
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         }
         Collections.sort(apiSortedList, new APINameComparator());
 
@@ -1358,7 +1360,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 }
             } else {
-                handleException("Couldn't find an API with the name-" + name + "version-" + version);
+                String msg = "Couldn't find an API with the name-" + name + "version-" + version;
+                log.error(msg);
+                throw new APIManagementException(msg);
             }
 
         } finally {
@@ -4236,9 +4240,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
         } catch (RegistryException e) {
-            handleException("Failed to get all APIs", e);
+            String msg = "Failed to get all APIs";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         } catch (UserStoreException e) {
-            handleException("Failed to get all APIs", e);
+            String msg = "Failed to get all APIs";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         } finally {
             PaginationContext.destroy();
             if (isTenantFlowStarted) {

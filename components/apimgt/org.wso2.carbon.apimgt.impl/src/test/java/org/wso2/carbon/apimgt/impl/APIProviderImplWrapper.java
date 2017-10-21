@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,15 +41,15 @@ import org.wso2.carbon.user.api.UserStoreException;
 public class APIProviderImplWrapper extends APIProviderImpl {
     
     private API api;
-    private Map<String, Map<String,String>> failedGateways;
-    private List<Documentation> documentationList;
+    private List<Documentation> documentationList = new ArrayList<Documentation>();
 
-    public APIProviderImplWrapper(ApiMgtDAO apiMgtDAO, List<Documentation> documentationList,
-            Map<String, Map<String,String>> failedGateways) throws APIManagementException {
+    public APIProviderImplWrapper(ApiMgtDAO apiMgtDAO, List<Documentation> documentationList) 
+            throws APIManagementException {
         super(null);
         this.apiMgtDAO = apiMgtDAO;
-        this.documentationList = documentationList;
-        this.failedGateways = failedGateways;
+        if (documentationList != null) {
+            this.documentationList = documentationList;
+        }
     }
     
     @Override
