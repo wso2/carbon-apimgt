@@ -20,10 +20,17 @@ package org.wso2.carbon.apimgt.impl.template;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({APIUtil.class})
 public class BAMMediatorConfigContextTest {
 
     @Test
@@ -31,8 +38,13 @@ public class BAMMediatorConfigContextTest {
         API api = new API(new APIIdentifier("admin", "TestAPI", "1.0.0"));
         api.setStatus(APIStatus.CREATED);
         api.setContextTemplate("/");
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.isAnalyticsEnabled()).thenReturn(false);
         ConfigContext configcontext = new APIConfigContext(api);
         BAMMediatorConfigContext bamMediatorConfigContext = new BAMMediatorConfigContext(configcontext, api);
         Assert.assertFalse((Boolean) bamMediatorConfigContext.getContext().get("statsEnabled"));
+        PowerMockito.when(APIUtil.isAnalyticsEnabled()).thenReturn(true);
+        bamMediatorConfigContext = new BAMMediatorConfigContext(configcontext, api);
+        Assert.assertTrue((Boolean) bamMediatorConfigContext.getContext().get("statsEnabled"));
     }
 }
