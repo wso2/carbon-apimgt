@@ -23,11 +23,4 @@ public class DataPublisherAlreadyExistsException extends Exception{
         super(msg);
     }
 
-    public DataPublisherAlreadyExistsException(String msg, Throwable e) {
-        super(msg, e);
-    }
-
-    public DataPublisherAlreadyExistsException(Throwable throwable) {
-        super(throwable);
-    }
 }
