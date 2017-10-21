@@ -6078,6 +6078,7 @@ public class ApiMgtDAO {
             while (rs.next()) {
                 application = new Application(rs.getString("NAME"), getSubscriber(rs.getString("SUBSCRIBER_ID")));
                 application.setId(rs.getInt("APPLICATION_ID"));
+                applicationsList.add(application);
             }
             Collections.sort(applicationsList, new Comparator<Application>() {
                 public int compare(Application o1, Application o2) {
@@ -7817,32 +7818,6 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
         return nameList;
-    }
-
-    //todo method comments
-    public List<String> getAPIVersionsMatchingContext(String context, String apiName)
-            throws APIManagementException {
-        Connection conn = null;
-        PreparedStatement ps = null;
-        List<String> versionList = new ArrayList<String>();
-        ResultSet resultSet = null;
-
-        String sqlQuery = SQLConstants.GET_VERSIONS_MATCHES_CONTEXT;
-        try {
-            conn = APIMgtDBUtil.getConnection();
-            ps = conn.prepareStatement(sqlQuery);
-            ps.setString(1, context);
-            ps.setString(2, apiName);
-            resultSet = ps.executeQuery();
-            while (resultSet.next()) {
-                versionList.add(resultSet.getString("API_VERSION"));
-            }
-        } catch (SQLException e) {
-            handleException("Failed to get API versions matches API name" + apiName, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
-        }
-        return versionList;
     }
 
     /**
