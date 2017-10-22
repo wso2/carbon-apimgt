@@ -37,6 +37,7 @@ public class TransportConfigContextTest {
         api.setTransports(Constants.TRANSPORT_HTTP);
         ConfigContext configcontext = new APIConfigContext(api);
         TransportConfigContext transportConfigContext = new TransportConfigContext(configcontext, api);
+        transportConfigContext.validate();
         Assert.assertTrue(Constants.TRANSPORT_HTTP.equalsIgnoreCase
                 (transportConfigContext.getContext().get("transport").toString()));
         api.setTransports(Constants.TRANSPORT_HTTP + "," + Constants.TRANSPORT_HTTPS);

@@ -144,27 +144,6 @@ public class ApplicationUtils {
         return null;
     }
 
-    /**
-     * common method to throw exceptions
-     *
-     * @param msg this parameter contain error message that we need to throw.
-     * @param e   Exception object.
-     * @throws APIManagementException
-     */
-    private static void handleException(String msg, Exception e) throws APIManagementException {
-        log.error(msg, e);
-        throw new APIManagementException(msg, e);
-    }
-    /**
-     * common method to throw exceptions only with message.
-     *
-     * @param msg this parameter contain error message that we need to throw.
-     * @throws APIManagementException
-     */
-    private static void handleException(String msg) throws APIManagementException {
-        log.error(msg);
-        throw new APIManagementException(msg);
-    }
 
     public static void updateOAuthAppAssociation(Application application, String keyType,
                                                  OAuthApplicationInfo oAuthApplication) throws APIManagementException {

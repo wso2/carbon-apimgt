@@ -105,7 +105,7 @@ public class WSO2APIPublisher implements APIPublisher {
         boolean deleted = false;
         if (store.getEndpoint() == null || store.getUsername() == null || store.getPassword() == null) {
             String msg = "External APIStore endpoint URL or credentials are not defined. " +
-                         "Cannot proceed with publishing API to the APIStore - " + store.getDisplayName();
+                         "Cannot proceed with deleting API from the APIStore - " + store.getDisplayName();
             throw new APIManagementException(msg);
         } else {
             CookieStore cookieStore = new BasicCookieStore();
@@ -123,7 +123,7 @@ public class WSO2APIPublisher implements APIPublisher {
 
     private boolean deleteWSO2Store(APIIdentifier apiId, String externalPublisher, String storeEndpoint,
                                     HttpContext httpContext,String displayName) throws APIManagementException {
-        HttpClient httpclient = new DefaultHttpClient();
+        HttpClient httpclient = getDefaultHttpClient();
         if (storeEndpoint.contains("/store")) {
             storeEndpoint = getPublisherURLFromStoreURL(storeEndpoint) + APIConstants.APISTORE_DELETE_URL;
         } else if (!generateEndpoint(storeEndpoint)) {
@@ -176,7 +176,7 @@ public class WSO2APIPublisher implements APIPublisher {
     private boolean authenticateAPIM(APIStore store,HttpContext httpContext) throws APIManagementException {
         try {
             // create a post request to addAPI.
-            HttpClient httpclient = new DefaultHttpClient();
+            HttpClient httpclient = getDefaultHttpClient();
             String storeEndpoint=store.getEndpoint();
             if (store.getEndpoint().contains("/store")) {
                 storeEndpoint = getPublisherURLFromStoreURL(storeEndpoint) + APIConstants.APISTORE_LOGIN_URL;
@@ -215,6 +215,11 @@ public class WSO2APIPublisher implements APIPublisher {
                                              + " : " +e.getMessage(), e);
         }
     }
+
+    protected HttpClient getDefaultHttpClient() {
+        return new DefaultHttpClient();
+    }
+
     /**
      * Login out from external APIStore
      *
@@ -223,7 +228,7 @@ public class WSO2APIPublisher implements APIPublisher {
     private boolean logoutFromExternalStore(APIStore store,HttpContext httpContext) throws APIManagementException {
         try {
             // create a post request to addAPI.
-            HttpClient httpclient = new DefaultHttpClient();
+            HttpClient httpclient = getDefaultHttpClient();
             String storeEndpoint=store.getEndpoint();
             if (store.getEndpoint().contains("/store")) {
                 storeEndpoint = getPublisherURLFromStoreURL(storeEndpoint) + APIConstants.APISTORE_LOGIN_URL;
@@ -266,7 +271,7 @@ public class WSO2APIPublisher implements APIPublisher {
     private boolean addAPIToStore(API api,String storeEndpoint,String externalPublisher,
                                   HttpContext httpContext,String displayName) throws APIManagementException {
         boolean added;
-        HttpClient httpclient = new DefaultHttpClient();
+        HttpClient httpclient = getDefaultHttpClient();
         if (storeEndpoint.contains("/store")) {
             storeEndpoint = getPublisherURLFromStoreURL(storeEndpoint) + APIConstants.APISTORE_ADD_URL;
         } else if (!generateEndpoint(storeEndpoint)) {
@@ -352,7 +357,7 @@ public class WSO2APIPublisher implements APIPublisher {
     private boolean updateWSO2Store(API api, String externalPublisher, String storeEndpoint,
                                     HttpContext httpContext,String displayName) throws APIManagementException {
         boolean updated;
-        HttpClient httpclient = new DefaultHttpClient();
+        HttpClient httpclient = getDefaultHttpClient();
         if (storeEndpoint.contains("/store")) {
             storeEndpoint = getPublisherURLFromStoreURL(storeEndpoint) + APIConstants.APISTORE_ADD_URL;
         } else if (!generateEndpoint(storeEndpoint)) {
@@ -468,7 +473,7 @@ public class WSO2APIPublisher implements APIPublisher {
     private boolean isAPIAvailableInWSO2Store(API api, String externalPublisher, String storeEndpoint,
                                               HttpContext httpContext) throws APIManagementException {
         boolean available = false;
-        HttpClient httpclient = new DefaultHttpClient();
+        HttpClient httpclient = getDefaultHttpClient();
         if (storeEndpoint.contains("/store")) {
             storeEndpoint = getPublisherURLFromStoreURL(storeEndpoint) + APIConstants.APISTORE_LIST_URL;
         } else if (!generateEndpoint(storeEndpoint)) {
@@ -514,7 +519,7 @@ public class WSO2APIPublisher implements APIPublisher {
     private boolean publishAPIToStore(APIIdentifier apiId,String storeEndpoint,String externalPublisher,
                                       HttpContext httpContext,String displayName) throws APIManagementException {
         boolean published;
-        HttpClient httpclient = new DefaultHttpClient();
+        HttpClient httpclient = getDefaultHttpClient();
         if (storeEndpoint.contains("/store")) {
             storeEndpoint = getPublisherURLFromStoreURL(storeEndpoint) + APIConstants.APISTORE_PUBLISH_URL;
         } else if (!generateEndpoint(storeEndpoint)) {
@@ -903,7 +908,7 @@ public class WSO2APIPublisher implements APIPublisher {
                                            HttpContext httpContext, String displayName, String externalPublisher)
             throws APIManagementException {
         boolean added;
-        HttpClient httpclient = new DefaultHttpClient();
+        HttpClient httpclient = getDefaultHttpClient();
         if (storeEndpoint.contains("/store")) {
             storeEndpoint = getPublisherURLFromStoreURL(storeEndpoint) + APIConstants.APISTORE_COPY_URL;
         } else if (!generateEndpoint(storeEndpoint)) {

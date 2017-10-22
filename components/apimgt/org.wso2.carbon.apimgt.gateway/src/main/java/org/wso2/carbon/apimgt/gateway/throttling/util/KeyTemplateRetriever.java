@@ -29,6 +29,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.throttling.ThrottleDataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -63,8 +64,8 @@ public class KeyTemplateRetriever extends TimerTask {
     private String[] retrieveKeyTemplateData() {
 
         try {
-            ThrottleProperties.BlockCondition blockConditionRetrieverConfiguration = ServiceReferenceHolder
-                    .getInstance().getThrottleProperties().getBlockCondition();
+            ThrottleProperties.BlockCondition blockConditionRetrieverConfiguration = getThrottleProperties()
+                    .getBlockCondition();
             String url = blockConditionRetrieverConfiguration.getServiceUrl() + "/keyTemplates";
             byte[] credentials = Base64.encodeBase64((blockConditionRetrieverConfiguration.getUsername() + ":" +
                                                       blockConditionRetrieverConfiguration.getPassword()).getBytes
@@ -106,15 +107,23 @@ public class KeyTemplateRetriever extends TimerTask {
         return null;
     }
 
+    protected ThrottleProperties getThrottleProperties() {
+        return ServiceReferenceHolder
+                .getInstance().getThrottleProperties();
+    }
+
 
     public void loadKeyTemplatesFromWebService() {
         List keyListMap = Arrays.asList(retrieveKeyTemplateData());
-        ServiceReferenceHolder.getInstance().getThrottleDataHolder().addKeyTemplateFromMap(GatewayUtils.generateMap(keyListMap));
+        getThrottleDataHolder().addKeyTemplateFromMap(GatewayUtils.generateMap(keyListMap));
+    }
+
+    protected ThrottleDataHolder getThrottleDataHolder() {
+        return ServiceReferenceHolder.getInstance().getThrottleDataHolder();
     }
 
     public void startKeyTemplateDataRetriever() {
-        new Timer().schedule(this, ServiceReferenceHolder
-                .getInstance().getThrottleProperties().getBlockCondition().getInitDelay());
+        new Timer().schedule(this, getThrottleProperties().getBlockCondition().getInitDelay());
     }
 
 

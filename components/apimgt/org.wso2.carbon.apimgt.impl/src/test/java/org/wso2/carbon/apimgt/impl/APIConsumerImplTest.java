@@ -20,24 +20,43 @@ package org.wso2.carbon.apimgt.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
+import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
+import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifactImpl;
+import org.wso2.carbon.governance.api.util.GovernanceUtils;
+import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import javax.xml.namespace.QName;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -45,33 +64,59 @@ import static org.mockito.Mockito.when;
 
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({APIUtil.class})
+@PrepareForTest({WorkflowExecutorFactory.class, APIUtil.class, GovernanceUtils.class, ApplicationUtils.class,
+        KeyManagerHolder.class})
+@SuppressStaticInitializationFor("org.wso2.carbon.apimgt.impl.utils.ApplicationUtils")
 public class APIConsumerImplTest {
 
     private static final Log log = LogFactory.getLog(APIConsumerImplTest.class);
 
     @Test
-    public void testReadMonetizationConfigAnnonymously() {
+    public void testReadMonetizationConfig() throws UserStoreException, RegistryException,
+            APIManagementException {
+
         APIMRegistryService apimRegistryService = Mockito.mock(APIMRegistryService.class);
+        String json = "{\"EnableMonetization\":\"true\"}";
+        when(apimRegistryService.getConfigRegistryResourceContent(Mockito.anyString(), Mockito.anyString())).thenReturn(json);
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
+        apiConsumer.apimRegistryService = apimRegistryService;
+        boolean isEnabled = apiConsumer.isMonetizationEnabled(MultitenantConstants.TENANT_DOMAIN);
+        assertTrue("Expected true but returned " + isEnabled, isEnabled);
+        Mockito.reset(apimRegistryService);
 
-        String json = "{\n  EnableMonetization : true\n }";
-
+        // error path UserStoreException
+        when(apimRegistryService.getConfigRegistryResourceContent(Mockito.anyString(), Mockito.anyString()))
+                .thenThrow(UserStoreException.class);
         try {
-            when(apimRegistryService.getConfigRegistryResourceContent("", "")).thenReturn(json);
-            /* TODO: Need to mock out ApimgtDAO and usage of registry else where in order to test this
-            APIConsumer apiConsumer = new UserAwareAPIConsumer("__wso2.am.anon__", apimRegistryService);
-
-            boolean isEnabled = apiConsumer.isMonetizationEnabled("carbon.super");
-
-            assertTrue("Expected true but returned " + isEnabled, isEnabled);
-
+            apiConsumer.isMonetizationEnabled(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            assertFalse(true);
         } catch (APIManagementException e) {
-            e.printStackTrace();
-        */} catch (UserStoreException e) {
-            e.printStackTrace();
-        } catch (RegistryException e) {
-            e.printStackTrace();
+            assertEquals("UserStoreException thrown when getting API tenant config from registry", e.getMessage());
         }
+
+        // error path apimRegistryService
+        Mockito.reset(apimRegistryService);
+        when(apimRegistryService.getConfigRegistryResourceContent(Mockito.anyString(), Mockito.anyString()))
+                .thenThrow(RegistryException.class);
+        try {
+            apiConsumer.isMonetizationEnabled(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            assertFalse(true);
+        } catch (APIManagementException e) {
+            assertEquals("RegistryException thrown when getting API tenant config from registry", e.getMessage());
+        }
+
+        // error path ParseException
+        Mockito.reset(apimRegistryService);
+        String jsonInvalid = "{EnableMonetization:true}";
+        when(apimRegistryService.getConfigRegistryResourceContent(Mockito.anyString(), Mockito.anyString()))
+                .thenReturn(jsonInvalid);
+        try {
+            apiConsumer.isMonetizationEnabled(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            assertFalse(true);
+        } catch (APIManagementException e) {
+            assertEquals("ParseException thrown when passing API tenant config from registry", e.getMessage());
+        }
+
     }
 
     /**
@@ -146,5 +191,99 @@ public class APIConsumerImplTest {
             assertEquals("Error while obtaining API from API key", e.getMessage());
         }
     }
-    
+
+    @Test
+    public void resumeWorkflowTest() throws Exception {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
+        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+        apiConsumer.apiMgtDAO = apiMgtDAO;
+        WorkflowDTO workflowDTO = new WorkflowDTO();
+        workflowDTO.setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        when(apiMgtDAO.retrieveWorkflow(Mockito.anyString())).thenReturn(workflowDTO);
+
+        // Null input case
+        assertNotNull(apiConsumer.resumeWorkflow(null));
+        String args[] = {UUID.randomUUID().toString(), WorkflowStatus.CREATED.toString(), UUID.randomUUID().toString
+                ()};
+        assertNotNull(apiConsumer.resumeWorkflow(args));
+
+        Mockito.reset(apiMgtDAO);
+        workflowDTO.setTenantDomain("wso2.com");
+        when(apiMgtDAO.retrieveWorkflow(Mockito.anyString())).thenReturn(workflowDTO);
+        JSONObject row = apiConsumer.resumeWorkflow(args);
+        assertNotNull(row);
+
+        Mockito.reset(apiMgtDAO);
+        when(apiMgtDAO.retrieveWorkflow(Mockito.anyString())).thenThrow(APIManagementException.class);
+        row = apiConsumer.resumeWorkflow(args);
+        assertEquals("Error while resuming the workflow. null",
+                row.get("message"));
+
+        // Workflow DAO null case
+        Mockito.reset(apiMgtDAO);
+        when(apiMgtDAO.retrieveWorkflow(Mockito.anyString())).thenReturn(null);
+        row = apiConsumer.resumeWorkflow(args);
+        assertNotNull(row);
+        assertEquals(true, row.get("error"));
+        assertEquals(500, row.get("statusCode"));
+
+        //Invalid status test
+        args[1] = "Invalid status";
+        Mockito.reset(apiMgtDAO);
+        when(apiMgtDAO.retrieveWorkflow(Mockito.anyString())).thenReturn(workflowDTO);
+        row = apiConsumer.resumeWorkflow(args);
+        assertEquals("Illegal argument provided. Valid values for status are APPROVED and REJECTED.",
+                row.get("message"));
+
+    }
+
+    @Test
+    public void getPaginatedAPIsWithTagTest() throws Exception {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
+
+        PowerMockito.mockStatic(GovernanceUtils.class);
+        GovernanceArtifact governanceArtifact = new GenericArtifactImpl(UUID.randomUUID().toString(), new QName(UUID.randomUUID().toString(), "UUID.randomUUID().toString()"),
+                "api");
+        List<GovernanceArtifact> governanceArtifactList = new ArrayList();
+        governanceArtifactList.add(governanceArtifact);
+        Mockito.when(GovernanceUtils.findGovernanceArtifacts(Mockito.anyString(), (Registry) Mockito.anyObject(),
+                Mockito.anyString())).thenReturn(governanceArtifactList);
+
+        assertNotNull(apiConsumer.getPaginatedAPIsWithTag("testTag", 0, 10, MultitenantConstants
+                .SUPER_TENANT_DOMAIN_NAME));
+    }
+
+    @Test
+    public void renewAccessTokenTest() throws APIManagementException {
+        APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
+        String args[] = {UUID.randomUUID().toString(), UUID.randomUUID().toString()};
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        PowerMockito.mockStatic(KeyManagerHolder.class);
+        AccessTokenRequest tokenRequest = new AccessTokenRequest();
+        AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
+        Mockito.when(keyManager.getNewApplicationAccessToken((AccessTokenRequest) Mockito.anyObject())).thenReturn
+                (accessTokenInfo);
+        Mockito.when(KeyManagerHolder.getKeyManagerInstance()).thenReturn(keyManager);
+
+        PowerMockito.mockStatic(ApplicationUtils.class);
+        Mockito.when(ApplicationUtils.populateTokenRequest(Mockito.anyString(), (AccessTokenRequest) Mockito
+                .anyObject()))
+                .thenReturn(tokenRequest);
+        assertNotNull(apiConsumer.renewAccessToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID
+                .randomUUID().toString(), "3600", args, "{}"));
+
+        // Error path
+        Mockito.when(ApplicationUtils.populateTokenRequest(Mockito.anyString(), (AccessTokenRequest) Mockito
+                .anyObject()))
+                .thenThrow(APIManagementException.class);
+        try {
+            apiConsumer.renewAccessToken(UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID()
+                    .toString(), "3600", args, "{}");
+            assertTrue(false);
+        } catch (APIManagementException e) {
+            assertTrue(true);
+        }
+    }
 }

@@ -19,8 +19,17 @@
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 import junit.framework.TestCase;
+import org.apache.http.HttpHeaders;
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
-import static org.junit.Assert.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertArrayEquals;
 
 public class DigestAuthMediatorTest extends TestCase {
 
@@ -197,4 +206,30 @@ public class DigestAuthMediatorTest extends TestCase {
         assertEquals(expectedHeader, AuthHeader);
     }
 
+    @Test
+    public void testMediate() {
+        MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
+        org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext
+                .class);
+        Map transportHeaders = new HashMap();
+        String expectedHeader = "Digest username=\"GarryL\", realm=\"Vcreate\", " +
+                "nonce=\"PwQ0MxY3OPW3MDI3NTo1NmU2M09hNzJmDsI1NWFlZik5ZWRwMjdjYWViZjcxZQ==\", " +
+                "uri=\"/service/path/S374453680109605K\", qop=auth, nc=00000001, cnonce=\"19b428e5\", " +
+                "response=\"c42047191b9d53a208cd615b23797b15\", opaque=\"5ccc069c403ebaf9f0171e9517f40e41\"";
+        transportHeaders.put(HttpHeaders.WWW_AUTHENTICATE, expectedHeader);
+        Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+        Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn
+                (transportHeaders);
+        Mockito.when(messageContext.getProperty(APIConstants.DigestAuthConstants.POSTFIX)).thenReturn("/abc");
+        Mockito.when(messageContext.getProperty(APIConstants.DigestAuthConstants.UNAMEPASSWORD)).thenReturn
+                ("YWRtaW46YWRtaW4x");
+        Mockito.when(messageContext.getProperty(APIConstants.DigestAuthConstants.HTTP_METHOD)).thenReturn("GET");
+
+        Mockito.when(messageContext.getProperty(APIConstants.DigestAuthConstants.BACKEND_URL)).thenReturn
+                ("https://localhost/cde");
+        Mockito.when(messageContext.getProperty(APIConstants.DigestAuthConstants.NONCE_COUNT)).thenReturn
+                (APIConstants.DigestAuthConstants.INIT_NONCE_COUNT);
+        DigestAuthMediator digestAuthMediator = new DigestAuthMediator();
+        digestAuthMediator.mediate(messageContext);
+    }
 }

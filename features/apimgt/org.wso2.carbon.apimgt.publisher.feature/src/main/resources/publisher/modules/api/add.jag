@@ -153,27 +153,37 @@ var updateAPIDesign = function (api) {
 };
 
 var addAPI = function (api) {
-    var success, log = new Log(),
+    var success, apiNameExist, apiContextExist, log = new Log(),
             provider = jagg.module("manager").getAPIProviderObj();
     try {
-        success = provider.addAPI(api);
-        if (log.isDebugEnabled()) {
-            log.debug("addAPI : " + api.name + "-" + api.version);
-        }
-        if(success){
+        apiNameExist = provider.isApiNameExist(api.apiName);
+        if (apiNameExist == 'false') {
+            success = provider.addAPI(api);
+            if (log.isDebugEnabled()) {
+                log.debug("addAPI : " + api.name + "-" + api.version);
+            }
+            if (success) {
+                return {
+                    error: false
+                };
+            } else {
+                return {
+                    error: true
+                };
+            }
+
+        } else {
             return {
-                error:false
-            };
-        } else  {
-            return {
-                error:true
+                error: true,
+                message: "A duplicate API name already exists for " + api.apiName
             };
         }
+
     } catch (e) {
         log.error(e.message);
         return {
-            error:true,
-            message:e.message.split(":")[1]
+            error: true,
+            message: e.message.split(":")[1]
         };
     }
 };

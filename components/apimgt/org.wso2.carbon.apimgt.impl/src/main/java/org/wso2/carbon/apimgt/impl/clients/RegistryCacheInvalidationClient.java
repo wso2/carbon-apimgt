@@ -105,8 +105,7 @@ public class RegistryCacheInvalidationClient {
         RegistryCacheInvalidationServiceStub registryCacheServiceStub;
 
         ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(null, null);
-        registryCacheServiceStub = 
-                new RegistryCacheInvalidationServiceStub(ctx, serverURL + "RegistryCacheInvalidationService");
+        registryCacheServiceStub = getRegistryCacheInvalidationServiceStub(serverURL, ctx);
         ServiceClient client = registryCacheServiceStub._getServiceClient();
         Options options = client.getOptions();
         options.setTimeOutInMilliSeconds(TIMEOUT_IN_MILLIS);
@@ -142,7 +141,7 @@ public class RegistryCacheInvalidationClient {
             throw new AxisFault("Server URL is malformed", e);
         }
 
-        AuthenticationAdminStub authAdminStub = new AuthenticationAdminStub(null, serverURL + "AuthenticationAdmin");
+        AuthenticationAdminStub authAdminStub = getAuthenticationAdminStub(serverURL);
         ServiceClient client = authAdminStub._getServiceClient();
         Options options = client.getOptions();
         options.setManageSession(true);
@@ -156,6 +155,15 @@ public class RegistryCacheInvalidationClient {
         } catch (LoginAuthenticationExceptionException e) {
             throw new AxisFault("Error while authenticating ", e);
         }
+    }
+
+    protected RegistryCacheInvalidationServiceStub getRegistryCacheInvalidationServiceStub(String serverURL,
+            ConfigurationContext ctx) throws AxisFault {
+        return new RegistryCacheInvalidationServiceStub(ctx, serverURL + "RegistryCacheInvalidationService");
+    }
+
+    protected AuthenticationAdminStub getAuthenticationAdminStub(String serverURL) throws AxisFault {
+        return new AuthenticationAdminStub(null, serverURL + "AuthenticationAdmin");
     }
 
 }

@@ -80,7 +80,7 @@ public class TierCacheInvalidationClient {
         TierCacheServiceStub tierCacheServiceStub;
 
         ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(null, null);
-        tierCacheServiceStub = new TierCacheServiceStub(ctx, serverURL + "TierCacheService");
+        tierCacheServiceStub = getTierCacheServiceStub(serverURL, ctx);
         ServiceClient client = tierCacheServiceStub._getServiceClient();
         Options options = client.getOptions();
         options.setTimeOutInMilliSeconds(TIMEOUT_IN_MILLIS);
@@ -104,7 +104,7 @@ public class TierCacheInvalidationClient {
             throw new AxisFault("Server URL is malformed", e);
         }
 
-        AuthenticationAdminStub authAdminStub = new AuthenticationAdminStub(null, serverURL + "AuthenticationAdmin");
+        AuthenticationAdminStub authAdminStub = getAuthenticationAdminStub(serverURL);
         ServiceClient client = authAdminStub._getServiceClient();
         Options options = client.getOptions();
         options.setManageSession(true);
@@ -118,6 +118,15 @@ public class TierCacheInvalidationClient {
         } catch (LoginAuthenticationExceptionException e) {
             throw new AxisFault("Error while authenticating ", e);
         }
+    }
+
+    protected AuthenticationAdminStub getAuthenticationAdminStub(String serverURL) throws AxisFault {
+        return new AuthenticationAdminStub(null, serverURL + "AuthenticationAdmin");
+    }
+
+    protected TierCacheServiceStub getTierCacheServiceStub(String serverURL, ConfigurationContext ctx)
+            throws AxisFault {
+        return new TierCacheServiceStub(ctx, serverURL + "TierCacheService");
     }
 
 }

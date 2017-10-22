@@ -520,8 +520,7 @@ public class APIManagerComponent {
      * This method will create new permission name  "applications" in registry permission.
      */
     private void addApplicationsPermissionsToRegistry() throws APIManagementException {
-        Registry tenantGovReg = CarbonContext.getThreadLocalCarbonContext().getRegistry(
-                RegistryType.USER_GOVERNANCE);
+        Registry tenantGovReg = getRegistry();
 
         String permissionResourcePath = CarbonConstants.UI_PERMISSION_NAME + RegistryConstants.PATH_SEPARATOR +
                                         APPLICATION_ROOT_PERMISSION;
@@ -551,14 +550,16 @@ public class APIManagerComponent {
 
     }
 
+    protected Registry getRegistry() {
+        return CarbonContext.getThreadLocalCarbonContext().getRegistry(
+                RegistryType.USER_GOVERNANCE);
+    }
 
     private void configureJMSPublisher() {
         OutputEventAdapterConfiguration adapterConfiguration = new OutputEventAdapterConfiguration();
-
         adapterConfiguration.setName(APIConstants.BLOCKING_EVENT_PUBLISHER);
         adapterConfiguration.setType(APIConstants.BLOCKING_EVENT_TYPE);
         adapterConfiguration.setMessageFormat(APIConstants.BLOCKING_EVENT_FORMAT);
-
 
         if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService() != null) {
             APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()

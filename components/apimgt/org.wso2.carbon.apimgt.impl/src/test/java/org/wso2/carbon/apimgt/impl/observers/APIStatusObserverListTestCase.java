@@ -15,8 +15,12 @@
 */
 package org.wso2.carbon.apimgt.impl.observers;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 
@@ -24,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class APIStatusObserverListTestCase {
-
 
     @Test
     public void testInitNonInitializedReadFromConfig() {
@@ -34,6 +37,21 @@ public class APIStatusObserverListTestCase {
         observerList.add("org.wso2.carbon.apimgt.impl.observers.SimpleLoggingObserver");
         Mockito.when(apiManagerConfiguration.getProperty(APIConstants.OBSERVER)).thenReturn(observerList);
         apiStatusObserverList.init(apiManagerConfiguration);
+
+        //notify observers
+        API api = Mockito.mock(API.class);
+        APIIdentifier apiIdentifier = Mockito.mock(APIIdentifier.class);
+        Mockito.when(api.getId()).thenReturn(apiIdentifier);
+        String API_NAME = "pizza-shack-api";
+        String API_VERSION = "1.0.0";
+        Mockito.when(apiIdentifier.getApiName()).thenReturn(API_NAME);
+        Mockito.when(apiIdentifier.getVersion()).thenReturn(API_VERSION);
+        apiStatusObserverList.notifyObservers(APIStatus.CREATED, APIStatus.PUBLISHED, api);
+
+        //try initializing again
+        apiStatusObserverList.init(apiManagerConfiguration);
+
         Mockito.verify(apiManagerConfiguration, Mockito.times(1)).getProperty(APIConstants.OBSERVER);
+        Assert.assertNotNull(APIStatusObserverList.getInstance());
     }
 }

@@ -33,6 +33,11 @@ public class TemplateUtilContextTest {
         api.setContextTemplate("/");
         ConfigContext configcontext = new APIConfigContext(api);
         TemplateUtilContext templateUtilContext = new TemplateUtilContext(configcontext);
+        String xmlSampleText = "<data>TemplateUtilContextTest Class</data>";
+        String xmlEscapedText = "&lt;data&gt;TemplateUtilContextTest Class&lt;/data&gt;";
+        String result = templateUtilContext.escapeXml(xmlSampleText);
+        Assert.assertTrue("Failed to escape XML tags in the provided string : " + xmlSampleText,
+                xmlEscapedText.equalsIgnoreCase(result));
         Assert.assertNotNull(templateUtilContext.getContext().get("util"));
     }
 }

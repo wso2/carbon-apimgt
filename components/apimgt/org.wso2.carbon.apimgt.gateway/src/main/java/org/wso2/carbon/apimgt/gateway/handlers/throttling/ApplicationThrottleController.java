@@ -90,7 +90,6 @@ public class ApplicationThrottleController {
         Object entryValue = lookup(policyKeyApplication, tenantId);
         if (entryValue == null || !(entryValue instanceof OMElement)) {
             handleException("Unable to load throttling policy using key: " + policyKeyApplication);
-            return null;
         }
 
         try {
@@ -236,7 +235,7 @@ public class ApplicationThrottleController {
             justification = "The error occurs due to FB violation in Registry code")
     private static String resolvePath(String path) {
         if (path == null || "".equals(path)) {
-            path = RegistryConstants.ROOT_PATH;
+            return RegistryConstants.ROOT_PATH;
         }
 
         path = path.substring(GOVERNANCE_REGISTRY_PREFIX.length());

@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -26,22 +27,25 @@ import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
+import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
+import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 
-public class APIProviderImplWrapper extends APIProviderImpl{
+public class APIProviderImplWrapper extends APIProviderImpl {
     
-    private GenericArtifactManager genericArtifactManager;
     private API api;
     private Map<String, Map<String,String>> failedGateways;
+    private List<Documentation> documentationList;
 
-    public APIProviderImplWrapper(ApiMgtDAO apiMgtDAO, GenericArtifactManager genericArtifactManager,
+    public APIProviderImplWrapper(ApiMgtDAO apiMgtDAO, List<Documentation> documentationList,
             Map<String, Map<String,String>> failedGateways) throws APIManagementException {
         super(null);
         this.apiMgtDAO = apiMgtDAO;
-        this.genericArtifactManager = genericArtifactManager;
+        this.documentationList = documentationList;
         this.failedGateways = failedGateways;
     }
     
@@ -88,6 +92,26 @@ public class APIProviderImplWrapper extends APIProviderImpl{
             return failedGateways.get("UNPUBLISHED");
         }
         return new HashMap<String, String>();
+    }
+    
+    @Override
+    public List<Documentation> getAllDocumentation(APIIdentifier apiId) throws APIManagementException {
+        return documentationList;
+    }
+    
+    @Override
+    protected int getTenantId(String tenantDomain) {
+        return -1234;
+    }
+    
+    @Override
+    public String addResourceFile(String resourcePath, ResourceFile resourceFile) throws APIManagementException{
+        return null;
+    }
+    
+    @Override
+    protected void sendAsncNotification(NotificationDTO notificationDTO) throws NotificationException {
+        //do nothing
     }
     
     /*protected String getTenantConfigContent() throws RegistryException, UserStoreException {

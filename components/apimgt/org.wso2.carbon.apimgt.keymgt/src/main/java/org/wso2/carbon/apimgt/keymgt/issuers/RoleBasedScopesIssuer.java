@@ -54,7 +54,7 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
     private static final String ISSUER_PREFIX = "default";
 
     @Override
-    public String getPrefix(){
+    public String getPrefix() {
         return ISSUER_PREFIX;
     }
 
@@ -66,31 +66,29 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
 
         String consumerKey = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getClientId();
         String username = tokReqMsgCtx.getAuthorizedUser().getUserName();
-        String endUsernameWithDomain = UserCoreUtil.addDomainToName(username,
-                tokReqMsgCtx.getAuthorizedUser().getUserStoreDomain());
+        String endUsernameWithDomain = addDomainToName(username, tokReqMsgCtx.getAuthorizedUser().getUserStoreDomain());
         List<String> reqScopeList = Arrays.asList(requestedScopes);
         Map<String, String> restAPIScopesOfCurrentTenant;
 
         try {
             Map<String, String> appScopes;
-            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            ApiMgtDAO apiMgtDAO = getApiMgtDAOInstance();
             //Get all the scopes and roles against the scopes defined for the APIs subscribed to the application.
             appScopes = apiMgtDAO.getScopeRolesOfApplication(consumerKey);
             //Add API Manager rest API scopes set. This list should be loaded at server start up and keep
             //in memory and add it to each and every request coming.
             String tenantDomain = tokReqMsgCtx.getAuthorizedUser().getTenantDomain();
-            restAPIScopesOfCurrentTenant = (Map) Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+            restAPIScopesOfCurrentTenant = (Map) getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
                     .getCache("REST_API_SCOPE_CACHE")
                     .get(tenantDomain);
-            if (restAPIScopesOfCurrentTenant!= null) {
+            if (restAPIScopesOfCurrentTenant != null) {
                 appScopes.putAll(restAPIScopesOfCurrentTenant);
             } else {
-                restAPIScopesOfCurrentTenant = APIUtil
-                        .getRESTAPIScopesFromConfig(APIUtil.getTenantRESTAPIScopesConfig(tenantDomain));
+                restAPIScopesOfCurrentTenant = getRESTAPIScopesFromConfig(getTenantRESTAPIScopesConfig(tenantDomain));
                 //call load tenant config for rest API.
                 //then put cache
                 appScopes.putAll(restAPIScopesOfCurrentTenant);
-                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
                         .getCache("REST_API_SCOPE_CACHE")
                         .put(tenantDomain, restAPIScopesOfCurrentTenant);
             }
@@ -107,7 +105,7 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
             }
 
             int tenantId;
-            RealmService realmService = APIKeyMgtDataHolder.getRealmService();
+            RealmService realmService = getRealmService();
             UserStoreManager userStoreManager;
             String[] userRoles;
 
@@ -117,7 +115,7 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
 
                 // If tenant Id is not set in the tokenReqContext, deriving it from username.
                 if (tenantId == 0 || tenantId == -1) {
-                    tenantId = IdentityTenantUtil.getTenantIdOfUser(username);
+                    tenantId = getTenantIdOfUser(username);
                 }
 
                 String grantType = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getGrantType();
@@ -128,7 +126,7 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
                 String isSAML2Enabled = System.getProperty(ResourceConstants.CHECK_ROLES_FROM_SAML_ASSERTION);
                 if (GrantType.SAML20_BEARER.toString().equals(grantType) && Boolean.parseBoolean(isSAML2Enabled)) {
                     Assertion assertion = (Assertion) tokReqMsgCtx.getProperty(ResourceConstants.SAML2_ASSERTION);
-                    userRoles = APIKeyMgtUtil.getRolesFromAssertion(assertion);
+                    userRoles = getRolesFromAssertion(assertion);
                 } else {
                     userRoles = userStoreManager.getRoleListOfUser(endUsernameWithDomain);
                 }
@@ -179,6 +177,27 @@ public class RoleBasedScopesIssuer extends AbstractScopesIssuer {
             log.error("Error while getting scopes of application " + e.getMessage(), e);
             return null;
         }
+    }
+
+    /**
+     * Add domain to name
+     *
+     * @param username   Username
+     * @param domainName domain name
+     * @return String
+     */
+    protected String addDomainToName(String username, String domainName) {
+        return UserCoreUtil.addDomainToName(username, domainName);
+    }
+
+    /**
+     * Get roles from assertion
+     *
+     * @param assertion Assertion
+     * @return String[]
+     */
+    protected String[] getRolesFromAssertion(Assertion assertion) {
+        return APIKeyMgtUtil.getRolesFromAssertion(assertion);
     }
 
 }

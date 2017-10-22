@@ -26,7 +26,7 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 
 public class EndpointConfigContextTest {
 
-    @Test
+    @Test (expected = APITemplateException.class)
     public void testEndpointConfigContext() throws Exception {
 
         API api = new API(new APIIdentifier("admin", "TestAPI", "1.0.0"));
@@ -42,5 +42,11 @@ public class EndpointConfigContextTest {
         EndpointConfigContext endpointConfigContext = new EndpointConfigContext(configcontext, api);
         endpointConfigContext.validate();
         Assert.assertNotNull(endpointConfigContext.getContext().get("endpoint_config"));
+        //set invalid value and check the validation
+        String invalidEndpointConfig = "\"production_endpoints\"{\"url\":\"" + url + "\", \"config\":null}," +
+                "\"sandbox_endpoint\":{\"url\":\"" + url + "\",\"config\":null},\"endpoint_type\":\"http\"";
+        api.setEndpointConfig(invalidEndpointConfig);
+        endpointConfigContext = new EndpointConfigContext(configcontext, api);
+        endpointConfigContext.validate();
     }
 }

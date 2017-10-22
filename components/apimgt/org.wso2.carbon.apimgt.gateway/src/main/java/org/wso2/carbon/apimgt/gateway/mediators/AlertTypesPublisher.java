@@ -17,7 +17,6 @@
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.gateway.mediators.APIMgtCommonExecutionPublisher;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.usage.publisher.dto.AlertTypeDTO;
 
@@ -54,7 +53,7 @@ public class AlertTypesPublisher extends APIMgtCommonExecutionPublisher {
                 this.initializeDataPublisher();
             }
 
-            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            ApiMgtDAO apiMgtDAO = getApiMgtdao();
             //data persist in the database.
             apiMgtDAO.addAlertTypesConfigInfo(userName, emailList, checkedAlertList, agent);
             //set DTO
@@ -80,6 +79,10 @@ public class AlertTypesPublisher extends APIMgtCommonExecutionPublisher {
 
     }
 
+    protected ApiMgtDAO getApiMgtdao() {
+        return ApiMgtDAO.getInstance();
+    }
+
     /**
      * This method will delete all the data relating to the alert subscription by given user Name.
      * @param userName logged in users name.
@@ -95,7 +98,7 @@ public class AlertTypesPublisher extends APIMgtCommonExecutionPublisher {
                 this.initializeDataPublisher();
             }
 
-            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            ApiMgtDAO apiMgtDAO = getApiMgtdao();
             //data persist in the database.
             apiMgtDAO.unSubscribeAlerts(userName,agent);
             //set DTO

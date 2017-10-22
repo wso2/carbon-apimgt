@@ -5934,40 +5934,6 @@ public final class APIUtil {
         return list;
     }
 
-
-    /**
-     * check whether policy is content aware
-     *
-     * @param policy
-     * @return
-     */
-    public static boolean isContentAwarePolicy(Policy policy) {
-        boolean status = false;
-        if (policy instanceof APIPolicy) {
-            APIPolicy apiPolicy = (APIPolicy) policy;
-            status = isDefaultQuotaPolicyContentAware(apiPolicy);
-            if (!status) {
-                //only go and check the pipelines if default quota is not content aware
-                //check if atleast one pipeline is content aware
-                for (Pipeline pipeline : apiPolicy.getPipelines()) { // add each pipeline data to AM_CONDITION table
-                    if (PolicyConstants.BANDWIDTH_TYPE.equals(pipeline.getQuotaPolicy().getType())) {
-                        status = true;
-                        break;
-                    }
-                }
-            }
-        } else if (policy instanceof ApplicationPolicy) {
-            ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
-            status = isDefaultQuotaPolicyContentAware(appPolicy);
-        } else if (policy instanceof SubscriptionPolicy) {
-            SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
-            status = isDefaultQuotaPolicyContentAware(subPolicy);
-        } else if (policy instanceof GlobalPolicy) {
-            status = false;
-        }
-        return status;
-    }
-
     private static boolean isDefaultQuotaPolicyContentAware(Policy policy) {
         if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
             return true;

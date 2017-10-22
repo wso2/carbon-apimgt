@@ -2,12 +2,11 @@ $(document).ready(function() {
 
 });
 
+function loadDefaultSummernoteContent(provider,apiName, version, docName) {
 
-function loadDefaultTinyMCEContent(provider,apiName, version, docName) {
-
-    tinyMCE.init({
-        selector: 'textarea',
-        init_instance_callback : function() {
+$('#summernote').summernote({
+          callbacks: {
+            onInit : function() {
             jagg.post("/site/blocks/documentation/ajax/docs.jag", { action:"getInlineContent", provider:provider,apiName:apiName,version:version,docName:docName },
                 function (json) {
                     if (!json.error) {
@@ -16,34 +15,22 @@ function loadDefaultTinyMCEContent(provider,apiName, version, docName) {
                         var docContent = json.doc.provider.content;
                         $('#apiDeatils').empty().html('<p><h1> ' + docName + '</h1></p>');
                         if(localStorage.getItem("doc_auto_save"+apiName+provider+version+docName+"draft") == null) {
-                            tinyMCE.activeEditor.setContent(docContent);
+                            $("#summernote").summernote("code", docContent);
                         }else{
-                            tinyMCE.activeEditor.setContent(localStorage.getItem("doc_auto_save"+apiName+provider+version+docName+"draft"));
+                            $("#summernote").summernote("code", localStorage.getItem("doc_auto_save"+apiName+provider+version+docName+"draft"));
                         }
                     } else {
                         $('#inlineError').show('fast');
                         $('#inlineSpan').html('<strong>'+ i18n.t('The content of this document cannot be loaded.')+'</strong><br />'+result.message);
                     }
                 }, "json");
-        },
-        plugins: [
-            'advlist autolink lists link image charmap print preview anchor',
-            'searchreplace visualblocks autosave code fullscreen spellchecker',
-            'insertdatetime media table contextmenu paste code'
-        ],
-        autosave_interval: "1s",
-        autosave_retention: "1440m",
-        autosave_restore_when_empty: true,
-        autosave_ask_before_unload: false,
-        autosave_prefix: "doc_auto_save"+apiName+provider+version+docName,
-        toolbar1: 'insertfile undo redo | styleselect | bold italic underline | alignleft aligncenter alignright alignjustify fontselect fontsizeselect formatselect | bullist numlist outdent indent | link unlink image',
-        toolbar2: 'cut copy past | forecolor backcolor | insertdatetime | spellchecker removeformat | subscript superscript | charmap preview',
-    });
-
-}
+          }
+             }
+               });
+        }
 
 function saveContent(provider, apiName, apiVersion, docName, mode) {
-	var contentDoc = tinyMCE.get('inlineEditor').getContent();
+	var contentDoc =  $('#summernote').summernote('code');
 	if (docName == "Swagger API Definition") {
 		/* Remove html tags */
 		contentDoc = contentDoc.replace(/(<([^>]+)>)/ig,"");

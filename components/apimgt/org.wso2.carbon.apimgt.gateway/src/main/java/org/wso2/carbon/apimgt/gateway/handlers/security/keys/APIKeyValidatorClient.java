@@ -62,7 +62,6 @@ public class APIKeyValidatorClient {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                                            "Required connection details for the key management server not provided");
         }
-
         try {
             ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem
                     (getClientRepoLocation(),getAxis2ClientXmlLocation());
@@ -218,12 +217,12 @@ public class APIKeyValidatorClient {
         return template;
     }
 
-    private String getAxis2ClientXmlLocation() {
+    protected String getAxis2ClientXmlLocation() {
         String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" +
                 ".clientAxis2XmlLocation");
         return axis2ClientXml;
     }
-    private String getClientRepoLocation() {
+    protected String getClientRepoLocation() {
         String axis2ClientXml = ServerConfiguration.getInstance().getFirstProperty("Axis2Config" +
                 ".ClientRepositoryLocation");
         return axis2ClientXml;

@@ -16,92 +16,137 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.oauth;
 
-import junit.framework.TestCase;
-import org.wso2.carbon.apimgt.gateway.handlers.security.TestAPIKeyValidator;
-import org.wso2.carbon.apimgt.gateway.TestUtils;
-import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import com.google.common.net.HttpHeaders;
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
-import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 
-public class OAuthAuthenticatorTest  {  //Removed extends TestCase
-    /*
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(
-                new APIManagerConfigurationServiceImpl(new APIManagerConfiguration()));
+import java.util.HashMap;
+import java.util.Map;
+
+
+public class OAuthAuthenticatorTest {
+
+
+    @Test
+    public void initOAuthParams() throws Exception {
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        OAuthAuthenticator oauthAuthenticator = new OauthAuthenticatorWrapper(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE))
+                .thenReturn("true");
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.JWT_HEADER))
+                .thenReturn("true");
+        oauthAuthenticator.initOAuthParams();
     }
 
-    public void testSimpleAuthentication() throws Exception {
-        TestAPIKeyValidator keyValidator = new TestAPIKeyValidator();        
-        APIKeyValidationInfoDTO goldUser = new APIKeyValidationInfoDTO();
-        goldUser.setAuthorized(true);
-        goldUser.setTier("Gold");
-        APIKeyValidationInfoDTO silverUser = new APIKeyValidationInfoDTO();
-        silverUser.setAuthorized(true);
-        silverUser.setTier("Silver");        
-        keyValidator.addUserInfo("/foo", "1.0.0", "abcde12345", goldUser);
-        keyValidator.addUserInfo("/foo", "1.0.0", "pqrst67890", silverUser);
-        
-        TestAuthenticator authenticator = new TestAuthenticator(keyValidator);
-        assertTrue(authenticator.authenticate(TestUtils.getMessageContext("/foo", "1.0.0", "abcde12345")));
-        assertTrue(authenticator.authenticate(TestUtils.getMessageContext("/foo", "1.0.0", "pqrst67890")));
-
-        try {
-            authenticator.authenticate(TestUtils.getMessageContext("/foo", "1.0.0", "klmno09876"));
-            fail("No exception thrown on auth failure");
-        } catch (APISecurityException e) {
-           // assertEquals(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, e.getErrorCode());
-           // System.out.println("Expected error received: " + e.getMessage());
-        }
-
-        try {
-            authenticator.authenticate(TestUtils.getMessageContext("/foo", "1.0.0"));
-            fail("No exception thrown on auth failure");
-        } catch (APISecurityException e) {
-            assertEquals(APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, e.getErrorCode());
-            System.out.println("Expected error received: " + e.getMessage());
-        }
+    @Test
+    public void initOAuthParamsWhileConfigIsCommented() throws Exception {
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        OAuthAuthenticator oauthAuthenticator = new OauthAuthenticatorWrapper(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE))
+                .thenReturn("false");
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.JWT_HEADER))
+                .thenReturn(null);
+        oauthAuthenticator.initOAuthParams();
     }
 
-    public void testAdvancedAuthentication1() throws Exception {
-        TestAPIKeyValidator fooKeyValidator = new TestAPIKeyValidator();
-        TestAPIKeyValidator barKeyValidator = new TestAPIKeyValidator();
-        APIKeyValidationInfoDTO goldUser = new APIKeyValidationInfoDTO();
-        goldUser.setAuthorized(true);
-        goldUser.setTier("Gold");
-        APIKeyValidationInfoDTO silverUser = new APIKeyValidationInfoDTO();
-        silverUser.setAuthorized(true);
-        silverUser.setTier("Silver");
-        fooKeyValidator.addUserInfo("/foo", "1.0.0", "abcde12345", goldUser);
-        fooKeyValidator.addUserInfo("/bar", "1.0.0", "pqrst67890", silverUser);
-        barKeyValidator.addUserInfo("/foo", "1.0.0", "abcde12345", goldUser);
-        barKeyValidator.addUserInfo("/bar", "1.0.0", "pqrst67890", silverUser);
+    @Test
+    public void authenticate() throws Exception {
+    }
 
-        TestAuthenticator fooAuthenticator = new TestAuthenticator(fooKeyValidator);
-        TestAuthenticator barAuthenticator = new TestAuthenticator(barKeyValidator);
+    @Test
+    public void extractCustomerKeyFromAuthHeader() throws Exception {
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        OAuthAuthenticator oauthAuthenticator = new OauthAuthenticatorWrapper(apiManagerConfiguration);
+        Map map = new HashMap();
+        Assert.assertNull("Assertion failure due to not null", oauthAuthenticator.extractCustomerKeyFromAuthHeader
+                (map));
+        map.put(HttpHeaders.AUTHORIZATION, "Bearer abcde-fghij");
+        Assert.assertNotNull(oauthAuthenticator.extractCustomerKeyFromAuthHeader(map), "Assertion failure due to null");
 
-        assertTrue(fooAuthenticator.authenticate(TestUtils.getMessageContext("/foo", "1.0.0", "abcde12345")));
-        try {
-            fooAuthenticator.authenticate(TestUtils.getMessageContext("/foo", "1.0.0", "pqrst67890"));
-        } catch (APISecurityException e) {
-            //assertEquals(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, e.getErrorCode());
-        }
+    }
 
-        assertTrue(barAuthenticator.authenticate(TestUtils.getMessageContext("/bar", "1.0.0", "pqrst67890")));
-        try {
-            barAuthenticator.authenticate(TestUtils.getMessageContext("/bar", "1.0.0", "abcde12345"));
-        } catch (APISecurityException e) {
-           // assertEquals(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, e.getErrorCode());
-        }
-        try {
-            barAuthenticator.authenticate(TestUtils.getMessageContext("/bar", "1.5.0", "pqrst67890"));
-        } catch (APISecurityException e) {
-           // assertEquals(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, e.getErrorCode());
-        }
-    } */
+
+    @Test
+    public void getRequestOrigin() throws Exception {
+    }
+
+    @Test
+    public void getSecurityHeader() throws Exception {
+    }
+
+    @Test
+    public void setSecurityHeader() throws Exception {
+    }
+
+    @Test
+    public void getDefaultAPIHeader() throws Exception {
+    }
+
+    @Test
+    public void setDefaultAPIHeader() throws Exception {
+    }
+
+    @Test
+    public void getConsumerKeyHeaderSegment() throws Exception {
+    }
+
+    @Test
+    public void setConsumerKeyHeaderSegment() throws Exception {
+    }
+
+    @Test
+    public void getOauthHeaderSplitter() throws Exception {
+    }
+
+    @Test
+    public void setOauthHeaderSplitter() throws Exception {
+    }
+
+    @Test
+    public void getConsumerKeySegmentDelimiter() throws Exception {
+    }
+
+    @Test
+    public void setConsumerKeySegmentDelimiter() throws Exception {
+    }
+
+    @Test
+    public void getSecurityContextHeader() throws Exception {
+    }
+
+    @Test
+    public void setSecurityContextHeader() throws Exception {
+    }
+
+    @Test
+    public void isRemoveOAuthHeadersFromOutMessage() throws Exception {
+    }
+
+    @Test
+    public void setRemoveOAuthHeadersFromOutMessage() throws Exception {
+    }
+
+    @Test
+    public void getClientDomainHeader() throws Exception {
+    }
+
+    @Test
+    public void setClientDomainHeader() throws Exception {
+    }
+
+    @Test
+    public void isRemoveDefaultAPIHeaderFromOutMessage() throws Exception {
+    }
+
+    @Test
+    public void setRemoveDefaultAPIHeaderFromOutMessage() throws Exception {
+    }
+
+    @Test
+    public void setRequestOrigin() throws Exception {
+    }
 
 }

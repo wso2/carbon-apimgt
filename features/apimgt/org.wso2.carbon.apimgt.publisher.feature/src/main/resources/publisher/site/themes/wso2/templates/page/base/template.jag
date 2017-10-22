@@ -62,7 +62,7 @@ var editUrl="info";
 var loginUrl = "login";
 var user = jagg.getUser();
 %>
-<body class="sticky-footer <%if(reqUrl.indexOf(loginUrl)>=0) { %>login-bg<%}%>" <% if(reqUrl.indexOf(inlineUrl)>=0 || reqUrl.indexOf(jsonUrl)>=0){%> onload="loadDefaultTinyMCEContent('<%= encode.forJavaScript(provider) %>','<%= encode.forJavaScript(name) %>','<%= encode.forJavaScript(version)%>','<%= encode.forJavaScript(docName)%>')"<%}%>
+<body class="sticky-footer <%if(reqUrl.indexOf(loginUrl)>=0) { %>login-bg<%}%>" <% if(reqUrl.indexOf(inlineUrl)>=0 || reqUrl.indexOf(jsonUrl)>=0){%> onload="loadDefaultSummernoteContent('<%= encode.forJavaScript(provider) %>','<%= encode.forJavaScript(name) %>','<%= encode.forJavaScript(version)%>','<%= encode.forJavaScript(docName)%>')"<%}%>
 <% if(reqUrl.indexOf(addUrl)>=0 || reqUrl.indexOf(editUrl)>=0){%> <%}%>>
 
 <% if(user) { %>

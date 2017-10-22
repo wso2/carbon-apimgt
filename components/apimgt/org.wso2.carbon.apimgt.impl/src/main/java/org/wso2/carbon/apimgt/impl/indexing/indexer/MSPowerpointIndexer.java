@@ -29,21 +29,21 @@ public class MSPowerpointIndexer implements Indexer {
 			throws SolrException {
 		try {
             String ppText = null;
-            try{
+            try {
                 //Extract Powerpoint 2003 (.ppt) document files
                 POIFSFileSystem fs = new POIFSFileSystem(new ByteArrayInputStream(fileData.data));
 
                 PowerPointExtractor extractor = new PowerPointExtractor(fs);
                 ppText = extractor.getText();
 
-            }catch (OfficeXmlFileException e){
+            } catch (OfficeXmlFileException e){
 
                 //if 2003 Powerpoint (.ppt) extraction failed, try with Powerpoint 2007 (.pptx) document file extractor
                 XMLSlideShow xmlSlideShow = new XMLSlideShow(new ByteArrayInputStream(fileData.data));
                 XSLFPowerPointExtractor xslfPowerPointExtractor = new XSLFPowerPointExtractor(xmlSlideShow);
                 ppText = xslfPowerPointExtractor.getText();
 
-            }catch (Exception e){
+            } catch (Exception e){
                 String msg = "Failed to extract the document";
                 log.error(msg, e);
             }
