@@ -81,7 +81,7 @@ public class ListFiles extends AbstractNativeFunction  {
             return getBValues(balArray);
         }
 
-        return VOID_RETURN;
+        return getBValues(new BStringArray());
 //        if (fList != null) {
 //            BStringArray balArray = new BStringArray();
 //            balArray.add(0, "a");
