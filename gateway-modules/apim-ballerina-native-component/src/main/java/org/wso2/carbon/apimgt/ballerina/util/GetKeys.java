@@ -19,13 +19,13 @@
 package org.wso2.carbon.apimgt.ballerina.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.model.types.TypeEnum;
 import org.ballerinalang.model.values.BJSON;
 import org.ballerinalang.model.values.BStringArray;
 import org.ballerinalang.model.values.BValue;
-import org.ballerinalang.nativeimpl.lang.utils.ErrorHandler;
 import org.ballerinalang.natives.AbstractNativeFunction;
 import org.ballerinalang.natives.annotations.Argument;
 import org.ballerinalang.natives.annotations.Attribute;
@@ -67,20 +67,25 @@ public class GetKeys extends AbstractNativeFunction {
     public BValue[] execute(Context ctx) {
 
         List<String> keys = new ArrayList<String>();
-        try {
+//        try {
             // Accessing Parameters.
             BJSON json = (BJSON) getRefArgument(ctx, 0);
-
+//            if (json == null) {
+//                return getBValues(new BStringArray());
+//            }
             JsonNode node = json.value();
 
+            if (node.getNodeType() != JsonNodeType.OBJECT) {
+                return getBValues(new BStringArray());
+            }
 
             Iterator<String> keysItr = ((ObjectNode) node).fieldNames();
             while (keysItr.hasNext()) {
                 keys.add(keysItr.next());
             }
-        } catch (Throwable e) {
-            ErrorHandler.handleJsonException("get keys from json", e);
-        }
+//        } catch (Throwable e) {
+//            ErrorHandler.handleJsonException("get keys from json", e);
+//        }
 
         return getBValues(new BStringArray(keys.toArray(new String[keys.size()])));
     }
