@@ -2816,6 +2816,172 @@ public class APIProviderImplTest {
         }
     }
     
+    @Test
+    public void testGetCustomFaultSequences() throws Exception {
+        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.1");
+              
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null);
+        
+        mockSequences(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION, APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT,
+                apiId);
+        
+        List<String> sequenceList = apiProvider.getCustomFaultSequences(apiId);
+        
+        Assert.assertNotNull(sequenceList);
+        Assert.assertEquals(2, sequenceList.size());
+        Assert.assertTrue(sequenceList.contains("fault-seq"));
+        Assert.assertTrue(sequenceList.contains("custom-fault-seq"));
+        
+        //org.wso2.carbon.registry.api.RegistryException
+        ServiceReferenceHolder sh = PowerMockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        PowerMockito.when(sh.getRegistryService()).thenReturn(registryService);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+        PowerMockito.when(registryService.getGovernanceSystemRegistry(Matchers.anyInt())).thenReturn(registry);
+        Mockito.when(registry.resourceExists(APIConstants.API_CUSTOM_FAULTSEQUENCE_LOCATION)).thenThrow(
+                org.wso2.carbon.registry.api.RegistryException.class);
+        String msg = "Error while processing the " + APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT
+                + " sequences of " + apiId + " in the registry";        
+        try {
+            apiProvider.getCustomFaultSequences(apiId);
+        } catch(APIManagementException e) {
+            Assert.assertEquals(msg, e.getMessage());
+        }
+        
+        //Registry Exception        
+        PowerMockito.when(registryService.getGovernanceSystemRegistry(Matchers.anyInt())).thenThrow(
+                RegistryException.class);
+        try {
+            apiProvider.getCustomFaultSequences(apiId);
+        } catch(APIManagementException e) {
+            Assert.assertEquals("Error while retrieving registry for tenant -1", e.getMessage());
+        }
+    }
+    
+    @Test
+    public void testGetCustomInSequences() throws Exception {
+        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.1");
+              
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null);
+        
+        mockSequences(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION, APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN,
+                apiId);
+        
+        List<String> sequenceList = apiProvider.getCustomInSequences(apiId);
+        
+        Assert.assertNotNull(sequenceList);
+        Assert.assertEquals(2, sequenceList.size());
+        Assert.assertTrue(sequenceList.contains("fault-seq"));
+        Assert.assertTrue(sequenceList.contains("custom-fault-seq"));
+        
+        //org.wso2.carbon.registry.api.RegistryException
+        ServiceReferenceHolder sh = PowerMockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        PowerMockito.when(sh.getRegistryService()).thenReturn(registryService);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+        PowerMockito.when(registryService.getGovernanceSystemRegistry(Matchers.anyInt())).thenReturn(registry);
+        Mockito.when(registry.resourceExists(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION)).thenThrow(
+                org.wso2.carbon.registry.api.RegistryException.class);
+        String msg = "Issue is in getting custom InSequences from the Registry";       
+        try {
+            apiProvider.getCustomInSequences(apiId);
+        } catch(APIManagementException e) {
+            Assert.assertEquals(msg, e.getMessage());
+        }
+        
+        //Registry Exception        
+        PowerMockito.when(registryService.getGovernanceSystemRegistry(Matchers.anyInt())).thenThrow(
+                RegistryException.class);
+        try {
+            apiProvider.getCustomInSequences(apiId);
+        } catch(APIManagementException e) {
+            Assert.assertEquals(msg, e.getMessage());
+        }
+    }
+    
+    @Test
+    public void testGetCustomOutSequences() throws Exception {
+        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.1");
+              
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null);
+        
+        mockSequences(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION, APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT,
+                apiId);
+        
+        List<String> sequenceList = apiProvider.getCustomOutSequences(apiId);
+        
+        Assert.assertNotNull(sequenceList);
+        Assert.assertEquals(2, sequenceList.size());
+        Assert.assertTrue(sequenceList.contains("fault-seq"));
+        Assert.assertTrue(sequenceList.contains("custom-fault-seq"));
+        
+        //org.wso2.carbon.registry.api.RegistryException
+        ServiceReferenceHolder sh = PowerMockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        PowerMockito.when(sh.getRegistryService()).thenReturn(registryService);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+        PowerMockito.when(registryService.getGovernanceSystemRegistry(Matchers.anyInt())).thenReturn(registry);
+        Mockito.when(registry.resourceExists(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION)).thenThrow(
+                org.wso2.carbon.registry.api.RegistryException.class);
+        String msg = "Issue is in getting custom OutSequences from the Registry";       
+        try {
+            apiProvider.getCustomOutSequences(apiId);
+        } catch(APIManagementException e) {
+            Assert.assertEquals(msg, e.getMessage());
+        }
+        
+        //Registry Exception        
+        PowerMockito.when(registryService.getGovernanceSystemRegistry(Matchers.anyInt())).thenThrow(
+                RegistryException.class);
+        try {
+            apiProvider.getCustomOutSequences(apiId);
+        } catch(APIManagementException e) {
+            Assert.assertEquals(msg, e.getMessage());
+        }
+    }
+    
+    private void mockSequences(String seqLoc, String apiSeqLoc, APIIdentifier apiId) throws Exception {
+        
+        ServiceReferenceHolder sh = PowerMockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        PowerMockito.when(sh.getRegistryService()).thenReturn(registryService);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+        PowerMockito.when(registryService.getGovernanceSystemRegistry(Matchers.anyInt())).thenReturn(registry);
+        
+        Mockito.when(registry.resourceExists(seqLoc)).thenReturn(true);
+        Collection seqCollection = Mockito.mock(Collection.class);
+        Mockito.when(registry.get(seqLoc)).thenReturn(
+                seqCollection);
+        String[] seqChildPaths = {"path1"};
+        Mockito.when(seqCollection.getChildren()).thenReturn(seqChildPaths);
+        Resource sequence = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(seqChildPaths[0])).thenReturn(sequence);
+        InputStream responseStream = IOUtils.toInputStream("<sequence name=\"fault-seq\"></sequence>", "UTF-8");
+        OMElement seqElment = buildOMElement(responseStream);
+        PowerMockito.when(APIUtil.buildOMElement(responseStream)).thenReturn(seqElment);
+        Mockito.when(sequence.getContentStream()).thenReturn(responseStream);
+        
+        String customSeqFileLocation = "/custom/fault";
+        Mockito.when(APIUtil.getSequencePath(apiId, apiSeqLoc)).thenReturn(
+                customSeqFileLocation);
+        Mockito.when(registry.resourceExists(customSeqFileLocation)).thenReturn(true);
+        Collection customSeqCollection = Mockito.mock(Collection.class);
+        Mockito.when(registry.get(customSeqFileLocation)).thenReturn(
+                customSeqCollection);
+        String[] customSeqChildPaths = {"path2"};
+        Mockito.when(customSeqCollection.getChildren()).thenReturn(customSeqChildPaths);
+        Resource customSequence = Mockito.mock(Resource.class);
+        Mockito.when(registry.get(customSeqChildPaths[0])).thenReturn(customSequence);
+        InputStream responseStream1 = IOUtils.toInputStream("<sequence name=\"custom-fault-seq\"></sequence>", "UTF-8");
+        OMElement seqElment1 = buildOMElement(responseStream1);
+        PowerMockito.when(APIUtil.buildOMElement(responseStream1)).thenReturn(seqElment1);
+        Mockito.when(customSequence.getContentStream()).thenReturn(responseStream1);
+    }
+    
     /**
      * This method can be used when invoking getAPIsByProvider()
      * 
