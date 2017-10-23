@@ -170,9 +170,10 @@ public class TenantWorkflowConfigHolderTest {
         Mockito.when(registry.get(APIConstants.WORKFLOW_EXECUTOR_LOCATION)).thenReturn(defaultWFConfigResource);
         try {
             tenantWorkflowConfigHolder.load();
-            Assert.fail("Expected WorkflowException has not been thrown when workflow executor class not found");
+            Assert.fail("Expected WorkflowException has not been thrown when workflow executor class cannot be " +
+                    "instantiate");
         } catch (WorkflowException e) {
-            Assert.assertEquals(e.getMessage(), "Unable to find class");
+            Assert.assertEquals(e.getMessage(), "Unable to instantiate class");
         }
     }
 
