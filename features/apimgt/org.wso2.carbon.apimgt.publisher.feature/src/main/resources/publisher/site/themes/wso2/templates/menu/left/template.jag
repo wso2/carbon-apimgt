@@ -38,6 +38,9 @@
     var  mod,isPermitted, isManageTierPermitted;
     isPermitted=jagg.getCreatePermitted().permitted;
     isManageTierPermitted = jagg.getManageTierPermitted().permitted;
+
+    var highlightLink;
+    if(reqUrl.equals(allStatsMappedUrl) || reqUrl.equals(allStatsListUrl)){ highlightLink = "in"}
 %>
 
    <div class="sidebar-wrapper sidebar-nav" id="left-sidebar" data-side="left" data-width="300" data-fixed-offset-top="0" data-spy="affix" data-offset-top="80" style="width: 300px; left: 0px;">
@@ -47,16 +50,82 @@
 					<li <%if(reqUrl.equals(jagg.url(""))||reqUrl.equals(jagg.url("/"))||reqUrl.indexOf(listUrl)>=0 || reqUrl.indexOf(listMappedUrl)>=0||reqUrl.indexOf(infoUrl)>=0 || reqUrl.indexOf(infoMappedUrl)>=0){%>class="active"<% } %>><a
 						href="<%=listMappedUrl%>?page=1<%=urlPostfix%>" title="<%=i18n.localize("APIs")%>"
 						onclick="jagg.sessionAwareJS({redirect:'<%=listMappedUrl%>?page=1<%=urlPostfix%>',e:event,ssoEnabled:<%=ssoEnabled%>})"><i class="fw fw-api fw-2x" title="<%=i18n.localize("APIs")%>" style="font-size:22px;"></i> <%=i18n.localize("APIs")%></a></li>
-
-
-
-					<li <%if(reqUrl.equals(allStatsMappedUrl) || reqUrl.equals(allStatsListUrl)){ %>class="active"<%} %>><a href="<%=allStatsListUrl%>" id="left-bar-menu-toggle"  title="<%=i18n.localize("Statistics")%>"
-                               aria-expanded="false"><i class="fw fw-statistics fw-2x" title="<%=i18n.localize("Analytics")%>" style="font-size:22px;"></i> <%=i18n.localize("Analytics")%>
+					<li>
+					<a title="<%=i18n.localize("Statistics")%>" data-toggle="collapse" data-target="#analytics" class="">
+                               <i class="fw fw-statistics fw-2x" title="<%=i18n.localize("Analytics")%>" style="font-size:22px;"></i> <%=i18n.localize("Analytics")%>
                                <i class="fw  fw-2x" title="<%=i18n.localize("Analytics")%>"></i>
+                               <span class="arrow"></span>
                                </a>
 
+<ul class="nav nav-pills secondary-nav collapse sub-menu <%=highlightLink%>" id="analytics" aria-expanded="true">
+            <li>
+                <a data-toggle="collapse" data-target="#api" class="">
+                    <%=i18n.localize("API")%>
+                    <span class="arrow"></span>
+                </a>
+                <ul id="api" class="nav nav-pills secondary-nav collapse sub-sub-menu <%=highlightLink%>" aria-expanded="true">
+                    <li><a title="Created APIs Over Time" href="/publisher/site/pages/all-statistics.jag?page=apis-time&amp;stat=stat" onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/all-statistics.jag?page=apis-time&amp;stat=stat',e:event,ssoEnabled:false})">
+                        Created APIs Over Time</a></li>
+                    <li><a title="API Usage" href="/publisher/site/pages/all-statistics.jag?page=api-usage-user&amp;stat=all-stat" onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/all-statistics.jag?page=api-usage-user&amp;stat=all-stat',e:event,ssoEnabled:false})">
+                        API Usage</a></li>
+                    <li><a title="Top API Users" href="/publisher/site/pages/all-statistics.jag?page=api-top-users&amp;stat=all-stat" onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/all-statistics.jag?page=page=api-top-users&amp;stat=all-stat',e:event,ssoEnabled:false})">
+                        Top API Users</a></li>
+                    <li><a title="API Last Access Times" href="/publisher/site/pages/all-statistics.jag?page=api-last-access-times&amp;stat=all-stat" onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/all-statistics.jag?page=api-last-access-times&amp;stat=all-stat',e:event,ssoEnabled:false})">
+                        API Last Access Times</a></li>
+                    <li><a title="Usage by Resource Path" href="/publisher/site/pages/all-statistics.jag?page=api-usage-resource-path&amp;stat=all-stat" onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/all-statistics.jag?page=api-usage-resource-path&amp;stat=all-stat',e:event,ssoEnabled:false})">
+                        Usage by Resource Path</a></li>
+                    <li><a title="Usage by Destination" href="/publisher/site/pages/all-statistics.jag?page=api-usage-destination&amp;stat=all-stat" onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/all-statistics.jag?page=api-usage-destination&amp;stat=all-stat',e:event,ssoEnabled:false})">
+                        Usage by Destination</a></li>
+                    <li><a title="API Usage Comparison" href="/publisher/site/pages/all-statistics.jag?page=api-usage&amp;stat=all-stat" onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/all-statistics.jag?page=api-usage&amp;stat=all-stat',e:event,ssoEnabled:false})">
+                        API Usage Comparison</a></li>
+                    <li><a title="API Throttled Requests" href="/publisher/site/pages/all-statistics.jag?page=api-throttledcounts&amp;stat=all-stat" onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/all-statistics.jag?page=api-throttledcounts&amp;stat=all-stat',e:event,ssoEnabled:false})">
+                        API Throttled Requests</a></li>
+                    <li><a title="Faulty Invocations" href="/publisher/site/pages/all-statistics.jag?page=faulty-invocations&amp;stat=all-stat" onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/all-statistics.jag?page=faulty-invocations&amp;stat=all-stat',e:event,ssoEnabled:false})">
+                        Faulty Invocations</a></li>
+                    <li><a title="API Latency" href="/publisher/site/pages/all-statistics.jag?page=api-latencytime&amp;stat=stat" onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/all-statistics.jag?page=api-latencytime&amp;stat=stat',e:event,ssoEnabled:false})">
+                        API Latency</a></li>
+                     <li><a title="API Usage Across Geo Locations" href="/publisher/site/pages/all-statistics.jag?page=api-geolocation-usage&amp;stat=stat" onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/all-statistics.jag?page=api-geolocation-usage&amp;stat=stat',e:event,ssoEnabled:false})">
+                      API Usage Across Geo Locations</a></li>
+                     <li><a title="API Usage Across Usage Agent" href="/publisher/site/pages/all-statistics.jag?page=api-user-agent-usage&amp;stat=stat" onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/all-statistics.jag?page=api-user-agent-usage&amp;stat=stat',e:event,ssoEnabled:false})">
+                      API Usage Across Usage Agent</a></li>
+                </ul>
+            </li>
 
-					</li>
+
+
+
+			  <li>
+                  <a data-toggle="collapse" data-target="#applications" class="">
+                      <%=i18n.localize("Applications")%>
+                      <span class="arrow"></span>
+                  </a>
+                  <ul id="applications" class="nav nav-pills secondary-nav collapse sub-sub-menu <%=highlightLink%>" aria-expanded="true">
+                    <li><a title="App Throttled Requests" href="/publisher/site/pages/all-statistics.jag?page=application-throttledcounts&amp;stat=all-stat" onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/all-statistics.jag?page=application-throttledcounts&amp;stat=all-stat',e:event,ssoEnabled:false})">
+                                    App Throttled Requests</a></li>
+                    <li><a title="Applications Created Over Time" href="/publisher/site/pages/all-statistics.jag?page=applications-time&amp;stat=all-stat" onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/all-statistics.jag?page=applications-time&amp;stat=all-stat',e:event,ssoEnabled:false})">
+                                    Applications Created Over Time</a></li>
+                  </ul>
+			  </li>
+
+
+
+
+            <li>
+                <a data-toggle="collapse" data-target="#subscriptions" class="">
+                    <%=i18n.localize("Subscriptions")%>
+                    <span class="arrow"></span>
+                </a>
+                <ul id="subscriptions" class="nav nav-pills secondary-nav collapse sub-sub-menu <%=highlightLink%>" aria-expanded="true">
+                    <li><a title="API Subscriptions" href="/publisher/site/pages/all-statistics.jag?page=api-subscriptions&amp;stat=all-stat" onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/all-statistics.jag?page=api-subscriptions&amp;stat=all-stat',e:event,ssoEnabled:false})">
+                                    API Subscriptions</a></li>
+                    <li><a title="Developer Signups Over Time" href="/publisher/site/pages/all-statistics.jag?page=developers-time&amp;stat=all-stat" onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/all-statistics.jag?page=developers-time&amp;stat=all-stat',e:event,ssoEnabled:false})">
+                                    Developer Signups Over Time</a></li>
+                    <li><a title="Subscriptions Created Over Time" href="/publisher/site/pages/all-statistics.jag?page=subscriptions-time&amp;stat=all-stat" onclick="jagg.sessionAwareJS({redirect:'/publisher/site/pages/all-statistics.jag?page=subscriptions-time&amp;stat=all-stat',e:event,ssoEnabled:false})">
+                                    Subscriptions Created Over Time</a></li>
+                </ul>
+            </li>
+		</ul>
+</li>
 
 					<%if(isPermitted){%>
 					<li <%if(reqUrl.equals(subsMappedUrl) || reqUrl.equals(subsUrl)){ %>class="active"<%} %>><a class="js_toggler" title="<%=i18n.localize("Manage Subscriptions")%>"
