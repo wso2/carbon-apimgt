@@ -35,17 +35,17 @@ import io.fabric8.openshift.client.OpenShiftClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.ServiceDiscoveryException;
-import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
-import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
-import org.wso2.carbon.apimgt.core.util.FileEncryptionUtil;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
@@ -92,10 +92,12 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
         Config config;
         log.debug("Using mounted service account token");
         try {
-            String saMountedToken = APIFileUtils.readFileContentAsText(implConfig.get("podMountedSATokenFile"));
+            String saMountedToken = new String(Files.readAllBytes(
+                    Paths.get(implConfig.get("podMountedSATokenFile"))), StandardCharsets.UTF_8);
             config = configBuilder.withOauthToken(saMountedToken).build();
-        } catch (APIMgtDAOException | NullPointerException e) {
+        } catch (IOException | NullPointerException e) {
             log.error("Error while building config with pod mounted token");
+            log.debug("Mounted token not found", e);
             log.info("Using externally stored service account token");
             config = configBuilder.withOauthToken(resolveToken()).build();
         }
@@ -104,11 +106,10 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
 
     private String resolveToken() throws ServiceDiscoveryException {
         String token;
-        String encryptedFilesDir = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
-                .getFileEncryptionConfigurations().getDestinationDirectory();
         try {
-            token = FileEncryptionUtil.readFromEncryptedFile(
-                    Paths.get(encryptedFilesDir + "/encrypted" + implConfig.get("serviceAccountTokenFile")));
+            token = FileEncryptionUtility.getInstance().readFromEncryptedFile(
+                    System.getProperty("carbon.home") + FileEncryptionUtility.SECURITY_DIR + File.separator
+                    + "encrypted" + implConfig.get("externalSATokenFile"));
         } catch (APIManagementException e) {
             String msg = "Error occurred while resolving externally stored token";
             log.error(msg, e);

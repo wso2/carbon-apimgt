@@ -43,7 +43,7 @@ public class ServiceDiscoveryImplConfig {
         cmsSpecificParameters.put("includeExternalNameServices", "false");
         cmsSpecificParameters.put("podMountedSATokenFile", "/var/run/secrets/kubernetes.io/serviceaccount/token");
         cmsSpecificParameters.put("externalSATokenFile", "KubernetesToken");
-        cmsSpecificParameters.put("caCertLocation", "/resources/security/ca.crt");
+        cmsSpecificParameters.put("caCertLocation", "");
     }
 
     public String getImplClass() {

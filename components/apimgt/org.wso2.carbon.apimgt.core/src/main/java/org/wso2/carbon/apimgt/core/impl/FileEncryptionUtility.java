@@ -1,0 +1,201 @@
+package org.wso2.carbon.apimgt.core.impl;
+
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.configuration.models.FileEncryptionConfigurations;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.core.util.APIFileUtils;
+import org.wso2.carbon.kernel.securevault.SecureVault;
+import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
+import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
+
+import static org.wso2.carbon.apimgt.core.util.APIMgtConstants.EncryptionConstants;
+
+/**
+ *  class for File Encryption Related functions
+ */
+public class FileEncryptionUtility {
+    private static final Logger log = LoggerFactory.getLogger(FileEncryptionUtility.class);
+    private static final int AES_Key_Size = 128;
+
+    private static final FileEncryptionUtility instance = new FileEncryptionUtility();
+    public static final String SECURITY_DIR = File.separator + "resources" + File.separator + "security";
+
+    private FileEncryptionConfigurations config;
+    private String aesKeyFileLocation;
+    private SecureVault secureVault;
+
+    /**
+     * Get FileEncryptionUtility instance
+     *
+     * @return FileEncryptionUtility object
+     */
+    public static FileEncryptionUtility getInstance() {
+        return instance;
+    }
+
+    /**
+     * Sets the location to store the encrypted AES key file
+     * Sets secure vault instance to encrypt AES key
+     * Calls createAndStoreAESKey method
+     *
+     * @throws APIManagementException if an error occurs while initializing the file encryption
+     */
+    public void init() throws APIManagementException {
+        config = ServiceReferenceHolder.getInstance().getAPIMConfiguration().getFileEncryptionConfigurations();
+        aesKeyFileLocation = System.getProperty("carbon.home") + SECURITY_DIR
+                + File.separator + EncryptionConstants.ENCRYPTED_AES_KEY_FILE;
+        secureVault = ServiceReferenceHolder.getInstance().getSecureVault();
+        if (secureVault == null) {
+            throw new APIManagementException("Secure vault OSGi service cannot be accessed");
+        }
+        createAndStoreAESKey();
+    }
+
+    /**
+     * Encrypts the contents of a file and stores it in a new file
+     *
+     * @param inputFilePath    absolute path of the file to encrypt
+     * @param outputFilePath   expected absolute path of the new encrypted file
+     * @throws APIManagementException  if an error occurs encrypting the file
+     */
+    public void encryptFile(String inputFilePath, String outputFilePath) throws APIManagementException {
+        try {
+            log.info("Encrypting file using stored AES key");
+            Cipher aesCipher = Cipher.getInstance(EncryptionConstants.AES);
+            SecretKeySpec aesKeySpec = new SecretKeySpec(getAESKey(), EncryptionConstants.AES);
+            aesCipher.init(Cipher.ENCRYPT_MODE, aesKeySpec);
+
+            InputStream inputStream = APIFileUtils.readFileContentAsStream(inputFilePath);
+            CipherOutputStream cipherOutStream = new CipherOutputStream(
+                    new FileOutputStream(outputFilePath), aesCipher);
+            IOUtils.copy(inputStream, cipherOutStream);
+            inputStream.close();
+            cipherOutStream.close();
+            APIFileUtils.deleteFile(inputFilePath);
+        } catch (NoSuchPaddingException | NoSuchAlgorithmException e) {
+            String msg = "Error occurred while initializing AES cipher for File Encryption";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (IOException | InvalidKeyException e) {
+            String msg = "Error while encrypting file using AES key";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Decrypts the content of an encrypted file and returns the text
+     *
+     * @param inputFilePath  absolute path of the encrypted file
+     * @return text after decryption
+     * @throws APIManagementException if an error occurs while reading from the encrypted file
+     */
+    public String readFromEncryptedFile(String inputFilePath) throws APIManagementException {
+        try {
+            log.info("Decrypting file using stored AES key");
+            Cipher aesCipher = Cipher.getInstance(EncryptionConstants.AES);
+            SecretKeySpec aesKeySpec = new SecretKeySpec(getAESKey(), EncryptionConstants.AES);
+            aesCipher.init(Cipher.DECRYPT_MODE, aesKeySpec);
+
+            CipherInputStream cipherInStream = new CipherInputStream(
+                    APIFileUtils.readFileContentAsStream(inputFilePath), aesCipher);
+            ByteArrayOutputStream byteArrayOutStream = new ByteArrayOutputStream();
+            IOUtils.copy(cipherInStream, byteArrayOutStream);
+            byte[] outByteArray = byteArrayOutStream.toByteArray();
+            cipherInStream.close();
+            byteArrayOutStream.close();
+            return new String(SecureVaultUtils.toChars(outByteArray));
+        } catch (IOException | InvalidKeyException e) {
+            String msg = "Error while decrypting file using AES key";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (NoSuchPaddingException | NoSuchAlgorithmException e) {
+            String msg = "Error occurred while initializing AES cipher for File Encryption";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Encrypts the list of file given in the configuration,
+     * which are located in the security directory.
+     * Encrypted files will have "encrypted" before its original name.
+     *
+     * @throws APIManagementException if an error occurs while encrypting the list of files
+     */
+    public void encryptFiles() throws APIManagementException {
+        List<String> namesOfFilesToEncrypt = config.getFilesToEncrypt();
+        String encryptedFilesLocation = System.getProperty("carbon.home") + SECURITY_DIR + File.separator;
+        for (String filename: namesOfFilesToEncrypt) {
+            String originalFile = encryptedFilesLocation + filename;
+            String encryptedFile = encryptedFilesLocation + "encrypted" + filename;
+            encryptFile(originalFile, encryptedFile);
+        }
+    }
+
+    /**
+     * Creates and stores an AES key
+     *
+     * @throws APIManagementException if an error occurs while creating or storing AES key
+     */
+    private void createAndStoreAESKey() throws APIManagementException {
+        try {
+            KeyGenerator keyGenerator = KeyGenerator.getInstance(EncryptionConstants.AES);
+            keyGenerator.init(AES_Key_Size);
+            byte[] aesKey = keyGenerator.generateKey().getEncoded();
+
+            //store key => encrypt -> encode -> chars -> string
+            byte[] encryptedKeyBytes = SecureVaultUtils.base64Encode(secureVault.encrypt(aesKey));
+            String encryptedKeyString = new String(SecureVaultUtils.toChars(encryptedKeyBytes));
+            APIFileUtils.createFile(aesKeyFileLocation);
+            APIFileUtils.writeToFile(aesKeyFileLocation, encryptedKeyString);
+            log.debug("AES key successfully created and stored");
+        } catch (SecureVaultException | NullPointerException | APIMgtDAOException e) {
+            String msg = "Error while storing created AES key";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (NoSuchAlgorithmException e) {
+            String msg = "Error while creating AES key";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    private byte[] getAESKey() throws APIManagementException {
+        byte[] encryptedAesKeyB;
+        byte[] aesKey;
+        try {
+            String encryptedAesKeyStr = APIFileUtils.readFileContentAsText(aesKeyFileLocation);
+            encryptedAesKeyB = SecureVaultUtils.base64Decode(SecureVaultUtils.toBytes(encryptedAesKeyStr));
+            aesKey = secureVault.decrypt(encryptedAesKeyB);
+        } catch (APIMgtDAOException e) {
+            String msg = "Error while retrieving stored AES key";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        } catch (SecureVaultException e) {
+            String msg = "Error while decrypting AES key";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
+        }
+        return aesKey;
+    }
+}

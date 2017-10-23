@@ -36,9 +36,9 @@ import org.wso2.carbon.apimgt.core.dao.impl.DataSource;
 import org.wso2.carbon.apimgt.core.dao.impl.DataSourceImpl;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.BrokerImpl;
+import org.wso2.carbon.apimgt.core.impl.FileEncryptionUtility;
 import org.wso2.carbon.apimgt.core.impl.ServiceDiscoveryConfigBuilder;
 import org.wso2.carbon.apimgt.core.util.BrokerUtil;
-import org.wso2.carbon.apimgt.core.util.FileEncryptionUtil;
 import org.wso2.carbon.apimgt.core.util.ThrottlerUtil;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExtensionsConfigBuilder;
 import org.wso2.carbon.datasource.core.api.DataSourceService;
@@ -101,8 +101,9 @@ public class BundleActivator {
             boolean fileEncryptionEnabled = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
                     .getFileEncryptionConfigurations().isEnabled();
             if (fileEncryptionEnabled) {
-                FileEncryptionUtil.init();
-                FileEncryptionUtil.encryptFiles();
+                FileEncryptionUtility fileEncryptionUtility = FileEncryptionUtility.getInstance();
+                fileEncryptionUtility.init();
+                fileEncryptionUtility.encryptFiles();
             }
         } catch (APIManagementException e) {
             log.error("Error occurred while encrypting files", e);

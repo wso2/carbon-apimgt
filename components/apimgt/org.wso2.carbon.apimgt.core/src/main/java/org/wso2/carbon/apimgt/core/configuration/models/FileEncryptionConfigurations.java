@@ -32,15 +32,11 @@ public class FileEncryptionConfigurations {
 
     @Element(description = "enable file encryption")
     private boolean enabled = false;
-    @Element(description = "directory with files to be encrypted")
-    private String sourceDirectory = "/resources/security";
-    @Element(description = "directory to store encrypted files")
-    private String destinationDirectory = "/resources/security";
     @Element(description = "files to encrypt")
     private List<String> filesToEncrypt = new ArrayList<>();
 
     public FileEncryptionConfigurations() {
-        this.filesToEncrypt.add("KubernetesToken");
+        this.filesToEncrypt.add("FileToEncrypt");
     }
 
     public boolean isEnabled() {
@@ -49,22 +45,6 @@ public class FileEncryptionConfigurations {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-    }
-
-    public String getSourceDirectory() {
-        return sourceDirectory;
-    }
-
-    public void setSourceDirectory(String sourceDirectory) {
-        this.sourceDirectory = sourceDirectory;
-    }
-
-    public String getDestinationDirectory() {
-        return destinationDirectory;
-    }
-
-    public void setDestinationDirectory(String destinationDirectory) {
-        this.destinationDirectory = destinationDirectory;
     }
 
     public List<String> getFilesToEncrypt() {

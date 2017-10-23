@@ -26,8 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * This interface allows discovering services in a cluster using a set of cms specific parameters
- * while filtering by namespace and/or criteria as needed.
+ * Abstract class to discover and list services in a cluster using a set of cms specific parameters
+ * while filtering by namespace and/or criteria as provided in the configuration.
  */
 public abstract class ServiceDiscoverer {
 
@@ -39,6 +39,12 @@ public abstract class ServiceDiscoverer {
     protected List<Endpoint> servicesList;
 
 
+    /**
+     * Initializes the necessary parameters
+     *
+     * @param cmsSpecificParameters  container management specific parameters provided in the configuration
+     * @throws ServiceDiscoveryException if an error occurs in the implementation's init method
+     */
     public void init(HashMap<String, String> cmsSpecificParameters) throws ServiceDiscoveryException {
         this.cmsSpecificParameters = cmsSpecificParameters;
         this.namespaceFilter = this.cmsSpecificParameters.get("namespace");
@@ -57,7 +63,7 @@ public abstract class ServiceDiscoverer {
     }
 
     /**
-     * To get list of endpoints without any filtering.
+     * Lists the endpoints without any filtering.
      *
      * @return List of Endpoints
      * @throws ServiceDiscoveryException If an error occurs while listing
@@ -65,7 +71,7 @@ public abstract class ServiceDiscoverer {
     public abstract List<Endpoint> listServices() throws ServiceDiscoveryException;
 
     /**
-     * To get list of endpoints, with a specific namespace.
+     * Lists the endpoints with a specific namespace.
      *
      * @param namespace     Namespace of the expected endpoints
      * @return List of Endpoints with the specified namespace
@@ -74,7 +80,7 @@ public abstract class ServiceDiscoverer {
     public abstract List<Endpoint> listServices(String namespace) throws ServiceDiscoveryException;
 
     /**
-     * To get list of endpoints, with a specific criteria.
+     * Lists the endpoints with a specific criteria.
      *
      * @param criteria    A criteria the endpoints should be filtered by
      * @return List of Endpoints with the specified criteria
@@ -83,7 +89,7 @@ public abstract class ServiceDiscoverer {
     public abstract List<Endpoint> listServices(HashMap<String, String> criteria) throws ServiceDiscoveryException;
 
     /**
-     * To get list of endpoints, with a specific namespace and a criteria.
+     * Lists the endpoints with a specific namespace and a criteria.
      *
      * @param namespace   Namespace of the expected endpoints
      * @param criteria    A criteria the endpoints should be filtered by
@@ -93,6 +99,17 @@ public abstract class ServiceDiscoverer {
     public abstract List<Endpoint> listServices(String namespace, HashMap<String, String> criteria)
             throws ServiceDiscoveryException;
 
+    /**
+     * Build a Endpoint
+     * @param id
+     * @param name
+     * @param endpointConfig
+     * @param maxTps
+     * @param type
+     * @param endpointSecurity
+     * @param applicableLevel
+     * @return
+     */
     protected Endpoint createEndpoint(String id, String name, String endpointConfig, Long maxTps,
                                     String type, String endpointSecurity, String applicableLevel) {
         Endpoint.Builder endpointBuilder = new Endpoint.Builder();
@@ -108,11 +125,20 @@ public abstract class ServiceDiscoverer {
         return endpointBuilder.build();
     }
 
-
+    /**
+     * Returns the namespace, provided in the configuration, to filter by
+     *
+     * @return Namespace to filter by
+     */
     public String getNamespaceFilter() {
         return namespaceFilter;
     }
 
+    /**
+     * Returns the criteria, provided in the configuration, to filter by
+     *
+     * @return Criteria to filter by
+     */
     public HashMap<String, String> getCriteriaFilter() {
         return criteriaFilter;
     }
