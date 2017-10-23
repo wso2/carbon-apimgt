@@ -136,10 +136,33 @@ public class TenantWorkflowConfigHolderTest {
     }
 
     @Test
-    public void testFailureToLoadTenantWFConfigWhenErrorWhileProcessingRegistryResourceContent() throws Exception {
-        String invalidWFExecutor = "<WorkFlowExtensions>\n" +
+    public void testFailureToLoadTenantWFConfigWhenWFExecutorClassNotFound() throws Exception {
+        //Workflow executor is an non existing class so that ClassNotFoundException will be thrown
+        String invalidWFExecutor =
+                "<WorkFlowExtensions>\n" +
                 "    <ApplicationCreation executor=\"org.wso2.carbon.apimgt.impl.workflow" +
                 ".TestExecutor\"/></WorkFlowExtensions>";
+        InputStream invalidInputStream = new ByteArrayInputStream(invalidWFExecutor.getBytes("UTF-8"));
+        TenantWorkflowConfigHolder tenantWorkflowConfigHolder = new TenantWorkflowConfigHolder(tenantDomain, tenantID);
+        Resource defaultWFConfigResource = new ResourceImpl();
+        defaultWFConfigResource.setContentStream(invalidInputStream);
+        Mockito.when(registry.get(APIConstants.WORKFLOW_EXECUTOR_LOCATION)).thenReturn(defaultWFConfigResource);
+        try {
+            tenantWorkflowConfigHolder.load();
+            Assert.fail("Expected WorkflowException has not been thrown when workflow executor class not found");
+        } catch (WorkflowException e) {
+            Assert.assertEquals(e.getMessage(), "Unable to find class");
+        }
+    }
+
+
+    @Test
+    public void testFailureToLoadTenantWFConfigWhenWFExecutorClassCannotBeInstantiated() throws Exception {
+        //Workflow executor is an abstract class so that InstantiationException will be thrown
+        String invalidWFExecutor =
+                "<WorkFlowExtensions>\n" +
+                "    <ApplicationCreation executor=\"org.wso2.carbon.apimgt.impl.workflow" +
+                ".WorkflowExecutor\"/></WorkFlowExtensions>";
         InputStream invalidInputStream = new ByteArrayInputStream(invalidWFExecutor.getBytes("UTF-8"));
         TenantWorkflowConfigHolder tenantWorkflowConfigHolder = new TenantWorkflowConfigHolder(tenantDomain, tenantID);
         Resource defaultWFConfigResource = new ResourceImpl();
