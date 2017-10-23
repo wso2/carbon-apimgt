@@ -22,5 +22,5 @@ public abstract class TagsApiService {
     public abstract Response tagsGet(Integer limit
  ,Integer offset
  ,String ifNoneMatch
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
 }

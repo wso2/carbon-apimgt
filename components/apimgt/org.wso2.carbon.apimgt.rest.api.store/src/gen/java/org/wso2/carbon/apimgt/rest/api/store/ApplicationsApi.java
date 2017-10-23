@@ -28,6 +28,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -51,6 +52,7 @@ import javax.ws.rs.core.Response;
 public class ApplicationsApi implements Microservice  {
    private final ApplicationsApiService delegate = ApplicationsApiServiceFactory.getApplicationsApi();
 
+    @OPTIONS
     @DELETE
     @Path("/{applicationId}")
     @Consumes({ "application/json" })
@@ -71,10 +73,11 @@ public class ApplicationsApi implements Microservice  {
     public Response applicationsApplicationIdDelete(@ApiParam(value = "**Application Identifier** consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.applicationsApplicationIdDelete(applicationId,ifMatch,ifUnmodifiedSince, request);
+        return delegate.applicationsApplicationIdDelete(applicationId,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @POST
     @Path("/{applicationId}/generate-keys")
     @Consumes({ "application/json" })
@@ -94,10 +97,11 @@ public class ApplicationsApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ApplicationKeysDTO.class) })
     public Response applicationsApplicationIdGenerateKeysPost(@ApiParam(value = "**Application Identifier** consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId
 ,@ApiParam(value = "Application key generation request object " ,required=true) ApplicationKeyGenerateRequestDTO body
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.applicationsApplicationIdGenerateKeysPost(applicationId,body, request);
+        return delegate.applicationsApplicationIdGenerateKeysPost(applicationId,body,request);
     }
+    @OPTIONS
     @POST
     @Path("/{applicationId}/generate-token")
     @Consumes({ "application/json" })
@@ -119,10 +123,11 @@ public class ApplicationsApi implements Microservice  {
 ,@ApiParam(value = "Application token generation request object " ,required=true) ApplicationTokenGenerateRequestDTO body
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.applicationsApplicationIdGenerateTokenPost(applicationId,body,ifMatch,ifUnmodifiedSince, request);
+        return delegate.applicationsApplicationIdGenerateTokenPost(applicationId,body,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{applicationId}")
     @Consumes({ "application/json" })
@@ -143,10 +148,11 @@ public class ApplicationsApi implements Microservice  {
     public Response applicationsApplicationIdGet(@ApiParam(value = "**Application Identifier** consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.applicationsApplicationIdGet(applicationId,ifNoneMatch,ifModifiedSince, request);
+        return delegate.applicationsApplicationIdGet(applicationId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{applicationId}/keys")
     @Consumes({ "application/json" })
@@ -165,10 +171,11 @@ public class ApplicationsApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ApplicationKeysListDTO.class) })
     public Response applicationsApplicationIdKeysGet(@ApiParam(value = "**Application Identifier** consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.applicationsApplicationIdKeysGet(applicationId, request);
+        return delegate.applicationsApplicationIdKeysGet(applicationId,request);
     }
+    @OPTIONS
     @GET
     @Path("/{applicationId}/keys/{keyType}")
     @Consumes({ "application/json" })
@@ -188,10 +195,11 @@ public class ApplicationsApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ApplicationKeysDTO.class) })
     public Response applicationsApplicationIdKeysKeyTypeGet(@ApiParam(value = "**Application Identifier** consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId
 ,@ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.applicationsApplicationIdKeysKeyTypeGet(applicationId,keyType, request);
+        return delegate.applicationsApplicationIdKeysKeyTypeGet(applicationId,keyType,request);
     }
+    @OPTIONS
     @PUT
     @Path("/{applicationId}/keys/{keyType}")
     @Consumes({ "application/json" })
@@ -212,10 +220,11 @@ public class ApplicationsApi implements Microservice  {
     public Response applicationsApplicationIdKeysKeyTypePut(@ApiParam(value = "**Application Identifier** consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId
 ,@ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox). ",required=true, allowableValues="PRODUCTION, SANDBOX") @PathParam("keyType") String keyType
 ,@ApiParam(value = "Grant types/Callback URL update request object " ,required=true) ApplicationKeysDTO body
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.applicationsApplicationIdKeysKeyTypePut(applicationId,keyType,body, request);
+        return delegate.applicationsApplicationIdKeysKeyTypePut(applicationId,keyType,body,request);
     }
+    @OPTIONS
     @POST
     @Path("/{applicationId}/map-keys")
     @Consumes({ "application/json" })
@@ -235,10 +244,11 @@ public class ApplicationsApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = ApplicationKeysDTO.class) })
     public Response applicationsApplicationIdMapKeysPost(@ApiParam(value = "**Application Identifier** consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId
 ,@ApiParam(value = "Application key mapping request object " ,required=true) ApplicationKeyMappingRequestDTO body
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.applicationsApplicationIdMapKeysPost(applicationId,body, request);
+        return delegate.applicationsApplicationIdMapKeysPost(applicationId,body,request);
     }
+    @OPTIONS
     @PUT
     @Path("/{applicationId}")
     @Consumes({ "application/json" })
@@ -260,10 +270,11 @@ public class ApplicationsApi implements Microservice  {
 ,@ApiParam(value = "Application object that needs to be updated " ,required=true) ApplicationDTO body
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.applicationsApplicationIdPut(applicationId,body,ifMatch,ifUnmodifiedSince, request);
+        return delegate.applicationsApplicationIdPut(applicationId,body,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     
     @Consumes({ "application/json" })
@@ -285,10 +296,11 @@ public class ApplicationsApi implements Microservice  {
 ,@ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
 ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.applicationsGet(query,limit,offset,ifNoneMatch, request);
+        return delegate.applicationsGet(query,limit,offset,ifNoneMatch,request);
     }
+    @OPTIONS
     @POST
     
     @Consumes({ "application/json" })
@@ -309,8 +321,8 @@ public class ApplicationsApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = ApplicationDTO.class) })
     public Response applicationsPost(@ApiParam(value = "Application object that is to be created. " ,required=true) ApplicationDTO body
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.applicationsPost(body, request);
+        return delegate.applicationsPost(body,request);
     }
 }

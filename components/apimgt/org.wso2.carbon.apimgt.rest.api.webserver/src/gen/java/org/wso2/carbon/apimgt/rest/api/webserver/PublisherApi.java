@@ -14,11 +14,13 @@ import org.wso2.msf4j.formparam.FormDataParam;
 import org.osgi.service.component.annotations.Component;
 
 import java.io.InputStream;
+import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -36,28 +38,29 @@ import javax.ws.rs.core.Response;
 )
 @Path(".*")
 @Consumes({ "application/json" })
-//@Produces({ "application/json" })
+
+@ApplicationPath("/publisher")
 @io.swagger.annotations.Api(description = "the publisher API")
 public class PublisherApi implements Microservice  {
    private final PublisherApiService delegate = PublisherApiServiceFactory.getPublisherApi();
 
+    @OPTIONS
     @GET
-
+    
     @Consumes({ "application/json" })
+    
     @io.swagger.annotations.ApiOperation(value = "Get file", notes = "Get file as requested ", response = File.class, tags={ "Application Policies", })
-    @io.swagger.annotations.ApiResponses(value = {
+    @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK", response = File.class),
-
+        
         @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = File.class),
-
+        
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported. ", response = File.class) })
     public Response publisherGet(@ApiParam(value = "Media types acceptable for the response. Default is JSON. " , defaultValue="JSON")@HeaderParam("Accept") String accept
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.publisherGet(accept,ifNoneMatch,ifModifiedSince, request);
+        return delegate.publisherGet(accept,ifNoneMatch,ifModifiedSince,request);
     }
-
-
 }

@@ -21,6 +21,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -44,6 +45,7 @@ import javax.ws.rs.core.Response;
 public class EndpointsApi implements Microservice  {
    private final EndpointsApiService delegate = EndpointsApiServiceFactory.getEndpointsApi();
 
+    @OPTIONS
     @DELETE
     @Path("/{endpointId}")
     @Consumes({ "application/json" })
@@ -64,10 +66,11 @@ public class EndpointsApi implements Microservice  {
     public Response endpointsEndpointIdDelete(@ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**. ",required=true) @PathParam("endpointId") String endpointId
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.endpointsEndpointIdDelete(endpointId,ifMatch,ifUnmodifiedSince, request);
+        return delegate.endpointsEndpointIdDelete(endpointId,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{endpointId}")
     @Consumes({ "application/json" })
@@ -86,10 +89,11 @@ public class EndpointsApi implements Microservice  {
     public Response endpointsEndpointIdGet(@ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**. ",required=true) @PathParam("endpointId") String endpointId
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.endpointsEndpointIdGet(endpointId,ifMatch,ifUnmodifiedSince, request);
+        return delegate.endpointsEndpointIdGet(endpointId,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @PUT
     @Path("/{endpointId}")
     @Consumes({ "application/json" })
@@ -111,10 +115,11 @@ public class EndpointsApi implements Microservice  {
 ,@ApiParam(value = "Tier object that needs to be modified " ,required=true) EndPointDTO body
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.endpointsEndpointIdPut(endpointId,body,ifMatch,ifUnmodifiedSince, request);
+        return delegate.endpointsEndpointIdPut(endpointId,body,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     
     @Consumes({ "application/json" })
@@ -132,10 +137,11 @@ public class EndpointsApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = EndPointListDTO.class) })
     public Response endpointsGet(@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.endpointsGet(ifNoneMatch,ifModifiedSince, request);
+        return delegate.endpointsGet(ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @HEAD
     
     @Consumes({ "application/json" })
@@ -155,10 +161,11 @@ public class EndpointsApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = void.class) })
     public Response endpointsHead(@ApiParam(value = "") @QueryParam("name") String name
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.endpointsHead(name,ifNoneMatch, request);
+        return delegate.endpointsHead(name,ifNoneMatch,request);
     }
+    @OPTIONS
     @POST
     
     @Consumes({ "application/json" })
@@ -177,8 +184,8 @@ public class EndpointsApi implements Microservice  {
     public Response endpointsPost(@ApiParam(value = "EndPoint object that needs to be added " ,required=true) EndPointDTO body
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.endpointsPost(body,ifNoneMatch,ifModifiedSince, request);
+        return delegate.endpointsPost(body,ifNoneMatch,ifModifiedSince,request);
     }
 }

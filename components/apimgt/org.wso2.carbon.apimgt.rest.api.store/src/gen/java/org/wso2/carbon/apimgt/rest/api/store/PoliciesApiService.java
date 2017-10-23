@@ -24,10 +24,10 @@ public abstract class PoliciesApiService {
  ,Integer limit
  ,Integer offset
  ,String ifNoneMatch
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
     public abstract Response policiesTierLevelTierNameGet(String tierName
  ,String tierLevel
  ,String ifNoneMatch
  ,String ifModifiedSince
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
 }

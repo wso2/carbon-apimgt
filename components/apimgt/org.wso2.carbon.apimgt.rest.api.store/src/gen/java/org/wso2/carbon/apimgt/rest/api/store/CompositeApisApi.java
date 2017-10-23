@@ -23,6 +23,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -46,6 +47,7 @@ import javax.ws.rs.core.Response;
 public class CompositeApisApi implements Microservice  {
    private final CompositeApisApiService delegate = CompositeApisApiServiceFactory.getCompositeApisApi();
 
+    @OPTIONS
     @DELETE
     @Path("/{apiId}")
     @Consumes({ "application/json" })
@@ -66,10 +68,11 @@ public class CompositeApisApi implements Microservice  {
     public Response compositeApisApiIdDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.compositeApisApiIdDelete(apiId,ifMatch,ifUnmodifiedSince, request);
+        return delegate.compositeApisApiIdDelete(apiId,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}")
     @Consumes({ "application/json" })
@@ -90,10 +93,11 @@ public class CompositeApisApi implements Microservice  {
     public Response compositeApisApiIdGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.compositeApisApiIdGet(apiId,ifNoneMatch,ifModifiedSince, request);
+        return delegate.compositeApisApiIdGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}/implementation")
     @Consumes({ "application/json" })
@@ -114,10 +118,11 @@ public class CompositeApisApi implements Microservice  {
     public Response compositeApisApiIdImplementationGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.compositeApisApiIdImplementationGet(apiId,ifNoneMatch,ifModifiedSince, request);
+        return delegate.compositeApisApiIdImplementationGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @PUT
     @Path("/{apiId}/implementation")
     @Consumes({ "multipart/form-data" })
@@ -143,10 +148,11 @@ public class CompositeApisApi implements Microservice  {
             @FormDataParam("apiImplementation") FileInfo apiImplementationDetail
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.compositeApisApiIdImplementationPut(apiId,apiImplementationInputStream, apiImplementationDetail,ifMatch,ifUnmodifiedSince, request);
+        return delegate.compositeApisApiIdImplementationPut(apiId,apiImplementationInputStream, apiImplementationDetail,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @PUT
     @Path("/{apiId}")
     @Consumes({ "application/json" })
@@ -170,10 +176,11 @@ public class CompositeApisApi implements Microservice  {
 ,@ApiParam(value = "API object that needs to be added " ,required=true) CompositeAPIDTO body
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.compositeApisApiIdPut(apiId,body,ifMatch,ifUnmodifiedSince, request);
+        return delegate.compositeApisApiIdPut(apiId,body,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}/swagger")
     @Consumes({ "application/json" })
@@ -194,10 +201,11 @@ public class CompositeApisApi implements Microservice  {
     public Response compositeApisApiIdSwaggerGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.compositeApisApiIdSwaggerGet(apiId,ifNoneMatch,ifModifiedSince, request);
+        return delegate.compositeApisApiIdSwaggerGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @PUT
     @Path("/{apiId}/swagger")
     @Consumes({ "multipart/form-data" })
@@ -221,10 +229,11 @@ public class CompositeApisApi implements Microservice  {
 ,@ApiParam(value = "Swagger definition of the Composite API", required=true)@FormDataParam("apiDefinition")  String apiDefinition
 ,@ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header. " )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.compositeApisApiIdSwaggerPut(apiId,apiDefinition,ifMatch,ifUnmodifiedSince, request);
+        return delegate.compositeApisApiIdSwaggerPut(apiId,apiDefinition,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     
     @Consumes({ "application/json" })
@@ -244,10 +253,11 @@ public class CompositeApisApi implements Microservice  {
 ,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
 ,@ApiParam(value = "**Search condition**.  You can search in attributes by using an **\"<attribute>:\"** modifier.  Eg. \"provider:wso2\" will match a Composite API if the provider of the Composite API is exactly \"wso2\".  Additionally you can use wildcards.  Eg. \"provider:wso2*\" will match a Composite API if the provider of the Composite API starts with \"wso2\".  Supported attribute modifiers are [**version, context, lifeCycleStatus, description, subcontext, doc, provider**]  If no advanced attribute modifier has been specified, search will match the given query string against Composite API Name. ") @QueryParam("query") String query
 ,@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.compositeApisGet(limit,offset,query,ifNoneMatch, request);
+        return delegate.compositeApisGet(limit,offset,query,ifNoneMatch,request);
     }
+    @OPTIONS
     @POST
     
     @Consumes({ "application/json" })
@@ -264,8 +274,8 @@ public class CompositeApisApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was in a not supported format. ", response = CompositeAPIDTO.class) })
     public Response compositeApisPost(@ApiParam(value = "API object that needs to be added " ,required=true) CompositeAPIDTO body
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.compositeApisPost(body, request);
+        return delegate.compositeApisPost(body,request);
     }
 }
