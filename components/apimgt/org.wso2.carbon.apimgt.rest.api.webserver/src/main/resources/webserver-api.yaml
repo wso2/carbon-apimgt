@@ -49,8 +49,8 @@ consumes:
 # of the of the response.
 # The default of the Accept header is json, i.e. there is not needed to
 # set the value, but supporting it serves extensibility.
-produces:
-  - application/json
+#produces:
+#  - application/json
 
 x-wso2-security:
   apim:
@@ -90,8 +90,8 @@ paths:
         - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
-      produces:
-        - text/html; charset=utf-8
+#      produces:
+#        - text/html; charset=utf-8
       tags:
         - Application Policies
       responses:
