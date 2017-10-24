@@ -42,9 +42,12 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.ServiceReferenceHolderMockCreator;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
@@ -54,7 +57,12 @@ import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.user.api.UserRealm;
+import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -70,9 +78,10 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.mockito.Matchers.eq;
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.DISABLE_ROLE_VALIDATION_AT_SCOPE_CREATION;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({LogFactory.class, ServiceReferenceHolder.class, SSLSocketFactory.class, CarbonUtils.class, GovernanceUtils.class})
+@PrepareForTest({LogFactory.class, ServiceReferenceHolder.class, SSLSocketFactory.class, CarbonUtils.class, GovernanceUtils.class, AuthorizationManager.class, MultitenantUtils.class})
 @PowerMockIgnore("javax.net.ssl.*")
 public class APIUtilTest {
 
@@ -969,6 +978,130 @@ public class APIUtilTest {
         sampleSequence.close();
     }
 
+    @Test
+    public void testCreateSwaggerJSONContent() throws Exception {
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService.class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Environment environment = Mockito.mock(Environment.class);
+        Map<String, Environment> environmentMap = new HashMap<String, Environment>();
+        environmentMap.put("Production", environment);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getApiGatewayEnvironments()).thenReturn(environmentMap);
+        Mockito.when(environment.getApiGatewayEndpoint()).thenReturn("");
+
+        String swaggerJSONContent = APIUtil.createSwaggerJSONContent(getUniqueAPI());
+
+        Assert.assertNotNull(swaggerJSONContent);
+    }
+
+    @Test
+    public void testIsRoleNameExist() throws Exception {
+        String userName = "John";
+        String roleName = "developer";
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        RealmService realmService = Mockito.mock(RealmService.class);
+        TenantManager tenantManager = Mockito.mock(TenantManager.class);
+        UserRealm userRealm = Mockito.mock(UserRealm.class);
+        UserStoreManager userStoreManager = Mockito.mock(UserStoreManager.class);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+        Mockito.when(realmService.getTenantUserRealm(Mockito.anyInt())).thenReturn(userRealm);
+        Mockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
+        Mockito.when(userStoreManager.isExistingRole(roleName)).thenReturn(true);
+        
+        Assert.assertTrue(APIUtil.isRoleNameExist(userName, roleName));
+    }
+
+    @Test
+    public void testIsRoleNameNotExist() throws Exception {
+        String userName = "John";
+        String roleName = "developer";
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        RealmService realmService = Mockito.mock(RealmService.class);
+        TenantManager tenantManager = Mockito.mock(TenantManager.class);
+        UserRealm userRealm = Mockito.mock(UserRealm.class);
+        UserStoreManager userStoreManager = Mockito.mock(UserStoreManager.class);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+        Mockito.when(realmService.getTenantUserRealm(Mockito.anyInt())).thenReturn(userRealm);
+        Mockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
+        Mockito.when(userStoreManager.isExistingRole(roleName)).thenReturn(false);
+
+        Assert.assertFalse(APIUtil.isRoleNameExist(userName, roleName));
+    }
+
+    @Test
+    public void testIsRoleNameExistDisableRoleValidation() throws Exception {
+        String userName = "John";
+        String roleName = "developer";
+
+        System.setProperty(DISABLE_ROLE_VALIDATION_AT_SCOPE_CREATION, "true");
+
+        Assert.assertTrue(APIUtil.isRoleNameExist(userName, roleName));
+
+        Assert.assertTrue(APIUtil.isRoleNameExist(userName, null));
+
+        Assert.assertTrue(APIUtil.isRoleNameExist(userName, ""));
+    }
+
+    @Test
+    public void testGetRoleNamesSuperTenant() throws Exception {
+        String userName = "John";
+
+        String[] roleNames = {"role1", "role2"};
+
+        AuthorizationManager authorizationManager = Mockito.mock(AuthorizationManager.class);
+
+        PowerMockito.mockStatic(MultitenantUtils.class);
+        PowerMockito.mockStatic(AuthorizationManager.class);
+        Mockito.when(MultitenantUtils.getTenantDomain(userName)).
+                thenReturn(org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        Mockito.when(AuthorizationManager.getInstance()).thenReturn(authorizationManager);
+        Mockito.when(authorizationManager.getRoleNames()).thenReturn(roleNames);
+
+
+        Assert.assertEquals(roleNames, APIUtil.getRoleNames(userName));
+    }
+
+    @Test
+    public void testGetRoleNamesNonSuperTenant() throws Exception {
+        String userName = "John";
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        RealmService realmService = Mockito.mock(RealmService.class);
+        TenantManager tenantManager = Mockito.mock(TenantManager.class);
+        UserRealm userRealm = Mockito.mock(UserRealm.class);
+        UserStoreManager userStoreManager = Mockito.mock(UserStoreManager.class);
+
+        String[] roleNames = {"role1", "role2"};
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(MultitenantUtils.class);
+        Mockito.when(MultitenantUtils.getTenantDomain(userName)).
+                thenReturn("test.com");
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+        Mockito.when(realmService.getTenantUserRealm(Mockito.anyInt())).thenReturn(userRealm);
+        Mockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
+        Mockito.when(userStoreManager.getRoleNames()).thenReturn(roleNames);
+
+        Assert.assertEquals(roleNames, APIUtil.getRoleNames(userName));
+    }
+
 
     private API getUniqueAPI() {
         APIIdentifier apiIdentifier = new APIIdentifier(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
@@ -979,6 +1112,58 @@ public class APIUtilTest {
 
         Set<String> environments = new HashSet<String>();
         environments.add(UUID.randomUUID().toString());
+
+        URITemplate uriTemplate = new URITemplate();
+        uriTemplate.setAuthType("None");
+        uriTemplate.setHTTPVerb("GET");
+        uriTemplate.setThrottlingTier("Unlimited");
+        uriTemplate.setUriTemplate("/*");
+        Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
+        uriTemplates.add(uriTemplate);
+
+        uriTemplate = new URITemplate();
+        uriTemplate.setAuthType("None");
+        uriTemplate.setHTTPVerb("GET");
+        uriTemplate.setThrottlingTier("Unlimited");
+        uriTemplate.setUriTemplate("/get");
+        uriTemplates.add(uriTemplate);
+
+        uriTemplate = new URITemplate();
+        uriTemplate.setAuthType("None");
+        uriTemplate.setHTTPVerb("POST");
+        uriTemplate.setThrottlingTier("Unlimited");
+        uriTemplate.setUriTemplate("/*");
+        uriTemplates.add(uriTemplate);
+
+        uriTemplate = new URITemplate();
+        uriTemplate.setAuthType("None");
+        uriTemplate.setHTTPVerb("POST");
+        uriTemplate.setThrottlingTier("Unlimited");
+        uriTemplate.setUriTemplate("/post");
+        uriTemplates.add(uriTemplate);
+
+        uriTemplate = new URITemplate();
+        uriTemplate.setAuthType("None");
+        uriTemplate.setHTTPVerb("DELETE");
+        uriTemplate.setThrottlingTier("Unlimited");
+        uriTemplate.setUriTemplate("/*");
+        uriTemplates.add(uriTemplate);
+
+        uriTemplate = new URITemplate();
+        uriTemplate.setAuthType("None");
+        uriTemplate.setHTTPVerb("PUT");
+        uriTemplate.setThrottlingTier("Unlimited");
+        uriTemplate.setUriTemplate("/*");
+        uriTemplates.add(uriTemplate);
+
+        uriTemplate = new URITemplate();
+        uriTemplate.setAuthType("None");
+        uriTemplate.setHTTPVerb("PUT");
+        uriTemplate.setThrottlingTier("Unlimited");
+        uriTemplate.setUriTemplate("/put");
+        uriTemplates.add(uriTemplate);
+
+        api.setUriTemplates(uriTemplates);
 
         api.setEnvironments(environments);
         api.setUUID(UUID.randomUUID().toString());
