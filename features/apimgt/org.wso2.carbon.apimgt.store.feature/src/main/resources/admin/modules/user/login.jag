@@ -61,7 +61,7 @@ var login = function (username, password, tenantMode) {
                     userDomain: username.split("@")[1],
                     auth: auth
                 });
-
+                getWorkflowCookie(username, password);
 
                 return {
                     error: false,
