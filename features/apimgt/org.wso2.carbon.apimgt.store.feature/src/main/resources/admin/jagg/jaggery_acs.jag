@@ -139,6 +139,10 @@
                     cookie: null,
                     userDomain: String(domainName)
                 });
+                sessionId = session.getId();
+                ssoRelyingParty.setSessionAuthenticated(sessionId, samlResponse, session);
+                session.put("showLogin", "false");
+                session.put("LOGGED_IN_USER", ssoRelyingParty.getLoggedInUser(sessionId));
                 userModule.getWorkflowCookieBySAMLToken();
                 response.sendRedirect(requestedURI);
             } else {
