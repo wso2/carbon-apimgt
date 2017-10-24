@@ -33,6 +33,7 @@ public class ApplicationImportExportManager {
      * @param limit number of max results
      * @param offset starting location when returning a limited set of results
      * @param query searchQuery
+     * @param username logged in user
      * @return {@link Application} instance
      * @throws APIManagementException if an error occurs while retrieving Application details
      */

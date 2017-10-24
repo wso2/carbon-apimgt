@@ -14,7 +14,6 @@ import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.Set;
 
 /**
  * Manager class for API Application Import and Export handling
@@ -31,14 +30,15 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
         this.path = path;
     }
 
+
     /**
      * Export a give set of Applications to a file system as zip archive.
      * The export root location is given by {@link FileBasedApplicationImportExportManager#path}/exported-applications.
      *
-     * @param application
-     * @param exportDirectoryName
-     * @returns
-     * @throws
+     * @param application         Application{@link Application} to be exported
+     * @param exportDirectoryName Name of directory to be exported
+     * @return path to the exported directory with exported artifacts
+     * @throws APIMgtEntityImportExportException
      */
     public String exportApplication(Application application, String exportDirectoryName) throws
             APIMgtEntityImportExportException {
@@ -138,10 +138,11 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
 
     }
 
-    public Application decodeApplicationFile( String applicationDetailsFilePath) throws APIMgtEntityImportExportException {
-        Application applicationDetails = null;
+    public Application decodeApplicationFile(String applicationDetailsFilePath)
+            throws APIMgtEntityImportExportException {
+        String applicationDetailsString;
         try {
-            String applicationDetailsString = APIFileUtils.readFileContentAsText(applicationDetailsFilePath);
+            applicationDetailsString = APIFileUtils.readFileContentAsText(applicationDetailsFilePath);
 
 
         } catch (APIMgtDAOException e) {
@@ -151,8 +152,8 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
 
         //convert to bean
         Gson gson = new GsonBuilder().create();
-        return applicationDetails;
-
+        return (gson.fromJson(applicationDetailsString, Application.class));/*returns an application object from
+                                                                                                        a String*/
     }
 
     /*private Application decodeAppInformationFromDirectoryStructure(String applicationArtifactBasePath)

@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.*;
 import org.wso2.carbon.apimgt.rest.api.store.dto.*;
@@ -47,15 +48,18 @@ public class ImportApiServiceImpl extends ImportApiService {
 
         try {
             consumer = RestApiUtil.getConsumer(RestApiUtil.getLoggedInUsername(request));
-            FileBasedApplicationImportExportManager importExportManager = new FileBasedApplicationImportExportManager(consumer, System.getProperty("java.io.tmpdir") + File.separator + "exported-app-archives-" +
-                    UUID.randomUUID().toString());
-            //Application application = importExportManager.importAndCreateApplications(fileInputStream);
+            FileBasedApplicationImportExportManager importExportManager = new FileBasedApplicationImportExportManager
+                    (consumer, System.getProperty("java.io.tmpdir") + File.separator + "exported-app-archives-" +
+                            UUID.randomUUID().toString());
+            Application applicationDetails = importExportManager.importAndCreateApplications(fileInputStream);
+            return Response.status(Response.Status.OK).entity(applicationDetails).build();
         } catch (APIManagementException e) {
-            e.printStackTrace();
+            String errorMsg = "Error while importing the Applications";
+            log.error(errorMsg, e);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
 
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
     }
 
     @Override
