@@ -109,21 +109,15 @@ var drawTopUsersGraph = function(from,to){
                 $('#topUsersView').empty();
                 if (length > 0) {
                 for(var k=0 ; k<length ;k++){
-                     $('#topUsersView').append($(' <h4>'+i18n.t("Application Name: ")+ json.usage[k].appName+'</h4><div class="col-md-12" ><div class="col-md-6" ><div id="userChart'+(k+1)+'" ><svg style="height:400px;"></svg></div> </div> <div class="col-md-6"> <table class="table table-striped table-bordered" id="userTable'+(k+1)+'" class="userTable display" cellspacing="0" width="100%"><thead><tr> <th>'+i18n.t("User")+'</th><th>'+i18n.t("Number of API calls")+'</th></tr></thead> </table> </div> </div>'));
-                }
+                     $('#topUsersView').append($(' <h4>'+i18n.t("Application Name: ")+ json.usage[k].appName+'</h4><div class="col-md-12" ><div class="col-md-6" ><div id="userChart'+(k+1)+'" ><svg style="height:400px;"></svg></div> </div> <div class="col-md-6"> <table class="table table-striped table-bordered" id="userTable'+(k+1)+'" class="userTable display" cellspacing="0" width="100%"><thead><tr> <th>'+i18n.t("User")+'</th><th>'+i18n.t("Number of API Calls")+'</th></tr></thead> </table> </div> </div>'));
 
-                for(var k=0 ; k<length ;k++){
                     var dataLength = json.usage[k].userCountArray.length,data = [];
                     $('#userTable'+(k+1)).find("tr:gt(0)").remove();
                     var chartData=[];
-                    for (var i = 0; i < dataLength; i++) {
 
-                        data[i] = [ json.usage[k].userCountArray[i].user, parseInt( json.usage[k].userCountArray[i].count )];
-                        $('#userTable'+(k+1)).append($('<tr><td>' +  json.usage[k].userCountArray[i].user + '</td><td class="tdNumberCell">' +json.usage[k].userCountArray[i].count + '</td></tr>'));
-                        chartData.push({"userName":json.usage[k].userCountArray[i].user,
-                                         "count":parseInt( json.usage[k].userCountArray[i].count)
-                        });
-                    }
+                    $('#userTable'+(k+1)).append($(json.usage[k].chartTableRows));
+
+                    chartData = json.usage[k].chartData;
                     drawChart('#userChart'+(k+1),k,chartData);
                     $('#userTable'+(k+1)).datatables_extended({
                         "fnDrawCallback": function(){
@@ -133,7 +127,6 @@ var drawTopUsersGraph = function(from,to){
                             else $('#userTable'+(k+1)+'_paginate').show();
                           }
                         });
-                    $('#userTable'+(k+1)).show();
                 }
             }else{
                 $('#topUsersView').html($('<div id="noData" class="message message-info"><h4><i class="icon fw fw-info"></i>'+i18n.t("No Data Available.")+'</h4></div>'));
