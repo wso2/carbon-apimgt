@@ -19,17 +19,26 @@ package org.wso2.carbon.apimgt.gateway.handlers.security;
 */
 
 import org.apache.axis2.client.Options;
+import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.config.SynapseConfiguration;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.caching.impl.Util;
+import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.TreeMap;
@@ -37,19 +46,33 @@ import java.util.TreeMap;
 /*
 * Test class for APIAuthenticationhandler
 * */
-
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({Util.class, MetricManager.class, Timer.Context.class})
 public class APIAuthenticationHandlerTestCase {
+    private Timer.Context context;
+    private SynapseEnvironment synapseEnvironment;
+    private MessageContext messageContext;
+    private org.apache.axis2.context.MessageContext axis2MsgCntxt;
+
+
+
+    @Before
+    public void setup(){
+        synapseEnvironment = Mockito.mock(SynapseEnvironment.class);
+        messageContext = Mockito.mock(Axis2MessageContext.class);
+        axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext.class);
+        Mockito.when(axis2MsgCntxt.getProperty(APIMgtGatewayConstants.REQUEST_RECEIVED_TIME)).thenReturn("1506576365");
+        Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+
+        PowerMockito.mockStatic(Timer.Context.class);
+        context = Mockito.mock(Timer.Context.class);
+    }
 
     /*
     * This method will test handleRequest method for it's happy path
     * */
     @Test
     public void testHandleRequest() {
-        SynapseEnvironment synapseEnvironment = Mockito.mock(SynapseEnvironment.class);
-        MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
-        org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext.class);
-        Mockito.when(axis2MsgCntxt.getProperty(APIMgtGatewayConstants.REQUEST_RECEIVED_TIME)).thenReturn("1506576365");
-        Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
 
         APIAuthenticationHandler apiAuthenticationHandler = createAPIAuthenticationHandler();
         apiAuthenticationHandler.init(synapseEnvironment);
@@ -149,11 +172,16 @@ public class APIAuthenticationHandlerTestCase {
     * This method will test for destroy()
     * */
     @Test
-    public void destroyTest() {
+    public void testDestroy() {
         APIAuthenticationHandler apiAuthenticationHandler = new APIAuthenticationHandler();
         apiAuthenticationHandler.destroy();
         SynapseEnvironment synapseEnvironment = Mockito.mock(SynapseEnvironment.class);
-
+        SynapseConfiguration synapseConfiguration = Mockito.mock(SynapseConfiguration.class);
+        AxisConfiguration axisConfiguration = Mockito.mock(AxisConfiguration.class);
+        Mockito.when(synapseEnvironment.getSynapseConfiguration()).thenReturn(synapseConfiguration);
+        Mockito.when(synapseConfiguration.getAxisConfiguration()).thenReturn(axisConfiguration);
+        PowerMockito.mockStatic(Util.class);
+        PowerMockito.when(Util.getTenantDomain()).thenReturn("carbon.super");
         apiAuthenticationHandler.init(synapseEnvironment);
         apiAuthenticationHandler.destroy();
     }
@@ -286,5 +314,35 @@ public class APIAuthenticationHandlerTestCase {
             }
         };
     }
+
+    @Test
+    public void testGetAuthenticator(){
+      APIAuthenticationHandler apiAuthenticationHandler = new APIAuthenticationHandler();
+      Assert.assertNotNull(apiAuthenticationHandler.getAuthenticator());
+
+      // test destroy when authenticator is not null todo
+    }
+
+    @Test
+    public void testStartMetricTimer(){
+      APIAuthenticationHandler apiAuthenticationHandler = new APIAuthenticationHandler();
+        PowerMockito.mockStatic(MetricManager.class);
+        Timer timer = Mockito.mock(Timer.class);
+        Mockito.when(timer.start()).thenReturn(context);
+        PowerMockito.when(MetricManager.name(APIConstants.METRICS_PREFIX, "APIAuthenticationHandler"))
+                .thenReturn("org.wso2.amAPIAuthenticationHandler");
+        PowerMockito.when(MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, "org.wso2.amAPIAuthenticationHandler"))
+                .thenReturn(timer);
+        Mockito.verify(apiAuthenticationHandler.startMetricTimer());
+    }
+
+    @Test
+    public void testStopMetricTimer(){
+      APIAuthenticationHandler apiAuthenticationHandler = new APIAuthenticationHandler();
+        Mockito.when(context.stop()).thenReturn(1000L);
+        apiAuthenticationHandler.stopMetricTimer(context);
+        Assert.assertTrue(true);
+    }
+
 }
 

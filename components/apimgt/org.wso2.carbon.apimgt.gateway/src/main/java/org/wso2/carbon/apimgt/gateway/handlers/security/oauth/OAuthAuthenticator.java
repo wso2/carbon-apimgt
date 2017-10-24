@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.VerbInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.metrics.manager.Level;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -112,11 +113,10 @@ public class OAuthAuthenticator implements Authenticator {
             log.debug("Received Client Domain ".concat(clientDomain));
         }
         //If the matching resource does not require authentication
-        Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+        Timer timer = getTimer(MetricManager.name(
                 APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_RESOURCE_AUTH"));
         Timer.Context context = timer.start();
-
-        String authenticationScheme = keyValidator.getResourceAuthenticationScheme(synCtx);
+        String authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(synCtx);
         context.stop();
         APIKeyValidationInfoDTO info;
         if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)){
@@ -127,9 +127,11 @@ public class OAuthAuthenticator implements Authenticator {
 
             //using existing constant in Message context removing the additinal constant in API Constants
             String clientIP = null;
-            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
+            org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) synCtx).
+                    getAxis2MessageContext();
             TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>)
-                                                         axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                                                         axis2MessageContext.getProperty
+                                                                 (org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
             if (transportHeaderMap != null) {
                 clientIP = transportHeaderMap.get(APIMgtGatewayConstants.X_FORWARDED_FOR);
@@ -189,14 +191,13 @@ public class OAuthAuthenticator implements Authenticator {
             org.apache.axis2.context.MessageContext axis2MessageCtx = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
             org.apache.axis2.context.MessageContext.setCurrentMessageContext(axis2MessageCtx);
 
-            timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+            timer = getTimer(MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GET_KEY_VALIDATION_INFO"));
             context = timer.start();
 
-            info = keyValidator.getKeyValidationInfo(apiContext, apiKey, apiVersion, authenticationScheme, clientDomain,
+            info = getAPIKeyValidator().getKeyValidationInfo(apiContext, apiKey, apiVersion, authenticationScheme, clientDomain,
                     matchingResource, httpMethod, defaultVersionInvoked);
             context.stop();
-
             synCtx.setProperty(APIMgtGatewayConstants.APPLICATION_NAME, info.getApplicationName());
             synCtx.setProperty(APIMgtGatewayConstants.END_USER_NAME, info.getEndUserName());
             synCtx.setProperty(APIMgtGatewayConstants.SCOPES, info.getScopes() == null ? null : info.getScopes()
@@ -405,6 +406,13 @@ public class OAuthAuthenticator implements Authenticator {
 
     public void setRequestOrigin(String requestOrigin) {
         this.requestOrigin = requestOrigin;
+    }
+
+    protected Timer getTimer(String name) {
+        return MetricManager.timer(Level.INFO, name);
+    }
+    protected APIKeyValidator getAPIKeyValidator() {
+        return this.keyValidator;
     }
 
 }
