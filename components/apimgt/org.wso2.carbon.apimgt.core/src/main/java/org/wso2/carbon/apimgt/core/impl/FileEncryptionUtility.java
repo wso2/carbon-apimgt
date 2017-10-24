@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.core.impl;
 
 import org.apache.commons.io.IOUtils;
@@ -30,7 +48,7 @@ import javax.crypto.spec.SecretKeySpec;
 import static org.wso2.carbon.apimgt.core.util.APIMgtConstants.EncryptionConstants;
 
 /**
- *  class for File Encryption Related functions
+ *  Class for File Encryption Related functions
  */
 public class FileEncryptionUtility {
     private static final Logger log = LoggerFactory.getLogger(FileEncryptionUtility.class);
@@ -44,7 +62,7 @@ public class FileEncryptionUtility {
     private SecureVault secureVault;
 
     /**
-     * Get FileEncryptionUtility instance
+     * Gives FileEncryptionUtility instance
      *
      * @return FileEncryptionUtility object
      */
@@ -55,7 +73,7 @@ public class FileEncryptionUtility {
     /**
      * Sets the location to store the encrypted AES key file
      * Sets secure vault instance to encrypt AES key
-     * Calls createAndStoreAESKey method
+     * Calls {@see createAndStoreAESKey} method
      *
      * @throws APIManagementException if an error occurs while initializing the file encryption
      */
@@ -106,7 +124,7 @@ public class FileEncryptionUtility {
      * Decrypts the content of an encrypted file and returns the text
      *
      * @param inputFilePath  absolute path of the encrypted file
-     * @return text after decryption
+     * @return content of the file after decryption
      * @throws APIManagementException if an error occurs while reading from the encrypted file
      */
     public String readFromEncryptedFile(String inputFilePath) throws APIManagementException {
@@ -136,8 +154,7 @@ public class FileEncryptionUtility {
     }
 
     /**
-     * Encrypts the list of file given in the configuration,
-     * which are located in the security directory.
+     * Encrypts the list of files given in the configuration, which are located in the security directory.
      * Encrypted files will have "encrypted" before its original name.
      *
      * @throws APIManagementException if an error occurs while encrypting the list of files
@@ -180,6 +197,12 @@ public class FileEncryptionUtility {
         }
     }
 
+    /**
+     * Decrypts the AES key using secure vault and returns it as a byte array
+     *
+     * @return AES key as a byte array
+     * @throws APIManagementException if an error occurs while reading or decrypting the AES key file
+     */
     private byte[] getAESKey() throws APIManagementException {
         byte[] encryptedAesKeyB;
         byte[] aesKey;

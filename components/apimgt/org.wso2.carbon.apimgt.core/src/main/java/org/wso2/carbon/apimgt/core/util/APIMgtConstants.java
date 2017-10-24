@@ -518,6 +518,10 @@ public class APIMgtConstants {
     public static class ServiceDiscoveryConstants {
         public static final String KUBERNETES_SERVICE_DISCOVERER =
                 "org.wso2.carbon.apimgt.core.impl.ServiceDiscovererKubernetes";
+
+        public static final String NAMESPACE = "namespace";
+        public static final String CRITERIA = "criteria";
+
     }
 
     /**

@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.core.configuration.models;
 
 
+import org.wso2.carbon.apimgt.core.impl.ServiceDiscovererKubernetes;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.kernel.annotations.Configuration;
 import org.wso2.carbon.kernel.annotations.Element;
@@ -38,12 +39,13 @@ public class ServiceDiscoveryImplConfig {
 
 
     public ServiceDiscoveryImplConfig() {
-        cmsSpecificParameters.put("masterUrl", "https://192.168.99.100:8443/");
-        cmsSpecificParameters.put("includeClusterIPs", "false");
-        cmsSpecificParameters.put("includeExternalNameServices", "false");
-        cmsSpecificParameters.put("podMountedSATokenFile", "/var/run/secrets/kubernetes.io/serviceaccount/token");
-        cmsSpecificParameters.put("externalSATokenFile", "KubernetesToken");
-        cmsSpecificParameters.put("caCertLocation", "");
+        cmsSpecificParameters.put(ServiceDiscovererKubernetes.MASTER_URL, "https://192.168.99.100:8443/");
+        cmsSpecificParameters.put(ServiceDiscovererKubernetes.INCLUDE_CLUSTER_IPs, "false");
+        cmsSpecificParameters.put(ServiceDiscovererKubernetes.INCLUDE_EXTERNAL_NAME_SERVICES, "false");
+        cmsSpecificParameters.put(ServiceDiscovererKubernetes.POD_MOUNTED_SA_TOKEN_FILE,
+                "/var/run/secrets/kubernetes.io/serviceaccount/token");
+        cmsSpecificParameters.put(ServiceDiscovererKubernetes.EXTERNAL_SA_TOKEN_FILE, "KubernetesToken");
+        cmsSpecificParameters.put(ServiceDiscovererKubernetes.CA_CERT_LOCATION, "");
     }
 
     public String getImplClass() {

@@ -20,10 +20,12 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.wso2.carbon.apimgt.core.exception.ServiceDiscoveryException;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ServiceDiscoveryConstants;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 
 /**
  * Abstract class to discover and list services in a cluster using a set of cms specific parameters
@@ -31,12 +33,11 @@ import java.util.List;
  */
 public abstract class ServiceDiscoverer {
 
-    protected HashMap<String, String> cmsSpecificParameters;
     private String namespaceFilter;
     private HashMap<String, String> criteriaFilter;
 
-    protected int serviceEndpointIndex;
-    protected List<Endpoint> servicesList;
+    int serviceEndpointIndex;
+    List<Endpoint> servicesList;
 
 
     /**
@@ -46,9 +47,8 @@ public abstract class ServiceDiscoverer {
      * @throws ServiceDiscoveryException if an error occurs in the implementation's init method
      */
     public void init(HashMap<String, String> cmsSpecificParameters) throws ServiceDiscoveryException {
-        this.cmsSpecificParameters = cmsSpecificParameters;
-        this.namespaceFilter = this.cmsSpecificParameters.get("namespace");
-        String criteriaString = this.cmsSpecificParameters.get("criteria");
+        this.namespaceFilter = cmsSpecificParameters.get(ServiceDiscoveryConstants.NAMESPACE);
+        String criteriaString = cmsSpecificParameters.get(ServiceDiscoveryConstants.CRITERIA);
         if (criteriaString != null) {
             String[] criteriaArray = criteriaString.split(",");
             HashMap<String, String> criteriaMap = new HashMap<>();
@@ -66,7 +66,7 @@ public abstract class ServiceDiscoverer {
      * Lists the endpoints without any filtering.
      *
      * @return List of Endpoints
-     * @throws ServiceDiscoveryException If an error occurs while listing
+     * @throws ServiceDiscoveryException if an error occurs while listing
      */
     public abstract List<Endpoint> listServices() throws ServiceDiscoveryException;
 
@@ -75,7 +75,7 @@ public abstract class ServiceDiscoverer {
      *
      * @param namespace     Namespace of the expected endpoints
      * @return List of Endpoints with the specified namespace
-     * @throws ServiceDiscoveryException If an error occurs while listing
+     * @throws ServiceDiscoveryException if an error occurs while listing
      */
     public abstract List<Endpoint> listServices(String namespace) throws ServiceDiscoveryException;
 
@@ -84,7 +84,7 @@ public abstract class ServiceDiscoverer {
      *
      * @param criteria    A criteria the endpoints should be filtered by
      * @return List of Endpoints with the specified criteria
-     * @throws ServiceDiscoveryException If an error occurs while listing
+     * @throws ServiceDiscoveryException if an error occurs while listing
      */
     public abstract List<Endpoint> listServices(HashMap<String, String> criteria) throws ServiceDiscoveryException;
 
@@ -94,23 +94,23 @@ public abstract class ServiceDiscoverer {
      * @param namespace   Namespace of the expected endpoints
      * @param criteria    A criteria the endpoints should be filtered by
      * @return List of Endpoints with the specified namespace and criteria
-     * @throws ServiceDiscoveryException If an error occurs while listing
+     * @throws ServiceDiscoveryException if an error occurs while listing
      */
     public abstract List<Endpoint> listServices(String namespace, HashMap<String, String> criteria)
             throws ServiceDiscoveryException;
 
     /**
-     * Build a Endpoint
-     * @param id
-     * @param name
-     * @param endpointConfig
-     * @param maxTps
-     * @param type
-     * @param endpointSecurity
-     * @param applicableLevel
-     * @return
+     * Builds a Endpoint
+     * @param id                Temporary id to be used by the UI
+     * @param name              Name of the service
+     * @param endpointConfig    Json string containing endpoint URL, namespace, criteria
+     * @param maxTps            MaxTps
+     * @param type              Application level protocol (eg. http/https)
+     * @param endpointSecurity  Json string about endpoint security necessarily including "enabled" boolean key
+     * @param applicableLevel   Whether applicable level is global or production only
+     * @return {@link org.wso2.carbon.apimgt.core.models.Endpoint} object
      */
-    protected Endpoint createEndpoint(String id, String name, String endpointConfig, Long maxTps,
+    protected Endpoint buildEndpoint(String id, String name, String endpointConfig, Long maxTps,
                                     String type, String endpointSecurity, String applicableLevel) {
         Endpoint.Builder endpointBuilder = new Endpoint.Builder();
         endpointBuilder.id(id);
@@ -126,18 +126,18 @@ public abstract class ServiceDiscoverer {
     }
 
     /**
-     * Returns the namespace, provided in the configuration, to filter by
+     * Gives the namespace to filter by
      *
-     * @return Namespace to filter by
+     * @return namespace
      */
     public String getNamespaceFilter() {
         return namespaceFilter;
     }
 
     /**
-     * Returns the criteria, provided in the configuration, to filter by
+     * Gives the criteria to filter by
      *
-     * @return Criteria to filter by
+     * @return criteria map
      */
     public HashMap<String, String> getCriteriaFilter() {
         return criteriaFilter;
