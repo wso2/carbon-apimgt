@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.utils;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
@@ -11,6 +13,8 @@ import org.wso2.carbon.apimgt.core.models.FileApplication;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 
 import java.io.File;
+import java.io.InputStream;
+import java.util.Set;
 
 /**
  * Manager class for API Application Import and Export handling
@@ -18,14 +22,24 @@ import java.io.File;
 public class FileBasedApplicationImportExportManager extends ApplicationImportExportManager {
 
     private static final Logger log = LoggerFactory.getLogger(FileBasedApplicationImportExportManager.class);
-    //private static final String IMPORTED_APPLICATIONS_DIRECTORY_NAME = "imported-applications";
+    private static final String IMPORTED_APPLICATIONS_DIRECTORY_NAME = "imported-applications";
     private String path;
+
 
     public FileBasedApplicationImportExportManager(APIStore apiStore, String path) {
         super(apiStore);
         this.path = path;
     }
 
+    /**
+     * Export a give set of Applications to a file system as zip archive.
+     * The export root location is given by {@link FileBasedApplicationImportExportManager#path}/exported-applications.
+     *
+     * @param application
+     * @param exportDirectoryName
+     * @returns
+     * @throws
+     */
     public String exportApplication(Application application, String exportDirectoryName) throws
             APIMgtEntityImportExportException {
 
@@ -46,7 +60,8 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
             APIFileUtils.createDirectory(applicationExportDirectory);
 
             //export application details
-            APIFileUtils.exportApplicationDetailsToFileSystem(new FileApplication(exportApplication), applicationExportDirectory);
+            APIFileUtils.exportApplicationDetailsToFileSystem(new FileApplication(exportApplication),
+                    applicationExportDirectory);
 
         } catch (APIMgtDAOException e) {
 
@@ -97,4 +112,76 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
 
         return archiveLocation + File.separator + archiveName + ".zip";
     }
+
+    //import and create applications
+    public Application importAndCreateApplications(InputStream uploadedAppArchiveInputStream)
+            throws APIMgtEntityImportExportException {
+
+        String appArchiveLocation = path + File.separator + IMPORTED_APPLICATIONS_DIRECTORY_NAME + ".zip";
+        String archiveExtractLocation = null;
+
+        try {
+            archiveExtractLocation = APIFileUtils.extractUploadedArchive(uploadedAppArchiveInputStream,
+                    IMPORTED_APPLICATIONS_DIRECTORY_NAME,
+                    appArchiveLocation, path); /*have to write a separate function extractUploadedArchive*/
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Error in accessing uploaded Application archive" + appArchiveLocation;
+            log.error(errorMsg, e);
+            throw new APIMgtEntityImportExportException(errorMsg, e, ExceptionCodes.APPLICATION_IMPORT_ERROR);
+        }
+
+
+        /*Application applicationDetails = decodeAppInformationFromDirectoryStructure(archiveExtractLocation);*/
+        Application applicationDetails = decodeApplicationFile(archiveExtractLocation);
+        return applicationDetails;
+
+
+    }
+
+    public Application decodeApplicationFile( String applicationDetailsFilePath) throws APIMgtEntityImportExportException {
+        Application applicationDetails = null;
+        try {
+            String applicationDetailsString = APIFileUtils.readFileContentAsText(applicationDetailsFilePath);
+
+
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Unable to read application details from file at " + applicationDetailsFilePath;
+            throw new APIMgtEntityImportExportException(errorMsg, e);
+        }
+
+        //convert to bean
+        Gson gson = new GsonBuilder().create();
+        return applicationDetails;
+
+    }
+
+    /*private Application decodeAppInformationFromDirectoryStructure(String applicationArtifactBasePath)
+            throws APIMgtEntityImportExportException {
+        Application appDetails = null;
+        Set<String> appDetailsRootDirectoryPaths = null;
+
+
+        try {
+            appDetailsRootDirectoryPaths = APIFileUtils.getDirectoryList(applicationArtifactBasePath);
+        } catch (APIMgtDAOException e) {
+            String errorMsg = "Unable to find application details at" + applicationArtifactBasePath;
+            log.error(errorMsg, e);
+            throw new APIMgtEntityImportExportException(errorMsg, e, ExceptionCodes.APPLICATION_IMPORT_ERROR);
+        }
+        if(appDetailsRootDirectoryPaths.isEmpty()){
+            try {
+                APIFileUtils.deleteDirectory(path);
+            } catch (APIMgtDAOException e) {
+                log.error("Unable remove directory at " + path);
+            }
+            String errorMsg = "Unable to find Application details at " + applicationArtifactBasePath;
+            throw new APIMgtEntityImportExportException(errorMsg, ExceptionCodes.APPLICATION_IMPORT_ERROR);
+        }
+
+        File appDetailsFile = getFileFromPrefix(applicationArtifactBasePath, ""); // prefix is ""
+        return appDetails;
+    }*/
+
+
 }
+

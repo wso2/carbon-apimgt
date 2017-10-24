@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.*;
 import org.wso2.carbon.apimgt.rest.api.store.dto.*;
@@ -48,6 +49,7 @@ public class ImportApiServiceImpl extends ImportApiService {
             consumer = RestApiUtil.getConsumer(RestApiUtil.getLoggedInUsername(request));
             FileBasedApplicationImportExportManager importExportManager = new FileBasedApplicationImportExportManager(consumer, System.getProperty("java.io.tmpdir") + File.separator + "exported-app-archives-" +
                     UUID.randomUUID().toString());
+            //Application application = importExportManager.importAndCreateApplications(fileInputStream);
         } catch (APIManagementException e) {
             e.printStackTrace();
         }
