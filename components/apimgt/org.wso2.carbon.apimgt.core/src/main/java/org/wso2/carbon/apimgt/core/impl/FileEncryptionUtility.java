@@ -73,7 +73,7 @@ public class FileEncryptionUtility {
     /**
      * Sets the location to store the encrypted AES key file
      * Sets secure vault instance to encrypt AES key
-     * Calls {@see createAndStoreAESKey} method
+     * Calls createAndStoreAESKey() method
      *
      * @throws APIManagementException if an error occurs while initializing the file encryption
      */

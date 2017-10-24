@@ -43,12 +43,12 @@ public abstract class ServiceDiscoverer {
     /**
      * Initializes the necessary parameters
      *
-     * @param cmsSpecificParameters  container management specific parameters provided in the configuration
+     * @param implementationParameters  container management specific parameters provided in the configuration
      * @throws ServiceDiscoveryException if an error occurs in the implementation's init method
      */
-    public void init(HashMap<String, String> cmsSpecificParameters) throws ServiceDiscoveryException {
-        this.namespaceFilter = cmsSpecificParameters.get(ServiceDiscoveryConstants.NAMESPACE);
-        String criteriaString = cmsSpecificParameters.get(ServiceDiscoveryConstants.CRITERIA);
+    public void init(HashMap<String, String> implementationParameters) throws ServiceDiscoveryException {
+        this.namespaceFilter = implementationParameters.get(ServiceDiscoveryConstants.NAMESPACE);
+        String criteriaString = implementationParameters.get(ServiceDiscoveryConstants.CRITERIA);
         if (criteriaString != null) {
             String[] criteriaArray = criteriaString.split(",");
             HashMap<String, String> criteriaMap = new HashMap<>();

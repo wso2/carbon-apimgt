@@ -25,19 +25,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Class to hold Service Discovery configurations and Generate yaml file
+ * Class to hold Service Discovery configurations and Generate YAML file
  */
 @Configuration(namespace = "wso2.carbon.serviceDiscovery", description = "Service Discovery configurations")
 public class ServiceDiscoveryConfigurations {
 
     @Element(description = "enable service discovery")
     private boolean enabled = false;
-    @Element(description = "service discovery implementation configurations")
-    private List<ServiceDiscoveryImplConfig> implementationConfigs = new ArrayList<>();
+    @Element(description = "service discovery implementations list")
+    private List<ServiceDiscoveryImplConfig> implementationsList = new ArrayList<>();
 
 
     public ServiceDiscoveryConfigurations() {
-        implementationConfigs.add(new ServiceDiscoveryImplConfig());
+        implementationsList.add(new ServiceDiscoveryImplConfig());
     }
 
     public boolean isServiceDiscoveryEnabled() {
@@ -48,11 +48,11 @@ public class ServiceDiscoveryConfigurations {
         this.enabled = enabled;
     }
 
-    public List<ServiceDiscoveryImplConfig> getImplementationConfigs() {
-        return implementationConfigs;
+    public List<ServiceDiscoveryImplConfig> getImplementationsList() {
+        return implementationsList;
     }
 
-    public void setImplementationConfigs(List<ServiceDiscoveryImplConfig> implementationConfigs) {
-        this.implementationConfigs = implementationConfigs;
+    public void setImplementationsList(List<ServiceDiscoveryImplConfig> implementationsList) {
+        this.implementationsList = implementationsList;
     }
 }

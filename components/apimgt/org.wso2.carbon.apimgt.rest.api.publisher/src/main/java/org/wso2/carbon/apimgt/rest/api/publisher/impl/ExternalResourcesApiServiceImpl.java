@@ -46,12 +46,12 @@ public class ExternalResourcesApiServiceImpl extends ExternalResourcesApiService
                 String errorMessage = "Service discovery is not enabled";
                 return handleInternalServerError(errorMessage, null);
             }
-            List<ServiceDiscoveryImplConfig> implConfigList = serviceDiscoveryConfig.getImplementationConfigs();
-            for (ServiceDiscoveryImplConfig implConfig : implConfigList) {
+            List<ServiceDiscoveryImplConfig> implConfigsList = serviceDiscoveryConfig.getImplementationsList();
+            for (ServiceDiscoveryImplConfig implConfig : implConfigsList) {
                 String implClassName = implConfig.getImplClass();
                 Class implClazz = ExternalResourcesApiServiceImpl.class.getClassLoader().loadClass(implClassName);
                 ServiceDiscoverer serviceDiscoverer = (ServiceDiscoverer) implClazz.newInstance();
-                serviceDiscoverer.init(implConfig.getCmsSpecificParameters());
+                serviceDiscoverer.init(implConfig.getImplParameters());
 
                 String namespaceFilter = serviceDiscoverer.getNamespaceFilter();
                 HashMap<String, String> criteriaFilter = serviceDiscoverer.getCriteriaFilter();

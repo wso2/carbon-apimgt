@@ -36,7 +36,7 @@ public class FileEncryptionConfigurations {
     private List<String> filesToEncrypt = new ArrayList<>();
 
     public FileEncryptionConfigurations() {
-        this.filesToEncrypt.add("FileToEncrypt");
+        this.filesToEncrypt.add("NameOfAFile");
     }
 
     public boolean isEnabled() {

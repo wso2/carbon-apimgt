@@ -25,6 +25,7 @@ import org.wso2.carbon.kernel.annotations.Configuration;
 import org.wso2.carbon.kernel.annotations.Element;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  * Class to hold Container Management System specific Service Discovery configurations
@@ -32,20 +33,20 @@ import java.util.HashMap;
 @Configuration(description = "Container Management System specific Service Discovery configurations")
 public class ServiceDiscoveryImplConfig {
 
-    @Element(description = "service discovery implementation class")
+    @Element(description = "implementation class")
     private String implClass = APIMgtConstants.ServiceDiscoveryConstants.KUBERNETES_SERVICE_DISCOVERER;
-    @Element(description = "container management system specific properties")
-    private HashMap<String, String> cmsSpecificParameters = new HashMap<>();
+    @Element(description = "implementation specific parameters")
+    private HashMap<String, String> implParameters = new LinkedHashMap<>();
 
 
     public ServiceDiscoveryImplConfig() {
-        cmsSpecificParameters.put(ServiceDiscovererKubernetes.MASTER_URL, "https://192.168.99.100:8443/");
-        cmsSpecificParameters.put(ServiceDiscovererKubernetes.INCLUDE_CLUSTER_IPs, "false");
-        cmsSpecificParameters.put(ServiceDiscovererKubernetes.INCLUDE_EXTERNAL_NAME_SERVICES, "false");
-        cmsSpecificParameters.put(ServiceDiscovererKubernetes.POD_MOUNTED_SA_TOKEN_FILE,
+        implParameters.put(ServiceDiscovererKubernetes.MASTER_URL, "https://192.168.99.100:8443/");
+        implParameters.put(ServiceDiscovererKubernetes.CA_CERT_PATH, "");
+        implParameters.put(ServiceDiscovererKubernetes.INCLUDE_CLUSTER_IPS, "false");
+        implParameters.put(ServiceDiscovererKubernetes.INCLUDE_EXTERNAL_NAME_SERVICES, "false");
+        implParameters.put(ServiceDiscovererKubernetes.EXTERNAL_SA_TOKEN_FILE_NAME, "KubernetesToken");
+        implParameters.put(ServiceDiscovererKubernetes.POD_MOUNTED_SA_TOKEN_FILE_PATH,
                 "/var/run/secrets/kubernetes.io/serviceaccount/token");
-        cmsSpecificParameters.put(ServiceDiscovererKubernetes.EXTERNAL_SA_TOKEN_FILE, "KubernetesToken");
-        cmsSpecificParameters.put(ServiceDiscovererKubernetes.CA_CERT_LOCATION, "");
     }
 
     public String getImplClass() {
@@ -56,11 +57,11 @@ public class ServiceDiscoveryImplConfig {
         this.implClass = implClass;
     }
 
-    public HashMap<String, String> getCmsSpecificParameters() {
-        return cmsSpecificParameters;
+    public HashMap<String, String> getImplParameters() {
+        return implParameters;
     }
 
-    public void setCmsSpecificParameters(HashMap<String, String> cmsSpecificParameters) {
-        this.cmsSpecificParameters = cmsSpecificParameters;
+    public void setImplParameters(HashMap<String, String> implParameters) {
+        this.implParameters = implParameters;
     }
 }

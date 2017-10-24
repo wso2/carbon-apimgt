@@ -2083,13 +2083,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 log.error("Service Discovery not enabled");
                 return discoveredEndpointList;
             }
-            List<ServiceDiscoveryImplConfig> implConfigList = serviceDiscoveryConfig.getImplementationConfigs();
+            List<ServiceDiscoveryImplConfig> implConfigList = serviceDiscoveryConfig.getImplementationsList();
             List<Endpoint> subDiscoveredEndpointList;
             for (ServiceDiscoveryImplConfig implConfig : implConfigList) {
                 String implClassName = implConfig.getImplClass();
                 Class implClazz = APIPublisherImpl.class.getClassLoader().loadClass(implClassName);
                 ServiceDiscoverer serviceDiscoverer = (ServiceDiscoverer) implClazz.newInstance();
-                serviceDiscoverer.init(implConfig.getCmsSpecificParameters());
+                serviceDiscoverer.init(implConfig.getImplParameters());
 
                 String namespaceFilter = serviceDiscoverer.getNamespaceFilter();
                 HashMap<String, String> criteriaFilter = serviceDiscoverer.getCriteriaFilter();

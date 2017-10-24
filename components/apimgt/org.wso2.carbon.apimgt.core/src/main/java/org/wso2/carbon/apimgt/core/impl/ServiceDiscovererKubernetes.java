@@ -61,11 +61,11 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
     private final Logger log  = LoggerFactory.getLogger(ServiceDiscovererKubernetes.class);
 
     public static final String MASTER_URL = "masterUrl";
-    public static final String INCLUDE_CLUSTER_IPs = "includeClusterIPs";
+    public static final String INCLUDE_CLUSTER_IPS = "includeClusterIPs";
     public static final String INCLUDE_EXTERNAL_NAME_SERVICES = "includeExternalNameServices";
-    public static final String POD_MOUNTED_SA_TOKEN_FILE = "podMountedSATokenFile";
-    public static final String EXTERNAL_SA_TOKEN_FILE = "externalSATokenFile";
-    public static final String CA_CERT_LOCATION = "caCertLocation";
+    public static final String POD_MOUNTED_SA_TOKEN_FILE_PATH = "podMountedSATokenFilePath";
+    public static final String EXTERNAL_SA_TOKEN_FILE_NAME = "externalSATokenFileName";
+    public static final String CA_CERT_PATH = "CACertPath";
 
     private static final String CLUSTER_IP = "ClusterIP";
     private static final String NODE_PORT = "NodePort";
@@ -84,14 +84,14 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
     /**
      * Initializes OpenShiftClient (extended KubernetesClient) and the necessary parameters
      *
-     * @param cmsSpecificParameters container management specific parameters provided in the configuration
+     * @param implementationParameters container management specific parameters provided in the configuration
      * @throws ServiceDiscoveryException if an error occurs while initializing the client
      */
     @Override
-    public void init(HashMap<String, String> cmsSpecificParameters) throws ServiceDiscoveryException {
-        super.init(cmsSpecificParameters);
-        this.implConfig = cmsSpecificParameters;
-        includeClusterIPs = Boolean.parseBoolean(implConfig.get(INCLUDE_CLUSTER_IPs));
+    public void init(HashMap<String, String> implementationParameters) throws ServiceDiscoveryException {
+        super.init(implementationParameters);
+        this.implConfig = implementationParameters;
+        includeClusterIPs = Boolean.parseBoolean(implConfig.get(INCLUDE_CLUSTER_IPS));
         includeExternalNameServices = Boolean.parseBoolean(implConfig.get(INCLUDE_EXTERNAL_NAME_SERVICES));
         try {
             this.client = new DefaultOpenShiftClient(buildConfig());
@@ -119,12 +119,12 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
         System.setProperty("kubernetes.auth.tryKubeConfig", "false");
         System.setProperty("kubernetes.auth.tryServiceAccount", "true");
         ConfigBuilder configBuilder = new ConfigBuilder().withMasterUrl(implConfig.get(MASTER_URL))
-                .withCaCertFile(implConfig.get(CA_CERT_LOCATION));
+                .withCaCertFile(implConfig.get(CA_CERT_PATH));
         Config config;
         log.debug("Using mounted service account token");
         try {
             String saMountedToken = new String(Files.readAllBytes(
-                    Paths.get(implConfig.get(POD_MOUNTED_SA_TOKEN_FILE))), StandardCharsets.UTF_8);
+                    Paths.get(implConfig.get(POD_MOUNTED_SA_TOKEN_FILE_PATH))), StandardCharsets.UTF_8);
             config = configBuilder.withOauthToken(saMountedToken).build();
         } catch (IOException | NullPointerException e) {
             log.error("Error while building config with pod mounted token");
@@ -146,7 +146,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
         try {
             token = FileEncryptionUtility.getInstance().readFromEncryptedFile(
                     System.getProperty("carbon.home") + FileEncryptionUtility.SECURITY_DIR + File.separator
-                    + "encrypted" + implConfig.get(EXTERNAL_SA_TOKEN_FILE));
+                    + "encrypted" + implConfig.get(EXTERNAL_SA_TOKEN_FILE_NAME));
         } catch (APIManagementException e) {
             String msg = "Error occurred while resolving externally stored token";
             log.error(msg, e);
@@ -426,7 +426,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
     }
 
     /**
-     * Used by {@see addNodePortEndpoint} method,
+     * Used by {@see #addNodePortEndpoint(String, ServicePort, String, String, String, String)} method,
      * since it is the (fabric8) Endpoints object that has the given service's pod list
      *
      * @param filterNamespace  namespace : if filtering was expected, else accepts null
@@ -450,7 +450,8 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
     }
 
     /**
-     * Used by {@see addNodePortEndpoint} method, in order to find the node URL which the pod resides
+     * Used by {@see #addNodePortEndpoint(String, ServicePort, String, String, String, String)} method,
+     * in order to find the node URL which the pod resides
      *
      * @param filterNamespace  namespace : if filtering was expected, else accepts null
      * @param podName          name of one of the pods, of the service
