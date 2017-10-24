@@ -40,5 +40,8 @@ public class HandlerConfigTest {
         handlerConfig.setProperties(properties);
         Assert.assertTrue(handlerConfig.hasProperties());
         Assert.assertTrue(handlerConfig.getProperties().get("key1").equalsIgnoreCase("value1"));
+        properties.clear();
+        handlerConfig.setProperties(properties);
+        Assert.assertFalse(handlerConfig.hasProperties());
     }
 }
