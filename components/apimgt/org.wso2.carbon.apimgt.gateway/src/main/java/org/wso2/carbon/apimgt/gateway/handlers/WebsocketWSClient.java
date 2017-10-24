@@ -133,9 +133,11 @@ public class WebsocketWSClient {
 			return toDTO(dto);
 		} catch (Exception e) {
 			throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-			                               "Error while accessing backend services for API key validation",
-			                               e);
+			                               "Error while accessing backend services for API key validation", e);
 		}
 	}
 
+	protected void setKeyValidationServiceStub(APIKeyValidationServiceStub keyValidationServiceStub) {
+		this.keyValidationServiceStub = keyValidationServiceStub;
+	}
 }

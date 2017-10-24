@@ -30,17 +30,17 @@ public class MediationSecurityAdminServiceClient{
 
 	static final String backendURLl = "local:///services/";
 	private MediationSecurityAdminServiceStub mediationSecurityAdminServiceStub;
-	
+
 	public MediationSecurityAdminServiceClient() throws AxisFault {
-		mediationSecurityAdminServiceStub = new MediationSecurityAdminServiceStub(null, backendURLl +"MediationSecurityAdminService");	
+		mediationSecurityAdminServiceStub = new MediationSecurityAdminServiceStub(null, backendURLl +"MediationSecurityAdminService");
 	}
 
 
 
-	
+
 	/**
 	 * encrypt the plain text password
-	 * 
+	 *
 	 * @param cipher
 	 *            init cipher
 	 * @param plainTextPass
@@ -49,7 +49,7 @@ public class MediationSecurityAdminServiceClient{
 	 * @throws APIManagementException
 	 */
 	public String doEncryption(String plainTextPass) throws APIManagementException {
-		
+
 		String encodedValue = null;
 		try {
 		 encodedValue =	 mediationSecurityAdminServiceStub.doEncrypt(plainTextPass);
@@ -62,6 +62,6 @@ public class MediationSecurityAdminServiceClient{
 		return encodedValue;
 	}
 
-	
+
 
 }

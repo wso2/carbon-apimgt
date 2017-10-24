@@ -26,6 +26,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.gateway.mediators.APIMgtCommonExecutionPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ResponsePublisherDTO;
@@ -76,8 +77,7 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
 
             //Check the config property is set to true to build the response message in-order
             //to get the response message size
-            boolean isBuildMsg = UsageComponent.getAmConfigService().getAPIAnalyticsConfiguration()
-                    .isBuildMsg();
+            boolean isBuildMsg = getApiAnalyticsConfiguration().isBuildMsg();
             org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) mc).
                     getAxis2MessageContext();
             if (isBuildMsg) {
@@ -171,6 +171,10 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             log.error("Cannot publish response event. " + e.getMessage(), e);
         }
         return true; // Should never stop the message flow
+    }
+
+    protected APIManagerAnalyticsConfiguration getApiAnalyticsConfiguration() {
+        return UsageComponent.getAmConfigService().getAPIAnalyticsConfiguration();
     }
 
     public boolean isContentAware() {
