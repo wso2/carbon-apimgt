@@ -24,6 +24,7 @@ const RadioGroup = Radio.Group;
 const RadioButton = Radio.Button;
 import Typography from 'material-ui/Typography';
 
+import './discover.css'
 import API from '../../../data/api'
 import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation';
 
@@ -113,6 +114,7 @@ export default class EndpointsDiscover extends Component {
             key: 'age',
             width: '40%',
             sorter: (a, b) => a.name.length - b.name.length,
+            className: 'ed-table-first-column',
             render: (text, record) => (
             <span>
                 {text}
@@ -124,10 +126,12 @@ export default class EndpointsDiscover extends Component {
             )
         }, {
             title: 'Type',
-            dataIndex: 'type'
+            dataIndex: 'type',
+            className: 'ed-font'
         }, {
             title: 'Service URL',
             dataIndex: 'endpointConfig',
+            className: 'ed-font',
             render: (text, record) => (
                 <span>
                     {JSON.parse(text).serviceUrl}
@@ -138,52 +142,59 @@ export default class EndpointsDiscover extends Component {
         }, {
             title: 'Max TPS',
             dataIndex: 'maxTps',
+            className: 'ed-font',
             sorter: (a, b) => a.maxTps - b.maxTps,
         }, {
             title: 'Action',
             key: 'action',
             dataIndex: 'id',
+            className: 'ed-font',
             render: (text, record) =><ButtonCell record={record} storedEndpoints={this.state.storedEndpoints}/>
         }];
         const serviceEndpointsListAndCreateMenu = (
             <Menu>
                 <Menu.Item key="0">
-                    <Link to="/endpoints">List Endpoints</Link>
+                    <Link to="/endpoints">View stored endpoints</Link>
                 </Menu.Item>
                 <Menu.Item key="1">
-                    <Link to="/endpoints/create">Create New Endpoint</Link>
+                    <Link to="/endpoints/create">Create custom endpoint</Link>
                 </Menu.Item>
             </Menu>
         );
         return (
             <ScopeValidation resourcePath={resourcePath.SERVICE_DISCOVERY} resourceMethod={resourceMethod.GET}>
-                <div>
-                    <Dropdown overlay={serviceEndpointsListAndCreateMenu}>
-                        <Button icon="left" />
-                    </Dropdown>
-                    <Typography className="page-title" type="display1">
-                        Discover Service Endpoints
-                    </Typography>
-                    <div style={{ margin:16 }}>
-                        <input
-                          type="text"
-                          placeholder="Search..."
-                          onChange={this.handleFilterTextInputChange}
-                        />
-                        <div style={{ marginLeft: 16, display: 'inline-block' }}>
-                            <span style={{ marginRight: 16 }}> Filter by</span>
-                            <RadioGroup onChange={this.handleRadioButtonChange} defaultValue="name">
-                              <RadioButton value="namespace">Namespace</RadioButton>
-                              <RadioButton value="criteria">Criteria</RadioButton>
-                              <RadioButton value="name">Service Name</RadioButton>
-                            </RadioGroup>
+                <div className="ed-body">
+                    <div className="ed-top-section">
+                        <Typography className="page-title ed-title" type="title">
+                             Discover Service Endpoints
+                        </Typography>
+                        <div className="ed-global-endpoints-button-div">
+                            <Dropdown overlay={serviceEndpointsListAndCreateMenu}>
+                                <Button size='large' className="ed-global-endpoints-button" icon="down">Global Endpoints</Button>
+                            </Dropdown>
+                        </div>
+                        <div className="ed-filter-area">
+                            <input
+                              type="text"
+                              className="ed-filter-input"
+                              placeholder="Type here to filter.."
+                              onChange={this.handleFilterTextInputChange}
+                            />
+                            <div className="ed-filter-area-radio-buttons-div">
+                                <span className="ed-filter-area-inline-text"> Filter by</span>
+                                <RadioGroup size='large' onChange={this.handleRadioButtonChange} defaultValue="name">
+                                  <RadioButton className="ed-font" value="namespace">Namespace</RadioButton>
+                                  <RadioButton className="ed-font" value="criteria">Criteria</RadioButton>
+                                  <RadioButton className="ed-font" value="name">Service Name</RadioButton>
+                                </RadioGroup>
+                            </div>
                         </div>
                     </div>
                     <Table loading={viewableEndpoints === null || this.state.storedEndpoints === null}
                         columns={columns}
                         dataSource={viewableEndpoints}
                         rowKey="id"
-                        size="middle"/>
+                        size="large"/>
                 </div>
             </ScopeValidation>
         );

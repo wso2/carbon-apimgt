@@ -1,0 +1,60 @@
+.ed-body{
+    font-size: 14px;
+}
+
+.ed-top-section {
+    margin: 15px 15px 5px 15px;
+}
+
+.ed-title {
+    color: #4c5768;
+    display: block;
+    display: inline-block;
+    padding: 0px 0px 0px 0px;
+}
+
+.ed-global-endpoints-button-div {
+    display: inline-block;
+    float: right;
+}
+
+.ed-global-endpoints-button {
+    font-size: 14px;
+    font-family: sans-serif;
+}
+
+.ed-filter-area {
+    margin: 25px 0px 0px 0px;
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 10px 5px 10px 0px;
+}
+
+.ed-filter-input {
+    height: 33px;
+    width: 260px;
+    font-size: 14px;
+}
+
+.ed-filter-area-inline-text {
+    margin-right: 16px;
+}
+
+.ed-filter-area-radio-buttons-div {
+    margin-left: 16px;
+    display: inline-block;
+}
+
+th.ed-table-first-column,
+tr.ed-table-first-column {
+    padding-left: 18px !important;
+    word-spacing: 10px !important;
+    font-size: 14px;
+}
+
+th.ed-font,
+tr.ed-font,
+.ed-font {
+    font-size: 14px;
+}
