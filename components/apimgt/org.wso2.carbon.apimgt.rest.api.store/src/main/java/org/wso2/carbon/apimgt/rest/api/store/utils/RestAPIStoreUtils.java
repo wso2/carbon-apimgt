@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.utils;
 
+import org.apache.axis2.AxisFault;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,7 +34,6 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -41,9 +41,14 @@ import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.mgt.stub.UserAdminStub;
+import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
+import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.UnsupportedEncodingException;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -60,8 +65,27 @@ import static org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUti
  * This class contains REST API Store related utility operations
  */
 public class RestAPIStoreUtils {
-
     private static final Log log = LogFactory.getLog(RestAPIStoreUtils.class);
+    private static UserAdminStub userAdminStub;
+    private static APIManagerConfiguration apiManagerConfiguration =  ServiceReferenceHolder.getInstance()
+            .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+    private static String keyManagerUrl;
+    private static String adminUsername;
+    private static String adminPassword;
+
+    static {
+        keyManagerUrl  = apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL);
+        adminUsername = apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
+        adminPassword = apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+        try {
+            userAdminStub = new UserAdminStub(null, keyManagerUrl + "UserAdmin");
+            CarbonUtils.setBasicAccessSecurityHeaders(adminUsername, adminPassword,
+                    true, userAdminStub._getServiceClient());
+        } catch (AxisFault axisFault) {
+            log.error("Error while initializing userAdminStub", axisFault);
+            userAdminStub = null;
+        }
+    }
 
     /**
      * check whether current logged in user has access to the specified application
@@ -429,6 +453,41 @@ public class RestAPIStoreUtils {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    /**
+     * To get the role list of a particular user
+     * @return the roleList Of User
+     * @throws APIManagementException API Management Exception.
+     */
+    public static List<String> getRoleListOfUser(String userName) throws APIManagementException {
+        if (userAdminStub == null) {
+            try {
+                userAdminStub = new UserAdminStub(null, keyManagerUrl + "UserAdmin");
+                CarbonUtils.setBasicAccessSecurityHeaders(adminUsername, adminPassword,
+                        true, userAdminStub._getServiceClient());
+            } catch (AxisFault axisFault) {
+                log.error("Error while initializing UserAdminStub", axisFault);
+                throw new APIManagementException("Error while accessing userAdminStub to get role list of user",
+                        axisFault);
+            }
+        }
+        try {
+            FlaggedName[] roleNames = userAdminStub.getRolesOfUser(userName, "*", -1);
+            List<String> userRoleList = new ArrayList<>();
+            for (FlaggedName roleName : roleNames) {
+                if (roleName.getSelected()) {
+                    userRoleList.add(roleName.getItemName());
+                }
+            }
+            return userRoleList;
+        } catch (RemoteException e) {
+            throw new APIManagementException("Error while connecting to UserAdmin admin service", e);
+        } catch (UserAdminUserAdminException e) {
+            throw new APIManagementException("UserAdminException while trying to get the role list of the user " +
+                    userName, e);
+        }
+
     }
 
 }

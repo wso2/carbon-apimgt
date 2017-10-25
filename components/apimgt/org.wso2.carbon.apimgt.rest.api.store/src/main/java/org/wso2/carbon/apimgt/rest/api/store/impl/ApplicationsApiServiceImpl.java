@@ -456,9 +456,17 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                         //get scopes for subscribed apis
                         Set<Scope> scopeSet = apiConsumer.getScopesBySubscribedAPIs(identifiers);
                         if (filterByUserRoles) {
+                            List<String> userRoleList = RestAPIStoreUtils.getRoleListOfUser(username);
                             for (Scope scope : scopeSet) {
                                 if (scope.getRoles() == null) {
                                     filteredScopes.add(scope);
+                                } else if (userRoleList != null && !userRoleList.isEmpty()) {
+                                    List<String> roleList = new ArrayList<String>(
+                                            Arrays.asList(scope.getRoles().replaceAll(" ", "").split(",")));
+                                    roleList.retainAll(userRoleList);
+                                    if (!roleList.isEmpty()) {
+                                        filteredScopes.add(scope);
+                                    }
                                 }
                             }
                         } else {
@@ -473,8 +481,14 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error getting scopes related with application "
-                    + applicationId, e, log);
+            if (e.getMessage().contains("UserAdmin")) {
+                RestApiUtil.handleInternalServerError(
+                        "UserAdmin admin service error while getting scopes related with application "
+                                + applicationId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError(
+                        "Error while getting scopes related with application " + applicationId, e, log);
+            }
         }
         return null;
     }
