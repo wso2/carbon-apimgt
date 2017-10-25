@@ -2450,7 +2450,7 @@ public class APIStoreHostObject extends ScriptableObject {
     public static NativeObject jsFunction_getAllSubscriptions(Context cx, Scriptable thisObj, Object[] args, Function funObj)
             throws ScriptException, APIManagementException, ApplicationNotFoundException {
 
-        if (args == null || args.length == 0 || !isStringArray(args)) {
+        if (args == null || args.length == 0) {
             return null;
         }
 
@@ -2468,8 +2468,12 @@ public class APIStoreHostObject extends ScriptableObject {
             String username = args[0].toString();
             String appName = args[1].toString();
             String groupingId = null;
+            boolean returnOnlyEntitledScopes = false;
             if (args.length > 4 && args[4] != null) {
                 groupingId = (String) args[4];
+            }
+            if (args.length > 5 && args[5] != null) {
+                returnOnlyEntitledScopes = (Boolean)args[5];
             }
             int startSubIndex = Integer.parseInt(args[2].toString());
             int endSubIndex = Integer.parseInt(args[3].toString());
@@ -2531,17 +2535,17 @@ public class APIStoreHostObject extends ScriptableObject {
                                 scopeObj.put("scopeKey", scopeObj, scope.getKey());
                                 scopeObj.put("scopeName", scopeObj, scope.getName());
                                 String roles = scope.getRoles();
-                                if (roles != null && !roles.isEmpty()) {
+                                if (!returnOnlyEntitledScopes || roles == null || roles.isEmpty()) {
+                                    scopesArray.put(scopesArray.getIds().length, scopesArray, scopeObj);
+                                } else {
                                     List<String> scopeRoleList = new ArrayList<String>(Arrays.asList(roles.split(",")));
-                                    List<String> userRoleList = new ArrayList<String>(Arrays.asList(APIUtil.getListOfRoles
-                                            (MultitenantUtils.getTenantAwareUsername(username))));
+                                    List<String> userRoleList = new ArrayList<String>(Arrays.asList(
+                                            APIUtil.getListOfRoles(MultitenantUtils.getTenantAwareUsername(username))));
                                     scopeRoleList.retainAll(userRoleList);
 
                                     if (!scopeRoleList.isEmpty()) {
                                         scopesArray.put(scopesArray.getIds().length, scopesArray, scopeObj);
                                     }
-                                } else {
-                                    scopesArray.put(scopesArray.getIds().length, scopesArray, scopeObj);
                                 }
                             }
                         }
