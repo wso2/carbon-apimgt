@@ -1347,6 +1347,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         if (APIStatus.PUBLISHED.equals(newStatus) || APIStatus.DEPRECATED.equals(newStatus)
                             || APIStatus.BLOCKED.equals(newStatus) || APIStatus.PROTOTYPED.equals(newStatus)) {
                             failedGateways = publishToGateway(api);
+                            //Sending Notifications to existing subscribers
+                            if (APIStatus.PUBLISHED.equals(newStatus)){
+                                List<APIIdentifier> oldPublishedAPIList = getOldPublishedAPIList(api);
+                                sendEmailNotification(api, oldPublishedAPIList);
+                            }
                         } else { // API Status : RETIRED or CREATED
                             failedGateways = removeFromGateway(api);
                         }
@@ -1535,6 +1540,74 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.debug(logMessage);
         }
         return failedEnvironment;
+    }
+
+    /**
+     * This method returns the previous versions of a given API
+     * @param api
+     * @return oldPublishedAPIList
+     * @throws APIManagementException
+     */
+    private List<APIIdentifier> getOldPublishedAPIList(API api) throws APIManagementException {
+        List<APIIdentifier> oldPublishedAPIList = new ArrayList<APIIdentifier>();
+        List<API> apiList = getAPIsByProvider(api.getId().getProviderName());
+        APIVersionComparator versionComparator = new APIVersionComparator();
+        for (API oldAPI : apiList) {
+            if (oldAPI.getId().getApiName().equals(api.getId().getApiName()) &&
+                    versionComparator.compare(oldAPI, api) < 0 &&
+                    (oldAPI.getStatus().equals(APIStatus.PUBLISHED))) {
+                oldPublishedAPIList.add(oldAPI.getId());
+            }
+        }
+
+        return oldPublishedAPIList;
+    }
+
+    /**
+     * This method used to send notifications to the previous subscribers of older versions of a given API
+     * @param api
+     * @param apiIdentifiers
+     * @throws APIManagementException
+     */
+    private void sendEmailNotification(API api, List<APIIdentifier> apiIdentifiers) throws APIManagementException {
+        try {
+            String isNotificationEnabled = "false";
+            Registry configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
+                    getConfigSystemRegistry(tenantId);
+            if (configRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                Resource resource = configRegistry.get(APIConstants.API_TENANT_CONF_LOCATION);
+                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                if (content != null) {
+                    JSONObject tenantConfig = (JSONObject) new JSONParser().parse(content);
+                    isNotificationEnabled = (String) tenantConfig.get(NotifierConstants.NOTIFICATIONS_ENABLED);
+                }
+            }
+
+            if (JavaUtils.isTrueExplicitly(isNotificationEnabled)) {
+
+                for (APIIdentifier oldAPI : apiIdentifiers) {
+                    Properties prop = new Properties();
+                    prop.put(NotifierConstants.API_KEY, oldAPI);
+                    prop.put(NotifierConstants.NEW_API_KEY, api.getId());
+
+                    Set<Subscriber> subscribersOfAPI = apiMgtDAO.getSubscribersOfAPI(oldAPI);
+                    prop.put(NotifierConstants.SUBSCRIBERS_PER_API, subscribersOfAPI);
+
+                    NotificationDTO notificationDTO = new NotificationDTO(prop,
+                            NotifierConstants.NOTIFICATION_TYPE_NEW_VERSION);
+                    notificationDTO.setTenantID(tenantId);
+                    notificationDTO.setTenantDomain(tenantDomain);
+                    new NotificationExecutor().sendAsyncNotifications(notificationDTO);
+                }
+            }
+        } catch (NotificationException e) {
+            log.error(e.getMessage(), e);
+        } catch (RegistryException re) {
+            handleException("Error while getting the tenant-config.json", re);
+        } catch (ParseException e) {
+            String msg = "Couldn't Create json Object from Swagger object for email notification";
+            handleException(msg, e);
+        }
     }
 
     private void validateAndSetTransports(API api) throws APIManagementException {
@@ -2002,44 +2075,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if(log.isDebugEnabled()) {
                 String logMessage = "Successfully created new version : " + newVersion + " of : " + api.getId().getApiName();
                 log.debug(logMessage);
-            }
-
-            //Sending Notifications to existing subscribers
-            try {
-                String isNotificationEnabled = "false";
-                Registry configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
-                        getConfigSystemRegistry(tenantId);
-                if (configRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                    Resource resource = configRegistry.get(APIConstants.API_TENANT_CONF_LOCATION);
-                    String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                    if(content !=null ){
-                        JSONObject tenantConfig= (JSONObject) new JSONParser().parse(content);
-                        isNotificationEnabled = (String) tenantConfig.get(NotifierConstants.NOTIFICATIONS_ENABLED);
-                    }
-                }
-
-                if (JavaUtils.isTrueExplicitly(isNotificationEnabled)){
-
-                    Properties prop = new Properties();
-                    prop.put(NotifierConstants.API_KEY, api.getId());
-                    prop.put(NotifierConstants.NEW_API_KEY, newAPI.getId());
-
-                    Set<Subscriber> subscribersOfAPI = apiMgtDAO.getSubscribersOfAPI(api.getId());
-                    prop.put(NotifierConstants.SUBSCRIBERS_PER_API, subscribersOfAPI);
-
-                    Set<Subscriber> subscribersOfProvider = apiMgtDAO.getSubscribersOfProvider(api.getId()
-                            .getProviderName());
-                    prop.put(NotifierConstants.SUBSCRIBERS_PER_API, subscribersOfProvider);
-
-                    NotificationDTO notificationDTO=new NotificationDTO(prop,NotifierConstants
-                            .NOTIFICATION_TYPE_NEW_VERSION);
-                    notificationDTO.setTenantID(tenantId);
-                    notificationDTO.setTenantDomain(tenantDomain);
-                    sendAsncNotification(notificationDTO);
-
-                }
-            } catch (NotificationException e) {
-                log.error(e.getMessage(), e);
             }
 
         } catch (DuplicateAPIException e)   {
