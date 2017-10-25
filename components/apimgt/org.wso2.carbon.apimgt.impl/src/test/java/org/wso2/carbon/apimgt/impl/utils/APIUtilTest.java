@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.juddi.v3.error.RegistryException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -38,10 +39,16 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.DocumentationType;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
@@ -51,30 +58,43 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.ServiceReferenceHolderMockCreator;
+import org.wso2.carbon.apimgt.impl.clients.ApplicationManagementServiceClient;
+import org.wso2.carbon.apimgt.impl.clients.OAuthAdminClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
+import org.wso2.carbon.governance.api.exception.GovernanceException;
+import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
+import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.governance.api.util.GovernanceArtifactConfiguration;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.Tag;
+import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.net.URL;
 import java.sql.Connection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -91,7 +111,10 @@ import static org.mockito.Matchers.eq;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.DISABLE_ROLE_VALIDATION_AT_SCOPE_CREATION;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({LogFactory.class, ServiceReferenceHolder.class, SSLSocketFactory.class, CarbonUtils.class, PrivilegedCarbonContext.class, GovernanceUtils.class, AuthorizationManager.class, MultitenantUtils.class, ApiMgtDAO.class})
+@PrepareForTest( {LogFactory.class, ServiceReferenceHolder.class, SSLSocketFactory.class, CarbonUtils.class,
+        GovernanceUtils.class, AuthorizationManager.class, MultitenantUtils.class, GenericArtifactManager.class,
+        APIUtil.class, KeyManagerHolder.class, SubscriberKeyMgtClient.class, ApplicationManagementServiceClient
+        .class, OAuthAdminClient.class,ApiMgtDAO.class})
 @PowerMockIgnore("javax.net.ssl.*")
 public class APIUtilTest {
 
@@ -167,7 +190,7 @@ public class APIUtilTest {
 
         ServiceReferenceHolderMockCreator holderMockCreator = new ServiceReferenceHolderMockCreator(1);
         ServiceReferenceHolderMockCreator.initContextService();
-        
+
         System.setProperty("org.wso2.ignoreHostnameVerification", "true");
         HttpClient client = APIUtil.getHttpClient(3244, "https");
 
@@ -288,7 +311,7 @@ public class APIUtilTest {
         JSONObject root = new JSONObject();
         root.put("sandbox_endpoints", sandboxEndpoints);
         root.put("endpoint_type", "http");
-        
+
         Mockito.when(api.getEndpointConfig()).thenReturn(root.toJSONString());
 
         Assert.assertTrue("Cannot find sandbox endpoint", APIUtil.isSandboxEndpointsExists(api));
@@ -1027,7 +1050,7 @@ public class APIUtilTest {
         Mockito.when(realmService.getTenantUserRealm(Mockito.anyInt())).thenReturn(userRealm);
         Mockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
         Mockito.when(userStoreManager.isExistingRole(roleName)).thenReturn(true);
-        
+
         Assert.assertTrue(APIUtil.isRoleNameExist(userName, roleName));
     }
 
@@ -1084,6 +1107,235 @@ public class APIUtilTest {
 
 
         Assert.assertEquals(roleNames, APIUtil.getRoleNames(userName));
+    }
+
+    @Test
+    public void testCreateAPIArtifactContent() throws Exception {
+        System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants
+                    .SUPER_TENANT_DOMAIN_NAME);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+            GenericArtifact genericArtifact = Mockito.mock(GenericArtifact.class);
+            API api = getUniqueAPI();
+            Mockito.when(genericArtifact.getAttributeKeys()).thenReturn(new String[] {"URITemplate"}).thenThrow
+                    (GovernanceException.class);
+
+            APIUtil.createAPIArtifactContent(genericArtifact, api);
+            Assert.assertTrue(true);
+            APIUtil.createAPIArtifactContent(genericArtifact, api);
+            Assert.fail();
+        } catch (APIManagementException ex) {
+            Assert.assertTrue(ex.getMessage().contains("Failed to create API for :"));
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+
+    }
+
+    @Test
+    public void testGetDocumentation() throws GovernanceException, APIManagementException {
+        PowerMockito.mockStatic(CarbonUtils.class);
+        ServerConfiguration serverConfiguration = Mockito.mock(ServerConfiguration.class);
+        Mockito.when(serverConfiguration.getFirstProperty("WebContextRoot")).thenReturn("/abc").thenReturn("/");
+        PowerMockito.when(CarbonUtils.getServerConfiguration()).thenReturn(serverConfiguration);
+        GenericArtifact genericArtifact = Mockito.mock(GenericArtifact.class);
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_TYPE)).thenReturn(DocumentationType.HOWTO.getType
+                ()).thenReturn(DocumentationType.PUBLIC_FORUM.getType()).thenReturn(DocumentationType.SUPPORT_FORUM
+                .getType()).thenReturn(DocumentationType.API_MESSAGE_FORMAT.getType()).thenReturn(DocumentationType
+                .SAMPLES.getType()).thenReturn(DocumentationType.OTHER.getType());
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_NAME)).thenReturn("Docname");
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_VISIBILITY)).thenReturn(null).thenReturn
+                (Documentation.DocumentVisibility.API_LEVEL.name()).thenReturn(Documentation.DocumentVisibility
+                .PRIVATE.name()).thenReturn(Documentation.DocumentVisibility.OWNER_ONLY.name());
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_SOURCE_TYPE)).thenReturn(Documentation
+                .DocumentSourceType.URL.name()).thenReturn(Documentation.DocumentSourceType.FILE.name());
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_SOURCE_URL)).thenReturn("https://localhost");
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_FILE_PATH)).thenReturn("file://abc");
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_OTHER_TYPE_NAME)).thenReturn("abc");
+        APIUtil.getDocumentation(genericArtifact);
+        APIUtil.getDocumentation(genericArtifact);
+        APIUtil.getDocumentation(genericArtifact);
+        APIUtil.getDocumentation(genericArtifact);
+        APIUtil.getDocumentation(genericArtifact);
+        APIUtil.getDocumentation(genericArtifact);
+
+    }
+
+    @Test
+    public void testGetDocumentationByDocCreator() throws Exception {
+        PowerMockito.mockStatic(CarbonUtils.class);
+        ServerConfiguration serverConfiguration = Mockito.mock(ServerConfiguration.class);
+        Mockito.when(serverConfiguration.getFirstProperty("WebContextRoot")).thenReturn("/abc").thenReturn("/");
+        PowerMockito.when(CarbonUtils.getServerConfiguration()).thenReturn(serverConfiguration);
+        GenericArtifact genericArtifact = Mockito.mock(GenericArtifact.class);
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_TYPE)).thenReturn(DocumentationType.HOWTO.getType
+                ()).thenReturn(DocumentationType.PUBLIC_FORUM.getType()).thenReturn(DocumentationType.SUPPORT_FORUM
+                .getType()).thenReturn(DocumentationType.API_MESSAGE_FORMAT.getType()).thenReturn(DocumentationType
+                .SAMPLES.getType()).thenReturn(DocumentationType.OTHER.getType());
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_NAME)).thenReturn("Docname");
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_VISIBILITY)).thenReturn(null).thenReturn
+                (Documentation.DocumentVisibility.API_LEVEL.name()).thenReturn(Documentation.DocumentVisibility
+                .PRIVATE.name()).thenReturn(Documentation.DocumentVisibility.OWNER_ONLY.name());
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_SOURCE_TYPE)).thenReturn(Documentation
+                .DocumentSourceType.URL.name()).thenReturn(Documentation.DocumentSourceType.FILE.name());
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_SOURCE_URL)).thenReturn("https://localhost");
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_FILE_PATH)).thenReturn("file://abc");
+        Mockito.when(genericArtifact.getAttribute(APIConstants.DOC_OTHER_TYPE_NAME)).thenReturn("abc");
+        APIUtil.getDocumentation(genericArtifact, "admin");
+        APIUtil.getDocumentation(genericArtifact, "admin");
+        APIUtil.getDocumentation(genericArtifact, "admin");
+        APIUtil.getDocumentation(genericArtifact, "admin");
+        APIUtil.getDocumentation(genericArtifact, "admin");
+        APIUtil.getDocumentation(genericArtifact, "admin");
+        APIUtil.getDocumentation(genericArtifact, "admin@wso2.com");
+    }
+
+    @Test
+    public void testCreateDocArtifactContent() throws GovernanceException, APIManagementException {
+        API api = getUniqueAPI();
+        PowerMockito.mockStatic(CarbonUtils.class);
+        ServerConfiguration serverConfiguration = Mockito.mock(ServerConfiguration.class);
+        Mockito.when(serverConfiguration.getFirstProperty("WebContextRoot")).thenReturn("/abc").thenReturn("/");
+        PowerMockito.when(CarbonUtils.getServerConfiguration()).thenReturn(serverConfiguration);
+        GenericArtifact genericArtifact = Mockito.mock(GenericArtifact.class);
+        Documentation documentation = new Documentation(DocumentationType.HOWTO, "this is a doc");
+        documentation.setSourceType(Documentation.DocumentSourceType.FILE);
+        documentation.setCreatedDate(new Date(System.currentTimeMillis()));
+        documentation.setSummary("abcde");
+        documentation.setVisibility(Documentation.DocumentVisibility.API_LEVEL);
+        documentation.setSourceUrl("/abcd/def");
+        documentation.setOtherTypeName("aa");
+        APIUtil.createDocArtifactContent(genericArtifact, api.getId(), documentation);
+        documentation.setSourceType(Documentation.DocumentSourceType.INLINE);
+        APIUtil.createDocArtifactContent(genericArtifact, api.getId(), documentation);
+        documentation.setSourceType(Documentation.DocumentSourceType.URL);
+        APIUtil.createDocArtifactContent(genericArtifact, api.getId(), documentation);
+
+        try {
+            documentation.setSourceType(Documentation.DocumentSourceType.URL);
+            Mockito.doThrow(GovernanceException.class).when(genericArtifact).setAttribute(APIConstants
+                    .DOC_SOURCE_URL, documentation.getSourceUrl());
+            APIUtil.createDocArtifactContent(genericArtifact, api.getId(), documentation);
+            Assert.fail();
+        } catch (APIManagementException ex) {
+            Assert.assertTrue(ex.getMessage().contains("Failed to create doc artifact content from :"));
+        }
+    }
+
+    @Test
+    public void testGetArtifactManager()  {
+        PowerMockito.mockStatic(GenericArtifactManager.class);
+        System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
+        Registry registry = Mockito.mock(UserRegistry.class);
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants
+                    .SUPER_TENANT_DOMAIN_NAME);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+            PowerMockito.mockStatic(GovernanceUtils.class);
+            PowerMockito.doNothing().when(GovernanceUtils.class, "loadGovernanceArtifacts",(UserRegistry)registry);
+            Mockito.when(GovernanceUtils.findGovernanceArtifactConfiguration(APIConstants.API_KEY, registry))
+                    .thenReturn(Mockito.mock(GovernanceArtifactConfiguration.class)).thenReturn(null).thenThrow
+                    (RegistryException.class);
+            GenericArtifactManager genericArtifactManager = Mockito.mock(GenericArtifactManager.class);
+            PowerMockito.whenNew(GenericArtifactManager.class).withArguments(registry, APIConstants.API_KEY)
+                    .thenReturn(genericArtifactManager);
+            GenericArtifactManager retrievedGenericArtifactManager = APIUtil.getArtifactManager(registry,
+                    APIConstants.API_KEY);
+            Assert.assertEquals(genericArtifactManager, retrievedGenericArtifactManager);
+            APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            Assert.fail();
+        } catch (APIManagementException ex) {
+            Assert.assertTrue(ex.getMessage().contains("Failed to initialize GenericArtifactManager"));
+        } catch (org.wso2.carbon.registry.core.exceptions.RegistryException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+
+    }
+
+    @Test
+    public void testGetgetKeyManagementClient() throws Exception {
+        PowerMockito.mockStatic(KeyManagerHolder.class);
+        KeyManagerConfiguration keyManagerConfiguration = Mockito.mock(KeyManagerConfiguration.class);
+        KeyManager keyManagr = Mockito.mock(KeyManager.class);
+        PowerMockito.when(KeyManagerHolder.getKeyManagerInstance()).thenReturn(keyManagr);
+        Mockito.when(keyManagr.getKeyManagerConfiguration()).thenReturn(keyManagerConfiguration);
+        Mockito.when(keyManagerConfiguration.getParameter(APIConstants.AUTHSERVER_URL)).thenReturn
+                ("https://localhost").thenReturn(null).thenReturn("https://localhost").thenReturn("https://localhost");
+        Mockito.when(keyManagerConfiguration.getParameter(APIConstants.KEY_MANAGER_USERNAME)).thenReturn("admin")
+                .thenReturn(null).thenReturn("admin").thenReturn(null).thenReturn("admin");
+        Mockito.when(keyManagerConfiguration.getParameter(APIConstants.KEY_MANAGER_PASSWORD)).thenReturn("admin")
+                .thenReturn("admin").thenReturn(null).thenReturn(null).thenReturn("admin");
+        PowerMockito.mockStatic(SubscriberKeyMgtClient.class);
+        SubscriberKeyMgtClient subscriberKeyMgtClient = Mockito.mock(SubscriberKeyMgtClient.class);
+        PowerMockito.whenNew(SubscriberKeyMgtClient.class).withArguments(Mockito.anyString(), Mockito.anyString(),
+                Mockito.anyString()).thenReturn(subscriberKeyMgtClient).thenThrow(Exception.class);
+
+        APIUtil.getKeyManagementClient();
+        try{
+            APIUtil.getKeyManagementClient();
+            Assert.fail();
+        }catch (APIManagementException ex){
+            Assert.assertTrue(ex.getMessage().contains("API key manager URL unspecified"));
+        }
+        try{
+            APIUtil.getKeyManagementClient();
+            Assert.fail();
+        }catch (APIManagementException ex){
+            Assert.assertTrue(ex.getMessage().contains("Authentication credentials for API key manager unspecified"));
+        }
+        try{
+            APIUtil.getKeyManagementClient();
+            Assert.fail();
+        }catch (APIManagementException ex){
+            Assert.assertTrue(ex.getMessage().contains("Authentication credentials for API key manager unspecified"));
+        }
+        try{
+            APIUtil.getKeyManagementClient();
+            Assert.fail();
+        }catch (APIManagementException ex){
+            Assert.assertTrue(ex.getMessage().contains("Error while initializing the subscriber key management client"));
+        }
+
+    }
+    @Test
+    public void testGetApplicationManagementServiceClient() throws Exception {
+        PowerMockito.mockStatic(ApplicationManagementServiceClient.class);
+        ApplicationManagementServiceClient applicationManagementServiceClient = Mockito.mock
+                (ApplicationManagementServiceClient.class);
+        PowerMockito.whenNew(ApplicationManagementServiceClient.class).withNoArguments().thenReturn
+                (applicationManagementServiceClient).thenThrow(Exception.class);
+        APIUtil.getApplicationManagementServiceClient();
+        Assert.assertTrue(true);
+        try{
+            APIUtil.getApplicationManagementServiceClient();
+            Assert.fail();
+        }catch (APIManagementException ex){
+            Assert.assertTrue(ex.getMessage().contains("Error while initializing the Application Management Service " +
+                    "client"));
+        }
+    }
+    @Test
+    public void testGetOAuthAdminClient() throws Exception {
+        PowerMockito.mockStatic(OAuthAdminClient.class);
+        OAuthAdminClient oAuthAdminClient = Mockito.mock(OAuthAdminClient.class);
+        PowerMockito.whenNew(OAuthAdminClient.class).withNoArguments().thenReturn(oAuthAdminClient).thenThrow
+                (Exception.class);
+        APIUtil.getOauthAdminClient();
+        Assert.assertTrue(true);
+        try{
+            APIUtil.getOauthAdminClient();
+            Assert.fail();
+        }catch (APIManagementException ex){
+            Assert.assertTrue(ex.getMessage().contains("Error while initializing the OAuth admin client"));
+        }
     }
 
     @Test
@@ -1188,7 +1440,7 @@ public class APIUtilTest {
         final String provider = expectedAPI.getId().getProviderName();
         final String tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         final int tenantId = -1234;
-        
+
         GovernanceArtifact artifact = Mockito.mock(GovernanceArtifact.class);
         Registry registry = Mockito.mock(Registry.class);
         ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
@@ -1219,7 +1471,7 @@ public class APIUtilTest {
         Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
         Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
         Mockito.when(tenantManager.getTenantId(tenantDomain)).thenReturn(tenantId);
-        
+
         String artifactPath = "";
         Mockito.when(GovernanceUtils.getArtifactPath(registry, "")).thenReturn(artifactPath);
         Mockito.when(registry.get(artifactPath)).thenReturn(resource);
@@ -1253,96 +1505,110 @@ public class APIUtilTest {
 
     @Test
     public void testGetAPIWithGovernanceArtifact() throws Exception {
-        API expectedAPI = getUniqueAPI();
+        System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants
+                    .SUPER_TENANT_DOMAIN_NAME);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
+            API expectedAPI = getUniqueAPI();
 
-        final String provider = expectedAPI.getId().getProviderName();
-        final String tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        final int tenantId = -1234;
+            final String provider = expectedAPI.getId().getProviderName();
+            final String tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
 
-        System.setProperty("carbon.home", "");
+            final int tenantId = -1234;
 
-        File siteConfFile = new File(Thread.currentThread().getContextClassLoader().
-                getResource("tenant-conf.json").getFile());
+            System.setProperty("carbon.home", "");
 
-        String tenantConfValue = FileUtils.readFileToString(siteConfFile);
+            File siteConfFile = new File(Thread.currentThread().getContextClassLoader().
+                    getResource("tenant-conf.json").getFile());
 
-        GovernanceArtifact artifact = Mockito.mock(GovernanceArtifact.class);
-        Registry registry = Mockito.mock(Registry.class);
-        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
-        Resource resource = Mockito.mock(Resource.class);
-        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-        RealmService realmService = Mockito.mock(RealmService.class);
-        TenantManager tenantManager = Mockito.mock(TenantManager.class);
-        APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService.class);
-        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
-        ThrottleProperties throttleProperties = Mockito.mock(ThrottleProperties.class);
-        SubscriptionPolicy policy = Mockito.mock(SubscriptionPolicy.class);
-        SubscriptionPolicy[] policies = new SubscriptionPolicy[]{policy};
-        QuotaPolicy quotaPolicy = Mockito.mock(QuotaPolicy.class);
-        RequestCountLimit limit = Mockito.mock(RequestCountLimit.class);
-        PrivilegedCarbonContext carbonContext = Mockito.mock(PrivilegedCarbonContext.class);
-        RegistryService registryService = Mockito.mock(RegistryService.class);
-        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
+            String tenantConfValue = FileUtils.readFileToString(siteConfFile);
 
-        PowerMockito.mockStatic(ApiMgtDAO.class);
-        PowerMockito.mockStatic(GovernanceUtils.class);
-        PowerMockito.mockStatic(MultitenantUtils.class);
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
+            GovernanceArtifact artifact = Mockito.mock(GovernanceArtifact.class);
+            Registry registry = Mockito.mock(Registry.class);
+            ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+            Resource resource = Mockito.mock(Resource.class);
+            ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+            RealmService realmService = Mockito.mock(RealmService.class);
+            TenantManager tenantManager = Mockito.mock(TenantManager.class);
+            APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService.class);
+            APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+            ThrottleProperties throttleProperties = Mockito.mock(ThrottleProperties.class);
+            SubscriptionPolicy policy = Mockito.mock(SubscriptionPolicy.class);
+            SubscriptionPolicy[] policies = new SubscriptionPolicy[] {policy};
+            QuotaPolicy quotaPolicy = Mockito.mock(QuotaPolicy.class);
+            RequestCountLimit limit = Mockito.mock(RequestCountLimit.class);
+            PrivilegedCarbonContext carbonContext = Mockito.mock(PrivilegedCarbonContext.class);
+            RegistryService registryService = Mockito.mock(RegistryService.class);
+            UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
 
-        Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
-        Mockito.when(apiMgtDAO.getAPIID(Mockito.any(APIIdentifier.class), eq((Connection) null))).thenReturn(123);
-        Mockito.when(apiMgtDAO.getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, provider)).thenReturn(new String[]{"Unlimited"});
-        Mockito.when(artifact.getId()).thenReturn("");
-        Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER)).thenReturn(provider);
-        Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT)).thenReturn("15");
-        Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_TIER)).thenReturn("Unlimited");
-        Mockito.when(MultitenantUtils.getTenantDomain(provider)).thenReturn(tenantDomain);
-        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
-        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
-        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
-        Mockito.when(tenantManager.getTenantId(tenantDomain)).thenReturn(tenantId);
-        Mockito.when(registryService.getConfigSystemRegistry(tenantId)).thenReturn(userRegistry);
-        Mockito.when(userRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(true);
-        Mockito.when(userRegistry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(resource);
+            PowerMockito.mockStatic(ApiMgtDAO.class);
+            PowerMockito.mockStatic(GovernanceUtils.class);
+            PowerMockito.mockStatic(MultitenantUtils.class);
+            PowerMockito.mockStatic(ServiceReferenceHolder.class);
 
-        String artifactPath = "";
-        Mockito.when(GovernanceUtils.getArtifactPath(registry, "")).thenReturn(artifactPath);
-        Mockito.when(registry.get(artifactPath)).thenReturn(resource);
-        Mockito.when(resource.getLastModified()).thenReturn(expectedAPI.getLastUpdated());
-        Mockito.when(resource.getCreatedTime()).thenReturn(expectedAPI.getLastUpdated());
-        Mockito.when(resource.getContent()).thenReturn(tenantConfValue.getBytes());
-        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
-        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
-        Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
-        Mockito.when(throttleProperties.isEnabled()).thenReturn(true);
-        Mockito.when(apiMgtDAO.getSubscriptionPolicies(tenantId)).thenReturn(policies);
-        Mockito.when(policy.getDefaultQuotaPolicy()).thenReturn(quotaPolicy);
-        Mockito.when(quotaPolicy.getLimit()).thenReturn(limit);
-        Mockito.when(registry.getTags(artifactPath)).thenReturn(getTagsFromSet(expectedAPI.getTags()));
+            Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+            Mockito.when(apiMgtDAO.getAPIID(Mockito.any(APIIdentifier.class), eq((Connection) null))).thenReturn(123);
+            Mockito.when(apiMgtDAO.getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, provider)).thenReturn(new String[] {"Unlimited"});
+            Mockito.when(artifact.getId()).thenReturn("");
+            Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER)).thenReturn(provider);
+            Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_CACHE_TIMEOUT)).thenReturn("15");
+            Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_TIER)).thenReturn("Unlimited");
+            Mockito.when(MultitenantUtils.getTenantDomain(provider)).thenReturn(tenantDomain);
+            Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+            Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+            Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+            Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+            Mockito.when(tenantManager.getTenantId(tenantDomain)).thenReturn(tenantId);
+            Mockito.when(registryService.getConfigSystemRegistry(tenantId)).thenReturn(userRegistry);
+            Mockito.when(userRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(true);
+            Mockito.when(userRegistry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(resource);
 
-        ArrayList<URITemplate> urlList = getURLTemplateList(expectedAPI.getUriTemplates());
-        Mockito.when(apiMgtDAO.getAllURITemplates(Mockito.anyString(), Mockito.anyString())).thenReturn(urlList);
+            String artifactPath = "";
+            Mockito.when(GovernanceUtils.getArtifactPath(registry, "")).thenReturn(artifactPath);
+            Mockito.when(registry.get(artifactPath)).thenReturn(resource);
+            Mockito.when(resource.getLastModified()).thenReturn(expectedAPI.getLastUpdated());
+            Mockito.when(resource.getCreatedTime()).thenReturn(expectedAPI.getLastUpdated());
+            Mockito.when(resource.getContent()).thenReturn(tenantConfValue.getBytes());
+            Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+            Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+            Mockito.when(apiManagerConfiguration.getThrottleProperties()).thenReturn(throttleProperties);
+            Mockito.when(throttleProperties.isEnabled()).thenReturn(true);
+            Mockito.when(apiMgtDAO.getSubscriptionPolicies(tenantId)).thenReturn(policies);
+            Mockito.when(policy.getDefaultQuotaPolicy()).thenReturn(quotaPolicy);
+            Mockito.when(quotaPolicy.getLimit()).thenReturn(limit);
+            Mockito.when(registry.getTags(artifactPath)).thenReturn(getTagsFromSet(expectedAPI.getTags()));
 
-        CORSConfiguration corsConfiguration = expectedAPI.getCorsConfiguration();
+            ArrayList<URITemplate> urlList = getURLTemplateList(expectedAPI.getUriTemplates());
+            Mockito.when(apiMgtDAO.getAllURITemplates(Mockito.anyString(), Mockito.anyString())).thenReturn(urlList);
 
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS)).
-                thenReturn(corsConfiguration.getAccessControlAllowHeaders().toString());
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS)).
-                thenReturn(corsConfiguration.getAccessControlAllowMethods().toString());
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN)).
-                thenReturn(corsConfiguration.getAccessControlAllowOrigins().toString());
+            CORSConfiguration corsConfiguration = expectedAPI.getCorsConfiguration();
 
-        Mockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(carbonContext);
-        
-        API api = APIUtil.getAPI(artifact);
+            Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_HEADERS)).
+                    thenReturn(corsConfiguration.getAccessControlAllowHeaders().toString());
+            Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_METHODS)).
+                    thenReturn(corsConfiguration.getAccessControlAllowMethods().toString());
+            Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN)).
+                    thenReturn(corsConfiguration.getAccessControlAllowOrigins().toString());
 
-        Assert.assertNotNull(api);
+
+            API api = APIUtil.getAPI(artifact);
+
+            Assert.assertNotNull(api);
+        }finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
     }
 
     @Test
     public void testGetAPIWithGovernanceArtifactAdvancedThrottlingDisabled() throws Exception {
+        System.setProperty("carbon.home", APIUtilTest.class.getResource("/").getFile());
+        try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(MultitenantConstants
+                    .SUPER_TENANT_DOMAIN_NAME);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(MultitenantConstants.SUPER_TENANT_ID);
         API expectedAPI = getUniqueAPI();
 
         final String provider = expectedAPI.getId().getProviderName();
@@ -1370,16 +1636,13 @@ public class APIUtilTest {
         SubscriptionPolicy[] policies = new SubscriptionPolicy[]{policy};
         QuotaPolicy quotaPolicy = Mockito.mock(QuotaPolicy.class);
         RequestCountLimit limit = Mockito.mock(RequestCountLimit.class);
-        PrivilegedCarbonContext carbonContext = Mockito.mock(PrivilegedCarbonContext.class);
-        RegistryService registryService = Mockito.mock(RegistryService.class);
+            RegistryService registryService = Mockito.mock(RegistryService.class);
         UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
 
         PowerMockito.mockStatic(ApiMgtDAO.class);
         PowerMockito.mockStatic(GovernanceUtils.class);
         PowerMockito.mockStatic(MultitenantUtils.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
-
         Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
         Mockito.when(apiMgtDAO.getAPIID(Mockito.any(APIIdentifier.class), eq((Connection) null))).thenReturn(123);
         Mockito.when(apiMgtDAO.getPolicyNames(PolicyConstants.POLICY_LEVEL_SUB, provider)).thenReturn(new String[]{"Unlimited"});
@@ -1424,11 +1687,12 @@ public class APIUtilTest {
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN)).
                 thenReturn(corsConfiguration.getAccessControlAllowOrigins().toString());
 
-        Mockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(carbonContext);
-
         API api = APIUtil.getAPI(artifact);
 
         Assert.assertNotNull(api);
+    }finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
     }
 
     private API getUniqueAPI() {
@@ -1516,6 +1780,10 @@ public class APIUtilTest {
         api.setLastUpdated(new Date());
         api.setCreatedTime(new Date().toString());
 
+        Set<Tier> tierSet = new HashSet<Tier>();
+        tierSet.add(new Tier("Unlimited"));
+        tierSet.add(new Tier("Gold"));
+        api.addAvailableTiers(tierSet);
         Set<String> tags = new HashSet<String>();
         tags.add("stuff");
         api.addTags(tags);
