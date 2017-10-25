@@ -20,7 +20,7 @@ import org.wso2.carbon.apimgt.rest.api.configurations.internal.ServiceReferenceH
 import org.wso2.carbon.apimgt.rest.api.configurations.models.EnvironmentConfigurations;
 
 /**
- * ervice class for get configurations
+ * Service class for get configurations
  */
 public class ConfigurationService {
     private static ConfigurationService instance = new ConfigurationService();
