@@ -2530,7 +2530,19 @@ public class APIStoreHostObject extends ScriptableObject {
                                 NativeObject scopeObj = new NativeObject();
                                 scopeObj.put("scopeKey", scopeObj, scope.getKey());
                                 scopeObj.put("scopeName", scopeObj, scope.getName());
-                                scopesArray.put(scopesArray.getIds().length, scopesArray, scopeObj);
+                                String roles = scope.getRoles();
+                                if (roles != null && !roles.isEmpty()) {
+                                    List<String> scopeRoleList = new ArrayList<String>(Arrays.asList(roles.split(",")));
+                                    List<String> userRoleList = new ArrayList<String>(Arrays.asList(APIUtil.getListOfRoles
+                                            (MultitenantUtils.getTenantAwareUsername(username))));
+                                    scopeRoleList.retainAll(userRoleList);
+
+                                    if (!scopeRoleList.isEmpty()) {
+                                        scopesArray.put(scopesArray.getIds().length, scopesArray, scopeObj);
+                                    }
+                                } else {
+                                    scopesArray.put(scopesArray.getIds().length, scopesArray, scopeObj);
+                                }
                             }
                         }
                     }
