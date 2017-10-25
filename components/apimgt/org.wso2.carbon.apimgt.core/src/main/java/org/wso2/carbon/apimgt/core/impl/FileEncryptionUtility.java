@@ -97,7 +97,6 @@ public class FileEncryptionUtility {
      */
     public void encryptFile(String inputFilePath, String outputFilePath) throws APIManagementException {
         try {
-            log.info("Encrypting file using stored AES key");
             Cipher aesCipher = Cipher.getInstance(EncryptionConstants.AES);
             SecretKeySpec aesKeySpec = new SecretKeySpec(getAESKey(), EncryptionConstants.AES);
             aesCipher.init(Cipher.ENCRYPT_MODE, aesKeySpec);
@@ -109,6 +108,7 @@ public class FileEncryptionUtility {
             inputStream.close();
             cipherOutStream.close();
             APIFileUtils.deleteFile(inputFilePath);
+            log.debug("Successfully encrypted file using stored AES key");
         } catch (NoSuchPaddingException | NoSuchAlgorithmException e) {
             String msg = "Error occurred while initializing AES cipher for File Encryption";
             log.error(msg, e);
@@ -129,7 +129,6 @@ public class FileEncryptionUtility {
      */
     public String readFromEncryptedFile(String inputFilePath) throws APIManagementException {
         try {
-            log.info("Decrypting file using stored AES key");
             Cipher aesCipher = Cipher.getInstance(EncryptionConstants.AES);
             SecretKeySpec aesKeySpec = new SecretKeySpec(getAESKey(), EncryptionConstants.AES);
             aesCipher.init(Cipher.DECRYPT_MODE, aesKeySpec);
@@ -141,6 +140,7 @@ public class FileEncryptionUtility {
             byte[] outByteArray = byteArrayOutStream.toByteArray();
             cipherInStream.close();
             byteArrayOutStream.close();
+            log.debug("Successfully decrypted file using stored AES key");
             return new String(SecureVaultUtils.toChars(outByteArray));
         } catch (IOException | InvalidKeyException e) {
             String msg = "Error while decrypting file using AES key";
