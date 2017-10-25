@@ -26,12 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -48,8 +43,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 import javax.ws.rs.core.Response;
 
 /**
@@ -426,6 +420,63 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     @Override
     public String applicationsApplicationIdDeleteGetLastUpdatedTime(String applicationId, String ifMatch, String ifUnmodifiedSince) {
         return RestAPIStoreUtils.getLastUpdatedTimeByApplicationId(applicationId);
+    }
+
+    /**
+     * Retrieves the scopes related with particular applications based on subscibed APIs.
+     *
+     * @param applicationId Application Identifier.
+     * @param filterByUserRoles Whether to filter scope by user roles.
+     * @param ifMatch If-Match header values
+     * @param ifUnmodifiedSince If-Unmodified-Since header value.
+     * @return the scopes
+     */
+    @Override
+    public Response applicationsApplicationScopesGet(String applicationId, boolean filterByUserRoles, String ifMatch,
+            String ifUnmodifiedSince) {
+        String username = RestApiUtil.getLoggedInUsername();
+        Subscriber subscriber = new Subscriber(username);
+        Set<SubscribedAPI> subscriptions;
+
+        try {
+            APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            if (application != null) {
+                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    subscriptions = apiConsumer
+                            .getSubscribedAPIs(subscriber, application.getName(), application.getGroupId());
+
+                    Iterator<SubscribedAPI> subscribedAPIIterator = subscriptions.iterator();
+                    List<APIIdentifier> identifiers = new ArrayList<APIIdentifier>();
+                    while (subscribedAPIIterator.hasNext()) {
+                        identifiers.add(subscribedAPIIterator.next().getApiId());
+                    }
+                    Set<Scope> filteredScopes = new LinkedHashSet<Scope>();
+                    if (!identifiers.isEmpty()) {
+                        //get scopes for subscribed apis
+                        Set<Scope> scopeSet = apiConsumer.getScopesBySubscribedAPIs(identifiers);
+                        if (filterByUserRoles) {
+                            for (Scope scope : scopeSet) {
+                                if (scope.getRoles() == null) {
+                                    filteredScopes.add(scope);
+                                }
+                            }
+                        } else {
+                            filteredScopes = scopeSet;
+                        }
+                    }
+                    return Response.ok().entity(filteredScopes).build();
+                } else {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error getting scopes related with application "
+                    + applicationId, e, log);
+        }
+        return null;
     }
 
     /**

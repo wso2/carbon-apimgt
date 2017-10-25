@@ -1,5 +1,8 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.wso2.carbon.apimgt.rest.api.store.dto.*;
 import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.factories.ApplicationsApiServiceFactory;
@@ -232,6 +235,30 @@ public class ApplicationsApi  {
     public String applicationsPostGetLastUpdatedTime(ApplicationDTO body,String contentType)
     {
         return delegate.applicationsPostGetLastUpdatedTime(body,contentType);
+    }
+
+    @GET
+    @Path("/scopes/{applicationId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get the scopes related with an application based on subscribed "
+            + "APIs\n", notes = "Get the scopes related with an application based on subscribed APIs")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK.\nResource successfully deleted.\n"),
+            @ApiResponse(code = 404, message = "Not Found.\nResource to be deleted does not exist.\n"),
+            @ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of "
+                    + "the preconditions is not met.\n") })
+    public Response applicationsApplicationScopesGet(
+            @ApiParam(value = "Application Identifier consisting of the UUID of the Application.",required = true )
+            @PathParam("applicationId") String applicationId,
+            @ApiParam(value = "To indicate whether scopes need to be filtered based on roles")
+            @QueryParam("filterByUserRoles") boolean filterByUserRoles,
+            @ApiParam(value = "Validator for conditional requests; based on ETag.")
+            @HeaderParam("If-Match") String ifMatch,
+            @ApiParam(value = "Validator for conditional requests; based on Last Modified header.")
+            @HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
+    {
+     return delegate.applicationsApplicationScopesGet(applicationId, filterByUserRoles, ifMatch,ifUnmodifiedSince);
     }
 }
 

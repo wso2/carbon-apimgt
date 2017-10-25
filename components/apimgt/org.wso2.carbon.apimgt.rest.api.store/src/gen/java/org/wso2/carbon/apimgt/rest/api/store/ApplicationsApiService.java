@@ -34,5 +34,8 @@ public abstract class ApplicationsApiService {
     public abstract String applicationsGenerateKeysPostGetLastUpdatedTime(String applicationId,ApplicationKeyGenerateRequestDTO body,String contentType,String ifMatch,String ifUnmodifiedSince);
     public abstract String applicationsGetGetLastUpdatedTime(String groupId,String query,Integer limit,Integer offset,String accept,String ifNoneMatch);
     public abstract String applicationsPostGetLastUpdatedTime(ApplicationDTO body,String contentType);
+
+    public abstract Response applicationsApplicationScopesGet(String applicationId, boolean filterByUserRoles,
+            String ifMatch, String ifUnmodifiedSince);
 }
 
