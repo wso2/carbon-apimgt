@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.caching.impl.CacheEntry;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +64,20 @@ public class APIAuthenticationServiceTest {
         APIAuthenticationService apiAuthenticationService = new ApiAuthenticationServiceWrapper(cacheManager);
         apiAuthenticationService.invalidateResourceCache("/api1","1.0.0","/*","GET");
     }
+    
+    @Test
+    public void invalidateResourceCacheForPolicy() throws Exception {
+        CacheManager cacheManager = Mockito.mock(CacheManager.class);
+        Cache cache = Mockito.mock(Cache.class);
+
+        Mockito.when(cacheManager.getCache(APIConstants.RESOURCE_CACHE_NAME)).thenReturn(cache);
+        APIAuthenticationService apiAuthenticationService = new ApiAuthenticationServiceWrapper(cacheManager);
+        apiAuthenticationService.invalidateResourceCache(
+                APIConstants.POLICY_CACHE_CONTEXT + "/t/" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME + "/", null,
+                null, null);
+        Mockito.verify(cache, Mockito.times(1)).removeAll();
+    }
+    
     @Test
     public void invalidateResourceCacheInTenant() throws Exception {
         CacheManager cacheManager = Mockito.mock(CacheManager.class);

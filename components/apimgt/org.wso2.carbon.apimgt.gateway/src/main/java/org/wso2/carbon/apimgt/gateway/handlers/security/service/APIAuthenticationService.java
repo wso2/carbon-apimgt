@@ -57,76 +57,46 @@ public class APIAuthenticationService extends AbstractServiceBusAdmin {
 
     }
 
-    public void invalidateResourceCache(String apiContext, String apiVersion, String resourceURLContext, String httpVerb) {
-        boolean isTenantFlowStarted = false;
-        int tenantDomainIndex = apiContext.indexOf("/t/");
-        String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
-        if (tenantDomainIndex != -1) {
-            String temp = apiContext.substring(tenantDomainIndex + 3, apiContext.length());
-            tenantDomain = temp.substring(0, temp.indexOf('/'));
-        }
+	public void invalidateResourceCache(String apiContext, String apiVersion, String resourceURLContext,
+			String httpVerb) {
+		boolean isTenantFlowStarted = false;
+		int tenantDomainIndex = apiContext.indexOf("/t/");
+		String tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+		if (tenantDomainIndex != -1) {
+			String temp = apiContext.substring(tenantDomainIndex + 3, apiContext.length());
+			tenantDomain = temp.substring(0, temp.indexOf('/'));
+		}
 
-        try {
+		try {
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 isTenantFlowStarted = startTenantFlow(tenantDomain);
             }
 
-            String resourceVerbCacheKey =
-                                          APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
-                                                                             resourceURLContext, httpVerb);
-
-            String apiCacheKey = APIUtil.getAPIInfoDTOCacheKey(apiContext, apiVersion);
-
-            Cache cache =
-                          getCacheManager()
-                                 .getCache(APIConstants.RESOURCE_CACHE_NAME);
-
-            if (cache.containsKey(apiCacheKey)) {
-                cache.remove(apiCacheKey);
+            Cache cache = getCacheManager().getCache(APIConstants.RESOURCE_CACHE_NAME);
+            if (apiContext.contains(APIConstants.POLICY_CACHE_CONTEXT)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Cleaning cache for policy update for tenant " + tenantDomain);
+                }
+                cache.removeAll();
+            } else {
+                String resourceVerbCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
+                        resourceURLContext, httpVerb);
+                String apiCacheKey = APIUtil.getAPIInfoDTOCacheKey(apiContext, apiVersion);
+                if (cache.containsKey(apiCacheKey)) {
+                    cache.remove(apiCacheKey);
+                }
+                if (cache.containsKey(resourceVerbCacheKey)) {
+                    cache.remove(resourceVerbCacheKey);
+                }
             }
-            // TODO this code is not needed now, can remove
-            /*
-             * if (keyCache.size() != 0) {
-             * Set keys = keyCache.keySet();
-             * for (Object cacheKey : keys) {
-             * String key = cacheKey.toString();
-             * if (key.contains(apiContext + ":" + apiVersion)) {
-             * keyCache.remove(key);
-             * }
-             * }
-             * }
-             */
 
-            if (cache.containsKey(resourceVerbCacheKey)) {
-                cache.remove(resourceVerbCacheKey);
-            }
-            // TODO this code is not needed now, can remove
-            /*
-             * if (cache.size() != 0) {
-             * if (resourceURLContext.equals("/")) {
-             * Set keys = cache.keySet();
-             * for (Object cacheKey : keys) {
-             * String key = cacheKey.toString();
-             * if (key.contains(apiContext + "/" + apiVersion +
-             * resourceURLContext)) {
-             * cache.remove(key);
-             * }
-             * }
-             * } else if (cache.get(resourceCacheKey) != null) {
-             * cache.remove(resourceVerbCacheKey);
-             * }
-             *
-             * cache.remove(resourceCacheKey);
-             * }
-             */
+		} finally {
+			if (isTenantFlowStarted) {
+				endTenantFlow();
+			}
+		}
 
-        } finally {
-            if (isTenantFlowStarted) {
-                endTenantFlow();
-            }
-        }
-
-    }
+	}
 
     protected void endTenantFlow() {
         PrivilegedCarbonContext.endTenantFlow();
