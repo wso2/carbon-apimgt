@@ -872,8 +872,6 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, api.getContextTemplate());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context");
             artifact.setAttribute(APIConstants.API_OVERVIEW_TYPE, api.getType());
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
 
             StringBuilder policyBuilder = new StringBuilder();
             for (Tier tier : api.getAvailableTiers()) {
@@ -982,21 +980,14 @@ public final class APIUtil {
             Documentation.DocumentSourceType docSourceType = Documentation.DocumentSourceType.INLINE;
             String artifactAttribute = artifact.getAttribute(APIConstants.DOC_SOURCE_TYPE);
 
-            if (artifactAttribute.equals(Documentation.DocumentSourceType.URL.name())) {
+            if (Documentation.DocumentSourceType.URL.name().equals(artifactAttribute)) {
                 docSourceType = Documentation.DocumentSourceType.URL;
-            } else if (artifactAttribute.equals(Documentation.DocumentSourceType.FILE.name())) {
-                docSourceType = Documentation.DocumentSourceType.FILE;
-            }
-
-            documentation.setSourceType(docSourceType);
-            if ("URL".equals(artifact.getAttribute(APIConstants.DOC_SOURCE_TYPE))) {
                 documentation.setSourceUrl(artifact.getAttribute(APIConstants.DOC_SOURCE_URL));
-            }
-
-            if (docSourceType == Documentation.DocumentSourceType.FILE) {
+            } else if (Documentation.DocumentSourceType.FILE.name().equals(artifactAttribute)) {
+                docSourceType = Documentation.DocumentSourceType.FILE;
                 documentation.setFilePath(prependWebContextRoot(artifact.getAttribute(APIConstants.DOC_FILE_PATH)));
             }
-
+            documentation.setSourceType(docSourceType);
             if (documentation.getType() == DocumentationType.OTHER) {
                 documentation.setOtherTypeName(artifact.getAttribute(APIConstants.DOC_OTHER_TYPE_NAME));
             }
@@ -1242,7 +1233,7 @@ public final class APIUtil {
                     apiId.getApiName() + RegistryConstants.PATH_SEPARATOR + apiId.getVersion();
             artifact.setAttribute(APIConstants.DOC_API_BASE_PATH, basePath);
         } catch (GovernanceException e) {
-            String msg = "Filed to create doc artifact content from :" + documentation.getName();
+            String msg = "Failed to create doc artifact content from :" + documentation.getName();
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }

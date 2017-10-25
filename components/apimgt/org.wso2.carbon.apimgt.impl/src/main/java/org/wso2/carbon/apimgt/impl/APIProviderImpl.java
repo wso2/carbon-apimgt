@@ -4370,6 +4370,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     policiesToUndeploy.add(policyFile + "_condition_" +  existingPolicy.getPipelines().get(i).getId());
                 }
                 policyLevel = PolicyConstants.POLICY_LEVEL_API;
+
+                APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                        .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                Map<String, Environment> gatewayEns = config.getApiGatewayEnvironments();
+                for (Environment environment : gatewayEns.values()) {
+                    try {
+                        APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Calling invalidation cache for API Policy for tenant ");
+                        }
+                        String policyContext = APIConstants.POLICY_CACHE_CONTEXT + "/t/" + apiPolicy.getTenantDomain()
+                                + "/";
+                        client.invalidateResourceCache(policyContext, null, null, null);
+
+                    } catch (AxisFault ex) {
+                        /*
+                         * didn't throw this exception to handle multiple gateway publishing feature therefore
+                         * this didn't break invalidating cache from the all the gateways if one gateway is
+                         * unreachable
+                         */
+                        log.error("Error while invalidating from environment " + environment.getName(), ex);
+                    }
+                }
             } else if (policy instanceof ApplicationPolicy) {
                 ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForAppLevel(appPolicy);
