@@ -41,7 +41,6 @@ import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.TestUtils;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
-import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -102,7 +101,7 @@ public class ApplicationRegistrationWSWorkflowExecutorTest {
     }
 
     @Test
-    public void testRetrievingWorkflowType(){
+    public void testRetrievingWorkflowType() {
         Assert.assertEquals(applicationRegistrationWSWorkflowExecutor.getWorkflowType(),
                 "AM_APPLICATION_REGISTRATION_PRODUCTION");
     }
