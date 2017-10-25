@@ -1543,7 +1543,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * This method returns the previous versions of a given API
+     * This method returns a list of previous versions of a given API
      * @param api
      * @return oldPublishedAPIList
      * @throws APIManagementException
@@ -1582,9 +1582,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     isNotificationEnabled = (String) tenantConfig.get(NotifierConstants.NOTIFICATIONS_ENABLED);
                 }
             }
-
             if (JavaUtils.isTrueExplicitly(isNotificationEnabled)) {
-
                 for (APIIdentifier oldAPI : apiIdentifiers) {
                     Properties prop = new Properties();
                     prop.put(NotifierConstants.API_KEY, oldAPI);
