@@ -63,8 +63,10 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.Tag;
+import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -75,6 +77,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.net.URL;
 import java.sql.Connection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -1370,8 +1373,7 @@ public class APIUtilTest {
         SubscriptionPolicy[] policies = new SubscriptionPolicy[]{policy};
         QuotaPolicy quotaPolicy = Mockito.mock(QuotaPolicy.class);
         RequestCountLimit limit = Mockito.mock(RequestCountLimit.class);
-        PrivilegedCarbonContext carbonContext = Mockito.mock(PrivilegedCarbonContext.class);
-        RegistryService registryService = Mockito.mock(RegistryService.class);
+            RegistryService registryService = Mockito.mock(RegistryService.class);
         UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
 
         PowerMockito.mockStatic(ApiMgtDAO.class);
