@@ -97,6 +97,18 @@
                     <version>${jacoco.version}</version>
                     <executions>
                         <execution>
+                            <id>default-instrument</id>
+                            <goals>
+                                <goal>instrument</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>default-restore-instrumented-classes</id>
+                            <goals>
+                                <goal>restore-instrumented-classes</goal>
+                            </goals>
+                        </execution>
+                        <execution>
                             <id>pre-unit-test</id>
                             <goals>
                                 <goal>prepare-agent</goal>
