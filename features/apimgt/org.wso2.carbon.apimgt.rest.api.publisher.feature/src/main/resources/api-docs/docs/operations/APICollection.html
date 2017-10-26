@@ -2,7 +2,7 @@
     <h1><a name="API (Collection)"></a>API (Collection)</h1>
 
             <hr/>
-            <h3 class="operation-heading"><a name="apisGet"></a>Retrieve/Search APIs 
+            <h3 class="operation-heading"><a name="apisGet"></a>Retrieve/Search APIs
  <br><small>GET https://apis.wso2.com/api/am/publisher/v0.11/apis</small></h3>
             <p class="marked"></p>
 
@@ -21,7 +21,7 @@ Each retrieved API is represented with a minimal amount of attributes. If you wa
                 </h4>
             </div>
 
-                <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.11/apis
+                <div id="request-apisGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v0.11/apis
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -61,7 +61,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://127.0.0.1:9443/api/am/publisher/v0.11/apis</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/publisher/v0.11/apis</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -168,8 +168,8 @@ Eg.
 Supported attribute modifiers are [**version, context, status,
 description, subcontext, doc, provider**]
 
-If no advanced attribute modifier has been specified, search will match the
-given query string against API Name.
+If no advanced attribute modifier has been specified,  the API names containing
+the search term will be returned as a result.
 </p>
                         </td>
                         <td>
@@ -226,7 +226,7 @@ given query string against API Name.
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resourec.
+variant of the resource (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -304,7 +304,7 @@ There is a special capability for a user who has &#x60;APIM Admin&#x60; permissi
                 </h4>
             </div>
 
-                <div id="request-apisPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.11/apis
+                <div id="request-apisPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v0.11/apis
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 
 {
@@ -320,6 +320,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
    &quot;cacheTimeout&quot;: 300,
    &quot;destinationStatsEnabled&quot;: false,
    &quot;isDefaultVersion&quot;: false,
+   &quot;type&quot;: &quot;HTTP&quot;,
    &quot;transport&quot;:    [
       &quot;http&quot;,
       &quot;https&quot;
@@ -377,7 +378,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                 </h4>
             </div>
                 <div id="response-apisPost" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
-Location: https://127.0.0.1:9443/api/am/publisher/v0.11/apis/7a2298c4-c905-403f-8fac-38c73301631f
+Location: https://localhost:9443/api/am/publisher/v0.11/apis/7a2298c4-c905-403f-8fac-38c73301631f
 Content-Type: application/json
 
 {
@@ -389,11 +390,11 @@ Content-Type: application/json
    &quot;provider&quot;: &quot;admin&quot;,
    &quot;apiDefinition&quot;: &quot;{\&quot;paths\&quot;:{\&quot;/order\&quot;:{\&quot;post\&quot;:{\&quot;x-auth-type\&quot;:\&quot;Application &amp; Application User\&quot;,\&quot;x-throttling-tier\&quot;:\&quot;Unlimited\&quot;,\&quot;description\&quot;:\&quot;Create a new Order\&quot;,\&quot;parameters\&quot;:[{\&quot;schema\&quot;:{\&quot;$ref\&quot;:\&quot;#/definitions/Order\&quot;},\&quot;description\&quot;:\&quot;Order object that needs to be added\&quot;,\&quot;name\&quot;:\&quot;body\&quot;,\&quot;required\&quot;:true,\&quot;in\&quot;:\&quot;body\&quot;}],\&quot;responses\&quot;:{\&quot;201\&quot;:{\&quot;headers\&quot;:{\&quot;Location\&quot;:{\&quot;description\&quot;:\&quot;The URL of the newly created resource.\&quot;,\&quot;type\&quot;:\&quot;string\&quot;}},\&quot;schema\&quot;:{\&quot;$ref\&quot;:\&quot;#/definitions/Order\&quot;},\&quot;description\&quot;:\&quot;Created.\&quot;}}}},\&quot;/menu\&quot;:{\&quot;get\&quot;:{\&quot;x-auth-type\&quot;:\&quot;Application &amp; Application User\&quot;,\&quot;x-throttling-tier\&quot;:\&quot;Unlimited\&quot;,\&quot;description\&quot;:\&quot;Return a list of available menu items\&quot;,\&quot;parameters\&quot;:[],\&quot;responses\&quot;:{\&quot;200\&quot;:{\&quot;headers\&quot;:{},\&quot;schema\&quot;:{\&quot;title\&quot;:\&quot;Menu\&quot;,\&quot;properties\&quot;:{\&quot;list\&quot;:{\&quot;items\&quot;:{\&quot;$ref\&quot;:\&quot;#/definitions/MenuItem\&quot;},\&quot;type\&quot;:\&quot;array\&quot;}},\&quot;type\&quot;:\&quot;object\&quot;},\&quot;description\&quot;:\&quot;OK.\&quot;}}}}},\&quot;schemes\&quot;:[\&quot;https\&quot;],\&quot;produces\&quot;:[\&quot;application/json\&quot;],\&quot;swagger\&quot;:\&quot;2.0\&quot;,\&quot;definitions\&quot;:{\&quot;MenuItem\&quot;:{\&quot;title\&quot;:\&quot;Pizza menu Item\&quot;,\&quot;properties\&quot;:{\&quot;price\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;},\&quot;description\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;},\&quot;name\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;},\&quot;image\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;}},\&quot;required\&quot;:[\&quot;name\&quot;]},\&quot;Order\&quot;:{\&quot;title\&quot;:\&quot;Pizza Order\&quot;,\&quot;properties\&quot;:{\&quot;customerName\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;},\&quot;delivered\&quot;:{\&quot;type\&quot;:\&quot;boolean\&quot;},\&quot;address\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;},\&quot;pizzaType\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;},\&quot;creditCardNumber\&quot;:{\&quot;type\&quot;:\&quot;string\&quot;},\&quot;quantity\&quot;:{\&quot;type\&quot;:\&quot;number\&quot;},\&quot;orderId\&quot;:{\&quot;type\&quot;:\&quot;integer\&quot;}},\&quot;required\&quot;:[\&quot;orderId\&quot;]}},\&quot;consumes\&quot;:[\&quot;application/json\&quot;],\&quot;info\&quot;:{\&quot;title\&quot;:\&quot;PizzaShackAPI\&quot;,\&quot;description\&quot;:\&quot;This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\n\&quot;,\&quot;license\&quot;:{\&quot;name\&quot;:\&quot;Apache 2.0\&quot;,\&quot;url\&quot;:\&quot;http://www.apache.org/licenses/LICENSE-2.0.html\&quot;},\&quot;contact\&quot;:{\&quot;email\&quot;:\&quot;architecture@pizzashack.com\&quot;,\&quot;name\&quot;:\&quot;John Doe\&quot;,\&quot;url\&quot;:\&quot;http://www.pizzashack.com\&quot;},\&quot;version\&quot;:\&quot;1.0.0\&quot;}}&quot;,
    &quot;wsdlUri&quot;: null,
-   &quot;status&quot;: &quot;CREATED&quot;,
    &quot;responseCaching&quot;: &quot;Disabled&quot;,
    &quot;cacheTimeout&quot;: 300,
    &quot;destinationStatsEnabled&quot;: null,
    &quot;isDefaultVersion&quot;: false,
+   &quot;type&quot;: &quot;HTTP&quot;,
    &quot;transport&quot;:    [
       &quot;http&quot;,
       &quot;https&quot;
@@ -446,7 +447,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json https://127.0.0.1:9443/api/am/publisher/v0.11/apis</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json https://localhost:9443/api/am/publisher/v0.11/apis</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">

@@ -18,7 +18,7 @@
                 </h4>
             </div>
 
-                <div id="request-environmentsGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.11/environments
+                <div id="request-environmentsGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v0.11/environments
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -34,10 +34,10 @@ Content-Type: application/json
 {
    &quot;list&quot;: [   {
       &quot;showInApiConsole&quot;: true,
-      &quot;serverUrl&quot;: &quot;https://192.168.56.1:9444//services/&quot;,
+      &quot;serverUrl&quot;: &quot;https://localhost:9443/services/&quot;,
       &quot;endpoints&quot;:       {
-         &quot;http&quot;: &quot;http://192.168.56.1:8281&quot;,
-         &quot;https&quot;: &quot;https://192.168.56.1:8244&quot;
+         &quot;http&quot;: &quot;http://localhost:8280&quot;,
+         &quot;https&quot;: &quot;https://localhost:8243&quot;
       },
       &quot;name&quot;: &quot;Production and Sandbox&quot;,
       &quot;type&quot;: &quot;hybrid&quot;
@@ -46,7 +46,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/environments&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://localhost:9443/api/am/publisher/v0.11/environments&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -77,12 +77,14 @@ Content-Type: application/json
                         <td class="param-name">
                             <p>apiId</p>
                             <p class="param-required">
+                                required
                                 
-                                optional
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Will return environment list for the provided API.
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
+The combination of the provider of the API, name of the API and the version is also accepted as a valid API I.
+Should be formatted as **provider-name-version**.
 </p>
                         </td>
                         <td>

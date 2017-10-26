@@ -18,7 +18,7 @@
                 </h4>
             </div>
 
-                <div id="request-apisApiIdDelete"class="pre collapse in"><code class="json">DELETE https://127.0.0.1:9443/api/am/publisher/v0.11/apis/6fb74674-4ab8-4b52-9886-f9a376985060
+                <div id="request-apisApiIdDelete"class="pre collapse in"><code class="json">DELETE https://localhost:9443/api/am/publisher/v0.11/apis/6fb74674-4ab8-4b52-9886-f9a376985060
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -31,7 +31,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                 <div id="response-apisApiIdDelete" class="pre collapse in"><code class="json">HTTP/1.1 200 OK</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X DELETE https://127.0.0.1:9443/api/am/publisher/v0.11/apis/6fb74674-4ab8-4b52-9886-f9a376985060</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X DELETE https://localhost:9443/api/am/publisher/v0.11/apis/6fb74674-4ab8-4b52-9886-f9a376985060</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -67,7 +67,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
 The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
 Should be formatted as **provider-name-version**.
 </p>
@@ -97,7 +97,7 @@ Should be formatted as **provider-name-version**.
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on ETag.
+                            <p class="param-description marked">Validator for conditional requests; based on ETag (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -125,7 +125,7 @@ Should be formatted as **provider-name-version**.
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header.
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -210,7 +210,7 @@ Should be formatted as **provider-name-version**.
                 </h4>
             </div>
 
-                <div id="request-apisApiIdGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.11/apis/7a2298c4-c905-403f-8fac-38c73301631f
+                <div id="request-apisApiIdGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v0.11/apis/7a2298c4-c905-403f-8fac-38c73301631f
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -237,6 +237,7 @@ Content-Type: application/json
    &quot;cacheTimeout&quot;: 300,
    &quot;destinationStatsEnabled&quot;: null,
    &quot;isDefaultVersion&quot;: false,
+   &quot;type&quot;: &quot;HTTP&quot;,
    &quot;transport&quot;:    [
       &quot;http&quot;,
       &quot;https&quot;
@@ -289,7 +290,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://127.0.0.1:9443/api/am/publisher/v0.11/apis/7a2298c4-c905-403f-8fac-38c73301631f</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/publisher/v0.11/apis/7a2298c4-c905-403f-8fac-38c73301631f</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -325,7 +326,7 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
 The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
 Should be formatted as **provider-name-version**.
 </p>
@@ -384,7 +385,7 @@ Should be formatted as **provider-name-version**.
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resourec.
+variant of the resource (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -413,7 +414,7 @@ variant of the resourec.
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
-formerly retrieved variant of the resource.
+formerly retrieved variant of the resource (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -499,7 +500,7 @@ But the properties &#x60;name&#x60;, &#x60;version&#x60;, &#x60;context&#x60;, &
                 </h4>
             </div>
 
-                <div id="request-apisApiIdPut"class="pre collapse in"><code class="json">PUT https://127.0.0.1:9443/api/am/publisher/v0.11/apis/7a2298c4-c905-403f-8fac-38c73301631f
+                <div id="request-apisApiIdPut"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/publisher/v0.11/apis/7a2298c4-c905-403f-8fac-38c73301631f
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 Content-Type: application/json
 
@@ -517,6 +518,7 @@ Content-Type: application/json
    &quot;cacheTimeout&quot;: 300,
    &quot;destinationStatsEnabled&quot;: null,
    &quot;isDefaultVersion&quot;: false,
+   &quot;type&quot;: &quot;HTTP&quot;,
    &quot;transport&quot;:    [
       &quot;https&quot;
    ],
@@ -590,6 +592,7 @@ Content-Type: application/json
    &quot;cacheTimeout&quot;: 300,
    &quot;destinationStatsEnabled&quot;: null,
    &quot;isDefaultVersion&quot;: false,
+   &quot;type&quot;: &quot;HTTP&quot;,
    &quot;transport&quot;: [&quot;https&quot;],
    &quot;tags&quot;:    [
       &quot;chicken&quot;,
@@ -642,7 +645,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X PUT -d @data.json https://127.0.0.1:9443/api/am/publisher/v0.11/apis/7a2298c4-c905-403f-8fac-38c73301631f</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X PUT -d @data.json https://localhost:9443/api/am/publisher/v0.11/apis/7a2298c4-c905-403f-8fac-38c73301631f</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -678,7 +681,7 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
 The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
 Should be formatted as **provider-name-version**.
 </p>
@@ -765,7 +768,7 @@ Should be formatted as **provider-name-version**.
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on ETag.
+                            <p class="param-description marked">Validator for conditional requests; based on ETag (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -793,7 +796,7 @@ Should be formatted as **provider-name-version**.
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header.
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -887,7 +890,7 @@ Should be formatted as **provider-name-version**.
                 </h4>
             </div>
 
-                <div id="request-apisApiIdSwaggerGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/swagger
+                <div id="request-apisApiIdSwaggerGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/swagger
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -921,7 +924,7 @@ Content-Length: 329
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://127.0.0.1:9443/api/am/publisher/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/swagger</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/publisher/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/swagger</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -957,7 +960,7 @@ Content-Length: 329
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
 The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
 Should be formatted as **provider-name-version**.
 </p>
@@ -1016,7 +1019,7 @@ Should be formatted as **provider-name-version**.
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resourec.
+variant of the resource (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -1045,7 +1048,7 @@ variant of the resourec.
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
-formerly retrieved variant of the resource.
+formerly retrieved variant of the resource (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -1130,7 +1133,7 @@ formerly retrieved variant of the resource.
                 </h4>
             </div>
 
-                <div id="request-apisApiIdSwaggerPut"class="pre collapse in"><code class="json">PUT https://127.0.0.1:9443/api/am/publisher/v0.11/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger
+                <div id="request-apisApiIdSwaggerPut"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/publisher/v0.11/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger
 Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013
 Content-Length: 477
 Content-Type: multipart/form-data; boundary&#x3D;------------------------4f51e636c0003d99
@@ -1171,7 +1174,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013&quot; -F apiDefinition&#x3D;&quot;{\&quot;paths\&quot;:{\&quot;\/*\&quot;:{\&quot;get\&quot;:{\&quot;x-auth-type\&quot;:\&quot;Application\&quot;,\&quot;x-throttling-tier\&quot;:\&quot;Unlimited\&quot;,\&quot;responses\&quot;:{\&quot;200\&quot;:{\&quot;description\&quot;:\&quot;OK\&quot;}}}}},\&quot;x-wso2-security\&quot;:{\&quot;apim\&quot;:{\&quot;x-wso2-scopes\&quot;:[]}},\&quot;swagger\&quot;:\&quot;2.0\&quot;,\&quot;info\&quot;:{\&quot;title\&quot;:\&quot;PhoneVerification\&quot;,\&quot;description\&quot;:\&quot;Verify a phone number\&quot;,\&quot;contact\&quot;:{\&quot;email\&quot;:\&quot;xx@ee.com\&quot;,\&quot;name\&quot;:\&quot;xx\&quot;},\&quot;version\&quot;:\&quot;1.0.0\&quot;}}&quot; -X PUT &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013&quot; -F apiDefinition&#x3D;&quot;{\&quot;paths\&quot;:{\&quot;\/*\&quot;:{\&quot;get\&quot;:{\&quot;x-auth-type\&quot;:\&quot;Application\&quot;,\&quot;x-throttling-tier\&quot;:\&quot;Unlimited\&quot;,\&quot;responses\&quot;:{\&quot;200\&quot;:{\&quot;description\&quot;:\&quot;OK\&quot;}}}}},\&quot;x-wso2-security\&quot;:{\&quot;apim\&quot;:{\&quot;x-wso2-scopes\&quot;:[]}},\&quot;swagger\&quot;:\&quot;2.0\&quot;,\&quot;info\&quot;:{\&quot;title\&quot;:\&quot;PhoneVerification\&quot;,\&quot;description\&quot;:\&quot;Verify a phone number\&quot;,\&quot;contact\&quot;:{\&quot;email\&quot;:\&quot;xx@ee.com\&quot;,\&quot;name\&quot;:\&quot;xx\&quot;},\&quot;version\&quot;:\&quot;1.0.0\&quot;}}&quot; -X PUT &quot;https://localhost:9443/api/am/publisher/v0.11/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/swagger&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -1207,7 +1210,7 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
 The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
 Should be formatted as **provider-name-version**.
 </p>
@@ -1292,7 +1295,7 @@ Should be formatted as **provider-name-version**.
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on ETag.
+                            <p class="param-description marked">Validator for conditional requests; based on ETag (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -1320,7 +1323,7 @@ Should be formatted as **provider-name-version**.
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header.
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -1414,7 +1417,7 @@ Should be formatted as **provider-name-version**.
                 </h4>
             </div>
 
-                <div id="request-apisApiIdThumbnailGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.11/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail
+                <div id="request-apisApiIdThumbnailGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v0.11/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail
 Authorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9
 </code></div>
 
@@ -1430,7 +1433,7 @@ Content-Type: image/jpeg
 [image content]</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9&quot; https://127.0.0.1:9443/api/am/publisher/v0.11/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail &gt; image.jpg</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9&quot; https://localhost:9443/api/am/publisher/v0.11/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail &gt; image.jpg</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -1466,7 +1469,7 @@ Content-Type: image/jpeg
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
 The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
 Should be formatted as **provider-name-version**.
 </p>
@@ -1525,7 +1528,7 @@ Should be formatted as **provider-name-version**.
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resourec.
+variant of the resource (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -1554,7 +1557,7 @@ variant of the resourec.
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
-formerly retrieved variant of the resource.
+formerly retrieved variant of the resource (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -1639,7 +1642,7 @@ formerly retrieved variant of the resource.
                 </h4>
             </div>
 
-                <div id="request-apisApiIdThumbnailPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.11/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/thumbnail
+                <div id="request-apisApiIdThumbnailPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v0.11/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/thumbnail
 Authorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9
 Content-Type: multipart/form-data; boundary&#x3D;------------------------5e542e0e5b50e1e4
 Content-Length: 18333
@@ -1660,7 +1663,7 @@ Content-Type: image/jpeg
                 </h4>
             </div>
                 <div id="response-apisApiIdThumbnailPost" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
-Location: https://127.0.0.1:9443/api/am/publisher/v0.11/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/thumbnail
+Location: https://localhost:9443/api/am/publisher/v0.11/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/thumbnail
 Content-Type: application/json
 
 {
@@ -1669,7 +1672,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -X POST -H &quot;Authorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9&quot; https://127.0.0.1:9443/api/am/publisher/v0.11/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail -F file&#x3D;@image.jpg</code></div>
+                <div class="pre"><code class="bash">curl -X POST -H &quot;Authorization: Bearer d34baf74-3f02-3929-814e-88b27f750ba9&quot; https://localhost:9443/api/am/publisher/v0.11/apis/29c9ec3d-f590-467e-83e6-96d43517080f/thumbnail -F file&#x3D;@image.jpg</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -1705,7 +1708,7 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
 The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
 Should be formatted as **provider-name-version**.
 </p>
@@ -1739,7 +1742,7 @@ Should be formatted as **provider-name-version**.
                         </td>
                         <td>
                             <span class="param-type">
-                                file
+                                File
                             </span>
                         </td>
                         <td>
@@ -1790,7 +1793,7 @@ Should be formatted as **provider-name-version**.
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on ETag.
+                            <p class="param-description marked">Validator for conditional requests; based on ETag (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -1818,7 +1821,7 @@ Should be formatted as **provider-name-version**.
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header.
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -1892,7 +1895,7 @@ Should be formatted as **provider-name-version**.
 
             <p class="marked">This operation is used to change the lifecycle of an API. Eg: Publish an API which is in &#x60;CREATED&#x60; state. In order to change the lifecycle, we need to provide the lifecycle &#x60;action&#x60; as a query parameter.
 
-For example, to Publish an API, &#x60;action&#x60; should be &#x60;Publish&#x60;.
+For example, to Publish an API, &#x60;action&#x60; should be &#x60;Publish&#x60;. Note that the &#x60;Re-publish&#x60; action is available only after calling &#x60;Block&#x60;.
 
 Some actions supports providing additional paramters which should be provided as &#x60;lifecycleChecklist&#x60; parameter. Please see parameters table for more information.
 </p>
@@ -1907,7 +1910,7 @@ Some actions supports providing additional paramters which should be provided as
                 </h4>
             </div>
 
-                <div id="request-apisChangeLifecyclePost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.11/apis/change-lifecycle?apiId&#x3D;890a4f4d-09eb-4877-a323-57f6ce2ed79b&amp;action&#x3D;Publish
+                <div id="request-apisChangeLifecyclePost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v0.11/apis/change-lifecycle?apiId&#x3D;890a4f4d-09eb-4877-a323-57f6ce2ed79b&amp;action&#x3D;Publish
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -1920,7 +1923,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                 <div id="response-apisChangeLifecyclePost" class="pre collapse in"><code class="json">HTTP/1.1 200 OK</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X POST &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/apis/change-lifecycle?apiId&#x3D;890a4f4d-09eb-4877-a323-57f6ce2ed79b&amp;action&#x3D;Publish&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X POST &quot;https://localhost:9443/api/am/publisher/v0.11/apis/change-lifecycle?apiId&#x3D;890a4f4d-09eb-4877-a323-57f6ce2ed79b&amp;action&#x3D;Publish&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -2004,7 +2007,7 @@ Supported actions are [ **Publish, Deploy as a Prototype, Demote to Created, Dem
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
 The combination of the provider of the API, name of the API and the version is also accepted as a valid API I.
 Should be formatted as **provider-name-version**.
 </p>
@@ -2043,7 +2046,7 @@ format.
 
 Supported checklist items are as follows.
 1. **Deprecate Old Versions**: Setting this to true will deprecate older versions of a particular API when it is promoted to Published state from Created state.
-2. **Requires Re-Subscription**: If you set this to true, users need to re subscribe to the API although they may have subscribed to an older version.
+2. **Require Re-Subscription**: If you set this to true, users need to re subscribe to the API although they may have subscribed to an older version.
 </p>
                         </td>
                         <td>
@@ -2071,7 +2074,7 @@ Supported checklist items are as follows.
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on ETag.
+                            <p class="param-description marked">Validator for conditional requests; based on ETag (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -2099,7 +2102,7 @@ Supported checklist items are as follows.
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header.
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -2184,7 +2187,7 @@ Supported checklist items are as follows.
                 </h4>
             </div>
 
-                <div id="request-apisCopyApiPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.11/apis/copy-api?apiId&#x3D;890a4f4d-09eb-4877-a323-57f6ce2ed79b&amp;newVersion&#x3D;2.0.0
+                <div id="request-apisCopyApiPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v0.11/apis/copy-api?apiId&#x3D;890a4f4d-09eb-4877-a323-57f6ce2ed79b&amp;newVersion&#x3D;2.0.0
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -2195,7 +2198,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                 </h4>
             </div>
                 <div id="response-apisCopyApiPost" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
-Location: https://127.0.0.1:9443/api/am/publisher/v0.11/apis/25a84fc9-38c0-4578-95e8-29fb6b1c4771
+Location: https://localhost:9443/api/am/publisher/v0.11/apis/25a84fc9-38c0-4578-95e8-29fb6b1c4771
 Content-Type: application/json
 
 {
@@ -2212,6 +2215,7 @@ Content-Type: application/json
    &quot;cacheTimeout&quot;: 300,
    &quot;destinationStatsEnabled&quot;: null,
    &quot;isDefaultVersion&quot;: false,
+   &quot;type&quot;: &quot;HTTP&quot;,
    &quot;transport&quot;: [&quot;https&quot;],
    &quot;tags&quot;:    [
       &quot;chicken&quot;,
@@ -2264,7 +2268,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X POST &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/apis/copy-api?apiId&#x3D;890a4f4d-09eb-4877-a323-57f6ce2ed79b&amp;newVersion&#x3D;2.0.0&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X POST &quot;https://localhost:9443/api/am/publisher/v0.11/apis/copy-api?apiId&#x3D;890a4f4d-09eb-4877-a323-57f6ce2ed79b&amp;newVersion&#x3D;2.0.0&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -2327,7 +2331,7 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
 The combination of the provider of the API, name of the API and the version is also accepted as a valid API I.
 Should be formatted as **provider-name-version**.
 </p>

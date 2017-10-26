@@ -27,12 +27,12 @@
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">Description of the Conditional Group</p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
@@ -42,12 +42,12 @@
                                 
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">Individual throttling conditions. They can be defined as either HeaderCondition, IPCondition, JWTClaimsCondition, QueryParameterCondition Please see schemas of each of those throttling condition in Definitions section. </p></td>
                         <td class="parameter">
                                 <a href="#!/models#array">array</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">&quot;[\n  {\n     \&quot;type\&quot;: \&quot;IPCondition\&quot;,\n     \&quot;invertCondition\&quot;: false,\n     \&quot;ipConditionType\&quot;: \&quot;IPSpecific\&quot;,\n     \&quot;specificIP\&quot;: \&quot;10.100.1.22\&quot;,\n     \&quot;startingIP\&quot;: null,\n     \&quot;endingIP\&quot;: null\n  },\n  {\n     \&quot;type\&quot;: \&quot;HeaderCondition\&quot;,\n     \&quot;invertCondition\&quot;: false,\n     \&quot;headerName\&quot;: \&quot;Location\&quot;,\n     \&quot;headerValue\&quot;: \&quot;google.com\&quot;\n  }\n]\n&quot;</p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
@@ -62,7 +62,7 @@
                                 <a href="#!/models#ThrottleLimit">ThrottleLimit</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
                     </tr>
                 </tbody>
             </table>
