@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.dao.impl.ApplicationDAOImpl;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtEntityImportExportException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
@@ -121,7 +122,8 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
         String archiveExtractLocation = null;
 
         try {
-            archiveExtractLocation = APIFileUtils.extractUploadedArchive(uploadedAppArchiveInputStream,
+            //change the method here as well
+            archiveExtractLocation = APIFileUtils.extractUploadedArchiveApplication(uploadedAppArchiveInputStream,
                     IMPORTED_APPLICATIONS_DIRECTORY_NAME,
                     appArchiveLocation, path); /*have to write a separate function extractUploadedArchive*/
         } catch (APIMgtDAOException e) {
@@ -151,9 +153,13 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
         }
 
         //convert to bean
+        //Gson gson = new Gson();
         Gson gson = new GsonBuilder().create();
-        return (gson.fromJson(applicationDetailsString, Application.class));/*returns an application object from
-                                                                                                        a String*/
+
+        Application applicationDetails = gson.fromJson(applicationDetailsString, Application.class);
+
+        return applicationDetails; //returns an application object from a json string
+
     }
 
     /*private Application decodeAppInformationFromDirectoryStructure(String applicationArtifactBasePath)
