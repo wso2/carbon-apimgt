@@ -1409,7 +1409,7 @@ public abstract class AbstractAPIManager implements APIManager {
     }
 
     public Subscriber getSubscriberById(String accessToken) throws APIManagementException {
-        return apiMgtDAO.getSubscriberById(accessToken);
+        return null;
     }
 
     public boolean isContextExist(String context) throws APIManagementException {
@@ -1679,24 +1679,11 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public Map<Integer, APIKey> searchAccessToken(String searchType, String searchTerm, String loggedInUser)
             throws APIManagementException {
-        if (searchType == null) {
-            return apiMgtDAO.getAccessTokens(searchTerm);
-        } else {
-            if ("User".equalsIgnoreCase(searchType)) {
-                return apiMgtDAO.getAccessTokensByUser(searchTerm, loggedInUser);
-            } else if ("Before".equalsIgnoreCase(searchType)) {
-                return apiMgtDAO.getAccessTokensByDate(searchTerm, false, loggedInUser);
-            } else if ("After".equalsIgnoreCase(searchType)) {
-                return apiMgtDAO.getAccessTokensByDate(searchTerm, true, loggedInUser);
-            } else {
-                return apiMgtDAO.getAccessTokens(searchTerm);
-            }
-        }
-
+        return Collections.emptyMap();
     }
 
     public Set<APIIdentifier> getAPIByAccessToken(String accessToken) throws APIManagementException {
-        return apiMgtDAO.getAPIByAccessToken(accessToken);
+        return Collections.emptySet();
     }
 
     public API getAPI(APIIdentifier identifier, APIIdentifier oldIdentifier, String oldContext) throws
