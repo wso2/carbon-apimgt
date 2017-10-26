@@ -1623,9 +1623,9 @@ public class AbstractAPIManagerTestCase {
         Assert.assertTrue(
                 abstractAPIManager.searchPaginatedAPIs("subcontext=search", null, 0, 5, false).containsKey("api2"));
 
-        TestUtils.mockAPIMConfiguration(APIConstants.API_STORE_APIS_PER_PAGE, null);
+        TestUtils.mockAPIMConfiguration(APIConstants.API_STORE_APIS_PER_PAGE, null, -1234);
         Assert.assertEquals(abstractAPIManager.searchPaginatedAPIs("search", null, 0, 5, false).get("length"), 0);
-        TestUtils.mockAPIMConfiguration(APIConstants.API_STORE_APIS_PER_PAGE, "5");
+        TestUtils.mockAPIMConfiguration(APIConstants.API_STORE_APIS_PER_PAGE, "5", -1234);
         GovernanceArtifact governanceArtifact = getGenericArtifact(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION,
                 "qname");
         List<GovernanceArtifact> governanceArtifactList = new ArrayList<GovernanceArtifact>();
