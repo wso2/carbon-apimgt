@@ -198,7 +198,7 @@ function retrieveOfflineSubscriptions () (boolean) {
             if (isSwaggerFile(apiData)) {
                 try {
                     json security = jsons:getJson(apiData, "$.security");
-                    //int secCount = jsons:getInt(security, "$.length()");
+                    int secCount = jsons:getInt(security, "$.length()");
                     json apps = security[0].api_key;
                     int noOfApps = jsons:getInt(apps, "$.length()");
                     int j = 0;
