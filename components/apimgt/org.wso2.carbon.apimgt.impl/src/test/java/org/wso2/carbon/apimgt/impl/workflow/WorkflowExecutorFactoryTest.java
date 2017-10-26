@@ -181,7 +181,7 @@ public class WorkflowExecutorFactoryTest {
             workflowExecutorFactory.getWorkflowExecutor(workflowType);
             Assert.fail("Expected WorkflowException has not occurred while retrieving workflow executor from config");
         } catch (WorkflowException e) {
-            Assert.assertEquals("Error while creating WorkFlowDTO for "+workflowType, e.getMessage());
+            Assert.assertEquals("Error while creating WorkFlowDTO for " + workflowType, e.getMessage());
         }
     }
 
