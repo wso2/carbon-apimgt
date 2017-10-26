@@ -31,13 +31,16 @@ import org.ballerinalang.natives.annotations.ReturnType;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
 
 /**
- * Ballerina function to return a string array of json file names in a given folder.
+ * Ballerina function to return a sorted string array of json file names in a given folder.
  * <br>
+ * Returns an empty array if the folder does not exist or when there are no json files inside
  * org.wso2.carbon.apimgt.ballerina.util:listFiles
  */
 @BallerinaFunction(
@@ -71,6 +74,7 @@ public class ListFiles extends AbstractNativeFunction  {
                     list.add(file.getName());
                 }
             }
+            Collections.sort(list, Comparator.naturalOrder());
             BStringArray balArray = new BStringArray();
             int i = 0;
             while (i < list.size()) {
@@ -79,9 +83,11 @@ public class ListFiles extends AbstractNativeFunction  {
             }
 
             return getBValues(balArray);
+        } else {
+            return getBValues(new BStringArray());
         }
 
-        return getBValues(new BStringArray());
+
 //        if (fList != null) {
 //            BStringArray balArray = new BStringArray();
 //            balArray.add(0, "a");
