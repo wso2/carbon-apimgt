@@ -170,8 +170,7 @@ public class WorkflowExecutorFactoryTest {
     }
 
     @Test
-    public void testWorkflowExceptionWhileRetrievingWorkflowExecutor() throws
-            Exception {
+    public void testWorkflowExceptionWhileRetrievingWorkflowExecutor() throws Exception {
         String workflowType = "AM_APPLICATION_CREATION";
         Mockito.when(cache.get(Mockito.anyString())).thenReturn(null);
         PowerMockito.whenNew(TenantWorkflowConfigHolder.class).withAnyArguments().thenReturn
