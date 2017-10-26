@@ -2569,6 +2569,10 @@ public class SQLConstants {
             "AND CON_APP.CONSUMER_KEY=AKM.CONSUMER_KEY " +
             "AND AKM.APPLICATION_ID = APP.APPLICATION_ID";
 
+    public static final String GET_APPLICATIONS_FOR_API_SQL = "SELECT UUID from AM_APPLICATION LEFT JOIN (SELECT "
+            + "APPLICATION_ID FROM AM_SUBSCRIPTION WHERE API_ID = (SELECT API_ID from AM_API WHERE API_PROVIDER = ? "
+            + "AND API_VERSION = ? AND API_NAME = ?)) APP WHERE APP.APPLICATION_ID = AM_APPLICATION.APPLICATION_ID";
+
     /** Throttle related constants**/
 
     public static class ThrottleSQLConstants{

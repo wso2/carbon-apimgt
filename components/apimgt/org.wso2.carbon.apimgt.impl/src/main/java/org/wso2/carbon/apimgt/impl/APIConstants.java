@@ -747,6 +747,8 @@ public final class APIConstants {
     public static final String TIERS_CACHE = "tiersCache";
     public static final int API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS = 3650;
     public static final String CLAIMS_APIM_CACHE = "claimsLocalCache";
+    public static final String APP_SUBSCRIPTION_SCOPE_CACHE = "appSubscriptionScopeCache";
+    public static final String APP_SUBSCRIPTION_FILTERED_SCOPE_CACHE = "appSubscriptionFilteredScopeCache";
 
     //URI Authentication Schemes
     public static final Set<String> SUPPORTED_METHODS =

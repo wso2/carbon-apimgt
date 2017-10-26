@@ -396,6 +396,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             if (application != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                     apiConsumer.removeApplication(application);
+                    APIManagerFactory.getInstance().getApplicationScopeCacheManager().notifyOnApplicationDelete
+                            (applicationId);
                     return Response.ok().build();
                 } else {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
@@ -434,45 +436,15 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     @Override
     public Response applicationsApplicationScopesGet(String applicationId, boolean filterByUserRoles, String ifMatch,
             String ifUnmodifiedSince) {
-        String username = RestApiUtil.getLoggedInUsername();
-        Subscriber subscriber = new Subscriber(username);
-        Set<SubscribedAPI> subscriptions;
-
+        String userName = RestApiUtil.getLoggedInUsername();
         try {
-            APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+            APIConsumer apiConsumer = RestApiUtil.getConsumer(userName);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
-                    subscriptions = apiConsumer
-                            .getSubscribedAPIs(subscriber, application.getName(), application.getGroupId());
 
-                    Iterator<SubscribedAPI> subscribedAPIIterator = subscriptions.iterator();
-                    List<APIIdentifier> identifiers = new ArrayList<APIIdentifier>();
-                    while (subscribedAPIIterator.hasNext()) {
-                        identifiers.add(subscribedAPIIterator.next().getApiId());
-                    }
-                    Set<Scope> filteredScopes = new LinkedHashSet<Scope>();
-                    if (!identifiers.isEmpty()) {
-                        //get scopes for subscribed apis
-                        Set<Scope> scopeSet = apiConsumer.getScopesBySubscribedAPIs(identifiers);
-                        if (filterByUserRoles) {
-                            List<String> userRoleList = RestAPIStoreUtils.getRoleListOfUser(username);
-                            for (Scope scope : scopeSet) {
-                                if (scope.getRoles() == null) {
-                                    filteredScopes.add(scope);
-                                } else if (userRoleList != null && !userRoleList.isEmpty()) {
-                                    List<String> roleList = new ArrayList<String>(
-                                            Arrays.asList(scope.getRoles().replaceAll(" ", "").split(",")));
-                                    roleList.retainAll(userRoleList);
-                                    if (!roleList.isEmpty()) {
-                                        filteredScopes.add(scope);
-                                    }
-                                }
-                            }
-                        } else {
-                            filteredScopes = scopeSet;
-                        }
-                    }
+                    Set<Scope> filteredScopes = RestAPIStoreUtils
+                            .getScopesForApplication(userName, application, filterByUserRoles);
                     return Response.ok().entity(filteredScopes).build();
                 } else {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
@@ -483,8 +455,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         } catch (APIManagementException e) {
             if (e.getMessage().contains("UserAdmin")) {
                 RestApiUtil.handleInternalServerError(
-                        "UserAdmin admin service error while getting scopes related with application "
-                                + applicationId, e, log);
+                        "UserAdmin admin service error while getting scopes related with application " + applicationId,
+                        e, log);
             } else {
                 RestApiUtil.handleInternalServerError(
                         "Error while getting scopes related with application " + applicationId, e, log);

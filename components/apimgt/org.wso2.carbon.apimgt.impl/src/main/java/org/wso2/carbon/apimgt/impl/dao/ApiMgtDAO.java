@@ -10891,4 +10891,41 @@ public class ApiMgtDAO {
         }
         return infoDTO;
     }
+
+    public List<String> getApplicationSubscriptions(APIIdentifier apiIdentifier) throws APIManagementException {
+        String sql = SQLConstants.GET_APPLICATIONS_FOR_API_SQL;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+            conn.setAutoCommit(true);
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, apiIdentifier.getProviderName());
+            ps.setString(2, apiIdentifier.getVersion());
+            ps.setString(3, apiIdentifier.getApiName());
+            rs = ps.executeQuery();
+            List<String> applicationList = new ArrayList<String>();
+            while (rs.next()) {
+                applicationList.add(rs.getString("UUID"));
+            }
+            return applicationList;
+        } catch (SQLException e) {
+            String errorMessage =
+                    "Error occurred while getting applications that particular api is subscribed to, while "
+                            + "executing sql  " + sql;
+            log.error(errorMessage, e);
+            handleException(errorMessage, e);
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.setAutoCommit(false);
+                }
+            } catch (SQLException e) {
+                log.error("Error occurred making the autocommit false for the connection", e);
+            }
+            APIMgtDBUtil.closeAllConnections(ps, conn, rs);
+        }
+        return null;
+    }
 }

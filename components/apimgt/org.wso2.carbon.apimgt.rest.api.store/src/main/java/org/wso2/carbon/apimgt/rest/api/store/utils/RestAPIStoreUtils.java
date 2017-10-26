@@ -25,15 +25,17 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
+import org.wso2.carbon.apimgt.api.ApplicationScopeCacheManager;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -49,13 +51,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -70,16 +66,20 @@ public class RestAPIStoreUtils {
     private static APIManagerConfiguration apiManagerConfiguration =  ServiceReferenceHolder.getInstance()
             .getAPIManagerConfigurationService().getAPIManagerConfiguration();
     private static String keyManagerUrl;
-    private static String adminUsername;
-    private static String adminPassword;
+    private static String keyManagerAdminUserName;
+    private static String keyManagerAdminPassword;
+    private static ApplicationScopeCacheManager applicationScopeCacheManager;
+
 
     static {
-        keyManagerUrl  = apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL);
-        adminUsername = apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-        adminPassword = apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+        keyManagerUrl = apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL);
+        keyManagerAdminUserName = apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
+        keyManagerAdminPassword = apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+        applicationScopeCacheManager = APIManagerFactory.getInstance().getApplicationScopeCacheManager();
+
         try {
             userAdminStub = new UserAdminStub(null, keyManagerUrl + "UserAdmin");
-            CarbonUtils.setBasicAccessSecurityHeaders(adminUsername, adminPassword,
+            CarbonUtils.setBasicAccessSecurityHeaders(keyManagerAdminUserName, keyManagerAdminPassword,
                     true, userAdminStub._getServiceClient());
         } catch (AxisFault axisFault) {
             log.error("Error while initializing userAdminStub", axisFault);
@@ -460,11 +460,11 @@ public class RestAPIStoreUtils {
      * @return the roleList Of User
      * @throws APIManagementException API Management Exception.
      */
-    public static List<String> getRoleListOfUser(String userName) throws APIManagementException {
+    private static List<String> getRoleListOfUser() throws APIManagementException {
         if (userAdminStub == null) {
             try {
                 userAdminStub = new UserAdminStub(null, keyManagerUrl + "UserAdmin");
-                CarbonUtils.setBasicAccessSecurityHeaders(adminUsername, adminPassword,
+                CarbonUtils.setBasicAccessSecurityHeaders(keyManagerAdminUserName, keyManagerAdminPassword,
                         true, userAdminStub._getServiceClient());
             } catch (AxisFault axisFault) {
                 log.error("Error while initializing UserAdminStub", axisFault);
@@ -473,7 +473,7 @@ public class RestAPIStoreUtils {
             }
         }
         try {
-            FlaggedName[] roleNames = userAdminStub.getRolesOfUser(userName, "*", -1);
+            FlaggedName[] roleNames = userAdminStub.getRolesOfCurrentUser();
             List<String> userRoleList = new ArrayList<>();
             for (FlaggedName roleName : roleNames) {
                 if (roleName.getSelected()) {
@@ -484,10 +484,68 @@ public class RestAPIStoreUtils {
         } catch (RemoteException e) {
             throw new APIManagementException("Error while connecting to UserAdmin admin service", e);
         } catch (UserAdminUserAdminException e) {
-            throw new APIManagementException("UserAdminException while trying to get the role list of the user " +
-                    userName, e);
+            throw new APIManagementException("UserAdminException while trying to get the role list of the current "
+                    + "user", e);
+        }
+    }
+
+    /**
+     * To get the relevant scopes for the application based on the subscribed APIs
+     *
+     * @param userName          UserName of the user, who is requesting the scopes
+     * @param application       Application which the scopes is requested against to
+     * @param filterByUserRoles Whether to filter scopes based on user roles.
+     * @return relevant scopes .
+     */
+    public static Set<Scope> getScopesForApplication(String userName, Application application,
+            boolean filterByUserRoles) throws APIManagementException {
+        String applicationUUID = application.getUUID();
+        Set<Scope> filteredScopes = applicationScopeCacheManager.getValueFromCache(applicationUUID,userName,
+                filterByUserRoles);
+
+        if (filteredScopes != null) {
+            return  filteredScopes;
+        }
+        /* If the relevant scope details for the particular application, and user is not there in cache, get it from
+            the regular db call.
+         */
+        Subscriber subscriber = new Subscriber(userName);
+        Set<SubscribedAPI> subscriptions;
+        APIConsumer apiConsumer = RestApiUtil.getConsumer(userName);
+        subscriptions = apiConsumer.getSubscribedAPIs(subscriber, application.getName(), application.getGroupId());
+        Iterator<SubscribedAPI> subscribedAPIIterator = subscriptions.iterator();
+        List<APIIdentifier> identifiers = new ArrayList<>();
+        while (subscribedAPIIterator.hasNext()) {
+            identifiers.add(subscribedAPIIterator.next().getApiId());
         }
 
+        if (!identifiers.isEmpty()) {
+            //get scopes for subscribed apis
+            Set<Scope> scopeSet = apiConsumer.getScopesBySubscribedAPIs(identifiers);
+            /*
+             * Based on the requirement directly send the scope list or filter it based on the role of the customer.
+             */
+            if (filterByUserRoles) {
+                filteredScopes = new LinkedHashSet<>();
+                List<String> userRoleList = getRoleListOfUser();
+                for (Scope scope : scopeSet) {
+                    if (scope.getRoles() == null) {
+                        filteredScopes.add(scope);
+                    } else if (userRoleList != null && !userRoleList.isEmpty()) {
+                        List<String> roleList = new ArrayList<>(
+                                Arrays.asList(scope.getRoles().replaceAll(" ", "").split(",")));
+                        roleList.retainAll(userRoleList);
+                        if (!roleList.isEmpty()) {
+                            filteredScopes.add(scope);
+                        }
+                    }
+                }
+            } else {
+                filteredScopes = scopeSet;
+            }
+            applicationScopeCacheManager.addToCache(applicationUUID, userName, filteredScopes, filterByUserRoles);
+        }
+        return filteredScopes;
     }
 
 }
