@@ -82,6 +82,13 @@ public class SubscriptionDeletionSimpleWorkflowExecutorTest {
         }
     }
 
-
+    @Test
+    public void testGetWorkflowDetails(){
+        try {
+            subscriptionDeletionSimpleWorkflowExecutor.getWorkflowDetails(Mockito.anyString());
+        } catch (WorkflowException e) {
+            Assert.fail("Unexpected exception occurred while retriving workflow details");
+        }
+    }
 
 }

@@ -207,4 +207,14 @@ public class UserSignUpSimpleWorkflowExecutorTest {
             Assert.assertEquals(e.getMessage(), "Error while accessing signup configuration");
         }
     }
+
+
+    @Test
+    public void testGetWorkflowDetails(){
+        try {
+            userSignUpSimpleWorkflowExecutor.getWorkflowDetails(Mockito.anyString());
+        } catch (WorkflowException e) {
+            Assert.fail("Unexpected exception occurred while retriving workflow details");
+        }
+    }
 }

@@ -79,4 +79,13 @@ public class SubscriptionCreationSimpleWorkflowExecutorTest {
             Assert.assertTrue(e.getMessage().contains("Could not complete subscription creation workflow"));
         }
     }
+
+    @Test
+    public void testGetWorkflowDetails(){
+        try {
+            subscriptionCreationSimpleWorkflowExecutor.getWorkflowDetails(Mockito.anyString());
+        } catch (WorkflowException e) {
+            Assert.fail("Unexpected exception occurred while retriving workflow details");
+        }
+    }
 }

@@ -367,5 +367,14 @@ public class UserSignUpWSWorkflowExecutorTest {
             Assert.assertTrue(e.getMessage().contains("Error converting String to OMElement"));
         }
     }
+
+    @Test
+    public void testGetWorkflowDetails(){
+        try {
+            userSignUpWSWorkflowExecutor.getWorkflowDetails(Mockito.anyString());
+        } catch (WorkflowException e) {
+            Assert.fail("Unexpected exception occurred while retriving workflow details");
+        }
+    }
 }
 

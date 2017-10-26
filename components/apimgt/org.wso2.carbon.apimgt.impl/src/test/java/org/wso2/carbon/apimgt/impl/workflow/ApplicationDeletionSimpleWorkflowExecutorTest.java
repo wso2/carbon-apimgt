@@ -95,4 +95,14 @@ public class ApplicationDeletionSimpleWorkflowExecutorTest {
                     "application: " +application.getName()));
         }
     }
+
+
+    @Test
+    public void testGetWorkflowDetails(){
+        try {
+            applicationDeletionSimpleWorkflowExecutor.getWorkflowDetails(Mockito.anyString());
+        } catch (WorkflowException e) {
+            Assert.fail("Unexpected exception occurred while retriving workflow details");
+        }
+    }
 }

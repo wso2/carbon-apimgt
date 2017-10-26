@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.impl.workflow;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 
 /**
@@ -58,4 +59,14 @@ public class APIStateChangeSimpleWorkflowExecutorTest {
             Assert.fail("Unexpected WorkflowException occurred while retrieving Workflow details");
         }
     }
+
+    @Test
+    public void testGetWorkflowDetails(){
+        try {
+            apiStateChangeSimpleWorkflowExecutor.getWorkflowDetails(Mockito.anyString());
+        } catch (WorkflowException e) {
+            Assert.fail("Unexpected exception occurred while retriving workflow details");
+        }
+    }
+
 }

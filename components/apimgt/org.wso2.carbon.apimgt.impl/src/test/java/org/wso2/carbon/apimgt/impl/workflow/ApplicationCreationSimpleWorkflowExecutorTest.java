@@ -106,6 +106,13 @@ public class ApplicationCreationSimpleWorkflowExecutorTest {
         }
     }
 
-
+    @Test
+    public void testGetWorkflowDetails(){
+        try {
+            applicationCreationSimpleWorkflowExecutor.getWorkflowDetails(Mockito.anyString());
+        } catch (WorkflowException e) {
+            Assert.fail("Unexpected exception occurred while retriving workflow details");
+        }
+    }
 
 }

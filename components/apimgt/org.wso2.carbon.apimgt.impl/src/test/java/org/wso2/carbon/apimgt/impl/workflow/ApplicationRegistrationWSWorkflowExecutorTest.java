@@ -64,6 +64,7 @@ public class ApplicationRegistrationWSWorkflowExecutorTest {
     private KeyManager keyManager;
     private String adminUsername = "admin";
     private String adminPassword = "admin";
+    private String callBaclURL = "http://localhost:8090/playground2.0/oauth2client";
 
 
     @Before
@@ -78,7 +79,7 @@ public class ApplicationRegistrationWSWorkflowExecutorTest {
         applicationRegistrationWSWorkflowExecutor = new ApplicationRegistrationWSWorkflowExecutor();
         apiMgtDAO = TestUtils.getApiMgtDAO();
         application = new Application("test", new Subscriber("testUser"));
-        application.setCallbackUrl("http://localhost:8090/playground2.0/oauth2client");
+        application.setCallbackUrl(callBaclURL);
         application.setTier("Unlimited");
         PowerMockito.mockStatic(KeyManagerHolder.class);
         keyManager = Mockito.mock(KeyManager.class);
@@ -91,7 +92,7 @@ public class ApplicationRegistrationWSWorkflowExecutorTest {
         workflowDTO = new ApplicationRegistrationWorkflowDTO();
         workflowDTO.setWorkflowReference("1");
         workflowDTO.setApplication(application);
-        workflowDTO.setCallbackUrl("http://localhost:8090/playground2.0/oauth2client");
+        workflowDTO.setCallbackUrl(callBaclURL);
         workflowDTO.setTenantDomain("carbon.super");
         workflowDTO.setUserName("testUser");
         workflowDTO.setExternalWorkflowReference("testUser");
@@ -269,6 +270,32 @@ public class ApplicationRegistrationWSWorkflowExecutorTest {
         } catch (WorkflowException e) {
             Assert.assertEquals(e.getMessage(), "Error converting registration cleanup String to OMElement. Cause: " +
                     "Error converting String to OMElement");
+        }
+    }
+
+    @Test
+    public void testExecutorProperties() {
+        applicationRegistrationWSWorkflowExecutor.setContentType("text/xml");
+        applicationRegistrationWSWorkflowExecutor.setServiceEndpoint("http://localhost:9443/services");
+        applicationRegistrationWSWorkflowExecutor.setUsername(adminUsername);
+        applicationRegistrationWSWorkflowExecutor.setPassword(adminPassword.toCharArray());
+        applicationRegistrationWSWorkflowExecutor.setCallbackURL(callBaclURL);
+
+        Assert.assertEquals(applicationRegistrationWSWorkflowExecutor.getContentType(), "text/xml");
+        Assert.assertEquals(applicationRegistrationWSWorkflowExecutor.getServiceEndpoint(),
+                "http://localhost:9443/services");
+        Assert.assertEquals(applicationRegistrationWSWorkflowExecutor.getUsername(), adminUsername);
+        Assert.assertEquals(String.valueOf(applicationRegistrationWSWorkflowExecutor.getPassword()), adminPassword);
+        Assert.assertEquals(applicationRegistrationWSWorkflowExecutor.getCallbackURL(), callBaclURL);
+
+    }
+
+    @Test
+    public void testGetWorkflowDetails() {
+        try {
+            applicationRegistrationWSWorkflowExecutor.getWorkflowDetails(Mockito.anyString());
+        } catch (WorkflowException e) {
+            Assert.fail("Unexpected exception occurred while retriving workflow details");
         }
     }
 }
