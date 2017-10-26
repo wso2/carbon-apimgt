@@ -30,13 +30,13 @@ import java.util.List;
 public class EnvironmentConfigurations {
 
     @Element(description = "Default Environment Name")
-    private String defaultEnvironment = "Production";
+    private String environmentName = "Production";
 
     @Element(description = "List of Environments")
     private List<Environment> environments = new ArrayList<Environment>();
 
-    public String getDefaultEnvironment() {
-        return defaultEnvironment;
+    public String getEnvironmentName() {
+        return environmentName;
     }
 
     public List<Environment> getEnvironments() {

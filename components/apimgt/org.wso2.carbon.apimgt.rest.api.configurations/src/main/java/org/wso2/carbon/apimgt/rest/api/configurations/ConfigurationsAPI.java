@@ -39,7 +39,7 @@ import javax.ws.rs.core.Response;
         service = Microservice.class,
         immediate = true
 )
-@Path("/configurations")
+@Path("/configService") //TODO[rnk] change url :Design Review
 public class ConfigurationsAPI implements Microservice {
 
     private static final Logger log = LoggerFactory.getLogger(ConfigurationsAPI.class);
