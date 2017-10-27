@@ -16,7 +16,7 @@
  * under the License.
  */
 
-import {Axios} from 'axios'
+import axios from 'axios'
 import DefaultConfig from './DefaultConfigs.json'
 
 class ConfigManager {
@@ -31,7 +31,22 @@ class ConfigManager {
 
     }
 
-    getConfigs() {
+    getDefaultConfigs() {
+        return DefaultConfig;
+    }
 
+    getThisHost(){
+        let host = window.location.protocol + "//" + window.location.host;
+        return host;
+    }
+
+    getPromisedEnvironments() {
+        let host = this.getThisHost();
+        let environmentConfigPath = this.getDefaultConfigs().environmentConfigPath;
+        let requestUrl = host + environmentConfigPath;
+
+        let promised_environments = axios.get(requestUrl);
     }
 }
+
+export default ConfigManager;

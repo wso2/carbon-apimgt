@@ -1,3 +1,7 @@
 {
-  "name": "WSO2"
+  "name": "WSO2",
+  "loginTokenPath": "/login/token",
+  "contextPath": "/publisher",
+  "bearer": "Bearer ",
+  "environmentConfigPath": "/configService/environments"
 }
