@@ -152,7 +152,7 @@ export default class EndpointsDiscover extends Component {
             render: (text, record) =><ButtonCell record={record} storedEndpoints={this.state.storedEndpoints}/>
         }];
         const serviceEndpointsListAndCreateMenu = (
-            <Menu>
+            <Menu className="ed-font">
                 <Menu.Item key="0">
                     <Link to="/endpoints">View stored endpoints</Link>
                 </Menu.Item>
@@ -209,20 +209,20 @@ class ButtonCell extends Component {
         this.state = {
             record: this.props.record,
             storedEndpoints: this.props.storedEndpoints,
-            actionButton: <Button type="primary" loading>Loading...</Button>
+            actionButton: <Button type="primary" size="large" className="ed-font" loading>Loading...</Button>
         };
     }
 
     getAddButton(){
         return (
-            <Button type="primary" onClick={() =>this.handleAddEndpointToDB()}>
+            <Button type="primary" size="large" className="ed-font" onClick={() =>this.handleAddEndpointToDB()}>
             Add to Database </Button>
         );
     }
 
     getUpdateButton(){
         return (
-            <Button type="secondary" onClick={() =>this.handleUpdateEndpoint()}>
+            <Button type="secondary" size="large" className="ed-font" onClick={() =>this.handleUpdateEndpoint()}>
             Update Database </Button>
         );
     }

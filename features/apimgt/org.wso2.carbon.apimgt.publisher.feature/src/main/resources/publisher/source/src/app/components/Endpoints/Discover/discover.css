@@ -46,15 +46,20 @@
     display: inline-block;
 }
 
-th.ed-table-first-column,
-tr.ed-table-first-column {
+th.ed-table-first-column {
     padding-left: 18px !important;
     word-spacing: 10px !important;
-    font-size: 14px;
+    font-size: 14px !important;
+}
+
+tr.ed-table-first-column,
+.ed-table-first-column {
+    padding-left: 18px !important;
+    font-size: 14px !important;
 }
 
 th.ed-font,
 tr.ed-font,
 .ed-font {
-    font-size: 14px;
+    font-size: 14px !important;
 }
