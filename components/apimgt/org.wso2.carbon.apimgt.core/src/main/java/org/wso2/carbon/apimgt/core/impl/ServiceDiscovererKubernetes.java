@@ -18,11 +18,7 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
-import io.fabric8.kubernetes.api.model.EndpointAddress;
-import io.fabric8.kubernetes.api.model.EndpointSubset;
-import io.fabric8.kubernetes.api.model.Endpoints;
 import io.fabric8.kubernetes.api.model.LoadBalancerIngress;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceList;
 import io.fabric8.kubernetes.api.model.ServicePort;
@@ -60,6 +56,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
 
     private final Logger log  = LoggerFactory.getLogger(ServiceDiscovererKubernetes.class);
 
+    //Constants that are also used in configurations as keys of key-value pairs
     public static final String MASTER_URL = "masterUrl";
     public static final String INCLUDE_CLUSTER_IPS = "includeClusterIPs";
     public static final String INCLUDE_EXTERNAL_NAME_SERVICES = "includeExternalNameServices";
@@ -67,18 +64,17 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
     public static final String EXTERNAL_SA_TOKEN_FILE_NAME = "externalSATokenFileName";
     public static final String CA_CERT_PATH = "CACertPath";
 
+
     private static final String CLUSTER_IP = "ClusterIP";
     private static final String NODE_PORT = "NodePort";
     private static final String EXTERNAL_NAME = "ExternalName";
     private static final String LOAD_BALANCER = "LoadBalancer";
     private static final String EXTERNAL_IP = "ExternalIP";
 
-
     private OpenShiftClient client;
     private HashMap<String, String> implConfig;
     private Boolean includeClusterIPs;
     private Boolean includeExternalNameServices;
-    private Boolean endpointsAvailable; //when false, will not look for NodePort urls for the remaining ports.
 
 
     /**
@@ -165,7 +161,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
             log.debug("Looking for services in all namespaces");
             try {
                 ServiceList services = client.services().inAnyNamespace().list();
-                addServiceEndpointsToList(services, null);
+                addServiceEndpointsToList(services);
             } catch (KubernetesClientException e) {
                 String msg = "Error occurred while trying to list services using Kubernetes client";
                 log.error(msg, e);
@@ -184,7 +180,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
             log.debug("Looking for services in namespace {}", namespace);
             try {
                 ServiceList services = client.services().inNamespace(namespace).list();
-                addServiceEndpointsToList(services, namespace);
+                addServiceEndpointsToList(services);
             } catch (KubernetesClientException e) {
                 String msg = "Error occurred while trying to list services using Kubernetes client";
                 log.error(msg, e);
@@ -204,7 +200,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
             log.debug("Looking for services, with the specified labels, in namespace {}", namespace);
             try {
                 ServiceList services = client.services().inNamespace(namespace).withLabels(criteria).list();
-                addServiceEndpointsToList(services, namespace);
+                addServiceEndpointsToList(services);
             } catch (KubernetesClientException e) {
                 String msg = "Error occurred while trying to list services using Kubernetes client";
                 log.error(msg, e);
@@ -228,7 +224,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
             try {
                 //namespace has to be set to null to check all allowed namespaces
                 ServiceList services = client.services().inNamespace(null).withLabels(criteria).list();
-                addServiceEndpointsToList(services, null);
+                addServiceEndpointsToList(services);
             } catch (KubernetesClientException e) {
                 String msg = "Error occurred while trying to list services using Kubernetes client";
                 log.error(msg, e);
@@ -248,16 +244,14 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
      * for each of service's ports
      *
      * @param services          filtered list of services
-     * @param filterNamespace   namespace : if was filtered using namespace, else accepts null
      */
-    private void addServiceEndpointsToList(ServiceList services, String filterNamespace) {
+    private void addServiceEndpointsToList(ServiceList services) {
         List<Service> serviceItems = services.getItems();
         for (Service service : serviceItems) {
             String serviceName = service.getMetadata().getName();
             Map<String, String> labelsMap = service.getMetadata().getLabels();
             String labels = (labelsMap != null) ? labelsMap.toString() : "";
             ServiceSpec serviceSpec = service.getSpec();
-            endpointsAvailable = true;
             for (ServicePort servicePort : serviceSpec.getPorts()) {
                 String protocol = servicePort.getName();
                 if (protocol != null &&
@@ -270,8 +264,8 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
                     if (includeExternalNameServices && serviceSpec.getType().equals(EXTERNAL_NAME)) {
                         addExternalNameEndpoint(serviceSpec, serviceName, protocol, namespace, labels);
                     }
-                    if (!serviceSpec.getType().equals(CLUSTER_IP) && endpointsAvailable) {
-                        addNodePortEndpoint(serviceName, servicePort, protocol, filterNamespace, namespace, labels);
+                    if (!serviceSpec.getType().equals(CLUSTER_IP)) {
+                        addNodePortEndpoint(serviceName, servicePort, protocol, namespace, labels);
                     }
                     if (service.getSpec().getType().equals(LOAD_BALANCER)) {
                         addLoadBalancerEndpoint(service, serviceName, port, protocol, namespace, labels);
@@ -314,40 +308,15 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
     }
 
     private void addNodePortEndpoint(String serviceName, ServicePort servicePort, String protocol,
-                                     String filterNamespace, String namespace, String labels) {
-        //Node URL is found by getting the pod's IP
-        //Pod is found via kubernetes endpoints
-        Endpoints kubernetesEndpoint = findEndpoint(filterNamespace, serviceName);
-        List<EndpointSubset> endpointSubsets = kubernetesEndpoint.getSubsets();
-        if (endpointSubsets == null) {
-            //no endpoints for the service : when LoadBalancer type or pods not selected
-            log.debug("Service:{}   No endpoints found for the service.", serviceName);
-            endpointsAvailable = false;
-            return;
-        }
-        for (EndpointSubset endpointSubset : endpointSubsets) {
-            List<EndpointAddress> endpointAddresses = endpointSubset.getAddresses();
-            if (endpointAddresses.isEmpty()) {  //no endpoints for the service : when NodePort type
-                log.debug("Service:{}   No endpoints found for the service.", serviceName);
-                endpointsAvailable = false;
-                return;
+                                     String namespace, String labels) {
+        try {
+            URL url = new URL(protocol, this.client.getMasterUrl().getHost(), servicePort.getNodePort(), "");
+            Endpoint endpoint = constructEndpoint(serviceName, namespace, protocol, NODE_PORT, url, labels);
+            if (endpoint != null) {
+                this.servicesList.add(endpoint);
             }
-            for (EndpointAddress endpointAddress : endpointAddresses) {
-                String podName = endpointAddress.getTargetRef().getName();
-                Pod pod = findPod(filterNamespace, podName);
-                try {
-                    URL url = new URL(protocol, pod.getStatus().getHostIP(), servicePort.getNodePort(), "");
-                    Endpoint endpoint = constructEndpoint(serviceName, namespace, protocol, NODE_PORT, url, labels);
-                    if (endpoint != null) {
-                        this.servicesList.add(endpoint);
-                    }
-                    return;
-                } catch (NullPointerException e) { //no pods available for this address
-                    log.debug("Service:{}  Pod {}  not available", serviceName, podName);
-                } catch (MalformedURLException e) {
-                    log.error("Service:{} Namespace:{} URLType:NodePort   URL malformed", serviceName, namespace);
-                }
-            }
+        } catch (MalformedURLException e) {
+            log.error("Service:{} Namespace:{} URLType:NodePort   URL malformed", serviceName, namespace);
         }
     }
 
@@ -423,50 +392,6 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
         String endpointIndex = String.format("kubernetes-%d", this.serviceEndpointIndex);
         return buildEndpoint(endpointIndex, serviceName, endpointConfig.toString(),
                 1000L, portType, "{\"enabled\": false}", APIMgtConstants.GLOBAL_ENDPOINT);
-    }
-
-    /**
-     * Used by {@see #addNodePortEndpoint(String, ServicePort, String, String, String, String)} method,
-     * since it is the (fabric8) Endpoints object that has the given service's pod list
-     *
-     * @param filterNamespace  namespace : if filtering was expected, else accepts null
-     * @param serviceName      service name as defined in the cluster
-     * @return {@link io.fabric8.kubernetes.api.model.Endpoints} object
-     */
-    private Endpoints findEndpoint(String filterNamespace, String serviceName) {
-        Endpoints endpoint;
-        if (filterNamespace == null) {
-            /*
-            In the line below, method ".inAnyNamespace()" did not support the extension ".withName()"
-            like .inNamespace() does. Therefore ".withField()" is used.
-            It returns a single item list which has the only endpoint created for the service.
-            */
-            endpoint = client.endpoints().inAnyNamespace()
-                    .withField("metadata.name", serviceName).list().getItems().get(0);
-        } else {
-            endpoint = client.endpoints().inNamespace(filterNamespace).withName(serviceName).get();
-        }
-        return endpoint;
-    }
-
-    /**
-     * Used by {@see #addNodePortEndpoint(String, ServicePort, String, String, String, String)} method,
-     * in order to find the node URL which the pod resides
-     *
-     * @param filterNamespace  namespace : if filtering was expected, else accepts null
-     * @param podName          name of one of the pods, of the service
-     * @return {@link io.fabric8.kubernetes.api.model.Pod} object
-     */
-    private Pod findPod(String filterNamespace, String podName) {
-        Pod pod;
-        if (filterNamespace == null) {
-            //same reason as in findEndpoint method
-            pod = client.pods().inAnyNamespace()
-                    .withField("metadata.name", podName).list().getItems().get(0);
-        } else {
-            pod = client.pods().inNamespace(filterNamespace).withName(podName).get();
-        }
-        return pod;
     }
 
 }
