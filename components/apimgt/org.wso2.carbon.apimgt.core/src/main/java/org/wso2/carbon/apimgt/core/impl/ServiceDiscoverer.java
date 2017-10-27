@@ -28,8 +28,7 @@ import java.util.List;
 
 
 /**
- * Abstract class to discover and list services in a cluster using a set of cms specific parameters
- * while filtering by namespace and/or criteria as provided in the configuration.
+ * Abstract class to discover and list services in a cluster
  */
 public abstract class ServiceDiscoverer {
 
@@ -41,13 +40,16 @@ public abstract class ServiceDiscoverer {
 
 
     /**
-     * Initializes the necessary parameters
+     * Initializes the necessary parameters,
+     * Must be called by all subclasses within their own overriding .init() methods
      *
-     * @param implementationParameters  container management specific parameters provided in the configuration
+     * @param implementationParameters  implementation parameters provided in the configuration
      * @throws ServiceDiscoveryException if an error occurs in the implementation's init method
      */
     public void init(HashMap<String, String> implementationParameters) throws ServiceDiscoveryException {
         this.namespaceFilter = implementationParameters.get(ServiceDiscoveryConstants.NAMESPACE);
+
+        // Convert the criteria that is passed in as a string into a map and then set the instance criteriaFilter
         String criteriaString = implementationParameters.get(ServiceDiscoveryConstants.CRITERIA);
         if (criteriaString != null) {
             String[] criteriaArray = criteriaString.split(",");
@@ -63,15 +65,15 @@ public abstract class ServiceDiscoverer {
     }
 
     /**
-     * Lists the endpoints without any filtering.
+     * Gives a list of endpoints without any filtering.
      *
-     * @return List of Endpoints
+     * @return List of all Endpoints
      * @throws ServiceDiscoveryException if an error occurs while listing
      */
     public abstract List<Endpoint> listServices() throws ServiceDiscoveryException;
 
     /**
-     * Lists the endpoints with a specific namespace.
+     * Gives a list of endpoints filtered by namespace.
      *
      * @param namespace     Namespace of the expected endpoints
      * @return List of Endpoints with the specified namespace
@@ -80,19 +82,19 @@ public abstract class ServiceDiscoverer {
     public abstract List<Endpoint> listServices(String namespace) throws ServiceDiscoveryException;
 
     /**
-     * Lists the endpoints with a specific criteria.
+     * Gives a list of endpoints filtered by criteria.
      *
-     * @param criteria    A criteria the endpoints should be filtered by
+     * @param criteria    A set of criteria, all the endpoints must belong to
      * @return List of Endpoints with the specified criteria
      * @throws ServiceDiscoveryException if an error occurs while listing
      */
     public abstract List<Endpoint> listServices(HashMap<String, String> criteria) throws ServiceDiscoveryException;
 
     /**
-     * Lists the endpoints with a specific namespace and a criteria.
+     * Gives a list of endpoints filtered by both namespace and criteria.
      *
      * @param namespace   Namespace of the expected endpoints
-     * @param criteria    A criteria the endpoints should be filtered by
+     * @param criteria    A set of criteria, all the endpoints must belong to
      * @return List of Endpoints with the specified namespace and criteria
      * @throws ServiceDiscoveryException if an error occurs while listing
      */
@@ -100,7 +102,7 @@ public abstract class ServiceDiscoverer {
             throws ServiceDiscoveryException;
 
     /**
-     * Builds a Endpoint
+     * Builds an Endpoint
      * @param id                Temporary id to be used by the UI
      * @param name              Name of the service
      * @param endpointConfig    Json string containing endpoint URL, namespace, criteria

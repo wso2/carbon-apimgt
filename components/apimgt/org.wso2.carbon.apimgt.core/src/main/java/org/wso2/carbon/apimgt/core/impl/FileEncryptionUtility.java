@@ -154,7 +154,7 @@ public class FileEncryptionUtility {
     }
 
     /**
-     * Encrypts the list of files given in the configuration, which are located in the security directory.
+     * Encrypts the list of files given in the configuration, which are located /resources/security directory.
      * Encrypted files will have "encrypted" before its original name.
      *
      * @throws APIManagementException if an error occurs while encrypting the list of files
@@ -176,6 +176,7 @@ public class FileEncryptionUtility {
      */
     private void createAndStoreAESKey() throws APIManagementException {
         try {
+            //create a new AES key
             KeyGenerator keyGenerator = KeyGenerator.getInstance(EncryptionConstants.AES);
             keyGenerator.init(AES_Key_Size);
             byte[] aesKey = keyGenerator.generateKey().getEncoded();

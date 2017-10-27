@@ -33,21 +33,31 @@ public class ServiceReferenceHolder {
     private static final Logger log = LoggerFactory.getLogger(ServiceReferenceHolder.class);
     private static ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private ConfigProvider configProvider;
+    private APIMConfigurations config;
     private SecureVault secureVault;
-    private APIMConfigurations config = null;
 
     private ServiceReferenceHolder() {
-
     }
 
     public static ServiceReferenceHolder getInstance() {
         return instance;
     }
 
+
+    /**
+     * Sets the configProvider instance
+     *
+     * @param configProvider configProvider instance to set
+     */
     public void setConfigProvider(ConfigProvider configProvider) {
         this.configProvider = configProvider;
     }
 
+    /**
+     * Gives the APIMConfigurations explicitly set in the deployment yaml or the default configurations
+     *
+     * @return APIMConfigurations
+     */
     public APIMConfigurations getAPIMConfiguration() {
         try {
             if (configProvider != null) {
@@ -66,12 +76,13 @@ public class ServiceReferenceHolder {
 
         return config;
     }
-   /*
-   * This method is to get configuration map of a given namespace
-   *
-   * @param namespace namespace defined in deployment.yaml
-   * @return resource path to scope mapping
-   * */
+
+    /**
+    * This method is to get configuration map of a given namespace
+    *
+    * @param namespace namespace defined in deployment.yaml
+    * @return resource path to scope mapping
+    */
     public Map<String, String> getRestAPIConfigurationMap(String namespace) {
         try {
             if (configProvider != null) {
@@ -86,10 +97,21 @@ public class ServiceReferenceHolder {
         return null;
     }
 
+
+    /**
+     * Gives the secure vault instance if already set
+     *
+     * @return secureVault instance
+     */
     public SecureVault getSecureVault() {
         return secureVault;
     }
 
+    /**
+     * Sets the secure vault instance
+     *
+     * @param secureVault secureVault instance to set
+     */
     public void setSecureVault(SecureVault secureVault) {
         this.secureVault = secureVault;
     }

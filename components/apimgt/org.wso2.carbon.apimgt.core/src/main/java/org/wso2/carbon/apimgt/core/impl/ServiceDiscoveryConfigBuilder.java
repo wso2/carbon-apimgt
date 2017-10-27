@@ -29,16 +29,13 @@ import org.wso2.carbon.kernel.configprovider.ConfigProvider;
  */
 public class ServiceDiscoveryConfigBuilder {
     private static final Logger log = LoggerFactory.getLogger(ServiceDiscoveryConfigBuilder.class);
-
     private static ServiceDiscoveryConfigurations serviceDiscoveryConfig;
 
-    public static ServiceDiscoveryConfigurations getServiceDiscoveryConfiguration() {
-        return serviceDiscoveryConfig;
-    }
-
-    public static void clearServiceDiscoveryConfig() {
-        serviceDiscoveryConfig = null;
-    }
+    /**
+     * Builds the {@link ServiceDiscoveryConfigurations} object
+     *
+     * @param configProvider  ConfigProvider instance
+     */
     public static void build(ConfigProvider configProvider) {
         try {
             serviceDiscoveryConfig = configProvider.getConfigurationObject(ServiceDiscoveryConfigurations.class);
@@ -46,5 +43,22 @@ public class ServiceDiscoveryConfigBuilder {
             log.error("Error while loading the configuration for Service discovery ", e);
             serviceDiscoveryConfig = new ServiceDiscoveryConfigurations();
         }
+    }
+
+    /**
+     * Clears {@link ServiceDiscoveryConfigurations} instance
+     */
+    public static void clearServiceDiscoveryConfig() {
+        serviceDiscoveryConfig = null;
+    }
+
+
+    /**
+     * Gives the {@link ServiceDiscoveryConfigurations} instance if already built
+     *
+     * @return ServiceDiscoveryConfigurations instance
+     */
+    public static ServiceDiscoveryConfigurations getServiceDiscoveryConfiguration() {
+        return serviceDiscoveryConfig;
     }
 }

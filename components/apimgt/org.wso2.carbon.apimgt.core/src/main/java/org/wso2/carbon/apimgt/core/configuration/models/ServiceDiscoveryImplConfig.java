@@ -44,7 +44,7 @@ public class ServiceDiscoveryImplConfig {
         implParameters.put(ServiceDiscovererKubernetes.CA_CERT_PATH, "");
         implParameters.put(ServiceDiscovererKubernetes.INCLUDE_CLUSTER_IPS, "false");
         implParameters.put(ServiceDiscovererKubernetes.INCLUDE_EXTERNAL_NAME_SERVICES, "false");
-        implParameters.put(ServiceDiscovererKubernetes.EXTERNAL_SA_TOKEN_FILE_NAME, "KubernetesToken");
+        implParameters.put(ServiceDiscovererKubernetes.EXTERNAL_SA_TOKEN_FILE_NAME, "");
         implParameters.put(ServiceDiscovererKubernetes.POD_MOUNTED_SA_TOKEN_FILE_PATH,
                 "/var/run/secrets/kubernetes.io/serviceaccount/token");
     }

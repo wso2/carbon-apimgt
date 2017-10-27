@@ -45,7 +45,7 @@ public class ExternalResourcesApiServiceImpl extends ExternalResourcesApiService
             // If service discovery not enabled - do not proceed
             if (!serviceDiscoveryConfig.isServiceDiscoveryEnabled()) {
                 String errorMessage = "Service discovery is not enabled";
-                return handleInternalServerError(errorMessage, null);
+                return buildInternalServerErrorResponse(errorMessage, null);
             }
 
             EndPointListDTO endPointListDTO = new EndPointListDTO();
@@ -93,15 +93,15 @@ public class ExternalResourcesApiServiceImpl extends ExternalResourcesApiService
                 }
             }
 
-            //Count is set after adding endpoints return by all implClasses
+            //Count is set after adding endpoints returned by all the implClasses
             endPointListDTO.setCount(endPointListDTO.getList().size());
             return Response.ok().entity(endPointListDTO).build();
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             String errorMessage = "Error while loading service discovery impl class";
-            return handleInternalServerError(errorMessage, e);
+            return buildInternalServerErrorResponse(errorMessage, e);
         } catch (IOException e) {
             String errorMessage = "Error while Converting Endpoint Security Details in Endpoint";
-            return handleInternalServerError(errorMessage, e);
+            return buildInternalServerErrorResponse(errorMessage, e);
         } catch (ServiceDiscoveryException e) {
             String errorMessage = "Error while Discovering Service Endpoints";
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
@@ -110,7 +110,7 @@ public class ExternalResourcesApiServiceImpl extends ExternalResourcesApiService
         }
     }
 
-    private Response handleInternalServerError(String errorMessage, Exception e){
+    private Response buildInternalServerErrorResponse(String errorMessage, Exception e){
         ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
         if ( e == null ) {
             log.error(errorMessage);

@@ -35,6 +35,7 @@ import org.wso2.carbon.kernel.securevault.SecureVault;
 )
 public class ConfigurationActivator {
     private static final Logger log = LoggerFactory.getLogger(ServiceReferenceHolder.class);
+
     /**
      * Get the ConfigProvider service.
      * This is the bind method that gets called for ConfigProvider service registration that satisfy the policy.
@@ -61,28 +62,29 @@ public class ConfigurationActivator {
         ServiceReferenceHolder.getInstance().setConfigProvider(null);
     }
 
+
+
     /**
      * Get the SecureVault service.
      * This is the bind method that gets called for SecureVault service registration,
      * which is registered by the 5.2.0-m3 kernel at org.wso2.carbon.kernel.internal.securevault.SecureVaultComponent
      *
-     * @param secureVault the ConfigProvider service that is registered as a service.
+     * @param secureVault the SecureVault service that is registered as a service.
      */
     @Reference(
             name = "org.wso2.carbon.kernel.securevault.SecureVault",
             service = SecureVault.class,
             cardinality = ReferenceCardinality.MANDATORY,
             policy = ReferencePolicy.DYNAMIC,
-            unbind = "unregisterSecureVault"
-    )
+            unbind = "unregisterSecureVault")
     protected void registerSecureVault(SecureVault secureVault) {
         ServiceReferenceHolder.getInstance().setSecureVault(secureVault);
     }
 
     /**
-     * This is the unbind method, which gets called for ConfigProvider instance un-registrations.
+     * This is the unbind method, which gets called for SecureVault instance un-registrations.
      *
-     * @param secureVault the ConfigProvider service that get unregistered.
+     * @param secureVault the SecureVault service that get unregistered.
      */
     protected void unregisterSecureVault(SecureVault secureVault) {
         ServiceReferenceHolder.getInstance().setSecureVault(null);
