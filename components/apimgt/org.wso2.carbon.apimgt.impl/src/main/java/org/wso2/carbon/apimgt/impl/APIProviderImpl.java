@@ -2669,8 +2669,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 contextCache.put(context, Boolean.FALSE);
             }
 
+            APIManagerFactory.getInstance().getApplicationScopeCacheManager().notifyUpdateOnApi(identifier);
             apiMgtDAO.deleteAPI(identifier);
-
             if (log.isDebugEnabled()) {
                 String logMessage =
                         "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()

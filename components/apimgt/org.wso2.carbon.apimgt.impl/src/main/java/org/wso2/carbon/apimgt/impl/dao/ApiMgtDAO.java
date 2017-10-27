@@ -10892,6 +10892,13 @@ public class ApiMgtDAO {
         return infoDTO;
     }
 
+    /**
+     * To get all of the applications, that particular API is subscribed to.
+     *
+     * @param apiIdentifier API Identifier
+     * @return list of application UUIDs, that particular API is subscribed to.
+     * @throws APIManagementException API Management exception.
+     */
     public List<String> getApplicationSubscriptions(APIIdentifier apiIdentifier) throws APIManagementException {
         String sql = SQLConstants.GET_APPLICATIONS_FOR_API_SQL;
         Connection conn = null;
