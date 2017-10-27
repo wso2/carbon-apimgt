@@ -437,6 +437,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     public Response applicationsApplicationScopesGet(String applicationId, boolean filterByUserRoles, String ifMatch,
             String ifUnmodifiedSince) {
         String userName = RestApiUtil.getLoggedInUsername();
+
         try {
             APIConsumer apiConsumer = RestApiUtil.getConsumer(userName);
             Application application = apiConsumer.getApplicationByUUID(applicationId);

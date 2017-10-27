@@ -39,19 +39,26 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.stub.useradmin.APIKeyMgtException;
+import org.wso2.carbon.apimgt.keymgt.stub.useradmin.MultiTenantUserAdminServiceStub;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
-import org.wso2.carbon.user.mgt.stub.UserAdminStub;
-import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
-import org.wso2.carbon.user.mgt.stub.types.carbon.FlaggedName;
+import org.wso2.carbon.user.core.UserStoreConfigConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,14 +69,13 @@ import static org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUti
  */
 public class RestAPIStoreUtils {
     private static final Log log = LogFactory.getLog(RestAPIStoreUtils.class);
-    private static UserAdminStub userAdminStub;
-    private static APIManagerConfiguration apiManagerConfiguration =  ServiceReferenceHolder.getInstance()
+    private static MultiTenantUserAdminServiceStub multiTenantUserAdminServiceStub;
+    private static APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
             .getAPIManagerConfigurationService().getAPIManagerConfiguration();
     private static String keyManagerUrl;
     private static String keyManagerAdminUserName;
     private static String keyManagerAdminPassword;
     private static ApplicationScopeCacheManager applicationScopeCacheManager;
-
 
     static {
         keyManagerUrl = apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL);
@@ -78,12 +84,12 @@ public class RestAPIStoreUtils {
         applicationScopeCacheManager = APIManagerFactory.getInstance().getApplicationScopeCacheManager();
 
         try {
-            userAdminStub = new UserAdminStub(null, keyManagerUrl + "UserAdmin");
-            CarbonUtils.setBasicAccessSecurityHeaders(keyManagerAdminUserName, keyManagerAdminPassword,
-                    true, userAdminStub._getServiceClient());
+            multiTenantUserAdminServiceStub = new MultiTenantUserAdminServiceStub(null,
+                    keyManagerUrl + "MultiTenantUserAdminService");
+            CarbonUtils.setBasicAccessSecurityHeaders(keyManagerAdminUserName, keyManagerAdminPassword, true,
+                    multiTenantUserAdminServiceStub._getServiceClient());
         } catch (AxisFault axisFault) {
-            log.error("Error while initializing userAdminStub", axisFault);
-            userAdminStub = null;
+            log.error("Error while initializing multiTenantUserTenantAdminStub", axisFault);
         }
     }
 
@@ -456,40 +462,6 @@ public class RestAPIStoreUtils {
     }
 
     /**
-     * To get the role list of a particular user
-     * @return the roleList Of User
-     * @throws APIManagementException API Management Exception.
-     */
-    private static List<String> getRoleListOfUser() throws APIManagementException {
-        if (userAdminStub == null) {
-            try {
-                userAdminStub = new UserAdminStub(null, keyManagerUrl + "UserAdmin");
-                CarbonUtils.setBasicAccessSecurityHeaders(keyManagerAdminUserName, keyManagerAdminPassword,
-                        true, userAdminStub._getServiceClient());
-            } catch (AxisFault axisFault) {
-                log.error("Error while initializing UserAdminStub", axisFault);
-                throw new APIManagementException("Error while accessing userAdminStub to get role list of user",
-                        axisFault);
-            }
-        }
-        try {
-            FlaggedName[] roleNames = userAdminStub.getRolesOfCurrentUser();
-            List<String> userRoleList = new ArrayList<>();
-            for (FlaggedName roleName : roleNames) {
-                if (roleName.getSelected()) {
-                    userRoleList.add(roleName.getItemName());
-                }
-            }
-            return userRoleList;
-        } catch (RemoteException e) {
-            throw new APIManagementException("Error while connecting to UserAdmin admin service", e);
-        } catch (UserAdminUserAdminException e) {
-            throw new APIManagementException("UserAdminException while trying to get the role list of the current "
-                    + "user", e);
-        }
-    }
-
-    /**
      * To get the relevant scopes for the application based on the subscribed APIs
      *
      * @param userName          UserName of the user, who is requesting the scopes
@@ -500,11 +472,11 @@ public class RestAPIStoreUtils {
     public static Set<Scope> getScopesForApplication(String userName, Application application,
             boolean filterByUserRoles) throws APIManagementException {
         String applicationUUID = application.getUUID();
-        Set<Scope> filteredScopes = applicationScopeCacheManager.getValueFromCache(applicationUUID,userName,
-                filterByUserRoles);
+        Set<Scope> filteredScopes = applicationScopeCacheManager
+                .getValueFromCache(applicationUUID, userName, filterByUserRoles);
 
         if (filteredScopes != null) {
-            return  filteredScopes;
+            return filteredScopes;
         }
         /* If the relevant scope details for the particular application, and user is not there in cache, get it from
             the regular db call.
@@ -527,9 +499,13 @@ public class RestAPIStoreUtils {
              */
             if (filterByUserRoles) {
                 filteredScopes = new LinkedHashSet<>();
-                List<String> userRoleList = getRoleListOfUser();
+                List<String> userRoleList = null;
+                String[] userRoleArray = getRoleListOfUser(userName);
+                if (userRoleArray != null) {
+                    userRoleList = Arrays.asList(userRoleArray);
+                }
                 for (Scope scope : scopeSet) {
-                    if (scope.getRoles() == null) {
+                    if (scope.getRoles() == null || scope.getRoles().isEmpty()) {
                         filteredScopes.add(scope);
                     } else if (userRoleList != null && !userRoleList.isEmpty()) {
                         List<String> roleList = new ArrayList<>(
@@ -546,6 +522,40 @@ public class RestAPIStoreUtils {
             applicationScopeCacheManager.addToCache(applicationUUID, userName, filteredScopes, filterByUserRoles);
         }
         return filteredScopes;
+    }
+
+    /**
+     * To get the role list of a particular user
+     *
+     * @return the roleList Of User
+     * @throws APIManagementException API Management Exception.
+     */
+    private static String[] getRoleListOfUser(String userName) throws APIManagementException {
+        if (multiTenantUserAdminServiceStub == null) {
+            try {
+                multiTenantUserAdminServiceStub = new MultiTenantUserAdminServiceStub(null,
+                        keyManagerUrl + "MultiTenantUserAdminService");
+                CarbonUtils.setBasicAccessSecurityHeaders(keyManagerAdminUserName, keyManagerAdminPassword, true,
+                        multiTenantUserAdminServiceStub._getServiceClient());
+            } catch (AxisFault axisFault) {
+                throw new APIManagementException(
+                        "Error while accessing mutltitenantUserAdminStub to get role list " + "of user", axisFault);
+            }
+        }
+        try {
+            int index = userName.indexOf("/");
+            String userStoreDomainName = UserStoreConfigConstants.PRIMARY;
+
+            if (index > 0) {
+                userStoreDomainName = userName.substring(0, index);
+            }
+            return multiTenantUserAdminServiceStub.getUserRoleList(userStoreDomainName + "/" + userName);
+        } catch (RemoteException e) {
+            throw new APIManagementException("Error while connecting to MultiTenantUserAdminService", e);
+        } catch (APIKeyMgtException e) {
+            throw new APIManagementException(
+                    "APIKeyMgtException while trying to get the role list of the user " + userName, e);
+        }
     }
 
 }
