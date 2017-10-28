@@ -1,3 +1,18 @@
+#   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+################################################################################
+
 swagger: '2.0'
 ######################################################
 # Prolog
@@ -1153,7 +1168,6 @@ paths:
       parameters:
         - $ref: '#/parameters/applicationId'
         - $ref: '#/parameters/filterByUserRoles'
-        - $ref: '#/parameters/Accept'
         - $ref: '#/parameters/If-None-Match'
         - $ref: '#/parameters/If-Modified-Since'
       tags:
@@ -1164,7 +1178,7 @@ paths:
             OK.
             Scope returned.
           schema:
-            $ref: '#/definitions/Application'
+            $ref: '#/definitions/ScopeList'
           headers:
             Content-Type:
               description: |
@@ -1183,6 +1197,12 @@ paths:
           description: |
             Not Modified.
             Empty body because the client has already the latest version of the requested resource.
+        '401':
+          description: |
+            Un authorized.
+            The user is not authorized to view the application .
+          schema:
+            $ref: '#/definitions/Error'
         '404':
           description: |
             Not Found.
@@ -1728,6 +1748,16 @@ parameters:
       Application Identifier consisting of the UUID of the Application.
     required: true
     type: string
+
+# Filter By user roles
+# Specified as part of the query string
+  filterByUserRoles:
+    name: filterByUserRoles
+    in: query
+    description : |
+      Filter user by roles.
+    required : false
+    type: boolean
 
 # Application Identifier
 # Specified as part of the query string
@@ -2561,6 +2591,34 @@ definitions:
           type: string
         description: Allowed scopes for the access token
         example: ["am_application_scope","default"]
+
+  ApplicationScope :
+    title: Scope of the APIs
+    properties:
+      key:
+        type: string
+        description: Key of scope
+        example: apim:fileread
+      name:
+        type: string
+        description: Name of the scope
+        example: apim file read
+      roles :
+        type: string
+        description: Roles scope is bounded to
+        example : admin, role1
+      description:
+        type: string
+        description: Description of the scope
+
+  ScopeList :
+    title : Scope list
+    properties:
+      list :
+        type : array
+        items:
+          $ref: '#/definitions/ApplicationScope'
+
 
 #-----------------------------------------------------
 # END-OF-FILE

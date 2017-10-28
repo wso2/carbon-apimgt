@@ -36,6 +36,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
  * other tenants, by using the super-tenant credentials.
  */
 public class MultiTenantUserAdminService extends AbstractAdmin {
+    private static final Log log = LogFactory.getLog(MultiTenantUserAdminService.class);
 
     /**
      * To get the role list of a particular user.
@@ -48,7 +49,14 @@ public class MultiTenantUserAdminService extends AbstractAdmin {
     @SuppressWarnings("unused")
     public String[] getUserRoleList(String userName) throws APIKeyMgtException {
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
+
+        if (log.isDebugEnabled()) {
+            log.debug("MultiTenantUserAdminService getUserRoleList request received from the tenant " + tenantId);
+        }
         if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
+            if (log.isDebugEnabled()) {
+                log.debug("This is");
+            }
             return null;
         } else {
             try {

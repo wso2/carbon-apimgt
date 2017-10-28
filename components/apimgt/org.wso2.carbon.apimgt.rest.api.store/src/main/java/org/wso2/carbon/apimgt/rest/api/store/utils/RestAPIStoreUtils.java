@@ -41,6 +41,8 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.stub.useradmin.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.stub.useradmin.MultiTenantUserAdminServiceStub;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -51,14 +53,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -469,14 +464,14 @@ public class RestAPIStoreUtils {
      * @param filterByUserRoles Whether to filter scopes based on user roles.
      * @return relevant scopes .
      */
-    public static Set<Scope> getScopesForApplication(String userName, Application application,
+    public static ScopeListDTO getScopesForApplication(String userName, Application application,
             boolean filterByUserRoles) throws APIManagementException {
         String applicationUUID = application.getUUID();
         Set<Scope> filteredScopes = applicationScopeCacheManager
                 .getValueFromCache(applicationUUID, userName, filterByUserRoles);
 
         if (filteredScopes != null) {
-            return filteredScopes;
+            return convertScopeSetToScopeList(filteredScopes);
         }
         /* If the relevant scope details for the particular application, and user is not there in cache, get it from
             the regular db call.
@@ -521,7 +516,7 @@ public class RestAPIStoreUtils {
             }
             applicationScopeCacheManager.addToCache(applicationUUID, userName, filteredScopes, filterByUserRoles);
         }
-        return filteredScopes;
+        return convertScopeSetToScopeList(filteredScopes);
     }
 
     /**
@@ -556,6 +551,30 @@ public class RestAPIStoreUtils {
             throw new APIManagementException(
                     "APIKeyMgtException while trying to get the role list of the user " + userName, e);
         }
+    }
+
+    /**
+     * Coverts the scope set to ScopeListDTO.
+     *
+     * @param scopeSet Set of scopes.
+     * @return ScopeListDTO.
+     */
+    private static ScopeListDTO convertScopeSetToScopeList(Set<Scope> scopeSet) {
+        ScopeListDTO scopeListDTO = new ScopeListDTO();
+        List<ApplicationScopeDTO> scopeDTOList = new ArrayList<>();
+        if (scopeSet == null) {
+            return null;
+        }
+        for (Scope scope : scopeSet) {
+            ApplicationScopeDTO scopeDTO = new ApplicationScopeDTO();
+            scopeDTO.setKey(scope.getKey());
+            scopeDTO.setName(scope.getName());
+            scopeDTO.setDescription(scope.getDescription());
+            scopeDTO.setRoles(scope.getRoles());
+            scopeDTOList.add(scopeDTO);
+        }
+        scopeListDTO.setList(scopeDTOList);
+        return scopeListDTO;
     }
 
 }

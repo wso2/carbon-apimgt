@@ -31,10 +31,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.*;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationMappingUtil;
@@ -427,25 +424,25 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     /**
      * Retrieves the scopes related with particular applications based on subscibed APIs.
      *
-     * @param applicationId Application Identifier.
+     * @param applicationId     Application Identifier.
      * @param filterByUserRoles Whether to filter scope by user roles.
-     * @param ifMatch If-Match header values
-     * @param ifUnmodifiedSince If-Unmodified-Since header value.
+     * @param accept            accepted media type of the client
+     * @param ifNoneMatch       If-None-Match header value
+     * @param ifModifiedSince   If-Modified-Since header value.
      * @return the scopes
      */
     @Override
-    public Response applicationsApplicationScopesGet(String applicationId, boolean filterByUserRoles, String ifMatch,
-            String ifUnmodifiedSince) {
+    public Response applicationsApplicationScopesGet(String applicationId, boolean filterByUserRoles,
+            String accept,String ifNoneMatch, String ifModifiedSince) {
         String userName = RestApiUtil.getLoggedInUsername();
-
         try {
             APIConsumer apiConsumer = RestApiUtil.getConsumer(userName);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
-
-                    Set<Scope> filteredScopes = RestAPIStoreUtils
+                    ScopeListDTO filteredScopes = RestAPIStoreUtils
                             .getScopesForApplication(userName, application, filterByUserRoles);
+
                     return Response.ok().entity(filteredScopes).build();
                 } else {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
