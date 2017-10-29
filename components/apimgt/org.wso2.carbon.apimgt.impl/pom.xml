@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>6.1.117-SNAPSHOT</version>
+        <version>6.1.124-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -273,6 +273,12 @@
             <groupId>org.jacoco</groupId>
             <artifactId>org.jacoco.agent</artifactId>
             <classifier>runtime</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
+            <version>1.4.01</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -20,7 +20,10 @@ package org.wso2.carbon.apimgt.impl;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
+import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.io.IOUtils;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -47,6 +50,9 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
+import org.wso2.carbon.apimgt.impl.notification.NotificationExecutor;
+import org.wso2.carbon.apimgt.impl.notification.NotifierConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.APIStateChangeSimpleWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
@@ -82,7 +88,8 @@ import javax.xml.stream.XMLStreamReader;
 @RunWith(PowerMockRunner.class)
 @SuppressStaticInitializationFor("org.wso2.carbon.context.PrivilegedCarbonContext")
 @PrepareForTest({ServiceReferenceHolder.class, ApiMgtDAO.class, APIUtil.class, APIGatewayManager.class, 
-    GovernanceUtils.class, PrivilegedCarbonContext.class, WorkflowExecutorFactory.class})
+    GovernanceUtils.class, PrivilegedCarbonContext.class, WorkflowExecutorFactory.class, JavaUtils.class,
+    APIProviderImpl.class})
 public class APIProviderImplTest {
 
     @BeforeClass
@@ -305,13 +312,16 @@ public class APIProviderImplTest {
         API api = new API(apiId);
         api.setContext("/test");
         api.setStatus(APIStatus.CREATED);
-        
-        TestUtils.mockRegistryAndUserRealm(-1234);
-        
+
+        TestUtils.mockRegistryAndUserRealm(-1);
+
         PowerMockito.mockStatic(ApiMgtDAO.class);
+        PowerMockito.mockStatic(JavaUtils.class);
         ApiMgtDAO apimgtDAO = Mockito.mock(ApiMgtDAO.class);
+        UserRegistry configRegistry = Mockito.mock(UserRegistry.class);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
         PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apimgtDAO);
-        Mockito.doNothing().when(apimgtDAO).addAPI(api, -1234);
+        Mockito.doNothing().when(apimgtDAO).addAPI(api, -1);
         
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.replaceEmailDomain(apiId.getProviderName())).thenReturn("admin");
@@ -320,7 +330,7 @@ public class APIProviderImplTest {
         Map<String, Map<String,String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
         
         
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, failedGateways);        
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, failedGateways);
         apiProvider.addAPI(api);
         
         //No state changes
@@ -328,12 +338,24 @@ public class APIProviderImplTest {
                 APIStatus.CREATED);        
         Assert.assertEquals(0, failedGatewaysReturned.size());
         Assert.assertEquals(APIStatus.CREATED, api.getStatus());
-        
-        TestUtils.mockAPIMConfiguration(APIConstants.API_GATEWAY_TYPE, APIConstants.API_GATEWAY_TYPE_SYNAPSE);
+
+        ServiceReferenceHolder serviceReferenceHolder = TestUtils.mockAPIMConfiguration(APIConstants.API_GATEWAY_TYPE,
+                APIConstants.API_GATEWAY_TYPE_SYNAPSE, -1);
         PowerMockito.when(apimgtDAO.getPublishedDefaultVersion(api.getId())).thenReturn("1.0.0");
         
         //Change to PUBLISHED state
+        //Existing APIs of the provider
+        API api1 = new API(new APIIdentifier("admin", "API1", "0.0.5"));
+        api1.setStatus(APIStatus.PUBLISHED);
+        API api2 = new API(new APIIdentifier("admin", "API2", "1.0.0"));
+
+        prepareForGetAPIsByProvider(apiProvider, "admin", api1, api2);
+        PowerMockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        PowerMockito.when(registryService.getConfigSystemRegistry(-1)).thenReturn(configRegistry);
+        PowerMockito.when(configRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(false);
+        PowerMockito.when(JavaUtils.isTrueExplicitly("false")).thenReturn(false);
         failedGatewaysReturned = apiProvider.propergateAPIStatusChangeToGateways(apiId, APIStatus.PUBLISHED);
+
         Assert.assertEquals(0, failedGatewaysReturned.size());
         Assert.assertEquals(APIStatus.PUBLISHED, api.getStatus());
         
@@ -362,6 +384,62 @@ public class APIProviderImplTest {
         failedGatewaysReturned = apiProvider.propergateAPIStatusChangeToGateways(apiId, APIStatus.RETIRED);
         Assert.assertEquals(1, failedGatewaysReturned.size());
         Assert.assertEquals(APIStatus.RETIRED, api.getStatus());
+    }
+
+    @Test
+    public void testEmailSentWhenPropergateAPIStatusChangeToGateways() throws Exception {
+        APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.0");
+        API api = new API(apiId);
+        api.setContext("/test");
+        api.setStatus(APIStatus.CREATED);
+
+        TestUtils.mockRegistryAndUserRealm(-1);
+
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        ApiMgtDAO apimgtDAO = PowerMockito.mock(ApiMgtDAO.class);
+        Resource resource = PowerMockito.mock(Resource.class);
+        String content = PowerMockito.mock(String.class);
+        JSONObject tenantConfig = PowerMockito.mock(JSONObject.class);
+        JSONParser jsonParser = PowerMockito.mock(JSONParser.class);
+        NotificationExecutor notificationExecutor = PowerMockito.mock(NotificationExecutor.class);
+        NotificationDTO notificationDTO = PowerMockito.mock(NotificationDTO.class);
+        UserRegistry configRegistry = PowerMockito.mock(UserRegistry.class);
+        RegistryService registryService = PowerMockito.mock(RegistryService.class);
+        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apimgtDAO);
+        PowerMockito.doNothing().when(apimgtDAO).addAPI(api, -1);
+
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.when(APIUtil.replaceEmailDomain(apiId.getProviderName())).thenReturn("admin");
+        PowerMockito.when(APIUtil.replaceEmailDomainBack(api.getId().getProviderName())).thenReturn("admin");
+
+        Map<String, Map<String,String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, failedGateways);
+        apiProvider.addAPI(api);
+
+        ServiceReferenceHolder serviceReferenceHolder = TestUtils.mockAPIMConfiguration(APIConstants.API_GATEWAY_TYPE,
+                APIConstants.API_GATEWAY_TYPE_SYNAPSE, -1);
+        PowerMockito.when(apimgtDAO.getPublishedDefaultVersion(api.getId())).thenReturn("1.0.0");
+
+        //Change to PUBLISHED state
+        //Existing APIs of the provider
+        API api1 = new API(new APIIdentifier("admin", "API1", "0.0.5"));
+        api1.setStatus(APIStatus.PUBLISHED);
+        API api2 = new API(new APIIdentifier("admin", "API2", "1.0.0"));
+
+        prepareForGetAPIsByProvider(apiProvider, "admin", api1, api2);
+        PowerMockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        PowerMockito.when(registryService.getConfigSystemRegistry(-1)).thenReturn(configRegistry);
+        PowerMockito.when(configRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(true);
+        PowerMockito.when(configRegistry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(resource);
+        PowerMockito.whenNew(String.class).withAnyArguments().thenReturn(content);
+        PowerMockito.whenNew(JSONParser.class).withAnyArguments().thenReturn(jsonParser);
+        PowerMockito.when(jsonParser.parse(content)).thenReturn(tenantConfig);
+        PowerMockito.when(tenantConfig.get(NotifierConstants.NOTIFICATIONS_ENABLED)).thenReturn("true");
+        PowerMockito.whenNew(NotificationDTO.class).withAnyArguments().thenReturn(notificationDTO);
+        PowerMockito.whenNew(NotificationExecutor.class).withAnyArguments().thenReturn(notificationExecutor);
+        apiProvider.propergateAPIStatusChangeToGateways(apiId, APIStatus.PUBLISHED);
+        Mockito.verify(notificationExecutor).sendAsyncNotifications(notificationDTO);
     }
     
     @Test
@@ -1069,7 +1147,7 @@ public class APIProviderImplTest {
         GenericArtifact defaultAPIArtifact = Mockito.mock(GenericArtifact.class);
         Mockito.when(artifactManager.getGenericArtifact(defaultAPIUUID)).thenReturn(defaultAPIArtifact);
         Mockito.doNothing().when(artifactManager).updateGenericArtifact(defaultAPIArtifact);
-        TestUtils.mockAPIMConfiguration(APIConstants.API_GATEWAY_TYPE, APIConstants.API_GATEWAY_TYPE_SYNAPSE);
+        TestUtils.mockAPIMConfiguration(APIConstants.API_GATEWAY_TYPE, APIConstants.API_GATEWAY_TYPE_SYNAPSE, -1234);
         
         //updateApiArtifact
         PowerMockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenReturn(artifact);

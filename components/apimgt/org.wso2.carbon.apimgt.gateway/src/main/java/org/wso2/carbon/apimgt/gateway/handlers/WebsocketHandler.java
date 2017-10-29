@@ -21,6 +21,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.channel.CombinedChannelDuplexHandler;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInboundHandler, WebsocketOutboundHandler> {
 
@@ -32,11 +33,15 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
 
         if (msg instanceof WebSocketFrame) {
-            if (inboundHandler().doThrottle(ctx, (WebSocketFrame) msg)) {
+            if (isThrottled(ctx, (WebSocketFrame) msg)) {
                 outboundHandler().write(ctx, msg, promise);
             }
         } else {
             outboundHandler().write(ctx, msg, promise);
         }
+    }
+
+    protected boolean isThrottled(ChannelHandlerContext ctx, WebSocketFrame msg) throws APIManagementException {
+        return inboundHandler().doThrottle(ctx, msg);
     }
 }

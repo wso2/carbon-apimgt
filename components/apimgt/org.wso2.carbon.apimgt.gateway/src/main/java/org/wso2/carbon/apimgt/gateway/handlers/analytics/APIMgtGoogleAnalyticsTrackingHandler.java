@@ -62,7 +62,7 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
     /** Version number of the throttle policy */
     private long version;
 
-	private GoogleAnalyticsConfig config = null;
+    protected GoogleAnalyticsConfig config = null;
 
 	@Override
 	public boolean handleRequest(MessageContext msgCtx) {
@@ -94,33 +94,37 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
                 log.warn("Unable to load Google Analytics configuration using key: " + configKey);
                 return true;
             }
-        	version = entry.getVersion();
-            config = new GoogleAnalyticsConfig((OMElement)entryValue);
+            version = entry.getVersion();
+            config = getGoogleAnalyticsConfig((OMElement) entryValue);
         }
         
         if (config == null) {
             log.warn("Unable to create Google Analytics configuration using key: " + configKey);
             return true;
-		}
-		
-		if (!config.enabled) {
-			return true;
-		}
-		try {
-			trackPageView(msgCtx);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		return true;
-	}
+        }
 
-	/**
-	 * Track a page view, updates all the cookies and campaign tracker, makes a
-	 * server side request to Google Analytics and writes the transparent gif
-	 * byte data to the response.
-	 * 
-	 * @throws Exception
-	 */
+        if (!config.isEnabled()) {
+            return true;
+        }
+        try {
+            trackPageView(msgCtx);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return true;
+    }
+
+    protected GoogleAnalyticsConfig getGoogleAnalyticsConfig(OMElement entryValue) {
+        return new GoogleAnalyticsConfig(entryValue);
+    }
+
+    /**
+     * Track a page view, updates all the cookies and campaign tracker, makes a
+     * server side request to Google Analytics and writes the transparent gif
+     * byte data to the response.
+     *
+     * @throws Exception
+     */
     private void trackPageView(MessageContext msgCtx) throws Exception {
         @SuppressWarnings("rawtypes")
         Map headers = (Map) ((Axis2MessageContext) msgCtx).getAxis2MessageContext()
@@ -243,13 +247,22 @@ public class APIMgtGoogleAnalyticsTrackingHandler extends AbstractHandler {
             		APIMgtUsagePublisherConstants.API_GOOGLE_ANALYTICS_TRACKING_ENABLED)).getText();
             enabled =  googleAnalyticsEnabledStr != null && JavaUtils.isTrueExplicitly(googleAnalyticsEnabledStr);
 		}
-	}
-	
-	public String getConfigKey() {
-		return configKey;
-	}
 
-	public void setConfigKey(String configKey) {
-		this.configKey = configKey;
-	}
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+    }
+
+    public String getConfigKey() {
+        return configKey;
+    }
+
+    public void setConfigKey(String configKey) {
+        this.configKey = configKey;
+    }
+
 }

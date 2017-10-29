@@ -42,6 +42,16 @@ public class EndpointConfigContextTest {
         EndpointConfigContext endpointConfigContext = new EndpointConfigContext(configcontext, api);
         endpointConfigContext.validate();
         Assert.assertNotNull(endpointConfigContext.getContext().get("endpoint_config"));
+        //set an empty string and check the validation
+        endpointConfig = "";
+        api.setEndpointConfig(endpointConfig);
+        endpointConfigContext = new EndpointConfigContext(configcontext, api);
+        endpointConfigContext.validate();
+        //set a null value and check the validation
+        endpointConfig = null;
+        api.setEndpointConfig(endpointConfig);
+        endpointConfigContext = new EndpointConfigContext(configcontext, api);
+        endpointConfigContext.validate();
         //set invalid value and check the validation
         String invalidEndpointConfig = "\"production_endpoints\"{\"url\":\"" + url + "\", \"config\":null}," +
                 "\"sandbox_endpoint\":{\"url\":\"" + url + "\",\"config\":null},\"endpoint_type\":\"http\"";

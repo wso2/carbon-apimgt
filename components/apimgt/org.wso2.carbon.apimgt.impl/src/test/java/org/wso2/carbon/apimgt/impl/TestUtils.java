@@ -88,15 +88,17 @@ public class TestUtils {
         return sh;
     }
     
-    public static void mockAPIMConfiguration(String propertyName, String value) throws RegistryException, 
+    public static ServiceReferenceHolder mockAPIMConfiguration(String propertyName, String value, int tenantId) throws RegistryException,
                                                                                         UserStoreException{
-        ServiceReferenceHolder sh = mockRegistryAndUserRealm(-1234);
+        ServiceReferenceHolder sh = mockRegistryAndUserRealm(tenantId);
         APIManagerConfigurationService amConfigService = Mockito.mock(APIManagerConfigurationService.class);
         APIManagerConfiguration amConfig = Mockito.mock(APIManagerConfiguration.class);
         
         PowerMockito.when(sh.getAPIManagerConfigurationService()).thenReturn(amConfigService);
         PowerMockito.when(amConfigService.getAPIManagerConfiguration()).thenReturn(amConfig);
         PowerMockito.when(amConfig.getFirstProperty(propertyName)).thenReturn(value);
+
+        return sh;
     }
     
     public static ServiceReferenceHolder getServiceReferenceHolder() {

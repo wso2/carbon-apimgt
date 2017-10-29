@@ -128,5 +128,7 @@ public class SequenceAdminServiceClient {
         }
     }
 
-
+    protected void setSequenceAdminStub(SequenceAdminServiceStub sequenceAdminStub) {
+		this.sequenceAdminStub = sequenceAdminStub;
+	}
 }
