@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserStoreConfigConstants;
 import org.wso2.carbon.utils.CarbonUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -471,7 +472,15 @@ public class RestAPIStoreUtils {
                 .getValueFromCache(applicationUUID, userName, filterByUserRoles);
 
         if (filteredScopes != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Scopes for the application " + applicationUUID + " is found in the cache");
+            }
             return convertScopeSetToScopeList(filteredScopes);
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Scopes for the application " + applicationUUID + " is not found in the cache, retrieving it "
+                    + "from the database for the user " + userName);
         }
         /* If the relevant scope details for the particular application, and user is not there in cache, get it from
             the regular db call.
@@ -482,37 +491,52 @@ public class RestAPIStoreUtils {
         subscriptions = apiConsumer.getSubscribedAPIs(subscriber, application.getName(), application.getGroupId());
         Iterator<SubscribedAPI> subscribedAPIIterator = subscriptions.iterator();
         List<APIIdentifier> identifiers = new ArrayList<>();
+
         while (subscribedAPIIterator.hasNext()) {
-            identifiers.add(subscribedAPIIterator.next().getApiId());
+            SubscribedAPI subscribedAPI = subscribedAPIIterator.next();
+            identifiers.add(subscribedAPI.getApiId());
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "API " + subscribedAPI.getApiId() + " is subscribed to the the application " + applicationUUID);
+            }
         }
 
         if (!identifiers.isEmpty()) {
             //get scopes for subscribed apis
             Set<Scope> scopeSet = apiConsumer.getScopesBySubscribedAPIs(identifiers);
+            if (scopeSet != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Number of un-filtered set of scopes retrieved for the application " + applicationUUID
+                            + "is " + scopeSet.size());
+                }
             /*
              * Based on the requirement directly send the scope list or filter it based on the role of the customer.
              */
-            if (filterByUserRoles) {
-                filteredScopes = new LinkedHashSet<>();
-                List<String> userRoleList = null;
-                String[] userRoleArray = getRoleListOfUser(userName);
-                if (userRoleArray != null) {
-                    userRoleList = Arrays.asList(userRoleArray);
-                }
-                for (Scope scope : scopeSet) {
-                    if (scope.getRoles() == null || scope.getRoles().isEmpty()) {
-                        filteredScopes.add(scope);
-                    } else if (userRoleList != null && !userRoleList.isEmpty()) {
-                        List<String> roleList = new ArrayList<>(
-                                Arrays.asList(scope.getRoles().replaceAll(" ", "").split(",")));
-                        roleList.retainAll(userRoleList);
-                        if (!roleList.isEmpty()) {
+                if (filterByUserRoles) {
+                    filteredScopes = new LinkedHashSet<>();
+                    List<String> userRoleList = null;
+                    String[] userRoleArray = getRoleListOfUser(userName);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Roles of the user " + userName + " are " + Arrays.toString(userRoleArray));
+                    }
+                    if (userRoleArray != null) {
+                        userRoleList = Arrays.asList(userRoleArray);
+                    }
+                    for (Scope scope : scopeSet) {
+                        if (scope.getRoles() == null || scope.getRoles().isEmpty()) {
                             filteredScopes.add(scope);
+                        } else if (userRoleList != null && !userRoleList.isEmpty()) {
+                            List<String> roleList = new ArrayList<>(
+                                    Arrays.asList(scope.getRoles().replaceAll("\\s+", "").split(",")));
+                            roleList.retainAll(userRoleList);
+                            if (!roleList.isEmpty()) {
+                                filteredScopes.add(scope);
+                            }
                         }
                     }
+                } else {
+                    filteredScopes = scopeSet;
                 }
-            } else {
-                filteredScopes = scopeSet;
             }
             applicationScopeCacheManager.addToCache(applicationUUID, userName, filteredScopes, filterByUserRoles);
         }
@@ -534,17 +558,21 @@ public class RestAPIStoreUtils {
                         multiTenantUserAdminServiceStub._getServiceClient());
             } catch (AxisFault axisFault) {
                 throw new APIManagementException(
-                        "Error while accessing mutltitenantUserAdminStub to get role list " + "of user", axisFault);
+                        "Error while accessing mutltitenantUserAdminStub to get role list of user", axisFault);
             }
         }
         try {
             int index = userName.indexOf("/");
-            String userStoreDomainName = UserStoreConfigConstants.PRIMARY;
+            String fullyQualifiedUserName = userName;
 
-            if (index > 0) {
-                userStoreDomainName = userName.substring(0, index);
+            if (index <= 0) {
+                fullyQualifiedUserName = UserStoreConfigConstants.PRIMARY + "/" + userName;
             }
-            return multiTenantUserAdminServiceStub.getUserRoleList(userStoreDomainName + "/" + userName);
+            if (RestApiUtil.getLoggedInUserTenantDomain().equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)
+                    && !userName.endsWith("@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                fullyQualifiedUserName += "@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+            }
+            return multiTenantUserAdminServiceStub.getUserRoleList(fullyQualifiedUserName);
         } catch (RemoteException e) {
             throw new APIManagementException("Error while connecting to MultiTenantUserAdminService", e);
         } catch (APIKeyMgtException e) {

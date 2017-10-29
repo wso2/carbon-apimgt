@@ -164,12 +164,16 @@ public class RestApiUtil {
      * @throws APIManagementException
      */
     public static APIConsumer getLoggedInUserConsumer() throws APIManagementException {
-        String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
-        return APIManagerFactory.getInstance().getAPIConsumer(loggedInUser);
+        return APIManagerFactory.getInstance().getAPIConsumer(getLoggedInUsername());
     }
 
     public static String getLoggedInUsername() {
-        return CarbonContext.getThreadLocalCarbonContext().getUsername();
+        String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(getLoggedInUserTenantDomain()) && userName
+                .contains("@") && !userName.endsWith("@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+            userName += "@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+        return userName;
     }
 
     public static String getLoggedInUserTenantDomain() {
@@ -186,6 +190,7 @@ public class RestApiUtil {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         JSONObject loginInfoJsonObj = new JSONObject();
         try {
+
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             loginInfoJsonObj.put("user", username);
             if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {

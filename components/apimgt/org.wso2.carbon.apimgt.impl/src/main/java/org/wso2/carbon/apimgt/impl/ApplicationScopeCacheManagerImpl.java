@@ -32,7 +32,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * This is a default concrete implementation of ApplicationScopeCacheManager.s
+ * This is a default concrete implementation of ApplicationScopeCacheManager.
  */
 public class ApplicationScopeCacheManagerImpl implements ApplicationScopeCacheManager{
     /**
@@ -109,9 +109,11 @@ public class ApplicationScopeCacheManagerImpl implements ApplicationScopeCacheMa
         getApplicationScopeCache(APIConstants.APP_SUBSCRIPTION_SCOPE_CACHE).remove(applicationUUID);
         List<String> userList = applicationUserMappings.get(applicationUUID);
 
-        for (String userName : userList) {
-            getApplicationScopeCache(APIConstants.APP_SUBSCRIPTION_FILTERED_SCOPE_CACHE)
-                    .remove(userName + "-" + applicationUUID);
+        if (userList != null) {
+            for (String userName : userList) {
+                getApplicationScopeCache(APIConstants.APP_SUBSCRIPTION_FILTERED_SCOPE_CACHE)
+                        .remove(userName + "-" + applicationUUID);
+            }
         }
         applicationUserMappings.remove(applicationUUID);
         updatedApplicationList.remove(applicationUUID);

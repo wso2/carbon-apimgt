@@ -55,9 +55,10 @@ public class MultiTenantUserAdminService extends AbstractAdmin {
         }
         if (tenantId != MultitenantConstants.SUPER_TENANT_ID) {
             if (log.isDebugEnabled()) {
-                log.debug("This is");
+                log.debug("MultiTenantUserAdminService is a privileged admin service and can only be used by "
+                        + "super-tenant users.");
             }
-            return null;
+            return new String[0];
         } else {
             try {
                 int userTenantId = IdentityTenantUtil.getTenantIdOfUser(userName);

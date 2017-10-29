@@ -437,6 +437,10 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         String userName = RestApiUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = RestApiUtil.getConsumer(userName);
+            if (log.isDebugEnabled()) {
+                log.debug("Scope retrieval request received from the " + userName + " for the application id "
+                        + applicationId + " with the query parameter('filterByUserRoles) value " + filterByUserRoles);
+            }
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
