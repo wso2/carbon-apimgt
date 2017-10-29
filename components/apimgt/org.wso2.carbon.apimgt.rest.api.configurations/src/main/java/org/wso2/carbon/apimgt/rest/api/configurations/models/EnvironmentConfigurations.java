@@ -26,13 +26,13 @@ import java.util.List;
 /**
  * Class to hold Environment configuration parameters
  */
-@Configuration(namespace = "wso2.carbon.apmigt.environments", description = "Environment Configaration Paramters")
+@Configuration(namespace = "wso2.carbon.apimgt.environments", description = "Environment Configurations")
 public class EnvironmentConfigurations {
 
-    @Element(description = "Default Environment Name")
+    @Element(description = "This APIM instance's Environment-name")
     private String environmentName = "Production";
 
-    @Element(description = "List of Environments")
+    @Element(description = "List of all Environments")
     private List<Environment> environments = new ArrayList<Environment>();
 
     public String getEnvironmentName() {

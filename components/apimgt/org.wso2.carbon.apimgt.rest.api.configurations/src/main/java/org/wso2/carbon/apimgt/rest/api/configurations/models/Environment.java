@@ -32,8 +32,8 @@ public class Environment {
     @Element(description = "Token Endpoint URL")
     private String loginTokenPath = "/login/token";
 
-    @Element(description = "Environment Name", required = true)
-    private String label = "Production";
+    @Element(description = "Unique Environment-name", required = true)
+    private String label = "Default";
 
     public String getHost() {
         return host;
