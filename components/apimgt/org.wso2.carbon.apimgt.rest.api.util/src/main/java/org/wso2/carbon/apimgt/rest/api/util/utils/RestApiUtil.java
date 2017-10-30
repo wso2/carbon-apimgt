@@ -169,6 +169,8 @@ public class RestApiUtil {
 
     public static String getLoggedInUsername() {
         String userName = CarbonContext.getThreadLocalCarbonContext().getUsername();
+        // This fix is needed to have user names with and without email address, without enabling
+        // "EnableEmailUserName" property
         if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(getLoggedInUserTenantDomain()) && userName
                 .contains("@") && !userName.endsWith("@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
             userName += "@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
@@ -190,7 +192,6 @@ public class RestApiUtil {
         String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
         JSONObject loginInfoJsonObj = new JSONObject();
         try {
-
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             loginInfoJsonObj.put("user", username);
             if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {

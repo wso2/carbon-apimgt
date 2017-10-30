@@ -87,8 +87,10 @@ public class RestAPIStoreUtils {
         keyManagerUrl = apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL);
         keyManagerAdminUserName = apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
         keyManagerAdminPassword = apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
-        isStoreCacheEnabled = Boolean
-                .parseBoolean(apiManagerConfiguration.getFirstProperty(APIConstants.STORE_CACHE_ENABLED));
+        String isStoreCacheEnabledConfiguration = apiManagerConfiguration.getFirstProperty(APIConstants
+                .STORE_CACHE_ENABLED);
+        isStoreCacheEnabled =
+                isStoreCacheEnabledConfiguration != null && Boolean.parseBoolean(isStoreCacheEnabledConfiguration);
         try {
             multiTenantUserAdminServiceStub = new MultiTenantUserAdminServiceStub(null,
                     keyManagerUrl + "MultiTenantUserAdminService");
