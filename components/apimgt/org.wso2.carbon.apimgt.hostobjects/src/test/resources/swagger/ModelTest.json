@@ -1,0 +1,17 @@
+ {
+    "title": "NewsArticleExt",
+    "type": "object",
+    "allOf": [
+      {
+        "$ref": "#/definitions/NewsArticle"
+      },
+      {
+        "type": "object",
+        "properties": {
+          "test": {
+            "type": "string"
+          }
+        }
+      }
+    ]
+  }

@@ -1,0 +1,13 @@
+
+    {
+      "name": "api_key",
+      "in": "header",
+      "description": "",
+      "items": {
+        "enum": [
+          "packages", "accommodations"
+        ]
+      },
+      "required": false,
+      "type": "string"
+    }
