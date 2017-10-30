@@ -141,7 +141,9 @@ class AuthManager {
     getTokenEndpoint(environment) {
         let loginTokenPath;
         if (environment) {
-            loginTokenPath = environment.host + environment.loginTokenPath + this.contextPath;
+            //The default value of `host` in back-end java code is an empty string.
+            let host = (environment.host) ? environment.host : this.host;
+            loginTokenPath = host + environment.loginTokenPath + this.contextPath;
         } else {
             //If no environment return default loginTokenPath
             loginTokenPath = this.host + "/login/token" + this.contextPath;
