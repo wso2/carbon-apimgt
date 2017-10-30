@@ -140,9 +140,9 @@ class AuthManager {
      */
     getTokenEndpoint(environment) {
         let loginTokenPath;
-        if(environment){
+        if (environment) {
             loginTokenPath = environment.host + environment.loginTokenPath + this.contextPath;
-        }else{
+        } else {
             //If no environment return default loginTokenPath
             loginTokenPath = this.host + "/login/token" + this.contextPath;
         }
@@ -223,7 +223,9 @@ class AuthManager {
     static hasScopes(resourcePath, resourceMethod) {
         let userscopes = this.getUser().scopes;
         let validScope = SingleClient.getScopeForResource(resourcePath, resourceMethod);
-        return validScope.then(scope => {return userscopes.includes(scope)});
+        return validScope.then(scope => {
+            return userscopes.includes(scope)
+        });
     }
 
 }
