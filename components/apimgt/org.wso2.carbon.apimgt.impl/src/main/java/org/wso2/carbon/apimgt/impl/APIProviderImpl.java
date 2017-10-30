@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
@@ -3241,8 +3242,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	                String[] inSeqChildPaths = inSeqCollection.getChildren();
                     for (String inSeqChildPath : inSeqChildPaths)    {
                         Resource inSequence = registry.get(inSeqChildPath);
-                        OMElement seqElment = APIUtil.buildOMElement(inSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(inSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + inSeqChildPath + "' from the registry.", e);
+                        }
                     }
                 }
             }
@@ -3256,8 +3261,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     String[] inSeqChildPaths = inSeqCollection.getChildren();
                     for (String inSeqChildPath : inSeqChildPaths)    {
                         Resource inSequence = registry.get(inSeqChildPath);
-                        OMElement seqElment = APIUtil.buildOMElement(inSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(inSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + inSeqChildPath + "' from the registry.", e);
+                        }
                     }
                 }
             }
@@ -3304,8 +3313,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	                String[] outSeqChildPaths = outSeqCollection.getChildren();
                     for (String childPath : outSeqChildPaths)   {
                         Resource outSequence = registry.get(childPath);
-                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + childPath + "' from the registry.", e);
+                        }
                     }
                 }
             }
@@ -3319,8 +3332,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     String[] outSeqChildPaths = outSeqCollection.getChildren();
                     for (String outSeqChildPath : outSeqChildPaths)    {
                         Resource outSequence = registry.get(outSeqChildPath);
-                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + outSeqChildPath + "' from the registry.", e);
+                        }
                     }
                 }
             }
@@ -3346,14 +3363,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
             if (registry.resourceExists(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION)) {
-                org.wso2.carbon.registry.api.Collection faultSeqCollection =
+                org.wso2.carbon.registry.api.Collection inSeqCollection =
                         (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION);
-                if (faultSeqCollection !=null) {
-                    String[] faultSeqChildPaths = faultSeqCollection.getChildren();
-                    for (String faultSeqChildPath : faultSeqChildPaths) {
-                        Resource outSequence = registry.get(faultSeqChildPath);
-                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                if (inSeqCollection !=null) {
+                    String[] inSeqChildPaths = inSeqCollection.getChildren();
+                    for (String inSeqChildPath : inSeqChildPaths) {
+                        Resource inSequence = registry.get(inSeqChildPath);
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(inSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + inSeqChildPath + "' from the registry.", e);
+                        }
                     }
 
                 }
@@ -3386,14 +3407,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
             if (registry.resourceExists(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION)) {
-                org.wso2.carbon.registry.api.Collection faultSeqCollection =
+                org.wso2.carbon.registry.api.Collection outSeqCollection =
                         (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
-                if (faultSeqCollection !=null) {
-                    String[] faultSeqChildPaths = faultSeqCollection.getChildren();
-                    for (String faultSeqChildPath : faultSeqChildPaths) {
-                        Resource outSequence = registry.get(faultSeqChildPath);
-                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                if (outSeqCollection !=null) {
+                    String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    for (String outSeqChildPath : outSeqChildPaths) {
+                        Resource outSequence = registry.get(outSeqChildPath);
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + outSeqChildPath + "' from the registry.", e);
+                        }
                     }
 
                 }
@@ -3433,10 +3458,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     String[] faultSeqChildPaths = faultSeqCollection.getChildren();
                     for (String faultSeqChildPath : faultSeqChildPaths) {
                         Resource outSequence = registry.get(faultSeqChildPath);
+                        try {
                         OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
                         sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + faultSeqChildPath + "' from the registry.", e);
+                        }
                     }
-
                 }
             }
 
@@ -3489,8 +3517,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     String[] faultSeqChildPaths = faultSeqCollection.getChildren();
                     for (String faultSeqChildPath : faultSeqChildPaths) {
                         Resource outSequence = registry.get(faultSeqChildPath);
-                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + faultSeqChildPath
+                                    + "' from the registry.", e);
+                        }
                     }
 
                 }
@@ -3500,14 +3533,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                                       APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
 
             if(registry.resourceExists(customOutSeqFileLocation))    {
-                org.wso2.carbon.registry.api.Collection outSeqCollection =
+                org.wso2.carbon.registry.api.Collection faultSeqCollection =
                         (org.wso2.carbon.registry.api.Collection) registry.get(customOutSeqFileLocation);
-                if (outSeqCollection != null) {
-                    String[] outSeqChildPaths = outSeqCollection.getChildren();
-                    for (String outSeqChildPath : outSeqChildPaths)    {
-                        Resource outSequence = registry.get(outSeqChildPath);
-                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                if (faultSeqCollection != null) {
+                    String[] faultSeqChildPaths = faultSeqCollection.getChildren();
+                    for (String faultSeqChildPath : faultSeqChildPaths)    {
+                        Resource faultSequence = registry.get(faultSeqChildPath);
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(faultSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + faultSeqChildPath
+                                    + "' from the registry.", e);
+                        }
                     }
                 }
             }
@@ -3558,17 +3596,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
-            String customOutSeqFileLocation = APIUtil.getSequencePath(apiIdentifier,
-                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
-            if(registry.resourceExists(customOutSeqFileLocation))    {
-                org.wso2.carbon.registry.api.Collection outSeqCollection =
-                        (org.wso2.carbon.registry.api.Collection) registry.get(customOutSeqFileLocation);
-                if (outSeqCollection != null) {
-                    String[] outSeqChildPaths = outSeqCollection.getChildren();
-                    for (String outSeqChildPath : outSeqChildPaths)    {
-                        Resource outSequence = registry.get(outSeqChildPath);
-                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+            String customInSeqFileLocation = APIUtil
+                    .getSequencePath(apiIdentifier, APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+            if (registry.resourceExists(customInSeqFileLocation)) {
+                org.wso2.carbon.registry.api.Collection inSeqCollection = (org.wso2.carbon.registry.api.Collection) registry
+                        .get(customInSeqFileLocation);
+                if (inSeqCollection != null) {
+                    String[] inSeqChildPaths = inSeqCollection.getChildren();
+                    for (String inSeqChildPath : inSeqChildPaths) {
+                        Resource outSequence = registry.get(inSeqChildPath);
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + inSeqChildPath
+                                    + "' from the registry.", e);
+                        }
                     }
                 }
             }
@@ -3627,8 +3670,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     String[] outSeqChildPaths = outSeqCollection.getChildren();
                     for (String outSeqChildPath : outSeqChildPaths)    {
                         Resource outSequence = registry.get(outSeqChildPath);
-                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + outSeqChildPath
+                                    + "' from the registry.", e);
+                        }
                     }
                 }
             }
@@ -3680,14 +3728,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String customOutSeqFileLocation = APIUtil.getSequencePath(apiIdentifier,
                     APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
             if(registry.resourceExists(customOutSeqFileLocation))    {
-                org.wso2.carbon.registry.api.Collection outSeqCollection =
-                        (org.wso2.carbon.registry.api.Collection) registry.get(customOutSeqFileLocation);
-                if (outSeqCollection != null) {
-                    String[] outSeqChildPaths = outSeqCollection.getChildren();
-                    for (String outSeqChildPath : outSeqChildPaths)    {
-                        Resource outSequence = registry.get(outSeqChildPath);
-                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                org.wso2.carbon.registry.api.Collection faultSeqCollection = (org.wso2.carbon.registry.api.Collection) registry
+                        .get(customOutSeqFileLocation);
+                if (faultSeqCollection != null) {
+                    String[] faultSeqChildPaths = faultSeqCollection.getChildren();
+                    for (String faultSeqChildPath : faultSeqChildPaths) {
+                        Resource faultSequence = registry.get(faultSeqChildPath);
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(faultSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + faultSeqChildPath
+                                    + "' from the registry.", e);
+                        }
                     }
                 }
             }
