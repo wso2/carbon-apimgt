@@ -159,3 +159,26 @@ input.ep-field{
 .btn-sequenceUpload{
     min-width:155px;
 }
+.sidebar-wrapper .nav i{
+    margin-left: 0;
+}
+.sub-menu li a{
+    text-indent: 10px;
+    color: #666;
+}
+.sub-sub-menu li a{
+    font-size: 13px;
+    text-indent: 35px;
+    color: #999;
+}
+
+.sidebar-wrapper { z-index: 1000; position: absolute; left: -350px; width: 350px; height: 100%; overflow-y: auto; -webkit-transition: left 0.5s ease, right 0.5s ease; -o-transition: left 0.5s ease, right 0.5s ease; transition: left 0.5s ease, right 0.5s ease; }
+.sidebar-nav ul :not(collapsed) .arrow:before, .sidebar-nav li :not(collapsed) .arrow:before { font-family: "font-wso2"; content: '\e684'; display: inline-block; vertical-align: middle; float: right; font-size: 10px; }
+.sidebar-nav ul .collapsed .arrow:before, .sidebar-nav li .collapsed .arrow:before {font-family: "font-wso2";content: '\e685';display: inline-block;vertical-align: middle;float: right;}
+.sidebar-nav .sub-menu ul :not(collapsed) .arrow:before,
+.sidebar-nav .sub-menu li :not(collapsed) .arrow:before{
+    font-size: 6px;
+}
+.nav-pills.pages > li:last-child{
+    margin-bottom: 30px;
+}
