@@ -17,36 +17,34 @@
  */
 
 import axios from 'axios'
-import DefaultConfig from './DefaultConfigs.json'
 
 class ConfigManager {
 
     constructor() {
-        this.preBuildConfigs = DefaultConfig;
-        this.runTimeConfigs = {};
-        this.runTimeConfigLocation = ""; // URL to fetch runtime config JSON
     }
 
-    checkRunTimeConfigs() {
+    /**
+     * get configurations from server: deployment.yaml
+     * @returns {Object}: configuration object
+     */
+    static getConfigs() {
+        return {
+            'promised_environments': function () {
+                if(ConfigManager._promised_environments){
+                    return ConfigManager._promised_environments;
+                }
+                let host = window.location.protocol + "//" + window.location.host;
+                let environmentConfigPath = "/configService/environments";
+                let requestUrl = host + environmentConfigPath;
 
-    }
-
-    getDefaultConfigs() {
-        return DefaultConfig;
-    }
-
-    getThisHost(){
-        let host = window.location.protocol + "//" + window.location.host;
-        return host;
-    }
-
-    getPromisedEnvironments() {
-        let host = this.getThisHost();
-        let environmentConfigPath = this.getDefaultConfigs().environmentConfigPath;
-        let requestUrl = host + environmentConfigPath;
-
-        let promised_environments = axios.get(requestUrl);
+                ConfigManager._promised_environments = axios.get(requestUrl);
+                return ConfigManager._promised_environments;
+            }
+        };
     }
 }
+
+//environment configurations
+ConfigManager._promised_environments = null;
 
 export default ConfigManager;

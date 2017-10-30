@@ -26,10 +26,11 @@ import SingleClient from './SingleClient'
 
 class AuthManager {
     constructor() {
-        this.configs = new Configs();
+        this.host = window.location.protocol + "//" + window.location.host;
         this.isLogged = false;
         this.username = null;
         this.userscope = null;
+        this.contextPath = "/publisher";
     }
 
     static refreshTokenOnExpire() {
@@ -132,15 +133,20 @@ class AuthManager {
         /* TODO: IMHO it's better to get this key (`wso2_user`) from configs */
     }
 
+    /**
+     * Get login token path from given environment or get default login token path
+     * @param {Object} environment: environment object
+     * @returns {String} loginTokenPath: login token path of the given environment
+     */
     getTokenEndpoint(environment) {
         let loginTokenPath;
         if(environment){
-            loginTokenPath = environment.host + environment.loginTokenPath;
+            loginTokenPath = environment.host + environment.loginTokenPath + this.contextPath;
         }else{
-            //If no environment defined return default loginTokenPath
-            loginTokenPath = this.configs.getThisHost() + this.configs.getDefaultConfigs().loginTokenPath;
+            //If no environment return default loginTokenPath
+            loginTokenPath = this.host + "/login/token" + this.contextPath;
         }
-        return loginTokenPath + this.configs.getDefaultConfigs().contextPath;
+        return loginTokenPath;
     }
 
     /**
@@ -148,6 +154,7 @@ class AuthManager {
      * Can't use swaggerjs to generate client.Hence using Axios to make AJAX calls
      * @param {String} username : Username of the user
      * @param {String} password : Plain text password
+     * @param {Object} environment : environment object
      * @returns {AxiosPromise} : Promise object with the login request made
      */
     authenticateUser(username, password, environment) {
@@ -168,7 +175,7 @@ class AuthManager {
             const validityPeriod = response.data.validityPeriod; // In seconds
             const WSO2_AM_TOKEN_1 = response.data.partialToken;
             const user = new User(response.data.authUser, response.data.idToken);
-            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, this.configs.getDefaultConfigs().contextPath);
+            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, this.contextPath);
             user.scopes = response.data.scopes.split(" ");
             AuthManager.setUser(user);
         });
@@ -179,9 +186,9 @@ class AuthManager {
      * Revoke the issued OAuth access token for currently logged in user and clear both cookie and localstorage data.
      */
     logout() {
-        let authHeader = this.configs.getDefaultConfigs().bearer + AuthManager.getUser().getPartialToken();
+        let authHeader = "Bearer " + AuthManager.getUser().getPartialToken();
         //TODO Will have to change the logout end point url to contain the app context(i.e. publisher/store, etc.)
-        let url = this.configs.getThisHost() + "/login/logout/publisher";
+        let url = this.host + "/login/logout" + this.contextPath;
         let headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -202,7 +209,7 @@ class AuthManager {
             ' apim:subscription_view apim:subscription_block apim:subscribe'
         };
         let referrer = (document.referrer.indexOf("https") !== -1) ? document.referrer : null;
-        let url = this.configs.getDefaultConfigs().contextPath + '/auth/apis/login/token';
+        let url = this.contextPath + '/auth/apis/login/token';
         /* TODO: Fetch this from configs ~tmkb*/
         let headers = {
             'Authorization': authzHeader,
