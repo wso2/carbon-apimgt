@@ -26,12 +26,21 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
-import org.wso2.carbon.apimgt.rest.api.store.dto.*;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationMappingUtil;
@@ -40,7 +49,8 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
 import javax.ws.rs.core.Response;
 
 /**
@@ -393,8 +403,6 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             if (application != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                     apiConsumer.removeApplication(application);
-                    APIManagerFactory.getInstance().getApplicationScopeCacheManager().notifyOnApplicationDelete
-                            (applicationId);
                     return Response.ok().build();
                 } else {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
@@ -422,7 +430,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     }
 
     /**
-     * Retrieves the scopes related with particular applications based on subscibed APIs.
+     * Retrieves the scopes related with particular applications based on subscribed APIs.
      *
      * @param applicationId     Application Identifier.
      * @param filterByUserRoles Whether to filter scope by user roles.
@@ -455,10 +463,10 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
         } catch (APIManagementException e) {
-            if (e.getMessage().contains("UserAdmin")) {
+            if (e.getMessage().contains("MultiTenantUserAdmin")) {
                 RestApiUtil.handleInternalServerError(
-                        "UserAdmin admin service error while getting scopes related with application " + applicationId,
-                        e, log);
+                        "MutiTenantUserAdmin admin service error while getting scopes related with application " +
+                                applicationId, e, log);
             } else {
                 RestApiUtil.handleInternalServerError(
                         "Error while getting scopes related with application " + applicationId, e, log);

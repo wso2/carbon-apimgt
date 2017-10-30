@@ -36,7 +36,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.ApplicationScopeCacheManager;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -90,7 +89,7 @@ import javax.xml.stream.XMLStreamReader;
 @SuppressStaticInitializationFor("org.wso2.carbon.context.PrivilegedCarbonContext")
 @PrepareForTest({ServiceReferenceHolder.class, ApiMgtDAO.class, APIUtil.class, APIGatewayManager.class, 
     GovernanceUtils.class, PrivilegedCarbonContext.class, WorkflowExecutorFactory.class, JavaUtils.class,
-    APIProviderImpl.class, APIManagerFactory.class})
+    APIProviderImpl.class})
 public class APIProviderImplTest {
 
     @BeforeClass
@@ -1153,14 +1152,9 @@ public class APIProviderImplTest {
         //updateApiArtifact
         PowerMockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenReturn(artifact);
         Mockito.when(artifact.getId()).thenReturn("12640983654");
-        PowerMockito.when(GovernanceUtils.getArtifactPath(apiProvider.registry, "12640983654"))
-                .thenReturn(apiSourcePath);
-        PowerMockito.mockStatic(APIManagerFactory.class);
-        APIManagerFactory apiManagerFactory = Mockito.mock(APIManagerFactory.class);
-        ApplicationScopeCacheManager applicationScopeCacheManager = Mockito.mock(ApplicationScopeCacheManager.class);
-        Mockito.doNothing().when(applicationScopeCacheManager).notifyUpdateOnApi(Mockito.any(APIIdentifier.class));
-        Mockito.doReturn(applicationScopeCacheManager).when(apiManagerFactory).getApplicationScopeCacheManager();
-        PowerMockito.when(APIManagerFactory.getInstance()).thenReturn(apiManagerFactory);
+        PowerMockito.when(GovernanceUtils.getArtifactPath(apiProvider.registry, "12640983654")).
+                                                                                        thenReturn(apiSourcePath);
+
         apiProvider.updateAPI(api); 
         //TODO: Need to add asserts        
     }

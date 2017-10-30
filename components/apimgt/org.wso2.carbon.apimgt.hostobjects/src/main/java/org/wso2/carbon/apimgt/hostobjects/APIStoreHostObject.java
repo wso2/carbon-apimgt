@@ -2391,8 +2391,6 @@ public class APIStoreHostObject extends ScriptableObject {
             }
             apiIdentifier.setTier(tier);
             addSubscriptionResponse = apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
-            Application application = apiConsumer.getApplicationById(applicationId);
-            APIManagerFactory.getInstance().getApplicationScopeCacheManager().notifyUpdateOnCache(application.getUUID());
         } catch (APIManagementException e) {
 
             if (e.getMessage() != null && e.getMessage().contains("was blocked")) {
@@ -2436,9 +2434,6 @@ public class APIStoreHostObject extends ScriptableObject {
             try {
                 int applicationId = APIUtil.getApplicationId(applicationName, userId);
                 addSubscriptionResponse = apiConsumer.addSubscription(apiIdentifier, userId, applicationId);
-                Application application = apiConsumer.getApplicationById(applicationId);
-                APIManagerFactory.getInstance().getApplicationScopeCacheManager()
-                        .notifyUpdateOnCache(application.getUUID());
             } catch (APIManagementException e) {
                 handleException("Error while adding the subscription for user: " + userId, e);
             }
@@ -3360,7 +3355,6 @@ public class APIStoreHostObject extends ScriptableObject {
 
             if (app != null) {
                 apiConsumer.removeApplication(app);
-                APIManagerFactory.getInstance().getApplicationScopeCacheManager().notifyOnApplicationDelete(app.getUUID());
             } else {
                 handleException("Application " + name + " doesn't exists");
             }
@@ -4052,8 +4046,6 @@ public class APIStoreHostObject extends ScriptableObject {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
             apiConsumer.removeSubscription(apiId, username, applicationId);
-            Application application = apiConsumer.getApplicationById(applicationId);
-            APIManagerFactory.getInstance().getApplicationScopeCacheManager().notifyUpdateOnCache(application.getUUID());
             return true;
         } catch (APIManagementException e) {
             handleException("Error while removing the subscription of" + name + "-" + version, e);

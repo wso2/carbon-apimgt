@@ -82,7 +82,6 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.core.UserStoreException;
 import org.wso2.carbon.user.core.tenant.TenantManager;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
@@ -171,13 +170,6 @@ public class AbstractAPIManagerTestCase {
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.doNothing().when(APIUtil.class, "loadTenantRegistry", Mockito.anyInt());
         PowerMockito.mockStatic(MultitenantUtils.class);
-        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
-
-        PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
-        PowerMockito.doReturn(privilegedCarbonContext)
-                .when(PrivilegedCarbonContext.class, "getThreadLocalCarbonContext");
-        Mockito.doReturn(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME).when(privilegedCarbonContext).getTenantDomain();
-
         BDDMockito.when(MultitenantUtils.getTenantDomain(Mockito.anyString())).thenReturn(SAMPLE_TENANT_DOMAIN_1);
         String userName = "admin";
         abstractAPIManager = new AbstractAPIManager(userName) {

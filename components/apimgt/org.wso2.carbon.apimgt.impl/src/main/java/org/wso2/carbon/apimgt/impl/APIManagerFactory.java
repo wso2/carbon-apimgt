@@ -20,7 +20,10 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.*;
+import org.wso2.carbon.apimgt.api.APIConsumer;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIManager;
+import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.impl.utils.LRUCache;
 
 public class APIManagerFactory {
@@ -33,7 +36,6 @@ public class APIManagerFactory {
 
     private APIManagerCache<APIProvider> providers = new APIManagerCache<APIProvider>(50);
     private APIManagerCache<APIConsumer> consumers = new APIManagerCache<APIConsumer>(500);
-    private ApplicationScopeCacheManager applicationScopeCacheManager;
 
     private APIManagerFactory() {
 
@@ -89,22 +91,6 @@ public class APIManagerFactory {
             }
         }
         return consumer;
-    }
-
-    /**
-     * To get the singleton of application scope cache manager.
-     *
-     * @return instance of ApplicationScopeCacheManager.
-     */
-    public ApplicationScopeCacheManager getApplicationScopeCacheManager() {
-        if (applicationScopeCacheManager == null) {
-            synchronized (ApplicationScopeCacheManager.class) {
-                if (applicationScopeCacheManager == null) {
-                    applicationScopeCacheManager = new ApplicationScopeCacheManagerImpl();
-                }
-            }
-        }
-        return applicationScopeCacheManager;
     }
 
     public void clearAll() {

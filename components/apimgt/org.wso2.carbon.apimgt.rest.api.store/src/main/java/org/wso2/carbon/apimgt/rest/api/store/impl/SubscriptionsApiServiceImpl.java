@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.rest.api.store.SubscriptionsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionListDTO;
@@ -209,8 +208,6 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
                         .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
                 SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI);
                 subscriptions.add(addedSubscriptionDTO);
-                APIManagerFactory.getInstance().getApplicationScopeCacheManager()
-                        .notifyUpdateOnCache(application.getUUID());
 
             } catch (APIMgtAuthorizationFailedException e) {
                 //this occurs when the api:application:tier mapping is not allowed. The reason for the message is taken from
@@ -281,7 +278,6 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             apiIdentifier.setTier(body.getTier());
             SubscriptionResponse subscriptionResponse = apiConsumer
                     .addSubscription(apiIdentifier, username, application.getId());
-            APIManagerFactory.getInstance().getApplicationScopeCacheManager().notifyUpdateOnCache(applicationId);
             SubscribedAPI addedSubscribedAPI = apiConsumer
                     .getSubscriptionByUUID(subscriptionResponse.getSubscriptionUUID());
             SubscriptionDTO addedSubscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(addedSubscribedAPI);
@@ -362,8 +358,6 @@ public class SubscriptionsApiServiceImpl extends SubscriptionsApiService {
             if (subscribedAPI != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForSubscription(subscribedAPI)) {
                     apiConsumer.removeSubscription(subscribedAPI);
-                    APIManagerFactory.getInstance().getApplicationScopeCacheManager().notifyUpdateOnCache
-                            (subscribedAPI.getApplication().getUUID());
                 } else {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_SUBSCRIPTION, subscriptionId, log);
                 }
