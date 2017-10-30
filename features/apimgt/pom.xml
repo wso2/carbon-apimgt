@@ -41,6 +41,7 @@
         <module>org.wso2.carbon.apimgt.store.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.core.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.authenticator.feature</module>
+        <module>org.wso2.carbon.apimgt.rest.api.configurations.feature</module>
         <module>org.wso2.carbon.apimgt.admin.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.analytics.feature</module>
     </modules>

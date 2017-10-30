@@ -42,6 +42,7 @@
         <module>org.wso2.carbon.apimgt.rest.api.core</module>
         <module>org.wso2.carbon.apimgt.rest.api.webserver</module>
         <module>org.wso2.carbon.apimgt.rest.api.authenticator</module>
+        <module>org.wso2.carbon.apimgt.rest.api.configurations</module>
         <module>org.wso2.carbon.apimgt.rest.api.analytics</module>
     </modules>
 
