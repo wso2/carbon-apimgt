@@ -463,7 +463,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
         } catch (APIManagementException e) {
-            if (e.getMessage().contains("MultiTenantUserAdmin")) {
+            if (e.getMessage()!= null && e.getMessage().contains("MultiTenantUserAdmin")) {
                 RestApiUtil.handleInternalServerError(
                         "MutiTenantUserAdmin admin service error while getting scopes related with application " +
                                 applicationId, e, log);

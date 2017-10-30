@@ -21,7 +21,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -109,6 +108,7 @@ public class MultiTenantUserAdminServiceTestCase {
         PowerMockito.doThrow(new IdentityRuntimeException("Identity run-time exception")).when(IdentityTenantUtil
                 .class, "getTenantIdOfUser", ADMIN_USER);
         multiTenantUserAdminService.getUserRoleList(ADMIN_USER);
+        log.info("Successfully completed testGetUserListNegativeScenario1 test case.");
     }
 
     /**
@@ -117,7 +117,7 @@ public class MultiTenantUserAdminServiceTestCase {
      */
     @Test(expected = APIKeyMgtException.class)
     public void testGetUserRoleListNegativeScenario2() throws Exception {
-        log.info("Running testGetUserListNegativeScenario1.");
+        log.info("Running testGetUserListNegativeScenario2.");
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         PowerMockito.mockStatic(IdentityTenantUtil.class);
         PowerMockito.mockStatic(APIKeyMgtDataHolder.class);
@@ -129,5 +129,6 @@ public class MultiTenantUserAdminServiceTestCase {
                 .when(IdentityTenantUtil.class, "getTenantIdOfUser", ADMIN_USER);
         Mockito.doThrow(new UserStoreException()).when(realmService).getTenantUserRealm(Mockito.anyInt());
         multiTenantUserAdminService.getUserRoleList(ADMIN_USER);
+        log.info("Successfully completed testGetUserListNegativeScenario2 test case.");
     }
 }
