@@ -75,14 +75,15 @@ import static org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUti
 public class RestAPIStoreUtils {
     private static final Log log = LogFactory.getLog(RestAPIStoreUtils.class);
     private static MultiTenantUserAdminServiceStub multiTenantUserAdminServiceStub;
-    private static APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
-            .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+    private static APIManagerConfiguration apiManagerConfiguration;
     private static String keyManagerUrl;
     private static String keyManagerAdminUserName;
     private static String keyManagerAdminPassword;
     private static boolean isStoreCacheEnabled;
 
     static {
+        apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
         keyManagerUrl = apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL);
         keyManagerAdminUserName = apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
         keyManagerAdminPassword = apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
@@ -537,7 +538,7 @@ public class RestAPIStoreUtils {
      * @return the roleList Of User
      * @throws APIManagementException API Management Exception.
      */
-    private static String[] getRoleListOfUser(String userName) throws APIManagementException {
+    protected static String[] getRoleListOfUser(String userName) throws APIManagementException {
         if (multiTenantUserAdminServiceStub == null) {
             try {
                 multiTenantUserAdminServiceStub = new MultiTenantUserAdminServiceStub(null,

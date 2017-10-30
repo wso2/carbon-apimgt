@@ -130,6 +130,12 @@ public class ApplicationsApiServiceImplTestCase {
         Response response = applicationsApiService
                 .applicationsApplicationScopesGet(NON_EXISTING_APPLICATION, false, null, null, null);
         Assert.assertNull("API call succeeded for wrong inputs", response);
+
+        PowerMockito.doThrow(new APIManagementException("MultiTenantUserAdmin"))
+                .when(RestApiUtil.class, "getConsumer", ADMIN_USERNAME);
+        response = applicationsApiService
+                .applicationsApplicationScopesGet(NON_EXISTING_APPLICATION, false, null, null, null);
+        Assert.assertNull("API call succeeded for wrong inputs", response);
     }
 
 }

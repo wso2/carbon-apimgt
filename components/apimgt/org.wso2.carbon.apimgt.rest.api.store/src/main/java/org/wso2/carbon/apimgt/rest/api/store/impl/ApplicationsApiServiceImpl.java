@@ -465,7 +465,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         } catch (APIManagementException e) {
             if (e.getMessage()!= null && e.getMessage().contains("MultiTenantUserAdmin")) {
                 RestApiUtil.handleInternalServerError(
-                        "MutiTenantUserAdmin admin service error while getting scopes related with application " +
+                        "MultiTenantUserAdmin admin service error while getting scopes related with application " +
                                 applicationId, e, log);
             } else {
                 RestApiUtil.handleInternalServerError(
