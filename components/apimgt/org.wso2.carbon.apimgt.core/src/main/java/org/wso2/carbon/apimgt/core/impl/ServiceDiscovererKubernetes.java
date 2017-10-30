@@ -112,17 +112,28 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
     private Config buildConfig() throws ServiceDiscoveryException, APIMgtDAOException {
         System.setProperty("kubernetes.auth.tryKubeConfig", "false");
         System.setProperty("kubernetes.auth.tryServiceAccount", "true");
+
+        /*
+         *  Common to both situations
+         *      - Token found inside APIM pod
+         *      - Token stored in APIM resources/security folder }
+         */
         ConfigBuilder configBuilder = new ConfigBuilder().withMasterUrl(implParameters.get(MASTER_URL))
                 .withCaCertFile(implParameters.get(CA_CERT_PATH));
 
+        /*
+         *  Check if a service account token File Name is given in the configuration
+         *      - if not : assume APIM is running inside a pod and look for the pod's token
+         */
         String externalSATokenFileName = implParameters.get(EXTERNAL_SA_TOKEN_FILE_NAME);
         if ("".equals(externalSATokenFileName)) {
             log.debug("Looking for service account token in " + POD_MOUNTED_SA_TOKEN_FILE_PATH);
-            String podMountedSAToken = APIFileUtils.readFileContentAsText(implParameters.get(POD_MOUNTED_SA_TOKEN_FILE_PATH));
+            String podMountedSAToken = APIFileUtils.readFileContentAsText(
+                    implParameters.get(POD_MOUNTED_SA_TOKEN_FILE_PATH));
             return configBuilder.withOauthToken(podMountedSAToken).build();
         } else {
             log.info("Using externally stored service account token");
-            return configBuilder.withOauthToken(resolveToken(externalSATokenFileName)).build();
+            return configBuilder.withOauthToken(resolveToken("encrypted" + externalSATokenFileName)).build();
         }
     }
 
@@ -132,12 +143,12 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
      * @return service account token
      * @throws ServiceDiscoveryException if an error occurs while resolving the token
      */
-    private String resolveToken(String externalSATokenFileName) throws ServiceDiscoveryException {
+    private String resolveToken(String encryptedTokenFileName) throws ServiceDiscoveryException {
         String token;
         try {
-            token = FileEncryptionUtility.getInstance().readFromEncryptedFile(
-                    System.getProperty("carbon.home") + FileEncryptionUtility.SECURITY_DIR + File.separator
-                    + "encrypted" + externalSATokenFileName);
+            String externalSATokenFilePath = System.getProperty("carbon.home") + FileEncryptionUtility.SECURITY_DIR
+                    + File.separator + encryptedTokenFileName;
+            token = FileEncryptionUtility.getInstance().readFromEncryptedFile(externalSATokenFilePath);
         } catch (APIManagementException e) {
             String msg = "Error occurred while resolving externally stored token";
             log.error(msg, e);
@@ -256,23 +267,23 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
                 if (APIMgtConstants.HTTP.equals(protocol) || APIMgtConstants.HTTPS.equals(protocol)) {
                     int port = servicePort.getPort();
 
-                    //Almost every service has a cluster IP. Hence, only check the "includeClusterIP" value
                     if (includeClusterIP) {
+                        // Almost every service has a cluster IP. Hence, only "includeClusterIP" value is checked
                         addClusterIPEndpoint(serviceSpec, serviceName, port, protocol, namespace, labels);
                     }
-                    //Only a "ExternalName" type service will have an "externalName" (the alias in kube-dns)
                     if (includeExternalNameTypeServices && EXTERNAL_NAME.equals(serviceType)) {
+                        // Since only a "ExternalName" type service can have an "externalName" (the alias in kube-dns)
                         addExternalNameEndpoint(serviceSpec, serviceName, protocol, namespace, labels);
                     }
-                    //Both "NodePort" and "LoadBalancer" types of services have "NodePort" type URLs
                     if (NODE_PORT.equals(serviceType) || LOAD_BALANCER.equals(serviceType)) {
+                        // Because both "NodePort" and "LoadBalancer" types of services have "NodePort" type URLs
                         addNodePortEndpoint(serviceName, servicePort, protocol, namespace, labels);
                     }
-                    //Since only "LoadBalancer" type services have "LoadBalancer" type URLs
                     if (LOAD_BALANCER.equals(serviceType)) {
+                        // Since only "LoadBalancer" type services have "LoadBalancer" type URLs
                         addLoadBalancerEndpoint(service, serviceName, port, protocol, namespace, labels);
                     }
-                    //A Special case (can be any of the service types above)
+                    // A Special case (can be any of the service types above)
                     addExternalIPEndpoint(serviceSpec, serviceName, port, protocol, namespace, labels);
                 } else if (log.isDebugEnabled()) {
                     log.debug("Service:{} Namespace:{} Port:{}/{}  Application level protocol not defined.",
@@ -383,7 +394,6 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
      */
     private Endpoint constructEndpoint(String serviceName, String namespace, String portType,
                                                  String urlType, URL url, String labels) {
-        //todo check if empty
         if (url == null) {
             return null;
         }
@@ -394,6 +404,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
         endpointConfig.put(ServiceDiscoveryConstants.CRITERIA, labels);
 
         String endpointIndex = String.format("kubernetes-%d", this.serviceEndpointIndex);
+
         return buildEndpoint(endpointIndex, serviceName, endpointConfig.toString(),
                 1000L, portType, "{\"enabled\": false}", APIMgtConstants.GLOBAL_ENDPOINT);
     }
