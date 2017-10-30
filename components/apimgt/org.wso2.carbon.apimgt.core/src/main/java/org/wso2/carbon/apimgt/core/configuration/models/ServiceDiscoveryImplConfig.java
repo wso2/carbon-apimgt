@@ -42,8 +42,8 @@ public class ServiceDiscoveryImplConfig {
     public ServiceDiscoveryImplConfig() {
         implParameters.put(ServiceDiscovererKubernetes.MASTER_URL, "https://192.168.99.100:8443/");
         implParameters.put(ServiceDiscovererKubernetes.CA_CERT_PATH, "");
-        implParameters.put(ServiceDiscovererKubernetes.INCLUDE_CLUSTER_IPS, "false");
-        implParameters.put(ServiceDiscovererKubernetes.INCLUDE_EXTERNAL_NAME_SERVICES, "false");
+        implParameters.put(ServiceDiscovererKubernetes.INCLUDE_CLUSTER_IPS, "true");
+        implParameters.put(ServiceDiscovererKubernetes.INCLUDE_EXTERNAL_NAME_SERVICES, "true");
         implParameters.put(ServiceDiscovererKubernetes.EXTERNAL_SA_TOKEN_FILE_NAME, "");
         implParameters.put(ServiceDiscovererKubernetes.POD_MOUNTED_SA_TOKEN_FILE_PATH,
                 "/var/run/secrets/kubernetes.io/serviceaccount/token");
