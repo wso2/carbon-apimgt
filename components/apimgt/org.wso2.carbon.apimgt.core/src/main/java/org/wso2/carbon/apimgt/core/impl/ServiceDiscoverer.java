@@ -43,14 +43,15 @@ public abstract class ServiceDiscoverer {
      * Initializes the necessary parameters,
      * Must be called by all subclasses within their own overriding .init() methods
      *
-     * @param implementationParameters  implementation parameters provided in the configuration
+     * @param implParameters  implementation parameters provided in the configuration
      * @throws ServiceDiscoveryException if an error occurs in the implementation's init method
      */
-    public void init(HashMap<String, String> implementationParameters) throws ServiceDiscoveryException {
-        this.namespaceFilter = implementationParameters.get(ServiceDiscoveryConstants.NAMESPACE);
+    public void init(ServiceDiscoveryClientFactory clientFactory, HashMap<String, String> implParameters)
+            throws ServiceDiscoveryException {
+        this.namespaceFilter = implParameters.get(ServiceDiscoveryConstants.NAMESPACE);
 
         // Convert the criteria that is passed in as a string into a map and then set the instance criteriaFilter
-        String criteriaString = implementationParameters.get(ServiceDiscoveryConstants.CRITERIA);
+        String criteriaString = implParameters.get(ServiceDiscoveryConstants.CRITERIA);
         if (criteriaString != null) {
             String[] criteriaArray = criteriaString.split(",");
             HashMap<String, String> criteriaMap = new HashMap<>();

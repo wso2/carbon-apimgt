@@ -25,7 +25,6 @@ import io.fabric8.kubernetes.api.model.ServiceSpec;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -82,21 +81,22 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
      * @throws ServiceDiscoveryException if an error occurs while initializing the client
      */
     @Override
-    public void init(HashMap<String, String> implementationParameters) throws ServiceDiscoveryException {
-        super.init(implementationParameters);
+    public void init(ServiceDiscoveryClientFactory clientFactory, HashMap<String, String> implementationParameters)
+            throws ServiceDiscoveryException {
+        super.init(clientFactory, implementationParameters);
         implParameters = implementationParameters;
         includeClusterIP = Boolean.parseBoolean(implParameters.get(INCLUDE_CLUSTER_IPS));
         includeExternalNameTypeServices = Boolean.parseBoolean(implParameters.get(INCLUDE_EXTERNAL_NAME_SERVICES));
         try {
-            client = new DefaultOpenShiftClient(buildConfig());
+            client = clientFactory.getDefaultOpenShiftClient(buildConfig());
         } catch (KubernetesClientException | APIMgtDAOException e) {
             String msg = "Error occurred while creating Kubernetes client";
             log.error(msg, e);
-            throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_INITIALIZING_SERVICE_DISCOVERY);
+            throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_INITIALIZING_SERVICE_DISCOVERY);
         } catch (ArrayIndexOutOfBoundsException e) {
             String msg = "Error occurred while reading filtering criteria from the configuration";
             log.error(msg, e);
-            throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_INITIALIZING_SERVICE_DISCOVERY);
+            throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_INITIALIZING_SERVICE_DISCOVERY);
         }
     }
 
