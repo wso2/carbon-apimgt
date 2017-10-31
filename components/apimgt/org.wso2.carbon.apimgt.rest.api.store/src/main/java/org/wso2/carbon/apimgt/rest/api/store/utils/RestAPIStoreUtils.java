@@ -67,6 +67,7 @@ import java.util.regex.Pattern;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.APP_SUBSCRIPTION_FILTERED_SCOPE_CACHE;
 import static org.wso2.carbon.apimgt.impl.APIConstants.APP_SUBSCRIPTION_SCOPE_CACHE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.MULTI_TENANT_USER_ADMIN_SERVICE;
 import static org.wso2.carbon.apimgt.rest.api.store.utils.mappings.APIMappingUtil.getAPIIdentifierFromApiIdOrUUID;
 
 /**
@@ -77,24 +78,29 @@ public class RestAPIStoreUtils {
     private static MultiTenantUserAdminServiceStub multiTenantUserAdminServiceStub;
     private static APIManagerConfiguration apiManagerConfiguration;
     private static String keyManagerUrl;
-    private static String keyManagerAdminUserName;
-    private static String keyManagerAdminPassword;
+    private static char[] keyManagerAdminUserName;
+    private static char[] keyManagerAdminPassword;
     private static boolean isStoreCacheEnabled;
 
     static {
-        apiManagerConfiguration = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        apiManagerConfiguration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
         keyManagerUrl = apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL);
-        keyManagerAdminUserName = apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
-        keyManagerAdminPassword = apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
-        String isStoreCacheEnabledConfiguration = apiManagerConfiguration.getFirstProperty(APIConstants
-                .SCOPE_CACHE_ENABLED);
+        String keyManagerUserNameString = apiManagerConfiguration
+                .getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
+        String keyManagerPasswordString = apiManagerConfiguration
+                .getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
+        keyManagerAdminUserName = keyManagerUserNameString != null ? keyManagerUserNameString.toCharArray() : null;
+        keyManagerAdminPassword = keyManagerPasswordString != null ? keyManagerPasswordString.toCharArray() : null;
+        String isStoreCacheEnabledConfiguration = apiManagerConfiguration
+                .getFirstProperty(APIConstants.SCOPE_CACHE_ENABLED);
         isStoreCacheEnabled =
                 isStoreCacheEnabledConfiguration != null && Boolean.parseBoolean(isStoreCacheEnabledConfiguration);
         try {
             multiTenantUserAdminServiceStub = new MultiTenantUserAdminServiceStub(null,
-                    keyManagerUrl + "MultiTenantUserAdminService");
-            CarbonUtils.setBasicAccessSecurityHeaders(keyManagerAdminUserName, keyManagerAdminPassword, true,
+                    keyManagerUrl + MULTI_TENANT_USER_ADMIN_SERVICE);
+            CarbonUtils.setBasicAccessSecurityHeaders(Arrays.toString(keyManagerAdminUserName),
+                    Arrays.toString(keyManagerAdminPassword), true,
                     multiTenantUserAdminServiceStub._getServiceClient());
         } catch (AxisFault axisFault) {
             log.error("Error while initializing multiTenantUserTenantAdminStub", axisFault);
@@ -480,8 +486,8 @@ public class RestAPIStoreUtils {
     public static ScopeListDTO getScopesForApplication(String userName, Application application,
             boolean filterByUserRoles) throws APIManagementException {
         String applicationUUID = application.getUUID();
-        String cacheName = filterByUserRoles ?  APP_SUBSCRIPTION_FILTERED_SCOPE_CACHE : APP_SUBSCRIPTION_SCOPE_CACHE;
-        String cacheKey = filterByUserRoles ? applicationUUID +"-" + userName : applicationUUID;
+        String cacheName = filterByUserRoles ? APP_SUBSCRIPTION_FILTERED_SCOPE_CACHE : APP_SUBSCRIPTION_SCOPE_CACHE;
+        String cacheKey = filterByUserRoles ? applicationUUID + "-" + userName : applicationUUID;
         Set<Scope> filteredScopes = getValueFromCache(cacheName, cacheKey);
         if (filteredScopes != null) {
             if (log.isDebugEnabled()) {
@@ -528,7 +534,7 @@ public class RestAPIStoreUtils {
                 } else {
                     filteredScopes = scopeSet;
                 }
-                addToApplicationScopeCache(cacheName, cacheKey,filteredScopes);
+                addToApplicationScopeCache(cacheName, cacheKey, filteredScopes);
             }
         }
         return convertScopeSetToScopeList(filteredScopes);
@@ -544,8 +550,9 @@ public class RestAPIStoreUtils {
         if (multiTenantUserAdminServiceStub == null) {
             try {
                 multiTenantUserAdminServiceStub = new MultiTenantUserAdminServiceStub(null,
-                        keyManagerUrl + "MultiTenantUserAdminService");
-                CarbonUtils.setBasicAccessSecurityHeaders(keyManagerAdminUserName, keyManagerAdminPassword, true,
+                        keyManagerUrl + MULTI_TENANT_USER_ADMIN_SERVICE);
+                CarbonUtils.setBasicAccessSecurityHeaders(Arrays.toString(keyManagerAdminUserName),
+                        Arrays.toString(keyManagerAdminPassword), true,
                         multiTenantUserAdminServiceStub._getServiceClient());
             } catch (AxisFault axisFault) {
                 throw new APIManagementException(

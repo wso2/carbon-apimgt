@@ -66,9 +66,12 @@ public class MultiTenantUserAdminService extends AbstractAdmin {
                         .getTenantUserRealm(userTenantId).getUserStoreManager();
                 return userStoreManager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(userName));
             } catch (UserStoreException e) {
-                throw new APIKeyMgtException(
-                        "UserStore exception while trying the get the user role list of the " + userName, e);
+                String errorMessage = "UserStore exception while trying the get the user role list of the " + userName;
+                log.error(errorMessage, e);
+                throw new APIKeyMgtException(errorMessage, e);
             } catch (IdentityRuntimeException e) {
+                String errorMessage = "UserStore exception while trying the get the user role list of the " + userName;
+                log.error(errorMessage, e);
                 throw new APIKeyMgtException("User " + userName + " is from a invalid domain", e);
             }
         }
