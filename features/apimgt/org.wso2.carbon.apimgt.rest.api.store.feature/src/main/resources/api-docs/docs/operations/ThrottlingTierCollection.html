@@ -8,6 +8,8 @@
 
             <p class="marked">This operation can be used to retrieve all the tiers available for the provided tier level. Tier level should be specified as a path parameter and should be one of &#x60;api&#x60; and &#x60;application&#x60;.
 
+&#x60;X-WSO2-Tenant&#x60; header can be used to retrive tiers that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
+
 **NOTE**:
 * API tiers are the ones that is available during subscription of an application to an API. Hence they are also called subscription tiers and are same as the subscription policies in Admin REST API.
 </p>
@@ -22,7 +24,7 @@
                 </h4>
             </div>
 
-                <div id="request-tiersTierLevelGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/store/v0.11/tiers/api
+                <div id="request-tiersTierLevelGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.11/tiers/api
 </code></div>
 
             <div class="pointer" data-toggle="collapse" data-target="#response-tiersTierLevelGet">
@@ -83,7 +85,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl &quot;https://127.0.0.1:9443/api/am/store/v0.11/tiers/api&quot;</code></div>
+                <div class="pre"><code class="bash">curl &quot;https://localhost:9443/api/am/store/v0.11/tiers/api&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -267,7 +269,7 @@ Content-Type: application/json
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resourec.
+variant of the resource.
 </p>
                         </td>
                         <td>

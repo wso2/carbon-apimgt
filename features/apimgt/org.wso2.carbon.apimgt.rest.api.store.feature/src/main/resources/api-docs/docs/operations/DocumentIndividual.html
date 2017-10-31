@@ -12,7 +12,7 @@ The document can be of 3 types. In each cases responses are different.
 
 1. **Inline type**:
    The content of the document will be retrieved in &#x60;text/plain&#x60; content type
-2. **FILE type**: 
+2. **FILE type**:
    The file will be downloaded with the related content type (eg. &#x60;application/pdf&#x60;)
 3. **URL type**:
     The client will recieve the URL of the document as the Location header with the response with - &#x60;303 See Other&#x60;
@@ -20,7 +20,7 @@ The document can be of 3 types. In each cases responses are different.
 &#x60;X-WSO2-Tenant&#x60; header can be used to retrive the content of a document of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
 
 **NOTE:**
-* This operation does not require an Authorization header by default. But in order to see a restricted API&#39;s document content, you need to provide Authorization header.        
+* This operation does not require an Authorization header by default. But in order to see a restricted API&#39;s document content, you need to provide Authorization header.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
@@ -33,7 +33,7 @@ The document can be of 3 types. In each cases responses are different.
                 </h4>
             </div>
 
-                <div id="request-apisApiIdDocumentsDocumentIdContentGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/store/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content
+                <div id="request-apisApiIdDocumentsDocumentIdContentGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content
 </code></div>
 
             <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdDocumentsDocumentIdContentGet">
@@ -59,7 +59,7 @@ startxref
 %%EOF</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl &quot;https://127.0.0.1:9443/api/am/store/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content&quot; &gt; sample.pdf</code></div>
+                <div class="pre"><code class="bash">curl &quot;https://localhost:9443/api/am/store/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content&quot; &gt; sample.pdf</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -95,7 +95,7 @@ startxref
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
 The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
 Should be formatted as **provider-name-version**.
 </p>
@@ -211,7 +211,7 @@ Should be formatted as **provider-name-version**.
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resourec.
+variant of the resource.
 </p>
                         </td>
                         <td>
@@ -240,7 +240,7 @@ variant of the resourec.
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
-formerly retrieved variant of the resource.
+formerly retrieved variant of the resource (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -290,7 +290,7 @@ formerly retrieved variant of the resource.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     
@@ -327,7 +327,7 @@ formerly retrieved variant of the resource.
 &#x60;X-WSO2-Tenant&#x60; header can be used to retrive a document of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
 
 **NOTE:**
-* This operation does not require an Authorization header by default. But in order to see a restricted API&#39;s document, you need to provide Authorization header.        
+* This operation does not require an Authorization header by default. But in order to see a restricted API&#39;s document, you need to provide Authorization header.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
@@ -340,7 +340,7 @@ formerly retrieved variant of the resource.
                 </h4>
             </div>
 
-                <div id="request-apisApiIdDocumentsDocumentIdGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/store/v0.11/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c
+                <div id="request-apisApiIdDocumentsDocumentIdGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.11/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c
 </code></div>
 
             <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdDocumentsDocumentIdGet">
@@ -363,7 +363,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl &quot;https://127.0.0.1:9443/api/am/store/v0.11/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c&quot;</code></div>
+                <div class="pre"><code class="bash">curl &quot;https://localhost:9443/api/am/store/v0.11/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -399,7 +399,7 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
 The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
 Should be formatted as **provider-name-version**.
 </p>
@@ -515,7 +515,7 @@ Should be formatted as **provider-name-version**.
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resourec.
+variant of the resource.
 </p>
                         </td>
                         <td>
@@ -544,7 +544,7 @@ variant of the resourec.
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
-formerly retrieved variant of the resource.
+formerly retrieved variant of the resource (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -585,7 +585,7 @@ formerly retrieved variant of the resource.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     
