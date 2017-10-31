@@ -10,21 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-<<<<<<< HEAD
-import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
-
-import javax.validation.constraints.NotNull;
-
-
-
-
-
-@ApiModel(description = "")
-public class ApplicationKeyGenerateRequestDTO  {
-  
-  
-=======
 /**
  * ApplicationKeyGenerateRequestDTO
  */
@@ -32,7 +17,6 @@ public class ApplicationKeyGenerateRequestDTO   {
   /**
    * Gets or Sets keyType
    */
->>>>>>> upstream/master
   public enum KeyTypeEnum {
     PRODUCTION("PRODUCTION"),
     
@@ -61,15 +45,11 @@ public class ApplicationKeyGenerateRequestDTO   {
     }
   }
 
-<<<<<<< HEAD
-  private String lastUpdatedTime = null;
-=======
   @JsonProperty("keyType")
   private KeyTypeEnum keyType = null;
 
   @JsonProperty("grantTypesToBeSupported")
   private List<String> grantTypesToBeSupported = new ArrayList<String>();
->>>>>>> upstream/master
 
   @JsonProperty("callbackUrl")
   private String callbackUrl = null;
@@ -83,21 +63,6 @@ public class ApplicationKeyGenerateRequestDTO   {
    * Get keyType
    * @return keyType
   **/
-<<<<<<< HEAD
-
-  @JsonIgnore
-  public String getCreatedTime(){
-    return createdTime;
-  }
-  public void setCreatedTime(String createdTime){
-    this.createdTime=createdTime;
-  }
-
-  
-  /**
-   **/
-=======
->>>>>>> upstream/master
   @ApiModelProperty(required = true, value = "")
   public KeyTypeEnum getKeyType() {
     return keyType;
@@ -107,19 +72,9 @@ public class ApplicationKeyGenerateRequestDTO   {
     this.keyType = keyType;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-  @ApiModelProperty(required = true, value = "")
-  @JsonProperty("validityTime")
-  public String getValidityTime() {
-    return validityTime;
-=======
   public ApplicationKeyGenerateRequestDTO grantTypesToBeSupported(List<String> grantTypesToBeSupported) {
     this.grantTypesToBeSupported = grantTypesToBeSupported;
     return this;
->>>>>>> upstream/master
   }
 
   public ApplicationKeyGenerateRequestDTO addGrantTypesToBeSupportedItem(String grantTypesToBeSupportedItem) {
@@ -136,10 +91,6 @@ public class ApplicationKeyGenerateRequestDTO   {
     return grantTypesToBeSupported;
   }
 
-<<<<<<< HEAD
-  
-  /**
-=======
   public void setGrantTypesToBeSupported(List<String> grantTypesToBeSupported) {
     this.grantTypesToBeSupported = grantTypesToBeSupported;
   }
@@ -150,7 +101,6 @@ public class ApplicationKeyGenerateRequestDTO   {
   }
 
    /**
->>>>>>> upstream/master
    * Callback URL
    * @return callbackUrl
   **/
@@ -163,32 +113,6 @@ public class ApplicationKeyGenerateRequestDTO   {
     this.callbackUrl = callbackUrl;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   * Allowed domains for the access token
-   **/
-  @ApiModelProperty(required = true, value = "Allowed domains for the access token")
-  @JsonProperty("accessAllowDomains")
-  public List<String> getAccessAllowDomains() {
-    return accessAllowDomains;
-  }
-  public void setAccessAllowDomains(List<String> accessAllowDomains) {
-    this.accessAllowDomains = accessAllowDomains;
-  }
-
-  
-  /**
-   * Allowed scopes for the access token
-   **/
-  @ApiModelProperty(value = "Allowed scopes for the access token")
-  @JsonProperty("scopes")
-  public List<String> getScopes() {
-    return scopes;
-  }
-  public void setScopes(List<String> scopes) {
-    this.scopes = scopes;
-=======
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -202,7 +126,6 @@ public class ApplicationKeyGenerateRequestDTO   {
     return Objects.equals(this.keyType, applicationKeyGenerateRequest.keyType) &&
         Objects.equals(this.grantTypesToBeSupported, applicationKeyGenerateRequest.grantTypesToBeSupported) &&
         Objects.equals(this.callbackUrl, applicationKeyGenerateRequest.callbackUrl);
->>>>>>> upstream/master
   }
 
   @Override

@@ -1,30 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-<<<<<<< HEAD
-import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
-
-import javax.validation.constraints.NotNull;
-
-
-
-
-
-@ApiModel(description = "")
-public class ErrorListItemDTO  {
-  
-  
-  @NotNull
-  private String code = null;
-  
-  @NotNull
-  private String message = null;
-
-  private String lastUpdatedTime = null;
-
-  private String createdTime = null;
-=======
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
@@ -40,7 +16,6 @@ public class ErrorListItemDTO   {
 
   @JsonProperty("message")
   private String message = null;
->>>>>>> upstream/master
 
   public ErrorListItemDTO code(String code) {
     this.code = code;
@@ -51,21 +26,6 @@ public class ErrorListItemDTO   {
    * Get code
    * @return code
   **/
-<<<<<<< HEAD
-
-  @JsonIgnore
-  public String getCreatedTime(){
-    return createdTime;
-  }
-  public void setCreatedTime(String createdTime){
-    this.createdTime=createdTime;
-  }
-
-  
-  /**
-   **/
-=======
->>>>>>> upstream/master
   @ApiModelProperty(required = true, value = "")
   public String getCode() {
     return code;
@@ -75,14 +35,6 @@ public class ErrorListItemDTO   {
     this.code = code;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   * Description about Individual errors occurred\n
-   **/
-  @ApiModelProperty(required = true, value = "Description about Individual errors occurred\n")
-  @JsonProperty("message")
-=======
   public ErrorListItemDTO message(String message) {
     this.message = message;
     return this;
@@ -93,7 +45,6 @@ public class ErrorListItemDTO   {
    * @return message
   **/
   @ApiModelProperty(required = true, value = "Description about individual errors occurred ")
->>>>>>> upstream/master
   public String getMessage() {
     return message;
   }

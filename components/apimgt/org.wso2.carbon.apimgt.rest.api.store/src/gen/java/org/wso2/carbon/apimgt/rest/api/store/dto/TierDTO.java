@@ -11,19 +11,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-<<<<<<< HEAD
-import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
-
-import javax.validation.constraints.NotNull;
-=======
 /**
  * TierDTO
  */
 public class TierDTO   {
   @JsonProperty("name")
   private String name = null;
->>>>>>> upstream/master
 
   @JsonProperty("description")
   private String description = null;
@@ -81,15 +74,11 @@ public class TierDTO   {
     
     COMMERCIAL("COMMERCIAL");
 
-<<<<<<< HEAD
-  private String lastUpdatedTime = null;
-=======
     private String value;
 
     TierPlanEnum(String value) {
       this.value = value;
     }
->>>>>>> upstream/master
 
     @Override
     @JsonValue
@@ -119,16 +108,10 @@ public class TierDTO   {
     return this;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
    /**
    * Get name
    * @return name
   **/
->>>>>>> upstream/master
   @ApiModelProperty(required = true, value = "")
   public String getName() {
     return name;
@@ -138,11 +121,6 @@ public class TierDTO   {
     this.name = name;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public TierDTO description(String description) {
     this.description = description;
     return this;
@@ -152,7 +130,6 @@ public class TierDTO   {
    * Get description
    * @return description
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public String getDescription() {
     return description;
@@ -162,11 +139,6 @@ public class TierDTO   {
     this.description = description;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public TierDTO tierLevel(TierLevelEnum tierLevel) {
     this.tierLevel = tierLevel;
     return this;
@@ -176,7 +148,6 @@ public class TierDTO   {
    * Get tierLevel
    * @return tierLevel
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public TierLevelEnum getTierLevel() {
     return tierLevel;
@@ -186,14 +157,6 @@ public class TierDTO   {
     this.tierLevel = tierLevel;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   * Custom attributes added to the tier policy\n
-   **/
-  @ApiModelProperty(value = "Custom attributes added to the tier policy\n")
-  @JsonProperty("attributes")
-=======
   public TierDTO attributes(Map<String, String> attributes) {
     this.attributes = attributes;
     return this;
@@ -209,7 +172,6 @@ public class TierDTO   {
    * @return attributes
   **/
   @ApiModelProperty(value = "Custom attributes added to the policy policy ")
->>>>>>> upstream/master
   public Map<String, String> getAttributes() {
     return attributes;
   }
@@ -218,14 +180,6 @@ public class TierDTO   {
     this.attributes = attributes;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   * Maximum number of requests which can be sent within a provided unit time\n
-   **/
-  @ApiModelProperty(required = true, value = "Maximum number of requests which can be sent within a provided unit time\n")
-  @JsonProperty("requestCount")
-=======
   public TierDTO requestCount(Long requestCount) {
     this.requestCount = requestCount;
     return this;
@@ -236,7 +190,6 @@ public class TierDTO   {
    * @return requestCount
   **/
   @ApiModelProperty(required = true, value = "Maximum number of requests which can be sent within a provided unit time ")
->>>>>>> upstream/master
   public Long getRequestCount() {
     return requestCount;
   }
@@ -245,11 +198,6 @@ public class TierDTO   {
     this.requestCount = requestCount;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public TierDTO unitTime(Long unitTime) {
     this.unitTime = unitTime;
     return this;
@@ -259,7 +207,6 @@ public class TierDTO   {
    * Get unitTime
    * @return unitTime
   **/
->>>>>>> upstream/master
   @ApiModelProperty(required = true, value = "")
   public Long getUnitTime() {
     return unitTime;
@@ -269,14 +216,6 @@ public class TierDTO   {
     this.unitTime = unitTime;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   * This attribute declares whether this tier is available under commercial or free\n
-   **/
-  @ApiModelProperty(required = true, value = "This attribute declares whether this tier is available under commercial or free\n")
-  @JsonProperty("tierPlan")
-=======
   public TierDTO tierPlan(TierPlanEnum tierPlan) {
     this.tierPlan = tierPlan;
     return this;
@@ -287,7 +226,6 @@ public class TierDTO   {
    * @return tierPlan
   **/
   @ApiModelProperty(required = true, value = "This attribute declares whether this policy is available under commercial or free ")
->>>>>>> upstream/master
   public TierPlanEnum getTierPlan() {
     return tierPlan;
   }
@@ -296,14 +234,6 @@ public class TierDTO   {
     this.tierPlan = tierPlan;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   * If this attribute is set to false, you are capabale of sending requests\neven if the request count exceeded within a unit time\n
-   **/
-  @ApiModelProperty(required = true, value = "If this attribute is set to false, you are capabale of sending requests\neven if the request count exceeded within a unit time\n")
-  @JsonProperty("stopOnQuotaReach")
-=======
   public TierDTO stopOnQuotaReach(Boolean stopOnQuotaReach) {
     this.stopOnQuotaReach = stopOnQuotaReach;
     return this;
@@ -314,7 +244,6 @@ public class TierDTO   {
    * @return stopOnQuotaReach
   **/
   @ApiModelProperty(required = true, value = "If this attribute is set to false, you are capabale of sending requests even if the request count exceeded within a unit time ")
->>>>>>> upstream/master
   public Boolean getStopOnQuotaReach() {
     return stopOnQuotaReach;
   }

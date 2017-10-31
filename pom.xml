@@ -36,7 +36,7 @@
         <url>https://github.com/wso2/carbon-apimgt.git</url>
         <developerConnection>scm:git:https://github.com/wso2/carbon-apimgt.git</developerConnection>
         <connection>scm:git:https://github.com/wso2/carbon-apimgt.git</connection>
-        <tag>v6.1.94</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <modules>
@@ -887,6 +887,7 @@
     <properties>
         <!-- File encoding of build -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- Maven plugins -->
         <!--Overridden from parent due to a bug in latest bundle plugin related to capability providers-->

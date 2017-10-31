@@ -11,19 +11,12 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationTokenDTO;
 import java.util.Objects;
 
-<<<<<<< HEAD
-import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
-
-import javax.validation.constraints.NotNull;
-=======
 /**
  * ApplicationDTO
  */
 public class ApplicationDTO   {
   @JsonProperty("applicationId")
   private String applicationId = null;
->>>>>>> upstream/master
 
   @JsonProperty("name")
   private String name = null;
@@ -40,15 +33,11 @@ public class ApplicationDTO   {
   @JsonProperty("description")
   private String description = null;
 
-<<<<<<< HEAD
-  private String lastUpdatedTime = null;
-=======
   @JsonProperty("lifeCycleStatus")
   private String lifeCycleStatus = null;
 
   @JsonProperty("token")
   private ApplicationTokenDTO token = null;
->>>>>>> upstream/master
 
   @JsonProperty("keys")
   private List<ApplicationKeysDTO> keys = new ArrayList<ApplicationKeysDTO>();
@@ -62,21 +51,6 @@ public class ApplicationDTO   {
    * Get applicationId
    * @return applicationId
   **/
-<<<<<<< HEAD
-
-  @JsonIgnore
-  public String getCreatedTime(){
-    return createdTime;
-  }
-  public void setCreatedTime(String createdTime){
-    this.createdTime=createdTime;
-  }
-
-  
-  /**
-   **/
-=======
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public String getApplicationId() {
     return applicationId;
@@ -86,11 +60,6 @@ public class ApplicationDTO   {
     this.applicationId = applicationId;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public ApplicationDTO name(String name) {
     this.name = name;
     return this;
@@ -100,7 +69,6 @@ public class ApplicationDTO   {
    * Get name
    * @return name
   **/
->>>>>>> upstream/master
   @ApiModelProperty(required = true, value = "")
   public String getName() {
     return name;
@@ -110,14 +78,6 @@ public class ApplicationDTO   {
     this.name = name;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   * If subscriber is not given user invoking the API will be taken as the subscriber.\n
-   **/
-  @ApiModelProperty(value = "If subscriber is not given user invoking the API will be taken as the subscriber.\n")
-  @JsonProperty("subscriber")
-=======
   public ApplicationDTO subscriber(String subscriber) {
     this.subscriber = subscriber;
     return this;
@@ -128,7 +88,6 @@ public class ApplicationDTO   {
    * @return subscriber
   **/
   @ApiModelProperty(value = "If subscriber is not given user invoking the API will be taken as the subscriber. ")
->>>>>>> upstream/master
   public String getSubscriber() {
     return subscriber;
   }
@@ -137,11 +96,6 @@ public class ApplicationDTO   {
     this.subscriber = subscriber;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public ApplicationDTO throttlingTier(String throttlingTier) {
     this.throttlingTier = throttlingTier;
     return this;
@@ -151,7 +105,6 @@ public class ApplicationDTO   {
    * Get throttlingTier
    * @return throttlingTier
   **/
->>>>>>> upstream/master
   @ApiModelProperty(required = true, value = "")
   public String getThrottlingTier() {
     return throttlingTier;
@@ -161,19 +114,9 @@ public class ApplicationDTO   {
     this.throttlingTier = throttlingTier;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("callbackUrl")
-  public String getCallbackUrl() {
-    return callbackUrl;
-=======
   public ApplicationDTO permission(String permission) {
     this.permission = permission;
     return this;
->>>>>>> upstream/master
   }
 
    /**
@@ -189,11 +132,6 @@ public class ApplicationDTO   {
     this.permission = permission;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public ApplicationDTO description(String description) {
     this.description = description;
     return this;
@@ -203,7 +141,6 @@ public class ApplicationDTO   {
    * Get description
    * @return description
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public String getDescription() {
     return description;
@@ -213,11 +150,6 @@ public class ApplicationDTO   {
     this.description = description;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public ApplicationDTO lifeCycleStatus(String lifeCycleStatus) {
     this.lifeCycleStatus = lifeCycleStatus;
     return this;
@@ -227,7 +159,6 @@ public class ApplicationDTO   {
    * Get lifeCycleStatus
    * @return lifeCycleStatus
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public String getLifeCycleStatus() {
     return lifeCycleStatus;
@@ -242,16 +173,10 @@ public class ApplicationDTO   {
     return this;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
    /**
    * Get token
    * @return token
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public ApplicationTokenDTO getToken() {
     return token;
@@ -271,16 +196,10 @@ public class ApplicationDTO   {
     return this;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
    /**
    * Get keys
    * @return keys
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public List<ApplicationKeysDTO> getKeys() {
     return keys;

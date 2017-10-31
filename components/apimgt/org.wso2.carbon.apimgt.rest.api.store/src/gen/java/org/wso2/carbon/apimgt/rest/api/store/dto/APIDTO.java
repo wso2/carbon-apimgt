@@ -1,16 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
-<<<<<<< HEAD
-import java.util.ArrayList;
-import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIBusinessInformationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.APIEndpointURLsDTO;
-
-import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
-
-import javax.validation.constraints.NotNull;
-=======
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -22,7 +11,6 @@ import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.dto.API_businessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.BaseAPIDTO;
 import java.util.Objects;
->>>>>>> upstream/master
 
 /**
  * APIDTO
@@ -37,15 +25,11 @@ public class APIDTO extends BaseAPIDTO  {
   @JsonProperty("tags")
   private List<String> tags = new ArrayList<String>();
 
-<<<<<<< HEAD
-  private String lastUpdatedTime = null;
-=======
   @JsonProperty("policies")
   private List<String> policies = new ArrayList<String>();
 
   @JsonProperty("wsdlUri")
   private String wsdlUri = null;
->>>>>>> upstream/master
 
   @JsonProperty("businessInformation")
   private API_businessInformationDTO businessInformation = null;
@@ -59,131 +43,11 @@ public class APIDTO extends BaseAPIDTO  {
    * Get lifeCycleStatus
    * @return lifeCycleStatus
   **/
-<<<<<<< HEAD
-
-  @JsonIgnore
-  public String getCreatedTime(){
-    return createdTime;
-  }
-  public void setCreatedTime(String createdTime){
-    this.createdTime=createdTime;
-  }
-
-  
-  /**
-   * UUID of the api registry artifact\n
-   **/
-  @ApiModelProperty(value = "UUID of the api registry artifact\n")
-  @JsonProperty("id")
-  public String getId() {
-    return id;
-  }
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(required = true, value = "")
-  @JsonProperty("name")
-  public String getName() {
-    return name;
-  }
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  
-  /**
-   **/
-=======
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public String getLifeCycleStatus() {
     return lifeCycleStatus;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-  @ApiModelProperty(required = true, value = "")
-  @JsonProperty("context")
-  public String getContext() {
-    return context;
-  }
-  public void setContext(String context) {
-    this.context = context;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(required = true, value = "")
-  @JsonProperty("version")
-  public String getVersion() {
-    return version;
-  }
-  public void setVersion(String version) {
-    this.version = version;
-  }
-
-  
-  /**
-   * If the provider value is not given user invoking the api will be used as the provider.\n
-   **/
-  @ApiModelProperty(required = true, value = "If the provider value is not given user invoking the api will be used as the provider.\n")
-  @JsonProperty("provider")
-  public String getProvider() {
-    return provider;
-  }
-  public void setProvider(String provider) {
-    this.provider = provider;
-  }
-
-  
-  /**
-   * Swagger definition of the API which contains details about URI templates and scopes\n
-   **/
-  @ApiModelProperty(required = true, value = "Swagger definition of the API which contains details about URI templates and scopes\n")
-  @JsonProperty("apiDefinition")
-  public String getApiDefinition() {
-    return apiDefinition;
-  }
-  public void setApiDefinition(String apiDefinition) {
-    this.apiDefinition = apiDefinition;
-  }
-
-  
-  /**
-   * WSDL URL if the API is based on a WSDL endpoint\n
-   **/
-  @ApiModelProperty(value = "WSDL URL if the API is based on a WSDL endpoint\n")
-  @JsonProperty("wsdlUri")
-  public String getWsdlUri() {
-    return wsdlUri;
-  }
-  public void setWsdlUri(String wsdlUri) {
-    this.wsdlUri = wsdlUri;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(required = true, value = "")
-  @JsonProperty("status")
-  public String getStatus() {
-    return status;
-  }
-  public void setStatus(String status) {
-    this.status = status;
-  }
-
-  
-  /**
-   **/
-=======
   public void setLifeCycleStatus(String lifeCycleStatus) {
     this.lifeCycleStatus = lifeCycleStatus;
   }
@@ -197,7 +61,6 @@ public class APIDTO extends BaseAPIDTO  {
    * Get isDefaultVersion
    * @return isDefaultVersion
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public Boolean getIsDefaultVersion() {
     return isDefaultVersion;
@@ -207,19 +70,9 @@ public class APIDTO extends BaseAPIDTO  {
     this.isDefaultVersion = isDefaultVersion;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("transport")
-  public List<String> getTransport() {
-    return transport;
-=======
   public APIDTO tags(List<String> tags) {
     this.tags = tags;
     return this;
->>>>>>> upstream/master
   }
 
   public APIDTO addTagsItem(String tagsItem) {
@@ -227,16 +80,10 @@ public class APIDTO extends BaseAPIDTO  {
     return this;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
    /**
    * Get tags
    * @return tags
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public List<String> getTags() {
     return tags;
@@ -246,19 +93,9 @@ public class APIDTO extends BaseAPIDTO  {
     this.tags = tags;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("tiers")
-  public List<String> getTiers() {
-    return tiers;
-=======
   public APIDTO policies(List<String> policies) {
     this.policies = policies;
     return this;
->>>>>>> upstream/master
   }
 
   public APIDTO addPoliciesItem(String policiesItem) {
@@ -266,16 +103,10 @@ public class APIDTO extends BaseAPIDTO  {
     return this;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
    /**
    * Get policies
    * @return policies
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public List<String> getPolicies() {
     return policies;
@@ -285,11 +116,6 @@ public class APIDTO extends BaseAPIDTO  {
     this.policies = policies;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public APIDTO wsdlUri(String wsdlUri) {
     this.wsdlUri = wsdlUri;
     return this;
@@ -299,7 +125,6 @@ public class APIDTO extends BaseAPIDTO  {
    * Get wsdlUri
    * @return wsdlUri
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public String getWsdlUri() {
     return wsdlUri;
@@ -309,11 +134,6 @@ public class APIDTO extends BaseAPIDTO  {
     this.wsdlUri = wsdlUri;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public APIDTO businessInformation(API_businessInformationDTO businessInformation) {
     this.businessInformation = businessInformation;
     return this;
@@ -323,7 +143,6 @@ public class APIDTO extends BaseAPIDTO  {
    * Get businessInformation
    * @return businessInformation
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public API_businessInformationDTO getBusinessInformation() {
     return businessInformation;

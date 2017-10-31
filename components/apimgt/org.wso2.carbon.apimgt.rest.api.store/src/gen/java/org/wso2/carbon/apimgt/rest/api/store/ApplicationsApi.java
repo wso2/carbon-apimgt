@@ -1,33 +1,14 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
-<<<<<<< HEAD
-import org.wso2.carbon.apimgt.rest.api.store.dto.*;
-import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
-import org.wso2.carbon.apimgt.rest.api.store.factories.ApplicationsApiServiceFactory;
 
 import io.swagger.annotations.ApiParam;
 
-import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
-=======
-
-import io.swagger.annotations.ApiParam;
-
->>>>>>> upstream/master
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyMappingRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeysDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeysListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
-<<<<<<< HEAD
-
-import java.util.List;
-
-import java.io.InputStream;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.Multipart;
-
-=======
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
@@ -56,9 +37,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
->>>>>>> upstream/master
 import javax.ws.rs.core.Response;
-import javax.ws.rs.*;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.store.ApplicationsApi",

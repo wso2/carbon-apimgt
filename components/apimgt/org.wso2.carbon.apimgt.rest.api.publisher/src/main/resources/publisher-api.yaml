@@ -3,7 +3,6 @@ swagger: '2.0'
 # Prolog
 ######################################################
 info:
-
   version: "v1.0"
   title: "WSO2 API Manager - Publisher API"
   description: |
@@ -2042,10 +2041,10 @@ paths:
             The requested media type is not supported
           schema:
             $ref: '#/definitions/Error'
-        406:
+        412:
           description: |
-            Not Acceptable.
-            The requested media type is not supported
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
           schema:
             $ref: '#/definitions/Error'
 
@@ -2975,6 +2974,7 @@ paths:
             Requested API does not exist.
           schema:
             $ref: '#/definitions/Error'
+
 
 ######################################################
 # Parameters - required by some of the APIs above

@@ -1,22 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-<<<<<<< HEAD
-import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
-
-import javax.validation.constraints.NotNull;
-
-
-
-
-
-@ApiModel(description = "")
-public class SubscriptionDTO  {
-  
-  
-  
-=======
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -29,7 +13,6 @@ import java.util.Objects;
  */
 public class SubscriptionDTO   {
   @JsonProperty("subscriptionId")
->>>>>>> upstream/master
   private String subscriptionId = null;
 
   @JsonProperty("applicationId")
@@ -38,15 +21,11 @@ public class SubscriptionDTO   {
   @JsonProperty("apiIdentifier")
   private String apiIdentifier = null;
 
-<<<<<<< HEAD
-  private String lastUpdatedTime = null;
-=======
   @JsonProperty("apiName")
   private String apiName = null;
 
   @JsonProperty("apiVersion")
   private String apiVersion = null;
->>>>>>> upstream/master
 
   @JsonProperty("policy")
   private String policy = null;
@@ -96,16 +75,10 @@ public class SubscriptionDTO   {
     return this;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
    /**
    * Get subscriptionId
    * @return subscriptionId
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public String getSubscriptionId() {
     return subscriptionId;
@@ -115,11 +88,6 @@ public class SubscriptionDTO   {
     this.subscriptionId = subscriptionId;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public SubscriptionDTO applicationId(String applicationId) {
     this.applicationId = applicationId;
     return this;
@@ -129,7 +97,6 @@ public class SubscriptionDTO   {
    * Get applicationId
    * @return applicationId
   **/
->>>>>>> upstream/master
   @ApiModelProperty(required = true, value = "")
   public String getApplicationId() {
     return applicationId;
@@ -139,11 +106,6 @@ public class SubscriptionDTO   {
     this.applicationId = applicationId;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public SubscriptionDTO apiIdentifier(String apiIdentifier) {
     this.apiIdentifier = apiIdentifier;
     return this;
@@ -153,7 +115,6 @@ public class SubscriptionDTO   {
    * Get apiIdentifier
    * @return apiIdentifier
   **/
->>>>>>> upstream/master
   @ApiModelProperty(required = true, value = "")
   public String getApiIdentifier() {
     return apiIdentifier;
@@ -163,11 +124,6 @@ public class SubscriptionDTO   {
     this.apiIdentifier = apiIdentifier;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public SubscriptionDTO apiName(String apiName) {
     this.apiName = apiName;
     return this;
@@ -195,7 +151,6 @@ public class SubscriptionDTO   {
    * Get apiVersion
    * @return apiVersion
   **/
->>>>>>> upstream/master
   @ApiModelProperty(required = true, value = "")
   public String getApiVersion() {
     return apiVersion;
@@ -205,11 +160,6 @@ public class SubscriptionDTO   {
     this.apiVersion = apiVersion;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public SubscriptionDTO policy(String policy) {
     this.policy = policy;
     return this;
@@ -237,7 +187,6 @@ public class SubscriptionDTO   {
    * Get lifeCycleStatus
    * @return lifeCycleStatus
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public LifeCycleStatusEnum getLifeCycleStatus() {
     return lifeCycleStatus;

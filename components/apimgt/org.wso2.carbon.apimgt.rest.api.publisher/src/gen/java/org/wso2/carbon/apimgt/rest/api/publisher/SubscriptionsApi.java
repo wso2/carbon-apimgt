@@ -76,15 +76,11 @@ public class SubscriptionsApi implements Microservice  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-<<<<<<< HEAD
-    @io.swagger.annotations.ApiOperation(value = "Get all Subscriptions", notes = "This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of\n\n1. Retrieving all subscriptions for the user's APIs.\n`GET https://127.0.0.1:9443/api/am/publisher/v0.11/subscriptions`\n\n2. Retrieving subscriptions for a specific API.\n`GET https://127.0.0.1:9443/api/am/publisher/v0.11/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`\n", response = SubscriptionListDTO.class)
-=======
     @io.swagger.annotations.ApiOperation(value = "Get all Subscriptions", notes = "This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of  1. Retrieving all subscriptions for the user's APIs. `GET https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions`  2. Retrieving subscriptions for a specific API. `GET https://127.0.0.1:9443/api/am/publisher/v1.0/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed` ", response = SubscriptionListDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscription_view", description = "View Subscription")
         })
     }, tags={ "Subscription (Collection)", })
->>>>>>> upstream/master
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Subscription list returned. ", response = SubscriptionListDTO.class),
         

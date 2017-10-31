@@ -1,19 +1,12 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-<<<<<<< HEAD
-import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
-
-import javax.validation.constraints.NotNull;
-=======
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
->>>>>>> upstream/master
 
 /**
  * DocumentDTO
@@ -82,15 +75,11 @@ public class DocumentDTO   {
     
     FILE("FILE");
 
-<<<<<<< HEAD
-  private String lastUpdatedTime = null;
-=======
     private String value;
 
     SourceTypeEnum(String value) {
       this.value = value;
     }
->>>>>>> upstream/master
 
     @Override
     @JsonValue
@@ -126,16 +115,10 @@ public class DocumentDTO   {
     return this;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
    /**
    * Get documentId
    * @return documentId
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public String getDocumentId() {
     return documentId;
@@ -145,11 +128,6 @@ public class DocumentDTO   {
     this.documentId = documentId;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public DocumentDTO name(String name) {
     this.name = name;
     return this;
@@ -159,7 +137,6 @@ public class DocumentDTO   {
    * Get name
    * @return name
   **/
->>>>>>> upstream/master
   @ApiModelProperty(required = true, value = "")
   public String getName() {
     return name;
@@ -169,11 +146,6 @@ public class DocumentDTO   {
     this.name = name;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public DocumentDTO type(TypeEnum type) {
     this.type = type;
     return this;
@@ -183,7 +155,6 @@ public class DocumentDTO   {
    * Get type
    * @return type
   **/
->>>>>>> upstream/master
   @ApiModelProperty(required = true, value = "")
   public TypeEnum getType() {
     return type;
@@ -193,11 +164,6 @@ public class DocumentDTO   {
     this.type = type;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public DocumentDTO summary(String summary) {
     this.summary = summary;
     return this;
@@ -207,7 +173,6 @@ public class DocumentDTO   {
    * Get summary
    * @return summary
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public String getSummary() {
     return summary;
@@ -217,11 +182,6 @@ public class DocumentDTO   {
     this.summary = summary;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public DocumentDTO sourceType(SourceTypeEnum sourceType) {
     this.sourceType = sourceType;
     return this;
@@ -231,7 +191,6 @@ public class DocumentDTO   {
    * Get sourceType
    * @return sourceType
   **/
->>>>>>> upstream/master
   @ApiModelProperty(required = true, value = "")
   public SourceTypeEnum getSourceType() {
     return sourceType;
@@ -241,11 +200,6 @@ public class DocumentDTO   {
     this.sourceType = sourceType;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public DocumentDTO sourceUrl(String sourceUrl) {
     this.sourceUrl = sourceUrl;
     return this;
@@ -255,7 +209,6 @@ public class DocumentDTO   {
    * Get sourceUrl
    * @return sourceUrl
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public String getSourceUrl() {
     return sourceUrl;
@@ -265,11 +218,6 @@ public class DocumentDTO   {
     this.sourceUrl = sourceUrl;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public DocumentDTO inlineContent(String inlineContent) {
     this.inlineContent = inlineContent;
     return this;
@@ -297,7 +245,6 @@ public class DocumentDTO   {
    * Get otherTypeName
    * @return otherTypeName
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public String getOtherTypeName() {
     return otherTypeName;

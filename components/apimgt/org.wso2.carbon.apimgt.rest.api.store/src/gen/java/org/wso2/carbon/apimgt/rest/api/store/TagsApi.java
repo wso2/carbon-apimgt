@@ -1,25 +1,12 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
-<<<<<<< HEAD
-import org.wso2.carbon.apimgt.rest.api.store.dto.*;
-import org.wso2.carbon.apimgt.rest.api.store.TagsApiService;
-import org.wso2.carbon.apimgt.rest.api.store.factories.TagsApiServiceFactory;
-=======
->>>>>>> upstream/master
 
 import io.swagger.annotations.ApiParam;
 
 import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.TagListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.factories.TagsApiServiceFactory;
 
-<<<<<<< HEAD
-import java.util.List;
-
-import java.io.InputStream;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.Multipart;
-
-=======
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FileInfo;
@@ -42,9 +29,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
->>>>>>> upstream/master
 import javax.ws.rs.core.Response;
-import javax.ws.rs.*;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.store.TagsApi",

@@ -1,22 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-<<<<<<< HEAD
-import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
-
-import javax.validation.constraints.NotNull;
-
-
-
-
-
-@ApiModel(description = "")
-public class ApplicationInfoDTO  {
-  
-  
-  
-=======
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
@@ -28,7 +12,6 @@ import java.util.Objects;
  */
 public class ApplicationInfoDTO   {
   @JsonProperty("applicationId")
->>>>>>> upstream/master
   private String applicationId = null;
 
   @JsonProperty("name")
@@ -37,15 +20,11 @@ public class ApplicationInfoDTO   {
   @JsonProperty("subscriber")
   private String subscriber = null;
 
-<<<<<<< HEAD
-  private String lastUpdatedTime = null;
-=======
   @JsonProperty("throttlingTier")
   private String throttlingTier = null;
 
   @JsonProperty("description")
   private String description = null;
->>>>>>> upstream/master
 
   @JsonProperty("lifeCycleStatus")
   private String lifeCycleStatus = null;
@@ -59,21 +38,6 @@ public class ApplicationInfoDTO   {
    * Get applicationId
    * @return applicationId
   **/
-<<<<<<< HEAD
-
-  @JsonIgnore
-  public String getCreatedTime(){
-    return createdTime;
-  }
-  public void setCreatedTime(String createdTime){
-    this.createdTime=createdTime;
-  }
-
-  
-  /**
-   **/
-=======
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public String getApplicationId() {
     return applicationId;
@@ -83,11 +47,6 @@ public class ApplicationInfoDTO   {
     this.applicationId = applicationId;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public ApplicationInfoDTO name(String name) {
     this.name = name;
     return this;
@@ -97,7 +56,6 @@ public class ApplicationInfoDTO   {
    * Get name
    * @return name
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public String getName() {
     return name;
@@ -107,11 +65,6 @@ public class ApplicationInfoDTO   {
     this.name = name;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public ApplicationInfoDTO subscriber(String subscriber) {
     this.subscriber = subscriber;
     return this;
@@ -121,7 +74,6 @@ public class ApplicationInfoDTO   {
    * Get subscriber
    * @return subscriber
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public String getSubscriber() {
     return subscriber;
@@ -131,11 +83,6 @@ public class ApplicationInfoDTO   {
     this.subscriber = subscriber;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public ApplicationInfoDTO throttlingTier(String throttlingTier) {
     this.throttlingTier = throttlingTier;
     return this;
@@ -145,7 +92,6 @@ public class ApplicationInfoDTO   {
    * Get throttlingTier
    * @return throttlingTier
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public String getThrottlingTier() {
     return throttlingTier;
@@ -155,11 +101,6 @@ public class ApplicationInfoDTO   {
     this.throttlingTier = throttlingTier;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public ApplicationInfoDTO description(String description) {
     this.description = description;
     return this;
@@ -169,7 +110,6 @@ public class ApplicationInfoDTO   {
    * Get description
    * @return description
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public String getDescription() {
     return description;
@@ -179,23 +119,6 @@ public class ApplicationInfoDTO   {
     this.description = description;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("status")
-  public String getStatus() {
-    return status;
-  }
-  public void setStatus(String status) {
-    this.status = status;
-  }
-
-  
-  /**
-   **/
-=======
   public ApplicationInfoDTO lifeCycleStatus(String lifeCycleStatus) {
     this.lifeCycleStatus = lifeCycleStatus;
     return this;
@@ -205,7 +128,6 @@ public class ApplicationInfoDTO   {
    * Get lifeCycleStatus
    * @return lifeCycleStatus
   **/
->>>>>>> upstream/master
   @ApiModelProperty(value = "")
   public String getLifeCycleStatus() {
     return lifeCycleStatus;

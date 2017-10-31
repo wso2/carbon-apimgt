@@ -1,23 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.store;
 
-<<<<<<< HEAD
-import org.wso2.carbon.apimgt.rest.api.store.dto.*;
-import org.wso2.carbon.apimgt.rest.api.store.SubscriptionsApiService;
-import org.wso2.carbon.apimgt.rest.api.store.factories.SubscriptionsApiServiceFactory;
-
-import io.swagger.annotations.ApiParam;
-
-import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.SubscriptionDTO;
-
-import java.util.List;
-
-import java.io.InputStream;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.Multipart;
-
-=======
 
 import io.swagger.annotations.ApiParam;
 
@@ -49,9 +31,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
->>>>>>> upstream/master
 import javax.ws.rs.core.Response;
-import javax.ws.rs.*;
 
 @Component(
     name = "org.wso2.carbon.apimgt.rest.api.store.SubscriptionsApi",
@@ -71,15 +51,11 @@ public class SubscriptionsApi implements Microservice  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-<<<<<<< HEAD
-    @io.swagger.annotations.ApiOperation(value = "Get all subscriptions\n", notes = "This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of\n\n1. Retrieving applications which are subscibed to a specific API.\n`GET https://127.0.0.1:9443/api/am/store/v0.11/subscriptions?apiId=c43a325c-260b-4302-81cb-768eafaa3aed`\n\n2. Retrieving APIs which are subscribed by a specific application.\n`GET https://127.0.0.1:9443/api/am/store/v0.11/subscriptions?applicationId=c43a325c-260b-4302-81cb-768eafaa3aed`\n\n**IMPORTANT:**\n* It is mandatory to provide either **apiId** or **applicationId**.\n", response = SubscriptionListDTO.class)
-=======
     @io.swagger.annotations.ApiOperation(value = "Get all subscriptions", notes = "Get subscription list. The API Identifier or Application Identifier the subscriptions of which are to be returned are passed as parameters. ", response = SubscriptionListDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
     }, tags={ "Retrieve", })
->>>>>>> upstream/master
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Subscription list returned. ", response = SubscriptionListDTO.class),
         
@@ -111,37 +87,6 @@ public class SubscriptionsApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 202, message = "Accepted. The request has been accepted. ", response = SubscriptionDTO.class),
         
-<<<<<<< HEAD
-        @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type.\nThe entity of the request was in a not supported format.\n") })
-
-    public Response subscriptionsPost(@ApiParam(value = "Subscription object that should to be added\n" ,required=true ) SubscriptionDTO body,
-    @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType)
-    {
-    return delegate.subscriptionsPost(body, contentType);
-    }
-
-    @POST
-    @Path("/multiple")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Add new subscriptions\n", notes = "Add new subscriptions\n", response = SubscriptionDTO.class)
-    @io.swagger.annotations.ApiResponses(value = {
-            @io.swagger.annotations.ApiResponse(code = 201, message = "Created.\nSuccessful response with the newly created object as entity in the body.\nLocation header contains URL of newly created entity.\n"),
-
-            @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error.\n"),
-
-            @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type.\nThe entity of the request was in a not supported format.\n") })
-
-    public Response subscriptionsPost(@ApiParam(value = "Subscription object that should to be added\n" ,required=true ) List<SubscriptionDTO> body,
-                                      @ApiParam(value = "Media type of the entity in the body. Default is JSON.\n" ,required=true , defaultValue="JSON")@HeaderParam("Content-Type") String contentType)
-    {
-        return delegate.subscriptionsPost(body,contentType);
-    }
-
-    public String subscriptionsPostGetLastUpdatedTime(SubscriptionDTO body,String contentType)
-    {
-        return delegate.subscriptionsPostGetLastUpdatedTime(body,contentType);
-=======
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error. ", response = SubscriptionDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type. The entity of the request was in a not supported format. ", response = SubscriptionDTO.class) })
@@ -149,7 +94,6 @@ public class SubscriptionsApi implements Microservice  {
  ,@Context Request request)
     throws NotFoundException {
         return delegate.subscriptionsPost(body,request);
->>>>>>> upstream/master
     }
     @OPTIONS
     @DELETE

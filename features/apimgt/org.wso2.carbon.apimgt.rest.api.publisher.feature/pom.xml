@@ -21,11 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-<<<<<<< HEAD
-        <version>6.1.94</version>
-=======
         <version>7.0.43-SNAPSHOT</version>
->>>>>>> upstream/master
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -45,87 +41,15 @@
     <build>
         <plugins>
             <plugin>
-<<<<<<< HEAD
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.wso2.carbon.apimgt</groupId>
-                                    <artifactId>org.wso2.carbon.apimgt.rest.api.publisher</artifactId>
-                                    <overWrite>true</overWrite>
-                                    <type>war</type>
-                                    <outputDirectory>${basedir}/src/main/resources/</outputDirectory>
-                                    <destFileName>api#am#publisher#v0.11.war</destFileName>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-=======
                 <groupId>org.wso2.carbon.maven</groupId>
                 <artifactId>carbon-feature-plugin</artifactId>
                 <version>${carbon.feature.plugin.version}</version>
                 <extensions>true</extensions>
->>>>>>> upstream/master
                 <executions>
                     <execution>
                         <id>1-p2-feature-generation</id>
                         <goals>
-<<<<<<< HEAD
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>src/main/resources</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>resources</directory>
-                                    <includes>
-                                        <include>api#am#publisher#v0.11.war</include>
-                                        <include>p2.inf</include>
-                                        <include>build.properties</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-common-doc-resources</id>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>src/main/resources/api-docs/docs/</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.rest.api.util/src/main/resources/doc-templates</directory>
-                                    <excludes>
-                                        <exclude>**/*.mustache</exclude>
-                                    </excludes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-specific-doc-resources</id>
-                        <phase>site</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-=======
                             <goal>generate</goal>
->>>>>>> upstream/master
                         </goals>
                         <configuration>
 

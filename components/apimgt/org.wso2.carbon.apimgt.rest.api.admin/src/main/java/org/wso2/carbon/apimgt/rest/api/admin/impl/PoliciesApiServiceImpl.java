@@ -115,23 +115,11 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             log.info("Received Advanced Policy Get request. Policy uuid: " + Id);
         }
         try {
-<<<<<<< HEAD
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            //Delete given global mediation policy
-            boolean deleteState = apiProvider.deleteGlobalMediationPolicy(mediationPolicyId);
-            if (deleteState) {
-                return Response.ok().build();
-            } else {
-                //If registry resource not found
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);
-            }
-=======
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             APIPolicy policy = apiMgtAdminService.getApiPolicyByUuid(Id);
             return Response.status(Response.Status.OK).entity(AdvancedThrottlePolicyMappingUtil.
                     fromAdvancedPolicyToDTO(policy)).build();
 
->>>>>>> upstream/master
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while getting Advanced Policy. policy uuid: " + Id;
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
@@ -226,26 +214,12 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             log.debug("Received Application Throttle Policy GET request");
         }
         try {
-<<<<<<< HEAD
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            //Get given global mediation policy
-            Mediation mediation = apiProvider.getGlobalMediationPolicy(mediationPolicyId);
-            if (mediation != null) {
-                MediationDTO mediationDTO =
-                        MediationMappingUtil.fromMediationToDTO(mediation);
-                return Response.ok().entity(mediationDTO).build();
-            } else {
-                //If global mediation policy not exists
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);
-            }
-=======
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             List<ApplicationPolicy> policies = apiMgtAdminService.getApplicationPolicies();
             ApplicationThrottlePolicyListDTO applicationThrottlePolicyListDTO = ApplicationThrottlePolicyMappingUtil
                     .fromApplicationPolicyArrayToListDTO(policies);
             return Response.ok().entity(applicationThrottlePolicyListDTO).build();
 
->>>>>>> upstream/master
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while retrieving Application Policies";
             org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
@@ -293,54 +267,11 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
             log.info("Received Application Policy Get request. Policy uuid: " + id);
         }
         try {
-<<<<<<< HEAD
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            //Get registry resource correspond to given uuid
-            Resource mediationResource = apiProvider.getCustomMediationResourceFromUuid(mediationPolicyId);
-            if (mediationResource != null) {
-
-                //extracting already existing name of the mediation policy
-                String contentString = IOUtils.toString(mediationResource.getContentStream(),
-                        RegistryConstants.DEFAULT_CHARSET_ENCODING);
-                //Get policy name from the mediation config
-                OMElement omElement = AXIOMUtil.stringToOM(contentString);
-                OMAttribute attribute = omElement.getAttribute(new QName
-                        (PolicyConstants.MEDIATION_NAME_ATTRIBUTE));
-                String existingMediationPolicyName = attribute.getAttributeValue();
-
-                //replacing the name of the body with existing name
-                body.setName(existingMediationPolicyName);
-
-                //Getting mediation config to be update from the body
-                contentStream = new ByteArrayInputStream(body.getConfig().getBytes
-                        (StandardCharsets.UTF_8));
-                //Creating new resource file
-                ResourceFile contentFile = new ResourceFile(contentStream, contentType);
-                //Getting registry path of the existing resource
-                String resourcePath = mediationResource.getPath();
-                //Updating the existing global mediation policy
-                String updatedPolicyUrl = apiProvider.addResourceFile(resourcePath, contentFile);
-                if (StringUtils.isNotBlank(updatedPolicyUrl)) {
-                    //Getting uuid of updated global mediation policy
-                    String uuid = apiProvider.getCreatedResourceUuid(resourcePath);
-                    //Getting updated mediation
-                    Mediation updatedMediation = apiProvider.getGlobalMediationPolicy(uuid);
-                    MediationDTO updatedMediationDTO =
-                            MediationMappingUtil.fromMediationToDTO(updatedMediation);
-                    URI uploadedMediationUri = new URI(updatedPolicyUrl);
-                    return Response.ok(uploadedMediationUri).entity(updatedMediationDTO).build();
-                }
-            } else {
-                //If resource not exists
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_POLICY, mediationPolicyId, log);
-            }
-=======
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             Policy applicationPolicy = apiMgtAdminService.getApplicationPolicyByUuid(id);
             return Response.status(Response.Status.OK).entity(ApplicationThrottlePolicyMappingUtil.
                     fromApplicationThrottlePolicyToDTO(applicationPolicy)).build();
 
->>>>>>> upstream/master
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while getting Application Policy. policy uuid: " + id;
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
@@ -370,35 +301,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
         }
 
         try {
-<<<<<<< HEAD
-            APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-            String content = body.getConfig();
-            contentStream = new ByteArrayInputStream(content.getBytes
-                    (StandardCharsets.UTF_8));
-            ResourceFile contentFile = new ResourceFile(contentStream, contentType);
-            //Extracting mediation policy name from the mediation config
-            String fileName = this.getMediationNameFromConfig(content);
-            //constructing the registry resource path
-            String mediationPolicyPath = APIConstants.API_CUSTOM_SEQUENCE_LOCATION +
-                    RegistryConstants.PATH_SEPARATOR + body.getType() +
-                    RegistryConstants.PATH_SEPARATOR + fileName;
-            if (apiProvider.checkIfResourceExists(mediationPolicyPath)) {
-                RestApiUtil.handleConflict("Mediation policy already exists", log);
-            }
-            //Adding new global mediation sequence
-            String mediationPolicyUrl =
-                    apiProvider.addResourceFile(mediationPolicyPath, contentFile);
-            if (StringUtils.isNotBlank(mediationPolicyUrl)) {
-                //Getting the uuid of the created global mediation policy
-                String uuid = apiProvider.getCreatedResourceUuid(mediationPolicyPath);
-                //Getting created mediation policy
-                Mediation createdMediation = apiProvider.getGlobalMediationPolicy(uuid);
-                MediationDTO createdPolicy =
-                        MediationMappingUtil.fromMediationToDTO(createdMediation);
-                URI uploadedMediationUri = new URI(mediationPolicyUrl);
-                return Response.created(uploadedMediationUri).entity(createdPolicy).build();
-            }
-=======
             APIMgtAdminService apiMgtAdminService = RestApiUtil.getAPIMgtAdminService();
             ApplicationPolicy applicationPolicy = ApplicationThrottlePolicyMappingUtil
                     .fromApplicationThrottlePolicyDTOToModel(body);
@@ -408,7 +310,6 @@ public class PoliciesApiServiceImpl extends PoliciesApiService {
                     fromApplicationThrottlePolicyToDTO(apiMgtAdminService.getApplicationPolicyByUuid(id))).
                     build();
 
->>>>>>> upstream/master
         } catch (APIManagementException e) {
             String errorMessage = "Error occurred while updating Application Policy. policy uuid: " + id;
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());

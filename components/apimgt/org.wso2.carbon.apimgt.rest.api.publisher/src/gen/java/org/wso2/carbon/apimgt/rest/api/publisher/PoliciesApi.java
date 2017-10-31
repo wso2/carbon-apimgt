@@ -4,13 +4,9 @@ package org.wso2.carbon.apimgt.rest.api.publisher;
 import io.swagger.annotations.ApiParam;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
-<<<<<<< HEAD
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.MediationListDTO;
-=======
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.factories.PoliciesApiServiceFactory;
->>>>>>> upstream/master
 
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;

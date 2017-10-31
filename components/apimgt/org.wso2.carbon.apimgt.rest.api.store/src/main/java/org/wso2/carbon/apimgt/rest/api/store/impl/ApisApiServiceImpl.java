@@ -403,14 +403,8 @@ public class ApisApiServiceImpl extends ApisApiService {
     /**
      * Retrives the document identified by the API's ID and the document's ID
      *
-<<<<<<< HEAD
-     * @param apiId           API Id
-     * @param xWSO2Tenant     requested tenant domain for cross tenant invocations
-     * @param accept          Accept header value
-=======
      * @param apiId           UUID of API
      * @param documentId      UUID of the document
->>>>>>> upstream/master
      * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
      * @param request         minor version header
@@ -418,26 +412,6 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-<<<<<<< HEAD
-    public Response apisApiIdThumbnailGet(String apiId, String xWSO2Tenant, String accept, String ifNoneMatch,
-            String ifModifiedSince) {
-        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
-        try {
-            APIConsumer apiConsumer = RestApiUtil.getLoggedInUserConsumer();
-            if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
-                RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
-            }
-            //this will fail if user does not have access to the API or the API does not exist
-            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, requestedTenantDomain);
-            ResourceFile thumbnailResource = apiConsumer.getIcon(apiIdentifier);
-
-            if (thumbnailResource != null) {
-                return Response
-                        .ok(thumbnailResource.getContent(), MediaType.valueOf(thumbnailResource.getContentType()))
-                        .build();
-            } else {
-                return Response.noContent().build();
-=======
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String ifNoneMatch,
                                                     String ifModifiedSince, Request request) throws NotFoundException {
         DocumentDTO documentDTO = null;
@@ -449,7 +423,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                     .contains(existingFingerprint)) {
                 return Response.notModified().build();
->>>>>>> upstream/master
             }
 
             DocumentInfo documentInfo = apiStore.getDocumentationSummary(documentId);
@@ -457,19 +430,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.ok().entity(documentDTO)
                     .header(HttpHeaders.ETAG, "\"" + existingFingerprint + "\"").build();
         } catch (APIManagementException e) {
-<<<<<<< HEAD
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
-            // existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
-            } else {
-                String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-        } catch (UserStoreException e) {
-            String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-=======
             String errorMessage =
                     "Error while retrieving documentation for given apiId " + apiId + "with docId " + documentId;
             HashMap<String, String> paramList = new HashMap<String, String>();
@@ -478,7 +438,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
->>>>>>> upstream/master
         }
     }
 
@@ -869,11 +828,6 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
-<<<<<<< HEAD
-    public String apisApiIdThumbnailGetGetLastUpdatedTime(String apiId, String xWSO2Tenant, String accept,
-            String ifNoneMatch, String ifModifiedSince) {
-        return RestAPIStoreUtils.apisApiIdThumbnailGetLastUpdated(apiId);
-=======
     public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch, String ifModifiedSince,
                                         Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
@@ -895,7 +849,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
->>>>>>> upstream/master
     }
 
 

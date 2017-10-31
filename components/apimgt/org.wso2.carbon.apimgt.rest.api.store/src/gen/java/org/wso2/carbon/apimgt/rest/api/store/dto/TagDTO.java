@@ -1,30 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
-<<<<<<< HEAD
-import io.swagger.annotations.*;
-import com.fasterxml.jackson.annotation.*;
-
-import javax.validation.constraints.NotNull;
-
-
-
-
-
-@ApiModel(description = "")
-public class TagDTO  {
-  
-  
-  @NotNull
-  private String name = null;
-  
-  @NotNull
-  private Integer weight = null;
-
-  private String lastUpdatedTime = null;
-
-  private String createdTime = null;
-=======
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
@@ -40,7 +16,6 @@ public class TagDTO   {
 
   @JsonProperty("weight")
   private Integer weight = null;
->>>>>>> upstream/master
 
   public TagDTO name(String name) {
     this.name = name;
@@ -51,21 +26,6 @@ public class TagDTO   {
    * Get name
    * @return name
   **/
-<<<<<<< HEAD
-
-  @JsonIgnore
-  public String getCreatedTime(){
-    return createdTime;
-  }
-  public void setCreatedTime(String createdTime){
-    this.createdTime=createdTime;
-  }
-
-  
-  /**
-   **/
-=======
->>>>>>> upstream/master
   @ApiModelProperty(required = true, value = "")
   public String getName() {
     return name;
@@ -75,11 +35,6 @@ public class TagDTO   {
     this.name = name;
   }
 
-<<<<<<< HEAD
-  
-  /**
-   **/
-=======
   public TagDTO weight(Integer weight) {
     this.weight = weight;
     return this;
@@ -89,7 +44,6 @@ public class TagDTO   {
    * Get weight
    * @return weight
   **/
->>>>>>> upstream/master
   @ApiModelProperty(required = true, value = "")
   public Integer getWeight() {
     return weight;
