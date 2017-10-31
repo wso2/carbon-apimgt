@@ -605,6 +605,36 @@
                 <version>${com.fasterxml.jackson.dataformat.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.wso2.orbit.com.squareup.okio</groupId>
+                <artifactId>okio</artifactId>
+                <version>${wso2.okio.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
+                <artifactId>okhttp-ws</artifactId>
+                <version>${wso2.okhttp-ws.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>${wso2.okhttp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
+                <artifactId>logging-interceptor</artifactId>
+                <version>${wso2.okhttp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.dnsjava</groupId>
+                <artifactId>dnsjava</artifactId>
+                <version>${wso2.dnsjava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>${org.json.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
                 <version>${snakeyaml.version}</version>
@@ -984,6 +1014,12 @@
         <h2.version>1.4.192</h2.version>
         <carbon.lcm.version>1.1.1</carbon.lcm.version>
         <carbon.lcm.import.version.range>[1.1.0, 1.2.0)</carbon.lcm.import.version.range>
+
+        <wso2.okhttp-ws.version>3.4.2.wso2v2</wso2.okhttp-ws.version>
+        <wso2.okhttp.version>3.8.0.wso2v2</wso2.okhttp.version>
+        <wso2.dnsjava.version>2.1.7.wso2v1</wso2.dnsjava.version>
+        <org.json.version>20160212</org.json.version>
+        <wso2.okio.version>1.6.0.wso2v1</wso2.okio.version>
         <wso2.kubernetes-client.version>2.5.2.wso2v3</wso2.kubernetes-client.version>
         <nimbusds.version>2.26.1.wso2v2</nimbusds.version>
         <nimbusds.import.version.range>[2.26.1, 2.26.2)</nimbusds.import.version.range>
