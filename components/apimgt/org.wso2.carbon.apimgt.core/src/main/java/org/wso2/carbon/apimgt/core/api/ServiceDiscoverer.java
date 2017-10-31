@@ -6,8 +6,14 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * This interface allows discovering services in a cluster using a URL given in a config file
+ * and filtering by namespace and criteria.
+ * Can be used to implement discovery in clusters such as Kubernetes or OpenShift.
+ */
+public interface ServiceDiscoverer {
 
-public interface ServiceDiscovery {
+    Boolean isEnabled();
 
     List<Endpoint> listServices() throws MalformedURLException;
 
