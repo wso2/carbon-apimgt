@@ -88,7 +88,7 @@ public class RestAPIStoreUtils {
         keyManagerAdminUserName = apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
         keyManagerAdminPassword = apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
         String isStoreCacheEnabledConfiguration = apiManagerConfiguration.getFirstProperty(APIConstants
-                .STORE_CACHE_ENABLED);
+                .SCOPE_CACHE_ENABLED);
         isStoreCacheEnabled =
                 isStoreCacheEnabledConfiguration != null && Boolean.parseBoolean(isStoreCacheEnabledConfiguration);
         try {

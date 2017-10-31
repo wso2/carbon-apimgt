@@ -83,7 +83,7 @@ public class RestAPIStoreUtilsTestCase {
         Mockito.doReturn(ADMIN).when(apiManagerConfiguration).getFirstProperty(APIConstants.KEYMANAGER_SERVERURL);
         Mockito.doReturn(ADMIN).when(apiManagerConfiguration).getFirstProperty(APIConstants.KEY_MANAGER_USERNAME);
         Mockito.doReturn(ADMIN).when(apiManagerConfiguration).getFirstProperty(APIConstants.KEY_MANAGER_PASSWORD);
-        Mockito.doReturn("true").when(apiManagerConfiguration).getFirstProperty(APIConstants.STORE_CACHE_ENABLED);
+        Mockito.doReturn("true").when(apiManagerConfiguration).getFirstProperty(APIConstants.SCOPE_CACHE_ENABLED);
 
         // Creating mock of MutiTenantUserAdminServiceStub.
         multiTenantUserAdminServiceStub = Mockito.mock(MultiTenantUserAdminServiceStub.class);
