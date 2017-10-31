@@ -88,7 +88,7 @@ public class ApiImportExportManager {
             if (endpoints.isEmpty()) {
                 log.error("No Endpoints found for api: " + api.getName() + ", version: " + api.getVersion());
                 // skip this API
-                continue;
+                // continue;
             }
             Set<Endpoint> endpointSet = new HashSet<>();
             for (Map.Entry<String, Endpoint> endpointEntry : endpoints.entrySet()) {
