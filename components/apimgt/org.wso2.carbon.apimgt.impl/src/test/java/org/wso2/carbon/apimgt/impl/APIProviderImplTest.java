@@ -1153,8 +1153,8 @@ public class APIProviderImplTest {
         PowerMockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenReturn(artifact);
         Mockito.when(artifact.getId()).thenReturn("12640983654");
         PowerMockito.when(GovernanceUtils.getArtifactPath(apiProvider.registry, "12640983654")).
-                                                                                        thenReturn(apiSourcePath); 
-        
+                                                                                        thenReturn(apiSourcePath);
+
         apiProvider.updateAPI(api); 
         //TODO: Need to add asserts        
     }

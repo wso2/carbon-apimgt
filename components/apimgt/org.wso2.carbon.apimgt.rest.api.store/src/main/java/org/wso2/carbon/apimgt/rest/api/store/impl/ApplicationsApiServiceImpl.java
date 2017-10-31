@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationMappingUtil;
@@ -426,6 +427,52 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     @Override
     public String applicationsApplicationIdDeleteGetLastUpdatedTime(String applicationId, String ifMatch, String ifUnmodifiedSince) {
         return RestAPIStoreUtils.getLastUpdatedTimeByApplicationId(applicationId);
+    }
+
+    /**
+     * Retrieves the scopes related with particular applications based on subscribed APIs.
+     *
+     * @param applicationId     Application Identifier.
+     * @param filterByUserRoles Whether to filter scope by user roles.
+     * @param accept            accepted media type of the client
+     * @param ifNoneMatch       If-None-Match header value
+     * @param ifModifiedSince   If-Modified-Since header value.
+     * @return the scopes
+     */
+    @Override
+    public Response applicationsApplicationScopesGet(String applicationId, boolean filterByUserRoles,
+            String accept,String ifNoneMatch, String ifModifiedSince) {
+        String userName = RestApiUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = RestApiUtil.getConsumer(userName);
+            if (log.isDebugEnabled()) {
+                log.debug("Scope retrieval request received from the " + userName + " for the application id "
+                        + applicationId + " with the query parameter('filterByUserRoles) value " + filterByUserRoles);
+            }
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            if (application != null) {
+                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    ScopeListDTO filteredScopes = RestAPIStoreUtils
+                            .getScopesForApplication(userName, application, filterByUserRoles);
+
+                    return Response.ok().entity(filteredScopes).build();
+                } else {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+        } catch (APIManagementException e) {
+            if (e.getMessage()!= null && e.getMessage().contains("MultiTenantUserAdmin")) {
+                RestApiUtil.handleInternalServerError(
+                        "MultiTenantUserAdmin admin service error while getting scopes related with application " +
+                                applicationId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError(
+                        "Error while getting scopes related with application " + applicationId, e, log);
+            }
+        }
+        return null;
     }
 
     /**

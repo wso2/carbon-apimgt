@@ -445,6 +445,7 @@ public final class APIConstants {
     public static final String TOKEN_CACHE_EXPIRY = CACHE_CONFIGS + "TokenCacheExpiry";
     public static final String STORE_TAG_CACHE_DURATION = CACHE_CONFIGS + "TagCacheDuration";
     public static final String API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE = CACHE_CONFIGS + "EnableRecentlyAddedAPICache";
+    public static final String SCOPE_CACHE_ENABLED = CACHE_CONFIGS + "EnableScopeCache";
     public static final String DEFAULT_CACHE_TIMEOUT = "Cache.DefaultCacheTimeout";
 
     public static final String API_KEY_VALIDATOR = "APIKeyValidator.";
@@ -522,6 +523,7 @@ public final class APIConstants {
     public static final String API_STORE_DISABLE_PERMISSION_CHECK = API_STORE + "DisablePermissionCheck";
     public static final String API_STORE_APIS_PER_PAGE = API_STORE + "APIsPerPage";
     public static final String API_STORE_FORUM_ENABLED = API_STORE + "isStoreForumEnabled";
+    public static final String MULTI_TENANT_USER_ADMIN_SERVICE = "MultiTenantUserAdminService";
 
 
     public static final String API_PUBLISHER = "APIPublisher.";
@@ -747,6 +749,8 @@ public final class APIConstants {
     public static final String TIERS_CACHE = "tiersCache";
     public static final int API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS = 3650;
     public static final String CLAIMS_APIM_CACHE = "claimsLocalCache";
+    public static final String APP_SUBSCRIPTION_SCOPE_CACHE = "appSubscriptionScopeCache";
+    public static final String APP_SUBSCRIPTION_FILTERED_SCOPE_CACHE = "appSubscriptionFilteredScopeCache";
 
     //URI Authentication Schemes
     public static final Set<String> SUPPORTED_METHODS =

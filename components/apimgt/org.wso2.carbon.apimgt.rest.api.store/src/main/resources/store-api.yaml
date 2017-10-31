@@ -1,3 +1,18 @@
+#   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+################################################################################
+
 swagger: '2.0'
 ######################################################
 # Prolog
@@ -1110,6 +1125,96 @@ paths:
             The request has not been performed because one of the preconditions is not met (Will be supported in future).
           schema:
             $ref: '#/definitions/Error'
+  '/applications/scopes/{applicationId}':
+    get:
+      x-scope: 'apim:subscribe'
+      x-wso2-request: |-
+        GET https://127.0.0.1:9443/api/am/store/v0.9/applications/scopes/896658a0-b4ee-4535-bbfa-806c894a4015
+        Authorization: Beareraa0ddec1ac656744234477f20fafcb0d
+      x-wso2-curl: 'curl -k -H "Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d" "https://127.0.0.1:9443/api/am/store/v0.9/applications/scopes/896658a0-b4ee-4535-bbfa-806c894a4015"'
+      x-wso2-response: |-
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+
+        {
+           "groupId": "",
+           "callbackUrl": null,
+           "subscriber": "admin",
+           "throttlingTier": "Unlimited",
+           "applicationId": "896658a0-b4ee-4535-bbfa-806c894a4015",
+           "description": null,
+           "status": "APPROVED",
+           "name": "DefaultApplication",
+           "keys": [   {
+              "consumerKey": "AVoREWiB16kY_GTIzscl40GYYZQa",
+              "consumerSecret": "KXQxmS8W3xDvvJH4AfR6xrhKIeIa",
+              "keyState": "COMPLETED",
+              "keyType": "PRODUCTION",
+              "supportedGrantTypes": null,
+              "token":       {
+                 "validityTime": 3600,
+                 "accessToken": "3887da6d111f0429c6dff47a46e87209",
+                 "tokenScopes":          [
+                    "am_application_scope",
+                    "default"
+                 ]
+              }
+           }]
+        }
+      summary: |
+        Get scopes associated with a particular application based on subscribed APIs
+      description: |
+        Get scopes associated with a particular application based on subscribed APIs
+      parameters:
+        - $ref: '#/parameters/applicationId'
+        - $ref: '#/parameters/filterByUserRoles'
+        - $ref: '#/parameters/If-None-Match'
+        - $ref: '#/parameters/If-Modified-Since'
+      tags:
+        - Application (Individual)
+      responses:
+        '200':
+          description: |
+            OK.
+            Scope returned.
+          schema:
+            $ref: '#/definitions/ScopeList'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests.
+              type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional reuquests.
+              type: string
+        '304':
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+        '401':
+          description: |
+            Un authorized.
+            The user is not authorized to view the application .
+          schema:
+            $ref: '#/definitions/Error'
+        '404':
+          description: |
+            Not Found.
+            Requested application does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        '406':
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
 
 ######################################################
 # The "Subscription Collection" resource APIs
@@ -1643,6 +1748,16 @@ parameters:
       Application Identifier consisting of the UUID of the Application.
     required: true
     type: string
+
+# Filter By user roles
+# Specified as part of the query string
+  filterByUserRoles:
+    name: filterByUserRoles
+    in: query
+    description : |
+      Filter user by roles.
+    required : false
+    type: boolean
 
 # Application Identifier
 # Specified as part of the query string
@@ -2476,6 +2591,34 @@ definitions:
           type: string
         description: Allowed scopes for the access token
         example: ["am_application_scope","default"]
+
+  ApplicationScope :
+    title: Scope of the APIs
+    properties:
+      key:
+        type: string
+        description: Key of scope
+        example: apim:fileread
+      name:
+        type: string
+        description: Name of the scope
+        example: apim file read
+      roles :
+        type: string
+        description: Roles scope is bounded to
+        example : admin, role1
+      description:
+        type: string
+        description: Description of the scope
+
+  ScopeList :
+    title : Scope list
+    properties:
+      list :
+        type : array
+        items:
+          $ref: '#/definitions/ApplicationScope'
+
 
 #-----------------------------------------------------
 # END-OF-FILE

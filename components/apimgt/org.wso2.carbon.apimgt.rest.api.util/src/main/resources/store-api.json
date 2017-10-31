@@ -1054,6 +1054,92 @@
                 }
             }
         },
+        "/applications/scopes/{applicationId}" : {
+            "get" : {
+                "tags" : [ "Application (Individual)" ],
+                "summary" : "Get scopes associated with a particular application based on subscribed APIs\n",
+                "description" : "Get scopes associated with a particular application based on subscribed APIs\n",
+                "parameters" : [ {
+                    "name" : "applicationId",
+                    "in" : "path",
+                    "description" : "Application Identifier consisting of the UUID of the Application.\n",
+                    "required" : true,
+                    "type" : "string"
+                }, {
+                    "name" : "filterByUserRoles",
+                    "in" : "query",
+                    "description" : "Filter user by roles.\n",
+                    "required" : false,
+                    "type" : "boolean"
+                }, {
+                    "name" : "Accept",
+                    "in" : "header",
+                    "description" : "Media types acceptable for the response. Default is application/json.\n",
+                    "required" : false,
+                    "type" : "string",
+                    "default" : "application/json"
+                }, {
+                    "name" : "If-None-Match",
+                    "in" : "header",
+                    "description" : "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n",
+                    "required" : false,
+                    "type" : "string"
+                }, {
+                    "name" : "If-Modified-Since",
+                    "in" : "header",
+                    "description" : "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource (Will be supported in future).\n",
+                    "required" : false,
+                    "type" : "string"
+                } ],
+                "responses" : {
+                    "200" : {
+                        "description" : "OK.\nScope returned.\n",
+                        "schema" : {
+                            "$ref" : "#/definitions/ScopeList"
+                        },
+                        "headers" : {
+                            "Content-Type" : {
+                                "type" : "string",
+                                "description" : "The content type of the body.\n"
+                            },
+                            "ETag" : {
+                                "type" : "string",
+                                "description" : "Entity Tag of the response resource. Used by caches, or in conditional requests.\n"
+                            },
+                            "Last-Modified" : {
+                                "type" : "string",
+                                "description" : "Date and time the resource has been modifed the last time.\nUsed by caches, or in conditional reuquests.\n"
+                            }
+                        }
+                    },
+                    "304" : {
+                        "description" : "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"
+                    },
+                    "401" : {
+                        "description" : "Un authorized.\nThe user is not authorized to view the application .\n",
+                        "schema" : {
+                            "$ref" : "#/definitions/Error"
+                        }
+                    },
+                    "404" : {
+                        "description" : "Not Found.\nRequested application does not exist.\n",
+                        "schema" : {
+                            "$ref" : "#/definitions/Error"
+                        }
+                    },
+                    "406" : {
+                        "description" : "Not Acceptable.\nThe requested media type is not supported\n",
+                        "schema" : {
+                            "$ref" : "#/definitions/Error"
+                        }
+                    }
+                },
+                "x-scope" : "apim:subscribe",
+                "x-wso2-request" : "GET https://127.0.0.1:9443/api/am/store/v0.9/applications/scopes/896658a0-b4ee-4535-bbfa-806c894a4015\nAuthorization: Beareraa0ddec1ac656744234477f20fafcb0d",
+                "x-wso2-curl" : "curl -k -H \"Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d\" \"https://127.0.0.1:9443/api/am/store/v0.9/applications/scopes/896658a0-b4ee-4535-bbfa-806c894a4015\"",
+                "x-wso2-response" : "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"groupId\": \"\",\n   \"callbackUrl\": null,\n   \"subscriber\": \"admin\",\n   \"throttlingTier\": \"Unlimited\",\n   \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n   \"description\": null,\n   \"status\": \"APPROVED\",\n   \"name\": \"DefaultApplication\",\n   \"keys\": [   {\n      \"consumerKey\": \"AVoREWiB16kY_GTIzscl40GYYZQa\",\n      \"consumerSecret\": \"KXQxmS8W3xDvvJH4AfR6xrhKIeIa\",\n      \"keyState\": \"COMPLETED\",\n      \"keyType\": \"PRODUCTION\",\n      \"supportedGrantTypes\": null,\n      \"token\":       {\n         \"validityTime\": 3600,\n         \"accessToken\": \"3887da6d111f0429c6dff47a46e87209\",\n         \"tokenScopes\":          [\n            \"am_application_scope\",\n            \"default\"\n         ]\n      }\n   }]\n}"
+            }
+        },
         "/subscriptions": {
             "get": {
                 "x-scope": "apim:subscribe",
@@ -1669,6 +1755,13 @@
             "in": "header",
             "description": "Validator for conditional requests; based on Last Modified header (Will be supported in future).\n",
             "type": "string"
+        },
+        "filterByUserRoles" : {
+            "name" : "filterByUserRoles",
+            "in": "query",
+            "description": "Whether to filter scopes by user roles",
+            "default": false,
+            "type": "boolean"
         }
     },
     "definitions": {
@@ -2448,6 +2541,41 @@
                     ]
                 }
             }
+        },
+        "ApplicationScope" : {
+            "properties" : {
+                "key" : {
+                    "type" : "string",
+                    "example" : "apim:fileread",
+                    "description" : "Key of scope"
+                },
+                "name" : {
+                    "type" : "string",
+                    "example" : "apim file read",
+                    "description" : "Name of the scope"
+                },
+                "roles" : {
+                    "type" : "string",
+                    "example" : "admin, role1",
+                    "description" : "Roles scope is bounded to"
+                },
+                "description" : {
+                    "type" : "string",
+                    "description" : "Description of the scope"
+                }
+            },
+            "title" : "Scope of the APIs"
+        },
+        "ScopeList" : {
+            "properties" : {
+                "list" : {
+                    "type" : "array",
+                    "items" : {
+                        "$ref" : "#/definitions/ApplicationScope"
+                    }
+                }
+            },
+            "title" : "Scope list"
         }
     }
 }

@@ -1,25 +1,44 @@
+/*
+ *  Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *
+ */
+
 package org.wso2.carbon.apimgt.rest.api.store;
 
-import org.wso2.carbon.apimgt.rest.api.store.dto.*;
-import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
-import org.wso2.carbon.apimgt.rest.api.store.factories.ApplicationsApiServiceFactory;
-
+import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-
-import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ScopeListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.factories.ApplicationsApiServiceFactory;
 
-import java.util.List;
-
-import java.io.InputStream;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import org.apache.cxf.jaxrs.ext.multipart.Multipart;
-
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.*;
 
 @Path("/applications")
 @Consumes({ "application/json" })
@@ -232,6 +251,41 @@ public class ApplicationsApi  {
     public String applicationsPostGetLastUpdatedTime(ApplicationDTO body,String contentType)
     {
         return delegate.applicationsPostGetLastUpdatedTime(body,contentType);
+    }
+
+    @GET
+    @Path("/scopes/{applicationId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get scopes associated with a particular application based on subscribed APIs ",
+            notes = "Get scopes associated with a particular application based on subscribed APIs ",
+            response = ScopeListDTO.class, tags={ "Application" })
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK. Scope returned. ", response = ScopeListDTO.class),
+            @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest "
+                    + "version of the requested resource. ", response = ScopeListDTO.class),
+            @ApiResponse(code = 401, message = "Un authorized. The user is not authorized to view the application . ",
+                    response = ScopeListDTO.class),
+            @ApiResponse(code = 404, message = "Not Found. Requested application does not exist. ",
+                    response = ScopeListDTO.class),
+            @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ",
+                    response = ScopeListDTO.class) })
+    public Response applicationsScopesApplicationIdGet(
+            @ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true)
+            @PathParam("applicationId") String applicationId,
+            @ApiParam(value = "Filter user by roles. ")
+            @QueryParam("filterByUserRoles") boolean filterByUserRoles,
+            @ApiParam(value = "Media types acceptable for the response. Default is application/json. " ,
+                    defaultValue="application/json")
+            @HeaderParam("Accept") String accept,
+            @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant "
+                    + "of the resource. " )
+            @HeaderParam("If-None-Match") String ifNoneMatch,
+            @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly "
+                    + "retrieved variant of the resource (Will be supported in future). " )
+            @HeaderParam("If-Modified-Since") String ifModifiedSince) {
+     return delegate.applicationsApplicationScopesGet(applicationId, filterByUserRoles, accept, ifNoneMatch,
+             ifModifiedSince);
     }
 }
 
