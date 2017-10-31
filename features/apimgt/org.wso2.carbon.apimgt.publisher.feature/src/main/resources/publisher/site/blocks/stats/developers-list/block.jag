@@ -1,8 +1,0 @@
-<%
-jagg.block("stats/developers-list", {
-    initializer:function (data) {
-
-    }
-
-});
-%>

@@ -1,0 +1,25 @@
+{{fragment "org.wso2.carbon.uuf.common.foundation.ui.swagger-ui"}}
+<div class="row">
+
+	<div id="console-info-div" class="col-md-12 col-lg-12">
+		{{#if @params.scheme}}
+		      <div id="label-warn-div" class="alert alert-danger" role="alert" style="display:none">
+			      <i class="icon fw fw-success"></i>
+			      {{i18n "No Gateway Access URL found in "}} {{@params.scheme}} {{i18n " scheme. API try it is not possible due to mixed content blocking"}}
+			      <button type="button" class="close" aria-label="close" data-dismiss="alert">
+			      <span aria-hidden="true">
+			      <i class="fw fw-cancel"></i>
+			      </span>
+			      </button>
+		      </div>
+	   	{{/if}}
+	</div>
+	
+	<div class="col-md-12 col-lg-12 panel-group accordion" role="tablist">
+	    <div class="swagger-section">
+	    	<div id="message-bar" class="swagger-ui-wrap">&nbsp;</div>
+	    	<div id="swagger-ui-container" class="swagger-ui-wrap"></div>
+	    </div>
+	</div>
+
+</div>

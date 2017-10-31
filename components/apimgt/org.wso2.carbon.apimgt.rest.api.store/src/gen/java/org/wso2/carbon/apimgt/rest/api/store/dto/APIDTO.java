@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
+<<<<<<< HEAD
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIBusinessInformationDTO;
@@ -9,81 +10,56 @@ import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
 
 import javax.validation.constraints.NotNull;
+=======
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.store.dto.API_businessInformationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.BaseAPIDTO;
+import java.util.Objects;
+>>>>>>> upstream/master
 
+/**
+ * APIDTO
+ */
+public class APIDTO extends BaseAPIDTO  {
+  @JsonProperty("lifeCycleStatus")
+  private String lifeCycleStatus = null;
 
-
-
-@ApiModel(description = "")
-public class APIDTO  {
-  
-  
-  
-  private String id = null;
-  
-  @NotNull
-  private String name = null;
-  
-  
-  private String description = null;
-  
-  @NotNull
-  private String context = null;
-  
-  @NotNull
-  private String version = null;
-  
-  @NotNull
-  private String provider = null;
-  
-  @NotNull
-  private String apiDefinition = null;
-  
-  
-  private String wsdlUri = null;
-  
-  @NotNull
-  private String status = null;
-  
-  
+  @JsonProperty("isDefaultVersion")
   private Boolean isDefaultVersion = null;
-  
-  
-  private List<String> transport = new ArrayList<String>();
-  
-  
+
+  @JsonProperty("tags")
   private List<String> tags = new ArrayList<String>();
-  
-  
-  private List<String> tiers = new ArrayList<String>();
-  
-  
-  private String thumbnailUrl = null;
-  
-  
-  private List<APIEndpointURLsDTO> endpointURLs = new ArrayList<APIEndpointURLsDTO>();
-  
-  
-  private APIBusinessInformationDTO businessInformation = null;
 
+<<<<<<< HEAD
   private String lastUpdatedTime = null;
+=======
+  @JsonProperty("policies")
+  private List<String> policies = new ArrayList<String>();
 
-  private String createdTime = null;
+  @JsonProperty("wsdlUri")
+  private String wsdlUri = null;
+>>>>>>> upstream/master
 
-  /**
-  * gets and sets the lastUpdatedTime for APIDTO
-  **/
-  @JsonIgnore
-  public String getLastUpdatedTime(){
-    return lastUpdatedTime;
+  @JsonProperty("businessInformation")
+  private API_businessInformationDTO businessInformation = null;
+
+  public APIDTO lifeCycleStatus(String lifeCycleStatus) {
+    this.lifeCycleStatus = lifeCycleStatus;
+    return this;
   }
-  public void setLastUpdatedTime(String lastUpdatedTime){
-    this.lastUpdatedTime=lastUpdatedTime;
-  }
 
-  /**
-  * gets and sets the createdTime for a APIDTO
+   /**
+   * Get lifeCycleStatus
+   * @return lifeCycleStatus
   **/
+<<<<<<< HEAD
 
   @JsonIgnore
   public String getCreatedTime(){
@@ -121,15 +97,14 @@ public class APIDTO  {
   
   /**
    **/
+=======
+>>>>>>> upstream/master
   @ApiModelProperty(value = "")
-  @JsonProperty("description")
-  public String getDescription() {
-    return description;
-  }
-  public void setDescription(String description) {
-    this.description = description;
+  public String getLifeCycleStatus() {
+    return lifeCycleStatus;
   }
 
+<<<<<<< HEAD
   
   /**
    **/
@@ -208,15 +183,31 @@ public class APIDTO  {
   
   /**
    **/
+=======
+  public void setLifeCycleStatus(String lifeCycleStatus) {
+    this.lifeCycleStatus = lifeCycleStatus;
+  }
+
+  public APIDTO isDefaultVersion(Boolean isDefaultVersion) {
+    this.isDefaultVersion = isDefaultVersion;
+    return this;
+  }
+
+   /**
+   * Get isDefaultVersion
+   * @return isDefaultVersion
+  **/
+>>>>>>> upstream/master
   @ApiModelProperty(value = "")
-  @JsonProperty("isDefaultVersion")
   public Boolean getIsDefaultVersion() {
     return isDefaultVersion;
   }
+
   public void setIsDefaultVersion(Boolean isDefaultVersion) {
     this.isDefaultVersion = isDefaultVersion;
   }
 
+<<<<<<< HEAD
   
   /**
    **/
@@ -224,23 +215,38 @@ public class APIDTO  {
   @JsonProperty("transport")
   public List<String> getTransport() {
     return transport;
-  }
-  public void setTransport(List<String> transport) {
-    this.transport = transport;
+=======
+  public APIDTO tags(List<String> tags) {
+    this.tags = tags;
+    return this;
+>>>>>>> upstream/master
   }
 
+  public APIDTO addTagsItem(String tagsItem) {
+    this.tags.add(tagsItem);
+    return this;
+  }
+
+<<<<<<< HEAD
   
   /**
    **/
+=======
+   /**
+   * Get tags
+   * @return tags
+  **/
+>>>>>>> upstream/master
   @ApiModelProperty(value = "")
-  @JsonProperty("tags")
   public List<String> getTags() {
     return tags;
   }
+
   public void setTags(List<String> tags) {
     this.tags = tags;
   }
 
+<<<<<<< HEAD
   
   /**
    **/
@@ -248,71 +254,133 @@ public class APIDTO  {
   @JsonProperty("tiers")
   public List<String> getTiers() {
     return tiers;
-  }
-  public void setTiers(List<String> tiers) {
-    this.tiers = tiers;
+=======
+  public APIDTO policies(List<String> policies) {
+    this.policies = policies;
+    return this;
+>>>>>>> upstream/master
   }
 
+  public APIDTO addPoliciesItem(String policiesItem) {
+    this.policies.add(policiesItem);
+    return this;
+  }
+
+<<<<<<< HEAD
   
   /**
    **/
+=======
+   /**
+   * Get policies
+   * @return policies
+  **/
+>>>>>>> upstream/master
   @ApiModelProperty(value = "")
-  @JsonProperty("thumbnailUrl")
-  public String getThumbnailUrl() {
-    return thumbnailUrl;
-  }
-  public void setThumbnailUrl(String thumbnailUrl) {
-    this.thumbnailUrl = thumbnailUrl;
+  public List<String> getPolicies() {
+    return policies;
   }
 
+  public void setPolicies(List<String> policies) {
+    this.policies = policies;
+  }
+
+<<<<<<< HEAD
   
   /**
    **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("endpointURLs")
-  public List<APIEndpointURLsDTO> getEndpointURLs() {
-    return endpointURLs;
-  }
-  public void setEndpointURLs(List<APIEndpointURLsDTO> endpointURLs) {
-    this.endpointURLs = endpointURLs;
+=======
+  public APIDTO wsdlUri(String wsdlUri) {
+    this.wsdlUri = wsdlUri;
+    return this;
   }
 
+   /**
+   * Get wsdlUri
+   * @return wsdlUri
+  **/
+>>>>>>> upstream/master
+  @ApiModelProperty(value = "")
+  public String getWsdlUri() {
+    return wsdlUri;
+  }
+
+  public void setWsdlUri(String wsdlUri) {
+    this.wsdlUri = wsdlUri;
+  }
+
+<<<<<<< HEAD
   
   /**
    **/
+=======
+  public APIDTO businessInformation(API_businessInformationDTO businessInformation) {
+    this.businessInformation = businessInformation;
+    return this;
+  }
+
+   /**
+   * Get businessInformation
+   * @return businessInformation
+  **/
+>>>>>>> upstream/master
   @ApiModelProperty(value = "")
-  @JsonProperty("businessInformation")
-  public APIBusinessInformationDTO getBusinessInformation() {
+  public API_businessInformationDTO getBusinessInformation() {
     return businessInformation;
   }
-  public void setBusinessInformation(APIBusinessInformationDTO businessInformation) {
+
+  public void setBusinessInformation(API_businessInformationDTO businessInformation) {
     this.businessInformation = businessInformation;
   }
 
-  
 
   @Override
-  public String toString()  {
+  public boolean equals(java.lang.Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    APIDTO API = (APIDTO) o;
+    return Objects.equals(this.lifeCycleStatus, API.lifeCycleStatus) &&
+        Objects.equals(this.isDefaultVersion, API.isDefaultVersion) &&
+        Objects.equals(this.tags, API.tags) &&
+        Objects.equals(this.policies, API.policies) &&
+        Objects.equals(this.wsdlUri, API.wsdlUri) &&
+        Objects.equals(this.businessInformation, API.businessInformation) &&
+        super.equals(o);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(lifeCycleStatus, isDefaultVersion, tags, policies, wsdlUri, businessInformation, super.hashCode());
+  }
+
+  @Override
+  public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIDTO {\n");
-    
-    sb.append("  id: ").append(id).append("\n");
-    sb.append("  name: ").append(name).append("\n");
-    sb.append("  description: ").append(description).append("\n");
-    sb.append("  context: ").append(context).append("\n");
-    sb.append("  version: ").append(version).append("\n");
-    sb.append("  provider: ").append(provider).append("\n");
-    sb.append("  apiDefinition: ").append(apiDefinition).append("\n");
-    sb.append("  wsdlUri: ").append(wsdlUri).append("\n");
-    sb.append("  status: ").append(status).append("\n");
-    sb.append("  isDefaultVersion: ").append(isDefaultVersion).append("\n");
-    sb.append("  transport: ").append(transport).append("\n");
-    sb.append("  tags: ").append(tags).append("\n");
-    sb.append("  tiers: ").append(tiers).append("\n");
-    sb.append("  thumbnailUrl: ").append(thumbnailUrl).append("\n");
-    sb.append("  endpointURLs: ").append(endpointURLs).append("\n");
-    sb.append("  businessInformation: ").append(businessInformation).append("\n");
-    sb.append("}\n");
+    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
+    sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
+    sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
+    sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
+    sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
+    sb.append("    wsdlUri: ").append(toIndentedString(wsdlUri)).append("\n");
+    sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
+    sb.append("}");
     return sb.toString();
   }
+
+  /**
+   * Convert the given object to string with each line indented by 4 spaces
+   * (except the first line).
+   */
+  private String toIndentedString(java.lang.Object o) {
+    if (o == null) {
+      return "null";
+    }
+    return o.toString().replace("\n", "\n    ");
+  }
 }
+

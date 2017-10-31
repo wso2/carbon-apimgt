@@ -1,0 +1,40 @@
+{{js "js/index.js"}}
+<div class="page-header">
+    <h5 class="lead">{{i18n "Manage.Subscriptions"}}</h5>
+</div>
+<div class="row">
+    <div id="subscriptions-welcome-message">
+        <div class="message message-info">
+            <h4><i class="icon fw fw-info"></i>{{i18n "No.subscriptions.to.list"}}</h4>
+            <p>{{i18n  "Subscribe.to.API.from"}}
+              <a target="_blank" href="/store/apis/" id="goToStore" title='{{i18n "API.Store"}}'>
+              {{i18n "API.Store"}} &nbsp;<i class="fw fw-store"></i>
+              </a>
+              </p>
+        </div>
+    </div>
+    <div class="hidden" id="subscriptions-listing-container">
+        <div class="content-section shadow-up">
+            <div class="content-data">
+                <div class="page-content">
+                    <table id="subscriptions-listing" class="table table-striped table-bordered"
+                           cellspacing="0"
+                           width="100%">
+                        <thead>
+                        <tr>
+                            <th>{{i18n "Application.Name"}}</th>
+                            <th>{{i18n "Subscriber"}}</th>
+                            <th>{{i18n "Subscription.Tier"}}</th>
+                            <th class="subscription-listing-status">{{i18n "Status"}}</th>
+                            <th class="subscription-listing-environment">{{i18n "Key.Type"}}</th>
+                            <th class="subscription-listing-action">{{i18n "Actions"}}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

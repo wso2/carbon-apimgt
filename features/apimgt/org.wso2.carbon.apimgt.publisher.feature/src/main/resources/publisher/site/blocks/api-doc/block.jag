@@ -1,6 +1,0 @@
-<%
-jagg.block("api-doc", {
-    initializer:function (data) {
-    }
-});
-%>

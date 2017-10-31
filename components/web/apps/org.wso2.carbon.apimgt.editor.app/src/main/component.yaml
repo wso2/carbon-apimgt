@@ -1,0 +1,13 @@
+apis: []
+
+bindings:
+  - zoneName: "org.wso2.carbon.apimgt.publisher.commons.ui.secondaryMenu"
+    mode: prepend
+    fragments:
+      - org.wso2.carbon.apimgt.web.editor.feature.secondaryMenu
+
+config:
+  title : "API Editor Tool"
+  appName : API Editor
+  loginRedirectUri: "/apis"
+  loginPageUri : "https://localhost:9292/editor/auth/login"

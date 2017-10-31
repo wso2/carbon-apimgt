@@ -1,0 +1,116 @@
+.ch-grid-container{
+    text-align: center;
+    /*display: flex;*/
+    /*align-items: center;*/
+    /*justify-content: center;*/
+}
+.ch-grid {
+    margin: 0;
+    list-style: none;
+    display: block;
+}
+.ch-grid li {
+    width: 200px;
+    height: 200px;
+    display: inline-block;
+    margin: 20px;
+}
+
+.ch-img-1 {  background: #AB47BC; }
+.ch-img-2 {  background: #26A69A; }
+.ch-img-3 {  background: #66BB6A; }
+.ch-img-4 {  background: #FF7043; }
+
+.ch-img-1 + .ch-info-back {  background: #AB47BC; }
+.ch-img-2 + .ch-info-back {  background: #26A69A; }
+.ch-img-3 + .ch-info-back {  background: #66BB6A; }
+.ch-img-4 + .ch-info-back {  background: #FF7043; }
+
+.ch-item {
+    width: 100%;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    z-index: 0;
+}
+.ch-info:hover .ch-info-front{
+    opacity: 0;
+}
+.ch-info:hover .ch-info-back{
+    opacity: 1;
+}
+.ch-info-front{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    height: 200px;
+    transition: all 0.5s;
+}
+
+.ch-info-front i{
+    color: white;
+    margin: 20px;
+}
+.ch-info-front span{
+    color: white;
+    font-size: 18px;
+    padding: 0 20px 20px 20px;
+}
+.ch-info-back{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    height: 200px;
+    position: relative;
+    top:-200px;
+    transition: all 1s;
+    opacity: 0;
+}
+.ch-info {
+    width: 200px;
+    height: 200px;
+    border-radius: 0;
+    overflow: hidden;
+}
+.ch-info h3 {
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 22px;
+    margin: 0 30px;
+    padding: 45px 0 0 0;
+    height: 75px;
+    text-shadow: 0 0 1px white, 0 1px 2px #204c4c;
+}
+.ch-info p {
+    color: #fff;
+    font-size: 16px;
+    font-style: italic;
+    font-weight: 400;
+    margin: 20px;
+}
+.ch-info p a {
+    display: block;
+    color: rgba(255, 255, 255, 0.7);
+    font-style: normal;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding-top: 4px;
+}
+.ch-info p a:hover {
+    color: rgba(255, 242, 34, 0.8);
+}
+
+.ch-info-wrap{
+    display: flex;
+    align-content: space-around;
+    background: #fff;
+}
+.hidden.ant-row{
+    display: none;
+}

@@ -1,6 +1,0 @@
-<%
-jagg.block("stats/api-geolocation-usage", {
-    initializer:function (data) {
-    }
-});
-%>

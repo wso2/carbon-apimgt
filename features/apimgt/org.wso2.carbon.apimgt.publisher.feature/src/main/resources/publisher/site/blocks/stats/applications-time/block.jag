@@ -1,8 +1,0 @@
-<%
-jagg.block("stats/applications-time", {
-    initializer:function (data) {
-
-    }
-
-});
-%>

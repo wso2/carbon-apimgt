@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 
+<<<<<<< HEAD
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
 
@@ -77,15 +78,38 @@ public class APIInfoDTO  {
   
   /**
    **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("name")
-  public String getName() {
-    return name;
-  }
-  public void setName(String name) {
-    this.name = name;
+=======
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.apimgt.rest.api.store.dto.BaseAPIInfoDTO;
+import java.util.Objects;
+
+/**
+ * APIInfoDTO
+ */
+public class APIInfoDTO extends BaseAPIInfoDTO  {
+  @JsonProperty("lifeCycleStatus")
+  private String lifeCycleStatus = null;
+
+  public APIInfoDTO lifeCycleStatus(String lifeCycleStatus) {
+    this.lifeCycleStatus = lifeCycleStatus;
+    return this;
   }
 
+   /**
+   * Get lifeCycleStatus
+   * @return lifeCycleStatus
+  **/
+>>>>>>> upstream/master
+  @ApiModelProperty(value = "")
+  public String getLifeCycleStatus() {
+    return lifeCycleStatus;
+  }
+
+<<<<<<< HEAD
   
   /**
    **/
@@ -145,23 +169,50 @@ public class APIInfoDTO  {
   }
   public void setStatus(String status) {
     this.status = status;
+=======
+  public void setLifeCycleStatus(String lifeCycleStatus) {
+    this.lifeCycleStatus = lifeCycleStatus;
   }
 
-  
 
   @Override
-  public String toString()  {
+  public boolean equals(java.lang.Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    APIInfoDTO apIInfo = (APIInfoDTO) o;
+    return Objects.equals(this.lifeCycleStatus, apIInfo.lifeCycleStatus) &&
+        super.equals(o);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(lifeCycleStatus, super.hashCode());
+>>>>>>> upstream/master
+  }
+
+  @Override
+  public String toString() {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIInfoDTO {\n");
-    
-    sb.append("  id: ").append(id).append("\n");
-    sb.append("  name: ").append(name).append("\n");
-    sb.append("  description: ").append(description).append("\n");
-    sb.append("  context: ").append(context).append("\n");
-    sb.append("  version: ").append(version).append("\n");
-    sb.append("  provider: ").append(provider).append("\n");
-    sb.append("  status: ").append(status).append("\n");
-    sb.append("}\n");
+    sb.append("    ").append(toIndentedString(super.toString())).append("\n");
+    sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
+    sb.append("}");
     return sb.toString();
   }
+
+  /**
+   * Convert the given object to string with each line indented by 4 spaces
+   * (except the first line).
+   */
+  private String toIndentedString(java.lang.Object o) {
+    if (o == null) {
+      return "null";
+    }
+    return o.toString().replace("\n", "\n    ");
+  }
 }
+

@@ -1,0 +1,13 @@
+package $package;
+import ballerina.net.http;
+#set( $endpointConfig = '#set( $endpointConfig = ' + $endpoint.endpointConfig + ' )' )
+#evaluate ($endpointConfig)
+http:ClientConnector client${endpoint.name} = initializeClient_${endpoint.name}();
+    function execute_${endpoint.name}_Endpoint(string httpVerb,string path, message m)(message){
+        message response = http:ClientConnector.execute(client${endpoint.name},httpVerb, path,m);
+        return m;
+    }
+function initializeClient_${endpoint.name}()(http:ClientConnector){
+        http:ClientConnector client = create http:ClientConnector("$endpointConfig.get("serviceUrl")");
+return client;
+        }

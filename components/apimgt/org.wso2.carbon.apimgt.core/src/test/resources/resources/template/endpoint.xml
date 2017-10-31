@@ -1,0 +1,18 @@
+package $package;
+import ballerina.lang.jsons;
+
+function getEndpointFromKey (string key) (string){
+    map endpointMap = {};
+#foreach($endpoint in $endpoints)
+    endpointMap["$endpoint.name"] = "$endpoint.endpointConfig";
+#end
+    string endpoint = endpointMap[key];
+    return endpoint;
+}
+
+function getUrlFromKey (string key) (string){
+    string jsonEndpoint = getEndpointFromKey(key);
+    json endpoint = (json) jsonEndpoint;
+    string url = jsons:getString(endpoint, "$.url");
+    return url;
+}

@@ -1,5 +1,0 @@
-instructions.configure = \
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.throttling.siddhi.extension_${feature.version}/conf/eventreceivers/,target:${installFolder}/../../conf/eventreceivers,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.throttling.siddhi.extension_${feature.version}/conf/eventstreams/,target:${installFolder}/../../conf/eventstreams,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.throttling.siddhi.extension_${feature.version}/conf/eventpublishers/,target:${installFolder}/../../conf/eventpublishers,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../features/org.wso2.carbon.apimgt.throttling.siddhi.extension_${feature.version}/conf/executionplans/,target:${installFolder}/../../conf/executionplans,overwrite:true);\

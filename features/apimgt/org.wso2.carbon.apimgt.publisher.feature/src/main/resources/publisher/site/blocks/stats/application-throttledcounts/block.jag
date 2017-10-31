@@ -1,8 +1,0 @@
-<%
-jagg.block("stats/application-throttledcounts", {
-    initializer:function (data) {
-
-    }
-
-});
-%>
