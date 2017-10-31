@@ -116,7 +116,7 @@ $(document).ready(function(){
   };
 
 var show_environments = function(){
-    var type = $(".keytype").val();
+    var type = $(".keytype option:selected").val();
     $("#environment_name").children('option').hide();
     $("#environment_name").children("option[class='" + type + "']").show();
     $("#environment_name").children("option[class='hybrid']").show();
