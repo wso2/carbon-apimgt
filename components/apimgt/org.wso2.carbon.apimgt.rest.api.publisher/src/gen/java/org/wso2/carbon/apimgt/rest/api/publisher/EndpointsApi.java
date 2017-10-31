@@ -44,8 +44,29 @@ import javax.ws.rs.core.Response;
 @io.swagger.annotations.Api(description = "the endpoints API")
 public class EndpointsApi implements Microservice  {
    private final EndpointsApiService delegate = EndpointsApiServiceFactory.getEndpointsApi();
+    
+    @GET
+    @Path("/discover-services")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Get all service endpoints after service discovery", notes = "This operation can be used to retrieve the list of service endpoints available in the cluster after a process of service discovery. ", response = EndPointListDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "Endpoint (Collection)", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Service Endpoint list is returned with other details. ", response = EndPointListDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = EndPointListDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = EndPointListDTO.class) })
+    public Response endpointsDiscoverServicesGet(@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
+,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
+, @Context Request request)
+    throws NotFoundException {
+        return delegate.endpointsDiscoverServicesGet(ifNoneMatch,ifModifiedSince, request);
+    }
 
-    @OPTIONS
     @DELETE
     @Path("/{endpointId}")
     @Consumes({ "application/json" })

@@ -20,6 +20,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 public abstract class EndpointsApiService {
+    public abstract Response endpointsDiscoverServicesGet(String ifNoneMatch
+ ,String ifModifiedSince
+ , Request request) throws NotFoundException;
     public abstract Response endpointsEndpointIdDelete(String endpointId
  ,String ifMatch
  ,String ifUnmodifiedSince
