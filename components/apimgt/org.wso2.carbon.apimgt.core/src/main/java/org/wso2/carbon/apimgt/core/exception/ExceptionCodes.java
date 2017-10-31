@@ -89,9 +89,11 @@ public enum ExceptionCodes implements ErrorHandler {
     ENDPOINT_DELETE_FAILED(900453, "Endpoint Delete Failed", 400, "Endpoint Delete Failed"),
 
     // Service Endpoint Discovery related codes
-    ERROR_WHILE_INITIALIZING_SERVICE_DISCOVERY(900460, "Error initializing service discovery", 500,
+    ERROR_LOADING_SERVICE_DISCOVERY_IMPL_CLASS(900460, "Error loading service discovery impl class", 500,
+            "Error while trying to load a service discovery impl class"),
+    ERROR_INITIALIZING_SERVICE_DISCOVERY(900461, "Error initializing service discovery", 500,
             "Error while connecting to the system with services"),
-    ERROR_WHILE_TRYING_TO_DISCOVER_SERVICES(900461, "Error while discovering services", 500,
+    ERROR_WHILE_TRYING_TO_DISCOVER_SERVICES(900462, "Error while discovering services", 500,
             "Error while trying to discover service endpoints"),
 
     // Gateway related codes

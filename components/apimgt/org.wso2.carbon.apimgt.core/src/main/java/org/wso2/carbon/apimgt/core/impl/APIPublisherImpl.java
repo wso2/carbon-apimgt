@@ -2079,29 +2079,56 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             ServiceDiscoveryConfigurations serviceDiscoveryConfig = ServiceDiscoveryConfigBuilder
                     .getServiceDiscoveryConfiguration();
+
+            // If service discovery not enabled - do not proceed
             if (!serviceDiscoveryConfig.isServiceDiscoveryEnabled()) {
                 log.error("Service Discovery not enabled");
                 return discoveredEndpointList;
             }
-            List<ServiceDiscoveryImplConfig> implConfigList = serviceDiscoveryConfig.getImplementationsList();
-            List<Endpoint> subDiscoveredEndpointList;
-            for (ServiceDiscoveryImplConfig implConfig : implConfigList) {
-                String implClassName = implConfig.getImplClass();
-                Class implClazz = APIPublisherImpl.class.getClassLoader().loadClass(implClassName);
-                ServiceDiscoverer serviceDiscoverer = (ServiceDiscoverer) implClazz.newInstance();
-                serviceDiscoverer.init(implConfig.getImplParameters());
 
+            ServiceDiscoveryClientFactory svcDiscClientFactory = new ServiceDiscoveryClientFactory();
+
+            List<ServiceDiscoveryImplConfig> implConfigList = serviceDiscoveryConfig.getImplementationsList();
+            for (ServiceDiscoveryImplConfig implConfig : implConfigList) {
+                //Every implConfig has two elements. The implClass and the implParameters.
+
+                /* Get the implClass instance */
+                String implClassName = implConfig.getImplClass();
+                Class implClazz = Class.forName(implClassName);
+                ServiceDiscoverer serviceDiscoverer = (ServiceDiscoverer) implClazz.newInstance();
+
+                /* Pass the implParameters to the above instance */
+                serviceDiscoverer.init(svcDiscClientFactory, implConfig.getImplParameters());
+
+                /*
+                 * The .init() method above sets the filtering parameters (if provided)
+                 * to the ServiceDiscoverer abstract class instance.
+                 *
+                 * Let's check whether those filtering parameters : "namespace" and/or "criteria" are set,
+                 * and call ServiceDiscoverer Impl class's #listServices method accordingly
+                 */
                 String namespaceFilter = serviceDiscoverer.getNamespaceFilter();
                 HashMap<String, String> criteriaFilter = serviceDiscoverer.getCriteriaFilter();
+                List<Endpoint> subDiscoveredEndpointList;
+
                 if (namespaceFilter == null && criteriaFilter == null) {
+                    //both not set
                     subDiscoveredEndpointList = serviceDiscoverer.listServices();
+
                 } else if (namespaceFilter != null && criteriaFilter != null) {
+                    //both set
                     subDiscoveredEndpointList = serviceDiscoverer.listServices(namespaceFilter, criteriaFilter);
+
                 } else if (namespaceFilter != null) {
+                    //only "namespace" is set
                     subDiscoveredEndpointList = serviceDiscoverer.listServices(namespaceFilter);
+
                 } else {
+                    //remaining -> only "criteria" is set
                     subDiscoveredEndpointList = serviceDiscoverer.listServices(criteriaFilter);
                 }
+
+
                 if (subDiscoveredEndpointList != null) {
                     discoveredEndpointList.addAll(subDiscoveredEndpointList);
                 }
@@ -2113,7 +2140,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             String msg = "Error while Loading Service Discovery Impl Class";
             log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.ERROR_LOADING_SERVICE_DISCOVERY_IMPL_CLASS);
         }
         return discoveredEndpointList;
     }
