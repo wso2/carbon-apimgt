@@ -619,6 +619,11 @@
                 <artifactId>joda-time</artifactId>
                 <version>${joda.time.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.io.fabric8</groupId>
+                <artifactId>kubernetes-client</artifactId>
+                <version>${wso2.kubernetes-client.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -979,7 +984,7 @@
         <h2.version>1.4.192</h2.version>
         <carbon.lcm.version>1.1.1</carbon.lcm.version>
         <carbon.lcm.import.version.range>[1.1.0, 1.2.0)</carbon.lcm.import.version.range>
-
+        <wso2.kubernetes-client.version>2.5.2.wso2v3</wso2.kubernetes-client.version>
         <nimbusds.version>2.26.1.wso2v2</nimbusds.version>
         <nimbusds.import.version.range>[2.26.1, 2.26.2)</nimbusds.import.version.range>
         <geronimo-jms.version>1.1.0.wso2v1</geronimo-jms.version>
