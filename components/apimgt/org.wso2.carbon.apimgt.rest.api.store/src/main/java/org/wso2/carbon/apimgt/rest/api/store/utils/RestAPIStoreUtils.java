@@ -78,7 +78,7 @@ public class RestAPIStoreUtils {
     private static MultiTenantUserAdminServiceStub multiTenantUserAdminServiceStub;
     private static APIManagerConfiguration apiManagerConfiguration;
     private static String keyManagerUrl;
-    private static char[] keyManagerAdminUserName;
+    private static String keyManagerAdminUserName;
     private static char[] keyManagerAdminPassword;
     private static boolean isStoreCacheEnabled;
 
@@ -86,11 +86,9 @@ public class RestAPIStoreUtils {
         apiManagerConfiguration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
         keyManagerUrl = apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL);
-        String keyManagerUserNameString = apiManagerConfiguration
-                .getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
+        keyManagerAdminUserName = apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME);
         String keyManagerPasswordString = apiManagerConfiguration
                 .getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD);
-        keyManagerAdminUserName = keyManagerUserNameString != null ? keyManagerUserNameString.toCharArray() : null;
         keyManagerAdminPassword = keyManagerPasswordString != null ? keyManagerPasswordString.toCharArray() : null;
         String isStoreCacheEnabledConfiguration = apiManagerConfiguration
                 .getFirstProperty(APIConstants.SCOPE_CACHE_ENABLED);
@@ -99,9 +97,8 @@ public class RestAPIStoreUtils {
         try {
             multiTenantUserAdminServiceStub = new MultiTenantUserAdminServiceStub(null,
                     keyManagerUrl + MULTI_TENANT_USER_ADMIN_SERVICE);
-            CarbonUtils.setBasicAccessSecurityHeaders(Arrays.toString(keyManagerAdminUserName),
-                    Arrays.toString(keyManagerAdminPassword), true,
-                    multiTenantUserAdminServiceStub._getServiceClient());
+            CarbonUtils.setBasicAccessSecurityHeaders(keyManagerAdminUserName, keyManagerPasswordString,
+                    true, multiTenantUserAdminServiceStub._getServiceClient());
         } catch (AxisFault axisFault) {
             log.error("Error while initializing multiTenantUserTenantAdminStub", axisFault);
         }
@@ -551,8 +548,8 @@ public class RestAPIStoreUtils {
             try {
                 multiTenantUserAdminServiceStub = new MultiTenantUserAdminServiceStub(null,
                         keyManagerUrl + MULTI_TENANT_USER_ADMIN_SERVICE);
-                CarbonUtils.setBasicAccessSecurityHeaders(Arrays.toString(keyManagerAdminUserName),
-                        Arrays.toString(keyManagerAdminPassword), true,
+                CarbonUtils.setBasicAccessSecurityHeaders(keyManagerAdminUserName,
+                        new String(keyManagerAdminPassword), true,
                         multiTenantUserAdminServiceStub._getServiceClient());
             } catch (AxisFault axisFault) {
                 throw new APIManagementException(
