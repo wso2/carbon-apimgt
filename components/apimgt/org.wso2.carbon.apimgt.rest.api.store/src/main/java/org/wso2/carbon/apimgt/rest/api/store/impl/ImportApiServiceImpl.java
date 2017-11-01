@@ -51,7 +51,7 @@ public class ImportApiServiceImpl extends ImportApiService {
             FileBasedApplicationImportExportManager importExportManager = new FileBasedApplicationImportExportManager
                     (consumer, System.getProperty("java.io.tmpdir") + File.separator + "exported-app-archives-" +
                             UUID.randomUUID().toString());
-            Application applicationDetails = importExportManager.importAndCreateApplications(fileInputStream);
+            Application applicationDetails = importExportManager.importApplications(fileInputStream);
             consumer.addApplication(applicationDetails);
             return Response.status(Response.Status.OK).entity(applicationDetails).build();
         } catch (APIManagementException e) {
@@ -66,7 +66,24 @@ public class ImportApiServiceImpl extends ImportApiService {
     @Override
     public Response importApplicationsPut(InputStream fileInputStream, FileInfo fileDetail
             , Request request) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+
+        APIStore consumer = null;
+
+        try {
+            consumer = RestApiUtil.getConsumer(RestApiUtil.getLoggedInUsername(request));
+            FileBasedApplicationImportExportManager importExportManager = new FileBasedApplicationImportExportManager
+                    (consumer, System.getProperty("java.io.tmpdir") + File.separator + "exported-app-archives-" +
+                            UUID.randomUUID().toString());
+            Application applicationDetails = importExportManager.importApplications(fileInputStream);
+            consumer.updateApplication(applicationDetails.getUuid(),applicationDetails);
+            return Response.status(Response.Status.OK).entity(applicationDetails).build();
+        } catch (APIManagementException e) {
+            String errorMsg = "Error while importing the Applications";
+            log.error(errorMsg, e);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+
     }
+
 }

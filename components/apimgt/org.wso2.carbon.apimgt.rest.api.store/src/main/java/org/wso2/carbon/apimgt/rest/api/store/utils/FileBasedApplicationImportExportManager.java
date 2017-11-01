@@ -54,7 +54,7 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
         }
 
         Application exportApplication = application;
-        String applicationExportDirectory = applicationArtifactBaseDirectoryPath;
+        String applicationExportDirectory = applicationArtifactBaseDirectoryPath + File.separator + exportApplication.getName();
 
         try {
             //create directory per application
@@ -115,7 +115,7 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
     }
 
     //import and create applications
-    public Application importAndCreateApplications(InputStream uploadedAppArchiveInputStream)
+    public Application importApplications(InputStream uploadedAppArchiveInputStream)
             throws APIMgtEntityImportExportException {
 
         String appArchiveLocation = path + File.separator + IMPORTED_APPLICATIONS_DIRECTORY_NAME + ".zip";
@@ -137,7 +137,6 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
         Application applicationDetails = decodeApplicationFile(archiveExtractLocation);
         return applicationDetails;
 
-
     }
 
     public Application decodeApplicationFile(String applicationDetailsFilePath)
@@ -153,7 +152,6 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
         }
 
         //convert to bean
-        //Gson gson = new Gson();
         Gson gson = new GsonBuilder().create();
 
         Application applicationDetails = gson.fromJson(applicationDetailsString, Application.class);

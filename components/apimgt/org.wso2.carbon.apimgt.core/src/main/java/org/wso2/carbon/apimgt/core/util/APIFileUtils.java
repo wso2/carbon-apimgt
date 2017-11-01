@@ -435,51 +435,6 @@ public class APIFileUtils {
     }
 
     /**
-     * Extracts a  given zip archive while importing applications
-     *
-     * @param archiveFilePath path of the zip archive
-     * @param destination     extract location
-     * @return name of the extracted zip archive
-     * @throws APIMgtDAOException if an error occurs while extracting the archive
-     */
-    public static String extractApplicationArchive(String archiveFilePath, String destination)
-            throws APIMgtDAOException {
-        String archiveName = null;
-
-        try (ZipFile zip = new ZipFile(new File(archiveFilePath))) {
-            Enumeration zipFileEntries = zip.entries();
-            int index = 0;
-
-            // Process each entry
-            while (zipFileEntries.hasMoreElements()) {
-
-                // grab a zip file entry
-                ZipEntry entry = (ZipEntry) zipFileEntries.nextElement();
-                String currentEntry = entry.getName();
-
-                archiveName = currentEntry;
-
-                File destinationFile = new File(destination, currentEntry);
-                File destinationParent = destinationFile.getParentFile();
-
-                // create the parent directory structure
-                if (destinationParent.mkdirs()) {
-                    log.debug("Creation of folder is successful. Directory Name : " + destinationParent.getName());
-                }
-
-                if (!entry.isDirectory()) {
-                    writeFileToDestination(zip, entry, destinationFile);
-                }
-            }
-            return archiveName;
-        } catch (IOException e) {
-            String errorMsg = "Failed to extract archive file: " + archiveFilePath + " to destination: " + destination;
-            log.error(errorMsg, e);
-            throw new APIMgtDAOException(errorMsg, e);
-        }
-    }
-
-    /**
      * Retrieves thumbnail as a binary stream from the file
      *
      * @param thumbnailFilePath path to file
@@ -537,33 +492,35 @@ public class APIFileUtils {
         }
         return archiveExtractLocation;
     }
-    //edit this method
+
     /**
-     * Extracts the APIs to the file system by reading the incoming {@link InputStream} object
-     * uploadedApiArchiveInputStream
+     * Extracts the Application to the file system by reading the incoming {@link InputStream} object
+     * uploadedApplicationArchiveInputStream
      *
-     * @param uploadedApiArchiveInputStream Incoming {@link InputStream}
+     * @param uploadedAppArchiveInputStream Incoming {@link InputStream}
      * @param importedDirectoryName         directory to extract the archive
-     * @param apiArchiveLocation            full path of the archive location
+     * @param appArchiveLocation            full path of the archive location
      * @param extractLocation               full path to the location to which the archive will be written
-     * @return location to which APIs were extracted
+     * @return location to which Applications were extracted
      * @throws APIMgtDAOException if an error occurs while extracting the archive
      */
-    public static String extractUploadedArchiveApplication(InputStream uploadedApiArchiveInputStream,
+    public static String extractUploadedArchiveApplication(InputStream uploadedAppArchiveInputStream,
                                                            String importedDirectoryName,
-                                                           String apiArchiveLocation, String extractLocation)
+                                                           String appArchiveLocation, String extractLocation)
             throws APIMgtDAOException {
         String archiveExtractLocation;
+        String archiveName;
         String extractedFilePath;
         try {
             // create api import directory structure
             APIFileUtils.createDirectory(extractLocation);
             // create archive
-            createArchiveFromInputStream(uploadedApiArchiveInputStream, apiArchiveLocation);
+            createArchiveFromInputStream(uploadedAppArchiveInputStream, appArchiveLocation);
             // extract the archive
             archiveExtractLocation = extractLocation + File.separator + importedDirectoryName;
-            extractedFilePath = extractApplicationArchive(apiArchiveLocation, archiveExtractLocation);
-            archiveExtractLocation = archiveExtractLocation + File.separator + extractedFilePath;
+            archiveName = extractArchive(appArchiveLocation, archiveExtractLocation);
+            extractedFilePath = archiveExtractLocation + File.separator + archiveName + File.separator +
+            archiveName + ".json";
 
         } catch (APIMgtDAOException e) {
             APIFileUtils.deleteDirectory(extractLocation);
@@ -571,7 +528,7 @@ public class APIFileUtils {
             log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
-        return archiveExtractLocation;
+        return extractedFilePath;
     }
 
     /**
@@ -591,7 +548,6 @@ public class APIFileUtils {
         getAllFiles(directoryToZip, fileList);
         try {
             writeArchiveFile(directoryToZip, fileList, archiveLocation, archiveName);
-
         } catch (IOException e) {
             String errorMsg = "Error while writing archive file " + directoryToZip.getPath() + " to archive " +
                     archiveLocation;
@@ -706,5 +662,4 @@ public class APIFileUtils {
             log.debug("Successfully saved Application details for application: " + application.getName());
         }
     }
-
 }
