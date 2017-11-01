@@ -119,8 +119,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             } else {
                 newSearchQuery = APIUtil.getSingleSearchCriteria(inputSearchQuery);
             }
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(newSearchQuery, tenantDomain, offset, limit, false);
+            Map allMatchedApisMap = apiConsumer
+                    .searchPaginatedAPIs(newSearchQuery, requestedTenantDomain, offset, limit, false);
             Set<API> sortedSet = (Set<API>) allMatchedApisMap.get("apis"); // This is a SortedSet
             ArrayList<API> allMatchedApis = new ArrayList<>(sortedSet);
 
