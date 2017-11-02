@@ -35,8 +35,9 @@ export default class EndpointsDiscover extends Component {
         this.state = {
             discoveredEndpoints: null,
             viewableEndpoints: null,
-            storedEndpoints: null,
             filterType: "",
+            filterText: "",
+            storedEndpoints: null,
             endpointBeingAdded: false,
         };
         this.handleFilterTextInputChange = this.handleFilterTextInputChange.bind(this);
@@ -45,19 +46,21 @@ export default class EndpointsDiscover extends Component {
 
     handleRadioButtonChange(e) {
         this.setState({
-            filterType: e.target.value
+            filterType: e.target.value,
+            viewableEndpoints: this.filterEndpoints(e.target.value, this.state.filterText)
         })
     }
 
     handleFilterTextInputChange(e) {
         this.setState({
-            viewableEndpoints: this.filterEndpoints(e.target.value)
+            filterText: e.target.value,
+            viewableEndpoints: this.filterEndpoints(this.state.filterType, e.target.value)
         })
     }
 
-    filterEndpoints(filterText){
-        const { discoveredEndpoints } = this.state;
-        switch(this.state.filterType) {
+    filterEndpoints(filterType, filterText){
+        const {discoveredEndpoints} = this.state;
+        switch(filterType) {
             case "namespace":
                 return discoveredEndpoints.filter(el => JSON.parse(el.endpointConfig).namespace.startsWith(filterText))
             case "criteria":
@@ -153,10 +156,10 @@ export default class EndpointsDiscover extends Component {
         }];
         const serviceEndpointsListAndCreateMenu = (
             <Menu className="ed-font">
-                <Menu.Item key="0">
-                    <Link to="/endpoints">View stored endpoints</Link>
+                <Menu.Item className="ed-font" key="0">
+                    <Link to="/endpoints">View all</Link>
                 </Menu.Item>
-                <Menu.Item key="1">
+                <Menu.Item className="ed-font" key="1">
                     <Link to="/endpoints/create">Create custom endpoint</Link>
                 </Menu.Item>
             </Menu>
@@ -166,7 +169,7 @@ export default class EndpointsDiscover extends Component {
                 <div className="ed-body">
                     <div className="ed-top-section">
                         <Typography className="page-title ed-title" type="title">
-                             Discover Service Endpoints
+                             Discovered Service Endpoints
                         </Typography>
                         <div className="ed-global-endpoints-button-div">
                             <Dropdown overlay={serviceEndpointsListAndCreateMenu}>
@@ -216,14 +219,14 @@ class ButtonCell extends Component {
     getAddButton(){
         return (
             <Button type="primary" size="large" className="ed-font" onClick={() =>this.handleAddEndpointToDB()}>
-            Add to Database </Button>
+            Add as Global Endpoint </Button>
         );
     }
 
     getUpdateButton(){
         return (
             <Button type="secondary" size="large" className="ed-font" onClick={() =>this.handleUpdateEndpoint()}>
-            Update Database </Button>
+            Update added Endpoint </Button>
         );
     }
 
