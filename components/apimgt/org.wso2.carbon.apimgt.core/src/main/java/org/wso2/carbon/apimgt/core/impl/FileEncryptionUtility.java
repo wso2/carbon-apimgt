@@ -35,6 +35,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -101,6 +103,7 @@ public class FileEncryptionUtility {
             SecretKeySpec aesKeySpec = new SecretKeySpec(getAESKey(), EncryptionConstants.AES);
             aesCipher.init(Cipher.ENCRYPT_MODE, aesKeySpec);
 
+            Files.deleteIfExists(Paths.get(outputFilePath));
             InputStream inputStream = APIFileUtils.readFileContentAsStream(inputFilePath);
             CipherOutputStream cipherOutStream = new CipherOutputStream(
                     new FileOutputStream(outputFilePath), aesCipher);
@@ -184,10 +187,12 @@ public class FileEncryptionUtility {
             //store key => encrypt -> encode -> chars -> string
             byte[] encryptedKeyBytes = SecureVaultUtils.base64Encode(secureVault.encrypt(aesKey));
             String encryptedKeyString = new String(SecureVaultUtils.toChars(encryptedKeyBytes));
+
+            Files.deleteIfExists(Paths.get(aesKeyFileLocation));
             APIFileUtils.createFile(aesKeyFileLocation);
             APIFileUtils.writeToFile(aesKeyFileLocation, encryptedKeyString);
             log.debug("AES key successfully created and stored");
-        } catch (SecureVaultException | NullPointerException | APIMgtDAOException e) {
+        } catch (SecureVaultException | NullPointerException | APIMgtDAOException | IOException e) {
             String msg = "Error while storing created AES key";
             log.error(msg, e);
             throw new APIManagementException(msg, e);
