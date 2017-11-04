@@ -24,6 +24,7 @@ import io.swagger.models.Swagger;
 import io.swagger.models.auth.SecuritySchemeDefinition;
 import io.swagger.parser.SwaggerParser;
 import org.apache.axiom.om.OMElement;
+import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.axis2.context.ServiceContext;
@@ -88,7 +89,12 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
+import org.wso2.carbon.apimgt.impl.certificatemgt.GatewayCertificateManager;
+import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
+import org.wso2.carbon.apimgt.impl.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -147,6 +153,8 @@ public class APIProviderHostObject extends ScriptableObject {
     private String username;
     private static String VERSION_PARAM="{version}";
     private static String ICON_PATH = "tmp/icon";
+    private static final String ALIAS = "alias";
+    private static final String END_POINT = "endpoint";
 
     private APIProvider apiProvider;
 
@@ -494,7 +502,7 @@ public class APIProviderHostObject extends ScriptableObject {
             api.removeAllTiers();
         	api.addAvailableTiers(availableTier);
         }
-        
+
         if (apiLevelPolicy != null) {
             if("none".equals(apiLevelPolicy)){
                 api.setApiLevelPolicy(null);
@@ -504,7 +512,7 @@ public class APIProviderHostObject extends ScriptableObject {
         } else {
                 api.setApiLevelPolicy(null);
         }
-        
+
         api.setLastUpdated(new Date());
 
         if (!apiData.get("swagger", apiData).equals("null")) {
@@ -693,7 +701,7 @@ public class APIProviderHostObject extends ScriptableObject {
         return saveAPI(apiProvider, api, null, false);
 
     }
-    
+
     private static String uploadSequenceFile(APIProvider apiProvider, FileHostObject seqFile, String filePath,
                                              APIIdentifier apiIdentifier)
                                                         throws APIManagementException, ScriptException {
@@ -728,7 +736,7 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return seqFileName;
     }
-    
+
     /**
      * This method is to functionality of uploading sequence to the registry     *
      * @param cx      Rhino context
@@ -741,11 +749,11 @@ public class APIProviderHostObject extends ScriptableObject {
     public static String jsFunction_uploadSequenceFile(Context cx, Scriptable thisObj,
                                                      Object[] args, Function funObj)
             throws APIManagementException, ScriptException {
-        
+
         if (args==null || args.length == 0) {
             handleException("Invalid number of input parameters.");
         }
-        
+
         String inSeqFileName = null;
 
         NativeObject apiData = (NativeObject) args[0];
@@ -761,7 +769,7 @@ public class APIProviderHostObject extends ScriptableObject {
         version = (version != null ? version.trim() : null);
 
         APIIdentifier apiId = new APIIdentifier(provider, name, version);
-        
+
         APIProvider apiProvider = getAPIProvider(thisObj);
         if (apiData.get("seqFile", apiData) != null)  {
             FileHostObject seqFile = (FileHostObject) apiData.get("seqFile", apiData);
@@ -769,9 +777,9 @@ public class APIProviderHostObject extends ScriptableObject {
             inSeqFileName = uploadSequenceFile(apiProvider, seqFile, inSeqPath, apiId);
         }
         return inSeqFileName;
-        
+
     }
-    
+
 	public static boolean jsFunction_isAPIUpdateValid(Context cx, Scriptable thisObj, Object[] args, Function funObj)
 			throws APIManagementException, ScriptException, FaultGatewaysException {
 
@@ -811,7 +819,7 @@ public class APIProviderHostObject extends ScriptableObject {
         		PrivilegedCarbonContext.endTenantFlow();
         	}
         }
-		
+
 		return success;
 	}
 
@@ -1975,16 +1983,16 @@ public class APIProviderHostObject extends ScriptableObject {
             }
             api.addAvailableTiers(availableTier);
         }
-        
-        if (apiLevelPolicy != null){          
+
+        if (apiLevelPolicy != null){
             if("none".equals(apiLevelPolicy)){
                 api.setApiLevelPolicy(null);
             } else {
                 api.setApiLevelPolicy(apiLevelPolicy);
             }
         }
-        
-        
+
+
         api.setStatus(oldApi.getStatus());
         api.setWsdlUrl(wsdl);
         api.setWadlUrl(wadl);
@@ -2724,7 +2732,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 }
                 String corsJson = APIUtil.getCorsConfigurationJsonFromDto(corsConfigurationDto);
                 myn.put(49, myn, corsJson);
-                
+
                 StringBuilder policiesSet = new StringBuilder("");
 
                 myn.put(50, myn, checkValue(policiesSet.toString()));
@@ -3563,18 +3571,18 @@ public class APIProviderHostObject extends ScriptableObject {
         }
         return apiStatus;
     }
-    
+
     public static NativeObject jsFunction_searchPaginatedAPIs(Context cx, Scriptable thisObj,
                                                     Object[] args,
                                                     Function funObj) throws APIManagementException {
         if (args == null || args.length < 4) {
             handleException("Invalid number of parameters.");
         }
-        
+
         NativeArray myn = new NativeArray(0);
         NativeObject resultObj = new NativeObject();
         Map<String, Object> result = new HashMap<String, Object>();
-        
+
         String providerName = (String) args[0];
         providerName = APIUtil.replaceEmailDomain(providerName);
         String inputSearchQuery = (String) args[1];
@@ -3631,7 +3639,7 @@ public class APIProviderHostObject extends ScriptableObject {
             /*if ("*".equals(searchTerm) || searchTerm.startsWith("*")) {
                 searchTerm = searchTerm.replaceFirst("\\*", ".*");
             }*/
-            APIProvider apiProvider = getAPIProvider(thisObj);            
+            APIProvider apiProvider = getAPIProvider(thisObj);
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(
                                                                       ((APIProviderHostObject) thisObj).getUsername()));
             result = apiProvider.searchPaginatedAPIs(newSearchQuery, tenantDomain, start, end, limitAttributes);
@@ -4552,9 +4560,9 @@ public class APIProviderHostObject extends ScriptableObject {
                                                               Object[] args, Function funObj)
             throws APIManagementException {
         List<String> sequenceList = null;
-        
+
         APIProvider apiProvider = getAPIProvider(thisObj);
-        
+
         if (args == null ||  args.length >= 3) {
             String apiName = (String) args[0];
             String apiVersion = (String) args[1];
@@ -4564,12 +4572,12 @@ public class APIProviderHostObject extends ScriptableObject {
                 provider = APIUtil.replaceEmailDomain(provider);
             }
             APIIdentifier apiIdentifier = new APIIdentifier(provider, apiName, apiVersion);
-            
+
             sequenceList = apiProvider.getCustomFaultSequences(apiIdentifier);
         } else {
             sequenceList = apiProvider.getCustomFaultSequences();
         }
-                
+
 
         NativeArray myn = new NativeArray(0);
         if (sequenceList == null) {
@@ -5026,6 +5034,184 @@ public class APIProviderHostObject extends ScriptableObject {
         return scopeExist.toString();
     }
 
+    /**
+     * This method is used to upload backend certificate related to endpoints.
+     *
+     * @param cx      Rhino context
+     * @param thisObj Scriptable object
+     * @param args    Passing arguments {userName, alias, endpoint, certificate}
+     * @param funObj  Function object
+     * @return : True if uploading certificate is successful. False otherwise.
+     */
+    public static int jsFunction_uploadCertificate(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+            throws APIManagementException {
+        ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        CertificateManager certificateManager = new CertificateManagerImpl();
+        if ((args == null) || (args.length != 4) || !isStringValues(args)) {
+            handleException("Invalid number of arguments.");
+        }
+
+        String userName = (String) args[0];
+        String alias = (String) args[1];
+        String endpoint = (String) args[2];
+        String certificate = (String) args[3];
+
+        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        Map<String, List<Environment>> resultMap = new HashMap<String, List<Environment>>();
+        try {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            responseCode = certificateManager
+                    .addCertificateToPublisher(certificate, alias, endpoint, tenantId);
+
+            if (responseCode == ResponseCode.SUCCESS) {
+                //Get the gateway manager and add the certificate to gateways.
+                GatewayCertificateManager gatewayCertificateManager = new GatewayCertificateManager();
+                resultMap = gatewayCertificateManager.addToGateways(certificate, alias);
+            } else {
+                log.error("Adding certificate to the Publisher node is failed. No certificate changes will be " +
+                        "affected.");
+            }
+        } catch (UserStoreException e) {
+            handleException("Error while reading tenant information ", e);
+        }
+        return responseCode.getResponseCode();
+    }
+
+    /**
+     * This method is used to remove backend certificate for the given alias and endpoint.
+     *
+     * @param cx      Rhino context
+     * @param thisObj Scriptable object
+     * @param args    Passing arguments {userName, alias, endpoint}
+     * @param funObj  Function object
+     * @return : True if deleting certificate is successful. False otherwise.
+     */
+    public static int jsFunction_deleteCertificate(Context cx, Scriptable thisObj, Object[] args, Function funObj)
+            throws APIManagementException {
+        ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        CertificateManager certificateManager = new CertificateManagerImpl();
+        if ((args == null) || (args.length != 3) || !isStringValues(args)) {
+            handleException("Invalid number of arguments.");
+        }
+
+        String userName = (String) args[0];
+        String alias = (String) args[1];
+        String endpoint = (String) args[2];
+
+        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        Map<String, List<Environment>> resultSet = new HashMap<String, List<Environment>>();
+
+        try {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            responseCode = certificateManager.deleteCertificateFromPublisher(alias, endpoint, tenantId);
+
+            if (responseCode == ResponseCode.SUCCESS) {
+                //Get the gateway manager and remove the certificate from gateways.
+                resultSet = new GatewayCertificateManager().removeFromGateways(alias);
+            } else {
+                log.error("Removing the certificate from Publisher node is failed. No certificate changes will "
+                        + "be affected.");
+            }
+        } catch (UserStoreException e) {
+            handleException("Error while reading tenant information ", e);
+        }
+        return responseCode.getResponseCode();
+    }
+
+    /**
+     * This method is to retrieve certificate metadata for a given endpoint.
+     *
+     * @param cx      Rhino context
+     * @param thisObj Scriptable object
+     * @param args    Passing arguments {username, endpoint}
+     * @param funObj  Function object
+     * @return The certificate metadata object.
+     * */
+    public static NativeObject jsFunction_getCertificate(Context cx, Scriptable thisObj, Object[] args,
+                                                         Function funObj) throws APIManagementException {
+        NativeObject certificateMetaData = new NativeObject();
+        CertificateManager certificateManager = new CertificateManagerImpl();
+        if ((args == null) || (args.length != 2) || !isStringValues(args)) {
+            log.error("Invalid arguments.");
+            return null;
+        }
+
+        String userName = (String) args[0];
+        String endpoint = (String) args[1];
+        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        try {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            CertificateMetadataDTO certificateMetadata = certificateManager.getCertificate(endpoint, tenantId);
+
+            if (certificateMetadata != null) {
+                //TODO: use constants for alias and endpoint
+                certificateMetaData.put(ALIAS, certificateMetaData, certificateMetadata.getAlias());
+                certificateMetaData.put(END_POINT, certificateMetaData, certificateMetadata.getEndpoint());
+            }
+        } catch (UserStoreException e) {
+            handleException("Error while reading tenant information ", e);
+        }
+        return certificateMetaData;
+    }
+
+
+    /**
+     * This method is to retrieve all the certificates belongs to the given tenant.
+     *
+     * @param cx Rhino context
+     * @param thisObj Scriptable object
+     * @param args Passing arguments {username}
+     * @param funObj Function object
+     * @return A list of uploaded certificate metadata.
+     */
+    public static NativeArray jsFunction_getCertificates(Context cx, Scriptable thisObj, Object[] args,
+                                                         Function funObj) throws APIManagementException {
+        NativeArray certificateMetaDataArray = new NativeArray(0);
+
+        NativeObject certificateMetaData = new NativeObject();
+        CertificateManager certificateManager = new CertificateManagerImpl();
+        if ((args == null) || (args.length != 2) || !isStringValues(args)) {
+            log.error("Invalid arguments.");
+            return null;
+        }
+
+        String userName = (String) args[0];
+        String endpoint = (String) args[1];
+
+        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        try {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            List<CertificateMetadataDTO> certificates = certificateManager.getCertificates(tenantId);
+            int i = 0;
+
+            if (certificates.size() > 0) {
+                for (CertificateMetadataDTO certificateMetadata : certificates) {
+                    NativeObject obj = new NativeObject();
+                    obj.put(ALIAS, obj, certificateMetadata.getAlias());
+                    obj.put(END_POINT, obj, certificateMetadata.getEndpoint());
+                    certificateMetaDataArray.put(i, certificateMetaDataArray, obj);
+                    i++;
+                }
+            }
+        } catch (UserStoreException e) {
+            handleException("Error while reading tenant information ", e);
+        }
+        return certificateMetaDataArray;
+    }
+
+    /**
+     * This method is to check whether the required configuration is done in the AM distribution.
+     *
+     * @return : True if the configuration is present, false otherwise.
+     */
+    public static boolean jsFunction_isConfigured() {
+        CertificateManager certificateManager = new CertificateManagerImpl();
+        return certificateManager.isConfigured();
+    }
     /**
      * @param failedGateways map of failed environments
      * @return json string of input map

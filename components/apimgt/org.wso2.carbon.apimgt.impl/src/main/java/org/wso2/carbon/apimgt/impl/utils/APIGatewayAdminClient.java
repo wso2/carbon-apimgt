@@ -373,4 +373,34 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         }
     }
 
+    /**
+     * Add certificate to the gateway nodes.
+     *
+     * @param certificate : Base64 encoded certificate string.
+     * @param alias       : The alias for the certificate.
+     * @return : True if the certificate is added to trust store. False otherwise.
+     * @throws AxisFault
+     */
+    public boolean addCertificate(String certificate, String alias) throws AxisFault {
+        try {
+            return apiGatewayAdminStub.addCertificate(certificate, alias);
+        } catch (RemoteException e) {
+            throw new AxisFault("Error adding certificate file", e);
+        }
+    }
+
+    /**
+     * Delete the certificate from gateway node.
+     *
+     * @param alias : The alias of the certificate which needs to be removed.
+     * @return : True if the certificate is removed successfully. False otherwise.
+     * @throws AxisFault
+     */
+    public boolean deleteCertificate(String alias) throws AxisFault {
+        try {
+            return apiGatewayAdminStub.deleteCertificate(alias);
+        } catch (RemoteException e) {
+            throw new AxisFault("Error deleting certificate", e);
+        }
+    }
 }

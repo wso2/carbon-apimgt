@@ -119,6 +119,35 @@
                </xs:sequence>
             </xs:complexType>
          </xs:element>
+         <xs:element name="addCertificate">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="certificate" nillable="true" type="xs:string"/>
+                  <xs:element minOccurs="0" name="alias" nillable="true" type="xs:string"/>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+         <xs:element name="addCertificateResponse">
+            <xs:complexType>
+               <xs:sequence>
+                  <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+               </xs:sequence>
+            </xs:complexType>
+         </xs:element>
+          <xs:element name="deleteCertificate">
+              <xs:complexType>
+                  <xs:sequence>
+                      <xs:element minOccurs="0" name="alias" nillable="true" type="xs:string"/>
+                  </xs:sequence>
+              </xs:complexType>
+          </xs:element>
+          <xs:element name="deleteCertificateResponse">
+              <xs:complexType>
+                  <xs:sequence>
+                      <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                  </xs:sequence>
+              </xs:complexType>
+          </xs:element>
          <xs:element name="getApiForTenant">
             <xs:complexType>
                <xs:sequence>
@@ -723,6 +752,18 @@
    <wsdl:message name="addDefaultAPIResponse">
       <wsdl:part name="parameters" element="ns:addDefaultAPIResponse"/>
    </wsdl:message>
+   <wsdl:message name="addCertificateRequest">
+      <wsdl:part name="parameters" element="ns:addCertificate"/>
+   </wsdl:message>
+   <wsdl:message name="addCertificateResponse">
+      <wsdl:part name="parameters" element="ns:addCertificateResponse"/>
+   </wsdl:message>
+   <wsdl:message name="deleteCertificateRequest">
+      <wsdl:part name="parameters" element="ns:deleteCertificate"/>
+   </wsdl:message>
+   <wsdl:message name="deleteCertificateResponse">
+      <wsdl:part name="parameters" element="ns:deleteCertificateResponse"/>
+   </wsdl:message>
    <wsdl:portType name="APIGatewayAdminPortType">
       <wsdl:operation name="updateApi">
          <wsdl:input message="ns:updateApiRequest" wsaw:Action="urn:updateApi"/>
@@ -847,6 +888,14 @@
       <wsdl:operation name="addDefaultAPI">
          <wsdl:input message="ns:addDefaultAPIRequest" wsaw:Action="urn:addDefaultAPI"/>
          <wsdl:output message="ns:addDefaultAPIResponse" wsaw:Action="urn:addDefaultAPIResponse"/>
+      </wsdl:operation>
+      <wsdl:operation name="addCertificate">
+         <wsdl:input message="ns:addCertificateRequest" wsaw:Action="urn:addCertificate"/>
+         <wsdl:output message="ns:addCertificateResponse" wsaw:Action="urn:addCertificateResponse"/>
+      </wsdl:operation>
+      <wsdl:operation name="deleteCertificate">
+          <wsdl:input message="ns:deleteCertificateRequest" wsaw:Action="urn:deleteCertificate"/>
+          <wsdl:output message="ns:deleteCertificateResponse" wsaw:Action="urn:deleteCertificateResponse"/>
       </wsdl:operation>
    </wsdl:portType>
    <wsdl:binding name="APIGatewayAdminSoap11Binding" type="ns:APIGatewayAdminPortType">
@@ -1130,6 +1179,24 @@
             <soap:body use="literal"/>
          </wsdl:output>
       </wsdl:operation>
+      <wsdl:operation name="addCertificate">
+         <soap:operation soapAction="urn:addCertificate" style="document"/>
+         <wsdl:input>
+            <soap:body use="literal"/>
+         </wsdl:input>
+         <wsdl:output>
+            <soap:body use="literal"/>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="deleteCertificate">
+          <soap:operation soapAction="urn:deleteCertificate" style="document"/>
+          <wsdl:input>
+              <soap:body use="literal"/>
+          </wsdl:input>
+          <wsdl:output>
+              <soap:body use="literal"/>
+          </wsdl:output>
+      </wsdl:operation>
    </wsdl:binding>
    <wsdl:binding name="APIGatewayAdminSoap12Binding" type="ns:APIGatewayAdminPortType">
       <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
@@ -1410,6 +1477,24 @@
          </wsdl:input>
          <wsdl:output>
             <soap12:body use="literal"/>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="addCertificate">
+         <soap12:operation soapAction="urn:addCertificate" style="document"/>
+         <wsdl:input>
+            <soap12:body use="literal"/>
+         </wsdl:input>
+         <wsdl:output>
+            <soap12:body use="literal"/>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="deleteCertificate">
+         <soap12:operation soapAction="urn:deleteCertificate" style="document"/>
+         <wsdl:input>
+             <soap12:body use="literal"/>
+         </wsdl:input>
+         <wsdl:output>
+             <soap12:body use="literal"/>
          </wsdl:output>
       </wsdl:operation>
    </wsdl:binding>
@@ -1693,6 +1778,24 @@
          <wsdl:output>
             <mime:content type="text/xml" part="parameters"/>
          </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="addCertificate">
+         <http:operation location="addCertificate"/>
+         <wsdl:input>
+            <mime:content type="text/xml" part="parameters"/>
+         </wsdl:input>
+         <wsdl:output>
+            <mime:content type="text/xml" part="parameters"/>
+         </wsdl:output>
+      </wsdl:operation>
+      <wsdl:operation name="deleteCertificate">
+          <http:operation location="deleteCertificate"/>
+          <wsdl:input>
+              <mime:content type="text/xml" part="parameters"/>
+          </wsdl:input>
+          <wsdl:output>
+              <mime:content type="text/xml" part="parameters"/>
+          </wsdl:output>
       </wsdl:operation>
    </wsdl:binding>
    <wsdl:service name="APIGatewayAdmin">

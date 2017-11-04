@@ -224,9 +224,9 @@ if(jagg.isCSRFTokenValid())
                        };
                    print(obj);
                    return;
-                } 
+                }
             }
-            
+
             apiData.implementation_type = request.getParameter("implementation_methods");
             apiData.wsdl = request.getParameter("wsdl");
             apiData.wadl = request.getParameter("wadl");
@@ -369,7 +369,7 @@ if(jagg.isCSRFTokenValid())
                 }
             }
             print(obj);
-            
+
     	} else if (action === "swagger") {
             mod = jagg.module("api");
             var apiData = {};
@@ -493,7 +493,35 @@ if(jagg.isCSRFTokenValid())
             }
             print(obj);
             return;
-        }  else {
+        } else if (request.getMethod() == 'POST' && action === 'deleteCert') {
+            mod = jagg.module('api');
+            var endpoint = request.getParameter('endpoint');
+            var alias = request.getParameter('alias')
+            result = mod.deleteCertificate(alias, endpoint);
+            if (result.response == false) {
+                print({error: true,
+                    message: "Deleting certificate failed."
+                })
+            } else {
+                print({
+                    error: false,
+                    message: {"action": "delete", "code": result.response}
+                })
+            }
+        } else if (request.getMethod() == 'POST' && action === 'addCertificate') {
+            mod = jagg.module('api');
+            var alias = request.getParameter('alias');
+            var ep = request.getParameter('ep');
+            var certificate = request.getParameter('certificate');
+
+            result = mod.uploadCertificate(certificate, alias, ep);
+
+            if (result.response == false) {
+                print({error: true, message: "Inserting certificate failed!"});
+            } else {
+                print({error: false, message: {"action": "add", "code": result.response}});
+            }
+        }else {
             print({
                       error:true,
                       message:msg.error.invalidAction(action)

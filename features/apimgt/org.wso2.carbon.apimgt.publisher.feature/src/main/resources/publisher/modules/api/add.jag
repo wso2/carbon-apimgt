@@ -248,6 +248,101 @@ var isURLValid = function (type,url,providerName,apiName,apiVersion,invalidStatu
     }
 };
 
+var uploadCertificate = function (certificate, alias, endpoint) {
+    var result, log = new Log(), provider = jagg.module("manager").getAPIProviderObj(), userName = user.username;
+    try {
+        result = provider.uploadCertificate(userName, alias, endpoint, certificate);
+        if (log.isDebugEnabled()) {
+            log.debug("Invoke upload certificate");
+        }
+        return {
+            error: false,
+            response: result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e
+        };
+    }
+}
+
+var deleteCertificate = function (alias, endpoint) {
+    var result, log = new Log(), provider = jagg.module("manager").getAPIProviderObj(), userName = user.username;
+    try {
+        result = provider.deleteCertificate(userName, alias, endpoint);
+        if (log.isDebugEnabled()) {
+            log.debug("Invoke delete certificate");
+        }
+        return {
+            error: false,
+            response: result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e
+        };
+    }
+}
+
+var getCertificate = function (endpoint) {
+    var result, log = new Log(), provider = jagg.module("manager").getAPIProviderObj(), userName = user.username;
+    try {
+        result = provider.getCertificate(userName, endpoint);
+        if (log.isDebugEnabled()) {
+            log.debug("Invoke get certificate");
+        }
+        return {
+            error: false,
+            certificate: result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e
+        };
+    }
+}
+
+var getCertificates = function () {
+    var result, log = new Log(), provider = jagg.module("manager").getAPIProviderObj(), userName = user.username;
+    try {
+        result = provider.getCertificates(userName, "ss");
+        if (log.isDebugEnabled()) {
+            log.debug("Invoke get certificates");
+        }
+        return {
+            error: false,
+            certificates: result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error:e
+        };
+    }
+}
+
+var isConfigured = function () {
+    var result, log = new Log(), provider = jagg.module("manager").getAPIProviderObj();
+    try {
+        result = provider.isConfigured();
+        if (log.isDebugEnabled()) {
+            log.debug("Invoked checking the table existence");
+        }
+        return {
+            error: false,
+            isConfigured: result
+        };
+    } catch (e) {
+        log.error(e.message);
+        return {
+            error: e
+        };
+    }
+}
+
 var getTiers = function () {
     var tier,tiers,list=[],log = new Log();
     var tier;

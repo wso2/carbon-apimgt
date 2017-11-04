@@ -131,6 +131,7 @@ var jagg = jagg || {};
         jagg.messageDisplay({content:params.content,title:"API Publisher - " + type,buttons:[
             {name:i18n.t("OK"),cssClass:"btn btn-primary",cbk:function() {
                 $('#messageModal').modal('hide');
+                $(".modal-backdrop.fade.in").remove();
                 if (params.cbk && typeof params.cbk == "function")
                     params.cbk();
             }}
@@ -263,5 +264,12 @@ $(document).ready(function(){
         div.toggle('fast');
         return false; 
     });
-    
+
+    $('.manage-certs').click(function() {
+        var id = $(this).attr('ref');
+        var div = $('#'+id);
+        div.toggle('fast');
+        return false;
+    });
+
 });
