@@ -147,12 +147,12 @@ public class AuthUtil {
 
     /**
      * Method used to build a cookie object.
-     * @param name  Name of the cookie.
-     * @param value Value of the cookie.
-     * @param path  Context to which cookie should be set.
-     * @param isHttpOnly    If this a http only cookie.
-     * @param isSecure      If this a secure cookie.
-     * @param expiresIn     Expiration time of the cookie.
+     * @param name       Name of the cookie.
+     * @param value      Value of the cookie.
+     * @param path       Context to which cookie should be set.
+     * @param isHttpOnly If this a http only cookie.
+     * @param isSecure   If this a secure cookie.
+     * @param expiresIn  Expiration time of the cookie.
      * @return Cookie object.
      */
     public static NewCookie cookieBuilder(String name, String value, String path, boolean isSecure,

@@ -26,13 +26,10 @@ import SingleClient from './SingleClient'
 
 class AuthManager {
     constructor() {
-        /* TODO: Move this to configuration ~tmkb*/
         this.host = window.location.protocol + "//" + window.location.host;
-        this.token = "/login/token/publisher";
         this.isLogged = false;
         this.username = null;
         this.userscope = null;
-        this.bearer = "Bearer ";
         this.contextPath = "/publisher";
     }
 
@@ -136,8 +133,22 @@ class AuthManager {
         /* TODO: IMHO it's better to get this key (`wso2_user`) from configs */
     }
 
-    getTokenEndpoint() {
-        return this.host + this.token;
+    /**
+     * Get login token path from given environment or get default login token path
+     * @param {Object} environment: environment object
+     * @returns {String} loginTokenPath: login token path of the given environment
+     */
+    getTokenEndpoint(environment) {
+        let loginTokenPath;
+        if (environment) {
+            //The default value of `host` in back-end java code is an empty string.
+            let host = (environment.host) ? environment.host : this.host;
+            loginTokenPath = host + environment.loginTokenPath + this.contextPath;
+        } else {
+            //If no environment return default loginTokenPath
+            loginTokenPath = this.host + "/login/token" + this.contextPath;
+        }
+        return loginTokenPath;
     }
 
     /**
@@ -145,9 +156,10 @@ class AuthManager {
      * Can't use swaggerjs to generate client.Hence using Axios to make AJAX calls
      * @param {String} username : Username of the user
      * @param {String} password : Plain text password
+     * @param {Object} environment : environment object
      * @returns {AxiosPromise} : Promise object with the login request made
      */
-    authenticateUser(username, password) {
+    authenticateUser(username, password, environment) {
         const headers = {
             'Authorization': 'Basic deidwe',
             'Accept': 'application/json',
@@ -160,12 +172,12 @@ class AuthManager {
             validity_period: 3600,
             scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage apim:subscription_view apim:subscription_block apim:subscribe'
         };
-        let promised_response = axios.post(this.getTokenEndpoint(), qs.stringify(data), {headers: headers});
+        let promised_response = axios.post(this.getTokenEndpoint(environment), qs.stringify(data), {headers: headers});
         promised_response.then(response => {
             const validityPeriod = response.data.validityPeriod; // In seconds
             const WSO2_AM_TOKEN_1 = response.data.partialToken;
             const user = new User(response.data.authUser, response.data.idToken);
-            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/publisher");
+            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, this.contextPath);
             user.scopes = response.data.scopes.split(" ");
             AuthManager.setUser(user);
         });
@@ -176,9 +188,9 @@ class AuthManager {
      * Revoke the issued OAuth access token for currently logged in user and clear both cookie and localstorage data.
      */
     logout() {
-        let authHeader = this.bearer + AuthManager.getUser().getPartialToken();
+        let authHeader = "Bearer " + AuthManager.getUser().getPartialToken();
         //TODO Will have to change the logout end point url to contain the app context(i.e. publisher/store, etc.)
-        let url = this.host + "/login/logout/publisher";
+        let url = this.host + "/login/logout" + this.contextPath;
         let headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -213,7 +225,9 @@ class AuthManager {
     static hasScopes(resourcePath, resourceMethod) {
         let userscopes = this.getUser().scopes;
         let validScope = SingleClient.getScopeForResource(resourcePath, resourceMethod);
-        return validScope.then(scope => {return userscopes.includes(scope)});
+        return validScope.then(scope => {
+            return userscopes.includes(scope)
+        });
     }
 
 }

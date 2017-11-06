@@ -21,6 +21,7 @@ import org.wso2.carbon.kernel.annotations.Configuration;
 import org.wso2.carbon.kernel.annotations.Element;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -30,10 +31,10 @@ import java.util.List;
 public class EnvironmentConfigurations {
 
     @Element(description = "This APIM instance's Environment-name")
-    private String environmentName = "Production";
+    private String environmentName = "Default";
 
     @Element(description = "List of all Environments")
-    private List<Environment> environments = new ArrayList<Environment>();
+    private List<Environment> environments = Arrays.asList(new Environment());
 
     public String getEnvironmentName() {
         return environmentName;

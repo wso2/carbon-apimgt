@@ -138,7 +138,7 @@
             <classifier>runtime</classifier>
             <scope>test</scope>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
             <version>1.4.11</version>
