@@ -68,6 +68,7 @@ public class ImportApiServiceImpl extends ImportApiService {
             , Request request) throws NotFoundException {
 
         APIStore consumer = null;
+        String username = RestApiUtil.getLoggedInUsername(request);
 
         try {
             consumer = RestApiUtil.getConsumer(RestApiUtil.getLoggedInUsername(request));
@@ -75,7 +76,7 @@ public class ImportApiServiceImpl extends ImportApiService {
                     (consumer, System.getProperty("java.io.tmpdir") + File.separator + "exported-app-archives-" +
                             UUID.randomUUID().toString());
             Application applicationDetails = importExportManager.importApplications(fileInputStream);
-            consumer.updateApplication(applicationDetails.getUuid(),applicationDetails);
+            importExportManager.updateApplication(applicationDetails, username);
             return Response.status(Response.Status.OK).entity(applicationDetails).build();
         } catch (APIManagementException e) {
             String errorMsg = "Error while importing the Applications";
