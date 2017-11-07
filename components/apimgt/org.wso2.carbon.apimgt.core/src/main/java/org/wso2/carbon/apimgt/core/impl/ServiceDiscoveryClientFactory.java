@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
+import io.fabric8.openshift.client.OpenShiftClient;
 
 
 /**
@@ -30,7 +31,7 @@ import io.fabric8.openshift.client.DefaultOpenShiftClient;
  */
 public class ServiceDiscoveryClientFactory {
 
-    public DefaultOpenShiftClient getDefaultOpenShiftClient(Config config) {
+    public OpenShiftClient createDefaultOpenShiftClient(Config config) {
         return new DefaultOpenShiftClient(config);
     }
 }

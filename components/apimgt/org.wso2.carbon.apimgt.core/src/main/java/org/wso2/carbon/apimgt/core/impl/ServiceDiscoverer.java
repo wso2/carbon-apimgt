@@ -22,7 +22,6 @@ import org.wso2.carbon.apimgt.core.exception.ServiceDiscoveryException;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ServiceDiscoveryConstants;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -34,14 +33,12 @@ public abstract class ServiceDiscoverer {
 
     private String namespaceFilter;
     private HashMap<String, String> criteriaFilter;
-
     int serviceEndpointIndex;
-    List<Endpoint> servicesList;
 
 
     /**
      * Initializes the necessary parameters,
-     * Must be called by all subclasses within their own overriding .init() methods
+     * Must be called by all subclasses of Service Discoverer within their own overriding .init() methods
      *
      * @param implParameters  implementation parameters provided in the configuration
      * @throws ServiceDiscoveryException if an error occurs in the implementation's init method
@@ -61,7 +58,6 @@ public abstract class ServiceDiscoverer {
             }
             this.criteriaFilter = criteriaMap;
         }
-        servicesList = new ArrayList<>();
         serviceEndpointIndex = 0;
     }
 
