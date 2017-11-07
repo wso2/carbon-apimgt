@@ -130,8 +130,6 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
             throw new APIMgtEntityImportExportException(errorMsg, e, ExceptionCodes.APPLICATION_IMPORT_ERROR);
         }
 
-
-        /*Application applicationDetails = decodeAppInformationFromDirectoryStructure(archiveExtractLocation);*/
         Application applicationDetails = decodeApplicationFile(archiveExtractLocation);
         return applicationDetails;
 
@@ -151,40 +149,12 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
 
         //convert to bean
         Gson gson = new GsonBuilder().create();
-
+        //returns an application object from a json string
         Application applicationDetails = gson.fromJson(applicationDetailsString, Application.class);
 
-        return applicationDetails; //returns an application object from a json string
+        return applicationDetails;
 
     }
-
-    /*private Application decodeAppInformationFromDirectoryStructure(String applicationArtifactBasePath)
-            throws APIMgtEntityImportExportException {
-        Application appDetails = null;
-        Set<String> appDetailsRootDirectoryPaths = null;
-
-
-        try {
-            appDetailsRootDirectoryPaths = APIFileUtils.getDirectoryList(applicationArtifactBasePath);
-        } catch (APIMgtDAOException e) {
-            String errorMsg = "Unable to find application details at" + applicationArtifactBasePath;
-            log.error(errorMsg, e);
-            throw new APIMgtEntityImportExportException(errorMsg, e, ExceptionCodes.APPLICATION_IMPORT_ERROR);
-        }
-        if(appDetailsRootDirectoryPaths.isEmpty()){
-            try {
-                APIFileUtils.deleteDirectory(path);
-            } catch (APIMgtDAOException e) {
-                log.error("Unable remove directory at " + path);
-            }
-            String errorMsg = "Unable to find Application details at " + applicationArtifactBasePath;
-            throw new APIMgtEntityImportExportException(errorMsg, ExceptionCodes.APPLICATION_IMPORT_ERROR);
-        }
-
-        File appDetailsFile = getFileFromPrefix(applicationArtifactBasePath, ""); // prefix is ""
-        return appDetails;
-    }*/
-
 
 }
 
