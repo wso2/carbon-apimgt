@@ -5,12 +5,10 @@ import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIStore;
-import org.wso2.carbon.apimgt.core.dao.impl.ApplicationDAOImpl;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtEntityImportExportException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.models.FileApplication;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 
 import java.io.File;
@@ -61,7 +59,7 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
             APIFileUtils.createDirectory(applicationExportDirectory);
 
             //export application details
-            APIFileUtils.exportApplicationDetailsToFileSystem(new FileApplication(exportApplication),
+            APIFileUtils.exportApplicationDetailsToFileSystem(exportApplication,
                     applicationExportDirectory);
 
         } catch (APIMgtDAOException e) {
