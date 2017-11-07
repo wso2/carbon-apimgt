@@ -39,11 +39,23 @@ public class Environment {
         return host;
     }
 
+    public void setHost(String host) {
+        this.host = host;
+    }
+
     public String getLoginTokenPath() {
         return loginTokenPath;
     }
 
+    public void setLoginTokenPath(String loginTokenPath) {
+        this.loginTokenPath = loginTokenPath;
+    }
+
     public String getLabel() {
         return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 }

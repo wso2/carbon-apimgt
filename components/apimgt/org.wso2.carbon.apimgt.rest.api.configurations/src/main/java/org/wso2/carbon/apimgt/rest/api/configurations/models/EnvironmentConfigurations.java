@@ -41,7 +41,15 @@ public class EnvironmentConfigurations {
         return environmentName;
     }
 
+    public void setEnvironmentName(String environmentName) {
+        this.environmentName = environmentName;
+    }
+
     public List<Environment> getEnvironments() {
         return environments;
+    }
+
+    public void setEnvironments(List<Environment> environments) {
+        this.environments = environments;
     }
 }

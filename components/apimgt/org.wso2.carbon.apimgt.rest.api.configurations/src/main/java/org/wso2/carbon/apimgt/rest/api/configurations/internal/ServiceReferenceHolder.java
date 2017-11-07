@@ -54,7 +54,7 @@ public class ServiceReferenceHolder {
                 log.error("Configuration provider is null");
             }
         } catch (CarbonConfigurationException e) {
-            log.error("Error getting config : org.wso2.carbon.apimgt.rest.api.configurations.internal.APIMAppConfiguration", e);
+            log.error("Error getting config : org.wso2.carbon.apimgt.rest.api.configurations.models.EnvironmentConfigurations", e);
         }
 
         if (environmentConfigurations == null) {
@@ -63,25 +63,5 @@ public class ServiceReferenceHolder {
         }
 
         return environmentConfigurations;
-    }
-
-    /**
-     * This method is to get configuration map of a given namespace
-     *
-     * @param namespace namespace defined in deployment.yaml
-     * @return resource path to scope mapping
-     */
-    public Map<String, String> getRestAPIConfigurationMap(String namespace) {
-        try {
-            if (configProvider != null) {
-                return configProvider.getConfigurationMap(namespace);
-            } else {
-                log.error("Configuration provider is null");
-            }
-        } catch (CarbonConfigurationException e) {
-            log.error("Error while reading the configurations map of namespace : " +
-                    "org.wso2.carbon.apimgt.rest.api.configurations.internal.APIMAppConfiguration", e);
-        }
-        return null;
     }
 }
