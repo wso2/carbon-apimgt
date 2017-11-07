@@ -100,16 +100,25 @@ var item_design_script_data = [
         event: 'click',
         description: 'Click the GET option to allow the GET HTTP method for this URL pattern.',
         shape: 'circle',
-        'showSkip' : false
+        'showSkip' : false,
+        onBeforeStart:function(){
+            $(window).scrollTop($('#get').offset().top);
+        }
     },
     {
         'click #add_resource': 'Click Add to add this pattern to the list of allowed REST resources',
-        'showSkip' : false
+        'showSkip' : false,
+        onBeforeStart:function(){
+            $(window).scrollTop($('#add_resource').offset().top);
+        }
     },
     {
         'click #go_to_implement': 'Next, click Implement to proceed to the implementation phase of' +
         ' the API creation.',
-        'showSkip' : false
+        'showSkip' : false,
+        onBeforeStart:function(){
+            $(window).scrollTop($('#go_to_implement').offset().top);
+        }
     }
 ];
 
@@ -143,16 +152,26 @@ var item_design_with_worldbank_api_script_data = [
         event: 'click',
         description: 'Select the GET checkbox to allow GET method for this URL pattern',
         shape: 'circle',
-        'showSkip' : false
+        'showSkip' : false,
+        onBeforeStart:function(){
+            $(window).scrollTop($('#get').offset().top);
+        }
+
     },
     {
         'click #add_resource': 'Click Add to add this pattern to the list of allowed REST resources',
-        'showSkip' : false
+        'showSkip' : false,
+        onBeforeStart:function(){
+            $(window).scrollTop($('#add_resource').offset().top);
+        }
     },
     {
         'click #go_to_implement': 'Now click Implement to proceed to the implementation phase of the' +
         ' API creation',
-        'showSkip' : false
+        'showSkip' : false,
+        onBeforeStart:function(){
+            $(window).scrollTop($('#go_to_implement').offset().top);
+        }
     }
 ];
 
@@ -172,7 +191,10 @@ var item_implement_script_data = [
     {
         'click #go_to_manage': 'Next, click the "Next: Manage" button to proceed to the last phase of' +
         ' the API creation.',
-        'showSkip' : false
+        'showSkip' : false,
+        onBeforeStart:function(){
+            $(window).scrollTop($('#go_to_manage').offset().top);
+        }
     }
 
 ];
@@ -193,7 +215,10 @@ var item_manage_script_data = [
     },
     {
         'click #publish_api': 'Click Save & Publish to publish the API in the API Store.',
-        'showSkip' : false
+        'showSkip' : false,
+        onBeforeStart:function(){
+            $(window).scrollTop($('#publish_api').offset().top);
+        }
     }
 ];
 

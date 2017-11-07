@@ -81,12 +81,18 @@ var re_generate_production_keys_data = [
     },
     {
         'click .regenerate': 'Click "Regenerate keys" to generate the new OAuth token.',
-        'showSkip' : false
+        'showSkip' : false,
+        onBeforeStart:function(){
+            $(window).scrollTop($('.regenerate').offset().top);
+        }
     },
     {
         'click #subscriptions-tab': 'Now you have generated an OAuth access token for accessing the API you created. ' +
         'Click "Subscriptions" to see your subscription information',
-        'showSkip' : false
+        'showSkip' : false,
+        onBeforeStart:function(){
+            $(window).scrollTop($('#application_name').offset().top);
+        }
     },
     {
         'click #subscription-table': 'Now, click the ' + getApiName() + ' API to open the API\'s overview again.',
@@ -117,16 +123,23 @@ var swagger_script_data = [
     {
         'click #default_get_countries_code': 'Click the GET /countries/{code} method that you created ' +
         'earlier to expand it.',
-        'showSkip' : false
+        'showSkip' : false,
+        onBeforeStart:function(){
+            $(window).scrollTop($('#default_get_countries_code').offset().top);
+        }
     },
     {
         'key .parameter required': 'Type a two-letter country code (e.g., "us") and press Tab',
         'keyCode': 9,
         'showSkip' : false
+
     },
     {
         'click .submit': 'Now, click "Try it out!" button to invoke the API',
-        'showSkip' : false
+        'showSkip' : false,
+        onBeforeStart:function(){
+            $(window).scrollTop($('#default_get_countries_code').offset().top);
+        }
     },
     {
         'click #default_get_countries_code': 'The API is successfully invoked. You can see the response, invocation ' +
