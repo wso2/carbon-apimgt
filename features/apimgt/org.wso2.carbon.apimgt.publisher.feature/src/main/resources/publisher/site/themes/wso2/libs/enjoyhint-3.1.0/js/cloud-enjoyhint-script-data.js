@@ -186,7 +186,12 @@ var item_implement_script_data = [
         'key #endpoint-input': 'Provide an existing backend service URL for World ' +
         'Bank data in our example, type: http://api.worldbank.org and press Tab',
         'keyCode': 9,
-        'showSkip' : false
+        'showSkip' : false,
+        'scrollAnimationSpeed': 1000,
+        onBeforeStart:function(){
+            setTimeout(function(){$("#endpoint-input").focus();},0);
+            $(window).scrollTop($('#endpoint-input').offset().top);
+        }
     },
     {
         'click #go_to_manage': 'Next, click the "Next: Manage" button to proceed to the last phase of' +
@@ -194,6 +199,7 @@ var item_implement_script_data = [
         'showSkip' : false,
         onBeforeStart:function(){
             $(window).scrollTop($('#go_to_manage').offset().top);
+            $('#go_to_manage').focus();
         }
     }
 
@@ -216,8 +222,9 @@ var item_manage_script_data = [
     {
         'click #publish_api': 'Click Save & Publish to publish the API in the API Store.',
         'showSkip' : false,
+        'scrollAnimationSpeed': 1000,
         onBeforeStart:function(){
-            $(window).scrollTop($('#publish_api').offset().top);
+            $(window).scrollTop($('footer.footer').offset().top);
         }
     }
 ];
