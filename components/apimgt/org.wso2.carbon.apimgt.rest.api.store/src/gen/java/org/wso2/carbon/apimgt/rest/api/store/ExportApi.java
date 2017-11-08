@@ -61,10 +61,8 @@ public class ExportApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = File.class) })
     public Response exportApplicationsGet(@ApiParam(value = "Application Search Query ",required=true) @QueryParam("query") String query
-,@ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit
-,@ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset
  ,@Context Request request)
     throws NotFoundException {
-        return delegate.exportApplicationsGet(query,limit,offset,request);
+        return delegate.exportApplicationsGet(query,request);
     }
 }

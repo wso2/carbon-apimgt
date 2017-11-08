@@ -34,7 +34,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
   Content-Type: application/zip</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9292/api/am/store/v1.0/export/applications?query&#x3D;xxx &gt; exported-applications.zip</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9292/api/am/store/v1.0/export/applications?query&#x3D;xxx &gt; exported-application.zip</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -80,62 +80,6 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                         </td>
                         <td>
                             <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            <span class="param-in">Query </span>
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>limit</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Maximum size of resource array to return.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                Integer
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked">25</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            <span class="param-in">Query </span>
-                            
-                            
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>offset</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Starting point within the complete list of items qualified.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                Integer
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked">0</p>
                         </td>
                     </tr>
             </table>

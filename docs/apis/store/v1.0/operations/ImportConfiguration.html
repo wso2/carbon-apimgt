@@ -29,7 +29,9 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                 </h4>
             </div>
                 <div id="response-importApplicationsPost" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
-Content-Type: application/json</code></div>
+Content-Type: application/json
+
+{&quot;name&quot;:&quot;sampleApp2&quot;,&quot;uuid&quot;:&quot;5e3ac21a-cc14-4404-95f1-659900c165c4&quot;,&quot;description&quot;:&quot;sample app 2&quot;,&quot;policy&quot;:{&quot;uuid&quot;:&quot;5b74ec82-264e-4104-91ef-fdd41b981798&quot;,&quot;policyName&quot;:&quot;50PerMin&quot;,&quot;isDeployed&quot;:false},&quot;status&quot;:&quot;APPROVED&quot;,&quot;createdUser&quot;:&quot;admin&quot;,&quot;createdTime&quot;:{&quot;date&quot;:{&quot;year&quot;:2017,&quot;month&quot;:11,&quot;day&quot;:8},&quot;time&quot;:{&quot;hour&quot;:4,&quot;minute&quot;:10,&quot;second&quot;:4,&quot;nano&quot;:434000000}}}</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
                 <div class="pre"><code class="bash">curl -k -F &quot;file&#x3D;@exported.zip&quot; -X POST -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9292/api/am/store/v1.0/import/applications</code></div>
@@ -137,7 +139,7 @@ Content-Type: application/json</code></div>
                 </tbody>
             </table>
             <hr/>
-            <h3 class="operation-heading"><a name="importApplicationsPut"></a>Imports an Application. <br><small>PUT https://apis.wso2.com/api/am/store/v1.0/import/applications</small></h3>
+            <h3 class="operation-heading"><a name="importApplicationsPut"></a>Imports an Updates an Application. <br><small>PUT https://apis.wso2.com/api/am/store/v1.0/import/applications</small></h3>
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to import an existing Application.
@@ -164,7 +166,9 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                 </h4>
             </div>
                 <div id="response-importApplicationsPut" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
-Content-Type: application/json</code></div>
+Content-Type: application/json
+
+{&quot;name&quot;:&quot;sampleApp2&quot;,&quot;uuid&quot;:&quot;5e3ac21a-cc14-4404-95f1-659900c165c4&quot;,&quot;description&quot;:&quot;sample app 2&quot;,&quot;policy&quot;:{&quot;uuid&quot;:&quot;5b74ec82-264e-4104-91ef-fdd41b981798&quot;,&quot;policyName&quot;:&quot;50PerMin&quot;,&quot;isDeployed&quot;:false},&quot;status&quot;:&quot;APPROVED&quot;,&quot;createdUser&quot;:&quot;admin&quot;,&quot;createdTime&quot;:{&quot;date&quot;:{&quot;year&quot;:2017,&quot;month&quot;:11,&quot;day&quot;:8},&quot;time&quot;:{&quot;hour&quot;:4,&quot;minute&quot;:10,&quot;second&quot;:4,&quot;nano&quot;:434000000}}}</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
                 <div class="pre"><code class="bash">curl -k -F &quot;file&#x3D;@exported.zip&quot; -X PUT -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9292/api/am/store/v1.0/import/applications</code></div>

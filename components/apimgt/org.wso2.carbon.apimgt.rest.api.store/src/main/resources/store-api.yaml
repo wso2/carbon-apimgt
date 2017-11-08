@@ -2169,7 +2169,7 @@ paths:
       produces:
         - application/zip
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\"
-      https://localhost:9292/api/am/store/v1.0/export/applications?query=xxx > exported-applications.zip"
+      https://localhost:9292/api/am/store/v1.0/export/applications?query=xxx > exported-application.zip"
       x-wso2-request: |
         GET https://127.0.0.1:9292/api/am/store/v1.0/export/applications?query=xxx
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -2185,8 +2185,6 @@ paths:
             Application Search Query
           required: true
           type: string
-        - $ref: '#/parameters/limit'
-        - $ref: '#/parameters/offset'
       tags:
         - Export Configuration
       responses:
@@ -2236,8 +2234,8 @@ paths:
       x-wso2-request: |
         PUT https://127.0.0.1:9292/api/am/store/v1.0/import/applications
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json"
-      summary: Imports an Application.
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\"name\":\"sampleApp2\",\"uuid\":\"5e3ac21a-cc14-4404-95f1-659900c165c4\",\"description\":\"sample app 2\",\"policy\":{\"uuid\":\"5b74ec82-264e-4104-91ef-fdd41b981798\",\"policyName\":\"50PerMin\",\"isDeployed\":false},\"status\":\"APPROVED\",\"createdUser\":\"admin\",\"createdTime\":{\"date\":{\"year\":2017,\"month\":11,\"day\":8},\"time\":{\"hour\":4,\"minute\":10,\"second\":4,\"nano\":434000000}}}"
+      summary: Imports an Updates an Application.
       description: |
         This operation can be used to import an existing Application.
       parameters:
@@ -2290,7 +2288,7 @@ paths:
       x-wso2-request: |
         POST https://127.0.0.1:9292/api/am/store/v1.0/import/applications
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\"name\":\"sampleApp2\",\"uuid\":\"5e3ac21a-cc14-4404-95f1-659900c165c4\",\"description\":\"sample app 2\",\"policy\":{\"uuid\":\"5b74ec82-264e-4104-91ef-fdd41b981798\",\"policyName\":\"50PerMin\",\"isDeployed\":false},\"status\":\"APPROVED\",\"createdUser\":\"admin\",\"createdTime\":{\"date\":{\"year\":2017,\"month\":11,\"day\":8},\"time\":{\"hour\":4,\"minute\":10,\"second\":4,\"nano\":434000000}}}"
       summary: Imports an Application.
       description: |
         This operation can be used to import an existing Application.

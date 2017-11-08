@@ -31,8 +31,8 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
 
 
     /**
-     * Export a give set of Applications to a file system as zip archive.
-     * The export root location is given by {@link FileBasedApplicationImportExportManager#path}/exported-applications.
+     * Export a given Application to a file system as zip archive.
+     * The export root location is given by {@link FileBasedApplicationImportExportManager#path}/exported-application.
      *
      * @param application         Application{@link Application} to be exported
      * @param exportDirectoryName Name of directory to be exported
@@ -120,10 +120,9 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
         String archiveExtractLocation = null;
 
         try {
-            //change the method here as well
             archiveExtractLocation = APIFileUtils.extractUploadedArchiveApplication(uploadedAppArchiveInputStream,
                     IMPORTED_APPLICATIONS_DIRECTORY_NAME,
-                    appArchiveLocation, path); /*have to write a separate function extractUploadedArchive*/
+                    appArchiveLocation, path);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Error in accessing uploaded Application archive" + appArchiveLocation;
             log.error(errorMsg, e);

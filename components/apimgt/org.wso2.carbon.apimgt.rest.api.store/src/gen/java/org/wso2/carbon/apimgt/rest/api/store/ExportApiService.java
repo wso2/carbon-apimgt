@@ -20,7 +20,5 @@ import javax.ws.rs.core.SecurityContext;
 
 public abstract class ExportApiService {
     public abstract Response exportApplicationsGet(String query
- ,Integer limit
- ,Integer offset
   ,Request request) throws NotFoundException;
 }
