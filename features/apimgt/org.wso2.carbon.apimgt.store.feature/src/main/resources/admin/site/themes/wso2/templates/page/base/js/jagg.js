@@ -147,6 +147,9 @@ var jagg = jagg || {};
     };
 
     jagg.showLogin = function(params){
+        if(!params && jagg.sessionExpired()){
+            window.location.reload();
+        }
         $('#messageModal').html($('#login-data').html());
         if(!$('#messageModal').is(":visible")){
             $('#messageModal').modal('show');
