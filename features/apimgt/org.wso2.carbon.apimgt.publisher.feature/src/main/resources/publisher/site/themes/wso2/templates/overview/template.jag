@@ -150,7 +150,7 @@
              <tr>
                 <td><%=i18n.localize("Business Owner")%></td>
                 <td id="bizOwnerData"><%=encode.forHtml(api.bizOwner)%> <% if(api.bizOwnerMail!=''){%>
-                [<a title="mailto" href="mailto:<%=api.bizOwnerMail%>"><%=encode.forHtml(api.bizOwnerMail)%></a>]
+                [<a title="mailto" href="mailto:<%=encode.forHtml(api.bizOwnerMail)%>"><%=encode.forHtml(api.bizOwnerMail)%></a>]
                 <%}%>
                 </td>
             </tr>
@@ -159,7 +159,7 @@
              <tr>
                 <td><%=i18n.localize("Technical Owner")%></td>
                 <td id="techOwnerData"><%=encode.forHtml(api.techOwner)%><% if(api.techOwnerMail!=''){%>
-                [<a href="mailto:<%=api.techOwnerMail%>" title="mailto"><%=encode.forHtml(api.techOwnerMail)%></a>]
+                [<a href="mailto:<%=encode.forHtml(api.techOwnerMail)%>" title="mailto"><%=encode.forHtml(api.techOwnerMail)%></a>]
                 <%}%>
                 </td>
             </tr>
