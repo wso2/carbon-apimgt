@@ -58,7 +58,10 @@ public abstract class ServiceDiscoverer {
             this.criteriaFilter = criteriaMap;
         }
         serviceEndpointIndex = 0;
+        initImpl(implParameters);
     }
+
+    abstract void initImpl(HashMap<String, String> implParameters);
 
     /**
      * Gives a list of endpoints without any filtering.

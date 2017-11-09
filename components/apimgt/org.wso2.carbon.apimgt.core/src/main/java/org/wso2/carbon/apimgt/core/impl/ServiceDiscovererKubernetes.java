@@ -82,8 +82,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
      * @throws ServiceDiscoveryException if an error occurs while initializing the client
      */
     @Override
-    public void init(HashMap<String, String> implParameters) throws ServiceDiscoveryException {
-        super.init(implParameters);
+    public void initImpl(HashMap<String, String> implParameters) throws ServiceDiscoveryException {
         try {
             setClient(new DefaultOpenShiftClient(buildConfig(implParameters)));
         } catch (KubernetesClientException | APIMgtDAOException e) {
