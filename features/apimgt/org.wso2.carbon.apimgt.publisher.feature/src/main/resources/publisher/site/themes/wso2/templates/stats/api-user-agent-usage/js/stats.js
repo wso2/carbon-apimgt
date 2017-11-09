@@ -171,7 +171,7 @@ function renderGraph(fromDate,toDate){
                 }
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
                           $('#noData').empty();
-                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>'+i18n.t("No Data Available.")+'</h4></div></div>'));
+                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>'+i18n.t("No Data Available")+'</h4></div></div>'));
                     $('#chartContainer').hide();
                 }
                 else {
