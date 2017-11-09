@@ -25,6 +25,7 @@ import io.fabric8.kubernetes.api.model.ServiceSpec;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -81,11 +82,10 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
      * @throws ServiceDiscoveryException if an error occurs while initializing the client
      */
     @Override
-    public void init(ServiceDiscoveryClientFactory clientFactory, HashMap<String, String> implParameters)
-            throws ServiceDiscoveryException {
-        super.init(clientFactory, implParameters);
+    public void init(HashMap<String, String> implParameters) throws ServiceDiscoveryException {
+        super.init(implParameters);
         try {
-            client = clientFactory.createDefaultOpenShiftClient(buildConfig(implParameters));
+            setClient(new DefaultOpenShiftClient(buildConfig(implParameters)));
         } catch (KubernetesClientException | APIMgtDAOException e) {
             String msg = "Error occurred while creating Kubernetes client";
             log.error(msg, e);
@@ -168,9 +168,9 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
         if (client != null) {
             log.debug("Looking for services in all namespaces");
             try {
-                List<Service> serviceList = client.services().inAnyNamespace().list().getItems();
+                List<Service> serviceList = client.services().inNamespace(null).list().getItems();
                 addServicesToEndpointList(serviceList, endpointList);
-            } catch (KubernetesClientException e) {
+            } catch (KubernetesClientException | MalformedURLException e) {
                 String msg = "Error occurred while trying to list services using Kubernetes client";
                 log.error(msg, e);
                 throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_TRYING_TO_DISCOVER_SERVICES);
@@ -190,7 +190,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
             try {
                 List<Service> serviceList = client.services().inNamespace(namespace).list().getItems();
                 addServicesToEndpointList(serviceList, endpointList);
-            } catch (KubernetesClientException e) {
+            } catch (KubernetesClientException | MalformedURLException e) {
                 String msg = "Error occurred while trying to list services using Kubernetes client";
                 log.error(msg, e);
                 throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_TRYING_TO_DISCOVER_SERVICES);
@@ -212,7 +212,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
                 List<Service> serviceList = client.services().inNamespace(namespace).withLabels(criteria)
                         .list().getItems();
                 addServicesToEndpointList(serviceList, endpointList);
-            } catch (KubernetesClientException e) {
+            } catch (KubernetesClientException | MalformedURLException e) {
                 String msg = "Error occurred while trying to list services using Kubernetes client";
                 log.error(msg, e);
                 throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_TRYING_TO_DISCOVER_SERVICES);
@@ -235,9 +235,10 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
             log.debug("Looking for services, with the specified labels, in all namespaces");
             try {
                 //namespace has to be set to null to check all allowed namespaces
-                List<Service> serviceList = client.services().inNamespace(null).withLabels(criteria).list().getItems();
+                List<Service> serviceList = client.services().inNamespace(null).withLabels(criteria)
+                        .list().getItems();
                 addServicesToEndpointList(serviceList, endpointList);
-            } catch (KubernetesClientException e) {
+            } catch (KubernetesClientException | MalformedURLException e) {
                 String msg = "Error occurred while trying to list services using Kubernetes client";
                 log.error(msg, e);
                 throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_TRYING_TO_DISCOVER_SERVICES);
@@ -257,7 +258,8 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
      *
      * @param serviceList   filtered list of services
      */
-    private void addServicesToEndpointList(List<Service> serviceList, List<Endpoint> endpointList) {
+    private void addServicesToEndpointList(List<Service> serviceList, List<Endpoint> endpointList)
+            throws MalformedURLException {
         for (Service service : serviceList) {
             //Set the parameters that does not change with the service port
             String serviceName = service.getMetadata().getName();
@@ -267,29 +269,33 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
             ServiceSpec serviceSpec = service.getSpec();
             String serviceType = serviceSpec.getType();
 
+            if (includeExternalNameTypeServices && EXTERNAL_NAME.equals(serviceType)) {
+                // Since only a "ExternalName" type service can have an "externalName" (the alias in kube-dns)
+                addExternalNameEndpoint(serviceName, serviceSpec.getExternalName(), namespace, labels, endpointList);
+            }
+
             for (ServicePort servicePort : serviceSpec.getPorts()) {
                 String protocol = servicePort.getName();
                 if (APIMgtConstants.HTTP.equals(protocol) || APIMgtConstants.HTTPS.equals(protocol)) {
                     int port = servicePort.getPort();
 
                     if (includeClusterIP && !EXTERNAL_NAME.equals(serviceType)) {
-                        // Almost every service has a cluster IP. Except for "externalName" type
-                        addClusterIPEndpoint(serviceSpec, serviceName, port, protocol, namespace, labels, endpointList);
-                    }
-                    if (includeExternalNameTypeServices && EXTERNAL_NAME.equals(serviceType)) {
-                        // Since only a "ExternalName" type service can have an "externalName" (the alias in kube-dns)
-                        addExternalNameEndpoint(serviceSpec, serviceName, protocol, namespace, labels, endpointList);
+                        // Since almost every service has a cluster IP, except for ExternalName type
+                        addClusterIPEndpoint(serviceName, serviceSpec.getClusterIP(), port, protocol,
+                                namespace, labels, endpointList);
                     }
                     if (NODE_PORT.equals(serviceType) || LOAD_BALANCER.equals(serviceType)) {
                         // Because both "NodePort" and "LoadBalancer" types of services have "NodePort" type URLs
-                        addNodePortEndpoint(serviceName, servicePort, protocol, namespace, labels, endpointList);
+                        addNodePortEndpoint(serviceName, servicePort.getNodePort(), protocol,
+                                namespace, labels, endpointList);
                     }
                     if (LOAD_BALANCER.equals(serviceType)) {
                         // Since only "LoadBalancer" type services have "LoadBalancer" type URLs
-                        addLoadBalancerEndpoint(service, serviceName, port, protocol, namespace, labels, endpointList);
+                        addLoadBalancerEndpoint(serviceName, service, port, protocol, namespace, labels, endpointList);
                     }
                     // A Special case (can be any of the service types above)
-                    addExternalIPEndpoint(serviceSpec, serviceName, port, protocol, namespace, labels, endpointList);
+                    addExternalIPEndpoint(serviceName, serviceSpec.getExternalIPs(), port, protocol,
+                            namespace, labels, endpointList);
                 } else if (log.isDebugEnabled()) {
                     log.debug("Service:{} Namespace:{} Port:{}/{}  Application level protocol not defined.",
                             serviceName, namespace, servicePort.getPort(), protocol);
@@ -298,64 +304,39 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
         }
     }
 
-    private void addClusterIPEndpoint(ServiceSpec serviceSpec, String serviceName, int port, String protocol,
-                                      String namespace, String labels, List<Endpoint> endpointList) {
-        String clusterIP = serviceSpec.getClusterIP();
-        try {
-            URL url = new URL(protocol, clusterIP, port, "");
-            Endpoint endpoint = constructEndpoint(serviceName, namespace, protocol, CLUSTER_IP, url, labels);
-            if (endpoint != null) {
-                endpointList.add(endpoint);
-            }
-        } catch (MalformedURLException e) {
-            log.error("Service:{} Namespace:{} URLType:ClusterIP   URL malformed",
-                    serviceName, namespace);
-        }
+
+    private void addExternalNameEndpoint(String serviceName, String externalName,
+                                         String namespace, String labels, List<Endpoint> endpointList)
+            throws MalformedURLException {
+        URL url = new URL("http://" + externalName);
+        endpointList.add(constructEndpoint(serviceName, namespace, "http", EXTERNAL_NAME, url, labels));
     }
 
-    private void addExternalNameEndpoint(ServiceSpec serviceSpec, String serviceName, String protocol,
-                                         String namespace, String labels, List<Endpoint> endpointList) {
-        String externalName = (String) serviceSpec.getAdditionalProperties().get("externalName");
-        try {
-            URL url = new URL(protocol + "://" + externalName);
-            Endpoint endpoint = constructEndpoint(serviceName, namespace, protocol, EXTERNAL_NAME, url, labels);
-            if (endpoint != null) {
-                endpointList.add(endpoint);
-            }
-        } catch (MalformedURLException e) {
-            log.error("Service:{} Namespace:{} URLType:ExternalName   URL malformed", serviceName, namespace);
-        }
+    private void addClusterIPEndpoint(String serviceName, String clusterIP, int port, String protocol,
+                                      String namespace, String labels, List<Endpoint> endpointList)
+            throws MalformedURLException {
+        URL url = new URL(protocol, clusterIP, port, "");
+        endpointList.add(constructEndpoint(serviceName, namespace, protocol, CLUSTER_IP, url, labels));
     }
 
-    private void addNodePortEndpoint(String serviceName, ServicePort servicePort, String protocol,
-                                     String namespace, String labels, List<Endpoint> endpointList) {
+    private void addNodePortEndpoint(String serviceName, int nodePort, String protocol,
+                                     String namespace, String labels, List<Endpoint> endpointList)
+            throws MalformedURLException {
         String nodeIP = client.getMasterUrl().getHost();
-        try {
-            URL url = new URL(protocol, nodeIP, servicePort.getNodePort(), "");
-            Endpoint endpoint = constructEndpoint(serviceName, namespace, protocol, NODE_PORT, url, labels);
-            if (endpoint != null) {
-                endpointList.add(endpoint);
-            }
-        } catch (MalformedURLException e) {
-            log.error("Service:{} Namespace:{} URLType:NodePort   URL malformed", serviceName, namespace);
-        }
+        URL url = new URL(protocol, nodeIP, nodePort, "");
+        endpointList.add(constructEndpoint(serviceName, namespace, protocol, NODE_PORT, url, labels));
     }
 
-    private void addLoadBalancerEndpoint(Service service, String serviceName, int port, String protocol,
-                                         String namespace, String labels, List<Endpoint> endpointList) {
+    private void addLoadBalancerEndpoint(String serviceName, Service service, int port, String protocol,
+                                         String namespace, String labels, List<Endpoint> endpointList)
+            throws MalformedURLException {
         List<LoadBalancerIngress> loadBalancerIngresses = service.getStatus().getLoadBalancer().getIngress();
         if (!loadBalancerIngresses.isEmpty()) {
             for (LoadBalancerIngress loadBalancerIngress : loadBalancerIngresses) {
-                try {
-                    URL url = new URL(protocol, loadBalancerIngress.getIp(), port, "");
-                    Endpoint endpoint = constructEndpoint(serviceName, namespace, protocol,
-                            LOAD_BALANCER, url, labels);
-                    if (endpoint != null) {
-                        endpointList.add(endpoint);
-                    }
-                } catch (MalformedURLException e) {
-                    log.error("Service:{} Namespace:{} URLType:LoadBalancer   URL malformed", serviceName, namespace);
-                }
+                String hostname = loadBalancerIngress.getHostname();
+                String host = (hostname == null || "".equals(hostname)) ? loadBalancerIngress.getIp() : hostname;
+                URL url = new URL(protocol, host, port, "");
+                endpointList.add(constructEndpoint(serviceName, namespace, protocol, LOAD_BALANCER, url, labels));
             }
         } else {
             log.debug("Service:{}  Namespace:{}  Port:{}/{} has no loadBalancer ingresses available.",
@@ -363,20 +344,13 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
         }
     }
 
-    private void addExternalIPEndpoint(ServiceSpec serviceSpec, String serviceName, int port, String protocol,
-                                       String namespace, String labels, List<Endpoint> endpointList) {
-        List<String> externalIPs = serviceSpec.getExternalIPs();
+    private void addExternalIPEndpoint(String serviceName, List<String> externalIPs, int port, String protocol,
+                                       String namespace, String labels, List<Endpoint> endpointList)
+            throws MalformedURLException {
         if (!externalIPs.isEmpty()) {
             for (String externalIP : externalIPs) {
-                try {
-                    URL url = new URL(protocol, externalIP, port, "");
-                    Endpoint endpoint = constructEndpoint(serviceName, namespace, protocol, EXTERNAL_IP, url, labels);
-                    if (endpoint != null) {
-                        endpointList.add(endpoint);
-                    }
-                } catch (MalformedURLException e) {
-                    log.error("Service:{} Namespace:{} URLType:ExternalIP   URL malformed", serviceName, namespace);
-                }
+                URL url = new URL(protocol, externalIP, port, "");
+                endpointList.add(constructEndpoint(serviceName, namespace, protocol, EXTERNAL_IP, url, labels));
             }
         }
     }
@@ -396,9 +370,6 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
      */
     private Endpoint constructEndpoint(String serviceName, String namespace, String portType,
                                                  String urlType, URL url, String labels) {
-        if (url == null) {
-            return null;
-        }
         JSONObject endpointConfig = new JSONObject();
         endpointConfig.put("serviceUrl", url.toString());
         endpointConfig.put("urlType", urlType);
@@ -411,4 +382,16 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
                 1000L, portType, "{\"enabled\": false}", APIMgtConstants.GLOBAL_ENDPOINT);
     }
 
+
+    void setClient(OpenShiftClient openShiftClient) {
+        this.client = openShiftClient;
+    }
+
+    void setIncludeClusterIP(Boolean includeClusterIP) {
+        this.includeClusterIP = includeClusterIP;
+    }
+
+    void setIncludeExternalNameTypeServices(Boolean includeExternalNameTypeServices) {
+        this.includeExternalNameTypeServices = includeExternalNameTypeServices;
+    }
 }

@@ -132,6 +132,9 @@ public class FileEncryptionUtility {
      */
     public String readFromEncryptedFile(String inputFilePath) throws APIManagementException {
         try {
+            if (!Files.exists(Paths.get(inputFilePath))) {
+                throw new APIManagementException("File to encrypt does not exist");
+            }
             Cipher aesCipher = Cipher.getInstance(EncryptionConstants.AES);
             SecretKeySpec aesKeySpec = new SecretKeySpec(getAESKey(), EncryptionConstants.AES);
             aesCipher.init(Cipher.DECRYPT_MODE, aesKeySpec);

@@ -43,8 +43,7 @@ public abstract class ServiceDiscoverer {
      * @param implParameters  implementation parameters provided in the configuration
      * @throws ServiceDiscoveryException if an error occurs in the implementation's init method
      */
-    public void init(ServiceDiscoveryClientFactory clientFactory, HashMap<String, String> implParameters)
-            throws ServiceDiscoveryException {
+    public void init(HashMap<String, String> implParameters) throws ServiceDiscoveryException {
         this.namespaceFilter = implParameters.get(ServiceDiscoveryConstants.NAMESPACE);
 
         // Convert the criteria that is passed in as a string into a map and then set the instance criteriaFilter

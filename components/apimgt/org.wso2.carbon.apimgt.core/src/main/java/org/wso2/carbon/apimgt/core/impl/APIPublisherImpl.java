@@ -2086,8 +2086,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 return discoveredEndpointList;
             }
 
-            ServiceDiscoveryClientFactory svcDiscClientFactory = new ServiceDiscoveryClientFactory();
-
             List<ServiceDiscoveryImplConfig> implConfigList = serviceDiscoveryConfig.getImplementationsList();
             for (ServiceDiscoveryImplConfig implConfig : implConfigList) {
                 //Every implConfig has two elements. The implClass and the implParameters.
@@ -2098,7 +2096,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 ServiceDiscoverer serviceDiscoverer = (ServiceDiscoverer) implClazz.newInstance();
 
                 /* Pass the implParameters to the above instance */
-                serviceDiscoverer.init(svcDiscClientFactory, implConfig.getImplParameters());
+                serviceDiscoverer.init(implConfig.getImplParameters());
 
                 /*
                  * The .init() method above sets the filtering parameters (if provided)
