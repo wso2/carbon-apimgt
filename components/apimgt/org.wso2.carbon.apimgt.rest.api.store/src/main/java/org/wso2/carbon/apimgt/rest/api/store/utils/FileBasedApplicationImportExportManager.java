@@ -15,7 +15,7 @@ import java.io.File;
 import java.io.InputStream;
 
 /**
- * Manager class for API Application Import and Export handling
+ * Manager class for File System based Application Import and Export handling
  */
 public class FileBasedApplicationImportExportManager extends ApplicationImportExportManager {
 
@@ -64,7 +64,7 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
 
         } catch (APIMgtDAOException e) {
 
-            log.error("Error in exporting API: " + exportApplication.getName() + ", version: " + application
+            log.error("Error in exporting Application: " + exportApplication.getName() + ", appId: " + application
                     .getId(), e);
             // cleanup the created directory
             try {
@@ -154,6 +154,8 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
         return applicationDetails;
 
     }
+
+
 
 }
 

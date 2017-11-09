@@ -16,7 +16,7 @@ public class ApplicationImportExportManager {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationImportExportManager.class);
 
-    APIStore apiStore;
+    private APIStore apiStore;
 
     public ApplicationImportExportManager(APIStore apiStore) {this.apiStore = apiStore;}
 
@@ -40,6 +40,14 @@ public class ApplicationImportExportManager {
 
     }
 
+
+    /**
+     * Update details of an existing Application when imported
+     *
+     * @param importedApplication
+     * @param username
+     * @throws APIManagementException
+     */
     public void updateApplication (Application importedApplication, String username)
             throws APIManagementException {
         try {

@@ -2175,9 +2175,9 @@ paths:
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK\n Connection: keep-alive\n  Content-Disposition: attachment;
        filename=\"exported-applications.zip\"\n  Content-Type: application/zip"
-      summary: Export information related to an Application.
+      summary: Export details related to an Application.
       description: |
-        This operation can be used to export information related to a perticular application.
+        This operation can be used to export details related to a perticular application.
       parameters:
         - name: query
           in: query

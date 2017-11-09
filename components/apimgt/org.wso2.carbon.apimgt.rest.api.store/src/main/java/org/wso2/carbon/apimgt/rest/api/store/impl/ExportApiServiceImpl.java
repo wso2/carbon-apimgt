@@ -48,7 +48,7 @@ public class ExportApiServiceImpl extends ExportApiService {
         Application applicationDetails;
         String exportedAppDirName = "exported-application";
         String pathToExportDir = System.getProperty("java.io.tmpdir") + File.separator + "exported-app-archives-" +
-                UUID.randomUUID().toString();
+                UUID.randomUUID().toString(); //creates a directory in default temporary-file directory
 
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
