@@ -55,7 +55,7 @@ public class ServiceDiscoveryKubernetesTestCase {
         ServiceDiscovererKubernetes sdKubernetes = new ServiceDiscovererKubernetes();
         sdKubernetes.setClient(openShiftClient);
         try {
-            sdKubernetes.init(createImplParametersMap(""));
+            sdKubernetes.initImpl(createImplParametersMap(""));
         } catch (ServiceDiscoveryException e) {
             Assert.assertEquals(e.getCause().getMessage(),
                     "Error while reading file /var/run/secrets/kubernetes.io/serviceaccount/token");
@@ -69,7 +69,7 @@ public class ServiceDiscoveryKubernetesTestCase {
         ServiceDiscovererKubernetes sdKubernetes = new ServiceDiscovererKubernetes();
         sdKubernetes.setClient(openShiftClient);
         try {
-            sdKubernetes.init(createImplParametersMap("TestK8Token"));
+            sdKubernetes.initImpl(createImplParametersMap("TestK8Token"));
         } catch (ServiceDiscoveryException e) {
             Assert.assertEquals(e.getCause().getMessage(),
                     "File to encrypt does not exist");
