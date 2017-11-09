@@ -61,7 +61,7 @@ public abstract class ServiceDiscoverer {
         initImpl(implParameters);
     }
 
-    abstract void initImpl(HashMap<String, String> implParameters);
+    abstract void initImpl(HashMap<String, String> implParameters) throws ServiceDiscoveryException;
 
     /**
      * Gives a list of endpoints without any filtering.
