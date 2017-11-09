@@ -974,6 +974,7 @@ public class JMSTaskManager {
                         connection, isSessionTransacted(), getSessionAckMode(), isJmsSpec11(), isQueue());
 
             } catch (Exception e) {
+                // Caching generic exception to create new connection for every exception
                 // Make connection and sharedConnection values to null in order to use newly created connection.
                 log.error("Error occurred due to " + e.getMessage());
                 connection = null;
