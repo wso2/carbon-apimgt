@@ -28,7 +28,7 @@ public class WSO2APIPublisherWrapper extends WSO2APIPublisher {
     }
 
     @Override
-    protected HttpClient getDefaultHttpClient() {
+    protected HttpClient getHttpClient(String storeEndpoint) {
         return client;
     }
 }
