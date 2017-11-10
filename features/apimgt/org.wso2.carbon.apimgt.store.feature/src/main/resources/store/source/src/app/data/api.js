@@ -36,7 +36,8 @@ class API {
      * @private
      */
     _requestMetaData(data = {}) {
-        AuthManager.refreshTokenOnExpire(); /* TODO: This should be moved to an interceptor ~tmkb*/
+        AuthManager.refreshTokenOnExpire();
+        /* TODO: This should be moved to an interceptor ~tmkb*/
         return {
             requestContentType: data['Content-Type'] || "application/json"
         };
@@ -51,8 +52,8 @@ class API {
     getAllAPIs(callback = null) {
         var promise_get_all = this.client.then(
             (client) => {
-                console.info("this._requestMetaData()" , this._requestMetaData());
-                return client.apis["API Collection"].get_apis({}, this._requestMetaData());
+                console.info("this._requestMetaData()", this._requestMetaData());
+                return client.apis["API (Collection)"].get_apis({}, this._requestMetaData());
             }
         );
         if (callback) {
@@ -71,7 +72,7 @@ class API {
     getAPIById(id, callback = null) {
         var promise_get = this.client.then(
             (client) => {
-                return client.apis["API (individual)"].get_apis__apiId_(
+                return client.apis["API (Individual)"].get_apis__apiId_(
                     {apiId: id}, this._requestMetaData());
             }
         );
@@ -93,9 +94,9 @@ class API {
 
         var promise_get = this.client.then(
             (client) => {
-		debugger;
-                return client.apis["API (individual)"].get_apis__apiId__documents(
-                    {apiId: id}, this._requestMetaData());
+                return client.apis["API (Individual)"].get_apis__apiId__documents(
+                    {apiId: id}, this._requestMetaData()
+                );
             }
         );
         if (callback) {
@@ -117,7 +118,7 @@ class API {
         var promised_getDocContent = this.client.then(
             (client) => {
                 let payload = {apiId: api_id, documentId: docId, "Accept": "application/octet-stream"};
-                return client.apis["API (individual)"].get_apis__apiId__documents__documentId__content(
+                return client.apis["API (Individual)"].get_apis__apiId__documents__documentId__content(
                     payload, this._requestMetaData({"Content-Type": "multipart/form-data"}));
             }
         );
@@ -153,10 +154,10 @@ class API {
      */
     getApplication(id, callback = null) {
         let promise_get = this.client.then(
-                (client) => {
-                return client.apis["Application (individual)"].get_applications__applicationId_(
+            (client) => {
+                return client.apis["Application (Individual)"].get_applications__applicationId_(
                     {applicationId: id}, this._requestMetaData());
-        }
+            }
         );
         if (callback) {
             return promise_get.then(callback);
@@ -173,10 +174,10 @@ class API {
      */
     getAllApplications(callback = null) {
         let promise_get = this.client.then(
-                (client) => {
-                return client.apis["Application Collection"].get_applications(
+            (client) => {
+                return client.apis["Application (Collection)"].get_applications(
                     {}, this._requestMetaData());
-        }
+            }
         );
         if (callback) {
             return promise_get.then(callback);
@@ -184,6 +185,7 @@ class API {
             return promise_get;
         }
     }
+
     /**
      * Get application by id
      * @param tierLevel
@@ -193,8 +195,8 @@ class API {
     getAllTiers(tierLevel, callback = null) {
         var promise_get_all = this.client.then(
             (client) => {
-                return client.apis["Tier Collection"].get_policies__tierLevel_(
-                    {tierLevel:tierLevel}, this._requestMetaData());
+                return client.apis["Tier (Collection)"].get_policies__tierLevel_(
+                    {tierLevel: tierLevel}, this._requestMetaData());
             }
         );
         if (callback) {
@@ -212,11 +214,11 @@ class API {
      */
     createApplication(application, callback = null) {
         var promise_create = this.client.then(
-                (client) => {
-                    let payload = {body: application};
-                    return client.apis["Application (individual)"].post_applications(
-                        payload, {'Content-Type':'application/json'});
-        }
+            (client) => {
+                let payload = {body: application};
+                return client.apis["Application (Individual)"].post_applications(
+                    payload, {'Content-Type': 'application/json'});
+            }
         );
         if (callback) {
             return promise_create.then(callback);
@@ -234,11 +236,11 @@ class API {
     updateApplication(application, callback = null) {
         //debugger;
         var promise_get = this.client.then(
-                (client) => {
+            (client) => {
                 let payload = {applicationId: application.id, body: application};
-                return client.apis["Application (individual)"].put_applications__applicationId_(
+                return client.apis["Application (Individual)"].put_applications__applicationId_(
                     {payload}, this._requestMetaData());
-        }
+            }
         );
         if (callback) {
             return promise_get.then(callback);
@@ -257,11 +259,11 @@ class API {
     generateKeys(applicationId, request_content, callback = null) {
         //debugger;
         var promise_get = this.client.then(
-                (client) => {
+            (client) => {
                 let payload = {applicationId: applicationId, body: request_content};
-                return client.apis["Application (individual)"].post_applications__applicationId__generate_keys(
+                return client.apis["Application (Individual)"].post_applications__applicationId__generate_keys(
                     payload, this._requestMetaData());
-        }
+            }
         );
         if (callback) {
             return promise_get.then(callback);
@@ -280,11 +282,11 @@ class API {
     generateToken(applicationId, request_content, callback = null) {
         //debugger;
         var promise_get = this.client.then(
-                (client) => {
+            (client) => {
                 let payload = {applicationId: applicationId, body: request_content};
-                return client.apis["Application (individual)"].post_applications__applicationId__generate_token(
+                return client.apis["Application (Individual)"].post_applications__applicationId__generate_token(
                     payload, this._requestMetaData());
-        }
+            }
         );
         if (callback) {
             return promise_get.then(callback);
@@ -302,10 +304,10 @@ class API {
     getKeys(applicationId, callback = null) {
         //debugger;
         var promise_get = this.client.then(
-                (client) => {
-                return client.apis["Application (individual)"].get_applications__applicationId__keys(
-                    {applicationId:applicationId}, this._requestMetaData());
-        }
+            (client) => {
+                return client.apis["Application (Individual)"].get_applications__applicationId__keys(
+                    {applicationId: applicationId}, this._requestMetaData());
+            }
         );
         if (callback) {
             return promise_get.then(callback);
@@ -323,10 +325,10 @@ class API {
     getSubscriptions(apiId, applicationId, callback = null) {
         //debugger;
         var promise_get = this.client.then(
-                (client) => {
-                return client.apis["Subscription Collection"].get_subscriptions(
-                    {apiId:apiId, applicationId:applicationId}, this._requestMetaData());
-        }
+            (client) => {
+                return client.apis["Subscription (Collection)"].get_subscriptions(
+                    {apiId: apiId, applicationId: applicationId}, this._requestMetaData());
+            }
         );
         if (callback) {
             return promise_get.then(callback);
@@ -345,10 +347,10 @@ class API {
     subscribe(apiId, applicationId, policy, callback = null) {
         var promise_create_subscription = this.client.then(
             (client) => {
-                let subscriptionData = {apiIdentifier:apiId, applicationId:applicationId, policy:policy};
+                let subscriptionData = {apiIdentifier: apiId, applicationId: applicationId, policy: policy};
                 let payload = {body: subscriptionData};
-                return client.apis["Subscription (individual)"].post_subscriptions(
-                    payload, {'Content-Type':'application/json'}
+                return client.apis["Subscription (Individual)"].post_subscriptions(
+                    payload, {'Content-Type': 'application/json'}
                 );
             }
         );
