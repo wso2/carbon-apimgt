@@ -43,7 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 
 
-public class ServiceDiscoveryKubernetesTestCase {
+public class ServiceDiscovererKubernetesTestCase {
 
     private static final String MASTER_URL = "https://200.20.20.20/";
     private List<Service> listOfServices;
