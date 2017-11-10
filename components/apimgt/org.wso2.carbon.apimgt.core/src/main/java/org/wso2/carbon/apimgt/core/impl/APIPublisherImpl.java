@@ -122,9 +122,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     private Map<String, EventObserver> eventObservers = new HashMap<>();
 
     public APIPublisherImpl(String username, IdentityProvider idp, KeyManager keyManager, ApiDAO apiDAO,
-            ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
-            APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO, TagDAO tagDAO,
-            GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGatewayPublisher) {
+                            ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
+                            APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO, TagDAO tagDAO,
+                            GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGatewayPublisher) {
         super(username, idp, keyManager, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager,
                 labelDAO, workflowDAO, tagDAO, gatewaySourceGenerator, apiGatewayPublisher);
     }
@@ -608,8 +608,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     /**
      * This method checks whether the currently logged in user has the "UPDATE" permission for the API
+     *
      * @param user - currently logged in user
-     * @param api - the api to be updated
+     * @param api  - the api to be updated
      * @throws APIManagementException - If the user does not have "UPDATE" permission for the API
      */
     private void verifyUserPermissionsToUpdateAPI(String user, API api) throws APIManagementException {
@@ -625,8 +626,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     /**
      * This method checks whether the currently logged in user has the "DELETE" permission for the API
+     *
      * @param user - currently logged in user
-     * @param api - the api to be deleted
+     * @param api  - the api to be deleted
      * @throws APIManagementException - If the user does not have "DELETE" permission for the API
      */
     private void verifyUserPermissionsToDeleteAPI(String user, API api) throws APIManagementException {
@@ -785,7 +787,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      *
      * @param permissionString - permissions string containing role ids in the groupId field
      * @return the permission string replacing the groupId field's value to role name
-     * @throws ParseException - if there is an error parsing the permission json
+     * @throws ParseException         - if there is an error parsing the permission json
      * @throws APIManagementException - if there is an error getting the IdentityProvider instance
      */
     private String replaceGroupIdWithName(String permissionString) throws ParseException, APIManagementException {
@@ -857,7 +859,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_LC_INVOKER, getUsername());
                 workflow.setAttribute(WorkflowConstants.ATTRIBUTE_API_LAST_UPTIME,
                         originalAPI.getLastUpdatedTime().toString());
-               
+
                 String workflowDescription = "API [" + workflow.getApiName() + " - " + workflow.getApiVersion()
                         + "] state change [" + workflow.getCurrentState() + " to " + workflow.getTransitionState()
                         + "] request from " + getUsername();
@@ -903,7 +905,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public void updateCheckListItem(String apiId, String status, Map<String, Boolean> checkListItemMap)
             throws APIManagementException {
         API api = getApiDAO().getAPI(apiId);
-        try {            
+        try {
             API.APIBuilder apiBuilder = new API.APIBuilder(api);
             apiBuilder.lastUpdatedTime(LocalDateTime.now());
             apiBuilder.updatedBy(getUsername());
@@ -1279,7 +1281,37 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 roles = new HashSet<>(getIdentityProvider().getRoleIdsOfUser(userId));
             }
             if (query != null && !query.isEmpty()) {
-                apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
+
+                String[] attributes = query.split(",");
+                Map<String, String> attributeMap = new HashMap<>();
+
+                boolean isFullTextSearch = false;
+                String searchAttribute, searchValue;
+                if (!query.contains(":")) {
+                    isFullTextSearch = true;
+                } else {
+                    log.info("Query: " + query);
+                    for (String attribute : attributes) {
+                        searchAttribute = attribute.split(":")[0];
+                        searchValue = attribute.split(":")[1];
+                        log.info(searchAttribute + ":" + searchValue);
+                        attributeMap.put(searchAttribute, searchValue);
+                    }
+                }
+
+                if (isFullTextSearch) {
+                    apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
+                } else {
+                    // TODO: Implement DAO methods to support the following query (or the like)
+                    // apiResults = getApiDAO().searchAPIsByAttributesInPublisher(new ArrayList<>(roles),
+                    //         attributeMap, offset, limit);
+
+                    // TODO: Remove after correct implementation
+                    apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
+                    log.info("[Not Implemented]: Attribute Search");
+                    log.info("Attributes:", attributeMap.toString());
+                }
+
             } else {
                 apiResults = getApiDAO().getAPIs(roles, user);
             }
@@ -1348,7 +1380,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
             API api = getApiDAO().getAPISummary(apiId);
             return getApiLifecycleManager()
-                        .getLifecycleDataForState(api.getLifecycleInstanceId(), api.getLifeCycleStatus());
+                    .getLifecycleDataForState(api.getLifecycleInstanceId(), api.getLifeCycleStatus());
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't retrieve API Summary for " + apiId;
             log.error(errorMsg, e);
@@ -1915,7 +1947,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public void notifyObservers(Event event, String username, ZonedDateTime eventTime,
-            Map<String, String> metaData) {
+                                Map<String, String> metaData) {
 
         Set<Map.Entry<String, EventObserver>> eventObserverEntrySet = eventObservers.entrySet();
         eventObserverEntrySet.forEach(eventObserverEntry -> eventObserverEntry.getValue().captureEvent(event,
@@ -1953,11 +1985,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             API api = getApiDAO().getAPI(apiId);
             if (APILCWorkflowStatus.PENDING.toString().equals(api.getWorkflowStatus())) {
 
-                    //change the state back
-                    getApiDAO().updateAPIWorkflowStatus(apiId, APILCWorkflowStatus.APPROVED);
+                //change the state back
+                getApiDAO().updateAPIWorkflowStatus(apiId, APILCWorkflowStatus.APPROVED);
 
-                    // call executor's cleanup task
-                    cleanupPendingTaskForAPIStateChange(apiId);
+                // call executor's cleanup task
+                cleanupPendingTaskForAPIStateChange(apiId);
 
 
             } else {
@@ -1966,9 +1998,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 throw new APIManagementException(msg, ExceptionCodes.WORKFLOW_NO_PENDING_TASK);
             }
         } catch (APIMgtDAOException e) {
-                String msg = "Error occurred while changing api lifecycle workflow status";
-                log.error(msg, e);
-                throw new APIManagementException(msg, e.getErrorHandler());
+            String msg = "Error occurred while changing api lifecycle workflow status";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e.getErrorHandler());
         }
     }
 
@@ -2016,7 +2048,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         for (Subscription listItem : subscriptionList) {
             subscriberList.add(listItem.getApplication().getCreatedUser());
         }
-        return  subscriberList;
+        return subscriberList;
     }
 
     private void cleanupPendingTaskForAPIStateChange(String apiId) throws APIManagementException {
