@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.api.RESTAPIAuthenticator;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.configurations.ConfigurationService;
 import org.wso2.carbon.messaging.Headers;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.Response;
@@ -163,12 +164,16 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
      * @throws APIMgtSecurityException if the Authorization header is invalid
      */
     private String extractPartialAccessTokenFromCookie(String cookie) {
+        //Append unique environment name in deployment.yaml
+        String environmentName = ConfigurationService.getEnvironmentName();
+
         if (cookie != null) {
             cookie = cookie.trim();
             String[] cookies = cookie.split(";");
             String token2 = Arrays.stream(cookies)
-                    .filter(name -> name.contains(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J))
-                    .findFirst().orElse("");
+                    .filter(name -> name.contains(
+                            APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J + "_" + environmentName
+                    )).findFirst().orElse("");
             String tokensArr[] = token2.split("=");
             if (tokensArr.length == 2) {
                 return tokensArr[1];
@@ -180,11 +185,14 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
     private boolean isCookieExists(Headers headers, String cookieName) {
         String cookie = headers.get(RestApiConstants.COOKIE_HEADER);
         String token2 = null;
+
+        //Append unique environment name in deployment.yaml
+        String environmentName = ConfigurationService.getEnvironmentName();
         if (cookie != null) {
             cookie = cookie.trim();
             String[] cookies = cookie.split(";");
             token2 = Arrays.stream(cookies)
-                    .filter(name -> name.contains(cookieName))
+                    .filter(name -> name.contains(cookieName + "_" + environmentName))
                     .findFirst().orElse(null);
         }
         return (token2 != null);
