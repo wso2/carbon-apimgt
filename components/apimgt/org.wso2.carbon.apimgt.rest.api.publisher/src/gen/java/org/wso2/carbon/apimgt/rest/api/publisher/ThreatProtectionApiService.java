@@ -1,0 +1,31 @@
+package org.wso2.carbon.apimgt.rest.api.publisher;
+
+import org.wso2.carbon.apimgt.rest.api.publisher.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
+
+import org.wso2.msf4j.formparam.FormDataParam;
+import org.wso2.msf4j.formparam.FileInfo;
+import org.wso2.msf4j.Request;
+
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThreatProtectionPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThreatProtectionPolicyListDTO;
+
+import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
+
+import java.io.InputStream;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
+public abstract class ThreatProtectionApiService {
+    public abstract Response threatProtectionAddPolicyApiIdPolicyIdPost(String apiId
+ ,String threatProtectionPolicyId
+  ,Request request) throws NotFoundException;
+    public abstract Response threatProtectionPoliciesGet( Request request) throws NotFoundException;
+    public abstract Response threatProtectionPolicyApiIdGet(String apiId
+  ,Request request) throws NotFoundException;
+    public abstract Response threatProtectionRemovePolicyApiIdPolicyIdPost(String apiId
+ ,String threatProtectionPolicyId
+  ,Request request) throws NotFoundException;
+}

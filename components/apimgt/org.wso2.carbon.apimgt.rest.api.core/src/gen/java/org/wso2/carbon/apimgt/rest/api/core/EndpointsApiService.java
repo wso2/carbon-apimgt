@@ -21,8 +21,8 @@ import javax.ws.rs.core.SecurityContext;
 public abstract class EndpointsApiService {
     public abstract Response endpointsEndpointIdGatewayConfigGet(String endpointId
  ,String accept
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
     public abstract Response endpointsGet(Integer limit
  ,String accept
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
 }

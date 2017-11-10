@@ -21,8 +21,8 @@ import javax.ws.rs.core.SecurityContext;
 public abstract class ApisApiService {
     public abstract Response apisApiIdGatewayConfigGet(String apiId
  ,String accept
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
     public abstract Response apisGet(String labels
  ,String status
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
 }

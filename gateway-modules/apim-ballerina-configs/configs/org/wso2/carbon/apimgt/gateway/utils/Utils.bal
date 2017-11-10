@@ -7,6 +7,7 @@ import ballerina.net.http;
 import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.gateway.holders as holders;
 import org.wso2.carbon.apimgt.gateway.constants;
+import org.wso2.carbon.apimgt.ballerina.util;
 
 errors:TypeCastError err;
 
@@ -259,6 +260,45 @@ function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO) {
     gatewayConf.throttlingInfo = throttlingInfoDTO;
 
     return gatewayConf;
+}
+
+function fromJSONToXMLThreatProtectionInfoDTO(json xmlThreatProtectionInfo) (dto:XMLThreatProtectionInfoDTO) {
+    dto:XMLThreatProtectionInfoDTO xmlThreatProtectionInfoDTO = {};
+    xmlThreatProtectionInfoDTO.name, err = (string)xmlThreatProtectionInfo.name;
+    xmlThreatProtectionInfoDTO._type, err = (string)xmlThreatProtectionInfo["type"];
+
+    string policyString;
+    policyString, _ = (string)xmlThreatProtectionInfo.policy;
+    json policy = util:parse(policyString);
+
+    xmlThreatProtectionInfoDTO.policyId, err = (string)xmlThreatProtectionInfo.uuid;
+    xmlThreatProtectionInfoDTO.dtdEnabled, err = (boolean)policy.dtdEnabled;
+    xmlThreatProtectionInfoDTO.externalEntitiesEnabled, err = (boolean)policy.externalEntitiesEnabled;
+    xmlThreatProtectionInfoDTO.maxDepth, err = (int)policy.maxDepth;
+    xmlThreatProtectionInfoDTO.elementCount, err = (int)policy.maxElementCount;
+    xmlThreatProtectionInfoDTO.attributeCount, err = (int)policy.maxAttributeCount;
+    xmlThreatProtectionInfoDTO.attributeLength, err = (int)policy.maxAttributeLength;
+    xmlThreatProtectionInfoDTO.entityExpansionLimit, err = (int)policy.entityExpansionLimit;
+    xmlThreatProtectionInfoDTO.childrenPerElement, err = (int)policy.maxChildrenPerElement;
+    return xmlThreatProtectionInfoDTO;
+}
+
+function fromJSONToJSONThreatProtectionInfoDTO(json jsonThreatProtectionInfo) (dto:JSONThreatProtectionInfoDTO) {
+    dto:JSONThreatProtectionInfoDTO jsonThreatProtectionInfoDTO = {};
+    jsonThreatProtectionInfoDTO.name, err = (string)jsonThreatProtectionInfo.name;
+    jsonThreatProtectionInfoDTO._type, err = (string)jsonThreatProtectionInfo["type"];
+
+    string policyString;
+    policyString, _ = (string)jsonThreatProtectionInfo.policy;
+    json policy = util:parse(policyString);
+
+    jsonThreatProtectionInfoDTO.policyId, err = (string)jsonThreatProtectionInfo.uuid;
+    jsonThreatProtectionInfoDTO.propertyCount, err = (int)policy.maxFieldCount;
+    jsonThreatProtectionInfoDTO.stringLength, err = (int)policy.maxStringLength;
+    jsonThreatProtectionInfoDTO.arrayElementCount, err = (int)policy.maxArrayElementCount;
+    jsonThreatProtectionInfoDTO.keyLength, err = (int)policy.maxFieldLength;
+    jsonThreatProtectionInfoDTO.maxDepth, err = (int)policy.maxDepth;
+    return jsonThreatProtectionInfoDTO;
 }
 
 function fromJSONToAPIDTO (json api) (dto:APIDTO) {

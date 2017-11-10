@@ -57,8 +57,8 @@ public class ExportApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = File.class) })
     public Response exportPoliciesThrottleGet(@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.exportPoliciesThrottleGet(accept, request);
+        return delegate.exportPoliciesThrottleGet(accept,request);
     }
 }

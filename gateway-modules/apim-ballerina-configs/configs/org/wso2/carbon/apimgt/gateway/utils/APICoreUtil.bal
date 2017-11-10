@@ -34,6 +34,20 @@ function registerGateway () (json) {
     return gatewayConfig;
 }
 
+function getThreatProtectionPolicies() (json) {
+    json threatProtectionJsonPolicyList = {};
+    try {
+        http:ClientConnector client = create http:ClientConnector(getAPICoreURL());
+        message request = {};
+        message response = http:ClientConnector.get(client, "/api/am/core/v1.0/threat-protection/policies", request);
+        threatProtectionJsonPolicyList = messages:getJsonPayload(response);
+    } catch (errors:Error error) {
+        system:println("Error occurred while retrieving ThreatProtection JSON Policy List from API Core. " + error.msg);
+        throw error;
+    }
+    return threatProtectionJsonPolicyList;
+}
+
 function loadAPIs () {
 
     json apis = getAPIs();

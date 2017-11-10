@@ -21,7 +21,6 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
-import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -45,7 +44,6 @@ import javax.ws.rs.core.Response;
 public class SubscriptionsApi implements Microservice  {
    private final SubscriptionsApiService delegate = SubscriptionsApiServiceFactory.getSubscriptionsApi();
 
-    @OPTIONS
     @POST
     @Path("/block-subscription")
     @Consumes({ "application/json" })
@@ -71,7 +69,6 @@ public class SubscriptionsApi implements Microservice  {
     throws NotFoundException {
         return delegate.subscriptionsBlockSubscriptionPost(subscriptionId,blockState,ifMatch,ifUnmodifiedSince,request);
     }
-    @OPTIONS
     @GET
     
     @Consumes({ "application/json" })
@@ -95,7 +92,6 @@ public class SubscriptionsApi implements Microservice  {
     throws NotFoundException {
         return delegate.subscriptionsGet(apiId,limit,offset,ifNoneMatch,request);
     }
-    @OPTIONS
     @GET
     @Path("/{subscriptionId}")
     @Consumes({ "application/json" })
@@ -118,7 +114,6 @@ public class SubscriptionsApi implements Microservice  {
     throws NotFoundException {
         return delegate.subscriptionsSubscriptionIdGet(subscriptionId,ifNoneMatch,ifModifiedSince,request);
     }
-    @OPTIONS
     @POST
     @Path("/unblock-subscription")
     @Consumes({ "application/json" })

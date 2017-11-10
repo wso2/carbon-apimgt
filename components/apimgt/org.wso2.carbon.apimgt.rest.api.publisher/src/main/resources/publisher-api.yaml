@@ -2923,6 +2923,56 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+  /threat-protection/policies:
+    get:
+      summary: Get All Threat Protection Policies
+      description: This can be used to get all defined threat protection policies
+      responses:
+        200:
+          description: Ok. List of policies is returned
+          schema:
+            $ref: '#/definitions/ThreatProtectionPolicyList'
+
+  /threat-protection/add-policy/{apiId}/{policyId}:
+    post:
+      summary: Associate a policy to an API
+      description: This can be used to asscociate a policy with an API
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/threatProtectionPolicyId'
+      responses:
+        200:
+          description: Ok. Successfully associated the policy with API
+        500:
+          description: Error accociating policy with API
+
+  /threat-protection/remove-policy/{apiId}/{policyId}:
+    post:
+      summary: Remove a policy accociated with an API
+      description: This can be used to remove a policy associated with an API
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - $ref: '#/parameters/threatProtectionPolicyId'
+      responses:
+        200:
+          description: Ok. Policy association removed.
+        500:
+          description: Error removing policy association.
+
+  /threat-protection/policy/{apiId}:
+    get:
+      summary: Get policy associated to an API
+      description: This can be used to get a policy associated with an API
+      parameters:
+        - $ref: '#/parameters/apiId'
+      responses:
+        200:
+          description: Ok. Associated policy is returned.
+          schema:
+            $ref: '#/definitions/ThreatProtectionPolicy'
+
+
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -3141,7 +3191,7 @@ parameters:
 
 # API definition specified as a file
 # Specified as a multipart form-data parameter
-  definitionFile:  
+  definitionFile:
     in: formData
     name: file
     description: Definition to upload as a file
@@ -3150,12 +3200,32 @@ parameters:
 
 # API definition URL
 # Specified as a multipart form-data parameter
-  definitionUrl:  
+  definitionUrl:
     in: formData
     name: url
     description: Definition url
     type: string
     required: false
+
+#Threat protection policy ID parameter
+  threatProtectionPolicyId:
+    name: ThreatProtectionPolicyId
+    in: path
+    description: |
+      The UUID of a Policy
+    required: true
+    type: string
+
+#Threat Protection policy
+  threatProtectionPolicy:
+    name: threatProtectionPolicy
+    in: body
+    description: |
+      Threat protection policy request parameter
+    required: true
+    schema: {
+      $ref: '#/definitions/ThreatProtectionPolicy'
+    }
 
 ######################################################
 # The resources used by some of the APIs above within the message body
@@ -4025,7 +4095,7 @@ definitions:
 
 #-----------------------------------------------------
 # The api definition validation response
-#-----------------------------------------------------        
+#-----------------------------------------------------
   APIDefinitionValidationResponse:
     title: API definition validation Response
     required:
@@ -4077,3 +4147,37 @@ definitions:
               hasSoapBinding:
                 description: Indicates whether the WSDL contains SOAP Bindings
                 type: boolean
+
+#-----------------------------------------------------
+# The Threat Protection Policy List resource
+#-----------------------------------------------------
+  ThreatProtectionPolicyList:
+    title: "Threat Protection Policy List"
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ThreatProtectionPolicy'
+
+#-----------------------------------------------------
+# The Threat Protection Policy resource
+#-----------------------------------------------------
+  ThreatProtectionPolicy:
+    title: "Threat Protection Policy Schema"
+    required:
+      - name
+      - type
+      - policy
+    properties:
+      uuid:
+        type: string
+        description: Policy ID
+      name:
+        type: string
+        description: Name of the policy
+      type:
+        type: string
+        description: Type of the policy
+      policy:
+        type: string
+        description: policy as a json string

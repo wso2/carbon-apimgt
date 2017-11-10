@@ -28,7 +28,6 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
-import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -52,7 +51,6 @@ import javax.ws.rs.core.Response;
 public class ApisApi implements Microservice  {
    private final ApisApiService delegate = ApisApiServiceFactory.getApisApi();
 
-    @OPTIONS
     @DELETE
     @Path("/{apiId}")
     @Consumes({ "application/json" })
@@ -77,7 +75,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdDelete(apiId,ifMatch,ifUnmodifiedSince,request);
     }
-    @OPTIONS
     @GET
     @Path("/{apiId}/documents/{documentId}/content")
     @Consumes({ "application/json" })
@@ -105,7 +102,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdDocumentsDocumentIdContentGet(apiId,documentId,ifNoneMatch,ifModifiedSince,request);
     }
-    @OPTIONS
     @POST
     @Path("/{apiId}/documents/{documentId}/content")
     @Consumes({ "multipart/form-data" })
@@ -135,7 +131,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdDocumentsDocumentIdContentPost(apiId,documentId,fileInputStream, fileDetail,inlineContent,ifMatch,ifUnmodifiedSince,request);
     }
-    @OPTIONS
     @DELETE
     @Path("/{apiId}/documents/{documentId}")
     @Consumes({ "application/json" })
@@ -159,7 +154,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdDocumentsDocumentIdDelete(apiId,documentId,ifMatch,ifUnmodifiedSince,request);
     }
-    @OPTIONS
     @GET
     @Path("/{apiId}/documents/{documentId}")
     @Consumes({ "application/json" })
@@ -185,7 +179,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdDocumentsDocumentIdGet(apiId,documentId,ifNoneMatch,ifModifiedSince,request);
     }
-    @OPTIONS
     @PUT
     @Path("/{apiId}/documents/{documentId}")
     @Consumes({ "application/json" })
@@ -212,7 +205,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdDocumentsDocumentIdPut(apiId,documentId,body,ifMatch,ifUnmodifiedSince,request);
     }
-    @OPTIONS
     @GET
     @Path("/{apiId}/documents")
     @Consumes({ "application/json" })
@@ -238,7 +230,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdDocumentsGet(apiId,limit,offset,ifNoneMatch,request);
     }
-    @OPTIONS
     @POST
     @Path("/{apiId}/documents")
     @Consumes({ "application/json" })
@@ -262,7 +253,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdDocumentsPost(apiId,body,ifMatch,ifUnmodifiedSince,request);
     }
-    @OPTIONS
     @GET
     @Path("/{apiId}/gateway-config")
     @Consumes({ "application/json" })
@@ -287,7 +277,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdGatewayConfigGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
-    @OPTIONS
     @PUT
     @Path("/{apiId}/gateway-config")
     @Consumes({ "multipart/form-data" })
@@ -315,7 +304,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdGatewayConfigPut(apiId,gatewayConfig,ifMatch,ifUnmodifiedSince,request);
     }
-    @OPTIONS
     @GET
     @Path("/{apiId}")
     @Consumes({ "application/json" })
@@ -340,7 +328,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
-    @OPTIONS
     @GET
     @Path("/{apiId}/lifecycle")
     @Consumes({ "application/json" })
@@ -365,7 +352,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdLifecycleGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
-    @OPTIONS
     @GET
     @Path("/{apiId}/lifecycle-history")
     @Consumes({ "application/json" })
@@ -390,7 +376,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdLifecycleHistoryGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
-    @OPTIONS
     @DELETE
     @Path("/{apiId}/lifecycle/lifecycle-pending-task")
     @Consumes({ "application/json" })
@@ -411,7 +396,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdLifecycleLifecyclePendingTaskDelete(apiId,request);
     }
-    @OPTIONS
     @PUT
     @Path("/{apiId}")
     @Consumes({ "application/json" })
@@ -439,7 +423,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdPut(apiId,body,ifMatch,ifUnmodifiedSince,request);
     }
-    @OPTIONS
     @GET
     @Path("/{apiId}/swagger")
     @Consumes({ "application/json" })
@@ -464,7 +447,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdSwaggerGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
-    @OPTIONS
     @PUT
     @Path("/{apiId}/swagger")
     @Consumes({ "multipart/form-data" })
@@ -492,7 +474,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdSwaggerPut(apiId,endpointId,ifMatch,ifUnmodifiedSince,request);
     }
-    @OPTIONS
     @GET
     @Path("/{apiId}/thumbnail")
     @Consumes({ "application/json" })
@@ -517,7 +498,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdThumbnailGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
-    @OPTIONS
     @POST
     @Path("/{apiId}/thumbnail")
     @Consumes({ "multipart/form-data" })
@@ -545,7 +525,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdThumbnailPost(apiId,fileInputStream, fileDetail,ifMatch,ifUnmodifiedSince,request);
     }
-    @OPTIONS
     @GET
     @Path("/{apiId}/wsdl")
     @Consumes({ "application/json" })
@@ -570,7 +549,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdWsdlGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
-    @OPTIONS
     @PUT
     @Path("/{apiId}/wsdl")
     @Consumes({ "multipart/form-data" })
@@ -600,7 +578,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdWsdlPut(apiId,fileInputStream, fileDetail,ifMatch,ifUnmodifiedSince,request);
     }
-    @OPTIONS
     @POST
     @Path("/change-lifecycle")
     @Consumes({ "application/json" })
@@ -631,7 +608,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisChangeLifecyclePost(action,apiId,lifecycleChecklist,ifMatch,ifUnmodifiedSince,request);
     }
-    @OPTIONS
     @POST
     @Path("/copy-api")
     @Consumes({ "application/json" })
@@ -653,7 +629,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisCopyApiPost(newVersion,apiId,request);
     }
-    @OPTIONS
     @GET
     
     @Consumes({ "application/json" })
@@ -677,7 +652,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisGet(limit,offset,query,ifNoneMatch,request);
     }
-    @OPTIONS
     @HEAD
     
     @Consumes({ "application/json" })
@@ -701,7 +675,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisHead(query,ifNoneMatch,request);
     }
-    @OPTIONS
     @POST
     @Path("/import-definition")
     @Consumes({ "multipart/form-data" })
@@ -730,7 +703,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisImportDefinitionPost(type,fileInputStream, fileDetail,url,additionalProperties,implementationType,ifMatch,ifUnmodifiedSince,request);
     }
-    @OPTIONS
     @POST
     
     @Consumes({ "application/json" })
@@ -751,7 +723,6 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisPost(body,request);
     }
-    @OPTIONS
     @POST
     @Path("/validate-definition")
     @Consumes({ "multipart/form-data" })

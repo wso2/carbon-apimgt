@@ -23,5 +23,5 @@ public abstract class SubscriptionsApiService {
  ,String apiVersion
  ,Integer limit
  ,String accept
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
 }

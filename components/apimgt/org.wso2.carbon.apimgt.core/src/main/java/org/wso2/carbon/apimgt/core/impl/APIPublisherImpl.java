@@ -2019,6 +2019,34 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         return  subscriberList;
     }
 
+    @Override
+    public void addThreatProtectionPolicy(String apiId, String policyId) throws APIManagementException {
+        API api = getAPIbyUUID(apiId);
+        API.APIBuilder builder = new API.APIBuilder(api);
+
+        Set<String> policies = builder.getThreatProtectionPolicies();
+        if (policies != null) {
+            policies.add(policyId);
+        } else {
+            policies = new HashSet<>();
+            policies.add(policyId);
+            builder.threatProtectionPolicies(policies);
+        }
+        updateAPI(builder);
+    }
+
+    @Override
+    public void deleteThreatProtectionPolicy(String apiId, String policyId) throws APIManagementException {
+        API api = getAPIbyUUID(apiId);
+        API.APIBuilder builder = new API.APIBuilder(api);
+
+        Set<String> policies = builder.getThreatProtectionPolicies();
+        if (policies != null) {
+            policies.remove(policyId);
+        }
+        updateAPI(builder);
+    }
+
     private void cleanupPendingTaskForAPIStateChange(String apiId) throws APIManagementException {
         Optional<String> workflowExtRef = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(apiId,
                 WorkflowConstants.WF_TYPE_AM_API_STATE);

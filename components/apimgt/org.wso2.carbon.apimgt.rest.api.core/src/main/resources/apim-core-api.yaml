@@ -574,6 +574,50 @@ paths:
               type: string
 
 ######################################################
+# The "Threat Protection" resource API
+######################################################
+  /threat-protection/policy:
+    post:
+      summary: "add a threat protection policy"
+      description: "add a threat protection policy"
+      parameters:
+        - $ref: '#/parameters/threatProtectionPolicy'
+      responses:
+        200:
+          description: OK
+
+  /threat-protection/policy/{threatProtectionPolicyId}:
+    get:
+      summary: "Get one threat protection policy"
+      description: "Get one threat protection policy"
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/ThreatProtectionPolicy'
+          description: OK
+
+    post:
+      summary: "post"
+      description: "desc"
+      parameters:
+        - $ref: '#/parameters/threatProtectionPolicyId'
+        - $ref: '#/parameters/threatProtectionPolicy'
+      responses:
+        200:
+          description: Ok
+
+
+  /threat-protection/policies:
+    get:
+      summary: "Get all threat protection policies"
+      description: "all"
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/ThreatProtectionPolicyList'
+          description: OK
+
+######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
@@ -661,6 +705,25 @@ parameters:
     required: false
     type: string
 
+#Threat protection policy ID parameter
+  threatProtectionPolicyId:
+    name: ThreatProtectionPolicyId
+    in: path
+    description: |
+      The UUID of a Policy
+    required: true
+    type: string
+
+#Threat Protection policy parameter
+  threatProtectionPolicy:
+    name: threatProtectionPolicy
+    in: body
+    description: |
+      Threat protection json policy request parameter
+    required: true
+    schema: {
+      $ref: '#/definitions/ThreatProtectionPolicy'
+    }
 
 ######################################################
 # The resources used by some of the APIs above within the message body
@@ -1114,6 +1177,7 @@ definitions:
         example: tcp://localhost:7612
       credentials:
         $ref: '#/definitions/Credentials'
+
 #-----------------------------------------------------
 # Throttling information
 #-----------------------------------------------------
@@ -1181,6 +1245,40 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/BlockingCondition'
+
+#-----------------------------------------------------
+# The Threat Protection JSON Policy List resource
+#-----------------------------------------------------
+  ThreatProtectionPolicyList:
+    title: "Threat Protection Policy List"
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ThreatProtectionPolicy'
+
+#-----------------------------------------------------
+# The Threat Protection Policy resource
+#-----------------------------------------------------
+  ThreatProtectionPolicy:
+    title: "Threat Protection Policy Schema"
+    required:
+      - name
+      - type
+      - policy
+    properties:
+      uuid:
+        type: string
+        description: Policy ID
+      name:
+        type: string
+        description: Name of the policy
+      type:
+        type: string
+        description: Type of the policy
+      policy:
+        type: string
+        description: policy as a json string
 
 #-----------------------------------------------------
 # END-OF-FILE

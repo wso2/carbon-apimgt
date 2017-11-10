@@ -554,4 +554,8 @@ public interface APIPublisher extends APIManager {
             throws APIMgtDAOException, APIMgtWSDLException;
 
     Set<String> getSubscribersByAPIId(String apiId) throws APIManagementException;
+
+    void addThreatProtectionPolicy(String apiId, String policyId) throws APIManagementException;
+
+    void deleteThreatProtectionPolicy(String apiId, String policyId) throws APIManagementException;
 }

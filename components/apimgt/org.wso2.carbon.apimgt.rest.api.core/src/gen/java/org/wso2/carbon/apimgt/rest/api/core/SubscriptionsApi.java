@@ -60,8 +60,8 @@ public class SubscriptionsApi implements Microservice  {
 ,@ApiParam(value = "Version of the API. ") @QueryParam("apiVersion") String apiVersion
 ,@ApiParam(value = "Number of entities that should be retrieved. ") @QueryParam("limit") Integer limit
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.subscriptionsGet(apiContext,apiVersion,limit,accept, request);
+        return delegate.subscriptionsGet(apiContext,apiVersion,limit,accept,request);
     }
 }

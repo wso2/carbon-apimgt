@@ -22,5 +22,5 @@ public abstract class ResourcesApiService {
     public abstract Response resourcesGet(String apiContext
  ,String apiVersion
  ,String accept
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
 }
