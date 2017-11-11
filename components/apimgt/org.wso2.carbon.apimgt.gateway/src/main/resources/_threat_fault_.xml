@@ -1,0 +1,21 @@
+<sequence xmlns="http://ws.apache.org/ns/synapse" name="_threat_fault_">
+    <payloadFactory media-type="json">
+        <format>{ "errors": { "error_code": "$1", "error_message": "$2", "error_description": "$3"}}</format>
+        <args>
+            <arg evaluator="xml" expression="get-property('THREAT_CODE')"/>
+            <arg evaluator="xml" expression="get-property('THREAT_MSG')"/>
+            <arg evaluator="xml" expression="get-property('THREAT_DESC')"/>
+        </args>
+    </payloadFactory>
+    <property name="messageType" value="application/json" scope="axis2"/>
+    <property name="HTTP_SC" scope="axis2" type="STRING" value="400"/>
+    <property name="RESPONSE" value="true"/>
+    <header name="To" action="remove"/>
+    <property name="NO_ENTITY_BODY" scope="axis2" action="remove"/>
+    <property name="ContentType" scope="axis2" action="remove"/>
+    <property name="Authorization" scope="transport" action="remove"/>
+    <property name="Host" scope="transport" action="remove"/>
+    <property name="Accept" scope="transport" action="remove"/>
+    <send/>
+    <drop/>
+</sequence>
