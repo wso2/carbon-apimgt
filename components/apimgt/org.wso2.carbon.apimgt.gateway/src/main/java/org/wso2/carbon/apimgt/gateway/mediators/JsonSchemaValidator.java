@@ -36,7 +36,7 @@ import org.wso2.carbon.apimgt.gateway.threatprotection.configuration.JSONConfig;
  * JSON schema.
  */
 public class JsonSchemaValidator extends AbstractMediator {
-    private static final Log logger = LogFactory.getLog(DigestAuthMediator.class);
+    private static final Log log = LogFactory.getLog(DigestAuthMediator.class);
     org.apache.axis2.context.MessageContext axis2MC;
 
     /**
@@ -84,7 +84,7 @@ public class JsonSchemaValidator extends AbstractMediator {
             try {
                 apimThreatAnalyzer.analyze(jsonPayload, apiContext);
             } catch (APIMThreatAnalyzerException e) {
-                logger.error(e.getMessage());
+                log.error(e.getMessage());
             }
             //return analyzer to the pool
             AnalyzerHolder.returnObject(apimThreatAnalyzer);
