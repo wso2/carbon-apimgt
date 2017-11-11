@@ -96,7 +96,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionStringComparator;
-import org.wso2.carbon.apimgt.keymgt.client.ProviderKeyMgtClient;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.authenticator.stub.AuthenticationAdminStub;
 import org.wso2.carbon.base.ServerConfiguration;
@@ -539,18 +538,6 @@ public class APIProviderHostObject extends ScriptableObject {
             apiProvider.saveSwagger20Definition(api.getId(),(String) apiData.get("swagger", apiData));
         }
 
-        // removing scopes from cache
-        try {
-            ProviderKeyMgtClient providerClient = HostObjectUtils.getProviderClient();
-            String[] consumerKeys = apiProvider.getConsumerKeys(new APIIdentifier(provider, name, version));
-            if (consumerKeys != null && consumerKeys.length != 0) {
-                providerClient.removeScopeCache(consumerKeys);
-            }
-
-        } catch (APIManagementException e) {
-            //swallowing the excepion since the api update should happen even if cache update fails
-            log.error("Error while removing the scope cache", e);
-        }
         //get new key manager instance for  resource registration.
         KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
 
