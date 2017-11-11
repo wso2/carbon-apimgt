@@ -49,7 +49,7 @@ public class JsonSchemaValidator extends AbstractMediator {
         if (log.isDebugEnabled()) {
             log.debug("JSON schema validation mediator is activated...");
         }
-        
+
         axis2MC  = ((Axis2MessageContext)messageContext).getAxis2MessageContext();
         String apiPath = axis2MC.getProperty(ThreatProtectorConstants.TRANSPORT_URL).toString();
         String contentType = axis2MC.getProperty(ThreatProtectorConstants.CONTENT_TYPE).toString();

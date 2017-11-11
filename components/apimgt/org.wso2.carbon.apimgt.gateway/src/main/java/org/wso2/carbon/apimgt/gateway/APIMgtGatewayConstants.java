@@ -58,19 +58,5 @@ public class APIMgtGatewayConstants {
     public static final String RESPONSE_MEDIATION_LATENCY = "response_mediation_latency";
     public static final String OTHER_LATENCY = "other_latency";
 
-    public static final String THREAT_FAILURE_HANDLER = "_threat_fault_";
-    public static final String HTTP_HEADER_THREAT_CODE = "400-002";
-    public static final String HTTP_HEADER_THREAT_MSG = "Threat detected in HTTP Headers";
-    public static final String HTTP_HEADER_THREAT_DESC = "Check the API documentation and send proper HTTP Headers";
-    public static final String QPARAM_THREAT_CODE = "400-002";
-    public static final String QPARAM_THREAT_MSG = "Threat detected in Query Parameters";
-    public static final String QPARAM_THREAT_DESC = "Check the API documentation and send proper Query Parameters";
-    public static final String PAYLOAD_THREAT_CODE = "400-002";
-    public static final String PAYLOAD_THREAT_MSG = "Threat detected in Payload";
-    public static final String PAYLOAD_THREAT_DESC = "Check the API documentation and send proper Payload";
-    public static final String THREAT_FOUND = "THREAT_FOUND";
-    public static final String THREAT_CODE = "THREAT_CODE";
-    public static final String THREAT_MSG = "THREAT_MSG";
-    public static final String THREAT_DESC = "THREAT_DESC";
 }
 
