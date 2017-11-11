@@ -30,7 +30,6 @@ public class ThreatProtectorConstants {
     public static final String TRANSPORT_URL = "TransportInURL";
 
     /** Constants for handling threat protection exceptions */
-
     public static final String THREAT_FAILURE_HANDLER = "_threat_fault_";
     public static final String HTTP_HEADER_THREAT_CODE = "400-002";
     public static final String HTTP_HEADER_THREAT_MSG = "Threat detected in HTTP Headers";
@@ -55,12 +54,9 @@ public class ThreatProtectorConstants {
     public static final String ENABLED = "enabled";
 
     /** Constants for regex protector */
-
     public static final String REGEX_PATTERN = "regex";
 
-
     /** Constants for JSON protector */
-
     public static final String MAX_PROPERTY_COUNT = "maxPropertyCount";
     public static final String MAX_STRING_LENGTH = "maxStringLength";
     public static final String MAX_ARRAY_ELEMENT_COUNT = "maxArrayElementCount";
@@ -68,7 +64,6 @@ public class ThreatProtectorConstants {
     public static final String MAX_JSON_DEPTH = "maxJsonDepth";
 
     /** Constants for XML protector */
-
     public static final String DTD_ENABLED = "dtdEnabled";
     public static final String EXTERNAL_ENTITIES_ENABLED = "externalEntitiesEnabled";
     public static final String MAX_ELEMENT_COUNT = "maxElementCount";

@@ -40,7 +40,7 @@ public class AnalyzerHolder {
     private static final String T_TEXT_JSON = "text/json";
     private static final String T_APPLICATION_JSON = "application/json";
 
-    private static Logger logger = LoggerFactory.getLogger(AnalyzerHolder.class);
+    private static Logger log = LoggerFactory.getLogger(AnalyzerHolder.class);
 
     private static AnalyzerPool<XMLAnalyzer> xmlAnalyzerAnalyzerPool;
     private static AnalyzerPool<JSONAnalyzer> jsonAnalyzerAnalyzerPool;
@@ -77,7 +77,7 @@ public class AnalyzerHolder {
 
                 analyzer.configure(xmlConfig);
             } catch (Exception e) {
-                logger.error("Threat Protection: Failed to create XMLAnalyzer, " + e.getMessage());
+                log.error("Threat Protection: Failed to create XMLAnalyzer, " + e.getMessage());
             }
         } else if (T_TEXT_JSON.equalsIgnoreCase(contentType) || T_APPLICATION_JSON.equalsIgnoreCase(contentType)) {
             try {
@@ -86,7 +86,7 @@ public class AnalyzerHolder {
                 JSONConfig jsonConfig = ConfigurationHolder.getJsonConfig(apiPath);
                 analyzer.configure(jsonConfig);
             } catch (Exception e) {
-                logger.error("Threat Protection: Failed to create JSONAnalyzer, " + e.getMessage());
+                log.error("Threat Protection: Failed to create JSONAnalyzer, " + e.getMessage());
             }
         }
         return analyzer;

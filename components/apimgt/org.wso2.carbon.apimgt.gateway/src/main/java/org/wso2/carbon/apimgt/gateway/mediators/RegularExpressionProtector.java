@@ -42,7 +42,6 @@ import java.util.regex.Pattern;
 public class RegularExpressionProtector extends AbstractMediator {
     org.apache.axis2.context.MessageContext axis2MC;
 
-
     public boolean mediate(MessageContext messageContext) {
         axis2MC  = ((Axis2MessageContext)messageContext).getAxis2MessageContext();
         Pattern pattern = Pattern.compile((String)messageContext.getProperty(ThreatProtectorConstants.REGEX_PATTERN),
