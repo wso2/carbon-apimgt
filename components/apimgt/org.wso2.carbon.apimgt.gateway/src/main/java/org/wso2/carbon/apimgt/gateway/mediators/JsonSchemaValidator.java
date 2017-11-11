@@ -46,11 +46,10 @@ public class JsonSchemaValidator extends AbstractMediator {
      * @return a boolean true if the message content is passed the json schema criticisers.
      */
     public boolean mediate(MessageContext messageContext) {
-
         if (log.isDebugEnabled()) {
             log.debug("JSON schema validation mediator is activated...");
         }
-
+        
         axis2MC  = ((Axis2MessageContext)messageContext).getAxis2MessageContext();
         String apiPath = axis2MC.getProperty(ThreatProtectorConstants.TRANSPORT_URL).toString();
         String contentType = axis2MC.getProperty(ThreatProtectorConstants.CONTENT_TYPE).toString();
@@ -74,12 +73,10 @@ public class JsonSchemaValidator extends AbstractMediator {
         jsonConfig.setMaxJsonDepth(maxJSONDepth);
         //put into ConfigurationHolder
         ConfigurationHolder.addJsonConfig(apiPath, jsonConfig);
-
         String jsonElements = axis2MC.getEnvelope().getBody().getFirstElement().toString();
         String jsonPayload = XML.toJSONObject(jsonElements).toString();
 
         if(!requestMethod.equals("GET")) {
-
             APIMThreatAnalyzer apimThreatAnalyzer = AnalyzerHolder.getAnalyzer(contentType,apiPath);
             try {
                 apimThreatAnalyzer.analyze(jsonPayload, apiContext);
