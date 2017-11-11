@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 import org.apache.axiom.om.OMAbstractFactory;
@@ -7,7 +25,6 @@ import org.apache.axiom.om.OMNamespace;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.http.HttpStatus;
-import org.apache.synapse.Mediator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -17,32 +34,31 @@ import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
-import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.threatprotection.ThreatProtectorConstants;
 
 import java.util.Map;
 import java.util.regex.Pattern;
 
 public class RegularExpressionProtector extends AbstractMediator {
-    org.apache.axis2.context.MessageContext a2mc;
-    private static Pattern pattern;
+    org.apache.axis2.context.MessageContext axis2MC;
 
-    @Override
+
     public boolean mediate(MessageContext messageContext) {
-        a2mc  = ((Axis2MessageContext)messageContext).getAxis2MessageContext();
-        regexCompile(messageContext);
-        String queryParams = getQueryParams(a2mc);
-        Map transportHeaders = getTransportHeaders(a2mc);
-        String payload = getPayloadString(a2mc);
+        axis2MC  = ((Axis2MessageContext)messageContext).getAxis2MessageContext();
+        Pattern pattern = Pattern.compile((String)messageContext.getProperty(ThreatProtectorConstants.REGEX_PATTERN),
+                Pattern.CASE_INSENSITIVE);
+        String queryParams = (String) axis2MC.getProperty(NhttpConstants.REST_URL_POSTFIX);
+        Map transportHeaders = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        String payload = JsonUtil.jsonPayloadToString(axis2MC);
 
         if (queryParams != null && pattern.matcher(queryParams).find()) {
             if (log.isDebugEnabled()) {
                 log.debug(String.format("Threat detected in query parameters [ %s ] by regex [ %s ]",
                         queryParams, pattern));
             }
-            handleThreat(messageContext,
-                    APIMgtGatewayConstants.QPARAM_THREAT_CODE,
-                    APIMgtGatewayConstants.QPARAM_THREAT_MSG,
-                    APIMgtGatewayConstants.QPARAM_THREAT_DESC);
+            handleThreat(messageContext, ThreatProtectorConstants.QPARAM_THREAT_CODE,
+                    ThreatProtectorConstants.QPARAM_THREAT_MSG,
+                    ThreatProtectorConstants.QPARAM_THREAT_DESC);
             return false;
         }
         if (transportHeaders != null && pattern.matcher(transportHeaders.toString()).find()) {
@@ -51,9 +67,9 @@ public class RegularExpressionProtector extends AbstractMediator {
                         transportHeaders, pattern));
             }
             handleThreat(messageContext,
-                    APIMgtGatewayConstants.HTTP_HEADER_THREAT_CODE,
-                    APIMgtGatewayConstants.HTTP_HEADER_THREAT_MSG,
-                    APIMgtGatewayConstants.HTTP_HEADER_THREAT_DESC);
+                    ThreatProtectorConstants.HTTP_HEADER_THREAT_CODE,
+                    ThreatProtectorConstants.HTTP_HEADER_THREAT_MSG,
+                    ThreatProtectorConstants.HTTP_HEADER_THREAT_DESC);
             return false;
         }
         if (payload != null && pattern.matcher(payload).find()) {
@@ -62,58 +78,26 @@ public class RegularExpressionProtector extends AbstractMediator {
                           payload, pattern));
             }
             handleThreat(messageContext,
-                         APIMgtGatewayConstants.PAYLOAD_THREAT_CODE,
-                         APIMgtGatewayConstants.PAYLOAD_THREAT_MSG,
-                         APIMgtGatewayConstants.PAYLOAD_THREAT_DESC);
+                    ThreatProtectorConstants.PAYLOAD_THREAT_CODE,
+                    ThreatProtectorConstants.PAYLOAD_THREAT_MSG,
+                    ThreatProtectorConstants.PAYLOAD_THREAT_DESC);
         }
         return true;
 
     }
 
-    //get query parameters
-    private String getQueryParams(org.apache.axis2.context.MessageContext a2mc) {
-        return (String) a2mc.getProperty(NhttpConstants.REST_URL_POSTFIX);
-    }
-
-    // get headers
-    private Map getTransportHeaders(org.apache.axis2.context.MessageContext a2mc) {
-        return (Map) a2mc.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-    }
-
-    //get payload
-    private String getPayloadString(org.apache.axis2.context.MessageContext a2mc) {
-        return JsonUtil.jsonPayloadToString(a2mc);
-    }
-
-    private void regexCompile(MessageContext messageContext) {
-        pattern = Pattern.compile((String)messageContext.getProperty("regex"), Pattern.CASE_INSENSITIVE);
-
-    }
-
     private void handleThreat(MessageContext messageContext, String threatCode, String threatMsg, String threatDesc) {
-        messageContext.setProperty(APIMgtGatewayConstants.THREAT_FOUND, true);
-        messageContext.setProperty(APIMgtGatewayConstants.THREAT_CODE, threatCode);
-        messageContext.setProperty(APIMgtGatewayConstants.THREAT_MSG, threatMsg);
-        messageContext.setProperty(APIMgtGatewayConstants.THREAT_DESC, threatDesc);
-        Mediator sequence = messageContext.getSequence(APIMgtGatewayConstants.THREAT_FAILURE_HANDLER);
+        messageContext.setProperty(ThreatProtectorConstants.THREAT_FOUND, true);
+        messageContext.setProperty(ThreatProtectorConstants.THREAT_CODE, threatCode);
+        messageContext.setProperty(ThreatProtectorConstants.THREAT_MSG, threatMsg);
+        messageContext.setProperty(ThreatProtectorConstants.THREAT_DESC, threatDesc);
 
-        // Invoke the custom error handler specified by the user
-        if (sequence != null && !sequence.mediate(messageContext)) {
-            // If needed user should be able to prevent the rest of the fault handling
-            // logic from getting executed
-            return;
-        }
-
-        // By default we send a 401 response back
-        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
-                getAxis2MessageContext();
-        // This property need to be set to avoid sending the content in pass-through pipe (request message)
-        // as the response.
         axis2MC.setProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED, Boolean.TRUE);
         try {
             RelayUtils.consumeAndDiscardMessage(axis2MC);
         } catch (AxisFault axisFault) {
-            //In case of an error it is logged and the process is continued because we're setting a fault message in the payload.
+            //In case of an error it is logged and the process is continued because we're setting a fault message
+            // in the payload.
             log.error("Error occurred while consuming and discarding the message", axisFault);
         }
         axis2MC.setProperty(Constants.Configuration.MESSAGE_TYPE, "application/soap+xml");

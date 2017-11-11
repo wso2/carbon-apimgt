@@ -222,7 +222,15 @@
                 <artifactId>slf4j</artifactId>
             <version>1.5.10.wso2v1</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.woodstox</groupId>
+            <artifactId>woodstox-core</artifactId>
+            <version>${woodstox-core.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -319,7 +327,6 @@
                             javax.net.ssl,
                             javax.xml.namespace,
                             org.apache.http.*,
-                            org.apache.commons.*,
                             org.apache.synapse.*,
                             org.apache.thrift.*; version="${libthrift.import.version.range}",
                             org.apache.neethi.*; version="2.0.4.wso2v4",
