@@ -123,8 +123,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     public APIPublisherImpl(String username, IdentityProvider idp, KeyManager keyManager, ApiDAO apiDAO,
                             ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
-                            APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO, TagDAO tagDAO,
-                            GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGatewayPublisher) {
+                            APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
+                            TagDAO tagDAO, GatewaySourceGenerator gatewaySourceGenerator,
+                            APIGateway apiGatewayPublisher) {
         super(username, idp, keyManager, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager,
                 labelDAO, workflowDAO, tagDAO, gatewaySourceGenerator, apiGatewayPublisher);
     }
@@ -1302,14 +1303,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 if (isFullTextSearch) {
                     apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
                 } else {
-                    // TODO: Implement DAO methods to support the following query (or the like)
-                    // apiResults = getApiDAO().searchAPIsByAttributesInPublisher(new ArrayList<>(roles),
-                    //         attributeMap, offset, limit);
-
-                    // TODO: Remove after correct implementation
-                    apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
-                    log.info("[Not Implemented]: Attribute Search");
                     log.info("Attributes:", attributeMap.toString());
+                    apiResults = getApiDAO().attributeSearchAPIs(roles, user, attributeMap, offset, limit);
                 }
 
             } else {
