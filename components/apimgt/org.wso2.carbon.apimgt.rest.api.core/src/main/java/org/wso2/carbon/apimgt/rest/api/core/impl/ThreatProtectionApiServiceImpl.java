@@ -74,7 +74,8 @@ public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
             ThreatProtectionDAO dao = DAOFactory.getThreatProtectionDAO();
             ThreatProtectionPolicy policy = MappingUtil.toThreatProtectionPolicy(threatProtectionPolicy);
 
-            if (StringUtils.isEmpty(policy.getUuid())) {
+            String policyUuid = policy.getUuid();
+            if (policyUuid == null || policyUuid.length() == 0) {
                 policy.setUuid(UUID.randomUUID().toString());
             }
             gateway.addThreatProtectionPolicy(policy);

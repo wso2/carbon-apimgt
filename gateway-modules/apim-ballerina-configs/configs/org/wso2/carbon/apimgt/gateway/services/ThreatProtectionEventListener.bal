@@ -23,13 +23,15 @@ service<jms> ThreatProtectionJmsService {
     resource onMessage (message m) {
         json event = messages:getJsonPayload(m);
         string eventType;
+        string policyType;
+        policyType, _ = (string)event.policy["type"];
         eventType, _ = (string)event.eventType;
         system:println(event);
-        if (strings:contains(eventType, "JSON")) {
+        if (strings:contains(policyType, "JSON")) {
             json jsonPolicy = event.policy;
             dto:JSONThreatProtectionInfoDTO jsonInfo = utils:fromJSONToJSONThreatProtectionInfoDTO(jsonPolicy);
             threatprotection:configureJsonAnalyzer(jsonInfo, eventType);
-        } else if (strings:contains(eventType, "XML")) {
+        } else if (strings:contains(policyType, "XML")) {
             json xmlPolicy = event.policy;
             dto:XMLThreatProtectionInfoDTO xmlInfo = utils:fromJSONToXMLThreatProtectionInfoDTO(xmlPolicy);
             threatprotection:configureXmlAnalyzer(xmlInfo, eventType);

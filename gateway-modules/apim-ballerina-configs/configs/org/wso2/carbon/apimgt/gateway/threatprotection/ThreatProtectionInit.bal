@@ -10,11 +10,11 @@ import org.wso2.carbon.apimgt.gateway.utils;
 import org.wso2.carbon.apimgt.ballerina.threatprotection;
 
 function initThreatProtection() (boolean) {
-    json list;
-    _, list = utils:getThreatProtectionPolicyIdsForApi("eb442616-816c-49c8-bc9a-ae22c74409da");
-
-    system:println("++++List++++");
-    system:println(list);
+    //json list;
+    //_, list = utils:getThreatProtectionPolicyIdsForApi("eb442616-816c-49c8-bc9a-ae22c74409da");
+    //
+    //system:println("++++List++++");
+    //system:println(list);
     try {
         json threatProtectionPolicies = utils:getThreatProtectionPolicies();
         storePolicies(threatProtectionPolicies);

@@ -55,9 +55,9 @@ import org.wso2.carbon.apimgt.ballerina.threatprotection.configurations.JSONConf
 @BallerinaAnnotation(annotationName = "Return", attributes = {@Attribute(name = "boolean",
         value = "true if success, false otherwise")})
 public class ConfigureJsonAnalyzer extends AbstractNativeFunction {
-    private static final String THREAT_PROTECTION_JSON_POLICY_ADD = "THREAT_PROTECTION_JSON_POLICY_ADD";
-    private static final String THREAT_PROTECTION_JSON_POLICY_DELETE = "THREAT_PROTECTION_JSON_POLICY_DELETE";
-    private static final String THREAT_PROTECTION_JSON_POLICY_UPDATE = "THREAT_PROTECTION_JSON_POLICY_UPDATE";
+    private static final String THREAT_PROTECTION_POLICY_ADD = "THREAT_PROTECTION_POLICY_ADD";
+    private static final String THREAT_PROTECTION_POLICY_DELETE = "THREAT_PROTECTION_POLICY_DELETE";
+    private static final String THREAT_PROTECTION_POLICY_UPDATE = "THREAT_PROTECTION_POLICY_UPDATE";
 
     private static Logger log = LoggerFactory.getLogger(ConfigureJsonAnalyzer.class);
 
@@ -69,8 +69,8 @@ public class ConfigureJsonAnalyzer extends AbstractNativeFunction {
         if (jsonInfo != null) {
             String jsonPolicyId = jsonInfo.getStringField(0);
             switch (event) {
-                case THREAT_PROTECTION_JSON_POLICY_ADD:
-                case THREAT_PROTECTION_JSON_POLICY_UPDATE:
+                case THREAT_PROTECTION_POLICY_ADD:
+                case THREAT_PROTECTION_POLICY_UPDATE:
                     String name = jsonInfo.getStringField(1);
                     int propertyCount = (int) jsonInfo.getIntField(0);
                     int stringLength = (int) jsonInfo.getIntField(1);
@@ -89,7 +89,7 @@ public class ConfigureJsonAnalyzer extends AbstractNativeFunction {
                     ConfigurationHolder.addJsonConfig(jsonPolicyId, jsonConfig);
                     break;
 
-                case THREAT_PROTECTION_JSON_POLICY_DELETE:
+                case THREAT_PROTECTION_POLICY_DELETE:
                     ConfigurationHolder.removeJsonConfig(jsonPolicyId);
                     break;
 

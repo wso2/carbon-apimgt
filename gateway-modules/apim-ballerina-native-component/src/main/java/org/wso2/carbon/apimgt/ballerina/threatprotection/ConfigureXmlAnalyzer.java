@@ -55,9 +55,9 @@ import org.wso2.carbon.apimgt.ballerina.threatprotection.configurations.XMLConfi
 @BallerinaAnnotation(annotationName = "Return", attributes = {@Attribute(name = "boolean",
         value = "true if success, false otherwise")})
 public class ConfigureXmlAnalyzer extends AbstractNativeFunction {
-    private static final String THREAT_PROTECTION_XML_POLICY_ADD = "THREAT_PROTECTION_XML_POLICY_ADD";
-    private static final String THREAT_PROTECTION_XML_POLICY_DELETE = "THREAT_PROTECTION_XML_POLICY_DELETE";
-    private static final String THREAT_PROTECTION_XML_POLICY_UPDATE = "THREAT_PROTECTION_XML_POLICY_UPDATE";
+    private static final String THREAT_PROTECTION_POLICY_ADD = "THREAT_PROTECTION_POLICY_ADD";
+    private static final String THREAT_PROTECTION_POLICY_DELETE = "THREAT_PROTECTION_POLICY_DELETE";
+    private static final String THREAT_PROTECTION_POLICY_UPDATE = "THREAT_PROTECTION_POLICY_UPDATE";
 
     private static final Logger log = LoggerFactory.getLogger(ConfigureXmlAnalyzer.class);
 
@@ -68,8 +68,8 @@ public class ConfigureXmlAnalyzer extends AbstractNativeFunction {
         if (xmlInfo != null) {
             String xmlPolicyId = xmlInfo.getStringField(0);
             switch (event) {
-                case THREAT_PROTECTION_XML_POLICY_ADD:
-                case THREAT_PROTECTION_XML_POLICY_UPDATE:
+                case THREAT_PROTECTION_POLICY_ADD:
+                case THREAT_PROTECTION_POLICY_UPDATE:
                     String name = xmlInfo.getStringField(1);
                     boolean dtdEnabled = xmlInfo.getBooleanField(0) != 0;
                     boolean externalEntitiesEnabled = xmlInfo.getBooleanField(1) != 0;
@@ -95,7 +95,7 @@ public class ConfigureXmlAnalyzer extends AbstractNativeFunction {
                     ConfigurationHolder.addXmlConfig(xmlPolicyId, xmlConfig);
                     break;
 
-                case THREAT_PROTECTION_XML_POLICY_DELETE:
+                case THREAT_PROTECTION_POLICY_DELETE:
                     ConfigurationHolder.removeXmlConfig(xmlPolicyId);
                     break;
 
