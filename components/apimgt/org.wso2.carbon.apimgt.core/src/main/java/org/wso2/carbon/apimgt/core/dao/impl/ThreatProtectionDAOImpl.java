@@ -32,8 +32,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
+import java.util.Set;
 
 /**
  * DAO Layer implementation class for Threat Protection Policies
@@ -78,7 +79,7 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
                 updatePolicy(policy, connection);
                 return;
             }
-            policy.setUuid(UUID.randomUUID().toString());
+            //policy.setUuid(UUID.randomUUID().toString());
             addPolicy(policy, connection);
         } catch (SQLException e) {
             String errorMsg = "Error adding Threat Protection policy";
@@ -94,6 +95,17 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
         } catch (SQLException e) {
             String errorMsg = "Error checking policy existence status for PolicyId: " + policyId;
             log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
+        }
+    }
+
+    @Override
+    public Set<String> getThreatProtectionPolicyIdsForApi(String apiId) throws APIMgtDAOException {
+        try (Connection connection = DAOUtil.getConnection()) {
+            return getThreatProtectionPolicyIdsForApi(apiId, connection);
+        } catch (SQLException e) {
+            String errorMsg = "Error getting threat protection policy ids for API_ID: " + apiId;
+            //log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
     }
@@ -227,6 +239,20 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
             log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
+    }
+
+    private Set<String> getThreatProtectionPolicyIdsForApi(String apiId, Connection connection) throws SQLException {
+        final String query = "SELECT POLICY_ID FROM AM_THREAT_PROTECTION_ASSOCIATIONS WHERE API_ID = ?";
+        Set<String> policyIds = new HashSet<>();
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, apiId);
+            try (ResultSet res = statement.executeQuery()) {
+                while (res.next()) {
+                    policyIds.add(res.getString("POLICY_ID"));
+                }
+            }
+        }
+        return policyIds;
     }
 
 }

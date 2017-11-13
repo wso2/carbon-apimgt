@@ -203,6 +203,24 @@ function getEndpointConfig (string endpointId) (int, string) {
     }
     return status, apiConfig;
 }
+
+function getThreatProtectionPolicyIdsForApi(string apiId) (int, json) {
+    message request = {};
+    message response = {};
+    json policyIdList;
+    int status;
+    try {
+        http:ClientConnector client = create http:ClientConnector(getAPICoreURL());
+        response = http:ClientConnector.get(client, "/api/am/core/v1.0/threat-protection/apis/" + apiId + "/policy", request);
+        policyIdList = messages:getJsonPayload(response);
+        status = http:getStatusCode(response);
+    } catch (errors:Error e) {
+        system:println("Error occurred while retrieving threat protection policies for API : " + apiId);
+        throw e;
+    }
+    return status, policyIdList;
+}
+
 function fromJsonToEndpointDto (json endpointConfig) (dto:EndpointDto) {
     dto:EndpointDto endpointDto = {};
     errors:TypeCastError err;

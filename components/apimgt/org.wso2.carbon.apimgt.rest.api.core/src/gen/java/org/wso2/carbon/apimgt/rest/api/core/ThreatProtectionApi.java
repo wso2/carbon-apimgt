@@ -4,6 +4,7 @@ package org.wso2.carbon.apimgt.rest.api.core;
 import io.swagger.annotations.ApiParam;
 
 import org.wso2.carbon.apimgt.rest.api.core.dto.ThreatProtectionPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.ThreatProtectionPolicyIdListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.ThreatProtectionPolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.factories.ThreatProtectionApiServiceFactory;
 
@@ -43,6 +44,20 @@ import javax.ws.rs.core.Response;
 public class ThreatProtectionApi implements Microservice  {
    private final ThreatProtectionApiService delegate = ThreatProtectionApiServiceFactory.getThreatProtectionApi();
 
+    @GET
+    @Path("/apis/{apiId}/policy")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Get threat protection policy IDs associated with an API", notes = "Can be used to get all policy IDs associated with an API", response = ThreatProtectionPolicyIdListDTO.class, tags={  })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Ok", response = ThreatProtectionPolicyIdListDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "No associated policies found for API", response = ThreatProtectionPolicyIdListDTO.class) })
+    public Response threatProtectionApisApiIdPolicyGet(@ApiParam(value = "The UUID of an API ",required=true) @PathParam("apiId") String apiId
+ ,@Context Request request)
+    throws NotFoundException {
+        return delegate.threatProtectionApisApiIdPolicyGet(apiId,request);
+    }
     @GET
     @Path("/policies")
     @Consumes({ "application/json" })

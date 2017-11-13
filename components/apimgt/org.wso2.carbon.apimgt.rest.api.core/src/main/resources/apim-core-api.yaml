@@ -617,6 +617,21 @@ paths:
             $ref: '#/definitions/ThreatProtectionPolicyList'
           description: OK
 
+  /threat-protection/apis/{apiId}/policy:
+    get:
+      summary: "Get threat protection policy IDs associated with an API"
+      description: "Can be used to get all policy IDs associated with an API"
+      parameters:
+        - $ref: '#/parameters/apiId'
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/ThreatProtectionPolicyIdList'
+          description: Ok
+        404:
+          description: "No associated policies found for API"
+
+
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -1280,6 +1295,15 @@ definitions:
         type: string
         description: policy as a json string
 
+  ThreatProtectionPolicyIdList:
+    title: "List of threat protection policy ids"
+    required:
+      - policyIds
+    properties:
+      policyIds:
+        type: array
+        items:
+          type: string
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

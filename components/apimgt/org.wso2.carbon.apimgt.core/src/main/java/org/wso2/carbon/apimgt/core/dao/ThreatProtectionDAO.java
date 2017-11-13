@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Provides access to Threat Protection data layer
@@ -74,5 +75,7 @@ public interface ThreatProtectionDAO {
      * @throws APIMgtDAOException if fails to get the existence status of the policy
      */
     boolean isPolicyExists(String policyId) throws APIMgtDAOException;
+
+    Set<String> getThreatProtectionPolicyIdsForApi(String apiId) throws APIMgtDAOException;
 
 }
