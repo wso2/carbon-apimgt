@@ -3,3 +3,16 @@
  * customize Swagger Editor you can serve this file with your CSS that overrides
  * or extends Swagger Editor styling.
 */
+
+.loading-animation{
+  background: url(../images/ajax-loader-blue.gif) no-repeat left center;
+  height: 100px;
+  width: 100px;
+  position: absolute;
+  left: 50%;
+  margin-left: -50px;
+  text-indent: 50px;
+  line-height: 100px;
+  color: #666;
+  font-size: 18px;
+}
