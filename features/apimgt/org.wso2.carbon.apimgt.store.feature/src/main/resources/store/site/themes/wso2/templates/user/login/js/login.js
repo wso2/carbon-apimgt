@@ -131,11 +131,14 @@ $(document).ready(function () {
 
 
     $("#goBackBtn").click(function () {
-    	var loginUrl = siteContext;        
-        if ($('#tenant').val() != null && $('#tenant').val() != "null") {
-        	loginUrl = siteContext + '?tenant='+$('#tenant').val();
+        var loginUrl = $.cookie("goto_url");
+        if ((loginUrl == null || loginUrl == "null" || loginUrl == "")) {
+            loginUrl = siteContext;
+            if ($('#tenant').val() != null && $('#tenant').val() != "null") {
+                loginUrl = siteContext + '?tenant=' + $('#tenant').val();
+            }
         }
-    	window.location.href = loginUrl;
+        window.location.href = loginUrl;
     });
     
     $("#logout-link").click(function () {

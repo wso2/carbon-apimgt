@@ -129,7 +129,7 @@ var drawTopUsersGraph = function(from,to){
                         });
                 }
             }else{
-                $('#topUsersView').html($('<div id="noData" class="message message-info"><h4><i class="icon fw fw-info"></i>'+i18n.t("No Data Available.")+'</h4></div>'));
+                $('#topUsersView').html($('<div id="noData" class="message message-info"><h4><i class="icon fw fw-info"></i>'+i18n.t("No Data Available")+'</h4></div>'));
             }
             } else {
                 if (json.message == "AuthenticateError") {
@@ -497,7 +497,7 @@ var drawRegisteredUserCountByApplications = function(from,to){
                     update(0);
                 }
             } else {
-            	$('#subsChart').html($('<div id="noData" class="message message-info"><h4><i class="icon fw fw-info"></i>No Data Available.</h4></div>'));
+            	$('#subsChart').html($('<div id="noData" class="message message-info"><h4><i class="icon fw fw-info"></i>'+i18n.t("No Data Available")+'</h4></div>'));
             }
             } else {
                 if (json.message == "AuthenticateError") {

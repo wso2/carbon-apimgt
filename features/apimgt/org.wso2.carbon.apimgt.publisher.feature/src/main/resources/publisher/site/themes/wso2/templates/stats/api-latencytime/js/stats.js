@@ -250,7 +250,7 @@ function renderGraph(fromDate,toDate,drillDown){
                 }
                 else if (json.usage && json.usage.length == 0 && statsEnabled) {
                     $('#noData').html('');
-                    $('#noData').append('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Data Available"></i>'+i18n.t("No Data Available.")+'</h4>'+ "<p> " + i18n.t('Generate some traffic to see statistics') + "</p>" +'</div></div>');
+                    $('#noData').append('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Data Available"></i>'+i18n.t("No Data Available")+'</h4>'+ "<p> " + i18n.t('Generate some traffic to see statistics') + "</p>" +'</div></div>');
                     $('#chartContainer').hide();
                     $('#apiLatencyTimeNote').addClass('hide');
 

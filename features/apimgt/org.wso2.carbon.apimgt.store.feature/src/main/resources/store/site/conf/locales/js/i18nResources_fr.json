@@ -32,7 +32,7 @@
     "Name contains one or more illegal characters ": "Le nom contient un ou plusieurs caractères illégaux ",
     "Name exceeds the character limit (70)": "Le nom dépasse le nombre limite de caractères (70)",
     "No": "Non",
-    "No Data Available.": "Aucune donnée disponible.",
+    "No Data Available": "Aucune donnée disponible.",
     "No Data Found ... ": "Aucune donnée trouvée ... ",
     "Not Configured": "Non configuré",
     "Number of API calls": "Nombres d'appels d'API",
