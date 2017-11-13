@@ -50,6 +50,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.net.InetSocketAddress;
+import java.util.UUID;
 
 /**
  * This is a handler which is actually embedded to the netty pipeline which does operations such as
@@ -333,6 +334,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         try {
             Application app = getApplicationById(infoDTO);
             String appOwner = app.getSubscriber().getName();
+            String keyType = infoDTO.getType();
+            String correlationID = UUID.randomUUID().toString();
 
             RequestPublisherDTO requestPublisherDTO = new RequestPublisherDTO();
             requestPublisherDTO.setApi(infoDTO.getApiName());
@@ -357,7 +360,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             requestPublisherDTO.setTenantDomain(tenantDomain);
             requestPublisherDTO.setTier(infoDTO.getTier());
             requestPublisherDTO.setVersion(version);
-
+            requestPublisherDTO.setKeyType(keyType);
+            requestPublisherDTO.setCorrelationID(correlationID);
             usageDataPublisher.publishEvent(requestPublisherDTO);
         } catch (Exception e) {
             // flow should not break if event publishing failed

@@ -45,6 +45,8 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
         setProtocol(responsePublisherDTO.getProtocol());
         setResponseCode(responsePublisherDTO.getResponseCode());
         setDestination(responsePublisherDTO.getDestination());
+        setKeyType(responsePublisherDTO.getKeyType());
+        setCorrelationID(responsePublisherDTO.getCorrelationID());
     }
 
     public static String getStreamDefinition() {
@@ -98,4 +100,8 @@ public class DataBridgeResponsePublisherDTO extends ResponsePublisherDTO {
                             getResponseSize(), getProtocol(), getResponseCode(), getDestination()};
     }
 
+    public Object createMetaData() {
+        String jsonString = "{\"keyType\":\"" + getKeyType() + "\",\"correlationID\", \"" + getCorrelationID() + "\"}";
+        return new Object[] { jsonString };
+    }
 }

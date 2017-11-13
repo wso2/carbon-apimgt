@@ -40,6 +40,8 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
         setApplicationName(faultPublisherDTO.getApplicationName());
         setApplicationId(faultPublisherDTO.getApplicationId());
         setProtocol(faultPublisherDTO.getProtocol());
+        setKeyType(faultPublisherDTO.getKeyType());
+        setCorrelationID(faultPublisherDTO.getCorrelationID());
     }
 
     public static String getStreamDefinition() {
@@ -82,5 +84,10 @@ public class DataBridgeFaultPublisherDTO extends FaultPublisherDTO{
         return new Object[]{getConsumerKey(), getContext(), getApiVersion(), getApi(), getResourcePath(), getMethod(),
                             getVersion(), getErrorCode(), getErrorMessage(), getRequestTime(), getUsername(),
                             getTenantDomain(), getHostName(), getApiPublisher(), getApplicationName(), getApplicationId(), getProtocol()};
+    }
+
+    public Object createMetaData() {
+        String jsonString = "{\"keyType\":\"" + getKeyType() + "\",\"correlationID\", \"" + getCorrelationID() + "\"}";
+        return new Object[] { jsonString };
     }
 }

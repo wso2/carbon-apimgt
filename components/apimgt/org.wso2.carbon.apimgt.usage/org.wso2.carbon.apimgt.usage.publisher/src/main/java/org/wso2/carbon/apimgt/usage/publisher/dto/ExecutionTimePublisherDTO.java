@@ -32,6 +32,8 @@ public class ExecutionTimePublisherDTO {
     private long backEndLatency;
 
     private long otherLatency;
+    private String keyType;
+    private String correlationID;
 
     public long getEventTime() {
         return eventTime;
@@ -143,5 +145,21 @@ public class ExecutionTimePublisherDTO {
 
     public void setResponseMediationLatency(long responseMediationLatency) {
         this.responseMediationLatency = responseMediationLatency;
+    }
+
+    public String getKeyType() {
+        return keyType;
+    }
+
+    public void setKeyType(String keyType) {
+        this.keyType = keyType;
+    }
+
+    public String getCorrelationID() {
+        return correlationID;
+    }
+
+    public void setCorrelationID(String correlationID) {
+        this.correlationID = correlationID;
     }
 }
