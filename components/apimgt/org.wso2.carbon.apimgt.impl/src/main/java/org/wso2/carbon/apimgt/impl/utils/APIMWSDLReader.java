@@ -185,9 +185,7 @@ public class APIMWSDLReader {
 
 		try {
 			// Generate wsdl document from registry data
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-			factory.setNamespaceAware(true);
+			DocumentBuilderFactory factory = getSecuredDocumentBuilder();
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			org.apache.woden.WSDLFactory wsdlFactory = org.apache.woden.WSDLFactory.newInstance();
 			org.apache.woden.WSDLReader reader = wsdlFactory.newWSDLReader();
