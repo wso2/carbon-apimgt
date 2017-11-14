@@ -42,6 +42,8 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
         setContinuedOnThrottleOut(requestPublisherDTO.isContinuedOnThrottleOut());
         setClientIp(requestPublisherDTO.getClientIp());
         setApplicationOwner(requestPublisherDTO.getApplicationOwner());
+        setKeyType(requestPublisherDTO.getKeyType());
+        setCorrelationID(requestPublisherDTO.getCorrelationID());
     }
 
     public static String getStreamDefinition() {
@@ -97,4 +99,8 @@ public class DataBridgeRequestPublisherDTO extends RequestPublisherDTO {
 
     }
 
+    public Object createMetaData() {
+        String jsonString = "{\"keyType\":\"" + getKeyType() + "\",\"correlationID\", \"" + getCorrelationID() + "\"}";
+        return new Object[] { jsonString };
+    }
 }

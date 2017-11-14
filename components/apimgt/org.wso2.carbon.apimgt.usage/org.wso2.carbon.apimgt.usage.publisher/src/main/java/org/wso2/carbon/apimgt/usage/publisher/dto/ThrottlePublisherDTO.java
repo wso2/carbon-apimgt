@@ -31,6 +31,8 @@ public class ThrottlePublisherDTO {
     private String throttledOutReason;
 
     private String username;
+    private String keyType;
+    private String correlationID;
 
     public String getAccessToken() {
         return accessToken;
@@ -127,5 +129,21 @@ public class ThrottlePublisherDTO {
 
     public void setSubscriber(String subscriber) {
         this.subscriber = subscriber;
+    }
+
+    public String getKeyType() {
+        return keyType;
+    }
+
+    public void setKeyType(String keyType) {
+        this.keyType = keyType;
+    }
+
+    public String getCorrelationID() {
+        return correlationID;
+    }
+
+    public void setCorrelationID(String correlationID) {
+        this.correlationID = correlationID;
     }
 }

@@ -20,6 +20,7 @@ import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.gateway.mediators.APIMgtCommonExecutionPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.dto.ThrottlePublisherDTO;
@@ -61,6 +62,9 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
                 if (consumerKey != null) {
                     hashCode = consumerKey.hashCode();
                 }
+                String keyType = (String) messageContext.getProperty(APIConstants.API_KEY_TYPE);
+                String correlationID = GatewayUtils.getAndSetCorrelationID(messageContext);
+
                 throttlePublisherDTO.setAccessToken(String.valueOf(hashCode));
                 String username = authContext.getUsername();
                 throttlePublisherDTO.setUsername(username);
@@ -80,6 +84,8 @@ public class APIMgtThrottleUsageHandler extends APIMgtCommonExecutionPublisher {
                 throttlePublisherDTO.setThrottledTime(currentTime);
                 throttlePublisherDTO.setThrottledOutReason(throttleOutReason);
                 throttlePublisherDTO.setSubscriber(authContext.getSubscriber());
+                throttlePublisherDTO.setKeyType(keyType);
+                throttlePublisherDTO.setCorrelationID(correlationID);
                 publisher.publishEvent(throttlePublisherDTO);
             }
         } catch (Exception e) {

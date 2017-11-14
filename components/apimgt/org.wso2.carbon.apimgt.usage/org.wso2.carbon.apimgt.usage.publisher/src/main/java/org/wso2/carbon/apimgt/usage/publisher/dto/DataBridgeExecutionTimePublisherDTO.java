@@ -35,6 +35,8 @@ public class DataBridgeExecutionTimePublisherDTO extends ExecutionTimePublisherD
         setResponseMediationLatency(executionTimePublisherDTO.getResponseMediationLatency());
         setBackEndLatency(executionTimePublisherDTO.getBackEndLatency());
         setOtherLatency(executionTimePublisherDTO.getOtherLatency());
+        setKeyType(executionTimePublisherDTO.getKeyType());
+        setCorrelationID(executionTimePublisherDTO.getCorrelationID());
     }
 
     public static String getStreamDefinition() {
@@ -115,5 +117,10 @@ public class DataBridgeExecutionTimePublisherDTO extends ExecutionTimePublisherD
                 getTenantDomain(), getProvider(), getApiResponseTime(), getContext(), getSecurityLatency(),
                 getThrottlingLatency(), getRequestMediationLatency(), getResponseMediationLatency(),
                 getBackEndLatency(), getOtherLatency(), getEventTime()};
+    }
+
+    public Object createMetaData() {
+        String jsonString = "{\"keyType\":\"" + getKeyType() + "\",\"correlationID\", \"" + getCorrelationID() + "\"}";
+        return new Object[] { jsonString };
     }
 }

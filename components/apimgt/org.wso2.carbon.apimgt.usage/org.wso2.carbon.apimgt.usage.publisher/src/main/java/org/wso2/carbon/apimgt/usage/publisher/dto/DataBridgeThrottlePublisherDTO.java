@@ -36,6 +36,8 @@ public class DataBridgeThrottlePublisherDTO extends ThrottlePublisherDTO {
         setApplicationId(throttlePublisherDTO.getApplicationId());
         setSubscriber(throttlePublisherDTO.getSubscriber());
         setThrottledOutReason(throttlePublisherDTO.getThrottledOutReason());
+        setKeyType(throttlePublisherDTO.getKeyType());
+        setCorrelationID(throttlePublisherDTO.getCorrelationID());
     }
 
     public static String getStreamDefinition() {
@@ -74,5 +76,10 @@ public class DataBridgeThrottlePublisherDTO extends ThrottlePublisherDTO {
         return new Object[]{getAccessToken(), getUsername(), getTenantDomain(), getApiname(),
                             getVersion(), getContext(), getProvider(), getThrottledTime(),
                             getApplicationName(), getApplicationId(), getSubscriber(), getThrottledOutReason()};
+    }
+
+    public Object createMetaData() {
+        String jsonString = "{\"keyType\":\"" + getKeyType() + "\",\"correlationID\", \"" + getCorrelationID() + "\"}";
+        return new Object[] { jsonString };
     }
 }

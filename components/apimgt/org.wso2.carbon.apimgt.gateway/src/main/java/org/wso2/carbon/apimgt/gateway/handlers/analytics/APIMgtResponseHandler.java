@@ -25,6 +25,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -125,6 +126,8 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
                 backendTime = 0;
                 cacheHit = true;
             }
+            String keyType = (String) mc.getProperty(APIConstants.API_KEY_TYPE);
+            String correlationID = GatewayUtils.getAndSetCorrelationID(mc);
 
             ResponsePublisherDTO responsePublisherDTO = new ResponsePublisherDTO();
             responsePublisherDTO.setConsumerKey((String) mc.getProperty(APIMgtGatewayConstants.CONSUMER_KEY));
@@ -165,6 +168,8 @@ public class APIMgtResponseHandler extends APIMgtCommonExecutionPublisher {
             String protocol = mc.getProperty(
                     SynapseConstants.TRANSPORT_IN_NAME) + "-" + port;
             responsePublisherDTO.setProtocol(protocol);
+            responsePublisherDTO.setKeyType(keyType);
+            responsePublisherDTO.setCorrelationID(correlationID);
             publisher.publishEvent(responsePublisherDTO);
 
         } catch (Exception e) {
