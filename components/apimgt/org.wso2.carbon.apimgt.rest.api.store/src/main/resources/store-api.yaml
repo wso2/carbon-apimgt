@@ -2169,7 +2169,7 @@ paths:
       produces:
         - application/zip
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\"
-      https://localhost:9292/api/am/store/v1.0/export/applications?query=xxx > exported-application.zip"
+      https://localhost:9292/api/am/store/v1.0/export/applications?appId=xxx > exported-application.zip"
       x-wso2-request: |
         GET https://127.0.0.1:9292/api/am/store/v1.0/export/applications?query=xxx
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
@@ -2179,7 +2179,7 @@ paths:
       description: |
         This operation can be used to export details related to a perticular application.
       parameters:
-        - name: query
+        - name: appId
           in: query
           description: |
             Application Search Query

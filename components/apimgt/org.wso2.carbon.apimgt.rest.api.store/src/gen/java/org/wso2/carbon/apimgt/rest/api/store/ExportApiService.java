@@ -19,6 +19,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 public abstract class ExportApiService {
-    public abstract Response exportApplicationsGet(String query
+    public abstract Response exportApplicationsGet(String appId
   ,Request request) throws NotFoundException;
 }

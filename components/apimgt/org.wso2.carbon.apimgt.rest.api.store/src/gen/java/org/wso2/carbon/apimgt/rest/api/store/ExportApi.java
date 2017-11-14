@@ -60,9 +60,9 @@ public class ExportApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = File.class),
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met. ", response = File.class) })
-    public Response exportApplicationsGet(@ApiParam(value = "Application Search Query ",required=true) @QueryParam("query") String query
+    public Response exportApplicationsGet(@ApiParam(value = "Application Search Query ",required=true) @QueryParam("appId") String appId
  ,@Context Request request)
     throws NotFoundException {
-        return delegate.exportApplicationsGet(query,request);
+        return delegate.exportApplicationsGet(appId,request);
     }
 }

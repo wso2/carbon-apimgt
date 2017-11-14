@@ -32,14 +32,14 @@ public class ExportApiServiceImpl extends ExportApiService {
     /**
      * Export an existing Application
      *
-     * @param query   Search query
+     * @param appId   Search query
      * @param request msf4j request object
      * @return Zip file containing exported Applications
      * @throws NotFoundException When the particular resource does not exist in the system
      */
 
     @Override
-    public Response exportApplicationsGet(String query, Request request)
+    public Response exportApplicationsGet(String appId, Request request)
             throws NotFoundException {
 
 
@@ -55,13 +55,13 @@ public class ExportApiServiceImpl extends ExportApiService {
             consumer = RestApiUtil.getConsumer(username);
             FileBasedApplicationImportExportManager importExportManager = new FileBasedApplicationImportExportManager
                     (consumer, pathToExportDir);
-            applicationDetails = importExportManager.getApplicationDetails(query, username);
+            applicationDetails = importExportManager.getApplicationDetails(appId, username);
             if (applicationDetails == null) {
                 // 404
-                String errorMsg = "No application found for query " + query;
+                String errorMsg = "No application found for query " + appId;
                 log.error(errorMsg);
                 HashMap<String, String> paramList = new HashMap<>();
-                paramList.put("query", query);
+                paramList.put("query", appId);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(ExceptionCodes.APPLICATION_NOT_FOUND, paramList);
                 return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
             }
