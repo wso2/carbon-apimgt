@@ -19,8 +19,8 @@ package org.wso2.carbon.apimgt.impl.dao;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagementException;
-import org.wso2.carbon.apimgt.impl.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
 import java.sql.Connection;
@@ -192,9 +192,10 @@ public class CertificateMgtDAO {
      * Method to retrieve certificate metadata from db for specific alias or endpoint.
      * From alias and endpoint, only one parameter is required. This will be used to query all the certificates
      * without a limitation for tenant.
-     *
+     * <p>
      * Addresses : If some tenant is trying to add a certificate with the same alias, proper error should be shown in
      * the UI.
+     *
      * @param alias    : Alias for the certificate. (Optional)
      * @param endpoint : The endpoint/ server url which the certificate is mapped to. (Optional)
      * @return : A CertificateMetadataDTO object if the certificate is retrieved successfully, null otherwise.

@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.impl.dto;
+package org.wso2.carbon.apimgt.api.dto;
 
 /**
  * This class represents the certificate information DTO.

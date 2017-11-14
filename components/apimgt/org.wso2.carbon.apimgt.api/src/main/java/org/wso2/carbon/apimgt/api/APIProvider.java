@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.apimgt.api;
 
+import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -827,5 +828,41 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     String getExternalWorkflowReferenceId (int subscriptionId) throws APIManagementException;
-    
+
+    /**
+     * Method to add a Certificate to publisher and gateway nodes.
+     *
+     * @param userName : The user name of the logged in user.
+     * @param certificate : Base64 encoded certificate string.
+     * @param alias : Alias for the certificate.
+     * @param endpoint : Endpoint which the certificate should be mapped to.
+     * @return Integer which represents the operation status.
+     * @throws APIManagementException
+     */
+    int addCertificate(String userName, String certificate, String alias, String endpoint) throws APIManagementException;
+
+    /**
+     * Method to remove the certificate which mapped to the given alias, endpoint from publisher and gateway nodes.
+     * @param userName : UserName of the logged in user.
+     * @param alias  : Alias of the certificate which needs to be deleted.
+     * @param endpoint : Endpoint which the certificate is mapped to.
+     * @return Integer which represents the operation status.
+     * @throws APIManagementException
+     */
+    int deleteCertificate(String userName, String alias, String endpoint) throws APIManagementException;
+
+    /**
+     * Method to get the server is configured to Dynamic SSL Profile feature.
+     * @return : TRUE if all the configurations are met, FALSE otherwise.
+     */
+    boolean isConfigured();
+
+    /**
+     * Method to retrieve all the certificates uploaded for the tenant represent by the user.
+     * @param userName : User name of the logged in user.
+     * @return : List of CertificateMetadata
+     * @throws APIManagementException
+     */
+    List<CertificateMetadataDTO> getCertificates(String userName) throws APIManagementException;
+
 }

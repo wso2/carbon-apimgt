@@ -19,8 +19,8 @@ package org.wso2.carbon.apimgt.impl.certificatemgt;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
-import org.wso2.carbon.apimgt.impl.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 
 import java.io.File;
@@ -56,7 +56,7 @@ public class CertificateManagerImpl implements CertificateManager {
                 } else if (responseCode.getResponseCode() == ResponseCode.CERTIFICATE_EXPIRED.getResponseCode()) {
                     log.error("Could not add Certificate. Certificate expired.");
                     certificateMgtDAO.deleteCertificate(alias, endpoint, tenantId);
-                }else {
+                } else {
                     log.info("Certificate is successfully added to the Publisher client Trust Store with Alias '"
                             + alias + "'");
                 }
@@ -82,6 +82,7 @@ public class CertificateManagerImpl implements CertificateManager {
                 try {
                     certificateMgtDAO.addCertificate(alias, endpoint, tenantId);
                 } catch (CertificateManagementException e) {
+                    log.error("Error adding certificate to the data base. Alias/ Endpoint exists.");
                     return ResponseCode.INTERNAL_SERVER_ERROR;
                 }
                 log.error("Error removing the Certificate from Trust Store. Rolling back...");

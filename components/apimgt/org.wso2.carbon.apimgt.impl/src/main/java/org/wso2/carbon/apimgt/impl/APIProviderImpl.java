@@ -32,6 +32,7 @@ import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.regexp.RE;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -42,6 +43,7 @@ import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
 import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -68,6 +70,10 @@ import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
+import org.wso2.carbon.apimgt.impl.certificatemgt.GatewayCertificateManager;
+import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -4906,6 +4912,77 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     public String getExternalWorkflowReferenceId(int subscriptionId) throws APIManagementException {
         return apiMgtDAO.getExternalWorkflowReferenceForSubscription(subscriptionId);
+    }
+
+    @Override
+    public int addCertificate(String userName, String certificate, String alias, String endpoint)
+            throws APIManagementException {
+        ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        CertificateManager certificateManager = new CertificateManagerImpl();
+        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        ;
+        try {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            responseCode = certificateManager
+                    .addCertificateToPublisher(certificate, alias, endpoint, tenantId);
+
+            if (responseCode == ResponseCode.SUCCESS) {
+                //Get the gateway manager and add the certificate to gateways.
+                GatewayCertificateManager gatewayCertificateManager = new GatewayCertificateManager();
+                gatewayCertificateManager.addToGateways(certificate, alias);
+            } else {
+                log.error("Adding certificate to the Publisher node is failed. No certificate changes will be " +
+                        "affected.");
+            }
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error while reading tenant information", e);
+        }
+        return responseCode.getResponseCode();
+    }
+
+    @Override
+    public int deleteCertificate(String userName, String alias, String endpoint) throws APIManagementException {
+        ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        CertificateManager certificateManager = new CertificateManagerImpl();
+        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+
+        try {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            responseCode = certificateManager.deleteCertificateFromPublisher(alias, endpoint, tenantId);
+
+            if (responseCode == ResponseCode.SUCCESS) {
+                //Get the gateway manager and remove the certificate from gateways.
+                GatewayCertificateManager gatewayCertificateManager = new GatewayCertificateManager();
+                gatewayCertificateManager.removeFromGateways(alias);
+            } else {
+                log.error("Removing the certificate from Publisher node is failed. No certificate changes will "
+                        + "be affected.");
+            }
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error while reading tenant information", e);
+        }
+        return responseCode.getResponseCode();
+    }
+
+    @Override
+    public boolean isConfigured() {
+        CertificateManager certificateManager = new CertificateManagerImpl();
+        return certificateManager.isConfigured();
+    }
+
+    @Override
+    public List<CertificateMetadataDTO> getCertificates(String userName) throws APIManagementException {
+        CertificateManager certificateManager = new CertificateManagerImpl();
+        int tenantId;
+        try {
+            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error while reading tenant information", e);
+        }
+        return certificateManager.getCertificates(tenantId);
     }
 
     /**

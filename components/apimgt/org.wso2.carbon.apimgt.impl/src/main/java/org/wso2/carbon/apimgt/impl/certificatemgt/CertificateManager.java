@@ -17,7 +17,7 @@
  */
 package org.wso2.carbon.apimgt.impl.certificatemgt;
 
-import org.wso2.carbon.apimgt.impl.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 
 import java.util.List;
 
@@ -35,10 +35,10 @@ public interface CertificateManager {
      * @param endpoint    : The endpoint which the certificate will be mapped to.
      * @param tenantId    : The tenant id which the certificate is belongs to.
      * @return : SUCCESS : If Operation executed successfully
-     *           INTERNAL_SERVER_ERROR : If any internal error occurred.
-     *           ALIAS_EXISTS_IN_TRUST_STORE : If the alias already present in the trust store.
-     *           CERTIFICATE_EXPIRED : If the certificate is expired.
-     *           CERTIFICATE_FOR_ENDPOINT_EXISTS : If the endpoint exists in the database.
+     * INTERNAL_SERVER_ERROR : If any internal error occurred.
+     * ALIAS_EXISTS_IN_TRUST_STORE : If the alias already present in the trust store.
+     * CERTIFICATE_EXPIRED : If the certificate is expired.
+     * CERTIFICATE_FOR_ENDPOINT_EXISTS : If the endpoint exists in the database.
      */
     public ResponseCode addCertificateToPublisher(String certificate, String alias, String endpoint, int tenantId);
 
@@ -49,8 +49,8 @@ public interface CertificateManager {
      * @param endpoint : The endpoint which the certificate is mapped to.
      * @param tenantId : The owner tenant id.
      * @return : SUCCESS: If operation success
-     *           INTERNAL_SERVER_ERROR: If any internal error occurred
-     *           CERTIFICATE_NOT_FOUND : If Certificate is not found in the trust store.
+     * INTERNAL_SERVER_ERROR: If any internal error occurred
+     * CERTIFICATE_NOT_FOUND : If Certificate is not found in the trust store.
      */
     public ResponseCode deleteCertificateFromPublisher(String alias, String endpoint, int tenantId);
 
