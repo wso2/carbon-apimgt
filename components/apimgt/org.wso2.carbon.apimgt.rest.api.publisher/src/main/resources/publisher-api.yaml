@@ -2847,6 +2847,17 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/APIInfo'
+      pagination:
+        properties:
+          offset:
+            type: integer
+            example: 12
+          limit:
+            type: integer
+            example: 25
+          total:
+            type: integer
+            example: 1290
 
 #-----------------------------------------------------
 # The API Info resource

@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.store.dto;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIListPaginationDTO;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -33,6 +34,8 @@ public class APIListDTO  {
 
   private String createdTime = null;
 
+  private APIListPaginationDTO pagination = null;
+
   /**
   * gets and sets the lastUpdatedTime for APIListDTO
   **/
@@ -56,7 +59,7 @@ public class APIListDTO  {
     this.createdTime=createdTime;
   }
 
-  
+
   /**
    * Number of APIs returned.\n
    **/
@@ -108,6 +111,18 @@ public class APIListDTO  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("pagination")
+  public APIListPaginationDTO getPagination() {
+    return pagination;
+  }
+  public void setPagination(APIListPaginationDTO pagination) {
+    this.pagination = pagination;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -118,6 +133,7 @@ public class APIListDTO  {
     sb.append("  next: ").append(next).append("\n");
     sb.append("  previous: ").append(previous).append("\n");
     sb.append("  list: ").append(list).append("\n");
+    sb.append("  pagination: ").append(pagination).append("\n");
     sb.append("}\n");
     return sb.toString();
   }
