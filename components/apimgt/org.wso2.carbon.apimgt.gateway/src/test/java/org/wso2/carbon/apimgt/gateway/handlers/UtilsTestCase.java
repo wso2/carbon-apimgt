@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.gateway.handlers;
 
+import com.google.common.net.HttpHeaders;
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
@@ -7,6 +8,9 @@ import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axiom.soap.SOAPHeader;
 import org.apache.axiom.soap.SOAPHeaderBlock;
+import org.apache.axiom.soap.impl.dom.SOAPHeaderBlockImpl;
+import org.apache.axiom.soap.impl.dom.SOAPHeaderImpl;
+import org.apache.axis2.addressing.EndpointReference;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.core.axis2.Axis2Sender;
@@ -73,11 +77,18 @@ public class UtilsTestCase {
     public void testSetFaultPayload() {
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
                 .thenReturn(headers);
+        Mockito.when(messageContext.getProperty("error_message_type"))
+                .thenReturn("error_message_type");
         OMElement omElement = Mockito.mock(OMElement.class);
         SOAPEnvelope soapEnvelope = Mockito.mock(SOAPEnvelope.class);
         SOAPBody soapBody = Mockito.mock(SOAPBody.class);
         Mockito.when(messageContext.getEnvelope()).thenReturn(soapEnvelope);
         Mockito.when(soapEnvelope.getBody()).thenReturn(soapBody);
+        Utils.setFaultPayload(messageContext, omElement);
+        Assert.assertTrue(true);  // No error has occurred. hence test passes.
+
+        //when acceptType != null
+        Mockito.when(headers.get(HttpHeaders.ACCEPT)).thenReturn("text/html");
         Utils.setFaultPayload(messageContext, omElement);
         Assert.assertTrue(true);  // No error has occurred. hence test passes.
 
@@ -88,8 +99,13 @@ public class UtilsTestCase {
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = Mockito.mock(APIKeyValidationInfoDTO.class);
         Assert.assertTrue(Utils.hasAccessTokenExpired(apiKeyValidationInfoDTO));
 
-        //test for active access token by seeting timestamp to 1027/10/13 0:9:18 GMT
+        //test for active access token by seting timestamp to 1027/10/13 0:9:18 GMT
         Mockito.when(apiKeyValidationInfoDTO.getIssuedTime()).thenReturn(1823386158000L);
+        Mockito.when(apiKeyValidationInfoDTO.getEndUserToken()).thenReturn("endusertoken");
+        Assert.assertFalse(Utils.hasAccessTokenExpired(apiKeyValidationInfoDTO));
+
+        //test when accessTokenDO.getValidityPeriod() == Long.MAX_VALUE
+        Mockito.when(apiKeyValidationInfoDTO.getValidityPeriod()).thenReturn(Long.MAX_VALUE);
         Assert.assertFalse(Utils.hasAccessTokenExpired(apiKeyValidationInfoDTO));
 
     }
@@ -124,7 +140,24 @@ public class UtilsTestCase {
         Mockito.when(soapEnvelope.getHeader()).thenReturn(soapHeader);
         Mockito.when(soapHeader.examineAllHeaderBlocks()).thenReturn(iterator);
         Mockito.when(iterator.hasNext()).thenReturn(true, false);
+//        Mockito.when(iterator.next()).thenReturn(omelement);
         Mockito.when(iterator.next()).thenReturn(soapHeaderBlock);
+        Utils.setSOAPFault(messageContext, "", "code", "detail");
+        Assert.assertTrue(true);  // No error has occurred. hence test passes.
+        
+        //when messageContext.isSOAP11() is true
+        Mockito.when(messageContext.isSOAP11()).thenReturn(true);
+        Utils.setSOAPFault(messageContext, "", "code", "detail");
+        Assert.assertTrue(true);  // No error has occurred. hence test passes.
+
+        // when messageContext.getFaultTo() != null
+        EndpointReference endpointReference = Mockito.mock(EndpointReference.class);
+        Mockito.when(messageContext.getFaultTo()).thenReturn(endpointReference);
+        Utils.setSOAPFault(messageContext, "", "code", "detail");
+        Assert.assertTrue(true);  // No error has occurred. hence test passes.
+
+        // when messageContext.getFaultTo() != null
+        Mockito.when(messageContext.getFaultTo()).thenReturn(endpointReference);
         Utils.setSOAPFault(messageContext, "", "code", "detail");
         Assert.assertTrue(true);  // No error has occurred. hence test passes.
 

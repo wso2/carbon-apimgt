@@ -19,9 +19,10 @@
 package org.wso2.carbon.apimgt.gateway.handlers;
 
 import org.apache.axis2.AxisFault;
-import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.context.ConfigurationContextFactory;
+import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.transport.TSSLTransportFactory;
+import org.apache.thrift.transport.TSocket;
+import org.apache.thrift.transport.TTransport;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,76 +32,114 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
+import org.wso2.carbon.apimgt.gateway.handlers.security.thrift.ThriftUtils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
-import org.wso2.carbon.apimgt.keymgt.stub.validator.APIKeyValidationServiceStub;
+import org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyValidationService;
 import org.wso2.carbon.utils.CarbonUtils;
-
-import static junit.framework.Assert.fail;
 
 /**
  * Test class for WebsocketThriftClient
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({WebsocketThriftClient.class, ServiceReferenceHolder.class, CarbonUtils.class})
+@PrepareForTest({WebsocketThriftClient.class, ServiceReferenceHolder.class, CarbonUtils.class, ThriftUtils.class,
+        TSSLTransportFactory.class, APIKeyValidationService.class, APIKeyValidationService.Client.class,
+        TBinaryProtocol.class, TSocket.class})
 public class WebsocketThriftClientTestCase {
+    private String context = "/ishara";
+    private String apiVersion = "1.0";
+    private String apiKey = "PhoneVerify";
+    private String sessionId = "ggf7uuunhced7i8ftndi";
+    private ThriftUtils thriftUtils;
+    private APIKeyValidationService.Client client;
+    private APIKeyValidationService service;
+
+    private String host = "192.168.0.100";
+    private int port = 7711;
+    private int timeout = 900;
+    private org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyValidationInfoDTO thriftDTO;
+    private TBinaryProtocol protocol;
+
 
     @Before
-    public void setup() {
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
-        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        Mockito.when(serviceReferenceHolder.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL))
-                .thenReturn("http://localhost:8083");
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME))
-                .thenReturn("username");
-        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD))
-                .thenReturn("abc123");
+    public void setup() throws Exception {
+        PowerMockito.mockStatic(ThriftUtils.class);
+        thriftUtils = Mockito.mock(ThriftUtils.class);
+        Mockito.when(ThriftUtils.getInstance()).thenReturn(thriftUtils);
+        PowerMockito.when(thriftUtils.getSessionId()).thenReturn(sessionId);
+        Mockito.when(thriftUtils.getTrustStorePath()).thenReturn("path");
+        Mockito.when(thriftUtils.getTrustStorePassword()).thenReturn("pw");
+
+        PowerMockito.when(ThriftUtils.getThriftServerHost()).thenReturn(host);
+        Mockito.when(thriftUtils.getThriftPort()).thenReturn(port);
+        Mockito.when(thriftUtils.getThriftClientConnectionTimeOut()).thenReturn(timeout);
+
+        TSSLTransportFactory.TSSLTransportParameters params =
+                Mockito.mock(TSSLTransportFactory.TSSLTransportParameters.class);
+        PowerMockito.whenNew(TSSLTransportFactory.TSSLTransportParameters.class).withAnyArguments().thenReturn(params);
+
+        PowerMockito.mockStatic(TSSLTransportFactory.class);
+        PowerMockito.mockStatic(TSocket.class);
+        TTransport transport = Mockito.mock(TTransport.class);
+        TSocket tSocket = Mockito.mock(TSocket.class);
+        PowerMockito.when(TSSLTransportFactory.getClientSocket(host, port, timeout)).thenReturn(tSocket);
+
+        PowerMockito.mockStatic(TBinaryProtocol.class);
+        protocol = Mockito.mock(TBinaryProtocol.class);
+        PowerMockito.whenNew(TBinaryProtocol.class).withAnyArguments().thenReturn(protocol);
+
+        thriftDTO = Mockito.mock(org.wso2.carbon.apimgt.impl.generated.thrift.APIKeyValidationInfoDTO.class);
+
+    }
+
+    /*
+    * Test for APISecurityException when Error creating the transport
+    * */
+    @Test
+    public void testGetAPIKeyDataAPISecurityException() throws AxisFault {
+        try {
+            WebsocketThriftClient websocketThriftClient = new WebsocketThriftClient();
+        } catch (APISecurityException e) {
+            Assert.assertTrue(e.getMessage().startsWith("Error creating the transport"));
+        }
     }
 
     /*
     * Test for APISecurityException when Error while accessing backend services
     * */
     @Test
-    public void testGetAPIKeyDataAPISecurityException() {
-        try {
-            WebsocketWSClient websocketWSClient = new WebsocketWSClient();
-            try {
-                ConfigurationContext ctx = ConfigurationContextFactory
-                        .createConfigurationContextFromFileSystem(null, null);
-                APIKeyValidationInfoDTO apiKeyValidationInfoDTOActual = websocketWSClient.getAPIKeyData("/ishara", "1.0", "PhoneVerify");
-            } catch (AxisFault axisFault) {
-                fail("AxisFault is thrown when creating ConfigurationContext " + axisFault.getMessage());
-            }
-        } catch (APISecurityException e) {
-            Assert.assertTrue(e.getMessage().startsWith("Error while accessing backend services for API key validation"));
-        }
+    public void testGetAPIKeyDataAPISecurityException1() throws Exception {
+
+        PowerMockito.mockStatic(APIKeyValidationService.class);
+        PowerMockito.mockStatic(APIKeyValidationService.Client.class);
+        service = Mockito.mock(APIKeyValidationService.class);
+        client = Mockito.mock(APIKeyValidationService.Client.class);
+        PowerMockito.whenNew(APIKeyValidationService.Client.class).withArguments(protocol).thenReturn(client);
+        WebsocketThriftClient websocketThriftClient = new WebsocketThriftClient();
+
+        Mockito.when(client.validateKeyforHandshake(context, apiVersion,
+                apiKey, sessionId)).thenReturn(thriftDTO);
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTOActual = websocketThriftClient.getAPIKeyData(context,
+                apiVersion, apiKey);
+        Assert.assertFalse(apiKeyValidationInfoDTOActual.isAuthorized());
+
     }
 
+    /*
+    * Test for  getAPIKeyData when login failed
+    * */
+    @Test(expected = APISecurityException.class)
+    public void testGetAPIKeyDataLodinFailed() throws Exception {
+        PowerMockito.when(thriftUtils.getSessionId()).thenReturn(null);
 
-    @Test
-    public void testGetAPIKeyData() throws Exception {
-        WebsocketWSClient websocketWSClient = new WebsocketWSClient();
-        ServiceClient serviceClient = Mockito.mock(ServiceClient.class);
-        PowerMockito.mockStatic(CarbonUtils.class);
-        org.wso2.carbon.apimgt.impl.dto.xsd.APIKeyValidationInfoDTO apiKeyValidationInfoDTO1 =
-                Mockito.mock(org.wso2.carbon.apimgt.impl.dto.xsd.APIKeyValidationInfoDTO.class);
-        Mockito.when(apiKeyValidationInfoDTO1.getThrottlingDataList()).thenReturn(new String[]{""});
-        Mockito.when(apiKeyValidationInfoDTO1.getAuthorized()).thenReturn(true);
-        APIKeyValidationServiceStub apiKeyValidationServiceStub = Mockito.mock(APIKeyValidationServiceStub.class);
-        Mockito.when(apiKeyValidationServiceStub._getServiceClient()).thenReturn(serviceClient);
-        PowerMockito.doNothing().when(CarbonUtils.class, "setBasicAccessSecurityHeaders", "", "", serviceClient);
+        PowerMockito.mockStatic(APIKeyValidationService.class);
+        PowerMockito.mockStatic(APIKeyValidationService.Client.class);
+        service = Mockito.mock(APIKeyValidationService.class);
+        WebsocketThriftClient websocketThriftClient = new WebsocketThriftClient();
 
-        websocketWSClient.setKeyValidationServiceStub(apiKeyValidationServiceStub);
-        Mockito.when(apiKeyValidationServiceStub.validateKeyforHandshake("/ishara", "1.0",
-                "PhoneVerify")).thenReturn(apiKeyValidationInfoDTO1);
-        ConfigurationContext ctx = ConfigurationContextFactory
-                .createConfigurationContextFromFileSystem(null, null);
-        APIKeyValidationInfoDTO apiKeyValidationInfoDTOActual = websocketWSClient.getAPIKeyData("/ishara", "1.0", "PhoneVerify");
-        Assert.assertTrue(apiKeyValidationInfoDTOActual.isAuthorized());
+        APIKeyValidationInfoDTO apiKeyValidationInfoDTOActual = websocketThriftClient.getAPIKeyData(context,
+                apiVersion, "");
+        Assert.assertFalse(apiKeyValidationInfoDTOActual.isAuthorized());
+
     }
 }

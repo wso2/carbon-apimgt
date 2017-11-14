@@ -138,7 +138,7 @@ public class WebsocketInboundHandlerTestCase {
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
         PowerMockito.when(cacheManager.createCacheBuilder(APIConstants.GATEWAY_KEY_CACHE_NAME)).thenReturn(cacheBuilder);
-        PowerMockito.when(DataPublisherUtil.getHostAddress()).thenReturn("192.168.0.1:8000");
+        PowerMockito.when(DataPublisherUtil.getHostAddress()).thenReturn("192.168.0.1:18000");
         APIMgtUsageDataBridgeDataPublisher apiMgtUsageDataBridgeDataPublisher = Mockito.mock(APIMgtUsageDataBridgeDataPublisher.class);
         Mockito.when(fullHttpRequest.getUri()).thenReturn(TENANT_URL);
         Mockito.when(fullHttpRequest.headers()).thenReturn(headers);

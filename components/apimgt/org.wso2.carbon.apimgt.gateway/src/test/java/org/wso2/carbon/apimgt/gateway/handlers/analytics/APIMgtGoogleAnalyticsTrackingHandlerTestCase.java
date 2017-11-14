@@ -128,7 +128,7 @@ public class APIMgtGoogleAnalyticsTrackingHandlerTestCase {
         Assert.assertTrue(apiMgtGoogleAnalyticsTrackingHandler.handleRequest(messageContext));
 
         //test when HOST and X_FORWARDED_FOR_HEADER are set
-        transportHeaders.put(HttpHeaders.HOST, "localhost:8080");
+        transportHeaders.put(HttpHeaders.HOST, "localhost:18080");
         transportHeaders.put(APIMgtUsagePublisherConstants.X_FORWARDED_FOR_HEADER, "192.168.0.34");
         Assert.assertTrue(apiMgtGoogleAnalyticsTrackingHandler.handleRequest(messageContext));
 
