@@ -53,7 +53,7 @@ public class WebsocketUtilTestCase {
     private String apiName = "PhoneVerify";
     private String cacheKey = "ishara";
     private String cachedToken = "235erwytgtkyb";
-    private String apiKeyValidationURL = "http://localhost:8083";
+    private String apiKeyValidationURL = "http://localhost:18083";
     private CacheManager cacheManager;
     private ServiceReferenceHolder serviceReferenceHolder;
     private Cache gwTokenCache;

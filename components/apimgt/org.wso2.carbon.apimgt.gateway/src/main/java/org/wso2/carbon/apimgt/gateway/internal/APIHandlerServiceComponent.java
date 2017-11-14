@@ -64,7 +64,7 @@ public class APIHandlerServiceComponent {
         clientPool = APIKeyValidatorClientPool.getInstance();
         thriftClientPool = ThriftKeyValidatorClientPool.getInstance();
 
-        String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
+        String filePath = getFilePath();
 		try {
 			configuration.load(filePath);
 
@@ -150,6 +150,15 @@ public class APIHandlerServiceComponent {
             log.debug("API manager configuration service unbound from the API handlers");
         }
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
+    }
+
+    protected String getFilePath() {
+        return CarbonUtils.getCarbonHome() + File.separator + "repository" +
+                File.separator + "conf" + File.separator + "api-manager.xml";
+    }
+
+    protected void setConfiguration(APIManagerConfiguration configuration) {
+        this.configuration = configuration;
     }
 
 }

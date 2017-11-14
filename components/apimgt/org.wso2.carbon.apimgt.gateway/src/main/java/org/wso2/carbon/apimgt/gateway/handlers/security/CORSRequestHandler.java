@@ -79,38 +79,22 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
      */
     void initializeHeaders() {
         if (allowHeaders == null) {
-            allowHeaders = getAllowedHeaders();
+            allowHeaders = APIUtil.getAllowedHeaders();
         }
         if (allowedOrigins == null) {
-            String allowedOriginsList = getAllowedOrigins();
+            String allowedOriginsList = APIUtil.getAllowedOrigins();
             if (!allowedOriginsList.isEmpty()) {
                 allowedOrigins = new HashSet<String>(Arrays.asList(allowedOriginsList.split(",")));
             }
         }
         if (allowCredentials == null) {
-            allowCredentialsEnabled = getIsAllowCredentials();
+            allowCredentialsEnabled = APIUtil.isAllowCredentials();
         }
         if (allowedMethods == null) {
-            allowedMethods = findAllowedMethods();
+            allowedMethods = APIUtil.getAllowedMethods();
         }
 
         initializeHeaderValues = true;
-    }
-
-    protected String findAllowedMethods() {
-        return APIUtil.getAllowedMethods();
-    }
-
-    protected boolean getIsAllowCredentials() {
-        return APIUtil.isAllowCredentials();
-    }
-
-    protected String getAllowedOrigins() {
-        return APIUtil.getAllowedOrigins();
-    }
-
-    protected String getAllowedHeaders() {
-        return APIUtil.getAllowedHeaders();
     }
 
     public void destroy() {
@@ -207,7 +191,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                 if (corsSequence != null) {
                     corsSequence.mediate(messageContext);
                 }
-                sendResponse(messageContext);
+                Utils.send(messageContext, HttpStatus.SC_OK);
                 return false;
             } else if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(apiImplementationType)) {
                 setCORSHeaders(messageContext, selectedResource);
@@ -218,10 +202,6 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
         } finally {
             stopMetricTimer(context);
         }
-    }
-
-    protected void sendResponse(MessageContext messageContext) {
-        Utils.send(messageContext, HttpStatus.SC_OK);
     }
 
     protected String getFullRequestPath(MessageContext messageContext) {

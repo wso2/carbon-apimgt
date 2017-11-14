@@ -31,10 +31,19 @@ import org.apache.synapse.rest.dispatch.DispatcherHelper;
 import org.apache.synapse.rest.dispatch.URLMappingHelper;
 import org.apache.synapse.rest.version.VersionStrategy;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.metrics.manager.Timer;
 
 import java.util.TreeMap;
@@ -42,10 +51,30 @@ import java.util.TreeMap;
 /**
  * Test class for CORSRequestHandler
  */
+
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({APIUtil.class, Utils.class, ServiceReferenceHolder.class})
 public class CORSRequestHandlerTestCase {
+    private APIManagerConfiguration apiManagerConfiguration;
+
+    @Before
+    public void setup() {
+        PowerMockito.mockStatic(APIUtil.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        PowerMockito.when(APIUtil.getAllowedMethods()).thenReturn("GET,PUT,POST,DELETE,PATCH,OPTIONS");
+        PowerMockito.when(APIUtil.isAllowCredentials()).thenReturn(false);
+        PowerMockito.when(APIUtil.getAllowedOrigins()).thenReturn("*");
+        PowerMockito.when(APIUtil.getAllowedHeaders()).thenReturn("authorization,Access-Control-Allow-Origin,Content-Type,SOAPAction");
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        PowerMockito.mockStatic(Utils.class);
+
+    }
 
     @Test
-    public void testHandleRequest() {
+    public void testHandleRequest() throws Exception {
         SynapseEnvironment synapseEnvironment = Mockito.mock(SynapseEnvironment.class);
         MessageContext messageContext = Mockito.mock(Axis2MessageContext.class);
         org.apache.axis2.context.MessageContext axis2MsgCntxt =
@@ -68,6 +97,7 @@ public class CORSRequestHandlerTestCase {
         Mockito.when(api.getVersionStrategy()).thenReturn(versionStrategy);
         Mockito.when(synapseConfiguration.getAPI("admin-AT-wso2.com--PizzaShackAPI")).thenReturn(api);
         Mockito.when(messageContext.getConfiguration()).thenReturn(synapseConfiguration);
+
         CORSRequestHandler corsRequestHandler = createCORSRequestHandler();
 
         corsRequestHandler.init(synapseEnvironment);
@@ -88,8 +118,19 @@ public class CORSRequestHandlerTestCase {
 
         TreeMap transportHeaders = new TreeMap();
         transportHeaders.put("Origin", "");
+
         Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS)).thenReturn(transportHeaders);
         Assert.assertTrue(corsRequestHandler.handleRequest(messageContext));
+
+
+        DispatcherHelper dispatcherHelper1 = new URLMappingHelper("/ishara/1.0") {
+            @Override
+            public String getString() {
+                return "/xx";
+            }
+        };
+        Mockito.when(resource.getDispatcherHelper()).thenReturn(dispatcherHelper1);
+
 
         Mockito.when(axis2MsgCntxt.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("OPTIONS");
         //test for OPTIONS request when OPTIONS is not supported by SupportedHTTPVerbs
@@ -114,7 +155,7 @@ public class CORSRequestHandlerTestCase {
     public void testGettersAndSetters() {
         CORSRequestHandler corsRequestHandler = new CORSRequestHandler();
         corsRequestHandler.setAllowCredentials("true");
-        corsRequestHandler.getAllowedMethods();
+        corsRequestHandler.setAllowedMethods("");
         corsRequestHandler.setAllowedMethods("");
         corsRequestHandler.setInline("");
         corsRequestHandler.setApiImplementationType("");
@@ -136,23 +177,8 @@ public class CORSRequestHandlerTestCase {
             }
 
             @Override
-            protected String findAllowedMethods() {
-                return "GET,PUT,POST,DELETE,PATCH,OPTIONS";
-            }
-
-            @Override
-            protected boolean getIsAllowCredentials() {
-                return false;
-            }
-
-            @Override
-            protected String getAllowedOrigins() {
-                return "*";
-            }
-
-            @Override
-            protected String getAllowedHeaders() {
-                return "authorization,Access-Control-Allow-Origin,Content-Type,SOAPAction";
+            protected String getFullRequestPath(MessageContext messageContext) {
+                return "/ishara/1.0/xx";
             }
 
             @Override
@@ -166,21 +192,10 @@ public class CORSRequestHandlerTestCase {
             }
 
             @Override
-            protected String getFullRequestPath(MessageContext messageContext) {
-                return "/ishara/1.0/xx";
-            }
-
-            @Override
             protected boolean isCorsEnabled() {
                 return true;
             }
 
-            @Override
-            protected void sendResponse(MessageContext messageContext) {
-
-            }
         };
     }
-
-
 }
