@@ -1897,6 +1897,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             artifact.setId(UUID.randomUUID().toString());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, newVersion);
 
+            //If the APIEndpointPasswordRegistryHandler is enabled set the endpoint password from the registry hidden
+            // property
+            if ((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
+                    .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD))) {
+                artifact.setAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD,
+                        apiSourceArtifact.getProperty(APIConstants.REGISTRY_HIDDEN_ENDPOINT_PROPERTY));
+            }
+
             //Check the status of the existing api,if its not in 'CREATED' status set
             //the new api status as "CREATED"
             String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
