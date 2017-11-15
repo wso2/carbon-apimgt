@@ -218,6 +218,8 @@ public class FileEncryptionUtility {
         return aesKey;
     }
 
+    /* Getters and Setters */
+
     public FileEncryptionConfigurations getConfig() {
         return config;
     }
@@ -226,11 +228,11 @@ public class FileEncryptionUtility {
         this.config = config;
     }
 
-    public String getAesKeyFileLocation() {
+    String getAesKeyFileLocation() {
         return aesKeyFileLocation;
     }
 
-    public void setAesKeyFileLocation() {
+    void setAesKeyFileLocation() {
         this.aesKeyFileLocation = System.getProperty("carbon.home") + SECURITY_DIR + File.separator
                 + EncryptionConstants.ENCRYPTED_AES_KEY_FILE;
     }

@@ -2100,7 +2100,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
                 /*
                  * The .init() method above sets the filtering parameters (if provided)
-                 * to the ServiceDiscoverer abstract class instance.
+                 * to the ServiceDiscoverer impl class instance.
                  *
                  * Let's check whether those filtering parameters : "namespace" and/or "criteria" are set,
                  * and call ServiceDiscoverer Impl class's #listServices method accordingly

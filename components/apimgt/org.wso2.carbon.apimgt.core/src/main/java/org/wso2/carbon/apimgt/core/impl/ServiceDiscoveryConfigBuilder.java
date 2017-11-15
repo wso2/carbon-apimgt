@@ -46,7 +46,7 @@ public class ServiceDiscoveryConfigBuilder {
     }
 
     /**
-     * Clears {@link ServiceDiscoveryConfigurations} instance
+     * Clears the {@link ServiceDiscoveryConfigurations} instance
      */
     public static void clearServiceDiscoveryConfig() {
         serviceDiscoveryConfig = null;

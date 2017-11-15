@@ -28,9 +28,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 /**
- * Class to hold Container Management System specific Service Discovery configurations
+ * Class to hold Implementation specific Service Discovery configurations
  */
-@Configuration(description = "Container Management System specific Service Discovery configurations")
+@Configuration(description = "Implementation specific Service Discovery configurations")
 public class ServiceDiscoveryImplConfig {
 
     @Element(description = "implementation class")

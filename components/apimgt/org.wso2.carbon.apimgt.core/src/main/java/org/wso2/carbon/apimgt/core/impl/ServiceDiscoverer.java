@@ -37,11 +37,11 @@ public abstract class ServiceDiscoverer {
 
 
     /**
-     * Initializes the necessary parameters,
-     * Must be called by all subclasses of Service Discoverer within their own overriding .init() methods
+     * Initializes the parameters namespaceFilter, criteriaFilter,
+     * and calls #initImpl(java.util.HashMap) method
      *
      * @param implParameters  implementation parameters provided in the configuration
-     * @throws ServiceDiscoveryException if an error occurs in the implementation's init method
+     * @throws ServiceDiscoveryException if an error occurs in the implementation's initImpl method
      */
     public void init(HashMap<String, String> implParameters) throws ServiceDiscoveryException {
         this.namespaceFilter = implParameters.get(ServiceDiscoveryConstants.NAMESPACE);
@@ -61,6 +61,13 @@ public abstract class ServiceDiscoverer {
         initImpl(implParameters);
     }
 
+
+    /**
+     * Initialization method for all implementation classes
+     *
+     * @param implParameters implementation parameters added by #init(java.util.HashMap) method
+     * @throws ServiceDiscoveryException if an error occurs while initializing
+     */
     abstract void initImpl(HashMap<String, String> implParameters) throws ServiceDiscoveryException;
 
     /**
@@ -83,7 +90,7 @@ public abstract class ServiceDiscoverer {
     /**
      * Gives a list of endpoints filtered by criteria.
      *
-     * @param criteria    A set of criteria, all the endpoints must belong to
+     * @param criteria    A set of criteria which all the endpoints must belong to
      * @return List of Endpoints with the specified criteria
      * @throws ServiceDiscoveryException if an error occurs while listing
      */
@@ -93,7 +100,7 @@ public abstract class ServiceDiscoverer {
      * Gives a list of endpoints filtered by both namespace and criteria.
      *
      * @param namespace   Namespace of the expected endpoints
-     * @param criteria    A set of criteria, all the endpoints must belong to
+     * @param criteria    A set of criteria which all the endpoints must belong to
      * @return List of Endpoints with the specified namespace and criteria
      * @throws ServiceDiscoveryException if an error occurs while listing
      */
@@ -102,12 +109,13 @@ public abstract class ServiceDiscoverer {
 
     /**
      * Builds an Endpoint
+     *
      * @param id                Temporary id to be used by the UI
      * @param name              Name of the service
      * @param endpointConfig    Json string containing endpoint URL, namespace, criteria
      * @param maxTps            MaxTps
      * @param type              Application level protocol (eg. http/https)
-     * @param endpointSecurity  Json string about endpoint security necessarily including "enabled" boolean key
+     * @param endpointSecurity  Json string on endpoint security necessarily including "enabled" boolean key
      * @param applicableLevel   Whether applicable level is global or production only
      * @return {@link org.wso2.carbon.apimgt.core.models.Endpoint} object
      */

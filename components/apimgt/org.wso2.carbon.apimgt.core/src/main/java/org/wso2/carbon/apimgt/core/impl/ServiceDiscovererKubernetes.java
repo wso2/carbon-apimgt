@@ -78,7 +78,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
     /**
      * Initializes OpenShiftClient (extended KubernetesClient) and sets the necessary parameters
      *
-     * @param implParameters implementation parameters provided in the configuration
+     * @param implParameters implementation parameters added by the super class #initImpl(java.util.HashMap) method
      * @throws ServiceDiscoveryException if an error occurs while initializing the client
      */
     @Override
