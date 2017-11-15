@@ -4,6 +4,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher;
 import io.swagger.annotations.ApiParam;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThreatProtectionPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThreatProtectionPolicyIdListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThreatProtectionPolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.factories.ThreatProtectionApiServiceFactory;
 
@@ -63,6 +64,22 @@ public class ThreatProtectionApi implements Microservice  {
         return delegate.threatProtectionAddPolicyApiIdPolicyIdPost(apiId,threatProtectionPolicyId,request);
     }
     @GET
+    @Path("/apis/{apiId}/policies")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Get policy associated to an API", notes = "This can be used to get a policy associated with an API", response = ThreatProtectionPolicyIdListDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={  })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Ok. Associated policy is returned.", response = ThreatProtectionPolicyIdListDTO.class) })
+    public Response threatProtectionApisApiIdPoliciesGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
+ ,@Context Request request)
+    throws NotFoundException {
+        return delegate.threatProtectionApisApiIdPoliciesGet(apiId,request);
+    }
+    @GET
     @Path("/policies")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -78,20 +95,22 @@ public class ThreatProtectionApi implements Microservice  {
         return delegate.threatProtectionPoliciesGet(request);
     }
     @GET
-    @Path("/policy/{apiId}")
+    @Path("/policies/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get policy associated to an API", notes = "This can be used to get a policy associated with an API", response = ThreatProtectionPolicyDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Get a threat protection policy", notes = "", response = ThreatProtectionPolicyDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
     }, tags={  })
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Ok. Associated policy is returned.", response = ThreatProtectionPolicyDTO.class) })
-    public Response threatProtectionPolicyApiIdGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Ok. Policy is returned", response = ThreatProtectionPolicyDTO.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "No policy found for given policy ID", response = ThreatProtectionPolicyDTO.class) })
+    public Response threatProtectionPoliciesPolicyIdGet(@ApiParam(value = "The UUID of a Policy ",required=true) @PathParam("ThreatProtectionPolicyId") String threatProtectionPolicyId
  ,@Context Request request)
     throws NotFoundException {
-        return delegate.threatProtectionPolicyApiIdGet(apiId,request);
+        return delegate.threatProtectionPoliciesPolicyIdGet(threatProtectionPolicyId,request);
     }
     @POST
     @Path("/remove-policy/{apiId}/{policyId}")

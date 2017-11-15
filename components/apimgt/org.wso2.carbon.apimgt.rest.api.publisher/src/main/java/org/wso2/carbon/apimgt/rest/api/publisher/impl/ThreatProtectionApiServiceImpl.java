@@ -13,6 +13,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
 
 
+import java.util.HashSet;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 
@@ -45,6 +46,24 @@ public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
             return Response.status(500).entity(errorMsg).build();
         }
     }
+
+    @Override
+    public Response threatProtectionApisApiIdPoliciesGet(String apiId, Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            API api = apiPublisher.getAPIbyUUID(apiId);
+            Set<String> policies = api.getThreatProtectionPolicies();
+            if (policies == null) {
+                policies = new HashSet<>();
+            }
+            return Response.status(200).entity(policies).build();
+        } catch (APIManagementException e) {
+            String errorMsg = "Error getting threat protection policies of API (ID: " + apiId + ").";
+            return Response.status(500).entity(errorMsg).build();
+        }
+    }
+
     @Override
     public Response threatProtectionPoliciesGet( Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
@@ -57,21 +76,12 @@ public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
         }
         return Response.status(500).build();
     }
-    @Override
-    public Response threatProtectionPolicyApiIdGet(String apiId
-            ,Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername(request);
-        try {
-            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            API api = apiPublisher.getAPIbyUUID(apiId);
-            Set<String> policies = api.getThreatProtectionPolicies();
-            return Response.status(200).entity(policies).build();
-        } catch (APIManagementException e) {
-            String errorMsg = "Error getting threat protection policies of API (ID: " + apiId + ").";
-            return Response.status(500).entity(errorMsg).build();
-        }
 
+    @Override
+    public Response threatProtectionPoliciesPolicyIdGet(String threatProtectionPolicyId, Request request) throws NotFoundException {
+        return null;
     }
+
     @Override
     public Response threatProtectionRemovePolicyApiIdPolicyIdPost(String apiId
             , String threatProtectionPolicyId

@@ -2959,7 +2959,7 @@ paths:
         500:
           description: Error removing policy association.
 
-  /threat-protection/policy/{apiId}:
+  /threat-protection/apis/{apiId}/policies:
     get:
       summary: Get policy associated to an API
       description: This can be used to get a policy associated with an API
@@ -2971,6 +2971,18 @@ paths:
           schema:
             $ref: '#/definitions/ThreatProtectionPolicyIdList'
 
+  /threat-protection/policies/{policyId}:
+    get:
+      summary: Get a threat protection policy
+      parameters:
+        - $ref: '#/parameters/threatProtectionPolicyId'
+      responses:
+        200:
+          description: Ok. Policy is returned
+          schema:
+            $ref: '#/definitions/ThreatProtectionPolicy'
+        404:
+          description: No policy found for given policy ID
 
 
 ######################################################
