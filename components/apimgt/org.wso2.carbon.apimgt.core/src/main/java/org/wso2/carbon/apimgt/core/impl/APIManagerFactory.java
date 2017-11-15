@@ -120,8 +120,8 @@ public class APIManagerFactory {
             APIPublisherImpl apiPublisher = new APIPublisherImpl(username, getIdentityProvider(), getKeyManager(),
                     DAOFactory.getApiDAO(), DAOFactory.getApplicationDAO(), DAOFactory.getAPISubscriptionDAO(),
                     DAOFactory.getPolicyDAO(), geApiLifecycleManager(), DAOFactory.getLabelDAO(),
-                    DAOFactory.getWorkflowDAO(), DAOFactory.getTagDAO(), new GatewaySourceGeneratorImpl(),
-                    new APIGatewayPublisherImpl());
+                    DAOFactory.getWorkflowDAO(), DAOFactory.getTagDAO(), DAOFactory.getThreatProtectionDAO(),
+                    new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
 
             // Register all the observers which need to observe 'Publisher' component
             apiPublisher.registerObserver(new EventLogger());

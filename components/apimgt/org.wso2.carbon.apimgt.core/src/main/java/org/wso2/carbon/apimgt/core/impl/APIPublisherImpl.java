@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
+import org.wso2.carbon.apimgt.core.dao.ThreatProtectionDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -75,6 +76,7 @@ import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.core.template.APIConfigContext;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
 import org.wso2.carbon.apimgt.core.template.dto.NotificationDTO;
@@ -122,11 +124,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     private Map<String, EventObserver> eventObservers = new HashMap<>();
 
     public APIPublisherImpl(String username, IdentityProvider idp, KeyManager keyManager, ApiDAO apiDAO,
-            ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
-            APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO, TagDAO tagDAO,
-            GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGatewayPublisher) {
+                            ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
+                            APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
+                            TagDAO tagDAO, ThreatProtectionDAO threatProtectionDAO,
+                            GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGatewayPublisher) {
         super(username, idp, keyManager, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager,
-                labelDAO, workflowDAO, tagDAO, gatewaySourceGenerator, apiGatewayPublisher);
+                labelDAO, workflowDAO, tagDAO, threatProtectionDAO, gatewaySourceGenerator, apiGatewayPublisher);
     }
 
     /**
@@ -2045,6 +2048,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             policies.remove(policyId);
         }
         updateAPI(builder);
+    }
+
+    @Override
+    public List<ThreatProtectionPolicy> getThreatProtectionPolicies() throws APIManagementException {
+        ThreatProtectionDAO dao = getThreatProtectionDAO();
+        return dao.getPolicies();
     }
 
     private void cleanupPendingTaskForAPIStateChange(String apiId) throws APIManagementException {

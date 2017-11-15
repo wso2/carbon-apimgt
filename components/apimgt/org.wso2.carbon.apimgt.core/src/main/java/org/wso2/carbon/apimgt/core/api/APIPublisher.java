@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 import org.wso2.carbon.lcm.sql.beans.LifecycleHistoryBean;
@@ -558,4 +559,6 @@ public interface APIPublisher extends APIManager {
     void addThreatProtectionPolicy(String apiId, String policyId) throws APIManagementException;
 
     void deleteThreatProtectionPolicy(String apiId, String policyId) throws APIManagementException;
+
+    List<ThreatProtectionPolicy> getThreatProtectionPolicies() throws APIManagementException;
 }

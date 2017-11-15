@@ -2969,7 +2969,7 @@ paths:
         200:
           description: Ok. Associated policy is returned.
           schema:
-            $ref: '#/definitions/ThreatProtectionPolicy'
+            $ref: '#/definitions/ThreatProtectionPolicyIdList'
 
 
 
@@ -4147,6 +4147,30 @@ definitions:
               hasSoapBinding:
                 description: Indicates whether the WSDL contains SOAP Bindings
                 type: boolean
+
+
+#-----------------------------------------------------
+# The Threat Protection Policy ID resource
+#-----------------------------------------------------
+  ThreatProtectionPolicyId:
+    title: "Threat Protection Policy ID"
+    required:
+      - id
+    properties:
+      id:
+        type: string
+        description: Threat Protection Policy ID
+
+#-----------------------------------------------------
+# The Threat Protection Policy ID List resource
+#-----------------------------------------------------
+  ThreatProtectionPolicyIdList:
+    title: "Threat Protection Policy ID List"
+    properties:
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ThreatProtectionPolicyId'
 
 #-----------------------------------------------------
 # The Threat Protection Policy List resource

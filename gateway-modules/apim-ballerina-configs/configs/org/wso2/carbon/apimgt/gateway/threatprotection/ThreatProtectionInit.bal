@@ -37,10 +37,10 @@ function storePolicies(json policies) {
         policyType, _ = (string)policy["type"];
         if (policyType == "XML") {
             xmlThreatProtectionConf = utils:fromJSONToXMLThreatProtectionInfoDTO(policy);
-            threatprotection:configureXmlAnalyzer(xmlThreatProtectionConf, "THREAT_PROTECTION_XML_POLICY_ADD");
+            threatprotection:configureXmlAnalyzer(xmlThreatProtectionConf, "THREAT_PROTECTION_POLICY_ADD");
         } else if (policyType == "JSON") {
             jsonThreatProtectionConf = utils:fromJSONToJSONThreatProtectionInfoDTO(policy);
-            threatprotection:configureJsonAnalyzer(jsonThreatProtectionConf, "THREAT_PROTECTION_JSON_POLICY_ADD");
+            threatprotection:configureJsonAnalyzer(jsonThreatProtectionConf, "THREAT_PROTECTION_POLICY_ADD");
         }
         i = i + 1;
     }
