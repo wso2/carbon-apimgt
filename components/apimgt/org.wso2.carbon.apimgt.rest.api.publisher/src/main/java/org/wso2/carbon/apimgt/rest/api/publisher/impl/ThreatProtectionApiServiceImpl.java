@@ -1,31 +1,21 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
-import org.wso2.carbon.apimgt.core.dao.ThreatProtectionDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.*;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
+import org.wso2.carbon.apimgt.rest.api.publisher.ThreatProtectionApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
+import org.wso2.msf4j.Request;
 
-
+import javax.ws.rs.core.Response;
 import java.util.HashSet;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
-
-import java.io.InputStream;
 import java.util.Set;
-
-import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
-import org.wso2.msf4j.Request;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
     private static final Logger log = LoggerFactory.getLogger(ThreatProtectionApiServiceImpl.class);

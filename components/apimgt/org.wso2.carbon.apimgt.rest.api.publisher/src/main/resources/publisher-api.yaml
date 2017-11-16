@@ -2934,6 +2934,9 @@ paths:
             $ref: '#/definitions/ThreatProtectionPolicyList'
 
   /threat-protection/add-policy/{apiId}/{policyId}:
+    security:
+      - OAuth2Security:
+        - apim:api_update
     post:
       summary: Associate a policy to an API
       description: This can be used to asscociate a policy with an API
@@ -2947,6 +2950,9 @@ paths:
           description: Error accociating policy with API
 
   /threat-protection/remove-policy/{apiId}/{policyId}:
+    security:
+      - OAuth2Security:
+        - apim:api_update
     post:
       summary: Remove a policy accociated with an API
       description: This can be used to remove a policy associated with an API
@@ -2960,6 +2966,9 @@ paths:
           description: Error removing policy association.
 
   /threat-protection/apis/{apiId}/policies:
+    security:
+      - OAuth2Security:
+        - apim:api_view
     get:
       summary: Get policy associated to an API
       description: This can be used to get a policy associated with an API

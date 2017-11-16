@@ -1,6 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.core.impl;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIGateway;
@@ -10,25 +9,18 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
-import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
-import org.wso2.carbon.apimgt.rest.api.core.*;
-import org.wso2.carbon.apimgt.rest.api.core.dto.*;
-
-
-import java.sql.ResultSet;
-import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.core.ApiResponseMessage;
 import org.wso2.carbon.apimgt.rest.api.core.NotFoundException;
+import org.wso2.carbon.apimgt.rest.api.core.ThreatProtectionApiService;
+import org.wso2.carbon.apimgt.rest.api.core.dto.ThreatProtectionPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.ThreatProtectionPolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.core.utils.MappingUtil;
+import org.wso2.msf4j.Request;
 
-import java.io.InputStream;
+import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
-import org.wso2.carbon.apimgt.rest.api.core.utils.MappingUtil;
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.wso2.msf4j.formparam.FileInfo;
-import org.wso2.msf4j.Request;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
 public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
 

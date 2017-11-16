@@ -17,6 +17,7 @@ import org.wso2.carbon.apimgt.ballerina.threatprotection;
     connectionFactoryName:"TopicConnectionFactory",
     destination:"ThreatProtectionTopic"
 }
+
 service<jms> ThreatProtectionJmsService {
 
     @http:GET {}
