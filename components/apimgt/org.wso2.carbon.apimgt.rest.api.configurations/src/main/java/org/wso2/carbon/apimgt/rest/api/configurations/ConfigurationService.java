@@ -34,6 +34,10 @@ public class ConfigurationService {
         return instance;
     }
 
+    public static String getEnvironmentName(){
+        return getInstance().getEnvironmentConfigurations().getEnvironmentName();
+    }
+
     public EnvironmentConfigurations getEnvironmentConfigurations() {
         return environmentConfigurations;
     }

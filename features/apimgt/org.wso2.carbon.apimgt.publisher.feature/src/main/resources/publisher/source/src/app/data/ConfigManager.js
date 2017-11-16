@@ -16,22 +16,48 @@
  * under the License.
  */
 
-import {Axios} from 'axios'
-import DefaultConfig from './DefaultConfigs.json'
+import axios from 'axios'
 
 class ConfigManager {
 
     constructor() {
-        this.preBuildConfigs = DefaultConfig;
-        this.runTimeConfigs = {};
-        this.runTimeConfigLocation = ""; // URL to fetch runtime config JSON
     }
 
-    checkRunTimeConfigs() {
-
-    }
-
-    getConfigs() {
-
+    /**
+     * get configurations from server: deployment.yaml
+     * @returns {Object}: configuration object
+     */
+    static getConfigs() {
+        return {
+            'environments': ConfigRequestMethods.promised_environments()
+        };
     }
 }
+
+/**
+ * @type {{ConstPath: StringPath}} ConfigRequestPaths: Configuration requesting url paths
+ */
+const ConfigRequestPaths = {
+    ENVIRONMENT_CONFIG_PATH: "/configService/environments"
+};
+
+/**
+ * @type {{'ConstRequestString': (function Request_Method())}} ConfigRequestMethods: Configuration requesting methods
+ */
+const ConfigRequestMethods = {
+    promised_environments() {
+        if (ConfigManager._promised_environments) {
+            return ConfigManager._promised_environments;
+        }
+        let host = window.location.origin;
+        let requestUrl = host + ConfigRequestPaths.ENVIRONMENT_CONFIG_PATH;
+
+        ConfigManager._promised_environments = axios.get(requestUrl);
+        return ConfigManager._promised_environments;
+    }
+};
+
+//List of private promised class variables to preserve single instance
+ConfigManager._promised_environments = null;
+
+export default ConfigManager;

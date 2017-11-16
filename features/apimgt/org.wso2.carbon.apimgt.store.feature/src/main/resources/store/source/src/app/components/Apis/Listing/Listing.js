@@ -27,14 +27,14 @@ import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import {Link} from 'react-router-dom'
 import Grid from 'material-ui/Grid';
-import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
+import Card, {CardActions, CardContent, CardMedia} from 'material-ui/Card';
 import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
-import BottomNavigation, { BottomNavigationButton } from 'material-ui/BottomNavigation';
+import BottomNavigation, {BottomNavigationButton} from 'material-ui/BottomNavigation';
 import ListIcon from 'material-ui-icons/List';
 import GridOnIcon from 'material-ui-icons/GridOn';
 
-import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table';
+import Table, {TableBody, TableCell, TableHead, TableRow} from 'material-ui/Table';
 import Paper from 'material-ui/Paper';
 
 
@@ -45,11 +45,11 @@ class Listing extends React.Component {
     }
 
     handleChange = (event, value) => {
-        this.setState({ value });
-        if(value === 0 ){
-            this.setState({listType:"list"});
-        } else if(value === 1 ){
-            this.setState({listType:"grid"});
+        this.setState({value});
+        if (value === 0) {
+            this.setState({listType: "list"});
+        } else if (value === 1) {
+            this.setState({listType: "grid"});
         }
         // this.setState({listType: value});
     };
@@ -62,7 +62,7 @@ class Listing extends React.Component {
         promised_tires.then(
             response => {
                 let tires = [];
-                for(let i=0; i<response.obj.count;i++) {
+                for (let i = 0; i < response.obj.count; i++) {
                     let tier = {};
                     tier.name = response.obj.list[i].name;
                     tier.description = response.obj.list[i].description;
@@ -83,7 +83,6 @@ class Listing extends React.Component {
         });
 
 
-
         let promised_apis = api.getAllAPIs();
         promised_apis.then((response) => {
             //debugger
@@ -101,7 +100,6 @@ class Listing extends React.Component {
     }
 
 
-
     render() {
         let forum_link = "/forum";
         let create_app_link = "/application/create";
@@ -109,50 +107,50 @@ class Listing extends React.Component {
             return <ResourceNotFound/>
         }
 
-        const { value } = this.state;
+        const {value} = this.state;
 
 
         return (
-            <div style={{padding:"20px"}}>
-                <BottomNavigation value={value} onChange={this.handleChange} style={{float:"right"}}>
-                    <BottomNavigationButton label="List" icon={<ListIcon />} />
-                    <BottomNavigationButton label="Grid" icon={<GridOnIcon />} />
+            <div style={{padding: "20px"}}>
+                <BottomNavigation value={value} onChange={this.handleChange} style={{float: "right"}}>
+                    <BottomNavigationButton label="List" icon={<ListIcon/>}/>
+                    <BottomNavigationButton label="Grid" icon={<GridOnIcon/>}/>
                 </BottomNavigation>
                 {
                     this.state.apis ?
                         this.state.listType === "grid" ?
 
-                            <Grid container >
-                                    {this.state.apis.list.map(api => {
-                                        return <ApiThumb api={api}/>
-                                    })}
+                            <Grid container>
+                                {this.state.apis.list.map(api => {
+                                    return <ApiThumb api={api} key={api.id}/>
+                                })}
                             </Grid>
-                        :
+                            :
 
-                            <Grid container >
+                            <Grid container>
                                 <Grid item xs>
                                     <Paper>
                                         <Table>
                                             <TableHead>
-                                            <TableRow>
-                                                <TableCell>Name</TableCell>
-                                                <TableCell>Version</TableCell>
-                                                <TableCell>Context</TableCell>
-                                                <TableCell>Description</TableCell>
-                                                <TableCell></TableCell>
+                                                <TableRow>
+                                                    <TableCell>Name</TableCell>
+                                                    <TableCell>Version</TableCell>
+                                                    <TableCell>Context</TableCell>
+                                                    <TableCell>Description</TableCell>
+                                                    <TableCell></TableCell>
                                                 </TableRow>
                                             </TableHead>
                                             <TableBody>
                                                 {this.state.apis.list.map(api => {
-                                                    return <APiTableRow api={api}/>
+                                                    return <APiTableRow api={api} key={api.id}/>
                                                 })}
                                             </TableBody>
                                         </Table>
                                     </Paper>
                                 </Grid>
                             </Grid>
-                    :
-                        <Loading />
+                        :
+                        <Loading/>
                 }
             </div>
         );

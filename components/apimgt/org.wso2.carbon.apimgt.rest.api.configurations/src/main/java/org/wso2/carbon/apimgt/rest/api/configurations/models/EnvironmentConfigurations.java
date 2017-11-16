@@ -21,6 +21,7 @@ import org.wso2.carbon.kernel.annotations.Configuration;
 import org.wso2.carbon.kernel.annotations.Element;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -29,11 +30,12 @@ import java.util.List;
 @Configuration(namespace = "wso2.carbon.apimgt.environments", description = "Environment Configurations")
 public class EnvironmentConfigurations {
 
-    @Element(description = "This APIM instance's Environment-name")
-    private String environmentName = "Production";
+    //Unique name for environment to set cookies by backend
+    @Element(description = "Unique Environment-name")
+    private String environmentName = "Default";
 
     @Element(description = "List of all Environments")
-    private List<Environment> environments = new ArrayList<Environment>();
+    private List<Environment> environments = Arrays.asList(new Environment());
 
     public String getEnvironmentName() {
         return environmentName;

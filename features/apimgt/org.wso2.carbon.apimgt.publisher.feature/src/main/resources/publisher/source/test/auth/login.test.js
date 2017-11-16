@@ -31,7 +31,12 @@ describe('AuthManager',
                 it('Should return HTTP 200 status code if user authenticate',
                     function () {
                         let authenticator = new AuthManager();
-                        let promised_auth = authenticator.authenticateUser('admin', 'admin');
+                        let environment = {
+                            "host": "https://localhost:9292",
+                            "loginTokenPath": "/login/token",
+                            "label": "Production"
+                        };
+                        let promised_auth = authenticator.authenticateUser('admin', 'admin', environment);
                         return promised_auth.then((response) => {
                             assert.equal(response.status, 200);
                         });

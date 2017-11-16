@@ -39,10 +39,6 @@
             <artifactId>org.wso2.carbon.apimgt.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.rest.api.commons</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.datasources</groupId>
             <artifactId>org.wso2.carbon.datasource.core</artifactId>
         </dependency>
@@ -84,16 +80,8 @@
             <artifactId>gson</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.rest.api.commons</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
             <artifactId>jackson-jaxrs-json-provider</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.rest.api.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jacoco</groupId>
@@ -209,7 +197,6 @@
             com.zaxxer.hikari.*; version="${hikari.package.import.version.range}",
             org.wso2.msf4j.*; version="${msf4j.package.import.version.range}",
             org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
-            org.wso2.carbon.apimgt.rest.api.common.*;version="${carbon.apimgt.version}",
             org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.import.pkg.version}",
             org.apache.commons.lang3.*; version="${apache.commons.lang3.import.version.range}",
             javax.ws.rs.*; version="${javax.ws.rs.import.version.range}",
