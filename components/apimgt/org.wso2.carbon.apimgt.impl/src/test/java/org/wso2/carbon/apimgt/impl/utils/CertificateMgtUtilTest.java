@@ -134,7 +134,8 @@ public class CertificateMgtUtilTest {
 
     @Test
     public void testAddExpiredCertificate() {
-        ResponseCode responseCode = certificateMgtUtils.addCertificateToTrustStore(EXPIRED_CERTIFICATE, ALIAS_EXPIRED);
+        ResponseCode responseCode = certificateMgtUtils.addCertificateToTrustStore(EXPIRED_CERTIFICATE,
+                ALIAS_EXPIRED);
         Assert.assertEquals(responseCode, ResponseCode.CERTIFICATE_EXPIRED);
     }
 }

@@ -5119,7 +5119,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
         int i = 0;
 
-        if (certificates.size() > 0) {
+        if (certificates != null) {
             for (CertificateMetadataDTO certificateMetadata : certificates) {
                 NativeObject obj = new NativeObject();
                 obj.put(ALIAS, obj, certificateMetadata.getAlias());

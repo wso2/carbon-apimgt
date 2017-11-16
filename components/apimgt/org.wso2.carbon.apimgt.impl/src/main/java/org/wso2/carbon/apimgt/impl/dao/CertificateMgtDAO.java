@@ -19,8 +19,12 @@ package org.wso2.carbon.apimgt.impl.dao;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
-import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagementException;
+import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
+import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
+import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.EndpointForCertificateExistsException;
+import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
 import java.sql.Connection;
@@ -37,7 +41,6 @@ import java.util.List;
  * Alias
  * Server Endpoint
  * Tenant Id
- * <p>
  * The alias and server ep has one-to-one mapping, which there could be one certificate for a particular endpoint.
  * A tenant could have multiple alias-ep entries.
  */
@@ -57,7 +60,7 @@ public class CertificateMgtDAO {
     /**
      * Returns an instance of CertificateMgtDao.
      */
-    public static CertificateMgtDAO getInstance() {
+    public static synchronized CertificateMgtDAO getInstance() {
         if (certificateMgtDAO == null) {
             certificateMgtDAO = new CertificateMgtDAO();
         }
@@ -69,7 +72,7 @@ public class CertificateMgtDAO {
      *
      * @return : True if exists, false otherwise.
      */
-    public boolean isTableExists() {
+    public boolean isTableExists() throws CertificateManagementException {
         boolean isExists = false;
         Connection connection = null;
         DatabaseMetaData databaseMetaData = null;
@@ -84,7 +87,7 @@ public class CertificateMgtDAO {
                 isExists = true;
             }
         } catch (SQLException e) {
-            log.error("Error retrieving Database information", e);
+            handleException("Error retrieving Database information", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(null, connection, null);
         }
@@ -98,13 +101,13 @@ public class CertificateMgtDAO {
      * @param tenantId : The tenant whose certificates should be retrieved.
      * @return : List of Certificate information objects.
      */
-    public List<CertificateMetadataDTO> getCertificates(int tenantId) {
+    public List<CertificateMetadataDTO> getCertificates(int tenantId) throws CertificateManagementException {
         List<CertificateMetadataDTO> certificates = new ArrayList<CertificateMetadataDTO>();
         CertificateMetadataDTO certificateMetadataDTO;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
-        String getCertsQuery = "SELECT * FROM AM_CERTIFICATE_METADATA WHERE TENANT_ID=?";
+        String getCertsQuery = SQLConstants.CertificateConstants.GET_CERTIFICATES;
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -120,7 +123,7 @@ public class CertificateMgtDAO {
                 certificates.add(certificateMetadataDTO);
             }
         } catch (SQLException e) {
-            log.error("Error while executing SQL to retrieve certificates.", e);
+            handleException("Error while executing SQL to retrieve certificates.", e);
         } finally {
             APIMgtDBUtil.closeStatement(preparedStatement);
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
@@ -137,11 +140,12 @@ public class CertificateMgtDAO {
      * @return : True if the information is added successfully, false otherwise.
      * @throws CertificateManagementException if existing entry is found for the given endpoint or alias.
      */
-    public boolean addCertificate(String alias, String endpoint, int tenantId) throws CertificateManagementException {
+    public boolean addCertificate(String alias, String endpoint, int tenantId) throws CertificateManagementException,
+            CertificateAliasExistsException, EndpointForCertificateExistsException {
         boolean result = false;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        String addCertQuery = "INSERT INTO AM_CERTIFICATE_METADATA (TENANT_ID, END_POINT, ALIAS) VALUES(?, ?, ?)";
+        String addCertQuery = SQLConstants.CertificateConstants.INSERT_CERTIFICATE;
 
         //Check whether any certificate is uploaded for the same alias or endpoint by another user/ tenant.
         CertificateMetadataDTO existingCertificate = getCertificate(alias, endpoint);
@@ -151,13 +155,12 @@ public class CertificateMgtDAO {
                 log.debug("A certificate for the endpoint " + endpoint + " has already added with alias " +
                         existingCertificate.getAlias());
             }
-            String message = "";
+            String message = "Alias or Endpoint exists in the database!";
             if (existingCertificate.getAlias().equals(alias)) {
-                message = "Alias";
+                throw new CertificateAliasExistsException(message);
             } else {
-                message = "Endpoint";
+                throw new EndpointForCertificateExistsException(message);
             }
-            throw new CertificateManagementException(message);
         }
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -171,7 +174,6 @@ public class CertificateMgtDAO {
             connection.commit();
             connection.setAutoCommit(initialAutoCommit);
         } catch (SQLException e) {
-            log.error("Error while executing SQL to add certificate.", e);
             try {
                 if (connection != null) {
                     connection.rollback();
@@ -181,6 +183,7 @@ public class CertificateMgtDAO {
             } catch (SQLException e1) {
                 log.error("Error while rolling back the transaction.", e1);
             }
+            handleException("Error while persisting certificate metadata.", e);
         } finally {
             APIMgtDBUtil.closeStatement(preparedStatement);
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
@@ -192,7 +195,6 @@ public class CertificateMgtDAO {
      * Method to retrieve certificate metadata from db for specific alias or endpoint.
      * From alias and endpoint, only one parameter is required. This will be used to query all the certificates
      * without a limitation for tenant.
-     * <p>
      * Addresses : If some tenant is trying to add a certificate with the same alias, proper error should be shown in
      * the UI.
      *
@@ -200,12 +202,12 @@ public class CertificateMgtDAO {
      * @param endpoint : The endpoint/ server url which the certificate is mapped to. (Optional)
      * @return : A CertificateMetadataDTO object if the certificate is retrieved successfully, null otherwise.
      */
-    private CertificateMetadataDTO getCertificate(String alias, String endpoint) {
+    private CertificateMetadataDTO getCertificate(String alias, String endpoint) throws CertificateManagementException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         CertificateMetadataDTO certificateMetadataDTO = null;
-        String getCertQuery = "SELECT * FROM AM_CERTIFICATE_METADATA WHERE (ALIAS=? OR END_POINT=?)";
+        String getCertQuery = SQLConstants.CertificateConstants.GET_CERTIFICATE_ALL_TENANTS;
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -221,7 +223,7 @@ public class CertificateMgtDAO {
                 certificateMetadataDTO.setEndpoint(resultSet.getString("END_POINT"));
             }
         } catch (SQLException e) {
-            log.error("Error while executing SQL to retrieve certificates.", e);
+            handleException("Error while retrieving certificate metadata.", e);
         } finally {
             APIMgtDBUtil.closeStatement(preparedStatement);
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
@@ -238,12 +240,13 @@ public class CertificateMgtDAO {
      * @param endpoint : The endpoint/ server url which the certificate is mapped to. (Optional)
      * @return : A CertificateMetadataDTO object if the certificate is retrieved successfully, null otherwise.
      */
-    public CertificateMetadataDTO getCertificate(String alias, String endpoint, int tenantId) {
+    public CertificateMetadataDTO getCertificate(String alias, String endpoint, int tenantId)
+            throws CertificateManagementException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         CertificateMetadataDTO certificateMetadataDTO = null;
-        String getCertQuery = "SELECT * FROM AM_CERTIFICATE_METADATA WHERE TENANT_ID=? AND (ALIAS=? OR END_POINT=?)";
+        String getCertQuery = SQLConstants.CertificateConstants.GET_CERTIFICATE_TENANT;
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -260,7 +263,7 @@ public class CertificateMgtDAO {
                 certificateMetadataDTO.setEndpoint(resultSet.getString("END_POINT"));
             }
         } catch (SQLException e) {
-            log.error("Error while executing SQL to retrieve certificates.", e);
+            handleException("Error while retrieving certificate metadata.", e);
         } finally {
             APIMgtDBUtil.closeStatement(preparedStatement);
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
@@ -276,11 +279,12 @@ public class CertificateMgtDAO {
      * @param tenantId : The Id of the tenant who owns the certificate.
      * @return : true if certificate deletion is successful, false otherwise.
      */
-    public boolean deleteCertificate(String alias, String endpoint, int tenantId) {
+    public boolean deleteCertificate(String alias, String endpoint, int tenantId)
+            throws CertificateManagementException {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         boolean result = false;
-        String deleteCertQuery = "DELETE FROM AM_CERTIFICATE_METADATA WHERE TENANT_ID=? AND (ALIAS=? OR END_POINT=?)";
+        String deleteCertQuery = SQLConstants.CertificateConstants.DELETE_CERTIFICATES;
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -294,7 +298,6 @@ public class CertificateMgtDAO {
             connection.commit();
             connection.setAutoCommit(initialAutoCommit);
         } catch (SQLException e) {
-            log.error("Error while executing SQL to retrieve certificates.", e);
             try {
                 if (connection != null) {
                     connection.rollback();
@@ -304,10 +307,21 @@ public class CertificateMgtDAO {
             } catch (SQLException e1) {
                 log.error("Error while rolling back the transaction.", e1);
             }
+            handleException("Error while deleting certificate metadata. ", e);
         } finally {
             APIMgtDBUtil.closeStatement(preparedStatement);
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, null);
         }
         return result;
+    }
+
+    /**
+     * Method to handle the SQL Exception.
+     * @param message : Error message.
+     * @param e : Throwable cause.
+     * @throws APIManagementException :
+     */
+    private void handleException(String message, Throwable e) throws CertificateManagementException {
+        throw new CertificateManagementException(message, e);
     }
 }

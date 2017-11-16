@@ -15,22 +15,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.carbon.apimgt.impl.certificatemgt;
+package org.wso2.carbon.apimgt.impl.certificatemgt.exceptions;
 
 /**
- * This class represents custom exception class for certificate management in api manager.
+ * This represents custom exception class for certificate management in api manager, which will be thrown in
+ * scenarios that certificate alias exists in the data base.
  */
-public class CertificateManagementException extends Exception{
+public class CertificateAliasExistsException extends Throwable {
 
-    public CertificateManagementException(String message) {
+    public CertificateAliasExistsException(String message) {
         super(message);
     }
 
-    public CertificateManagementException(String message, Throwable e) {
+    public CertificateAliasExistsException(String message, Throwable e) {
         super(message, e);
     }
 
-    public String getMessage() {
-        return super.getMessage();
+    public CertificateAliasExistsException(Throwable e) {
+        super(e);
     }
 }

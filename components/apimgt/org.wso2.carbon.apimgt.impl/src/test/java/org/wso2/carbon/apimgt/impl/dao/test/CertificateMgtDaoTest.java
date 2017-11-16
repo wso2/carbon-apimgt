@@ -30,7 +30,9 @@ import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
-import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagementException;
+import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
+import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
+import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.EndpointForCertificateExistsException;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
@@ -63,7 +65,8 @@ public class CertificateMgtDaoTest {
     private static final int TENANT_2 = 1001;
 
     @BeforeClass
-    public static void setUp() throws APIManagerDatabaseException, APIManagementException, SQLException {
+    public static void setUp() throws APIManagerDatabaseException, APIManagementException, SQLException,
+            XMLStreamException, IOException, NamingException {
         String dbConfigPath = System.getProperty("APIManagerDBConfigurationPath");
         APIManagerConfiguration config = new APIManagerConfiguration();
         initializeDatabase(dbConfigPath);
@@ -74,96 +77,93 @@ public class CertificateMgtDaoTest {
         certificateMgtDAO = CertificateMgtDAO.getInstance();
     }
 
-    private static void initializeDatabase(String configFilePath) {
+    private static void initializeDatabase(String configFilePath) throws IOException, XMLStreamException, NamingException {
 
         InputStream in;
+        in = FileUtils.openInputStream(new File(configFilePath));
+        StAXOMBuilder builder = new StAXOMBuilder(in);
+        String dataSource = builder.getDocumentElement().getFirstChildWithName(new QName("DataSourceName"))
+                .getText();
+        OMElement databaseElement = builder.getDocumentElement()
+                .getFirstChildWithName(new QName("Database"));
+        String databaseURL = databaseElement.getFirstChildWithName(new QName("URL")).getText();
+        String databaseUser = databaseElement.getFirstChildWithName(new QName("Username")).getText();
+        String databasePass = databaseElement.getFirstChildWithName(new QName("Password")).getText();
+        String databaseDriver = databaseElement.getFirstChildWithName(new QName("Driver")).getText();
+
+        BasicDataSource basicDataSource = new BasicDataSource();
+        basicDataSource.setDriverClassName(databaseDriver);
+        basicDataSource.setUrl(databaseURL);
+        basicDataSource.setUsername(databaseUser);
+        basicDataSource.setPassword(databasePass);
+
+        // Create initial context
+        System.setProperty(Context.INITIAL_CONTEXT_FACTORY,
+                "org.apache.naming.java.javaURLContextFactory");
+        System.setProperty(Context.URL_PKG_PREFIXES,
+                "org.apache.naming");
         try {
-            in = FileUtils.openInputStream(new File(configFilePath));
-            StAXOMBuilder builder = new StAXOMBuilder(in);
-            String dataSource = builder.getDocumentElement().getFirstChildWithName(new QName("DataSourceName"))
-                    .getText();
-            OMElement databaseElement = builder.getDocumentElement()
-                    .getFirstChildWithName(new QName("Database"));
-            String databaseURL = databaseElement.getFirstChildWithName(new QName("URL")).getText();
-            String databaseUser = databaseElement.getFirstChildWithName(new QName("Username")).getText();
-            String databasePass = databaseElement.getFirstChildWithName(new QName("Password")).getText();
-            String databaseDriver = databaseElement.getFirstChildWithName(new QName("Driver")).getText();
-
-            BasicDataSource basicDataSource = new BasicDataSource();
-            basicDataSource.setDriverClassName(databaseDriver);
-            basicDataSource.setUrl(databaseURL);
-            basicDataSource.setUsername(databaseUser);
-            basicDataSource.setPassword(databasePass);
-
-            // Create initial context
-            System.setProperty(Context.INITIAL_CONTEXT_FACTORY,
-                    "org.apache.naming.java.javaURLContextFactory");
-            System.setProperty(Context.URL_PKG_PREFIXES,
-                    "org.apache.naming");
-            try {
-                InitialContext.doLookup("java:/comp/env/jdbc/WSO2AM_DB");
-            } catch (NamingException e) {
-                InitialContext ic = new InitialContext();
-                ic.createSubcontext("java:");
-                ic.createSubcontext("java:/comp");
-                ic.createSubcontext("java:/comp/env");
-                ic.createSubcontext("java:/comp/env/jdbc");
-
-                ic.bind("java:/comp/env/jdbc/WSO2AM_DB", basicDataSource);
-            }
-        } catch (XMLStreamException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+            InitialContext.doLookup("java:/comp/env/jdbc/WSO2AM_DB");
         } catch (NamingException e) {
-            e.printStackTrace();
+            InitialContext ic = new InitialContext();
+            ic.createSubcontext("java:");
+            ic.createSubcontext("java:/comp");
+            ic.createSubcontext("java:/comp/env");
+            ic.createSubcontext("java:/comp/env/jdbc");
+
+            ic.bind("java:/comp/env/jdbc/WSO2AM_DB", basicDataSource);
         }
     }
 
     @Test
-    public void testIsTableExists() {
+    public void testIsTableExists() throws CertificateManagementException {
         Assert.assertTrue(certificateMgtDAO.isTableExists());
     }
 
     @Test
-    public void testGetCertificateWithNoCertificate() {
-        CertificateMetadataDTO certificateDTO = certificateMgtDAO.getCertificate(TEST_ALIAS_2, TEST_ENDPOINT_2, TENANT_ID);
+    public void testGetCertificateWithNoCertificate() throws CertificateManagementException {
+        CertificateMetadataDTO certificateDTO =
+                certificateMgtDAO.getCertificate(TEST_ALIAS_2, TEST_ENDPOINT_2, TENANT_ID);
         Assert.assertNull(certificateDTO);
     }
 
     @Test
-    public void testAddCertificate() throws CertificateManagementException {
+    public void testAddCertificate() throws CertificateManagementException, CertificateAliasExistsException,
+            EndpointForCertificateExistsException, APIManagementException {
         boolean result = certificateMgtDAO.addCertificate(TEST_ALIAS, TEST_ENDPOINT, TENANT_ID);
         Assert.assertTrue(result);
     }
 
     @Test
-    public void testGetCertificate() {
-        CertificateMetadataDTO certificateDTO = certificateMgtDAO.getCertificate("ALIAS_1", "EP_1", TENANT_2);
+    public void testGetCertificate() throws CertificateManagementException {
+        CertificateMetadataDTO certificateDTO =
+                certificateMgtDAO.getCertificate("ALIAS_1", "EP_1", TENANT_2);
         Assert.assertNotNull(certificateDTO);
     }
 
     @Test
-    public void testDeleteCertificate() {
+    public void testDeleteCertificate() throws CertificateManagementException {
         boolean result = certificateMgtDAO.deleteCertificate("ALIAS2", "EP2", TENANT_ID);
         Assert.assertTrue(result);
     }
 
     @Test
-    public void testGetCertificates() {
+    public void testGetCertificates() throws CertificateManagementException {
         List<CertificateMetadataDTO> certificates = certificateMgtDAO.getCertificates(TENANT_ID);
         Assert.assertNotNull(certificates);
         Assert.assertTrue(certificates.size() > 0);
     }
 
-    @Test(expected = CertificateManagementException.class)
-    public void testAddExistingCertificate() throws CertificateManagementException {
+    @Test(expected = CertificateAliasExistsException.class)
+    public void testAddCertificateForExistingAlias() throws CertificateManagementException,
+            CertificateAliasExistsException, EndpointForCertificateExistsException {
         certificateMgtDAO.addCertificate("ALIAS4", "EP4", TENANT_ID);
     }
 
-    @Test(expected = CertificateManagementException.class)
-    public void testAddExistingCertificateTenant() throws CertificateManagementException {
-        certificateMgtDAO.addCertificate("ALIAS_3", "EP_3", TENANT_2);
+    @Test(expected = EndpointForCertificateExistsException.class)
+    public void testAddCertificateForExistingEndpoint() throws CertificateManagementException,
+            CertificateAliasExistsException, EndpointForCertificateExistsException {
+        certificateMgtDAO.addCertificate("ALIAS_31", "EP_3", TENANT_2);
     }
 }
 

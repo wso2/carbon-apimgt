@@ -19,9 +19,9 @@ package org.wso2.carbon.apimgt.impl.certificatemgt;
 
 /**
  * Status codes for Certificate management operations.
- * <p>
+ * 
  * Response Code Definitions
- * <p>
+ * 
  * 1. SUCCESS : Operation successful
  * 2. INTERNAL_SERVER_ERROR : Operation failed due to internal error.
  * 3. ALIAS_EXISTS_IN_TRUST_STORE : Failed to add certificate to trust store. Alias exists in trust store.

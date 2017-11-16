@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.impl.certificatemgt;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
+import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
+import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.EndpointForCertificateExistsException;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 
@@ -66,37 +69,44 @@ public class CertificateManagerImpl implements CertificateManager {
                         "publisher Trust Store.");
                 return ResponseCode.INTERNAL_SERVER_ERROR;
             }
+        } catch (EndpointForCertificateExistsException e) {
+            return ResponseCode.CERTIFICATE_FOR_ENDPOINT_EXISTS;
         } catch (CertificateManagementException e) {
-            String cause = e.getMessage();
-            return cause.contains("Alias") ? ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE : ResponseCode
-                    .CERTIFICATE_FOR_ENDPOINT_EXISTS;
+            log.error("Error when persisting/ deleting certificate metadata. ", e);
+            return ResponseCode.INTERNAL_SERVER_ERROR;
+        } catch (CertificateAliasExistsException e) {
+            return ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
         }
     }
 
     @Override
     public ResponseCode deleteCertificateFromPublisher(String alias, String endpoint, int tenantId) {
-        boolean removeFromDB = certificateMgtDAO.deleteCertificate(alias, endpoint, tenantId);
-        if (removeFromDB) {
-            ResponseCode responseCode = certificateMgtUtils.removeCertificateFromTrustStore(alias);
-            if (responseCode == ResponseCode.INTERNAL_SERVER_ERROR) {
-                try {
+        try {
+            boolean removeFromDB = certificateMgtDAO.deleteCertificate(alias, endpoint, tenantId);
+            if (removeFromDB) {
+                ResponseCode responseCode = certificateMgtUtils.removeCertificateFromTrustStore(alias);
+                if (responseCode == ResponseCode.INTERNAL_SERVER_ERROR) {
                     certificateMgtDAO.addCertificate(alias, endpoint, tenantId);
-                } catch (CertificateManagementException e) {
-                    log.error("Error adding certificate to the data base. Alias/ Endpoint exists.");
-                    return ResponseCode.INTERNAL_SERVER_ERROR;
+                    log.error("Error removing the Certificate from Trust Store. Rolling back...");
+                } else if (responseCode.getResponseCode() == ResponseCode.CERTIFICATE_NOT_FOUND.getResponseCode()) {
+                    log.warn("The Certificate for Alias '" + alias + "' has been previously removed from " +
+                            "Trust Store. Hence DB entry is removed.");
+                } else {
+                    log.info("Certificate is successfully removed from the Publisher Trust Store with Alias '"
+                            + alias + "'");
                 }
-                log.error("Error removing the Certificate from Trust Store. Rolling back...");
-            } else if (responseCode.getResponseCode() == ResponseCode.CERTIFICATE_NOT_FOUND.getResponseCode()) {
-                log.warn("The Certificate for Alias '" + alias + "' has been previously removed from Trust Store." +
-                        " Hence DB entry is removed.");
+                return responseCode;
             } else {
-                log.info("Certificate is successfully removed from the Publisher Trust Store with Alias '"
-                        + alias + "'");
+                log.error("Failed to remove certificate from the data base. No certificate changes will be affected.");
+                return ResponseCode.INTERNAL_SERVER_ERROR;
             }
-            return responseCode;
-        } else {
-            log.error("Failed to remove certificate from the data base. No certificate changes will be affected.");
+        } catch (EndpointForCertificateExistsException e) {
+            return ResponseCode.CERTIFICATE_FOR_ENDPOINT_EXISTS;
+        } catch (CertificateManagementException e) {
+            log.error("Error persisting/ deleting certificate metadata. ", e);
             return ResponseCode.INTERNAL_SERVER_ERROR;
+        } catch (CertificateAliasExistsException e) {
+            return ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE;
         }
     }
 
@@ -136,19 +146,37 @@ public class CertificateManagerImpl implements CertificateManager {
 
     @Override
     public boolean isConfigured() {
-        boolean isTableExists = certificateMgtDAO.isTableExists();
+        boolean isTableExists = false;
         boolean isFilePresent = new File(SSL_PROFILE_FILE_PATH).exists();
+        try {
+            isTableExists = certificateMgtDAO.isTableExists();
+        } catch (CertificateManagementException e) {
+            log.error("Error retrieving database metadata. ", e);
+            return false;
+        }
         return isFilePresent && isTableExists;
     }
 
     @Override
     public CertificateMetadataDTO getCertificate(String endpoint, int tenantId) {
-        return certificateMgtDAO.getCertificate("", endpoint, tenantId);
+        CertificateMetadataDTO certificateMetadata = null;
+        try {
+            certificateMetadata = certificateMgtDAO.getCertificate("", endpoint, tenantId);
+        } catch (CertificateManagementException e) {
+            log.error("Error when retrieving certificate metadata for endpoint '" + endpoint + "'");
+        }
+        return certificateMetadata;
     }
 
     @Override
     public List<CertificateMetadataDTO> getCertificates(int tenantId) {
-        return certificateMgtDAO.getCertificates(tenantId);
+        List<CertificateMetadataDTO> certificates = null;
+        try {
+            certificates = certificateMgtDAO.getCertificates(tenantId);
+        } catch (CertificateManagementException e) {
+            log.error("Error retrieving certificates for the tenantId '" + tenantId + "' ", e);
+        }
+        return certificates;
     }
 
     /**

@@ -34,11 +34,11 @@ public interface CertificateManager {
      * @param alias       : Alias for the certificate.
      * @param endpoint    : The endpoint which the certificate will be mapped to.
      * @param tenantId    : The tenant id which the certificate is belongs to.
-     * @return : SUCCESS : If Operation executed successfully
-     * INTERNAL_SERVER_ERROR : If any internal error occurred.
-     * ALIAS_EXISTS_IN_TRUST_STORE : If the alias already present in the trust store.
-     * CERTIFICATE_EXPIRED : If the certificate is expired.
-     * CERTIFICATE_FOR_ENDPOINT_EXISTS : If the endpoint exists in the database.
+     * @return :    SUCCESS : If Operation executed successfully
+     *              INTERNAL_SERVER_ERROR : If any internal error occurred.
+     *              ALIAS_EXISTS_IN_TRUST_STORE : If the alias already present in the trust store.
+     *              CERTIFICATE_EXPIRED : If the certificate is expired.
+     *              CERTIFICATE_FOR_ENDPOINT_EXISTS : If the endpoint exists in the database.
      */
     public ResponseCode addCertificateToPublisher(String certificate, String alias, String endpoint, int tenantId);
 
@@ -48,9 +48,9 @@ public interface CertificateManager {
      * @param alias    : Alias of the certificate which needs to be removed.
      * @param endpoint : The endpoint which the certificate is mapped to.
      * @param tenantId : The owner tenant id.
-     * @return : SUCCESS: If operation success
-     * INTERNAL_SERVER_ERROR: If any internal error occurred
-     * CERTIFICATE_NOT_FOUND : If Certificate is not found in the trust store.
+     * @return :    SUCCESS: If operation success
+     *              INTERNAL_SERVER_ERROR: If any internal error occurred
+     *              CERTIFICATE_NOT_FOUND : If Certificate is not found in the trust store.
      */
     public ResponseCode deleteCertificateFromPublisher(String alias, String endpoint, int tenantId);
 
@@ -72,9 +72,9 @@ public interface CertificateManager {
     public boolean deleteCertificateFromGateways(String alias);
 
     /**
-     * This method is to check whether the configuration is present.
+     * This method is to check whether the API-Manager is configured for Certificate Management feature.
      *
-     * @return : True if exists, false otherwise.
+     * @return : True if configured else false.
      */
     public boolean isConfigured();
 

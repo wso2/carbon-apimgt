@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 
 import java.io.ByteArrayInputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -46,6 +47,9 @@ public class CertificateMgtUtils {
     private static Log log = LogFactory.getLog(CertificateMgtUtils.class);
     private static String TRUST_STORE_PASSWORD = System.getProperty("javax.net.ssl.trustStorePassword");
     private static String TRUST_STORE = System.getProperty("javax.net.ssl.trustStore");
+    private static InputStream localTrustStoreStream = null;
+    private static OutputStream fileOutputStream = null;
+    private static ResponseCode responseCode;
 
     /**
      * This method generates a certificate from a base64 encoded certificate string and add to the configured trust
@@ -64,14 +68,15 @@ public class CertificateMgtUtils {
     public ResponseCode addCertificateToTrustStore(String base64Cert, String alias) {
         boolean isCertExists = false;
         boolean expired = false;
+        InputStream serverCert = null;
         try {
             //Decode base64 encoded certificate.
             byte[] cert = (Base64.decodeBase64(base64Cert.getBytes("UTF-8")));
-            InputStream serverCert = new ByteArrayInputStream(cert);
+            serverCert = new ByteArrayInputStream(cert);
 
             //Read the client-truststore.jks into a KeyStore.
             File trustStoreFile = new File(TRUST_STORE);
-            InputStream localTrustStoreStream = new FileInputStream(trustStoreFile);
+            localTrustStoreStream = new FileInputStream(trustStoreFile);
             KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(localTrustStoreStream, TRUST_STORE_PASSWORD.toCharArray());
 
@@ -95,32 +100,32 @@ public class CertificateMgtUtils {
                     }
                 }
             }
-
-            serverCert.close();
-            OutputStream out = new FileOutputStream(trustStoreFile);
-            trustStore.store(out, TRUST_STORE_PASSWORD.toCharArray());
-            out.close();
-            return expired ? ResponseCode.CERTIFICATE_EXPIRED :
+            fileOutputStream = new FileOutputStream(trustStoreFile);
+            trustStore.store(fileOutputStream, TRUST_STORE_PASSWORD.toCharArray());
+            responseCode = expired ? ResponseCode.CERTIFICATE_EXPIRED :
                     isCertExists ? ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE : ResponseCode.SUCCESS;
         } catch (CertificateException e) {
             log.error("Error loading certificate.", e);
-            return ResponseCode.INTERNAL_SERVER_ERROR;
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
         } catch (FileNotFoundException e) {
             log.error("Error reading/ writing to the certificate file.", e);
-            return ResponseCode.INTERNAL_SERVER_ERROR;
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
         } catch (NoSuchAlgorithmException e) {
             log.error("Could not find the algorithm to load the certificate.", e);
-            return ResponseCode.INTERNAL_SERVER_ERROR;
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
         } catch (UnsupportedEncodingException e) {
             log.error("Error retrieving certificate from String", e);
-            return ResponseCode.INTERNAL_SERVER_ERROR;
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
         } catch (KeyStoreException e) {
             log.error("Error reading certificate contents.", e);
-            return ResponseCode.INTERNAL_SERVER_ERROR;
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
         } catch (IOException e) {
             log.error("Error in loading the certificate.", e);
-            return ResponseCode.INTERNAL_SERVER_ERROR;
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        } finally {
+            closeStreams(localTrustStoreStream, fileOutputStream, serverCert);
         }
+        return responseCode;
     }
 
     /**
@@ -138,7 +143,7 @@ public class CertificateMgtUtils {
         boolean isExists;
         try {
             File trustStoreFile = new File(TRUST_STORE);
-            InputStream localTrustStoreStream = new FileInputStream(trustStoreFile);
+            localTrustStoreStream = new FileInputStream(trustStoreFile);
             KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
             trustStore.load(localTrustStoreStream, TRUST_STORE_PASSWORD.toCharArray());
 
@@ -149,22 +154,41 @@ public class CertificateMgtUtils {
                 isExists = false;
             }
 
-            OutputStream out = new FileOutputStream(trustStoreFile);
-            trustStore.store(out, TRUST_STORE_PASSWORD.toCharArray());
-            out.close();
-            return isExists ? ResponseCode.SUCCESS : ResponseCode.CERTIFICATE_NOT_FOUND;
+            fileOutputStream = new FileOutputStream(trustStoreFile);
+            trustStore.store(fileOutputStream, TRUST_STORE_PASSWORD.toCharArray());
+            responseCode = isExists ? ResponseCode.SUCCESS : ResponseCode.CERTIFICATE_NOT_FOUND;
         } catch (IOException e) {
             log.error("Error in loading the certificate.", e);
-            return ResponseCode.INTERNAL_SERVER_ERROR;
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
         } catch (CertificateException e) {
             log.error("Error loading certificate.", e);
-            return ResponseCode.INTERNAL_SERVER_ERROR;
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
         } catch (NoSuchAlgorithmException e) {
             log.error("Could not find the algorithm to load the certificate.", e);
-            return ResponseCode.INTERNAL_SERVER_ERROR;
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
         } catch (KeyStoreException e) {
             log.error("Error reading certificate contents.", e);
-            return ResponseCode.INTERNAL_SERVER_ERROR;
+            responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        } finally {
+            closeStreams(localTrustStoreStream, fileOutputStream);
+        }
+        return responseCode;
+    }
+
+    /**
+     * Closes all the provided streams.
+     *
+     * @param streams : One or more of streams.
+     */
+    private void closeStreams(Closeable... streams) {
+        try {
+            for (Closeable stream : streams) {
+                if (stream != null) {
+                    stream.close();
+                }
+            }
+        } catch (IOException e) {
+            log.error("Error closing the stream.", e);
         }
     }
 }

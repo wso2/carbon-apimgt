@@ -27,11 +27,17 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
+import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
+import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
+import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.EndpointForCertificateExistsException;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.base.MultitenantConstants;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class contains unit tests for CertificateManagerImpl class.
@@ -68,7 +74,8 @@ public class CertificateManagerImplTest {
     @BeforeClass
     public static void init() {
         MockitoAnnotations.initMocks(CertificateManagerImplTest.class);
-        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "deleteCertificate")).toReturn(true);
+        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "deleteCertificate"))
+                .toReturn(true);
         certificateManager = new CertificateManagerImpl();
     }
 
@@ -79,7 +86,7 @@ public class CertificateManagerImplTest {
                 .toReturn(ResponseCode.SUCCESS);
         ResponseCode result =
                 certificateManager.addCertificateToPublisher(BASE64_ENCODED_CERT, ALIAS, END_POINT, TENANT_ID);
-        Assert.assertEquals(result, ResponseCode.SUCCESS);
+        Assert.assertEquals(ResponseCode.SUCCESS, result);
     }
 
     @Test
@@ -89,27 +96,29 @@ public class CertificateManagerImplTest {
                 .toReturn(ResponseCode.INTERNAL_SERVER_ERROR);
         ResponseCode responseCode = certificateManager.addCertificateToPublisher(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
-        Assert.assertEquals(responseCode, ResponseCode.INTERNAL_SERVER_ERROR);
+        Assert.assertEquals(ResponseCode.INTERNAL_SERVER_ERROR, responseCode);
     }
 
     @Test
     public void testAddToPublisherWithExpiredCertificate() {
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate")).toReturn(true);
+        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "deleteCertificate")).toReturn(true);
         PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
                 .toReturn(ResponseCode.CERTIFICATE_EXPIRED);
         ResponseCode responseCode = certificateManager.addCertificateToPublisher(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
-        Assert.assertEquals(responseCode, ResponseCode.CERTIFICATE_EXPIRED);
+        Assert.assertEquals(ResponseCode.CERTIFICATE_EXPIRED, responseCode);
     }
 
     @Test
     public void testAddToPublisherWithExistingAlias() {
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate")).toReturn(true);
+        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "deleteCertificate")).toReturn(true);
         PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
                 .toReturn(ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE);
         ResponseCode responseCode = certificateManager.addCertificateToPublisher(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
-        Assert.assertEquals(responseCode, ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE);
+        Assert.assertEquals(ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE, responseCode);
     }
 
     @Test
@@ -117,25 +126,25 @@ public class CertificateManagerImplTest {
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate")).toReturn(false);
         ResponseCode responseCode = certificateManager.addCertificateToPublisher(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
-        Assert.assertEquals(responseCode, ResponseCode.INTERNAL_SERVER_ERROR);
+        Assert.assertEquals(ResponseCode.INTERNAL_SERVER_ERROR, responseCode);
     }
 
     @Test
     public void testAddToPublisherWithExistingAliasInDB() {
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate")).toThrow(new
-                CertificateManagementException("Alias"));
+                CertificateAliasExistsException(""));
         ResponseCode responseCode = certificateManager.addCertificateToPublisher(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
-        Assert.assertEquals(responseCode, ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE);
+        Assert.assertEquals(ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE, responseCode);
     }
 
     @Test
     public void testAddToPublisherWithExistingEndpointInDB() {
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate")).toThrow(new
-                CertificateManagementException("Endpoint"));
+                EndpointForCertificateExistsException(""));
         ResponseCode responseCode = certificateManager.addCertificateToPublisher(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
-        Assert.assertEquals(responseCode, ResponseCode.CERTIFICATE_FOR_ENDPOINT_EXISTS);
+        Assert.assertEquals(ResponseCode.CERTIFICATE_FOR_ENDPOINT_EXISTS, responseCode);
     }
 
     @Test
@@ -144,8 +153,8 @@ public class CertificateManagerImplTest {
                 .toReturn(ResponseCode.SUCCESS);
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "deleteCertificate"))
                 .toReturn(true);
-        ResponseCode result = certificateManager.deleteCertificateFromPublisher(ALIAS, END_POINT, TENANT_ID);
-        Assert.assertEquals(result, ResponseCode.SUCCESS);
+        ResponseCode responseCode = certificateManager.deleteCertificateFromPublisher(ALIAS, END_POINT, TENANT_ID);
+        Assert.assertEquals(ResponseCode.SUCCESS, responseCode);
     }
 
     @Test
@@ -154,8 +163,8 @@ public class CertificateManagerImplTest {
                 .toReturn(ResponseCode.SUCCESS);
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "deleteCertificate"))
                 .toReturn(false);
-        ResponseCode result = certificateManager.deleteCertificateFromPublisher(ALIAS, END_POINT, TENANT_ID);
-        Assert.assertEquals(result, ResponseCode.INTERNAL_SERVER_ERROR);
+        ResponseCode responseCode = certificateManager.deleteCertificateFromPublisher(ALIAS, END_POINT, TENANT_ID);
+        Assert.assertEquals(ResponseCode.INTERNAL_SERVER_ERROR, responseCode);
     }
 
     @Test
@@ -166,8 +175,8 @@ public class CertificateManagerImplTest {
                 .toReturn(true);
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate"))
                 .toReturn(true);
-        ResponseCode result = certificateManager.deleteCertificateFromPublisher(ALIAS, END_POINT, TENANT_ID);
-        Assert.assertEquals(result, ResponseCode.CERTIFICATE_NOT_FOUND);
+        ResponseCode responseCode = certificateManager.deleteCertificateFromPublisher(ALIAS, END_POINT, TENANT_ID);
+        Assert.assertEquals(ResponseCode.CERTIFICATE_NOT_FOUND, responseCode);
     }
 
     @Test
@@ -178,8 +187,8 @@ public class CertificateManagerImplTest {
                 .toReturn(true);
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate"))
                 .toThrow(new CertificateManagementException(""));
-        ResponseCode result = certificateManager.deleteCertificateFromPublisher(ALIAS, END_POINT, TENANT_ID);
-        Assert.assertEquals(result, ResponseCode.INTERNAL_SERVER_ERROR);
+        ResponseCode responseCode = certificateManager.deleteCertificateFromPublisher(ALIAS, END_POINT, TENANT_ID);
+        Assert.assertEquals(ResponseCode.INTERNAL_SERVER_ERROR, responseCode);
     }
 
     @Test
@@ -190,8 +199,8 @@ public class CertificateManagerImplTest {
                 .toReturn(true);
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate"))
                 .toReturn(true);
-        ResponseCode result = certificateManager.deleteCertificateFromPublisher(ALIAS, END_POINT, TENANT_ID);
-        Assert.assertEquals(result, ResponseCode.INTERNAL_SERVER_ERROR);
+        ResponseCode responseCode = certificateManager.deleteCertificateFromPublisher(ALIAS, END_POINT, TENANT_ID);
+        Assert.assertEquals(ResponseCode.INTERNAL_SERVER_ERROR, responseCode);
     }
 
 
@@ -267,5 +276,42 @@ public class CertificateManagerImplTest {
         field.set(certificateManager, TEST_PATH);
         boolean result = certificateManager.isConfigured();
         Assert.assertTrue(result);
+    }
+
+    @Test
+    public void testGetCertificate() {
+        CertificateMetadataDTO certificateMetadata = generateMetadata();
+        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "getCertificate", String.class,
+                String.class, int.class)).toReturn(certificateMetadata);
+        CertificateMetadataDTO result = certificateManager.getCertificate(END_POINT, TENANT_ID);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(certificateMetadata, result);
+    }
+
+    @Test
+    public void testGetCertificates() {
+        List<CertificateMetadataDTO> certificateMetadataList = generateCertificates();
+        PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "getCertificates")).toReturn
+                (certificateMetadataList);
+        List<CertificateMetadataDTO> resultMetadataList = certificateManager.getCertificates(TENANT_ID);
+        Assert.assertNotNull(resultMetadataList);
+    }
+
+    private CertificateMetadataDTO generateMetadata() {
+        CertificateMetadataDTO certificateMetadataDTO = new CertificateMetadataDTO();
+        certificateMetadataDTO.setAlias(ALIAS);
+        certificateMetadataDTO.setEndpoint(END_POINT);
+        return certificateMetadataDTO;
+    }
+
+    private List<CertificateMetadataDTO> generateCertificates() {
+        List<CertificateMetadataDTO> certificateMetadataDTOList = new ArrayList<CertificateMetadataDTO>();
+        for (int i = 0; i < 10; i++) {
+            CertificateMetadataDTO certificateMetadataDTO = new CertificateMetadataDTO();
+            certificateMetadataDTO.setAlias(ALIAS + "_" + i);
+            certificateMetadataDTO.setEndpoint(END_POINT + "_" + i);
+            certificateMetadataDTOList.add(certificateMetadataDTO);
+        }
+        return certificateMetadataDTOList;
     }
 }

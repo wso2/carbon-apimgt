@@ -37,7 +37,7 @@ import java.util.Map;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({APIGatewayAdminClient.class, ServiceReferenceHolder.class, GatewayCertificateManager.class})
-public class GatewayCertificateManaterTest {
+public class GatewayCertificateManagerTest {
 
     private static final String PROD_1 = "PROD_1";
     private static final String PROD_1_PASSWORD = "wso2123";
@@ -85,7 +85,6 @@ public class GatewayCertificateManaterTest {
         PowerMockito.stub(PowerMockito.method(APIGatewayAdminClient.class, "addCertificate"))
                 .toReturn(true);
         PowerMockito.whenNew(APIGatewayAdminClient.class).withAnyArguments().thenReturn(apiGatewayAdminClient);
-
         Map<String, List<Environment>> resultList = gatewayCertificateManager.addToGateways(BASE64_ENCODED_CERT, ALIAS);
         Assert.assertNotNull(resultList);
     }
