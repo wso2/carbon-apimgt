@@ -40,7 +40,7 @@ public interface CertificateManager {
      *              CERTIFICATE_EXPIRED : If the certificate is expired.
      *              CERTIFICATE_FOR_ENDPOINT_EXISTS : If the endpoint exists in the database.
      */
-    public ResponseCode addCertificateToPublisher(String certificate, String alias, String endpoint, int tenantId);
+    public ResponseCode addCertificateToParentNode(String certificate, String alias, String endpoint, int tenantId);
 
     /**
      * Method to delete certificate from publisher trust store.
@@ -52,7 +52,7 @@ public interface CertificateManager {
      *              INTERNAL_SERVER_ERROR: If any internal error occurred
      *              CERTIFICATE_NOT_FOUND : If Certificate is not found in the trust store.
      */
-    public ResponseCode deleteCertificateFromPublisher(String alias, String endpoint, int tenantId);
+    public ResponseCode deleteCertificateFromParentNode(String alias, String endpoint, int tenantId);
 
     /**
      * Method to add the certificate to gateway nodes.
@@ -61,7 +61,7 @@ public interface CertificateManager {
      * @param alias       : Certificate alias.
      * @return : True if the certificate is added to gateway node successfully. False otherwise.
      */
-    public boolean addCertificateToGateways(String certificate, String alias);
+    public boolean addCertificateToGateway(String certificate, String alias);
 
     /**
      * This method is to remove the certificate from client-truststore.jks of gateway nodes.
@@ -69,7 +69,7 @@ public interface CertificateManager {
      * @param alias : The alias of the certificate to be removed.
      * @return : True if the certificate is removed successfully, false otherwise.
      */
-    public boolean deleteCertificateFromGateways(String alias);
+    public boolean deleteCertificateFromGateway(String alias);
 
     /**
      * This method is to check whether the API-Manager is configured for Certificate Management feature.

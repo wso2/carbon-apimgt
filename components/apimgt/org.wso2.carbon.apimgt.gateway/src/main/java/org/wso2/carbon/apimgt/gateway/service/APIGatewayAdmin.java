@@ -457,7 +457,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * */
     public boolean addCertificate(String certificate, String alias) {
         CertificateManager certificateManager = new CertificateManagerImpl();
-        return certificateManager.addCertificateToGateways(certificate, alias);
+        return certificateManager.addCertificateToGateway(certificate, alias);
     }
 
     /**
@@ -467,6 +467,6 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * */
     public boolean deleteCertificate(String alias) {
         CertificateManager certificateManager = new CertificateManagerImpl();
-        return certificateManager.deleteCertificateFromGateways(alias);
+        return certificateManager.deleteCertificateFromGateway(alias);
     }
 }

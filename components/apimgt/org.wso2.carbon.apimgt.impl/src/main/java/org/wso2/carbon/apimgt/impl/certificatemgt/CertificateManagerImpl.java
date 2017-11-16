@@ -36,7 +36,8 @@ public class CertificateManagerImpl implements CertificateManager {
 
     private static Log log = LogFactory.getLog(CertificateManagerImpl.class);
     private static final String PROFILE_CONFIG = "sslprofiles.xml";
-    private static String CARBON_HOME = System.getProperty("carbon.home");
+    private static final String CARBON_HOME_STRING = "carbon.home";
+    private static String CARBON_HOME = System.getProperty(CARBON_HOME_STRING);
     private static final char SEP = File.separatorChar;
     private static String SSL_PROFILE_FILE_PATH = CARBON_HOME + SEP + "repository" + SEP + "resources" + SEP
             + "security" + SEP + PROFILE_CONFIG;
@@ -44,7 +45,7 @@ public class CertificateManagerImpl implements CertificateManager {
     private static CertificateMgtUtils certificateMgtUtils = new CertificateMgtUtils();
 
     @Override
-    public ResponseCode addCertificateToPublisher(String certificate, String alias, String endpoint, int tenantId) {
+    public ResponseCode addCertificateToParentNode(String certificate, String alias, String endpoint, int tenantId) {
         try {
             if (certificateMgtDAO.addCertificate(alias, endpoint, tenantId)) {
                 ResponseCode responseCode = certificateMgtUtils.addCertificateToTrustStore(certificate, alias);
@@ -80,7 +81,7 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public ResponseCode deleteCertificateFromPublisher(String alias, String endpoint, int tenantId) {
+    public ResponseCode deleteCertificateFromParentNode(String alias, String endpoint, int tenantId) {
         try {
             boolean removeFromDB = certificateMgtDAO.deleteCertificate(alias, endpoint, tenantId);
             if (removeFromDB) {
@@ -111,7 +112,7 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public boolean addCertificateToGateways(String certificate, String alias) {
+    public boolean addCertificateToGateway(String certificate, String alias) {
         boolean result;
         ResponseCode responseCode = certificateMgtUtils.addCertificateToTrustStore(certificate, alias);
         if (responseCode == ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE) {
@@ -131,7 +132,7 @@ public class CertificateManagerImpl implements CertificateManager {
     }
 
     @Override
-    public boolean deleteCertificateFromGateways(String alias) {
+    public boolean deleteCertificateFromGateway(String alias) {
         ResponseCode responseCode = certificateMgtUtils.removeCertificateFromTrustStore(alias);
         if (responseCode != ResponseCode.INTERNAL_SERVER_ERROR) {
             log.info("The certificate with Alias '" + alias + "' is successfully removed from the Gateway " +

@@ -85,7 +85,7 @@ public class CertificateManagerImplTest {
         PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
                 .toReturn(ResponseCode.SUCCESS);
         ResponseCode result =
-                certificateManager.addCertificateToPublisher(BASE64_ENCODED_CERT, ALIAS, END_POINT, TENANT_ID);
+                certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS, END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.SUCCESS, result);
     }
 
@@ -94,7 +94,7 @@ public class CertificateManagerImplTest {
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate")).toReturn(true);
         PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
                 .toReturn(ResponseCode.INTERNAL_SERVER_ERROR);
-        ResponseCode responseCode = certificateManager.addCertificateToPublisher(BASE64_ENCODED_CERT, ALIAS,
+        ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.INTERNAL_SERVER_ERROR, responseCode);
     }
@@ -105,7 +105,7 @@ public class CertificateManagerImplTest {
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "deleteCertificate")).toReturn(true);
         PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
                 .toReturn(ResponseCode.CERTIFICATE_EXPIRED);
-        ResponseCode responseCode = certificateManager.addCertificateToPublisher(BASE64_ENCODED_CERT, ALIAS,
+        ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.CERTIFICATE_EXPIRED, responseCode);
     }
@@ -116,7 +116,7 @@ public class CertificateManagerImplTest {
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "deleteCertificate")).toReturn(true);
         PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
                 .toReturn(ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE);
-        ResponseCode responseCode = certificateManager.addCertificateToPublisher(BASE64_ENCODED_CERT, ALIAS,
+        ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE, responseCode);
     }
@@ -124,7 +124,7 @@ public class CertificateManagerImplTest {
     @Test
     public void testAddToPublisherWhenDBError() {
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate")).toReturn(false);
-        ResponseCode responseCode = certificateManager.addCertificateToPublisher(BASE64_ENCODED_CERT, ALIAS,
+        ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.INTERNAL_SERVER_ERROR, responseCode);
     }
@@ -133,7 +133,7 @@ public class CertificateManagerImplTest {
     public void testAddToPublisherWithExistingAliasInDB() {
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate")).toThrow(new
                 CertificateAliasExistsException(""));
-        ResponseCode responseCode = certificateManager.addCertificateToPublisher(BASE64_ENCODED_CERT, ALIAS,
+        ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE, responseCode);
     }
@@ -142,7 +142,7 @@ public class CertificateManagerImplTest {
     public void testAddToPublisherWithExistingEndpointInDB() {
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate")).toThrow(new
                 EndpointForCertificateExistsException(""));
-        ResponseCode responseCode = certificateManager.addCertificateToPublisher(BASE64_ENCODED_CERT, ALIAS,
+        ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.CERTIFICATE_FOR_ENDPOINT_EXISTS, responseCode);
     }
@@ -153,7 +153,7 @@ public class CertificateManagerImplTest {
                 .toReturn(ResponseCode.SUCCESS);
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "deleteCertificate"))
                 .toReturn(true);
-        ResponseCode responseCode = certificateManager.deleteCertificateFromPublisher(ALIAS, END_POINT, TENANT_ID);
+        ResponseCode responseCode = certificateManager.deleteCertificateFromParentNode(ALIAS, END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.SUCCESS, responseCode);
     }
 
@@ -163,7 +163,7 @@ public class CertificateManagerImplTest {
                 .toReturn(ResponseCode.SUCCESS);
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "deleteCertificate"))
                 .toReturn(false);
-        ResponseCode responseCode = certificateManager.deleteCertificateFromPublisher(ALIAS, END_POINT, TENANT_ID);
+        ResponseCode responseCode = certificateManager.deleteCertificateFromParentNode(ALIAS, END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.INTERNAL_SERVER_ERROR, responseCode);
     }
 
@@ -175,7 +175,7 @@ public class CertificateManagerImplTest {
                 .toReturn(true);
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate"))
                 .toReturn(true);
-        ResponseCode responseCode = certificateManager.deleteCertificateFromPublisher(ALIAS, END_POINT, TENANT_ID);
+        ResponseCode responseCode = certificateManager.deleteCertificateFromParentNode(ALIAS, END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.CERTIFICATE_NOT_FOUND, responseCode);
     }
 
@@ -187,7 +187,7 @@ public class CertificateManagerImplTest {
                 .toReturn(true);
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate"))
                 .toThrow(new CertificateManagementException(""));
-        ResponseCode responseCode = certificateManager.deleteCertificateFromPublisher(ALIAS, END_POINT, TENANT_ID);
+        ResponseCode responseCode = certificateManager.deleteCertificateFromParentNode(ALIAS, END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.INTERNAL_SERVER_ERROR, responseCode);
     }
 
@@ -199,7 +199,7 @@ public class CertificateManagerImplTest {
                 .toReturn(true);
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate"))
                 .toReturn(true);
-        ResponseCode responseCode = certificateManager.deleteCertificateFromPublisher(ALIAS, END_POINT, TENANT_ID);
+        ResponseCode responseCode = certificateManager.deleteCertificateFromParentNode(ALIAS, END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.INTERNAL_SERVER_ERROR, responseCode);
     }
 
@@ -211,7 +211,7 @@ public class CertificateManagerImplTest {
         Field field = CertificateManagerImpl.class.getDeclaredField("SSL_PROFILE_FILE_PATH");
         field.setAccessible(true);
         field.set(certificateManager, TEST_PATH);
-        boolean result = certificateManager.addCertificateToGateways(BASE64_ENCODED_CERT, ALIAS);
+        boolean result = certificateManager.addCertificateToGateway(BASE64_ENCODED_CERT, ALIAS);
         Assert.assertTrue(result);
     }
 
@@ -219,7 +219,7 @@ public class CertificateManagerImplTest {
     public void testAddToGatewayCertificateExistsInTrustStore() {
         PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore"))
                 .toReturn(ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE);
-        boolean result = certificateManager.addCertificateToGateways(BASE64_ENCODED_CERT, ALIAS);
+        boolean result = certificateManager.addCertificateToGateway(BASE64_ENCODED_CERT, ALIAS);
         Assert.assertTrue(result);
     }
 
@@ -230,7 +230,7 @@ public class CertificateManagerImplTest {
         Field field = CertificateManagerImpl.class.getDeclaredField("SSL_PROFILE_FILE_PATH");
         field.setAccessible(true);
         field.set(certificateManager, TEST_PATH);
-        boolean result = certificateManager.addCertificateToGateways(BASE64_ENCODED_CERT, ALIAS);
+        boolean result = certificateManager.addCertificateToGateway(BASE64_ENCODED_CERT, ALIAS);
         Assert.assertFalse(result);
     }
 
@@ -241,7 +241,7 @@ public class CertificateManagerImplTest {
         Field field = CertificateManagerImpl.class.getDeclaredField("SSL_PROFILE_FILE_PATH");
         field.setAccessible(true);
         field.set(certificateManager, TEST_PATH_NOT_EXISTS);
-        boolean result = certificateManager.addCertificateToGateways(BASE64_ENCODED_CERT, ALIAS);
+        boolean result = certificateManager.addCertificateToGateway(BASE64_ENCODED_CERT, ALIAS);
         Assert.assertFalse(result);
     }
 
@@ -252,7 +252,7 @@ public class CertificateManagerImplTest {
         Field field = CertificateManagerImpl.class.getDeclaredField("SSL_PROFILE_FILE_PATH");
         field.setAccessible(true);
         field.set(certificateManager, TEST_PATH);
-        boolean result = certificateManager.deleteCertificateFromGateways(ALIAS);
+        boolean result = certificateManager.deleteCertificateFromGateway(ALIAS);
         Assert.assertTrue(result);
     }
 
@@ -263,7 +263,7 @@ public class CertificateManagerImplTest {
         Field field = CertificateManagerImpl.class.getDeclaredField("SSL_PROFILE_FILE_PATH");
         field.setAccessible(true);
         field.set(certificateManager, TEST_PATH);
-        boolean result = certificateManager.deleteCertificateFromGateways(ALIAS);
+        boolean result = certificateManager.deleteCertificateFromGateway(ALIAS);
         Assert.assertFalse(result);
     }
 

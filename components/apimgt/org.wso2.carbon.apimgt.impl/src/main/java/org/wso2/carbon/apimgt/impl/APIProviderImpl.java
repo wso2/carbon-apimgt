@@ -32,7 +32,6 @@ import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.regexp.RE;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -4925,7 +4924,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
             responseCode = certificateManager
-                    .addCertificateToPublisher(certificate, alias, endpoint, tenantId);
+                    .addCertificateToParentNode(certificate, alias, endpoint, tenantId);
 
             if (responseCode == ResponseCode.SUCCESS) {
                 //Get the gateway manager and add the certificate to gateways.
@@ -4936,7 +4935,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         "affected.");
             }
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error while reading tenant information", e);
+            handleException("Error while reading tenant information", e);
         }
         return responseCode.getResponseCode();
     }
@@ -4950,7 +4949,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
-            responseCode = certificateManager.deleteCertificateFromPublisher(alias, endpoint, tenantId);
+            responseCode = certificateManager.deleteCertificateFromParentNode(alias, endpoint, tenantId);
 
             if (responseCode == ResponseCode.SUCCESS) {
                 //Get the gateway manager and remove the certificate from gateways.
@@ -4961,7 +4960,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         + "be affected.");
             }
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error while reading tenant information", e);
+            handleException("Error while reading tenant information", e);
         }
         return responseCode.getResponseCode();
     }
@@ -4975,12 +4974,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public List<CertificateMetadataDTO> getCertificates(String userName) throws APIManagementException {
         CertificateManager certificateManager = new CertificateManagerImpl();
-        int tenantId;
+        int tenantId = 0;
         try {
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
         } catch (UserStoreException e) {
-            throw new APIManagementException("Error while reading tenant information", e);
+            handleException("Error while reading tenant information", e);
         }
         return certificateManager.getCertificates(tenantId);
     }

@@ -75,13 +75,14 @@ public class CertificateMgtDAO {
     public boolean isTableExists() throws CertificateManagementException {
         boolean isExists = false;
         Connection connection = null;
+        ResultSet resultSet = null;
         DatabaseMetaData databaseMetaData = null;
 
         try {
             connection = APIMgtDBUtil.getConnection();
             databaseMetaData = connection.getMetaData();
 
-            ResultSet resultSet = databaseMetaData.getTables(null, null,
+            resultSet = databaseMetaData.getTables(null, null,
                     CERTIFICATE_TABLE_NAME, null);
             if (resultSet.next()) {
                 isExists = true;
@@ -89,7 +90,7 @@ public class CertificateMgtDAO {
         } catch (SQLException e) {
             handleException("Error retrieving Database information", e);
         } finally {
-            APIMgtDBUtil.closeAllConnections(null, connection, null);
+            APIMgtDBUtil.closeAllConnections(null, connection, resultSet);
         }
         return isExists;
     }
