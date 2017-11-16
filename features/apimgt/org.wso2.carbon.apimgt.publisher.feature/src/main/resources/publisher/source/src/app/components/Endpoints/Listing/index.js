@@ -22,6 +22,7 @@ import {Link} from 'react-router-dom'
 import {Table, Popconfirm, Button, Dropdown, Menu, message} from 'antd';
 
 import API from '../../../data/api'
+import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation';
 
 export default class EndpointsListing extends Component {
     constructor(props) {
@@ -109,22 +110,29 @@ export default class EndpointsListing extends Component {
             selectedRowKeys,
             onChange: this.onSelectChange,
         };
-
-        const endpointCreatMenu = (
+        debugger;
+        const endpointCreateMenu = (
             <Menu>
-                <Menu.Item>
+                <Menu.Item key="0">
                     <Link to="/endpoints/create">Create new Endpoint</Link>
+                </Menu.Item>
+                <Menu.Item key="1">
+                    <ScopeValidation resourcePath={resourcePath.SERVICE_DISCOVERY} resourceMethod={resourceMethod.GET}>
+                        <Link to="/endpoints/discover">Discover Endpoints</Link>
+                    </ScopeValidation>
                 </Menu.Item>
             </Menu>
         );
         return (
             <div>
                 <div className="api-add-links">
-                    <Dropdown overlay={endpointCreatMenu} placement="topRight">
+                    <Dropdown overlay={endpointCreateMenu} placement="topRight">
                         <Button shape="circle" icon="plus"/>
                     </Dropdown>
                 </div>
-                <h4>Global Endpoints</h4>
+                <span>
+                <h3>Global Endpoints</h3>
+                </span>
                 <Table rowSelection={rowSelection} loading={endpoints === null} columns={columns}
                        dataSource={endpoints}
                        rowKey="id"

@@ -176,7 +176,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
      * This method populates resource to scope mappings into localConfigMap
      *
      * @param swagger   swagger oc of the apis
-     * @param namespace namespacee unique identifier of the api
+     * @param namespace namespace unique identifier of the api
      */
     private void populateConfigMapForScope(Swagger swagger, String namespace) {
         //todo: Keep polulateConfigMapForScope and remove populateConfigMapForScopes after finalizing yamls

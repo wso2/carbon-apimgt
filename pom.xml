@@ -272,6 +272,11 @@
                 <version>${com.fasterxml.jackson.core.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>${com.fasterxml.jackson.dataformat.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>javax.ws.rs</groupId>
                 <artifactId>javax.ws.rs-api</artifactId>
                 <version>${javax.ws.rs-api.version}</version>
@@ -605,6 +610,36 @@
                 <version>${com.fasterxml.jackson.dataformat.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.wso2.orbit.com.squareup.okio</groupId>
+                <artifactId>okio</artifactId>
+                <version>${wso2.okio.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
+                <artifactId>okhttp-ws</artifactId>
+                <version>${wso2.okhttp-ws.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>${wso2.okhttp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
+                <artifactId>logging-interceptor</artifactId>
+                <version>${wso2.okhttp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.dnsjava</groupId>
+                <artifactId>dnsjava</artifactId>
+                <version>${wso2.dnsjava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>${org.json.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
                 <version>${snakeyaml.version}</version>
@@ -618,6 +653,11 @@
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
                 <version>${joda.time.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.io.fabric8</groupId>
+                <artifactId>kubernetes-client</artifactId>
+                <version>${wso2.kubernetes-client.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -941,6 +981,8 @@
         <org.wso2.carbon.security.caas.import.version.range>[1.0.0,2.0.0)</org.wso2.carbon.security.caas.import.version.range>
         <google.code.gson.import.version.range>[2.7,3.0)</google.code.gson.import.version.range>
 
+
+        <com.fasterxml.jackson.dataformat.version>2.8.4</com.fasterxml.jackson.dataformat.version>
         <com.fasterxml.jackson.datatype.version>2.7.4</com.fasterxml.jackson.datatype.version>
         <com.fasterxml.jackson.datatbind.version>2.7.4</com.fasterxml.jackson.datatbind.version>
         <javax.ws.rs-api.version>2.0</javax.ws.rs-api.version>
@@ -981,6 +1023,12 @@
         <carbon.lcm.version>1.1.1</carbon.lcm.version>
         <carbon.lcm.import.version.range>[1.1.0, 1.2.0)</carbon.lcm.import.version.range>
 
+        <wso2.okhttp-ws.version>3.4.2.wso2v2</wso2.okhttp-ws.version>
+        <wso2.okhttp.version>3.8.0.wso2v2</wso2.okhttp.version>
+        <wso2.dnsjava.version>2.1.7.wso2v1</wso2.dnsjava.version>
+        <org.json.version>20160212</org.json.version>
+        <wso2.okio.version>1.6.0.wso2v1</wso2.okio.version>
+        <wso2.kubernetes-client.version>2.5.2.wso2v3</wso2.kubernetes-client.version>
         <nimbusds.version>2.26.1.wso2v2</nimbusds.version>
         <nimbusds.import.version.range>[2.26.1, 2.26.2)</nimbusds.import.version.range>
         <geronimo-jms.version>1.1.0.wso2v1</geronimo-jms.version>
