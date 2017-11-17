@@ -102,6 +102,7 @@ public class APIKeyMgtServiceComponentTest {
         PowerMockito.when(TSSLTransportFactory
                 .getServerSocket(Mockito.anyInt(), Mockito.anyInt(), Mockito.any(InetAddress.class),
                         Mockito.any(TSSLTransportFactory.TSSLTransportParameters.class))).thenReturn(serverTransport);
+        PowerMockito.doThrow(new TTransportException()).when(serverTransport).listen();
         PowerMockito.whenNew(TThreadPoolServer.class).withAnyArguments().thenReturn(tThreadPoolServer);
         PowerMockito.when(ctxt.getBundleContext()).thenReturn(bundleContext);
         PowerMockito.when(bundleContext
@@ -112,6 +113,8 @@ public class APIKeyMgtServiceComponentTest {
         PowerMockito.when(serviceReferenceHolder1.getAPIManagerConfigurationService())
                 .thenReturn(apiManagerConfigurationService);
         PowerMockito.when(apiManagerConfiguration.getProperty(APIConstants.WHITELISTED_SCOPES)).thenReturn(null);
+        PowerMockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_THRIFT_SERVER_HOST))
+                .thenReturn("localhost");
     }
 
     @Test
