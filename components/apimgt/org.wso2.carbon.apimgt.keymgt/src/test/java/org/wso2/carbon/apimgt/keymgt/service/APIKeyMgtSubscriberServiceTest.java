@@ -1,5 +1,11 @@
 package org.wso2.carbon.apimgt.keymgt.service;
 
+import org.apache.axis2.AxisFault;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,10 +15,19 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
+import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.keymgt.util.APIKeyMgtUtil;
+import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.application.common.IdentityApplicationManagementException;
 import org.wso2.carbon.identity.application.common.model.ServiceProvider;
@@ -23,12 +38,18 @@ import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.cache.OAuthCache;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.dto.OAuthConsumerAppDTO;
+import org.wso2.carbon.utils.CarbonUtils;
+
+import java.sql.SQLException;
+import java.util.*;
 
 import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ PrivilegedCarbonContext.class, OAuthApplicationInfo.class, ApplicationManagementService.class,
-        APIKeyMgtSubscriberService.class, ApiMgtDAO.class, OAuthServerConfiguration.class, OAuthCache.class })
+        APIKeyMgtSubscriberService.class, ApiMgtDAO.class, OAuthServerConfiguration.class, OAuthCache.class,
+        ServiceReferenceHolder.class, CarbonUtils.class, ServerConfiguration.class, APIUtil.class,
+        APIKeyMgtUtil.class })
 public class APIKeyMgtSubscriberServiceTest {
     private final int TENANT_ID = 1234;
     private final String TENANT_DOMAIN = "foo.com";
@@ -42,6 +63,7 @@ public class APIKeyMgtSubscriberServiceTest {
     private final String[] GRANT_TYPES = { "password" };
     private final String REFRESH_GRANT_TYPE = "refresh_token";
     private final String IMPLICIT_GRANT_TYPE = "implicit";
+    private final String ACCESS_TOKEN = "ca19a540f544777860e44e75f605d927";
     private APIKeyMgtSubscriberService apiKeyMgtSubscriberService = new APIKeyMgtSubscriberService();
 
     @Test
@@ -298,6 +320,240 @@ public class APIKeyMgtSubscriberServiceTest {
             Assert.fail("APIManagementException should be thrown");
         } catch (APIManagementException e) {
             Assert.assertEquals("Error occurred while deleting ServiceProvider", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testGetSubscribedAPIsOfUser() throws Exception {
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+        Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+        APIInfoDTO[] apiInfoDTOS = new APIInfoDTO[1];
+        apiInfoDTOS[0] = new APIInfoDTO();
+        Mockito.when(apiMgtDAO.getSubscribedAPIsOfUser(USER_NAME)).thenReturn(apiInfoDTOS);
+        Assert.assertEquals(1, apiKeyMgtSubscriberService.getSubscribedAPIsOfUser(USER_NAME).length);
+    }
+
+    @Test
+    public void testRenewAccessToken() throws Exception {
+        String tokenType = "production";
+        String oldAccessToken = "s5d8v8d8f8ds5d9e7w53a1a7e5g5";
+        String[] allowedDomains = new String[] { "wso2.com" };
+        String validityTime = "3600";
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito
+                .mock(APIManagerConfigurationService.class);
+
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.TOKEN_ENDPOINT_NAME))
+                .thenReturn("/oauth2/token");
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL))
+                .thenReturn("https://localhost:9443/services/");
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.REVOKE_API_URL))
+                .thenReturn("https://localhost:8280/revoke/");
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
+                .thenReturn(apiManagerConfigurationService);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
+                .thenReturn(apiManagerConfigurationService);
+
+        PowerMockito.mockStatic(CarbonUtils.class);
+        PowerMockito.mockStatic(ServerConfiguration.class);
+        PowerMockito.mockStatic(APIUtil.class);
+        ServerConfiguration serverConfiguration = Mockito.mock(ServerConfiguration.class);
+        Mockito.when(serverConfiguration.getFirstProperty("WebContextRoot")).thenReturn("/");
+        PowerMockito.when(CarbonUtils.getServerConfiguration()).thenReturn(serverConfiguration);
+        HttpClient httpClient = Mockito.mock(HttpClient.class);
+        HttpResponse httpResponse = Mockito.mock(HttpResponse.class);
+        StatusLine statusLine = Mockito.mock(StatusLine.class);
+        Mockito.when(httpClient.execute(Mockito.any(HttpPost.class))).thenReturn(httpResponse);
+        Mockito.when(statusLine.getStatusCode()).thenReturn(200);
+        Mockito.when(httpResponse.getStatusLine()).thenReturn(statusLine);
+        PowerMockito.when(APIUtil.getHttpClient(Mockito.anyInt(), Mockito.anyString())).thenReturn(httpClient);
+
+        String jsonResponse =
+                "{\"scope\":\"\",\"token_type\":\"Bearer\",\"expires_in\":2061,\"access_token\":\"" + ACCESS_TOKEN
+                        + "\"}";
+        Mockito.when(httpResponse.getEntity()).thenReturn(new StringEntity(jsonResponse));
+
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+        Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+        String newAccessToken = apiKeyMgtSubscriberService
+                .renewAccessToken(tokenType, oldAccessToken, allowedDomains, CONSUMER_KEY, CONSUMER_SECRET,
+                        validityTime);
+        Assert.assertEquals(ACCESS_TOKEN, newAccessToken);
+
+        Mockito.when(statusLine.getStatusCode()).thenReturn(500);
+        try {
+            newAccessToken = apiKeyMgtSubscriberService
+                    .renewAccessToken(tokenType, oldAccessToken, allowedDomains, CONSUMER_KEY, CONSUMER_SECRET,
+                            validityTime);
+        } catch (APIKeyMgtException e) {
+            Assert.assertEquals("Error in getting new accessToken", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testRevokeAccessToken() throws Exception {
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+        Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+
+        OAuthServerConfiguration oAuthServerConfiguration = Mockito.mock(OAuthServerConfiguration.class);
+        PowerMockito.mockStatic(OAuthServerConfiguration.class);
+        PowerMockito.when(OAuthServerConfiguration.getInstance()).thenReturn(oAuthServerConfiguration);
+        PowerMockito.when(oAuthServerConfiguration.isCacheEnabled()).thenReturn(true);
+
+        OAuthCache oAuthCache = Mockito.mock(OAuthCache.class);
+        PowerMockito.mockStatic(OAuthCache.class);
+        PowerMockito.when(OAuthCache.getInstance()).thenReturn(oAuthCache);
+
+        apiKeyMgtSubscriberService.revokeAccessToken("1", CONSUMER_KEY, USER_NAME);
+    }
+
+    @Test
+    public void testRevokeAccessTokenForApplication() throws Exception {
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+        Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+        Set<String> apiKeys = new HashSet<String>();
+        Set<SubscribedAPI> apiSet = new HashSet<SubscribedAPI>();
+        APIIdentifier apiIdentifier = new APIIdentifier(USER_NAME, "API_NAME", "1.0.0");
+        SubscribedAPI subscribedAPI = new SubscribedAPI(new Subscriber(USER_NAME), apiIdentifier);
+        Application application = new Application("app_name", new Subscriber(USER_NAME));
+        application.setId(1);
+        subscribedAPI.setApplication(application);
+        apiSet.add(subscribedAPI);
+        apiKeys.add(ACCESS_TOKEN);
+        Mockito.when(apiMgtDAO.getApplicationKeys(1)).thenReturn(apiKeys);
+
+        Mockito.when(apiMgtDAO.getSubscribedAPIs(Mockito.any(Subscriber.class), Mockito.anyString()))
+                .thenReturn(apiSet);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito
+                .mock(APIManagerConfigurationService.class);
+        Map<String, Environment> environmentMap = new HashMap<String, Environment>();
+        environmentMap.put("hybrid", new Environment());
+        Mockito.when(apiManagerConfiguration.getApiGatewayEnvironments()).thenReturn(environmentMap);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
+                .thenReturn(apiManagerConfigurationService);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
+                .thenReturn(apiManagerConfigurationService);
+
+        PowerMockito.mockStatic(APIKeyMgtUtil.class);
+        API api = new API(apiIdentifier);
+        PowerMockito.when(APIKeyMgtUtil.getAPI(apiIdentifier)).thenReturn(api);
+
+        APIAuthenticationAdminClient apiAuthenticationAdminClient = Mockito.mock(APIAuthenticationAdminClient.class);
+        PowerMockito.whenNew(APIAuthenticationAdminClient.class).withAnyArguments()
+                .thenReturn(apiAuthenticationAdminClient);
+        apiKeyMgtSubscriberService.revokeAccessTokenForApplication(application);
+
+        Application[] applications = new Application[1];
+        applications[0] = application;
+        Mockito.when(apiMgtDAO.getApplications(Mockito.any(Subscriber.class), Mockito.anyString()))
+                .thenReturn(applications);
+        testRevokeAccessTokenBySubscriber((new Subscriber(USER_NAME)));
+
+        Mockito.when(apiMgtDAO.getApplicationsByTier(Mockito.anyString())).thenReturn(applications);
+        testRevokeKeysByTier("GOLD");
+        Mockito.reset(apiMgtDAO);
+    }
+
+    public void testRevokeAccessTokenBySubscriber(Subscriber subscriber) {
+        try {
+            apiKeyMgtSubscriberService.revokeAccessTokenBySubscriber(subscriber);
+        } catch (AxisFault e) {
+            Assert.fail("AxisFault should not be throw");
+        } catch (APIManagementException e) {
+            Assert.fail("APIManagementException should not be throw");
+        }
+    }
+
+    public void testRevokeKeysByTier(String tierName) {
+        try {
+            apiKeyMgtSubscriberService.revokeKeysByTier(tierName);
+        } catch (AxisFault e) {
+            Assert.fail("AxisFault should not be throw");
+        } catch (APIManagementException e) {
+            Assert.fail("APIManagementException should not be throw");
+        }
+    }
+
+    @Test
+    public void testClearOAuthCache() throws Exception {
+        OAuthServerConfiguration oAuthServerConfiguration = Mockito.mock(OAuthServerConfiguration.class);
+        PowerMockito.mockStatic(OAuthServerConfiguration.class);
+        PowerMockito.when(OAuthServerConfiguration.getInstance()).thenReturn(oAuthServerConfiguration);
+        PowerMockito.when(oAuthServerConfiguration.isCacheEnabled()).thenReturn(true);
+
+        OAuthCache oAuthCache = Mockito.mock(OAuthCache.class);
+        PowerMockito.mockStatic(OAuthCache.class);
+        PowerMockito.when(OAuthCache.getInstance()).thenReturn(oAuthCache);
+        apiKeyMgtSubscriberService.clearOAuthCache(CONSUMER_KEY, USER_NAME);
+    }
+
+    @Test
+    public void testRevokeTokensOfUserByApp() throws Exception {
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+        Mockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+
+        List<AccessTokenInfo> accessTokens = new ArrayList<AccessTokenInfo>();
+        AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
+        accessTokenInfo.setAccessToken(ACCESS_TOKEN);
+        accessTokenInfo.setConsumerKey(CONSUMER_KEY);
+        accessTokenInfo.setConsumerSecret(CONSUMER_SECRET);
+        accessTokens.add(accessTokenInfo);
+        Mockito.when(apiMgtDAO.getAccessTokenListForUser(USER_NAME, APPLICATION_NAME)).thenReturn(accessTokens);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito
+                .mock(APIManagerConfigurationService.class);
+        Map<String, Environment> environmentMap = new HashMap<String, Environment>();
+        Environment environment = new Environment();
+        environment.setApiGatewayEndpoint("http://localhost:8280,https://localhost:8243");
+        environmentMap.put("hybrid", environment);
+        Mockito.when(apiManagerConfiguration.getApiGatewayEnvironments()).thenReturn(environmentMap);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.REVOKE_API_URL))
+                .thenReturn("https://localhost:8280/revoke/");
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
+                .thenReturn(apiManagerConfigurationService);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
+                .thenReturn(apiManagerConfigurationService);
+
+        PowerMockito.mockStatic(APIUtil.class);
+        HttpClient httpClient = Mockito.mock(HttpClient.class);
+        HttpResponse httpResponse = Mockito.mock(HttpResponse.class);
+        StatusLine statusLine = Mockito.mock(StatusLine.class);
+        Mockito.when(httpClient.execute(Mockito.any(HttpPost.class))).thenReturn(httpResponse);
+        Mockito.when(statusLine.getStatusCode()).thenReturn(200);
+        Mockito.when(httpResponse.getStatusLine()).thenReturn(statusLine);
+        PowerMockito.when(APIUtil.getHttpClient(Mockito.anyInt(), Mockito.anyString())).thenReturn(httpClient);
+        boolean status = apiKeyMgtSubscriberService.revokeTokensOfUserByApp(USER_NAME, APPLICATION_NAME);
+        Assert.assertEquals(true, status);
+
+        Mockito.when(apiMgtDAO.getAccessTokenListForUser(USER_NAME, APPLICATION_NAME))
+                .thenThrow(new SQLException("Error getting AccessToken List For User"));
+        try {
+            status = apiKeyMgtSubscriberService.revokeTokensOfUserByApp(USER_NAME, APPLICATION_NAME);
+            Assert.fail("APIManagementException should be thrown");
+        } catch (APIManagementException e) {
+            Assert.assertEquals("Error while revoking token for user=" + USER_NAME + " app=" + APPLICATION_NAME,
+                    e.getMessage());
         }
     }
 }
