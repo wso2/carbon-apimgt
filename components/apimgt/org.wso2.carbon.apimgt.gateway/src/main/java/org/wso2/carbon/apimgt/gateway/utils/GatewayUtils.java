@@ -284,7 +284,7 @@ public class GatewayUtils {
     }
 
     /**
-     * The method sets message context properties for error message.
+     * This method sets the message context properties for threat detection error message.
      *
      * @param messageContext This message context contains the request message properties of the relevant API which was
      *                       enabled a Validator message mediation in flow.
