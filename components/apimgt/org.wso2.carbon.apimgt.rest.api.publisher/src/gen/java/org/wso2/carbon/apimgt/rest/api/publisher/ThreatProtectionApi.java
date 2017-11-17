@@ -58,10 +58,10 @@ public class ThreatProtectionApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 500, message = "Error accociating policy with API", response = void.class) })
     public Response threatProtectionAddPolicyApiIdPolicyIdPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
-,@ApiParam(value = "The UUID of a Policy ",required=true) @PathParam("ThreatProtectionPolicyId") String threatProtectionPolicyId
+,@ApiParam(value = "The UUID of a Policy ",required=true) @PathParam("policyId") String policyId
  ,@Context Request request)
     throws NotFoundException {
-        return delegate.threatProtectionAddPolicyApiIdPolicyIdPost(apiId,threatProtectionPolicyId,request);
+        return delegate.threatProtectionAddPolicyApiIdPolicyIdPost(apiId,policyId,request);
     }
     @GET
     @Path("/apis/{apiId}/policies")
@@ -107,10 +107,10 @@ public class ThreatProtectionApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 200, message = "Ok. Policy is returned", response = ThreatProtectionPolicyDTO.class),
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "No policy found for given policy ID", response = ThreatProtectionPolicyDTO.class) })
-    public Response threatProtectionPoliciesPolicyIdGet(@ApiParam(value = "The UUID of a Policy ",required=true) @PathParam("ThreatProtectionPolicyId") String threatProtectionPolicyId
+    public Response threatProtectionPoliciesPolicyIdGet(@ApiParam(value = "The UUID of a Policy ",required=true) @PathParam("policyId") String policyId
  ,@Context Request request)
     throws NotFoundException {
-        return delegate.threatProtectionPoliciesPolicyIdGet(threatProtectionPolicyId,request);
+        return delegate.threatProtectionPoliciesPolicyIdGet(policyId,request);
     }
     @POST
     @Path("/remove-policy/{apiId}/{policyId}")
@@ -126,9 +126,9 @@ public class ThreatProtectionApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 500, message = "Error removing policy association.", response = void.class) })
     public Response threatProtectionRemovePolicyApiIdPolicyIdPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
-,@ApiParam(value = "The UUID of a Policy ",required=true) @PathParam("ThreatProtectionPolicyId") String threatProtectionPolicyId
+,@ApiParam(value = "The UUID of a Policy ",required=true) @PathParam("policyId") String policyId
  ,@Context Request request)
     throws NotFoundException {
-        return delegate.threatProtectionRemovePolicyApiIdPolicyIdPost(apiId,threatProtectionPolicyId,request);
+        return delegate.threatProtectionRemovePolicyApiIdPolicyIdPost(apiId,policyId,request);
     }
 }

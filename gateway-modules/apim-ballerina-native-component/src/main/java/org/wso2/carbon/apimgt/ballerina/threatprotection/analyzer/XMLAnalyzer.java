@@ -95,10 +95,6 @@ public class XMLAnalyzer implements APIMThreatAnalyzer {
                     + e.getMessage(), e);
             throw new APIMThreatAnalyzerException(XML_THREAT_PROTECTION_MSG_PREFIX + apiContext
                     + " - XML Validation Failed: " + e.getMessage(), e);
-        } catch (NullPointerException e) {
-            logger.error(XML_THREAT_PROTECTION_MSG_PREFIX + apiContext + " - " + e.getMessage(), e);
-            throw new APIMThreatAnalyzerException(XML_THREAT_PROTECTION_MSG_PREFIX + apiContext
-                    + " - " + e.getMessage(), e);
         } finally {
             try {
                 if (xmlEventReaderReader != null) {

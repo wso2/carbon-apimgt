@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.models.WSDLInfo;
+import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
@@ -62,6 +63,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThreatProtectionPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO.WorkflowStatusEnum;
 
@@ -568,6 +570,16 @@ public class MappingUtil {
             securitySchemesList.add("apikey");
         }
         return securitySchemesList;
+    }
+
+    public static ThreatProtectionPolicyDTO toThreatProtectionPolicyDTO(ThreatProtectionPolicy policy) {
+        ThreatProtectionPolicyDTO dto = new ThreatProtectionPolicyDTO();
+        dto.setUuid(policy.getUuid());
+        dto.setType(policy.getType());
+        dto.setName(policy.getName());
+        dto.setPolicy(policy.getPolicy());
+
+        return dto;
     }
 
 }

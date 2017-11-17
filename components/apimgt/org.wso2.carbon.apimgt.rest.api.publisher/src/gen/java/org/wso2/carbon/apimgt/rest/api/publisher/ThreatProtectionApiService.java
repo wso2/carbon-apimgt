@@ -21,14 +21,14 @@ import javax.ws.rs.core.SecurityContext;
 
 public abstract class ThreatProtectionApiService {
     public abstract Response threatProtectionAddPolicyApiIdPolicyIdPost(String apiId
- ,String threatProtectionPolicyId
+ ,String policyId
   ,Request request) throws NotFoundException;
     public abstract Response threatProtectionApisApiIdPoliciesGet(String apiId
   ,Request request) throws NotFoundException;
     public abstract Response threatProtectionPoliciesGet( Request request) throws NotFoundException;
-    public abstract Response threatProtectionPoliciesPolicyIdGet(String threatProtectionPolicyId
+    public abstract Response threatProtectionPoliciesPolicyIdGet(String policyId
   ,Request request) throws NotFoundException;
     public abstract Response threatProtectionRemovePolicyApiIdPolicyIdPost(String apiId
- ,String threatProtectionPolicyId
+ ,String policyId
   ,Request request) throws NotFoundException;
 }

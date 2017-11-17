@@ -2056,6 +2056,12 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         return dao.getPolicies();
     }
 
+    @Override
+    public ThreatProtectionPolicy getThreatProtectionPolicy(String policyId) throws APIManagementException {
+        ThreatProtectionDAO dao = getThreatProtectionDAO();
+        return dao.getPolicy(policyId);
+    }
+
     private void cleanupPendingTaskForAPIStateChange(String apiId) throws APIManagementException {
         Optional<String> workflowExtRef = getWorkflowDAO().getExternalWorkflowReferenceForPendingTask(apiId,
                 WorkflowConstants.WF_TYPE_AM_API_STATE);

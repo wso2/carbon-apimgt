@@ -9,6 +9,8 @@ import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
 import org.wso2.carbon.apimgt.rest.api.publisher.ThreatProtectionApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThreatProtectionPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 import org.wso2.msf4j.Request;
 
@@ -69,7 +71,21 @@ public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
 
     @Override
     public Response threatProtectionPoliciesPolicyIdGet(String threatProtectionPolicyId, Request request) throws NotFoundException {
-        return null;
+        String username = RestApiUtil.getLoggedInUsername(request);
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            ThreatProtectionPolicy policy = apiPublisher.getThreatProtectionPolicy(threatProtectionPolicyId);
+
+            if (policy == null) {
+                return Response.status(404).entity("No policy found for PolicyID: " + threatProtectionPolicyId).build();
+            }
+
+            ThreatProtectionPolicyDTO dto = MappingUtil.toThreatProtectionPolicyDTO(policy);
+            return Response.ok().entity(dto).build();
+        } catch (APIManagementException e) {
+            log.error("Error retrieving Threat Protection Policies", e);
+        }
+        return Response.status(500).build();
     }
 
     @Override

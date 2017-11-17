@@ -561,4 +561,6 @@ public interface APIPublisher extends APIManager {
     void deleteThreatProtectionPolicy(String apiId, String policyId) throws APIManagementException;
 
     List<ThreatProtectionPolicy> getThreatProtectionPolicies() throws APIManagementException;
+
+    ThreatProtectionPolicy getThreatProtectionPolicy(String policyId) throws APIManagementException;
 }
