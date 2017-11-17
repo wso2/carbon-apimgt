@@ -100,13 +100,19 @@ public class APIKeyValidationServiceImplTest {
         Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
                 .thenReturn(apiManagerConfigurationService);
         apiKeyValidationServiceImpl = new APIKeyValidationServiceImpl();
+
+        System.setProperty(CARBON_HOME, "");
+        PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
+        PowerMockito.mockStatic(PrivilegedCarbonContext.class);
+        PowerMockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
+        PowerMockito.when(privilegedCarbonContext.getUsername()).thenReturn(USER_NAME);
     }
 
     @Test
     public void testValidateKeyTest() throws Exception {
 
         APIKeyValidationInfoDTO dto;
-
+        APIKeyValidationServiceImpl.init(null);
         try {
             dto = apiKeyValidationServiceImpl
                     .validateKey(CONTEXT, VERSION, ACCESS_TOKEN, SESSION_ID, REQUIRED_AUTHENTICATION_LEVEL,
@@ -207,6 +213,13 @@ public class APIKeyValidationServiceImplTest {
     public void testGetAllURITemplatesTest() throws Exception {
         List<URITemplate> uriTemplateList;
 
+        ThriftAuthenticatorService thriftAuthenticatorService = Mockito.mock(ThriftAuthenticatorService.class);
+        Mockito.when(thriftAuthenticatorService.isAuthenticated(SESSION_ID)).thenReturn(true);
+        ThriftSession currentSession = new ThriftSession();
+        currentSession.setAttribute(MultitenantConstants.TENANT_ID, TENANT_ID);
+        Mockito.when(thriftAuthenticatorService.getSessionInfo(SESSION_ID)).thenReturn(currentSession);
+        APIKeyValidationServiceImpl.init(thriftAuthenticatorService);
+
         org.wso2.carbon.metrics.manager.internal.ServiceReferenceHolder serviceReferenceHolder1 = Mockito
                 .mock(org.wso2.carbon.metrics.manager.internal.ServiceReferenceHolder.class);
         PowerMockito.mockStatic(org.wso2.carbon.metrics.manager.internal.ServiceReferenceHolder.class);
@@ -259,7 +272,7 @@ public class APIKeyValidationServiceImplTest {
             Assert.assertEquals("Thrift Authenticator or APIKeyValidationService is not initialized.", e.getMessage());
         }
 
-        ThriftAuthenticatorService thriftAuthenticatorService = Mockito.mock(ThriftAuthenticatorService.class);
+        thriftAuthenticatorService = Mockito.mock(ThriftAuthenticatorService.class);
         Mockito.when(thriftAuthenticatorService.isAuthenticated(SESSION_ID)).thenReturn(false);
         APIKeyValidationServiceImpl.init(thriftAuthenticatorService);
         try {
@@ -316,7 +329,6 @@ public class APIKeyValidationServiceImplTest {
         Mockito.when(thriftAuthenticatorService.getSessionInfo(SESSION_ID)).thenReturn(currentSession);
         APIKeyValidationServiceImpl.init(thriftAuthenticatorService);
 
-//        PowerMockito.mockStatic(APIKeyMgtUtil.class);
         PowerMockito.mockStatic(KeyManagerHolder.class);
 
         KeyManager keyManager = Mockito.mock(KeyManager.class);
