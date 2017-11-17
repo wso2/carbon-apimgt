@@ -55,6 +55,8 @@ public class CertificateManagerImplTest {
     private static final String TEST_PATH = CertificateManagerImplTest.class.getClassLoader().getResource
             ("security/sslprofiles.xml").getPath();
     private static final String TEST_PATH_NOT_EXISTS = "/abx.xml";
+    private static final String JAVAX_SSL_TRUST_STORE_PASSWORD = "wso2carbon";
+    private static final String JAVAX_NET_SSL_TRUST_STORE_PASSWORD_PROPERTY = "javax.net.ssl.trustStorePassword";
     private static final String BASE64_ENCODED_CERT =
             "MIIDEzCCAtGgAwIBAgIEC68tazALBgcqhkjOOAQDBQAwWzELMAkGA1UEBhMCbGsxCzAJBgNVBAgT\r\n" +
                     "AmxrMRAwDgYDVQQHEwdjb2xvbWJvMQ0wCwYDVQQKEwR3c28yMQ0wCwYDVQQLEwR3c28yMQ8wDQYD\r\n" +
@@ -73,6 +75,7 @@ public class CertificateManagerImplTest {
 
     @BeforeClass
     public static void init() {
+        System.setProperty(JAVAX_NET_SSL_TRUST_STORE_PASSWORD_PROPERTY, JAVAX_SSL_TRUST_STORE_PASSWORD);
         MockitoAnnotations.initMocks(CertificateManagerImplTest.class);
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "deleteCertificate"))
                 .toReturn(true);
