@@ -166,6 +166,7 @@
                 session.put("showLogin", "false");
                 session.put("LOGGED_IN_USER", ssoRelyingParty.getLoggedInUser(sessionId));
             }  else {
+		ssoRelyingParty.invalidateSessionBySessionId(sessionId);
                 response.sendRedirect("../site/pages/error-pages/401.html");
                 return;
             }
