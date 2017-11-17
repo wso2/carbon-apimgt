@@ -24,6 +24,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.SynapseException;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -279,5 +281,22 @@ public class GatewayUtils {
             }
         }
         return correlationID;
+    }
+
+    /**
+     * The method sets message context properties for error message.
+     *
+     * @param messageContext This message context contains the request message properties of the relevant API which was
+     *                       enabled a Validator message mediation in flow.
+     * @param errorMessage   specific error message for each validator.
+     */
+    public static void handleException(org.apache.synapse.MessageContext messageContext, String errorMessage) {
+        messageContext.setProperty(APIMgtGatewayConstants.STATUS, true);
+        messageContext.setProperty(APIMgtGatewayConstants.ERROR_CODE,
+                APIMgtGatewayConstants.HTTP_HEADER_THREAT_CODE);
+        messageContext.setProperty(APIMgtGatewayConstants.ERROR_MESSAGE, errorMessage);
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty(
+                APIMgtGatewayConstants.HTTP_SC, APIMgtGatewayConstants.HTTP_SC_CODE);
+        throw new SynapseException(errorMessage);
     }
 }
