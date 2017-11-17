@@ -10,7 +10,7 @@ msgstr ""
 "#-#-#-#-#  javascript.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-15 16:48+0530\n"
+"POT-Creation-Date: 2017-11-13 00:57+0530\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,6 +27,106 @@ msgstr ""
 "POT-Creation-Date: 2016-07-11T11:38:05.277Z\n"
 "PO-Revision-Date: 2016-07-11T11:38:05.277Z\n"
 "Language: en\n"
+
+#: site/themes/wso2/templates/item-implement/js/api-implementation.js:541
+#: site/themes/wso2/templates/item-implement/js/api-implementation.js:611
+#: site/themes/wso2/templates/item-edit/js/edit.js:490
+#: site/themes/wso2/templates/item-edit/js/edit.js:538
+#: site/themes/wso2/templates/item-edit/js/edit.js:587
+msgid "No defined sequences"
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:2
+msgid "Do you really want to delete the certificate for Endpoint"
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:3
+msgid "Alias should not be empty"
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:4
+msgid "You must upload a Certificate file"
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:72
+msgid ""
+"You must first enter Production/ Sandbox endpoints to add a certificate or "
+"the Endpoints you have entered are not valid."
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:166
+msgid "This action cannot be undone"
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:168
+msgid "Delete Certificate for Endpoint"
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:254
+msgid "Could not add certificate for alias"
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:255
+msgid "Alias exists in trust store"
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:261
+msgid "Could not add certificate for Endpoint"
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:262
+msgid "Certificate for the endpoint"
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:262
+msgid "already exists"
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:268
+msgid "Could not add certificate for alias and endpoint"
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:269
+msgid "Certificate exists for Alias : Endpoint combination"
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:331
+msgid ""
+"Certificate is added successfully. This will be affect to all the users."
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:333
+msgid ""
+"Certificate is deleted Successfully. This will be affect to all the users."
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:338
+msgid "Failed to add Certificate due to an Internal Server Error."
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:340
+msgid "Failed to delete Certificate due to an Internal Server Error."
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:344
+msgid ""
+"Failed to add Certificate in to Publisher Trust Store. Certificate exists "
+"for the Alias"
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:348
+msgid ""
+"Failed to delete the certificate. Certificate could not found for the given "
+"alias. Hence the entry is removed from the data base."
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:352
+msgid "Failed to add Certificate. Certificate Expired"
+msgstr ""
+
+#: site/themes/wso2/templates/item-implement/js/jquery.certUi.js:355
+msgid "Failed to add Certificate. Certificate for Endpoint exists."
+msgstr ""
 
 #: site/themes/wso2/templates/manage-alerts/js/manage-alerts.js:15
 #: site/themes/wso2/templates/manage-alerts/js/manage-alerts.js:39
@@ -45,207 +145,30 @@ msgstr ""
 msgid "Please select at least one alert type"
 msgstr ""
 
-#: site/themes/wso2/templates/stats/api-response-times/js/stats.js:84
-#: site/themes/wso2/templates/stats/api-throttledtime/js/stats.js:129
-msgid "Thumbnail image when stats are enabled"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/api-response-times/js/stats.js:90
-msgid "errorMsgs.checkBAMConnectivity"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/api-response-times/js/stats.js:90
-#: site/themes/wso2/templates/stats/api-throttledtime/js/stats.js:138
-msgid "Thumbnail image when stats are not configured"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/api-response-times/js/stats.js:249
-msgid "Note that the graph shows only 15 entries"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/api-response-times/js/stats.js:319
-#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:216
-#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:248
-#: site/themes/wso2/templates/stats/api-usage/js/stats.js:455
-#: site/themes/wso2/templates/stats/application-throttledcounts/js/stats.js:120
-msgid "No Stats"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/api-response-times/js/stats.js:319
-#: site/themes/wso2/templates/stats/application-throttledcounts/js/stats.js:120
-#: site/themes/wso2/templates/stats/application-throttledcounts/js/stats.js:198
-#: site/themes/wso2/templates/stats/application-throttledcounts/js/stats.js:202
-msgid "No Data Available"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:216
-#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:248
-#: site/themes/wso2/templates/stats/api-usage/js/stats.js:455
-#: site/themes/wso2/templates/stats/api-user-agent-usage/js/stats.js:174
-#: site/themes/wso2/templates/stats/api-usage-resource-path/js/stats.js:142
-msgid "No Data Available."
-msgstr ""
-
-#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:404
-#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:579
-msgid "Subscriber Count"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:421
-#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:431
-msgid "Show more details"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:493
-msgid "Note that the graph shows only 20 entries"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:547
-#: site/themes/wso2/templates/stats/faulty-invocations/js/stats.js:121
-#: site/themes/wso2/templates/stats/api-usage/js/stats.js:123
-#: site/themes/wso2/templates/stats/api-throttledtime/js/stats.js:161
-msgid "API"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:547
-msgid "Subscription Count"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:547
-#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:579
-#: site/themes/wso2/templates/stats/faulty-invocations/js/stats.js:122
-msgid "Version"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:547
-#: site/themes/wso2/templates/stats/api-usage/js/stats.js:124
-msgid "Hits"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:579
-msgid "Hit Count"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/js/stats.js:68
-msgid "Not Configured"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/js/stats.js:70
-msgid "WSO2 documentation on APIM Analytics"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/js/stats.js:71
-msgid "Refer our documentation to configure API Manager Analytics correctly"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/js/stats.js:79
-msgid "Data Publishing Enabled"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/js/stats.js:80
-msgid "Generate some traffic to see statistics"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/faulty-invocations/js/stats.js:123
-msgid "Count"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/faulty-invocations/js/stats.js:124
-msgid "Percentage"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/apis-time/js/stats.js:87
-msgid "Published API Count"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/api-usage-resource-path/js/stats.js:81
-msgid "to"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/application-throttledcounts/js/stats.js:103
-msgid "No Apps Available"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/application-throttledcounts/js/stats.js:198
-#: site/themes/wso2/templates/stats/application-throttledcounts/js/stats.js:202
-msgid "No-Stats"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/api-throttledtime/js/stats.js:136
-msgid "WSO2 wiki documentation on APIM Statistics"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/api-throttledtime/js/stats.js:137
-msgid "Refer our documentation to configure WSO2 DAS correctly"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/applications-time/js/stats.js:66
-#: site/themes/wso2/templates/stats/applications-time/js/stats.js:68
-#: site/themes/wso2/templates/stats/developers-time/js/stats.js:63
-msgid "All"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/applications-time/js/stats.js:86
-#: site/themes/wso2/templates/stats/developers-time/js/stats.js:77
-msgid "Time"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/applications-time/js/stats.js:91
-msgid "Application Count"
-msgstr ""
-
-#: site/themes/wso2/templates/stats/developers-time/js/stats.js:82
-msgid "Developer Signups"
-msgstr ""
-
-#: site/themes/wso2/templates/item-design/js/api-design.js:135
-msgid "URL pattern cannot be empty."
-msgstr ""
-
-#: site/themes/wso2/templates/item-design/js/api-design.js:140
-msgid "URL pattern cannot contain white space"
-msgstr ""
-
-#: site/themes/wso2/templates/item-design/js/api-design.js:225
-msgid "You should select at least one HTTP verb."
-msgstr ""
-
-#: site/themes/wso2/templates/item-design/js/api-design.js:442
-msgid "Delete Parameter"
-msgstr ""
-
-#: site/themes/wso2/templates/item-design/js/api-design.js:453
-msgid "confirm.deleteScope"
-msgstr ""
-
-#: site/themes/wso2/templates/item-design/js/api-design.js:454
-msgid "Delete Scope"
-msgstr ""
-
-#: site/themes/wso2/templates/item-design/js/api-design.js:932
+#: site/themes/wso2/templates/item-edit/js/edit.js:339
 msgid ""
-"At least one resource should be specified. Do you want to add a wildcard "
-"resource (/*)?"
+"This row cannot be deleted. At least one resource entry has to be available."
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/js/api-design.js:934
-msgid "Resource not specified"
+#: site/themes/wso2/templates/item-edit/js/edit.js:361
+msgid "URL Pattern has to be unique. "
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/js/api-design.js:989
-msgid "Error occurred while updating the API"
+#: site/themes/wso2/templates/item-edit/js/edit.js:361
+msgid "has duplicated entries. "
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/js/api-design.js:1015
-msgid "The tag can only have a maximum of 30 characters."
+#: site/themes/wso2/templates/item-edit/js/edit.js:364
+msgid "URL Pattern cannot be empty. "
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/js/api-design.js:1034
-msgid "Please press Enter to add the tag."
+#: site/themes/wso2/templates/item-edit/js/edit.js:386
+msgid "At least one HTTP Verb has to be checked for a resource. "
 msgstr ""
 
-#: site/themes/wso2/templates/item-design/js/api-design.js:1141
-msgid "API Update validation error "
+#. @todo: param_string
+#: site/themes/wso2/templates/user/login/js/login.js:28
+msgid "Error! "
 msgstr ""
 
 #: site/themes/wso2/templates/users-keys/js/subscriptions.js:28
@@ -254,86 +177,6 @@ msgstr ""
 
 #: site/themes/wso2/templates/users-keys/js/subscriptions.js:31
 msgid "Unblock"
-msgstr ""
-
-#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:15
-msgid "Duplicate context value."
-msgstr ""
-
-#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:26
-msgid "Duplicate API name."
-msgstr ""
-
-#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:30
-msgid "Select a value for the tier."
-msgstr ""
-
-#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:35
-msgid ""
-"Name contains one or more illegal characters  (~ ! @ #  ; % ^ & * + = { } | "
-"&lt; &gt;, ' \" \\ ) ."
-msgstr ""
-
-#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:40
-msgid ""
-"Name contains one or more illegal characters  (~ ! @ #  ; % ^ & * + = | &lt; "
-"&gt;, ' \" \\ ) ."
-msgstr ""
-
-#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:44
-msgid "Empty curly brackets \"{}\" are not allowed in the context field."
-msgstr ""
-
-#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:53
-msgid "Please provide a valid URL."
-msgstr ""
-
-#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:57
-msgid "Name contains white spaces."
-msgstr ""
-
-#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:62
-msgid "Input contains one or more illegal characters  (& &lt; &gt; '  \" "
-msgstr ""
-
-#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:74
-msgid "Invalid role name[s]"
-msgstr ""
-
-#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:78
-msgid "A Production or Sandbox URL must be provided."
-msgstr ""
-
-#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:90
-msgid "You must upload or select a message mediation policy"
-msgstr ""
-
-#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:97
-#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:111
-msgid "Service Name must be provided for WSDL endpoint."
-msgstr ""
-
-#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:104
-#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:118
-msgid "Service Port must be provided for WSDL endpoint."
-msgstr ""
-
-#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:130
-msgid "File must be in an image file format."
-msgstr ""
-
-#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:135
-msgid "Name or Context contains / at the end"
-msgstr ""
-
-#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:140
-msgid ""
-"Version contains one or more illegal characters  (~ ! @ #  ; % ^ & * + = | "
-"&lt; &gt;, ' \" \\) ."
-msgstr ""
-
-#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:144
-msgid "maximum support 20000 characters only"
 msgstr ""
 
 #: site/themes/wso2/templates/utils/url-validation/url-validation.js:31
@@ -353,10 +196,11 @@ msgstr ""
 msgid "Valid"
 msgstr ""
 
+#. When an exception is thrown from jsFunction_isURLValid
+#. When an exception is thrown from sendHttpHEADRequest method
 #: site/themes/wso2/templates/utils/url-validation/url-validation.js:53
 #: site/themes/wso2/templates/utils/url-validation/url-validation.js:55
 #: site/themes/wso2/templates/utils/url-validation/url-validation.js:59
-#: site/themes/wso2/templates/utils/url-validation/url-validation.js:64
 msgid "Invalid"
 msgstr ""
 
@@ -369,123 +213,267 @@ msgid ""
 "Cannot test the endpoint provided. Please specify the full URL for testing."
 msgstr ""
 
-#: site/themes/wso2/templates/page/base/js/jagg.js:48
-#: site/themes/wso2/templates/page/base/js/jagg.js:116
-msgid "OK"
-msgstr ""
-
-#: site/themes/wso2/templates/page/base/js/jagg.js:76
-msgid "API Publisher"
-msgstr ""
-
-#: site/themes/wso2/templates/page/base/js/jagg.js:79
-#: site/themes/wso2/templates/documentation/js/docs.js:86
-msgid "Yes"
-msgstr ""
-
-#: site/themes/wso2/templates/page/base/js/jagg.js:90
-#: site/themes/wso2/templates/documentation/js/docs.js:87
-msgid "No"
-msgstr ""
-
-#: site/themes/wso2/templates/page/base/js/jagg.js:102
-msgid "Error Message Thumbnail"
-msgstr ""
-
-#: site/themes/wso2/templates/page/base/js/jagg.js:106
-msgid "Notification"
-msgstr ""
-
-#: site/themes/wso2/templates/page/base/js/jagg.js:109
+#: site/themes/wso2/templates/utils/url-validation/url-validation.js:64
+#: site/themes/wso2/templates/page/base/js/jagg.js:125
 msgid "Warning"
 msgstr ""
 
-#: site/themes/wso2/templates/page/base/js/jagg.js:112
-#: site/themes/wso2/templates/listing/js/samples.js:100
-#: site/themes/wso2/templates/listing/js/samples.js:109
-#: site/themes/wso2/templates/listing/js/samples.js:219
-#: site/themes/wso2/templates/listing/js/samples.js:242
-msgid "Error"
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:15
+msgid "Duplicate context value."
 msgstr ""
 
-#: site/themes/wso2/templates/page/base/js/jagg.js:148
-msgid "Username and Password fields are empty."
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:32
+msgid "Duplicate API name."
 msgstr ""
 
-#: site/themes/wso2/templates/page/base/js/jagg.js:242
-msgid "Show More Options"
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:36
+msgid "Only / is not allowed as context."
 msgstr ""
 
-#: site/themes/wso2/templates/page/base/js/jagg.js:245
-msgid "Show Fewer Options"
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:40
+msgid "Select a value for the tier."
 msgstr ""
 
-#: site/themes/wso2/templates/documentation/js/docs.js:84
-#: site/themes/wso2/templates/listing/js/listing.js:7
-msgid "Confirm Delete"
-msgstr ""
-
-#: site/themes/wso2/templates/documentation/js/docs.js:85
-msgid "Are you sure you want to delete the file"
-msgstr ""
-
-#: site/themes/wso2/templates/documentation/js/docs.js:97
-msgid "No documentation associated with the API"
-msgstr ""
-
-#: site/themes/wso2/templates/documentation/js/docs.js:240
-msgid "Duplicate Document Name."
-msgstr ""
-
-#: site/themes/wso2/templates/documentation/js/docs.js:242
-#: site/themes/wso2/templates/documentation/js/docs.js:244
-#: site/themes/wso2/templates/documentation/js/docs.js:248
-#: site/themes/wso2/templates/documentation/js/docs.js:250
-msgid "This field is required."
-msgstr ""
-
-#: site/themes/wso2/templates/documentation/js/docs.js:318
-msgid "File already exists..!"
-msgstr ""
-
-#: site/themes/wso2/templates/documentation/js/docs.js:401
-msgid "Invalid document URL format."
-msgstr ""
-
-#: site/themes/wso2/templates/documentation/inline-editor/js/inline.js:26
-msgid "The content of this document cannot be loaded."
-msgstr ""
-
-#: site/themes/wso2/templates/item-edit/js/edit.js:339
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:45
 msgid ""
-"Sorry. This row cannot be deleted. At least one resource entry has to be "
-"available."
+"Name contains one or more illegal characters  (~ ! @ #  ; % ^ & * + = { } () "
+"| &lt; &gt;, ' \" \\ ) ."
 msgstr ""
 
-#: site/themes/wso2/templates/item-edit/js/edit.js:361
-msgid "URL Pattern has to be unique. "
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:50
+msgid ""
+"Name contains one or more illegal characters  (~ ! @ #  ; % ^ & * + = { } () "
+"| &lt; &gt;, ' \" \\ $) ."
 msgstr ""
 
-#: site/themes/wso2/templates/item-edit/js/edit.js:361
-msgid "has duplicated entries. "
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:55
+msgid ""
+"Name contains one or more illegal characters  (~ ! @ #  ; % ^ & * + = | &lt; "
+"&gt;, ' \" \\ ) ."
 msgstr ""
 
-#: site/themes/wso2/templates/item-edit/js/edit.js:364
-msgid "URL Pattern cannot be empty. "
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:62
+msgid ""
+"\"{version}\" or \"/{version}\" cannot be used solely in the context field."
 msgstr ""
 
-#: site/themes/wso2/templates/item-edit/js/edit.js:386
-msgid "At least one HTTP Verb has to be checked for a resource. "
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:66
+msgid "Empty curly brackets \"{}\" are not allowed in the context field."
 msgstr ""
 
-#: site/themes/wso2/templates/item-edit/js/edit.js:490
-#: site/themes/wso2/templates/item-edit/js/edit.js:538
-#: site/themes/wso2/templates/item-edit/js/edit.js:587
-#: site/themes/wso2/templates/item-implement/js/api-implementation.js:515
-#: site/themes/wso2/templates/item-implement/js/api-implementation.js:585
-msgid "No defined sequences"
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:75
+msgid "Please provide a valid URL."
 msgstr ""
 
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:79
+msgid "Name contains white spaces."
+msgstr ""
+
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:84
+msgid "Input contains one or more illegal characters  (& &lt; &gt; '  \" "
+msgstr ""
+
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:96
+msgid "Invalid role name[s]"
+msgstr ""
+
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:100
+msgid "A Production or Sandbox URL must be provided."
+msgstr ""
+
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:112
+msgid "You must upload or select a message mediation policy"
+msgstr ""
+
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:119
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:133
+msgid "Service Name must be provided for WSDL endpoint."
+msgstr ""
+
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:126
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:140
+msgid "Service Port must be provided for WSDL endpoint."
+msgstr ""
+
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:152
+msgid "File must be in an image file format."
+msgstr ""
+
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:157
+msgid "Name or Context contains / at the end"
+msgstr ""
+
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:162
+msgid ""
+"Version contains one or more illegal characters  ( [ ] { } ( ) ` ~ ! @ #  ; "
+"% ^ & * + = | &lt; &gt;, ' \" \\) ."
+msgstr ""
+
+#: site/themes/wso2/templates/utils/custom-validation/custom-validation.js:166
+msgid "maximum support 20000 characters only"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/api-throttledtime/js/stats.js:129
+#: site/themes/wso2/templates/stats/api-response-times/js/stats.js:84
+msgid "Thumbnail image when stats are enabled"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/api-throttledtime/js/stats.js:136
+#: site/themes/wso2/templates/stats/api-throttledtime/js/stats.js:137
+#: site/themes/wso2/templates/stats/js/stats.js:71
+msgid "Refer our documentation to configure API Manager Analytics correctly"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/api-throttledtime/js/stats.js:138
+#: site/themes/wso2/templates/stats/api-response-times/js/stats.js:90
+msgid "Thumbnail image when stats are not configured"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/api-throttledtime/js/stats.js:161
+#: site/themes/wso2/templates/stats/faulty-invocations/js/stats.js:121
+#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:554
+#: site/themes/wso2/templates/stats/api-usage/js/stats.js:123
+msgid "API"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/api-response-times/js/stats.js:90
+msgid "errorMsgs.checkBAMConnectivity"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/api-response-times/js/stats.js:249
+msgid "Note that the graph shows only 15 entries"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/api-response-times/js/stats.js:319
+#: site/themes/wso2/templates/stats/application-throttledcounts/js/stats.js:121
+#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:216
+#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:248
+#: site/themes/wso2/templates/stats/api-usage/js/stats.js:455
+msgid "No Stats"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/api-response-times/js/stats.js:319
+#: site/themes/wso2/templates/stats/application-throttledcounts/js/stats.js:121
+#: site/themes/wso2/templates/stats/application-throttledcounts/js/stats.js:199
+#: site/themes/wso2/templates/stats/application-throttledcounts/js/stats.js:203
+msgid "No Data Available"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/application-throttledcounts/js/stats.js:104
+msgid "No Apps Available"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/application-throttledcounts/js/stats.js:199
+#: site/themes/wso2/templates/stats/application-throttledcounts/js/stats.js:203
+msgid "No-Stats"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/apis-time/js/stats.js:89
+msgid "Created API Count"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/js/stats.js:68
+msgid "Not Configured"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/js/stats.js:70
+msgid "WSO2 documentation on APIM Analytics"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/js/stats.js:79
+msgid "Data Publishing Enabled"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/js/stats.js:80
+#: site/themes/wso2/templates/stats/api-latencytime/js/stats.js:253
+#: site/themes/wso2/templates/stats/api-geolocation-usage/js/stats.js:168
+msgid "Generate some traffic to see statistics"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/api-usage-resource-path/js/stats.js:81
+msgid "to"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/api-usage-resource-path/js/stats.js:142
+#: site/themes/wso2/templates/stats/api-user-agent-usage/js/stats.js:174
+#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:216
+#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:248
+#: site/themes/wso2/templates/stats/api-latencytime/js/stats.js:253
+#: site/themes/wso2/templates/stats/api-geolocation-usage/js/stats.js:168
+#: site/themes/wso2/templates/stats/api-usage/js/stats.js:455
+msgid "No Data Available."
+msgstr ""
+
+#: site/themes/wso2/templates/stats/developers-time/js/stats.js:66
+#: site/themes/wso2/templates/stats/applications-time/js/stats.js:70
+#: site/themes/wso2/templates/stats/applications-time/js/stats.js:72
+msgid "All"
+msgstr ""
+
+#. .useInteractiveGuideline(true)  //We want nice looking tooltips and a guideline!
+#. how fast do you want the lines to transition?
+#. Show the legend, allowing users to turn on/off line series.
+#. Show the y-axis
+#. Show the x-axis
+#: site/themes/wso2/templates/stats/developers-time/js/stats.js:80
+#: site/themes/wso2/templates/stats/applications-time/js/stats.js:90
+msgid "Time"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/developers-time/js/stats.js:85
+msgid "Developer Signups"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/faulty-invocations/js/stats.js:122
+#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:554
+#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:586
+msgid "Version"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/faulty-invocations/js/stats.js:123
+msgid "Count"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/faulty-invocations/js/stats.js:124
+msgid "Percentage"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/applications-time/js/stats.js:95
+msgid "Application Count"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:410
+#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:586
+msgid "Subscriber Count"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:427
+#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:437
+msgid "Show more details"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:499
+msgid "Note that the graph shows only 20 entries"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:554
+msgid "Subscriptions"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:554
+msgid "Total Hits"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:554
+#: site/themes/wso2/templates/stats/api-usage/js/stats.js:124
+msgid "Hits"
+msgstr ""
+
+#: site/themes/wso2/templates/stats/api-usage-user/js/stats.js:586
+msgid "Hit Count"
+msgstr ""
+
+#. todo param_string
 #: site/themes/wso2/templates/item-add/js/resource-template.js:216
 msgid "URL Pattern has to be unique."
 msgstr ""
@@ -502,8 +490,51 @@ msgstr ""
 msgid "At least one HTTP Verb has to be checked for a resource."
 msgstr ""
 
-#: site/themes/wso2/templates/user/login/js/login.js:27
-msgid "Error! "
+#: site/themes/wso2/templates/page/base/js/jagg.js:64
+#: site/themes/wso2/templates/page/base/js/jagg.js:132
+msgid "OK"
+msgstr ""
+
+#: site/themes/wso2/templates/page/base/js/jagg.js:92
+msgid "API Publisher"
+msgstr ""
+
+#: site/themes/wso2/templates/page/base/js/jagg.js:95
+#: site/themes/wso2/templates/documentation/js/docs.js:94
+msgid "Yes"
+msgstr ""
+
+#: site/themes/wso2/templates/page/base/js/jagg.js:106
+#: site/themes/wso2/templates/documentation/js/docs.js:95
+msgid "No"
+msgstr ""
+
+#: site/themes/wso2/templates/page/base/js/jagg.js:118
+msgid "Error Message Thumbnail"
+msgstr ""
+
+#: site/themes/wso2/templates/page/base/js/jagg.js:122
+msgid "Notification"
+msgstr ""
+
+#: site/themes/wso2/templates/page/base/js/jagg.js:128
+#: site/themes/wso2/templates/listing/js/samples.js:100
+#: site/themes/wso2/templates/listing/js/samples.js:109
+#: site/themes/wso2/templates/listing/js/samples.js:219
+#: site/themes/wso2/templates/listing/js/samples.js:242
+msgid "Error"
+msgstr ""
+
+#: site/themes/wso2/templates/page/base/js/jagg.js:165
+msgid "Username and Password fields are empty."
+msgstr ""
+
+#: site/themes/wso2/templates/page/base/js/jagg.js:259
+msgid "Show More Options"
+msgstr ""
+
+#: site/themes/wso2/templates/page/base/js/jagg.js:262
+msgid "Show Fewer Options"
 msgstr ""
 
 #: site/themes/wso2/templates/listing/js/samples.js:98
@@ -548,8 +579,98 @@ msgstr ""
 msgid "Are you sure you want to delete the API"
 msgstr ""
 
+#: site/themes/wso2/templates/listing/js/listing.js:7
+#: site/themes/wso2/templates/documentation/js/docs.js:92
+msgid "Confirm Deletion"
+msgstr ""
+
 #: site/themes/wso2/templates/listing/js/listing.js:16
 msgid "Deleting API"
+msgstr ""
+
+#: site/themes/wso2/templates/item-design/js/api-design.js:135
+msgid "URL pattern cannot be empty."
+msgstr ""
+
+#: site/themes/wso2/templates/item-design/js/api-design.js:140
+msgid "URL pattern cannot contain white space"
+msgstr ""
+
+#: site/themes/wso2/templates/item-design/js/api-design.js:225
+msgid "You should select at least one HTTP verb."
+msgstr ""
+
+#: site/themes/wso2/templates/item-design/js/api-design.js:458
+msgid "Delete Parameter"
+msgstr ""
+
+#: site/themes/wso2/templates/item-design/js/api-design.js:484
+msgid "Are you sure you want to delete the scope"
+msgstr ""
+
+#: site/themes/wso2/templates/item-design/js/api-design.js:485
+msgid "Delete Scope"
+msgstr ""
+
+#: site/themes/wso2/templates/item-design/js/api-design.js:977
+msgid ""
+"At least one resource should be specified. Do you want to add a wildcard "
+"resource (/*)?"
+msgstr ""
+
+#: site/themes/wso2/templates/item-design/js/api-design.js:979
+msgid "Resource not specified"
+msgstr ""
+
+#: site/themes/wso2/templates/item-design/js/api-design.js:1034
+msgid "Error occurred while updating the API"
+msgstr ""
+
+#: site/themes/wso2/templates/item-design/js/api-design.js:1060
+msgid "The tag can only have a maximum of 30 characters."
+msgstr ""
+
+#: site/themes/wso2/templates/item-design/js/api-design.js:1079
+msgid "Please press Enter to add the tag."
+msgstr ""
+
+#: site/themes/wso2/templates/item-design/js/api-design.js:1186
+msgid "API Update validation error "
+msgstr ""
+
+#: site/themes/wso2/templates/documentation/js/docs.js:93
+msgid "Are you sure you want to delete the file"
+msgstr ""
+
+#: site/themes/wso2/templates/documentation/js/docs.js:105
+msgid "No documentation associated with the API"
+msgstr ""
+
+#: site/themes/wso2/templates/documentation/js/docs.js:202
+msgid "Add Document"
+msgstr ""
+
+#: site/themes/wso2/templates/documentation/js/docs.js:251
+msgid "Duplicate Document Name."
+msgstr ""
+
+#: site/themes/wso2/templates/documentation/js/docs.js:253
+#: site/themes/wso2/templates/documentation/js/docs.js:255
+#: site/themes/wso2/templates/documentation/js/docs.js:259
+#: site/themes/wso2/templates/documentation/js/docs.js:261
+msgid "This field is required."
+msgstr ""
+
+#: site/themes/wso2/templates/documentation/js/docs.js:329
+msgid "File already exists..!"
+msgstr ""
+
+#: site/themes/wso2/templates/documentation/js/docs.js:412
+msgid "Invalid document URL format."
+msgstr ""
+
+#: site/themes/wso2/templates/documentation/inline-editor/js/inline.js:24
+msgid "The content of this document cannot be loaded."
 msgstr ""
 
 msgid "public"

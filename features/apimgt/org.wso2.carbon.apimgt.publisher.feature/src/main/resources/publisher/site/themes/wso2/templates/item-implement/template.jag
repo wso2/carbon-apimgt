@@ -10,6 +10,8 @@
     var storeUrl = jagg.module("manager").getAPIStoreURL().url;
     var apiStatus = api.status;
     var isWSAPI = api.type.toUpperCase() == "WS";
+    var isConfigured = outputs.isConfigured;
+    var certificates = JSON.stringify(outputs.certificates);
 
     var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
     var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
@@ -349,6 +351,22 @@
 													<div id="sandbox_endpoints_help" class="hide">
 														 <p><%= i18n.localize("The Sandbox Endpoint is a mock endpoint that resembles the functionality of the actual backend API.")%></p>
 													</div>
+
+                                                    <!--Manage Certificates - main-->
+                                                        <div class="certificate_mgt_content">
+                                                            <div class="form-group">
+                                                                <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 col-sm-offset-3 col-md-offset-3 col-lg-offset-3">
+                                                                    <a href="#" class="manage-certs but"
+                                                                       ref="manage-endpoint-certs" title="Manage Certificates">
+                                                                        <%=i18n.localize("Manage Certificates")%>
+                                                                </a>
+                                                            </div>
+                                                            <div id="manage-endpoint-certs" style="display: none">
+                                                                <div id="cert-config"></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <!--Manage Certificate - form-->
 							<%if(api.type.toUpperCase() != "WS"){%>
 							                         <div class="form-group">
 							                            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3 col-sm-offset-3 col-md-offset-3 col-lg-offset-3">
@@ -405,6 +423,154 @@
 							                        </div>
 
 							                        </div><!-- more option endpoint --><%}%>
+
+							                        <!--Manage Endpoint Certificate templates -->
+                                                    <input hidden id="cert-data" value="<%=encode.forHtmlAttribute(certificates)%>"/>
+
+                                                    <script id="certificate-ui-template" type="text/x-handlebars-template">
+                                                        <div class="row">
+                                                            <span id="#delete-failed"></span>
+                                                            <div class="col-sm-6 col-lg-offset-3">
+                                                                {{#if certificates}}
+                                                                <table class="certificates-table table table-striped">
+                                                                    <thead>
+                                                                    <tr class="certificate-table-header ">
+                                                                        <td align="center"><strong><%=i18n.localize("Endpoint")%></strong></td>
+                                                                        <td align="center"><strong><%=i18n.localize("Alias")%></strong></td>
+                                                                        <td></td>
+                                                                    </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                    {{#each certificates}}
+                                                                    <tr>
+                                                                        <td align="center">{{endpoint}}</td>
+                                                                        <td align="center">{{alias}}</td>
+                                                                        <% if (outputs.isCreatePermitted) { %>
+                                                                        <td align="right">
+                                                                            <a class="delete-cert" data-alias="{{alias}}" data-ep="{{endpoint}}">
+                                                                                <span class="fw-stack" style="font-size:10px">
+                                                                                    <i class="fw fw-delete fw-stack-1x"></i>
+                                                                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                                                                </span>
+                                                                            </a>
+                                                                        </td>
+                                                                        <%}%>
+                                                                    </tr>
+                                                                    {{/each}}
+                                                                    </tbody>
+                                                                </table>
+
+                                                                {{else}}
+                                                                <div>
+                                                                    <div class="alert alert-danger">
+                                                                        <%=i18n.localize("You do not have any uploaded Certificates for above endpoints")%>.
+                                                                    </div>
+                                                                </div>
+                                                                {{/if}}
+                                                                <% if (outputs.isCreatePermitted) { %>
+                                                                <span class="btn btn-primary add-cert-btn"><%=i18n.localize("Add New Certificate")%></span>
+                                                                <%}%>
+                                                            </div>
+                                                        </div>
+                                                        <br/>
+                                                        <div id="upload-cert-modal" class="modal fade">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <button type="button" class="close modal-close" aria-hidden="true"><i class="fw fw-cancel"></i>
+                                                                        </button>
+                                                                        <h3 class="modal-title"><%=i18n.localize("Upload Endpoint Certificates")%></h3>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <div class="cert-upload-form"></div>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <div id="res" style="color:red;float:left"></div>
+                                                                        <a href="#" class="btn btn-primary cert-upload-btn" id="cert-upload"
+                                                                           title='<%=i18n.localize("Upload")%>"'><%=i18n.localize("Upload")%></a>
+                                                                        <a href="#" class="btn btn-secondary modal-close" title='<%=i18n.localize("Close")%>"'><%=i18n.localize("Close")%></a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </script>
+
+                                                    <script class="cert-upload-form-content" type="text/x-handlebars-template">
+                                                        <div class="form-group">
+                                                            <label class="control-label col-sm-3" for="certAlias"><%=i18n.localize("Alias")%>:<span
+                                                                    class="requiredAstrix">*</span>
+                                                                <a class="help_popup" help_data="alias-help" data-trigger="hover" title="Alias"
+                                                                   data-placement="bottom">
+                                                                                <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                                                                    <i class="fw fw-circle fw-stack-2x"></i>
+                                                                                    <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                                                                </span>
+                                                                </a>
+                                                                <p id="alias-help" class="hide"><%=i18n.localize("Enter an Alias for the certificate")%>.</p>
+                                                            </label>
+                                                            <div class="col-sm-6">
+                                                                <input type="text" class="form-control certAlias" id="certAlias" name="certificate_alias"
+                                                                       placeholder="Certificate Alias" value="" required>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <label class="control-label col-sm-3"
+                                                                   for="certEP"><%=i18n.localize("Endpoint")%>:<span
+                                                                    class="requiredAstrix">*</span>
+                                                                <a class="help_popup" help_data="ep-help"
+                                                                   data-trigger="hover" title="Endpoint"
+                                                                   data-placement="bottom">
+                                                                        <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                                                            <i class="fw fw-circle fw-stack-2x"></i>
+                                                                            <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                                                        </span>
+                                                                </a>
+                                                                <p id="ep-help" class="hide">
+                                                                    <%=i18n.localize("Select the endpoint for the certificate")%>.
+                                                                </p>
+                                                            </label>
+                                                            <div class="col-sm-6">
+                                                                <select type="text" class="form-control" id="certEP" required>
+                                                                    {{#each enteredEndpoints}}
+                                                                    <option>{{host}}</option>
+                                                                    {{/each}}
+                                                                </select>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <label class="control-label col-sm-3"
+                                                                   for="certUpload"><%=i18n.localize("Certificate")%>:<span
+                                                                    class="requiredAstrix">*</span>
+                                                                <a class="help_popup" help_data="cert-help"
+                                                                   data-trigger="hover" title="Alias" data-placement="bottom">
+                                                                        <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                                                            <i class="fw fw-circle fw-stack-2x"></i>
+                                                                            <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                                                        </span>
+                                                                </a>
+                                                                <p id="cert-help" class="hide"><%=i18n.localize("Upload the certificate file")%>.</p>
+                                                            </label>
+                                                            <div class="col-sm-6">
+                                                                <div class="input-group input-wrap file-upload-control">
+                                                                    <input class="form-control cert-content" readonly type="text" required>
+                                                                    <input class="form-control cert-upload" id="certUpload"
+                                                                           name="certificate-upload"
+                                                                           type="file"
+                                                                           required
+                                                                           accept="application/pkcs8, application/pkcs10, application/pkix-crl, application/pkcs7-mime, application/x-x509-ca-cert, application/x-x509-user-cert, application/x-pkcs7-crl, application/x-pkcs12, application/x-pkcs7-certificates, application/x-pkcs7-certreqresp, .p8, .p10, .csr, .cer, .crl, .p7c, .crt, .der, .p12, .pfx, .p7b, .spc, .p7r">
+                                                                    <div class="input-group-btn">
+                                                                        <button class="btn btn-secondary browse" title="Browse File" type="button">
+                                                                            <i aria-hidden="true" class="fw fw-file-browse"></i>
+                                                                            <span class="hidden-xs"><%=i18n.localize("Browse")%></span>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </script>
+							                        <!--Manage Endpoint Certificates-->
 												<br/><br/>
 							                    <fieldset>
 							                        <% if (isSynapseGateway) { %>
@@ -1044,9 +1210,9 @@
                 <label class="control-label col-sm-3" for="actionSelect">Action</label>
                 <div class="col-sm-6">
                     <select class="form-control selectpicker" id="actionSelect" name="actionSelect">
-                        <option {{#ifCond actionSelect "==" "fault"}}selected{{/ifCond}} value="fault"><%=i18n.localize("Execute fault sequence")%></option>
-                        <option {{#ifCond actionSelect "==" "neverTimeout"}}selected{{/ifCond}} value="neverTimeout"><%=i18n.localize("Never timeout")%></option>
-                        <option {{#ifCond actionSelect "==" "discard"}}selected{{/ifCond}} value="discard"><%=i18n.localize("Discard message")%></option>
+                        <option {{#ifCond "==" retryErroCode "fault"}}selected{{/ifCond}} value="fault"><%=i18n.localize("Execute fault sequence")%></option>
+                        <option {{#ifCond "==" retryErroCode "neverTimeout"}}selected{{/ifCond}}value="neverTimeout"><%=i18n.localize("Never timeout")%></option>
+                        <option {{#ifCond "==" retryErroCode "discard"}}selected{{/ifCond}} value="discard"><%=i18n.localize("Discard message")%></option>
                     </select>
                     <p class="help-block hide"><%=i18n.localize("The action to be made at a timeout situation. You can select from: 1) Never Timeout 2) Discard Message 3) Execute Fault Sequence")%></p>
 					<span class="help-block jsonform-errortext" style="display:none;"></span>

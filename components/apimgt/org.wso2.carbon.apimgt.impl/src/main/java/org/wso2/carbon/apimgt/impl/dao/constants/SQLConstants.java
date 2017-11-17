@@ -2715,4 +2715,19 @@ public class SQLConstants {
         public static final String TIER_ATTACHED_TO_APPLICATION = " SELECT count(APPLICATION_TIER) as c FROM AM_APPLICATION where APPLICATION_TIER = ? and CREATED_BY like ? ";
 
     }
+
+    public static class CertificateConstants {
+        public static final String INSERT_CERTIFICATE = "INSERT INTO AM_CERTIFICATE_METADATA " +
+                "(TENANT_ID, END_POINT, ALIAS) VALUES(?, ?, ?)";
+
+        public static final String GET_CERTIFICATES = "SELECT * FROM AM_CERTIFICATE_METADATA WHERE TENANT_ID=?";
+
+        public static final String GET_CERTIFICATE_ALL_TENANTS = "SELECT * FROM AM_CERTIFICATE_METADATA WHERE " +
+                "(ALIAS=? OR END_POINT=?)";
+        public static final String GET_CERTIFICATE_TENANT = "SELECT * FROM AM_CERTIFICATE_METADATA WHERE TENANT_ID=? " +
+                "AND (ALIAS=? OR END_POINT=?)";
+
+        public static final String DELETE_CERTIFICATES = "DELETE FROM AM_CERTIFICATE_METADATA WHERE TENANT_ID=? " +
+                "AND (ALIAS=? OR END_POINT=?)";
+    }
 }

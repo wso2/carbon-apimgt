@@ -20,6 +20,14 @@ $(document).ready(function(){
         config : endpoint_config
     });
 
+    var certificate_data;
+    if ($('#cert-data').val() != "") {
+        certificate_data = jQuery.parseJSON($('#cert-data').val());
+    }
+    $("#cert-config").certUi({
+        config: {"cert_data": certificate_data, "ep_data": endpoint_config}
+    });
+
     $('a.help_popup').popover({
         html : true,
         container: 'body',
