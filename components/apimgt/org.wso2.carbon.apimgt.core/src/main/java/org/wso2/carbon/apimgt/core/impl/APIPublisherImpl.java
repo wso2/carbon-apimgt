@@ -40,6 +40,8 @@ import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.configuration.models.NotificationConfigurations;
+import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryConfigurations;
+import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryImplConfig;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
@@ -57,6 +59,7 @@ import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.exception.NotificationException;
+import org.wso2.carbon.apimgt.core.exception.ServiceDiscoveryException;
 import org.wso2.carbon.apimgt.core.exception.WorkflowException;
 import org.wso2.carbon.apimgt.core.executors.NotificationExecutor;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
@@ -1389,7 +1392,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      * Return list of endpoints
      *
      * @return List of Endpoints..
-     * @throws APIManagementException If filed to get endpoints.
+     * @throws APIManagementException If failed to get endpoints.
      */
     @Override
     public List<Endpoint> getAllEndpoints() throws APIManagementException {
@@ -2061,5 +2064,77 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 }
             }
         }
+    }
+
+    /**
+     * Discover and return a list of service endpoints
+     *
+     * @return {@code List<Endpoint>}
+     * @throws APIManagementException If an error occurred while discovering services
+     */
+    @Override
+    public List<Endpoint> discoverServiceEndpoints() throws APIManagementException {
+        List<Endpoint> discoveredEndpointList = new ArrayList();
+        try {
+            ServiceDiscoveryConfigurations serviceDiscoveryConfig = ServiceDiscoveryConfigBuilder
+                    .getServiceDiscoveryConfiguration();
+
+            // If service discovery not enabled - do not proceed
+            if (!serviceDiscoveryConfig.isServiceDiscoveryEnabled()) {
+                log.error("Service Discovery not enabled");
+                return discoveredEndpointList;
+            }
+            List<ServiceDiscoveryImplConfig> implConfigList = serviceDiscoveryConfig.getImplementationsList();
+            for (ServiceDiscoveryImplConfig implConfig : implConfigList) {
+                //Every implConfig has two elements. The implClass and the implParameters.
+
+                /* Get the implClass instance */
+                String implClassName = implConfig.getImplClass();
+                Class implClazz = Class.forName(implClassName);
+                ServiceDiscoverer serviceDiscoverer = (ServiceDiscoverer) implClazz.newInstance();
+
+                /* Pass the implParameters to the above instance */
+                serviceDiscoverer.init(implConfig.getImplParameters());
+
+                /*
+                 * The .init() method above sets the filtering parameters (if provided)
+                 * to the ServiceDiscoverer impl class instance.
+                 *
+                 * Let's check whether those filtering parameters : "namespace" and/or "criteria" are set,
+                 * and call ServiceDiscoverer Impl class's #listServices method accordingly
+                 */
+                String namespaceFilter = serviceDiscoverer.getNamespaceFilter();
+                HashMap<String, String> criteriaFilter = serviceDiscoverer.getCriteriaFilter();
+                List<Endpoint> subDiscoveredEndpointList;
+
+                if (namespaceFilter == null && criteriaFilter == null) {
+                    //both not set
+                    subDiscoveredEndpointList = serviceDiscoverer.listServices();
+                } else if (namespaceFilter != null && criteriaFilter != null) {
+                    //both set
+                    subDiscoveredEndpointList = serviceDiscoverer.listServices(namespaceFilter, criteriaFilter);
+                } else if (namespaceFilter != null) {
+                    //only "namespace" is set
+                    subDiscoveredEndpointList = serviceDiscoverer.listServices(namespaceFilter);
+                } else {
+                    //remaining -> only "criteria" is set
+                    subDiscoveredEndpointList = serviceDiscoverer.listServices(criteriaFilter);
+                }
+
+
+                if (subDiscoveredEndpointList != null) {
+                    discoveredEndpointList.addAll(subDiscoveredEndpointList);
+                }
+            }
+        } catch (ServiceDiscoveryException e) {
+            String msg = "Error while Discovering Service Endpoints";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e, e.getErrorHandler());
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            String msg = "Error while Loading Service Discovery Impl Class";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e, ExceptionCodes.ERROR_LOADING_SERVICE_DISCOVERY_IMPL_CLASS);
+        }
+        return discoveredEndpointList;
     }
 }

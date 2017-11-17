@@ -57,6 +57,10 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
             <artifactId>jackson-jaxrs-base</artifactId>
         </dependency>
@@ -152,6 +156,10 @@
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-models</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.fabric8</groupId>
+            <artifactId>kubernetes-client</artifactId>
         </dependency>
     </dependencies>
 
@@ -312,6 +320,10 @@
                                     <version>${com.fasterxml.jackson.core.version}</version>
                                 </bundle>
                                 <bundle>
+                                    <symbolicName>com.fasterxml.jackson.dataformat.jackson-dataformat-yaml</symbolicName>
+                                    <version>${com.fasterxml.jackson.dataformat.version}</version>
+                                </bundle>
+                                <bundle>
                                     <symbolicName>nimbus-jose-jwt</symbolicName>
                                     <version>${nimbusds.version}</version>
                                 </bundle>
@@ -398,6 +410,38 @@
                                 <bundle>
                                     <symbolicName>io.swagger.models</symbolicName>
                                     <version>${io.swagger.models.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>json</symbolicName>
+                                    <version>20160212.0.0</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>okio</symbolicName>
+                                    <version>${wso2.okio.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>okhttp</symbolicName>
+                                    <version>${wso2.okhttp.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>logging-interceptor</symbolicName>
+                                    <version>${wso2.okhttp.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>okhttp-ws</symbolicName>
+                                    <version>${wso2.okhttp-ws.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>dnsjava</symbolicName>
+                                    <version>${wso2.dnsjava.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>org.yaml.snakeyaml</symbolicName>
+                                    <version>${snakeyaml.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>kubernetes-client</symbolicName>
+                                    <version>${wso2.kubernetes-client.version}</version>
                                 </bundle>
                             </bundles>
                         </configuration>
