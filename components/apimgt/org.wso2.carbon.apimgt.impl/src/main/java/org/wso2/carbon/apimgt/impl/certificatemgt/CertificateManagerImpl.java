@@ -164,7 +164,7 @@ public class CertificateManagerImpl implements CertificateManager {
         try {
             certificateMetadata = certificateMgtDAO.getCertificate("", endpoint, tenantId);
         } catch (CertificateManagementException e) {
-            log.error("Error when retrieving certificate metadata for endpoint '" + endpoint + "'");
+            log.error("Error when retrieving certificate metadata for endpoint '" + endpoint + "'", e);
         }
         return certificateMetadata;
     }
@@ -193,9 +193,15 @@ public class CertificateManagerImpl implements CertificateManager {
             if (success) {
                 log.info("The Transport Sender will be re-initialized in few minutes.");
             } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("Error when modifying the sslprofiles.xml file");
+                }
                 log.error("Could not modify the file '" + PROFILE_CONFIG + "'");
             }
         } else {
+            if (log.isDebugEnabled()) {
+                log.debug("sslprofiles.xml file not found.");
+            }
             log.error("Could not find the file '" + PROFILE_CONFIG + "'");
         }
         return success;

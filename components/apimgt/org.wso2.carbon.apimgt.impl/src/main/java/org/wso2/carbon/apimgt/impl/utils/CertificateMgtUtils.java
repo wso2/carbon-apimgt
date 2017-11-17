@@ -94,6 +94,9 @@ public class CertificateMgtUtils {
                     X509Certificate x509Certificate = (X509Certificate) certificate;
                     if (x509Certificate.getNotAfter().getTime() <= System.currentTimeMillis()) {
                         expired = true;
+                        if (log.isDebugEnabled()) {
+                            log.debug("Provided certificate is expired.");
+                        }
                     } else {
                         //If not expired add the certificate to trust store.
                         trustStore.setCertificateEntry(alias, certificate);
@@ -140,7 +143,7 @@ public class CertificateMgtUtils {
      * CERTIFICATE_NOT_FOUND : If the Alias is not found in the key store.
      */
     public ResponseCode removeCertificateFromTrustStore(String alias) {
-        boolean isExists;
+        boolean isExists; //Check for the existence of the certificate in trust store.
         try {
             File trustStoreFile = new File(TRUST_STORE);
             localTrustStoreStream = new FileInputStream(trustStoreFile);
@@ -152,6 +155,9 @@ public class CertificateMgtUtils {
                 isExists = true;
             } else {
                 isExists = false;
+                if (log.isDebugEnabled()) {
+                    log.debug("Certificate for alias '" + alias + "' not found in the trust store.");
+                }
             }
 
             fileOutputStream = new FileOutputStream(trustStoreFile);

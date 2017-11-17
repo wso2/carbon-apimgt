@@ -88,6 +88,9 @@ public class CertificateMgtDAO {
                 isExists = true;
             }
         } catch (SQLException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while retrieving database information. ", e);
+            }
             handleException("Error retrieving Database information", e);
         } finally {
             APIMgtDBUtil.closeAllConnections(null, connection, resultSet);
@@ -124,7 +127,10 @@ public class CertificateMgtDAO {
                 certificates.add(certificateMetadataDTO);
             }
         } catch (SQLException e) {
-            handleException("Error while executing SQL to retrieve certificates.", e);
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while retrieving certificate metadata. ", e);
+            }
+            handleException("Error while retrieving certificates.", e);
         } finally {
             APIMgtDBUtil.closeStatement(preparedStatement);
             APIMgtDBUtil.closeAllConnections(preparedStatement, connection, resultSet);
@@ -183,6 +189,9 @@ public class CertificateMgtDAO {
                 }
             } catch (SQLException e1) {
                 log.error("Error while rolling back the transaction.", e1);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("Error occurred while adding certificate metadata to database.", e);
             }
             handleException("Error while persisting certificate metadata.", e);
         } finally {
