@@ -4,6 +4,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.junit.Assert;
@@ -40,6 +41,8 @@ import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.identity.oauth.dto.OAuthConsumerAppDTO;
 import org.wso2.carbon.utils.CarbonUtils;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -545,6 +548,31 @@ public class APIKeyMgtSubscriberServiceTest {
         PowerMockito.when(APIUtil.getHttpClient(Mockito.anyInt(), Mockito.anyString())).thenReturn(httpClient);
         boolean status = apiKeyMgtSubscriberService.revokeTokensOfUserByApp(USER_NAME, APPLICATION_NAME);
         Assert.assertEquals(true, status);
+
+        Mockito.when(statusLine.getStatusCode()).thenReturn(500);
+        try {
+            status = apiKeyMgtSubscriberService.revokeTokensOfUserByApp(USER_NAME, APPLICATION_NAME);
+            Assert.fail("APIManagementException should be thrown");
+        } catch (RuntimeException e) {
+            Assert.assertEquals("Token revoke failed : HTTP error code : " + 500, e.getMessage());
+        }
+
+        Mockito.when(httpClient.execute(Mockito.any(HttpPost.class))).thenThrow(new IOException("Connection Error"));
+        try {
+            status = apiKeyMgtSubscriberService.revokeTokensOfUserByApp(USER_NAME, APPLICATION_NAME);
+            Assert.fail("APIManagementException should be thrown");
+        } catch (APIManagementException e) {
+            Assert.assertEquals("Error while creating tokens - Connection Error", e.getMessage());
+        }
+
+        PowerMockito.whenNew(UrlEncodedFormEntity.class).withAnyArguments()
+                .thenThrow(new UnsupportedEncodingException("Unsupported Encoding"));
+        try {
+            status = apiKeyMgtSubscriberService.revokeTokensOfUserByApp(USER_NAME, APPLICATION_NAME);
+            Assert.fail("APIManagementException should be thrown");
+        } catch (APIManagementException e) {
+            Assert.assertEquals("Error while preparing request for token/revoke APIs", e.getMessage());
+        }
 
         Mockito.when(apiMgtDAO.getAccessTokenListForUser(USER_NAME, APPLICATION_NAME))
                 .thenThrow(new SQLException("Error getting AccessToken List For User"));
