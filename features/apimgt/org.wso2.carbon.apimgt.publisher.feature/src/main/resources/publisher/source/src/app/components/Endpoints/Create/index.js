@@ -40,7 +40,7 @@ export default class EndpointCreate extends Component {
     }
 
     handleSwitch(secured) {
-        this.setState({secured: secured})
+        this.setState({secured: secured});
     }
 
     handleInputs(e) {

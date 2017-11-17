@@ -88,6 +88,13 @@ public enum ExceptionCodes implements ErrorHandler {
     ENDPOINT_ADD_FAILED(900452, "Endpoint adding failed", 400, "Endpoint adding failed"),
     ENDPOINT_DELETE_FAILED(900453, "Endpoint Delete Failed", 400, "Endpoint Delete Failed"),
 
+    // Service Endpoint Discovery related codes
+    ERROR_LOADING_SERVICE_DISCOVERY_IMPL_CLASS(900460, "Error loading service discovery impl class", 500,
+            "Error while trying to load a service discovery impl class"),
+    ERROR_INITIALIZING_SERVICE_DISCOVERY(900461, "Error initializing service discovery", 500,
+            "Error while connecting to the system with services"),
+    ERROR_WHILE_TRYING_TO_DISCOVER_SERVICES(900462, "Error while discovering services", 500,
+            "Error while trying to discover service endpoints"),
 
     // Gateway related codes
     API_DEFINITION_MALFORMED(900500, "ApiDefinition not found", 400, "Failed to retrieve API Definition"),
@@ -149,7 +156,7 @@ public enum ExceptionCodes implements ErrorHandler {
     CANNOT_PROCESS_WSDL_CONTENT(900676, "Invalid WSDL", 400, "Provided WSDL content cannot be processed"),
     INTERNAL_WSDL_EXCEPTION(900677, "Internal WSDL error", 500, "Internal error while processing WSDL"),
     UNSUPPORTED_WSDL_EXTENSIBILITY_ELEMENT(900678, "Invalid WSDL", 400, "WSDL extensibility element not supported"),
-    ERROR_WHILE_INITIALIZING_WSDL_FACTORY(900679, "Internal WSDL error", 500, "Error while initiallizing WSDL factory"),
+    ERROR_WHILE_INITIALIZING_WSDL_FACTORY(900679, "Internal WSDL error", 500, "Error while initializing WSDL factory"),
     ERROR_WHILE_CREATING_WSDL_ARCHIVE(900680, "Internal WSDL error", 500, "Error while creating WSDL archive"),
 
     // REST API related codes
@@ -193,6 +200,8 @@ public enum ExceptionCodes implements ErrorHandler {
     INTERNAL_ERROR(900967, "General Error", 500, "Server Error Occurred"),
     POLICY_LEVEL_NOT_SUPPORTED(900968, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "
             + "valid"),
+
+
     //Throttle related codes
     THROTTLE_TEMPLATE_EXCEPTION(900969, "Policy Generating Error", 500, " Error while generate policy configuration"),
     ENDPOINT_CONFIG_NOT_FOUND(90070, "Endpoint Config Not found", 404, "Error while retrieving Endpoint " +
