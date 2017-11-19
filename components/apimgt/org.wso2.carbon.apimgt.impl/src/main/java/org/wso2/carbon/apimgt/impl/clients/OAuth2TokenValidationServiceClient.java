@@ -83,8 +83,7 @@ public class OAuth2TokenValidationServiceClient {
 
     public OAuth2ClientApplicationDTO validateAuthenticationRequest(String accessTokenIdentifier)
             throws APIManagementException {
-        CarbonUtils.setBasicAccessSecurityHeaders(username, password,
-                true, oAuth2TokenValidationServiceStub._getServiceClient());
+        CarbonUtils.setBasicAccessSecurityHeaders(username, password, oAuth2TokenValidationServiceStub._getServiceClient());
         if (cookie != null) {
             oAuth2TokenValidationServiceStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING,
                     cookie);

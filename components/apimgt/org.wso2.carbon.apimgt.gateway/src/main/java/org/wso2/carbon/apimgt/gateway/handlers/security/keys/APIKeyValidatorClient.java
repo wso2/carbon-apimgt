@@ -82,8 +82,7 @@ public class APIKeyValidatorClient {
                                                  String requiredAuthenticationLevel, String clientDomain,
                                                  String matchingResource, String httpVerb) throws APISecurityException {
 
-        CarbonUtils.setBasicAccessSecurityHeaders(username, password,
-                                                  true, keyValidationServiceStub._getServiceClient());
+        CarbonUtils.setBasicAccessSecurityHeaders(username, password, keyValidationServiceStub._getServiceClient());
         if (cookie != null) {
             keyValidationServiceStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
         }
@@ -145,8 +144,7 @@ public class APIKeyValidatorClient {
     public ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion
     ) throws APISecurityException {
 
-        CarbonUtils.setBasicAccessSecurityHeaders(username, password,
-                                                  true, keyValidationServiceStub._getServiceClient());
+        CarbonUtils.setBasicAccessSecurityHeaders(username, password, keyValidationServiceStub._getServiceClient());
         if (cookie != null) {
             keyValidationServiceStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
         }

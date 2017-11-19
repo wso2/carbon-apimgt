@@ -231,8 +231,7 @@ public class APIProviderHostObject extends ScriptableObject {
         try {
 
             UserAdminStub userAdminStub = new UserAdminStub(url + "UserAdmin");
-            CarbonUtils.setBasicAccessSecurityHeaders(username, password,
-                    true, userAdminStub._getServiceClient());
+            CarbonUtils.setBasicAccessSecurityHeaders(username, password, userAdminStub._getServiceClient());
             //If multiple user stores are in use, and if the user hasn't specified the domain to which
             //he needs to login to
             /* Below condition is commented out as per new multiple users-store implementation,users from
