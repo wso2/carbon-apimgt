@@ -40,7 +40,6 @@ public class FileEncryptionUtilityTestCase {
 
     private static final String testDir = File.separator + "src" + File.separator + "test";
     private static final String securityDir = File.separator + "resources" + File.separator + "security";
-
     private static final String testFileToEncrypt = "testFileToEncrypt";
     private static final String someText = "someText";
 

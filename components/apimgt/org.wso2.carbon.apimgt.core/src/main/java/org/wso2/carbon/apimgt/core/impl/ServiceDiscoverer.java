@@ -25,7 +25,6 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ServiceDiscoveryConstant
 import java.util.HashMap;
 import java.util.List;
 
-
 /**
  * Abstract class to discover and list services in a cluster
  */

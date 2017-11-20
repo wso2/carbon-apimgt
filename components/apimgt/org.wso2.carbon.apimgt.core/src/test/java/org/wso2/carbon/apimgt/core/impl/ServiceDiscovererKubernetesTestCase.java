@@ -36,7 +36,6 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.exception.ServiceDiscoveryException;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 
-
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
