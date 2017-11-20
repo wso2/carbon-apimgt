@@ -316,7 +316,7 @@ class API {
             }
         ).catch(
              error => {
-                 alert("error in adding "+error);
+                 alert("error in adding " + error);
              }
          );
         if (callback) {

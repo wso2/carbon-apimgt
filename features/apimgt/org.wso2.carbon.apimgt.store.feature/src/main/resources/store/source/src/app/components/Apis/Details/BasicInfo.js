@@ -405,7 +405,6 @@ class Star extends React.Component {
 class StarRatingBar extends React.Component {
     constructor(props) {
         super(props);
-
         this.state = {
                         previousRating : 0,
                         rating : 0
@@ -429,7 +428,6 @@ class StarRatingBar extends React.Component {
         let promised_rating = api.getRatingFromUser(this.props.apiIdProp, null);
         promised_rating.then(
             response => {
-                console.log(response.obj.userRating);
                 this.setState({rating :response.obj.userRating});
                 this.setState({previousRating :response.obj.userRating});
             }

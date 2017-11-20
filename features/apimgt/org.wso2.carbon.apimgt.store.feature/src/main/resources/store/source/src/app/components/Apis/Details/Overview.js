@@ -184,7 +184,6 @@ class Overview extends Component {
                 var index = 0;
                 var comments = [];
                 this.setState({commentList : response.obj.list});
-                console.log(comments);
             }).catch (
                  error => {
                      message.error("Error occurred while retrieving comments!");
