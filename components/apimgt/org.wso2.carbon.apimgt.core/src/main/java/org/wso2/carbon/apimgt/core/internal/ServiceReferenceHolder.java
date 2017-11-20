@@ -36,13 +36,11 @@ public class ServiceReferenceHolder {
     private APIMConfigurations config;
     private SecureVault secureVault;
 
-    private ServiceReferenceHolder() {
-    }
+    private ServiceReferenceHolder() {}
 
     public static ServiceReferenceHolder getInstance() {
         return instance;
     }
-
 
     /**
      * Sets the configProvider instance
@@ -96,7 +94,6 @@ public class ServiceReferenceHolder {
         }
         return null;
     }
-
 
     /**
      * Gives the secure vault instance if already set

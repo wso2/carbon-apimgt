@@ -9,15 +9,13 @@ import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ExternalResourcesApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointListDTO;
-
-import java.io.IOException;
-import java.util.List;
-
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
-
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 import org.wso2.msf4j.Request;
+
+import java.io.IOException;
+import java.util.List;
 import javax.ws.rs.core.Response;
 
 public class ExternalResourcesApiServiceImpl extends ExternalResourcesApiService {

@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * A dummy class to test org.wso2.carbon.apimgt.core.impl.APIPublisherImpl#discoverServiceEndpoints()
+ * A sample class to test org.wso2.carbon.apimgt.core.impl.APIPublisherImpl#discoverServiceEndpoints()
  */
 public class ServiceDiscovererTestClass extends ServiceDiscoverer {
 

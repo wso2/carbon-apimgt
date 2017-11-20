@@ -48,7 +48,7 @@ public class FileEncryptionUtilityTestCase {
     private String encryptedFilePath;
     private String originalFilePath;
 
-    @BeforeTest
+    @BeforeTest(description = "Create a file to encrypt and set carbon.home system property")
     public void createFileToEncrypt() throws Exception {
         System.setProperty("carbon.home", System.getProperty("user.dir") + testDir);
         securityDirAbsolutePath = System.getProperty("carbon.home") + securityDir + File.separator;
@@ -58,19 +58,21 @@ public class FileEncryptionUtilityTestCase {
         APIFileUtils.writeToFile(originalFilePath, someText);
     }
 
-    @Test (priority = 0, expectedExceptions = APIManagementException.class)
+    @Test (description = "Test .init() while secure vault instance in not available",
+            expectedExceptions = APIManagementException.class)
     public void testInitWhileSecureVaultNotAvailable() throws Exception {
         FileEncryptionUtility fileEncryptionUtility = FileEncryptionUtility.getInstance();
         fileEncryptionUtility.init();
     }
 
-    @Test (priority = 1, expectedExceptions = APIManagementException.class)
+    @Test (priority = 1, description = "Test storing AES key while secure vault instance is not set",
+            expectedExceptions = APIManagementException.class)
     public void testStoringAesKeyWhileSecureVaultNotSet() throws Exception {
         FileEncryptionUtility fileEncryptionUtility = FileEncryptionUtility.getInstance();
         fileEncryptionUtility.createAndStoreAESKey();
     }
 
-    @Test (priority = 2)
+    @Test (priority = 2, description = "Test complete flow of encrypting files")
     public void testEncryptFiles() throws Exception {
         FileEncryptionConfigurations config = new FileEncryptionConfigurations();
         List<String> filesToEncrypt = new ArrayList<>();
@@ -96,20 +98,22 @@ public class FileEncryptionUtilityTestCase {
         Assert.assertEquals(fileEncryptionUtility.readFromEncryptedFile(encryptedFilePath), someText);
     }
 
-    @Test (priority = 3, expectedExceptions = APIMgtDAOException.class)
+    @Test (priority = 3, description = "Test encrypting a file which does not exist",
+            expectedExceptions = APIMgtDAOException.class)
     public void testEncryptingNonExistentFile() throws Exception {
         FileEncryptionUtility fileEncryptionUtility = FileEncryptionUtility.getInstance();
         fileEncryptionUtility.encryptFile(securityDirAbsolutePath + "NonExistentFile",
                 securityDirAbsolutePath + "encryptedNonExistentFile");
     }
 
-    @Test (priority = 4, expectedExceptions = APIManagementException.class)
+    @Test (priority = 4, description = "Test decrypting a file which does not exist",
+            expectedExceptions = APIManagementException.class)
     public void testDecryptingNonExistentFile() throws Exception {
         FileEncryptionUtility fileEncryptionUtility = FileEncryptionUtility.getInstance();
         fileEncryptionUtility.readFromEncryptedFile(securityDirAbsolutePath + "NonExistentFile");
     }
 
-    @AfterTest
+    @AfterTest (description = "Clear files and the system property created by the test")
     public void removeCreatedFiles() throws Exception {
         String encryptedAesKeyPath = securityDirAbsolutePath + "encryptedAESKeyFile";
         Files.deleteIfExists(Paths.get(encryptedFilePath));

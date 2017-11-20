@@ -9,7 +9,7 @@ import org.wso2.carbon.kernel.configprovider.ConfigProvider;
 
 public class ServiceDiscoveryConfigBuilderTestCase {
 
-    @Test
+    @Test(description = "Test all the methods in ServiceDiscoveryConfigBuilder")
     public void testServiceDiscoveryConfigBuilder() throws Exception {
         ConfigProvider configProvider = Mockito.mock(ConfigProvider.class);
         ServiceDiscoveryConfigurations sdConfig = Mockito.mock(ServiceDiscoveryConfigurations.class);
@@ -21,7 +21,7 @@ public class ServiceDiscoveryConfigBuilderTestCase {
         Assert.assertNull(ServiceDiscoveryConfigBuilder.getServiceDiscoveryConfiguration());
     }
 
-    @Test
+    @Test(description = "Test the flow where Config Provider throws an exception")
     public void testWhenExceptionThrownByConfigProvider() throws Exception {
         ConfigProvider configProvider = Mockito.mock(ConfigProvider.class);
         Mockito.doThrow(CarbonConfigurationException.class)

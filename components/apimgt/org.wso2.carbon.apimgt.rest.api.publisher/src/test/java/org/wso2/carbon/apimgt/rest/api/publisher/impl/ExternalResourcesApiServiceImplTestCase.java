@@ -20,7 +20,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
-import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +43,6 @@ import org.wso2.msf4j.Request;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
-
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(RestAPIPublisherUtil.class)
@@ -90,7 +88,6 @@ public class ExternalResourcesApiServiceImplTestCase {
         Assert.assertEquals(response.getStatus(), 500);
         Assert.assertTrue(response.getEntity().toString().contains("Error while discovering services"));
     }
-
 
     // Sample request to be used by tests
     private Request getRequest() throws Exception {

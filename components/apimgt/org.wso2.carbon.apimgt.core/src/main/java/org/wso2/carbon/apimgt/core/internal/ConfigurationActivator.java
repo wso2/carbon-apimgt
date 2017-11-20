@@ -62,8 +62,6 @@ public class ConfigurationActivator {
         ServiceReferenceHolder.getInstance().setConfigProvider(null);
     }
 
-
-
     /**
      * Get the SecureVault service.
      * This is the bind method that gets called for SecureVault service registration,

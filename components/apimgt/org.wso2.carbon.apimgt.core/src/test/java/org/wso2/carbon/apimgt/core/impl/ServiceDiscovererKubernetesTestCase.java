@@ -42,14 +42,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-
 public class ServiceDiscovererKubernetesTestCase {
 
     private static final String MASTER_URL = "https://200.20.20.20/";
     private List<Service> listOfServices;
 
-    @Test
-    public void testInitWhenExternalTokenFileNameNotGiven() throws Exception {
+    @Test(description = "Test init method when external service account token file name is NOT given")
+    public void testInitWhileExternalTokenFileNameNotGiven() throws Exception {
         OpenShiftClient openShiftClient = Mockito.mock(OpenShiftClient.class);
 
         ServiceDiscovererKubernetes sdKubernetes = new ServiceDiscovererKubernetes();
@@ -57,13 +56,14 @@ public class ServiceDiscovererKubernetesTestCase {
         try {
             sdKubernetes.initImpl(createImplParametersMap(""));
         } catch (ServiceDiscoveryException e) {
+            //since pod's token is then searched, this is exception msg we get
             Assert.assertEquals(e.getCause().getMessage(),
                     "Error while reading file /var/run/secrets/kubernetes.io/serviceaccount/token");
         }
     }
 
-    @Test
-    public void testInitWhenExternalTokenFileNameGiven() throws Exception {
+    @Test(description = "Test init method while external service account token file name is Given")
+    public void testInitWhileExternalTokenFileNameGiven() throws Exception {
         OpenShiftClient openShiftClient = Mockito.mock(OpenShiftClient.class);
 
         ServiceDiscovererKubernetes sdKubernetes = new ServiceDiscovererKubernetes();
@@ -76,8 +76,8 @@ public class ServiceDiscovererKubernetesTestCase {
         }
     }
 
-    @Test
-    public void testListServicesWhenClientIsNull() throws Exception {
+    @Test(description = "Test all listServices methods while client is null")
+    public void testListServicesWhileClientIsNull() throws Exception {
         ServiceDiscovererKubernetes sdKubernetes = new ServiceDiscovererKubernetes();
         String namespace = "dev";
         HashMap<String, String> criteria = new HashMap<>();
@@ -89,14 +89,14 @@ public class ServiceDiscovererKubernetesTestCase {
         Assert.assertEquals(true, sdKubernetes.listServices(namespace, criteria).isEmpty());
     }
 
-    @Test
+    @Test(description = "Test .listServices() method")
     public void testListServices() throws Exception {
         OpenShiftClient openShiftClient = Mockito.mock(OpenShiftClient.class, Mockito.RETURNS_DEEP_STUBS);
 
         ServiceDiscovererKubernetes sdKubernetes = new ServiceDiscovererKubernetes();
         sdKubernetes.setClient(openShiftClient);
-        sdKubernetes.setIncludeClusterIP(true);
-        sdKubernetes.setIncludeExternalNameTypeServices(true);
+        sdKubernetes.setIncludeClusterIP(true);                 //Include ClusterIPs
+        sdKubernetes.setIncludeExternalNameTypeServices(true);  //Include ExternalNames
 
         NonNamespaceOperation nonNamespaceOperation = Mockito.mock(NonNamespaceOperation.class);
         Mockito.when(openShiftClient.services().inNamespace(null)).thenReturn(nonNamespaceOperation);
@@ -105,17 +105,17 @@ public class ServiceDiscovererKubernetesTestCase {
         List<Endpoint> endpoints = sdKubernetes.listServices();
 
         Assert.assertEquals(endpoints.size(), 10);
-        Mockito.verify(openShiftClient, Mockito.times(2)).getMasterUrl();
+        Mockito.verify(openShiftClient, Mockito.times(2)).getMasterUrl(); //2 NodePort URL endpoints
     }
 
-    @Test
+    @Test(description = "Test .listServices() method without ClusterIPs and ExternalNamesURLs")
     public void testListServicesWithoutCLusterIPAndExternalName() throws Exception {
         OpenShiftClient openShiftClient = Mockito.mock(OpenShiftClient.class, Mockito.RETURNS_DEEP_STUBS);
 
         ServiceDiscovererKubernetes sdKubernetes = new ServiceDiscovererKubernetes();
         sdKubernetes.setClient(openShiftClient);
-        sdKubernetes.setIncludeClusterIP(false);
-        sdKubernetes.setIncludeExternalNameTypeServices(false);
+        sdKubernetes.setIncludeClusterIP(false);                //Not include ClusterIPs
+        sdKubernetes.setIncludeExternalNameTypeServices(false); //Not include ExternalNames
 
         NonNamespaceOperation nonNamespaceOperation = Mockito.mock(NonNamespaceOperation.class);
         Mockito.when(openShiftClient.services().inNamespace(null)).thenReturn(nonNamespaceOperation);
@@ -127,14 +127,14 @@ public class ServiceDiscovererKubernetesTestCase {
         Mockito.verify(openShiftClient, Mockito.times(2)).getMasterUrl();
     }
 
-    @Test
+    @Test(description = "Test .listServices(Namespace) method")
     public void testListServicesWithNamespace() throws Exception {
         OpenShiftClient openShiftClient = Mockito.mock(OpenShiftClient.class, Mockito.RETURNS_DEEP_STUBS);
 
         ServiceDiscovererKubernetes sdKubernetes = new ServiceDiscovererKubernetes();
         sdKubernetes.setClient(openShiftClient);
-        sdKubernetes.setIncludeClusterIP(false);
-        sdKubernetes.setIncludeExternalNameTypeServices(true);
+        sdKubernetes.setIncludeClusterIP(false);                //Not include ClusterIPs
+        sdKubernetes.setIncludeExternalNameTypeServices(true);  //Include ExternalNames
 
         NonNamespaceOperation nonNamespaceOperation = Mockito.mock(NonNamespaceOperation.class);
         Mockito.when(openShiftClient.services().inNamespace("dev")).thenReturn(nonNamespaceOperation);
@@ -145,14 +145,14 @@ public class ServiceDiscovererKubernetesTestCase {
         Assert.assertEquals(endpoints.size(), 4);
     }
 
-    @Test
+    @Test(description = "Test .listServices(Criteria) method")
     public void testListServicesWithCriteria() throws Exception {
         OpenShiftClient openShiftClient = Mockito.mock(OpenShiftClient.class, Mockito.RETURNS_DEEP_STUBS);
 
         ServiceDiscovererKubernetes sdKubernetes = new ServiceDiscovererKubernetes();
         sdKubernetes.setClient(openShiftClient);
-        sdKubernetes.setIncludeClusterIP(true);
-        sdKubernetes.setIncludeExternalNameTypeServices(false);
+        sdKubernetes.setIncludeClusterIP(true);                 //Include ClusterIPs
+        sdKubernetes.setIncludeExternalNameTypeServices(false); //Not include ExternalNames
         HashMap<String, String> oneLabel = createOneLabelHashMap();
 
         NonNamespaceOperation nonNamespaceOperation = Mockito.mock(NonNamespaceOperation.class);
@@ -166,14 +166,14 @@ public class ServiceDiscovererKubernetesTestCase {
         Assert.assertEquals(endpoints.size(), 3);
     }
 
-    @Test
+    @Test(description = "Test .listServices(Namespace, Criteria) method")
     public void testListServicesWithBothNamespaceAndCriteria() throws Exception {
         OpenShiftClient openShiftClient = Mockito.mock(OpenShiftClient.class, Mockito.RETURNS_DEEP_STUBS);
 
         ServiceDiscovererKubernetes sdKubernetes = new ServiceDiscovererKubernetes();
         sdKubernetes.setClient(openShiftClient);
-        sdKubernetes.setIncludeClusterIP(true);
-        sdKubernetes.setIncludeExternalNameTypeServices(true);
+        sdKubernetes.setIncludeClusterIP(true);                 //Include ClusterIPs
+        sdKubernetes.setIncludeExternalNameTypeServices(true);  //Include ExternalNames
         HashMap<String, String> oneLabel = createOneLabelHashMap();
 
         NonNamespaceOperation nonNamespaceOperation = Mockito.mock(NonNamespaceOperation.class);
@@ -186,13 +186,13 @@ public class ServiceDiscovererKubernetesTestCase {
         Assert.assertEquals(endpoints.size(), 2);
     }
 
-    @Test
+    @Test(description = "Test .listServices() while the list has only one service and its port is not http nor https")
     public void testListServicesWithWrongPortType() throws Exception {
         OpenShiftClient openShiftClient = Mockito.mock(OpenShiftClient.class, Mockito.RETURNS_DEEP_STUBS);
 
         ServiceDiscovererKubernetes sdKubernetes = new ServiceDiscovererKubernetes();
         sdKubernetes.setClient(openShiftClient);
-        sdKubernetes.setIncludeExternalNameTypeServices(true);
+        sdKubernetes.setIncludeExternalNameTypeServices(true); //Include ExternalNames (includeClusterIP not checked)
 
         NonNamespaceOperation nonNamespaceOperation = Mockito.mock(NonNamespaceOperation.class);
         Mockito.when(openShiftClient.services().inNamespace(null)).thenReturn(nonNamespaceOperation);
@@ -202,14 +202,14 @@ public class ServiceDiscovererKubernetesTestCase {
         Assert.assertTrue(endpoints.isEmpty());
     }
 
-    @Test
+    @Test(description = "Test .listServices() while the list only has a LoadBalancer type service without any ingress")
     public void testListServicesOfLoadBalancerTypeWithoutIngress() throws Exception {
         OpenShiftClient openShiftClient = Mockito.mock(OpenShiftClient.class, Mockito.RETURNS_DEEP_STUBS);
 
         ServiceDiscovererKubernetes sdKubernetes = new ServiceDiscovererKubernetes();
         sdKubernetes.setClient(openShiftClient);
-        sdKubernetes.setIncludeClusterIP(false);
-        sdKubernetes.setIncludeExternalNameTypeServices(false);
+        sdKubernetes.setIncludeClusterIP(false);                 //Not include ClusterIPs
+        sdKubernetes.setIncludeExternalNameTypeServices(false);  //Not include ExternalNames
 
         NonNamespaceOperation nonNamespaceOperation = Mockito.mock(NonNamespaceOperation.class);
         Mockito.when(openShiftClient.services().inNamespace(null)).thenReturn(nonNamespaceOperation);
@@ -220,16 +220,16 @@ public class ServiceDiscovererKubernetesTestCase {
         Assert.assertEquals(endpoints.size(), 1);
     }
 
-    /*
-    ServiceName  Namespace   Criteria  Type          Ports  LoadBalancer  ExternalIP
-
-    service0     dev         app=web   ClusterIP     http       -         included
-    service1     dev         -         ExternalName  http       -             -
-    service2     dev         -         LoadBalancer  https      IP            -
-    service3     prod        app=web   ClusterIP     http       -             -
-    service4     prod        -         LoadBalancer  http     hostname        -
+    /**
+     *  ServiceName  Namespace   Criteria  Type          Ports  LoadBalancer  ExternalIP
+     *
+     *  service0     dev         app=web   ClusterIP     http       -         included
+     *  service1     dev         -         ExternalName  http       -             -
+     *  service2     dev         -         LoadBalancer  https      IP            -
+     *  service3     prod        app=web   ClusterIP     http       -             -
+     *  service4     prod        -         LoadBalancer  http     hostname        -
      */
-    @BeforeTest
+    @BeforeTest(description = "Create a list of services with all combinations included")
     void init() {
         HashMap<String, String> oneLabel = createOneLabelHashMap();
 
@@ -284,6 +284,12 @@ public class ServiceDiscovererKubernetesTestCase {
         this.listOfServices = servicesList;
     }
 
+    /**
+     * Creates an implParameters map which contains token locations
+     *
+     * @param externalTokenFileName external token file name to be added
+     * @return  implParameters map
+     */
     private HashMap<String, String> createImplParametersMap(String externalTokenFileName) {
         HashMap<String, String> implParameters = new HashMap<>();
         implParameters.put(ServiceDiscovererKubernetes.EXTERNAL_SA_TOKEN_FILE_NAME, externalTokenFileName);
@@ -292,22 +298,31 @@ public class ServiceDiscovererKubernetesTestCase {
         return implParameters;
     }
 
+    /**
+     * Creates a HashMap which contains only one label
+     *
+     * @return  HashMap with one label
+     */
     private HashMap<String, String> createOneLabelHashMap() {
         HashMap<String, String> oneLabel = new HashMap<>();
         oneLabel.put("app", "web");
         return oneLabel;
     }
 
+    /**
+     * Creates a ServiceList containing all services in #listOfServices
+     *
+     * @return list of all the services in #listOfServices
+     */
     private ServiceList createServiceList() {
-        List<Service> servicesList = new ArrayList<>();
-        servicesList.add(listOfServices.get(0));
-        servicesList.add(listOfServices.get(1));
-        servicesList.add(listOfServices.get(2));
-        servicesList.add(listOfServices.get(3));
-        servicesList.add(listOfServices.get(4));
-        return new ServiceListBuilder().withItems(servicesList).build();
+        return new ServiceListBuilder().withItems(listOfServices).build();
     }
 
+    /**
+     * Creates a ServiceList where namespace of each service is "dev"
+     *
+     * @return list of services, where their namespace is "dev"
+     */
     private ServiceList createServiceListWithNamespace() {
         List<Service> servicesList = new ArrayList<>();
         servicesList.add(listOfServices.get(0));
@@ -316,6 +331,11 @@ public class ServiceDiscovererKubernetesTestCase {
         return new ServiceListBuilder().withItems(servicesList).build();
     }
 
+    /**
+     * Creates a ServiceList where each service include the label "app=web"
+     *
+     * @return list of services, where one of the criteria/labels is "app=web"
+     */
     private ServiceList createServiceListWithCriteria() {
         List<Service> servicesList = new ArrayList<>();
         servicesList.add(listOfServices.get(0));
@@ -323,6 +343,11 @@ public class ServiceDiscovererKubernetesTestCase {
         return new ServiceListBuilder().withItems(servicesList).build();
     }
 
+    /**
+     * Creates a ServiceList of namespace "dev", criteria "app=web"
+     *
+     * @return list of services, of which namespace is "dev", criteria is "app=web"
+     */
     private ServiceList createServiceListWithBothNamespaceAndCriteria() {
         List<Service> servicesList = new ArrayList<>();
         servicesList.add(listOfServices.get(0));

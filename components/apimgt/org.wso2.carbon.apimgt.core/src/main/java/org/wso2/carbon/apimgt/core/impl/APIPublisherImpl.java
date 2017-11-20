@@ -2067,9 +2067,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     /**
-     * Discover and return a list of service endpoints
+     * Discover and return a list of service endpoints, of all systems that were included in the config
      *
-     * @return {@code List<Endpoint>}
+     * @return {@code List<Endpoint>}   list of all service endpoints
      * @throws APIManagementException If an error occurred while discovering services
      */
     @Override
@@ -2090,8 +2090,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
                 /* Get the implClass instance */
                 String implClassName = implConfig.getImplClass();
-                Class implClazz = Class.forName(implClassName);
-                ServiceDiscoverer serviceDiscoverer = (ServiceDiscoverer) implClazz.newInstance();
+                Class implClass = Class.forName(implClassName);
+                ServiceDiscoverer serviceDiscoverer = (ServiceDiscoverer) implClass.newInstance();
 
                 /* Pass the implParameters to the above instance */
                 serviceDiscoverer.init(implConfig.getImplParameters());
@@ -2120,7 +2120,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     //remaining -> only "criteria" is set
                     subDiscoveredEndpointList = serviceDiscoverer.listServices(criteriaFilter);
                 }
-
 
                 if (subDiscoveredEndpointList != null) {
                     discoveredEndpointList.addAll(subDiscoveredEndpointList);

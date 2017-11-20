@@ -110,7 +110,6 @@ export default class EndpointsListing extends Component {
             selectedRowKeys,
             onChange: this.onSelectChange,
         };
-        debugger;
         const endpointCreateMenu = (
             <Menu>
                 <Menu.Item key="0">
