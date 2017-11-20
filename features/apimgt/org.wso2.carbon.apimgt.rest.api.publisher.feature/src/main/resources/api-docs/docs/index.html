@@ -78,7 +78,7 @@
                         <span class="class-name">API (Collection)</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
-                                        <li id="op-apisGet"><a href="#!/operations#APICollection#apisGet">Retrieve/Search APIs 
+                                        <li id="op-apisGet"><a href="#!/operations#APICollection#apisGet">Retrieve/Search APIs
 </a></li>
                                         <li id="op-apisPost"><a href="#!/operations#APICollection#apisPost">Create a new API</a></li>
                             </ul>
@@ -132,6 +132,26 @@
                             </ul>
                         </li>
                         <hr/>
+                        <span class="class-name">Mediation Policy (Collection)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdPoliciesMediationGet"><a href="#!/operations#MediationPolicyCollection#apisApiIdPoliciesMediationGet">Get all mediation policies of an API
+</a></li>
+                                        <li id="op-apisApiIdPoliciesMediationPost"><a href="#!/operations#MediationPolicyCollection#apisApiIdPoliciesMediationPost">Add an API specific mediation policy</a></li>
+                                        <li id="op-policiesMediationGet"><a href="#!/operations#MediationPolicyCollection#policiesMediationGet">Get all global level mediation policies
+</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Mediation Policy (Individual)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdPoliciesMediationMediationPolicyIdDelete"><a href="#!/operations#MediationPolicyIndividual#apisApiIdPoliciesMediationMediationPolicyIdDelete">Delete an API specific mediation policy</a></li>
+                                        <li id="op-apisApiIdPoliciesMediationMediationPolicyIdGet"><a href="#!/operations#MediationPolicyIndividual#apisApiIdPoliciesMediationMediationPolicyIdGet">Get an API specific mediation policy</a></li>
+                                        <li id="op-apisApiIdPoliciesMediationMediationPolicyIdPut"><a href="#!/operations#MediationPolicyIndividual#apisApiIdPoliciesMediationMediationPolicyIdPut">Update an API specific mediation policy</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
                         <span class="class-name">Subscription (Collection)</span>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
@@ -163,6 +183,21 @@
                                         <li id="op-tiersTierLevelTierNameGet"><a href="#!/operations#ThrottlingTierIndividual#tiersTierLevelTierNameGet">Get details of a tier</a></li>
                                         <li id="op-tiersTierLevelTierNamePut"><a href="#!/operations#ThrottlingTierIndividual#tiersTierLevelTierNamePut">Update a Tier</a></li>
                                         <li id="op-tiersUpdatePermissionPost"><a href="#!/operations#ThrottlingTierIndividual#tiersUpdatePermissionPost">Update tier permission</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Workflows (Individual)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-workflowsUpdateWorkflowStatusPost"><a href="#!/operations#WorkflowsIndividual#workflowsUpdateWorkflowStatusPost">Update workflow status</a></li>
+                            </ul>
+                        </li>
+                        <hr/>
+                        <span class="class-name">Wsdl (Individual)</span>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                        <li id="op-apisApiIdWsdlGet"><a href="#!/operations#WsdlIndividual#apisApiIdWsdlGet">Get the WSDL of an API</a></li>
+                                        <li id="op-apisApiIdWsdlPost"><a href="#!/operations#WsdlIndividual#apisApiIdWsdlPost">Add a WSDL to an API</a></li>
                             </ul>
                         </li>
             </ul>
@@ -250,6 +285,21 @@
                         </li>
                         <li class="section-box">
                             <ul class="nav nav-stacked">
+                                <li id="def-Mediation"><a href="#!/models#Mediation">Mediation</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-MediationInfo"><a href="#!/models#MediationInfo">MediationInfo</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-MediationList"><a href="#!/models#MediationList">MediationList</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
                                 <li id="def-Sequence"><a href="#!/models#Sequence">Sequence</a></li>
                             </ul>
                         </li>
@@ -278,6 +328,21 @@
                                 <li id="def-TierPermission"><a href="#!/models#TierPermission">TierPermission</a></li>
                             </ul>
                         </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Workflow"><a href="#!/models#Workflow">Workflow</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-Wsdl"><a href="#!/models#Wsdl">Wsdl</a></li>
+                            </ul>
+                        </li>
+                        <li class="section-box">
+                            <ul class="nav nav-stacked">
+                                <li id="def-ExtendedSubscription"><a href="#!/models#ExtendedSubscription">ExtendedSubscription</a></li>
+                            </ul>
+                        </li>
             </ul>
         </nav>
     </div>
@@ -294,14 +359,14 @@
 
                             <p class="marked">This specifies a **RESTful API** for WSO2 **API Manager** - Publisher.
 
-Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.0.4/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources/publisher-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.
+Please see [full swagger definition](https://raw.githubusercontent.com/wso2/carbon-apimgt/v6.1.66/components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher/src/main/resources/publisher-api.yaml) of the API which is written using [swagger 2.0](http://swagger.io/) specification.
 </p>
 
                             <div class="sect2">
                                     <h3>Version information</h3>
 
                                     <div class="paragraph">
-                                        <p class="marked">0.10.0</p>
+                                        <p class="marked">0.11.0</p>
                                     </div>
 
                                         <h3>Contact information</h3>

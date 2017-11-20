@@ -1,0 +1,501 @@
+<div class="main-content">
+    <h1><a name="Wsdl (Individual)"></a>Wsdl (Individual)</h1>
+
+            <hr/>
+            <h3 class="operation-heading"><a name="apisApiIdWsdlGet"></a>Get the WSDL of an API <br><small>GET https://apis.wso2.com/api/am/publisher/v0.11/apis/{apiId}/wsdl</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to retrieve the WSDL definition of an API.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_view</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:api_view' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdWsdlGet">
+                <h4 class="section-heading">
+                    Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+
+                <div id="request-apisApiIdWsdlGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v0.11/apis/7f82f6b0-2667-441e-af23-c0fc44cf3a17/wsdl
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdWsdlGet">
+                <h4 class="section-heading">
+                    Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+                <div id="response-apisApiIdWsdlGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+   &quot;name&quot;: &quot;admin--hello1.0.0.wsdl&quot;,
+   &quot;wsdlDefinition&quot;: &quot;&lt;definitions xmlns&#x3D;\&quot;http://schemas.xmlsoap.org/wsdl/\&quot; xmlns:xsd&#x3D;\&quot;http://www.w3.org/2001/XMLSchema\&quot; xmlns:soap&#x3D;\&quot;http://schemas.xmlsoap.org/wsdl/soap/\&quot; xmlns:tns&#x3D;\&quot;http://www.examples.com/wsdl/HelloService.wsdl\&quot; name&#x3D;\&quot;HelloService\&quot; targetNamespace&#x3D;\&quot;http://www.examples.com/wsdl/HelloService.wsdl\&quot;&gt;\n  &lt;message name&#x3D;\&quot;SayHelloResponse\&quot;&gt;\n    &lt;part name&#x3D;\&quot;greeting\&quot; type&#x3D;\&quot;xsd:string\&quot;&gt;\n    &lt;\/part&gt;\n  &lt;\/message&gt;\n  &lt;message name&#x3D;\&quot;SayHelloRequest\&quot;&gt;\n    &lt;part name&#x3D;\&quot;firstName\&quot; type&#x3D;\&quot;xsd:string\&quot;&gt;\n    &lt;\/part&gt;\n  &lt;\/message&gt;\n  &lt;portType name&#x3D;\&quot;Hello_PortType\&quot;&gt;\n    &lt;operation name&#x3D;\&quot;sayHello\&quot;&gt;\n      &lt;input message&#x3D;\&quot;tns:SayHelloRequest\&quot;&gt;\n    &lt;\/input&gt;\n      &lt;output message&#x3D;\&quot;tns:SayHelloResponse\&quot;&gt;\n    &lt;\/output&gt;\n    &lt;\/operation&gt;\n  &lt;\/portType&gt;\n  &lt;binding name&#x3D;\&quot;Hello_Binding\&quot; type&#x3D;\&quot;tns:Hello_PortType\&quot;&gt;\n    &lt;soap:binding style&#x3D;\&quot;rpc\&quot; transport&#x3D;\&quot;http://schemas.xmlsoap.org/soap/http\&quot;/&gt;\n    &lt;operation name&#x3D;\&quot;sayHello\&quot;&gt;\n      &lt;soap:operation soapAction&#x3D;\&quot;sayHello\&quot;/&gt;\n      &lt;input&gt;\n        &lt;soap:body use&#x3D;\&quot;encoded\&quot; encodingStyle&#x3D;\&quot;http://schemas.xmlsoap.org/soap/encoding/\&quot; namespace&#x3D;\&quot;urn:examples:helloservice\&quot;/&gt;\n      &lt;\/input&gt;\n      &lt;output&gt;\n        &lt;soap:body use&#x3D;\&quot;encoded\&quot; encodingStyle&#x3D;\&quot;http://schemas.xmlsoap.org/soap/encoding/\&quot; namespace&#x3D;\&quot;urn:examples:helloservice\&quot;/&gt;\n      &lt;\/output&gt;\n    &lt;\/operation&gt;\n  &lt;\/binding&gt;\n  &lt;service name&#x3D;\&quot;Hello_Service\&quot;&gt;\n&lt;documentation&gt;WSDL File for HelloService&lt;\/documentation&gt;\n    &lt;port name&#x3D;\&quot;Hello_Port\&quot; binding&#x3D;\&quot;tns:Hello_Binding\&quot;&gt;\n      &lt;soap:address location&#x3D;\&quot;http://localhost:8280/hellp/1.0.0\&quot;/&gt;\n    &lt;\/port&gt;\n  &lt;\/service&gt;\n&lt;\/definitions&gt;&quot;
+}</code></div>
+
+            <h4 class="section-heading">Sample CURL</h4>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://localhost:9443/api/am/publisher/v0.11/apis/7f82f6b0-2667-441e-af23-c0fc44cf3a17/wsdl&quot;</code></div>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
+The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
+Should be formatted as **provider-name-version**.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>Accept</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Media types acceptable for the response. Default is application/json.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked">application/json</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resource (Will be supported in future).
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Modified-Since</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
+formerly retrieved variant of the resource (Will be supported in future).
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Requested WSDL DTO object belongs to the API </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Wsdl">Wsdl</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">304</p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h3 class="operation-heading"><a name="apisApiIdWsdlPost"></a>Add a WSDL to an API <br><small>POST https://apis.wso2.com/api/am/publisher/v0.11/apis/{apiId}/wsdl</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to add a WSDL definition to an existing API.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_create</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:api_create' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-apisApiIdWsdlPost">
+                <h4 class="section-heading">
+                    Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+
+                <div id="request-apisApiIdWsdlPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v0.11/apis/af3f96da-9ccf-463f-8cee-13ec8530a9cd/wsdl
+Content-Type: application/json
+Authorization: Bearer 7d237cab-7011-3f81-b384-24d03e750873
+
+{
+   &quot;name&quot;: &quot;admin--PizzaShackAPI1.0.0.wsdl&quot;,
+   &quot;wsdlDefinition&quot;: &quot;&lt;definitions xmlns&#x3D;\&quot;http://schemas.xmlsoap.org/wsdl/\&quot; xmlns:xsd&#x3D;\&quot;http://www.w3.org/2001/XMLSchema\&quot; xmlns:soap&#x3D;\&quot;http://schemas.xmlsoap.org/wsdl/soap/\&quot; xmlns:tns&#x3D;\&quot;http://www.examples.com/wsdl/HelloService.wsdl\&quot; name&#x3D;\&quot;HelloService\&quot; targetNamespace&#x3D;\&quot;http://www.examples.com/wsdl/HelloService.wsdl\&quot;&gt;\n  &lt;message name&#x3D;\&quot;SayHelloResponse\&quot;&gt;\n    &lt;part name&#x3D;\&quot;greeting\&quot; type&#x3D;\&quot;xsd:string\&quot;&gt;\n    &lt;\/part&gt;\n  &lt;\/message&gt;\n  &lt;message name&#x3D;\&quot;SayHelloRequest\&quot;&gt;\n    &lt;part name&#x3D;\&quot;firstName\&quot; type&#x3D;\&quot;xsd:string\&quot;&gt;\n    &lt;\/part&gt;\n  &lt;\/message&gt;\n  &lt;portType name&#x3D;\&quot;Hello_PortType\&quot;&gt;\n    &lt;operation name&#x3D;\&quot;sayHello\&quot;&gt;\n      &lt;input message&#x3D;\&quot;tns:SayHelloRequest\&quot;&gt;\n    &lt;\/input&gt;\n      &lt;output message&#x3D;\&quot;tns:SayHelloResponse\&quot;&gt;\n    &lt;\/output&gt;\n    &lt;\/operation&gt;\n  &lt;\/portType&gt;\n  &lt;binding name&#x3D;\&quot;Hello_Binding\&quot; type&#x3D;\&quot;tns:Hello_PortType\&quot;&gt;\n    &lt;soap:binding style&#x3D;\&quot;rpc\&quot; transport&#x3D;\&quot;http://schemas.xmlsoap.org/soap/http\&quot;/&gt;\n    &lt;operation name&#x3D;\&quot;sayHello\&quot;&gt;\n      &lt;soap:operation soapAction&#x3D;\&quot;sayHello\&quot;/&gt;\n      &lt;input&gt;\n        &lt;soap:body use&#x3D;\&quot;encoded\&quot; encodingStyle&#x3D;\&quot;http://schemas.xmlsoap.org/soap/encoding/\&quot; namespace&#x3D;\&quot;urn:examples:helloservice\&quot;/&gt;\n      &lt;\/input&gt;\n      &lt;output&gt;\n        &lt;soap:body use&#x3D;\&quot;encoded\&quot; encodingStyle&#x3D;\&quot;http://schemas.xmlsoap.org/soap/encoding/\&quot; namespace&#x3D;\&quot;urn:examples:helloservice\&quot;/&gt;\n      &lt;\/output&gt;\n    &lt;\/operation&gt;\n  &lt;\/binding&gt;\n  &lt;service name&#x3D;\&quot;Hello_Service\&quot;&gt;\n&lt;documentation&gt;WSDL File for HelloService&lt;\/documentation&gt;\n    &lt;port name&#x3D;\&quot;Hello_Port\&quot; binding&#x3D;\&quot;tns:Hello_Binding\&quot;&gt;\n      &lt;soap:address location&#x3D;\&quot;http://localhost:8280/hellp/1.0.0\&quot;/&gt;\n    &lt;\/port&gt;\n  &lt;\/service&gt;\n&lt;\/definitions&gt;&quot;
+}</code></div>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdWsdlPost">
+                <h4 class="section-heading">
+                    Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+                <div id="response-apisApiIdWsdlPost" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+   &quot;name&quot;: &quot;admin--PizzaShackAPI1.0.0.wsdl&quot;,
+   &quot;wsdlDefinition&quot;: &quot;&lt;definitions xmlns&#x3D;\&quot;http://schemas.xmlsoap.org/wsdl/\&quot; xmlns:xsd&#x3D;\&quot;http://www.w3.org/2001/XMLSchema\&quot; xmlns:soap&#x3D;\&quot;http://schemas.xmlsoap.org/wsdl/soap/\&quot; xmlns:tns&#x3D;\&quot;http://www.examples.com/wsdl/HelloService.wsdl\&quot; name&#x3D;\&quot;HelloService\&quot; targetNamespace&#x3D;\&quot;http://www.examples.com/wsdl/HelloService.wsdl\&quot;&gt;\n  &lt;message name&#x3D;\&quot;SayHelloResponse\&quot;&gt;\n    &lt;part name&#x3D;\&quot;greeting\&quot; type&#x3D;\&quot;xsd:string\&quot;&gt;\n    &lt;\/part&gt;\n  &lt;\/message&gt;\n  &lt;message name&#x3D;\&quot;SayHelloRequest\&quot;&gt;\n    &lt;part name&#x3D;\&quot;firstName\&quot; type&#x3D;\&quot;xsd:string\&quot;&gt;\n    &lt;\/part&gt;\n  &lt;\/message&gt;\n  &lt;portType name&#x3D;\&quot;Hello_PortType\&quot;&gt;\n    &lt;operation name&#x3D;\&quot;sayHello\&quot;&gt;\n      &lt;input message&#x3D;\&quot;tns:SayHelloRequest\&quot;&gt;\n    &lt;\/input&gt;\n      &lt;output message&#x3D;\&quot;tns:SayHelloResponse\&quot;&gt;\n    &lt;\/output&gt;\n    &lt;\/operation&gt;\n  &lt;\/portType&gt;\n  &lt;binding name&#x3D;\&quot;Hello_Binding\&quot; type&#x3D;\&quot;tns:Hello_PortType\&quot;&gt;\n    &lt;soap:binding style&#x3D;\&quot;rpc\&quot; transport&#x3D;\&quot;http://schemas.xmlsoap.org/soap/http\&quot;/&gt;\n    &lt;operation name&#x3D;\&quot;sayHello\&quot;&gt;\n      &lt;soap:operation soapAction&#x3D;\&quot;sayHello\&quot;/&gt;\n      &lt;input&gt;\n        &lt;soap:body use&#x3D;\&quot;encoded\&quot; encodingStyle&#x3D;\&quot;http://schemas.xmlsoap.org/soap/encoding/\&quot; namespace&#x3D;\&quot;urn:examples:helloservice\&quot;/&gt;\n      &lt;\/input&gt;\n      &lt;output&gt;\n        &lt;soap:body use&#x3D;\&quot;encoded\&quot; encodingStyle&#x3D;\&quot;http://schemas.xmlsoap.org/soap/encoding/\&quot; namespace&#x3D;\&quot;urn:examples:helloservice\&quot;/&gt;\n      &lt;\/output&gt;\n    &lt;\/operation&gt;\n  &lt;\/binding&gt;\n  &lt;service name&#x3D;\&quot;Hello_Service\&quot;&gt;\n&lt;documentation&gt;WSDL File for HelloService&lt;\/documentation&gt;\n    &lt;port name&#x3D;\&quot;Hello_Port\&quot; binding&#x3D;\&quot;tns:Hello_Binding\&quot;&gt;\n      &lt;soap:address location&#x3D;\&quot;http://localhost:8280/hellp/1.0.0\&quot;/&gt;\n    &lt;\/port&gt;\n  &lt;\/service&gt;\n&lt;\/definitions&gt;&quot;
+}</code></div>
+
+            <h4 class="section-heading">Sample CURL</h4>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json &quot;https://localhost:9443/api/am/publisher/v0.11/apis/af3f96da-9ccf-463f-8cee-13ec8530a9cd/wsdl&quot;</code></div>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
+The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
+Should be formatted as **provider-name-version**.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            
+                            <span class="param-in">Body </span>
+                        </td>
+                        <td class="param-name">
+                            <p>body</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">JSON payload including WSDL definition that needs to be added
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                Wsdl
+                                    (<a href="#!/models#Wsdl">Wsdl</a>)
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>Content-Type</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Media type of the entity in the body. Default is application/json.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked">application/json</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on ETag (Will be supported in future).
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Unmodified-Since</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header (Will be supported in future).
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Successful response with updated wsdl definition </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad Request. Invalid request or validation error </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">403</p></td>
+                        <td class="parameter"><p class="marked">Forbidden. The request must be conditional but no condition has been specified. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. The resource to be updated does not exist. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">412</p></td>
+                        <td class="parameter"><p class="marked">Precondition Failed. The request has not been performed because one of the preconditions is not met. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+</div>

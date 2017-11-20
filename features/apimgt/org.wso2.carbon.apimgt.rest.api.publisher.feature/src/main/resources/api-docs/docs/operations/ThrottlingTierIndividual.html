@@ -6,7 +6,7 @@
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to delete an existing tier. The only supported tier level is &#x60;api&#x60; tiers.
-&#x60;DELETE https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api/Low&#x60;
+&#x60;DELETE https://localhost:9443/api/am/publisher/v0.11/tiers/api/Low&#x60;
 
 **IMPORTANT:**
 * This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling tiers modification related operations.
@@ -22,7 +22,7 @@
                 </h4>
             </div>
 
-                <div id="request-tiersTierLevelTierNameDelete"class="pre collapse in"><code class="json">DELETE https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api/Low
+                <div id="request-tiersTierLevelTierNameDelete"class="pre collapse in"><code class="json">DELETE https://localhost:9443/api/am/publisher/v0.11/tiers/api/Low
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -35,7 +35,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                 <div id="response-tiersTierLevelTierNameDelete" class="pre collapse in"><code class="json">HTTP/1.1 200 OK</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X DELETE &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api/Low&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X DELETE &quot;https://localhost:9443/api/am/publisher/v0.11/tiers/api/Low&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -105,10 +105,6 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 
 <code>api</code>
 
-<code>application</code>
-
-<code>resource</code>
-
                         </td>
                         <td>
                             <span class="param-type">
@@ -135,7 +131,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on ETag.
+                            <p class="param-description marked">Validator for conditional requests; based on ETag (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -163,7 +159,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header.
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -227,6 +223,8 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to retrieve details of a single tier by specifying the tier level and tier name.
+Note that the scope of the API is mandatory while retreiving the access token with the following cURL command : &#x60;curl -k -d \&quot;grant_type&#x3D;password&amp;username&#x3D;username&amp;password&#x3D;password&amp;scope&#x3D;apim:tier_view\&quot; -H \&quot;Authorization: Basic &lt;token&gt;\&quot; https://localhost:8243/token&#x60;.
+You will receive the access token as the response, for example &#x60;&quot;access_token&quot;:&quot;8644c013-7ff1-3217-b150-d7b92cae6be7&quot;&#x60;.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
@@ -239,7 +237,7 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
                 </h4>
             </div>
 
-                <div id="request-tiersTierLevelTierNameGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api/Bronze
+                <div id="request-tiersTierLevelTierNameGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v0.11/tiers/api/Bronze
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -264,7 +262,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api/Bronze</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; https://localhost:9443/api/am/publisher/v0.11/tiers/api/Bronze</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -393,7 +391,7 @@ Content-Type: application/json
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resourec.
+variant of the resource (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -422,7 +420,7 @@ variant of the resourec.
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
-formerly retrieved variant of the resource.
+formerly retrieved variant of the resource (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -495,7 +493,7 @@ formerly retrieved variant of the resource.
             <p class="marked"></p>
 
             <p class="marked">This operation can be used to update an existing tier. The only supported tier level is &#x60;api&#x60; tiers.
-&#x60;PUT https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api/Low&#x60;
+&#x60;PUT https://localhost:9443/api/am/publisher/v0.11/tiers/api/Low&#x60;
 
 **IMPORTANT:**
 * This is only effective when Advanced Throttling is disabled in the Server. If enabled, we need to use Admin REST API for throttling tiers modification related operations.
@@ -511,7 +509,7 @@ formerly retrieved variant of the resource.
                 </h4>
             </div>
 
-                <div id="request-tiersTierLevelTierNamePut"class="pre collapse in"><code class="json">PUT https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api/Low
+                <div id="request-tiersTierLevelTierNamePut"class="pre collapse in"><code class="json">PUT https://localhost:9443/api/am/publisher/v0.11/tiers/api/Low
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 Content-Type: application/json
 
@@ -556,7 +554,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X PUT -d @data.json &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/api/Low&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X PUT -d @data.json &quot;https://localhost:9443/api/am/publisher/v0.11/tiers/api/Low&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -655,10 +653,6 @@ Content-Type: application/json
 
 <code>api</code>
 
-<code>application</code>
-
-<code>resource</code>
-
                         </td>
                         <td>
                             <span class="param-type">
@@ -713,7 +707,7 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on ETag.
+                            <p class="param-description marked">Validator for conditional requests; based on ETag (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -741,7 +735,7 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header.
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -826,7 +820,7 @@ Content-Type: application/json
                 </h4>
             </div>
 
-                <div id="request-tiersUpdatePermissionPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/update-permission?tierName&#x3D;Bronze&amp;tierLevel&#x3D;api
+                <div id="request-tiersUpdatePermissionPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v0.11/tiers/update-permission?tierName&#x3D;Bronze&amp;tierLevel&#x3D;api
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 Content-Type: application/json
 
@@ -844,7 +838,7 @@ Content-Type: application/json
                 <div id="response-tiersUpdatePermissionPost" class="pre collapse in"><code class="json">HTTP/1.1 200 OK</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/tiers/update-permission?tierName&#x3D;Bronze&amp;tierLevel&#x3D;api&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json &quot;https://localhost:9443/api/am/publisher/v0.11/tiers/update-permission?tierName&#x3D;Bronze&amp;tierLevel&#x3D;api&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -944,7 +938,7 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on ETag.
+                            <p class="param-description marked">Validator for conditional requests; based on ETag (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -972,7 +966,7 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header.
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header (Will be supported in future).
 </p>
                         </td>
                         <td>
