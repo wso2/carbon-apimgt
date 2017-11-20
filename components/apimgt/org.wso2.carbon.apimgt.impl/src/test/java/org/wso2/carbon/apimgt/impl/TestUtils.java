@@ -25,6 +25,11 @@ import org.powermock.api.mockito.PowerMockito;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
+import org.wso2.carbon.apimgt.api.model.policy.Limit;
+import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
+import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -33,10 +38,6 @@ import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
-
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
 
 import java.util.UUID;
 
@@ -106,5 +107,37 @@ public class TestUtils {
         ServiceReferenceHolder sh = PowerMockito.mock(ServiceReferenceHolder.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);
         return sh;
+    }
+
+    /**
+     * Return unique subscription policy with rate limit
+     *
+     * @return unique subscription policy
+     */
+    public static SubscriptionPolicy getUniqueSubscriptionPolicyWithRequestCountLimit() {
+        SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(UUID.randomUUID().toString());
+        Limit limit = new RequestCountLimit();
+        limit.setTimeUnit("seconds");
+        limit.setUnitTime(10);
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setLimit(limit);
+        subscriptionPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        return subscriptionPolicy;
+    }
+
+    /**
+     * Return unique subscription policy with Bandwidth limit
+     *
+     * @return unique subscription policy
+     */
+    public static SubscriptionPolicy getUniqueSubscriptionPolicyWithBandwidthLimit() {
+        SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(UUID.randomUUID().toString());
+        Limit limit = new BandwidthLimit();
+        limit.setTimeUnit("seconds");
+        limit.setUnitTime(10);
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setLimit(limit);
+        subscriptionPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        return subscriptionPolicy;
     }
 }
