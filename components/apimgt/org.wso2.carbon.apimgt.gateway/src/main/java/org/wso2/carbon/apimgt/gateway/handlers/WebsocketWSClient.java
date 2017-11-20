@@ -124,8 +124,7 @@ public class WebsocketWSClient {
 	public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey)
 			throws APISecurityException {
 
-		CarbonUtils.setBasicAccessSecurityHeaders(username, password, true,
-		                                          keyValidationServiceStub._getServiceClient());
+		CarbonUtils.setBasicAccessSecurityHeaders(username, password, keyValidationServiceStub._getServiceClient());
 
 		try {
 			org.wso2.carbon.apimgt.impl.dto.xsd.APIKeyValidationInfoDTO dto =

@@ -43,7 +43,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         this.environment = environment;
 
         CarbonUtils.setBasicAccessSecurityHeaders(environment.getUserName(), environment.getPassword(),
-                true, apiGatewayAdminStub._getServiceClient());
+                apiGatewayAdminStub._getServiceClient());
     }
 
     /**

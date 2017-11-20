@@ -46,7 +46,7 @@ public class RemoteUserManagerClient {
 			userStoreManagerStub = new RemoteUserStoreManagerServiceStub(configContext, serviceURL +
 			                                                                   "RemoteUserStoreManagerService");
 			ServiceClient svcClient = userStoreManagerStub._getServiceClient();
-			CarbonUtils.setBasicAccessSecurityHeaders(username, password, true,svcClient);
+			CarbonUtils.setBasicAccessSecurityHeaders(username, password, svcClient);
 			Options options = svcClient.getOptions();
 			options.setTimeOutInMilliSeconds(TIMEOUT_IN_MILLIS);
 			options.setProperty(HTTPConstants.SO_TIMEOUT, TIMEOUT_IN_MILLIS);
