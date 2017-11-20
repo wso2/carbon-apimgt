@@ -635,6 +635,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void addAPI(API api) throws APIManagementException {
         try {
+            validateApiInfo(api);
             createAPI(api);
 
             if (log.isDebugEnabled()) {
@@ -684,6 +685,37 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (APIManagementException e) {
             throw new APIManagementException("Error in adding API :" + api.getId().getApiName(), e);
         }
+    }
+
+    /**
+     * Validates the name and version of api against illegal characters.
+     *
+     * @param api API info object
+     * @throws APIManagementException
+     */
+    private void validateApiInfo(API api) throws APIManagementException {
+        String apiName = api.getId().getApiName();
+        String apiVersion = api.getId().getVersion();
+        if (containsIllegals(apiName)) {
+            handleException("API Name contains one or more illegal characters  " +
+                    "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )");
+        }
+        if (containsIllegals(apiVersion)) {
+            handleException("API Version contains one or more illegal characters  " +
+                    "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )");
+        }
+    }
+
+    /**
+     * Check whether a string contains illegal charactersA
+     *
+     * @param toExamine string to examine for illegal characters
+     * @return true if found illegal characters, else false
+     */
+    public boolean containsIllegals(String toExamine) {
+        Pattern pattern = Pattern.compile(APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA);
+        Matcher matcher = pattern.matcher(toExamine);
+        return matcher.find();
     }
 
     /**
