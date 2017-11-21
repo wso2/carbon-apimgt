@@ -368,7 +368,7 @@ public class APIConsumerImplTest {
         PowerMockito.when(GovernanceUtils.getArtifactPath(userRegistry, artifact.getId())).
                 thenReturn(artifactPath);
         Tag tag = new Tag();
-        org.wso2.carbon.registry.core.Tag[] tags = new Tag[]{tag};
+        Tag[] tags = new Tag[]{tag};
         Mockito.when(userRegistry.getTags(artifactPath)).thenReturn(tags);
         assertNotNull(apiConsumer.getAllPaginatedAPIsByStatus(MultitenantConstants
                 .SUPER_TENANT_DOMAIN_NAME, 0, 10, "testStatus", false));
@@ -418,7 +418,7 @@ public class APIConsumerImplTest {
         PowerMockito.when(GovernanceUtils.getArtifactPath(userRegistry, artifact.getId())).
                 thenReturn(artifactPath);
         Tag tag = new Tag();
-        org.wso2.carbon.registry.core.Tag[] tags = new Tag[]{tag};
+        Tag[] tags = new Tag[]{tag};
         Mockito.when(userRegistry.getTags(artifactPath)).thenReturn(tags);
         assertNotNull(apiConsumer.getAllPaginatedAPIsByStatus(MultitenantConstants
                 .SUPER_TENANT_DOMAIN_NAME, 0, 10, new String[]{"testStatus"}, false));
@@ -679,8 +679,6 @@ public class APIConsumerImplTest {
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         Mockito.when(keyManager.getNewApplicationAccessToken((AccessTokenRequest) Mockito.anyObject())).thenReturn
                 (accessTokenInfo);
-
-
         Mockito.when(ApplicationUtils.populateTokenRequest(Mockito.anyString(), (AccessTokenRequest) Mockito
                 .anyObject()))
                 .thenReturn(tokenRequest);
@@ -962,7 +960,6 @@ public class APIConsumerImplTest {
         Assert.assertEquals(apiConsumer
                 .updateAuthClient("1", "app1", "access", "www.host.com", new String[0], null, null, null, null)
                 .getClientName(), clientName);
-
     }
 
     @Test
@@ -972,7 +969,6 @@ public class APIConsumerImplTest {
                 .thenReturn(applications);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         Assert.assertEquals(apiConsumer.getApplications(new Subscriber("sub1"), "1").length, 2);
-
     }
 
     @Test
@@ -984,8 +980,8 @@ public class APIConsumerImplTest {
                 .thenReturn(applications);
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper(apiMgtDAO);
         Assert.assertEquals(
-                apiConsumer.getApplicationsWithPagination(new Subscriber("sub1"), "1", 0, 5, "", "", "ASC").length, 2);
-
+                apiConsumer.getApplicationsWithPagination(new Subscriber("sub1"), "1", 0, 5,
+                        "", "", "ASC").length, 2);
     }
 
     @Test
@@ -1333,8 +1329,8 @@ public class APIConsumerImplTest {
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("is used for another Application"));
         }
-        Assert.assertEquals(5, apiConsumer.mapExistingOAuthClient("", "admin", "1", "app1", "refresh").size());
-
+        Assert.assertEquals(5, apiConsumer.mapExistingOAuthClient("", "admin", "1",
+                "app1", "refresh").size());
     }
 
     @Test
@@ -1342,7 +1338,8 @@ public class APIConsumerImplTest {
         Application application = new Application(1);
         Mockito.when(apiMgtDAO.getApplicationByName(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
                 .thenReturn(application);
-        new APIConsumerImplWrapper(apiMgtDAO).cleanUpApplicationRegistration("app1", "access", "2", API_PROVIDER);
+        new APIConsumerImplWrapper(apiMgtDAO).cleanUpApplicationRegistration("app1", "access",
+                "2", API_PROVIDER);
         Mockito.verify(apiMgtDAO, Mockito.times(1))
                 .deleteApplicationRegistration(Mockito.anyString(), Mockito.anyString());
     }
@@ -1498,6 +1495,4 @@ public class APIConsumerImplTest {
         apiConsumer.rateAPI(identifier, apiRating, user);
         Mockito.verify(apiMgtDAO, Mockito.times(1)).addRating(identifier, apiRating.getRating(), user);
     }
-
-
 }
