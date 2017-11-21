@@ -581,7 +581,7 @@ public class APIConsumerImplTest {
     @Test
     public void testGetUserRating() throws APIManagementException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
-        APIIdentifier apiIdentifier = new APIIdentifier("admin", "TestAPI", "1.0.0");
+        APIIdentifier apiIdentifier = new APIIdentifier(API_PROVIDER, "TestAPI", "1.0.0");
         when(apiMgtDAO.getUserRating(apiIdentifier, "admin")).thenReturn(2);
         apiConsumer.apiMgtDAO = apiMgtDAO;
         assertEquals(2, apiConsumer.getUserRating(apiIdentifier, "admin"));
@@ -732,7 +732,7 @@ public class APIConsumerImplTest {
     public void testIsSubscribed() throws APIManagementException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
         apiConsumer.apiMgtDAO = apiMgtDAO;
-        APIIdentifier apiIdentifier = new APIIdentifier("admin", "TestAPI", "1.0.0");
+        APIIdentifier apiIdentifier = new APIIdentifier(API_PROVIDER, "TestAPI", "1.0.0");
         Mockito.when(apiMgtDAO.isSubscribed(apiIdentifier, "testID")).thenReturn(true);
         assertEquals(true, apiConsumer.isSubscribed(apiIdentifier, "testID"));
 
