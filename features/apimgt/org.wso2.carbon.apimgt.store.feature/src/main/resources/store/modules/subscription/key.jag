@@ -1,4 +1,6 @@
 <%
+var encode = require('encode');
+encode = new encode.Encode();
 var generateAPIKey = function (api, context, application, username, keyType, callbackUrl) {
     var key,
             log = new Log(),
@@ -186,7 +188,7 @@ var refreshToken = function (username,application, keyType ,oldAccessToken,clien
         return {
             error:true,
             key:null,
-            message:e.message.split("Exception:")[1]
+            message:encode.forHtml(e.message.split("Exception:")[1])
         };
     }
 };
