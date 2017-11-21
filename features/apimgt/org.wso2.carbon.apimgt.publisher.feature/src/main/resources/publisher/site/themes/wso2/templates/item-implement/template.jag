@@ -14,7 +14,7 @@
     var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
     var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
 
-	var corsJson = JSON.parse(api.corsConfiguration);
+	var corsJson = JSON.parse(stringify(api.corsConfiguration));
 %>
 <script language="javascript">
     var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'PATCH', 'OPTIONS'];
