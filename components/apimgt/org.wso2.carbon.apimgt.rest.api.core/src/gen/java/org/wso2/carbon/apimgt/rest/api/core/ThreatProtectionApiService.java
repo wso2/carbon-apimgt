@@ -25,7 +25,10 @@ public abstract class ThreatProtectionApiService {
     public abstract Response threatProtectionPoliciesGet( Request request) throws NotFoundException;
     public abstract Response threatProtectionPolicyPost(ThreatProtectionPolicyDTO threatProtectionPolicy
   ,Request request) throws NotFoundException;
-    public abstract Response threatProtectionPolicyThreatProtectionPolicyIdGet( Request request) throws NotFoundException;
+    public abstract Response threatProtectionPolicyThreatProtectionPolicyIdDelete(String threatProtectionPolicyId
+  ,Request request) throws NotFoundException;
+    public abstract Response threatProtectionPolicyThreatProtectionPolicyIdGet(String threatProtectionPolicyId
+  ,Request request) throws NotFoundException;
     public abstract Response threatProtectionPolicyThreatProtectionPolicyIdPost(String threatProtectionPolicyId
  ,ThreatProtectionPolicyDTO threatProtectionPolicy
   ,Request request) throws NotFoundException;

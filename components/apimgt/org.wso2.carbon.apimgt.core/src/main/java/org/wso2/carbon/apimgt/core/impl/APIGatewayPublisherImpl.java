@@ -90,6 +90,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
         apiSummary.setName(api.getName());
         apiSummary.setVersion(api.getVersion());
         apiSummary.setContext(api.getContext());
+        apiSummary.setThreatProtectionPolicies(api.getThreatProtectionPolicies());
         gatewayDTO.setApiSummary(apiSummary);
         publishToPublisherTopic(gatewayDTO);
 
@@ -129,6 +130,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
         apiSummary.setName(api.getName());
         apiSummary.setVersion(api.getVersion());
         apiSummary.setContext(api.getContext());
+        apiSummary.setThreatProtectionPolicies(api.getThreatProtectionPolicies());
         gatewayDTO.setApiSummary(apiSummary);
         publishToPublisherTopic(gatewayDTO);
 
@@ -489,6 +491,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
         apiSummary.setCreatedTime(api.getCreatedTime());
         apiSummary.setLastUpdatedTime(api.getLastUpdatedTime());
         apiSummary.setSecurityScheme(api.getSecurityScheme());
+        apiSummary.setThreatProtectionPolicies(api.getThreatProtectionPolicies());
         return apiSummary;
     }
 

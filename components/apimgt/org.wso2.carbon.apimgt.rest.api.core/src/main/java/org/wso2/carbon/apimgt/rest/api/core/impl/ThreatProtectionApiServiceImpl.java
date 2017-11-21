@@ -80,11 +80,42 @@ public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
         }
         return Response.status(500).entity("Internal Server Error.").build();
     }
+
     @Override
-    public Response threatProtectionPolicyThreatProtectionPolicyIdGet( Request request) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+    public Response threatProtectionPolicyThreatProtectionPolicyIdDelete(String threatProtectionPolicyId, Request request) throws NotFoundException {
+        ThreatProtectionDAO dao = DAOFactory.getThreatProtectionDAO();
+        APIGateway gateway = APIManagerFactory.getInstance().getApiGateway();
+        try {
+            dao.deletePolicy(threatProtectionPolicyId);
+
+            ThreatProtectionPolicy policy = new ThreatProtectionPolicy();
+            policy.setUuid(threatProtectionPolicyId);
+            gateway.deleteThreatProtectionPolicy(policy);
+            return Response.ok().build();
+        } catch (APIMgtDAOException e) {
+            log.error("Error deleting threat protection policy. PolicyID: " + threatProtectionPolicyId, e);
+        } catch (GatewayException e) {
+            log.error("Error publishing threat protection policy delete event to gateway. PolicyID: "
+                    + threatProtectionPolicyId, e);
+        }
+        return Response.status(500).entity("Internal Server Error.").build();
     }
+
+    @Override
+    public Response threatProtectionPolicyThreatProtectionPolicyIdGet(String threatProtectionPolicyId, Request request) throws NotFoundException {
+        ThreatProtectionDAO dao = DAOFactory.getThreatProtectionDAO();
+        try {
+            ThreatProtectionPolicyDTO dto = MappingUtil.toThreatProtectionPolicyDTO(
+                    dao.getPolicy(threatProtectionPolicyId));
+
+            return dto != null? Response.ok().entity(dto).build(): Response.status(404).entity("Policy not found.").
+                    build();
+        } catch (APIMgtDAOException e) {
+            log.error("Error getting threat protection policy for PolicyID: " + threatProtectionPolicyId, e);
+        }
+        return Response.status(500).entity("Internal Server Error").build();
+    }
+
     @Override
     public Response threatProtectionPolicyThreatProtectionPolicyIdPost(String threatProtectionPolicyId
             , ThreatProtectionPolicyDTO threatProtectionPolicy

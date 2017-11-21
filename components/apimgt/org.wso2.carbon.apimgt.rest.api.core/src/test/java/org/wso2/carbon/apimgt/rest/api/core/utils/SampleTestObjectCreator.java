@@ -442,7 +442,8 @@ public class SampleTestObjectCreator {
                 createdBy(API_CREATOR).
                 uriTemplates(Collections.emptyMap()).
                 apiDefinition(apiDefinition).
-                lastUpdatedTime(LocalDateTime.now());
+                lastUpdatedTime(LocalDateTime.now()).
+                threatProtectionPolicies(new HashSet<>(Arrays.asList("a", "b")));
 
         return apiBuilder;
     }

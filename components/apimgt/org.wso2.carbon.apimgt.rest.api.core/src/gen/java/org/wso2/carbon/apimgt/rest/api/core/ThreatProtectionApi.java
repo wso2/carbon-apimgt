@@ -81,6 +81,20 @@ public class ThreatProtectionApi implements Microservice  {
     throws NotFoundException {
         return delegate.threatProtectionPolicyPost(threatProtectionPolicy,request);
     }
+    @DELETE
+    @Path("/policy/{threatProtectionPolicyId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Delete a threat protection policy", notes = "Delete a threat protection policy", response = void.class, tags={  })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Ok. Policy is deleted", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 500, message = "Internal server error occurred during the operation", response = void.class) })
+    public Response threatProtectionPolicyThreatProtectionPolicyIdDelete(@ApiParam(value = "The UUID of a Policy ",required=true) @PathParam("ThreatProtectionPolicyId") String threatProtectionPolicyId
+ ,@Context Request request)
+    throws NotFoundException {
+        return delegate.threatProtectionPolicyThreatProtectionPolicyIdDelete(threatProtectionPolicyId,request);
+    }
     @GET
     @Path("/policy/{threatProtectionPolicyId}")
     @Consumes({ "application/json" })
@@ -88,9 +102,10 @@ public class ThreatProtectionApi implements Microservice  {
     @io.swagger.annotations.ApiOperation(value = "Get one threat protection policy", notes = "Get one threat protection policy", response = ThreatProtectionPolicyDTO.class, tags={  })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK", response = ThreatProtectionPolicyDTO.class) })
-    public Response threatProtectionPolicyThreatProtectionPolicyIdGet( @Context Request request)
+    public Response threatProtectionPolicyThreatProtectionPolicyIdGet(@ApiParam(value = "The UUID of a Policy ",required=true) @PathParam("ThreatProtectionPolicyId") String threatProtectionPolicyId
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.threatProtectionPolicyThreatProtectionPolicyIdGet(request);
+        return delegate.threatProtectionPolicyThreatProtectionPolicyIdGet(threatProtectionPolicyId,request);
     }
     @POST
     @Path("/policy/{threatProtectionPolicyId}")

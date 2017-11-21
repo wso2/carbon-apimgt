@@ -13,8 +13,8 @@ function requestInterceptor(message m) (boolean, message) {
     string apiContext = messages:getProperty(m, constants:BASE_PATH);
     //extract api version when support arrives
     //use apiContext + ":" + apiVersion to obtain apiId from holder
-    string apiId = "GLOBAL";
-    return analyzePayload(m, apiContext, apiId);
+    string policyId = "GLOBAL";
+    return analyzePayload(m, apiContext, policyId);
 }
 
 function responseInterceptor (message m) (boolean, message) {
@@ -22,7 +22,7 @@ function responseInterceptor (message m) (boolean, message) {
     return true, m;
 }
 
-function analyzePayload(message m, string apiContext, string apiId) (boolean, message) {
+function analyzePayload(message m, string apiContext, string policyId) (boolean, message) {
     string contentType;
     try {
         contentType = messages:getHeader(m, "Content-Type");
@@ -30,11 +30,10 @@ function analyzePayload(message m, string apiContext, string apiId) (boolean, me
         system:println("Threat Protection: No Content-Type declared for " + apiContext);
         return true, m;
     }
-    //verify
     string payload = messages:getStringPayload(m);
     boolean ok;
     string errMessage;
-    ok, errMessage = threatprotection:analyze(contentType, payload, apiContext, apiId);
+    ok, errMessage = threatprotection:analyze(contentType, payload, apiContext, policyId);
 
     if (ok) {
         return true, m;

@@ -2067,7 +2067,8 @@ public class ApiDAOImpl implements ApiDAO {
                         lifeCycleStatus(rs.getString("CURRENT_LC_STATUS")).
                         lifecycleInstanceId(rs.getString("LIFECYCLE_INSTANCE_ID")).
                         workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).
-                        securityScheme(rs.getInt("SECURITY_SCHEME")).build();
+                        securityScheme(rs.getInt("SECURITY_SCHEME")).
+                        threatProtectionPolicies(getThreatProtectionPolicies(connection, apiPrimaryKey)).build();
 
                 apiList.add(apiSummary);
             }
@@ -2113,7 +2114,6 @@ public class ApiDAOImpl implements ApiDAO {
         try (ResultSet rs = statement.executeQuery()) {
             while (rs.next()) {
                 String apiPrimaryKey = rs.getString("UUID");
-
                 CompositeAPI apiSummary = new CompositeAPI.Builder().
                         id(apiPrimaryKey).
                         provider(rs.getString("PROVIDER")).
@@ -2122,7 +2122,8 @@ public class ApiDAOImpl implements ApiDAO {
                         context(rs.getString("CONTEXT")).
                         description(rs.getString("DESCRIPTION")).
                         applicationId(getCompositeAPIApplicationId(connection, apiPrimaryKey)).
-                        workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).build();
+                        workflowStatus(rs.getString("LC_WORKFLOW_STATUS")).
+                        threatProtectionPolicies(getThreatProtectionPolicies(connection, apiPrimaryKey)).build();
 
                 apiList.add(apiSummary);
             }

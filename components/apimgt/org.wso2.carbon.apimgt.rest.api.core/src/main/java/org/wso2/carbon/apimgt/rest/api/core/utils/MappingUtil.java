@@ -151,6 +151,10 @@ public class MappingUtil {
             apiInfo.setLifeCycleStatus(api.getLifeCycleStatus());
             apiInfo.setVersion(api.getVersion());
             apiInfo.setSecurityScheme(api.getSecurityScheme());
+
+            for (String threatProtectionPolicyId: api.getThreatProtectionPolicies()) {
+                apiInfo.addThreatProtectionPoliciesItem(threatProtectionPolicyId);
+            }
             apiInfoList.add(apiInfo);
         }
         return apiInfoList;
@@ -345,6 +349,8 @@ public class MappingUtil {
      * @return ThreatProtectionPolicyDTO rest api core model
      */
     public static ThreatProtectionPolicyDTO toThreatProtectionPolicyDTO(ThreatProtectionPolicy policy) {
+        if (policy == null) return null;
+
         ThreatProtectionPolicyDTO dto = new ThreatProtectionPolicyDTO();
         dto.setUuid(policy.getUuid());
         dto.setName(policy.getName());
@@ -360,6 +366,7 @@ public class MappingUtil {
      * @return apimgt core ThreatProtectionJsonPolicy
      */
     public static ThreatProtectionPolicy toThreatProtectionPolicy(ThreatProtectionPolicyDTO dto) {
+        if (dto == null) return null;
         ThreatProtectionPolicy policy = new ThreatProtectionPolicy();
         policy.setUuid(dto.getUuid());
         policy.setType(dto.getType());

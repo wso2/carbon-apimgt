@@ -590,6 +590,8 @@ paths:
     get:
       summary: "Get one threat protection policy"
       description: "Get one threat protection policy"
+      parameters:
+        - $ref: '#/parameters/threatProtectionPolicyId'
       responses:
         200:
           schema:
@@ -605,6 +607,17 @@ paths:
       responses:
         200:
           description: Ok
+
+    delete:
+      summary: "Delete a threat protection policy"
+      description: "Delete a threat protection policy"
+      parameters:
+        - $ref: '#/parameters/threatProtectionPolicyId'
+      responses:
+        200:
+          description: "Ok. Policy is deleted"
+        500:
+          description: "Internal server error occurred during the operation"
 
 
   /threat-protection/policies:
@@ -1090,6 +1103,10 @@ definitions:
       securityScheme:
         type: integer
         example: 1
+      threatProtectionPolicies:
+        type: array
+        items:
+          type: string
 
 #-----------------------------------------------------
 # The Policy resource

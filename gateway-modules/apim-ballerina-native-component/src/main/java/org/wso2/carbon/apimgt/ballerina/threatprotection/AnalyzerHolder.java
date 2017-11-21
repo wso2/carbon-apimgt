@@ -77,7 +77,7 @@ public class AnalyzerHolder {
                 //configure per api
                 XMLConfig xmlConfig = ConfigurationHolder.getXmlConfig(policyId);
                 if (xmlConfig == null) {
-                    xmlConfig = ConfigurationHolder.getXmlConfig(ConfigurationHolder.GLOBAL_CONFIG_KEY);
+                    xmlConfig = ConfigurationHolder.getXmlConfig(policyId);
                 }
                 analyzer.configure(xmlConfig);
             } catch (Exception e) {
