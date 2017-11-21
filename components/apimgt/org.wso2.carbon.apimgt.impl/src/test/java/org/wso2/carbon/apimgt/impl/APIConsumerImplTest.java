@@ -581,7 +581,7 @@ public class APIConsumerImplTest {
     @Test
     public void testGetUserRating() throws APIManagementException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
-        APIIdentifier apiIdentifier = new APIIdentifier(API_PROVIDER, "TestAPI", "1.0.0");
+        APIIdentifier apiIdentifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
         when(apiMgtDAO.getUserRating(apiIdentifier, "admin")).thenReturn(2);
         apiConsumer.apiMgtDAO = apiMgtDAO;
         assertEquals(2, apiConsumer.getUserRating(apiIdentifier, "admin"));
@@ -718,7 +718,7 @@ public class APIConsumerImplTest {
         SubscribedAPI subscribedAPI = Mockito.mock(SubscribedAPI.class);
         originalSubscribedAPIs.add(subscribedAPI);
         Subscriber subscriber = new Subscriber("Subscriber");
-        APIIdentifier apiId1 = new APIIdentifier("admin", "API1", "1.0.0");
+        APIIdentifier apiId1 = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
         Tier tier = Mockito.mock(Tier.class);
 
         when(apiMgtDAO.getSubscribedAPIs(subscriber, "testID")).thenReturn(originalSubscribedAPIs);
@@ -732,7 +732,7 @@ public class APIConsumerImplTest {
     public void testIsSubscribed() throws APIManagementException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
         apiConsumer.apiMgtDAO = apiMgtDAO;
-        APIIdentifier apiIdentifier = new APIIdentifier(API_PROVIDER, "TestAPI", "1.0.0");
+        APIIdentifier apiIdentifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
         Mockito.when(apiMgtDAO.isSubscribed(apiIdentifier, "testID")).thenReturn(true);
         assertEquals(true, apiConsumer.isSubscribed(apiIdentifier, "testID"));
 
@@ -773,7 +773,7 @@ public class APIConsumerImplTest {
                 thenReturn(artifactManager);
         GenericArtifact artifact = Mockito.mock(GenericArtifact.class);
         GenericArtifact[] genericArtifacts = new GenericArtifact[]{artifact};
-        APIIdentifier apiId1 = new APIIdentifier("admin", "API1", "1.0.0");
+        APIIdentifier apiId1 = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
         API api = new API(apiId1);
 
         Mockito.when(artifactManager.getAllGenericArtifacts()).thenReturn(genericArtifacts);
@@ -821,7 +821,7 @@ public class APIConsumerImplTest {
     public void testAddComment() throws APIManagementException {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
         apiConsumer.apiMgtDAO = apiMgtDAO;
-        APIIdentifier apiIdentifier = new APIIdentifier("admin", "TestAPI", "1.0.0");
+        APIIdentifier apiIdentifier = new APIIdentifier(API_PROVIDER, SAMPLE_API_NAME, SAMPLE_API_VERSION);
         Mockito.when(apiMgtDAO.addComment(apiIdentifier, "testComment", "testUser")).thenReturn(1111);
         apiConsumer.addComment(apiIdentifier, "testComment", "testUser");
         Mockito.verify(apiMgtDAO, Mockito.times(1)).
