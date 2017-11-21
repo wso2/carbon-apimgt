@@ -30,15 +30,19 @@ import java.util.regex.Pattern;
 
 /**
  * This mediator would protect the backend resources from the threat vulnerabilities by matching the
- * special key words in the request headers, query parameters and body.
+ * special key words in the request headers, query/path parameters and body.
  */
 public class RegularExpressionProtector extends AbstractMediator {
     private Boolean enabledCheckBody = true;
+    private String threatType = null;
+    private Pattern pattern = null;
+    private Boolean enabledCheckHeaders = true;
+    private Boolean enabledCheckPathParam = true;
 
     /**
-     * This mediate method get the message context and validate against special characters.
+     * This mediate method get the message context and validate against the special characters.
      *
-     * @param messageContext This message context contains the request message properties of the relevant API which was
+     * @param messageContext contains the message properties of the relevant API request which was
      *                       enabled the regexValidator message mediation in flow.
      * @return A boolean value.True if successful and false if not.
      */
@@ -46,17 +50,12 @@ public class RegularExpressionProtector extends AbstractMediator {
         if (log.isDebugEnabled()) {
             log.debug("RegularExpressionProtector mediator is activated...");
         }
-        Object messageProperty;
-        Pattern pattern = null;
-
-        Boolean enabledCheckQueryParam = true;
-        Boolean enabledCheckPathParam = true;
-        org.apache.axis2.context.MessageContext axis2MC;
-        axis2MC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-
-        messageProperty = messageContext.getProperty(APIMgtGatewayConstants.REGEX_PATTERN);
+        Object messageProperty = messageContext.getProperty(APIMgtGatewayConstants.REGEX_PATTERN);
         if (messageProperty != null) {
             pattern = Pattern.compile(messageProperty.toString(), Pattern.CASE_INSENSITIVE);
+        } else {
+            GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
+                    "Threat detection key words are missing");
         }
 
         messageProperty = messageContext.getProperty(APIMgtGatewayConstants.ENABLED_CHECK_BODY);
@@ -69,52 +68,98 @@ public class RegularExpressionProtector extends AbstractMediator {
             enabledCheckPathParam = Boolean.valueOf(messageProperty.toString());
         }
 
-        messageProperty = messageContext.getProperty(APIMgtGatewayConstants.ENABLED_CHECK_QUERYPARAM);
+        messageProperty = messageContext.getProperty(APIMgtGatewayConstants.ENABLED_CHECK_HEADERS);
         if (messageProperty != null) {
-            enabledCheckQueryParam = Boolean.valueOf(messageProperty.toString());
+            enabledCheckHeaders = Boolean.valueOf(messageProperty.toString());
         }
+        messageProperty = messageContext.getProperty(APIMgtGatewayConstants.THREAT_TYPE);
+        if (messageProperty != null) {
+            threatType = String.valueOf(messageProperty);
+        }
+        checkRequestBody(messageContext);
+        checkRequestHeaders(messageContext);
+        checkRequestPath(messageContext);
+        return true;
+    }
 
-        String queryParams = (String) axis2MC.getProperty(NhttpConstants.REST_URL_POSTFIX);
-        Map transportHeaders = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-
-        if (enabledCheckBody) {
+    /**
+     * This method check whether the request body contains matching vulnerable key words.
+     *
+     * @param messageContext contains the message properties of the relevant API request which was
+     *                       enabled the regexValidator message mediation in flow.
+     */
+    private void checkRequestBody(MessageContext messageContext) {
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
+                messageContext).getAxis2MessageContext();
+        if (enabledCheckBody && axis2MC.getEnvelope() != null) {
             String payload = axis2MC.getEnvelope().getBody().getFirstElement().toString();
             if (pattern != null && payload != null && pattern.matcher(payload).find()) {
                 if (log.isDebugEnabled()) {
                     log.debug(String.format("Threat detected in request payload [ %s ] by regex [ %s ]))",
                             payload, pattern));
                 }
-                GatewayUtils.handleException(messageContext, APIMgtGatewayConstants.PAYLOAD_THREAT_MSG);
+                GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
+                        threatType + " " + APIMgtGatewayConstants.PAYLOAD_THREAT_MSG);
             }
         }
-        if (enabledCheckQueryParam) {
+    }
+
+    /**
+     * This method check whether the request header contains matching vulnerable keywords.
+     *
+     * @param messageContext contains the message properties of the relevant API request which was
+     *                       enabled the regexValidator message mediation in flow.
+     */
+
+    private void checkRequestHeaders(MessageContext messageContext) {
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
+                messageContext).getAxis2MessageContext();
+        if (enabledCheckPathParam) {
+            String queryParams = (String) axis2MC.getProperty(NhttpConstants.REST_URL_POSTFIX);
             if (pattern != null && queryParams != null && pattern.matcher(queryParams).find()) {
                 if (log.isDebugEnabled()) {
                     log.debug(String.format("Threat detected in query parameters [ %s ] by regex [ %s ]",
                             queryParams, pattern));
                 }
-                GatewayUtils.handleException(messageContext, APIMgtGatewayConstants.QPARAM_THREAT_MSG);
+                GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
+                        threatType + " " + APIMgtGatewayConstants.QPARAM_THREAT_MSG);
             }
         }
-        if (enabledCheckPathParam) {
+
+    }
+
+    /**
+     * This method check whether the request path contains matching vulnerable keywords.
+     *
+     * @param messageContext contains the message properties of the relevant API request which was
+     *                       enabled the regexValidator message mediation in flow.
+     */
+    private void checkRequestPath(MessageContext messageContext) {
+        org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
+                messageContext).getAxis2MessageContext();
+        if (enabledCheckHeaders) {
+            Map transportHeaders = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             if (pattern != null && transportHeaders != null && pattern.matcher(transportHeaders.toString()).find()) {
                 if (log.isDebugEnabled()) {
                     log.debug(String.format("Threat detected in Transport headers [ %s ] by regex [ %s ]",
                             transportHeaders, pattern));
                 }
-                GatewayUtils.handleException(messageContext, APIMgtGatewayConstants.HTTP_HEADER_THREAT_MSG);
+                GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
+                        threatType + " " + APIMgtGatewayConstants.HTTP_HEADER_THREAT_MSG);
             }
         }
-        return true;
     }
 
     /**
-     * This method checks the status of the checkbody status which comes from the custom sequence.If client ask to check
-     * the message body isContentenAware method returns true else It will return false.
-     * @return enabledCheckBody is true this returns true else it returns false to avoid the message build.
+     * This method checks the status of the {enabledCheckBody} property which comes from the custom sequence.
+     * If client ask to check the message body,returns true else It will return false.
+     *
+     * @return If enabledCheckBody is true,The method returns true else it returns false to avoid the message build.
      */
 
     public boolean isContentAware() {
-        return !enabledCheckBody;
+        return enabledCheckBody;
     }
+
 }
+

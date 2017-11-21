@@ -24,8 +24,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.SynapseException;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -33,7 +31,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.registry.RegistryServiceHolder;
 import org.wso2.carbon.registry.core.Resource;
@@ -51,8 +48,8 @@ public class GatewayUtils {
 
     public static boolean isClusteringEnabled() {
         ClusteringAgent agent = ServiceReferenceHolder.getInstance().getServerConfigurationContext().
-                                                                            getAxisConfiguration().getClusteringAgent();
-        if(agent != null) {
+                getAxisConfiguration().getClusteringAgent();
+        if (agent != null) {
             return true;
         }
         return false;
@@ -68,10 +65,11 @@ public class GatewayUtils {
 
     /**
      * Extracts the IP from Message Context.
+     *
      * @param messageContext Axis2 Message Context.
      * @return IP as a String.
      */
-    public static String getIp(MessageContext messageContext){
+    public static String getIp(MessageContext messageContext) {
 
         //Set transport headers of the message
         TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>) messageContext
@@ -98,10 +96,11 @@ public class GatewayUtils {
 
     /**
      * Can be used to extract Query Params from {@code org.apache.axis2.context.MessageContext}.
+     *
      * @param messageContext The Axis2 MessageContext
      * @return A Map with Name Value pairs.
      */
-    public static Map<String,String> getQueryParams(MessageContext messageContext){
+    public static Map<String, String> getQueryParams(MessageContext messageContext) {
         String queryString = (String) messageContext.getProperty(NhttpConstants.REST_URL_POSTFIX);
         if (!StringUtils.isEmpty(queryString)) {
             if (queryString.indexOf("?") > -1) {
@@ -122,19 +121,19 @@ public class GatewayUtils {
                 queryParamsMap.put(queryParamName, queryParamValue);
             }
 
-           return queryParamsMap;
+            return queryParamsMap;
         }
         return null;
     }
 
-    public static Map getJWTClaims(AuthenticationContext authContext){
+    public static Map getJWTClaims(AuthenticationContext authContext) {
         String[] jwtTokenArray = authContext.getCallerToken().split(Pattern.quote("."));
         // decoding JWT
         try {
             byte[] jwtByteArray = Base64.decodeBase64(jwtTokenArray[1].getBytes("UTF-8"));
             String jwtAssertion = new String(jwtByteArray, "UTF-8");
             JSONParser parser = new JSONParser();
-            return  (Map) parser.parse(jwtAssertion);
+            return (Map) parser.parse(jwtAssertion);
         } catch (UnsupportedEncodingException e) {
             log.error("Error while decoding jwt header", e);
         } catch (ParseException e) {
@@ -142,12 +141,11 @@ public class GatewayUtils {
         }
         return null;
     }
-    
+
     /**
      * Get the config system registry for tenants
      *
-     * @param tenantDomain
-     *            - The tenant domain
+     * @param tenantDomain - The tenant domain
      * @return - A UserRegistry instance for the tenant
      * @throws APIManagementException
      */
@@ -157,7 +155,7 @@ public class GatewayUtils {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         } else {
             PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                                   .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
         }
 
         int tenantId = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantId();
@@ -175,23 +173,21 @@ public class GatewayUtils {
 
     /**
      * Delete the given registry property from the given tenant registry path
-     * 
-     * @param propertyName
-     *            property name
-     * @param path
-     *            resource path
+     *
+     * @param propertyName property name
+     * @param path         resource path
      * @param tenantDomain
      * @throws APIManagementException
      */
     public static void deleteRegistryProperty(String propertyName, String path, String tenantDomain)
-                                                                                        throws APIManagementException {
+            throws APIManagementException {
         UserRegistry registry = getRegistry(tenantDomain);
         PrivilegedCarbonContext.startTenantFlow();
         if (tenantDomain != null && StringUtils.isNotEmpty(tenantDomain)) {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         } else {
             PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                                   .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
         }
         try {
             Resource resource = registry.get(path);
@@ -202,7 +198,7 @@ public class GatewayUtils {
             }
         } catch (RegistryException e) {
             throw new APIManagementException("Error while reading registry resource " + path + " for tenant " +
-                                             tenantDomain);
+                    tenantDomain);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -211,25 +207,22 @@ public class GatewayUtils {
     /**
      * Add/Update the given registry property from the given tenant registry
      * path
-     * 
-     * @param propertyName
-     *            property name
-     * @param propertyValue
-     *            property value
-     * @param path
-     *            resource path
+     *
+     * @param propertyName  property name
+     * @param propertyValue property value
+     * @param path          resource path
      * @param tenantDomain
      * @throws APIManagementException
      */
     public static void setRegistryProperty(String propertyName, String propertyValue, String path, String tenantDomain)
-                                                                                       throws APIManagementException {
+            throws APIManagementException {
         UserRegistry registry = getRegistry(tenantDomain);
         PrivilegedCarbonContext.startTenantFlow();
         if (tenantDomain != null && StringUtils.isNotEmpty(tenantDomain)) {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
         } else {
             PrivilegedCarbonContext.getThreadLocalCarbonContext()
-                                   .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
         }
         try {
             Resource resource = registry.get(path);
@@ -243,7 +236,7 @@ public class GatewayUtils {
             resource.discard();
         } catch (RegistryException e) {
             throw new APIManagementException("Error while reading registry resource " + path + " for tenant " +
-                                             tenantDomain);
+                    tenantDomain);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
@@ -251,7 +244,7 @@ public class GatewayUtils {
 
     /**
      * Returns the alias string of API endpoint security password
-     * 
+     *
      * @param apiProviderName
      * @param apiName
      * @param version
@@ -284,19 +277,22 @@ public class GatewayUtils {
     }
 
     /**
-     * This method sets the message context properties for threat detection error message.
+     * This method handles threat violations. If the request propagates a threat, this method generates
+     * an custom exception.
      *
-     * @param messageContext This message context contains the request message properties of the relevant API which was
-     *                       enabled a Validator message mediation in flow.
-     * @param errorMessage   specific error message for each validator.
+     * @param messageContext contains the message properties of the relevant API request which was
+     *                       enabled the regexValidator message mediation in flow.
+     * @param errorCode      It depends on status of the error message.
+     * @param desc           Description of the error message.It describe the vulnerable type and where it happens.
+     * @return here return true to continue the sequence. No need to return any value from this method.
      */
-    public static void handleException(org.apache.synapse.MessageContext messageContext, String errorMessage) {
-        messageContext.setProperty(APIMgtGatewayConstants.STATUS, true);
-        messageContext.setProperty(APIMgtGatewayConstants.ERROR_CODE,
-                APIMgtGatewayConstants.HTTP_HEADER_THREAT_CODE);
-        messageContext.setProperty(APIMgtGatewayConstants.ERROR_MESSAGE, errorMessage);
-        ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty(
-                APIMgtGatewayConstants.HTTP_SC, APIMgtGatewayConstants.HTTP_SC_CODE);
-        throw new SynapseException(errorMessage);
+    public static boolean handleThreat(org.apache.synapse.MessageContext messageContext,
+                                       String errorCode, String desc) {
+        messageContext.setProperty(APIMgtGatewayConstants.THREAT_FOUND, true);
+        messageContext.setProperty(APIMgtGatewayConstants.THREAT_CODE, errorCode);
+        messageContext.setProperty(APIMgtGatewayConstants.THREAT_MSG, APIMgtGatewayConstants.BAD_REQUEST);
+        messageContext.setProperty(APIMgtGatewayConstants.THREAT_DESC, desc);
+        messageContext.setProperty(APIMgtGatewayConstants.THREAT_OCCURRED, APIMgtGatewayConstants.ERROR);
+        return true;
     }
 }
