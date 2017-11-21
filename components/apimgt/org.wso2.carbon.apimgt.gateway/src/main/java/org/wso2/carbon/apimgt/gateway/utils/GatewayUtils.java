@@ -279,7 +279,6 @@ public class GatewayUtils {
     /**
      * This method handles threat violations. If the request propagates a threat, this method generates
      * an custom exception.
-     *
      * @param messageContext contains the message properties of the relevant API request which was
      *                       enabled the regexValidator message mediation in flow.
      * @param errorCode      It depends on status of the error message.

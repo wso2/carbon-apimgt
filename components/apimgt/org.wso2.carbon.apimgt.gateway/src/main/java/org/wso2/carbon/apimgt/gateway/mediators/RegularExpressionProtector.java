@@ -41,7 +41,6 @@ public class RegularExpressionProtector extends AbstractMediator {
 
     /**
      * This mediate method get the message context and validate against the special characters.
-     *
      * @param messageContext contains the message properties of the relevant API request which was
      *                       enabled the regexValidator message mediation in flow.
      * @return A boolean value.True if successful and false if not.
@@ -81,7 +80,6 @@ public class RegularExpressionProtector extends AbstractMediator {
 
     /**
      * This method check whether the request body contains matching vulnerable key words.
-     *
      * @param messageContext contains the message properties of the relevant API request which was
      *                       enabled the regexValidator message mediation in flow.
      */
@@ -126,7 +124,7 @@ public class RegularExpressionProtector extends AbstractMediator {
     /**
      * This method check whether the request path contains matching vulnerable keywords.
      * @param messageContext contains the message properties of the relevant API request which was
-     *                       enabled the regexValidator message mediation in flow.
+     *                   enabled the regexValidator message mediation in flow.
      */
     private void checkRequestPath(MessageContext messageContext) {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
@@ -149,7 +147,6 @@ public class RegularExpressionProtector extends AbstractMediator {
      * If client ask to check the message body,returns true else It will return false.
      * @return If enabledCheckBody is true,The method returns true else it returns false to avoid the message build.
      */
-
     public boolean isContentAware() {
         return enabledCheckBody;
     }
