@@ -1,6 +1,8 @@
 <%
 include("/jagg/jagg.jag");
 var log = new Log();
+var encode = require('encode');
+encode = new encode.Encode();
 
 function loadSwaggerObj(path)
 {
@@ -249,7 +251,7 @@ if(jagg.isCSRFTokenValid())
             if (result.error==true) {
                 obj = {
                     error:true,
-                    message:result.message,
+                    message:encode.forHtml(result.message),
                     data :apiId,
                 };
             } else {
