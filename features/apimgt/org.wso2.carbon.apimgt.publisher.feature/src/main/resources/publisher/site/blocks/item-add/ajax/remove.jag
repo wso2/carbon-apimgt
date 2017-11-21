@@ -1,5 +1,7 @@
 <%
 include("/jagg/jagg.jag");
+var encode = require('encode');
+encode = new encode.Encode();
 
 (function () {
     response.contentType = "application/json; charset=UTF-8";
@@ -24,7 +26,7 @@ include("/jagg/jagg.jag");
             if (result.error==true) {
                 obj = {
                     error:true,
-                    message:result.message
+                    message:encode.forHtml(result.message)
                 };
             } else {
                 obj = {
