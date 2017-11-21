@@ -1,4 +1,7 @@
 <%
+var encode = require('encode');
+encode = new encode.Encode();
+
 include("/jagg/jagg.jag");
 
 (function () {
@@ -24,7 +27,7 @@ include("/jagg/jagg.jag");
             if (result.error==true) {
                 obj = {
                     error:true,
-                    message:result.message
+                     message:encode.forHtml(result.message)
                 };
             } else {
                 obj = {
