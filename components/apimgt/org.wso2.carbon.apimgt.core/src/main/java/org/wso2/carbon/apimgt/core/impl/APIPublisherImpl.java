@@ -1275,6 +1275,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         List<API> apiResults;
         String user = getUsername();
         Set<String> roles = new HashSet<>();
+        final String ATTRIBUTE_DELIMITER = ",";
+        final String KEY_VALUE_DELIMITER = ":";
+
         try {
             //TODO: Need to validate users roles against results returned
             if (!"admin".equals(user)) {
@@ -1283,19 +1286,19 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             }
             if (query != null && !query.isEmpty()) {
 
-                String[] attributes = query.split(",");
+                String[] attributes = query.split(ATTRIBUTE_DELIMITER);
                 Map<String, String> attributeMap = new HashMap<>();
 
                 boolean isFullTextSearch = false;
                 String searchAttribute, searchValue;
-                if (!query.contains(":")) {
+                if (!query.contains(KEY_VALUE_DELIMITER)) {
                     isFullTextSearch = true;
                 } else {
-                    log.info("Query: " + query);
+                    log.info("Search query: " + query);
                     for (String attribute : attributes) {
-                        searchAttribute = attribute.split(":")[0];
-                        searchValue = attribute.split(":")[1];
-                        log.info(searchAttribute + ":" + searchValue);
+                        searchAttribute = attribute.split(KEY_VALUE_DELIMITER)[0];
+                        searchValue = attribute.split(KEY_VALUE_DELIMITER)[1];
+                        log.info(searchAttribute + KEY_VALUE_DELIMITER + searchValue);
                         attributeMap.put(searchAttribute, searchValue);
                     }
                 }
