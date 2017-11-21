@@ -57,17 +57,14 @@ public class RegularExpressionProtector extends AbstractMediator {
             GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
                     "Threat detection key words are missing");
         }
-
         messageProperty = messageContext.getProperty(APIMgtGatewayConstants.ENABLED_CHECK_BODY);
         if (messageProperty != null) {
             enabledCheckBody = Boolean.valueOf(messageProperty.toString());
         }
-
         messageProperty = messageContext.getProperty(APIMgtGatewayConstants.ENABLED_CHECK_PATHPARAM);
         if (messageProperty != null) {
             enabledCheckPathParam = Boolean.valueOf(messageProperty.toString());
         }
-
         messageProperty = messageContext.getProperty(APIMgtGatewayConstants.ENABLED_CHECK_HEADERS);
         if (messageProperty != null) {
             enabledCheckHeaders = Boolean.valueOf(messageProperty.toString());
@@ -106,11 +103,9 @@ public class RegularExpressionProtector extends AbstractMediator {
 
     /**
      * This method check whether the request header contains matching vulnerable keywords.
-     *
-     * @param messageContext contains the message properties of the relevant API request which was
+     ** @param messageContext contains the message properties of the relevant API request which was
      *                       enabled the regexValidator message mediation in flow.
      */
-
     private void checkRequestHeaders(MessageContext messageContext) {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
                 messageContext).getAxis2MessageContext();
@@ -130,7 +125,6 @@ public class RegularExpressionProtector extends AbstractMediator {
 
     /**
      * This method check whether the request path contains matching vulnerable keywords.
-     *
      * @param messageContext contains the message properties of the relevant API request which was
      *                       enabled the regexValidator message mediation in flow.
      */
@@ -153,7 +147,6 @@ public class RegularExpressionProtector extends AbstractMediator {
     /**
      * This method checks the status of the {enabledCheckBody} property which comes from the custom sequence.
      * If client ask to check the message body,returns true else It will return false.
-     *
      * @return If enabledCheckBody is true,The method returns true else it returns false to avoid the message build.
      */
 
