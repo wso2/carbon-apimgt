@@ -31,7 +31,10 @@ $(document).ready(function(){
         $(btn).val(i18n.t('Validating..'));
 
         if (url == '') {
-        	$(btn).parent().parent().after(' <span class="label label-danger url_validate_label"><i class="fw fw-warning icon-white" title="missing Url"></i> '+ i18n.t('Please provide a URL to test.')+'</span>');
+            $(btn).parent().parent().after(' <span class="label label-danger url_validate_label">' +
+                '<i class="fw fw-cancel icon-white" title="invalid url"></i> ' +
+                ' <span class ="url_validate_message"></span></span>');
+            jQuery( '.url_validate_message' ).text( i18n.t('Invalid') + '. ' +  result.response.response);
             var toFade = $(btn).parent().parent().parent().find('.url_validate_label');
             $(btn).removeClass("loadingButton-small");
             $(btn).val(i18n.t('Test URI'));
