@@ -107,7 +107,7 @@ public class RegularExpressionProtector extends AbstractMediator {
     private void checkRequestHeaders(MessageContext messageContext) {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
                 messageContext).getAxis2MessageContext();
-        if (enabledCheckPathParam) {
+        if (enabledCheckHeaders) {
             String queryParams = (String) axis2MC.getProperty(NhttpConstants.REST_URL_POSTFIX);
             if (pattern != null && queryParams != null && pattern.matcher(queryParams).find()) {
                 if (log.isDebugEnabled()) {
@@ -129,7 +129,7 @@ public class RegularExpressionProtector extends AbstractMediator {
     private void checkRequestPath(MessageContext messageContext) {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
                 messageContext).getAxis2MessageContext();
-        if (enabledCheckHeaders) {
+        if (enabledCheckPathParam) {
             Map transportHeaders = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             if (pattern != null && transportHeaders != null && pattern.matcher(transportHeaders.toString()).find()) {
                 if (log.isDebugEnabled()) {
