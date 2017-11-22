@@ -79,7 +79,7 @@ public class WSO2APIPublisher implements APIPublisher {
 
         if (store.getEndpoint() == null || store.getUsername() == null || store.getPassword() == null) {
             String msg = "External APIStore endpoint URL or credentials are not defined. " +
-                    "Cannot proceed with publishing API to the APIStore - "+store.getDisplayName();
+                    "Cannot proceed with publishing API to the APIStore - " + store.getDisplayName();
             throw new APIManagementException(msg);
         }
         else{
