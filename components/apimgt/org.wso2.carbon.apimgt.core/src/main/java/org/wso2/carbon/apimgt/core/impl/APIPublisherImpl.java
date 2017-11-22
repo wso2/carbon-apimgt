@@ -117,6 +117,8 @@ import java.util.UUID;
 public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher, APIMObservable {
 
     private static final Logger log = LoggerFactory.getLogger(APIPublisherImpl.class);
+    private static final String ATTRIBUTE_DELIMITER = ",";
+    private static final String KEY_VALUE_DELIMITER = ":";
 
     // Map to store observers, which observe APIPublisher events
     private Map<String, EventObserver> eventObservers = new HashMap<>();
@@ -1275,8 +1277,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         List<API> apiResults;
         String user = getUsername();
         Set<String> roles = new HashSet<>();
-        final String ATTRIBUTE_DELIMITER = ",";
-        final String KEY_VALUE_DELIMITER = ":";
 
         try {
             //TODO: Need to validate users roles against results returned
