@@ -20,6 +20,7 @@ import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.AnalyticsConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.CredentialConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.DataPublisherConfigurations;
+import org.wso2.carbon.apimgt.core.configuration.models.GoogleAnalyticsConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.JWTConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.KeyMgtConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.ThrottlingConfigurations;
@@ -33,6 +34,16 @@ public class RegistrationSummary {
     private AnalyticsInfo analyticsInfo;
     private JWTInfo jwtInfo;
     private ThrottlingInfo throttlingInfo;
+    private GoogleAnalyticsTrackingInfo googleAnalyticsTrackingInfo;
+
+    public RegistrationSummary(APIMConfigurations apimConfigurations) {
+        this.keyManagerInfo = new KeyManagerInfo(apimConfigurations.getKeyManagerConfigs());
+        this.analyticsInfo = new AnalyticsInfo(apimConfigurations.getAnalyticsConfigurations());
+        this.jwtInfo = new JWTInfo(apimConfigurations.getJwtConfigurations());
+        this.throttlingInfo = new ThrottlingInfo(apimConfigurations.getThrottlingConfigurations());
+        this.googleAnalyticsTrackingInfo = new GoogleAnalyticsTrackingInfo(apimConfigurations
+                .getGoogleAnalyticsConfigurations());
+    }
 
     public AnalyticsInfo getAnalyticsInfo() {
         return analyticsInfo;
@@ -46,15 +57,12 @@ public class RegistrationSummary {
         return throttlingInfo;
     }
 
-    public RegistrationSummary(APIMConfigurations apimConfigurations) {
-        this.keyManagerInfo = new KeyManagerInfo(apimConfigurations.getKeyManagerConfigs());
-        this.analyticsInfo = new AnalyticsInfo(apimConfigurations.getAnalyticsConfigurations());
-        this.jwtInfo = new JWTInfo(apimConfigurations.getJwtConfigurations());
-        this.throttlingInfo = new ThrottlingInfo(apimConfigurations.getThrottlingConfigurations());
-    }
-
     public KeyManagerInfo getKeyManagerInfo() {
         return keyManagerInfo;
+    }
+
+    public GoogleAnalyticsTrackingInfo getGoogleAnalyticsTrackingInfo() {
+        return googleAnalyticsTrackingInfo;
     }
 
     /**
@@ -120,6 +128,27 @@ public class RegistrationSummary {
 
         public Credentials getDasServerCredentials() {
             return dasServerCredentials;
+        }
+    }
+
+    /**
+     * This class holds Google Analytics Tracking information required by gateway
+     */
+    public static class GoogleAnalyticsTrackingInfo {
+        private boolean enabled;
+        private String trackingCode;
+
+        public GoogleAnalyticsTrackingInfo(GoogleAnalyticsConfigurations googleAnalyticsConfigurations) {
+            this.enabled = googleAnalyticsConfigurations.isEnabled();
+            this.trackingCode = googleAnalyticsConfigurations.getTrackingID();
+        }
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public String getTrackingCode() {
+            return trackingCode;
         }
     }
 

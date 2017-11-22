@@ -123,6 +123,22 @@
                             </arguments>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>ganalytics</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>org.wso2.carbon.apimgt.plugin.GenerateArchives</mainClass>
+                            <arguments>
+                                <argument>main</argument>
+                                <argument>${project.basedir}/configs</argument>
+                                <argument>org/wso2/carbon/apimgt/gateway/ganalytics/</argument>
+                                <argument>${project.build.directory}/ganalytics</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
                 </executions>
 
             </plugin>

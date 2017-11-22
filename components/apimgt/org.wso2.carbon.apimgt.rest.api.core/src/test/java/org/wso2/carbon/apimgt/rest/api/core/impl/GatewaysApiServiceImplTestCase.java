@@ -93,6 +93,10 @@ public class GatewaysApiServiceImplTestCase {
         Mockito.when(throttlingServerCredentials.getUsername()).thenReturn(THROTTLE_SERVER_USERNAME);
         Mockito.when(throttlingServerCredentials.getPassword()).thenReturn(THROTTLE_SERVER_PASSWORD);
 
+        RegistrationSummary.GoogleAnalyticsTrackingInfo googleAnalyticsTrackingInfo = Mockito.mock
+                (RegistrationSummary.GoogleAnalyticsTrackingInfo.class);
+        Mockito.when(registrationSummary.getGoogleAnalyticsTrackingInfo()).thenReturn(googleAnalyticsTrackingInfo);
+
         GatewaysApiServiceImpl gatewaysApiService = new GatewaysApiServiceImpl();
         Response response = gatewaysApiService.gatewaysRegisterPost(registrationDTO, "application/json", getRequest());
 
