@@ -5084,4 +5084,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         new NotificationExecutor().sendAsyncNotifications(notificationDTO);
         
     }
+
+    protected void invalidateResourceCache(String apiContext, String apiVersion, String resourceURLContext,
+                                           String httpVerb, Environment environment) throws AxisFault {
+        APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
+        client.invalidateResourceCache(apiContext, apiVersion, resourceURLContext, httpVerb);
+    }
+
+    protected ThrottlePolicyTemplateBuilder getThrottlePolicyTemplateBuilder() {
+        return new ThrottlePolicyTemplateBuilder();
+    }
 }

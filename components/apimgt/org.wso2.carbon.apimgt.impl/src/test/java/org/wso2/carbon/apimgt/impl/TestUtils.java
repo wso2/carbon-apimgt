@@ -19,25 +19,35 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
+import org.wso2.carbon.apimgt.api.model.policy.Limit;
+import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
+import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-
+import javax.cache.Cache;
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class TestUtils {
@@ -80,14 +90,18 @@ public class TestUtils {
         PowerMockito.when(systemReg.getUserRealm()).thenReturn(userRealm);        
         PowerMockito.doNothing().when(ServiceReferenceHolder.class); 
         ServiceReferenceHolder.setUserRealm(userRealm);
-        
+        org.wso2.carbon.user.api.UserRealm userR = Mockito.mock(org.wso2.carbon.user.api.UserRealm.class);
+        PowerMockito.when(realmService.getTenantUserRealm(-1234)).thenReturn(userR);
+        AuthorizationManager authManager = Mockito.mock(AuthorizationManager.class);
+        PowerMockito.when(userR.getAuthorizationManager()).thenReturn(authManager);
         PowerMockito.when(realmService.getBootstrapRealm()).thenReturn(bootstrapRealm);
         ServiceReferenceHolder.setUserRealm(bootstrapRealm);
-        
-        PowerMockito.when(tm.getTenantId("carbon.super")).thenReturn(tenantId);
+
+        PowerMockito.when(tm.getTenantId(Matchers.anyString())).thenReturn(tenantId);
+
         return sh;
     }
-    
+
     public static ServiceReferenceHolder mockAPIMConfiguration(String propertyName, String value, int tenantId) throws RegistryException,
                                                                                         UserStoreException{
         ServiceReferenceHolder sh = mockRegistryAndUserRealm(tenantId);
@@ -100,11 +114,93 @@ public class TestUtils {
 
         return sh;
     }
+
+    public static void mockAPIMConfiguration() throws RegistryException,
+            UserStoreException {
+        ServiceReferenceHolder sh = mockRegistryAndUserRealm(-1234);
+        APIManagerConfigurationService amConfigService = Mockito.mock(APIManagerConfigurationService.class);
+        APIManagerConfiguration amConfig = Mockito.mock(APIManagerConfiguration.class);
+
+        PowerMockito.when(sh.getAPIManagerConfigurationService()).thenReturn(amConfigService);
+        PowerMockito.when(amConfigService.getAPIManagerConfiguration()).thenReturn(amConfig);
+
+        Map<String, Environment> apiGatewayEnvironments = new HashMap<String, Environment>();
+        Environment env1 = new Environment();
+        env1.setApiGatewayEndpoint("https://abc.com, http://abc.com");
+        apiGatewayEnvironments.put("PROD", env1);
+        // Mocking some commonly used configs
+        PowerMockito.when(amConfig.getApiGatewayEnvironments()).thenReturn(apiGatewayEnvironments);
+        PowerMockito.when(amConfig.getFirstProperty(APIConstants.API_GATEWAY_TYPE)).thenReturn(
+                APIConstants.API_GATEWAY_TYPE_SYNAPSE);
+        PowerMockito.when(amConfig.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS)).
+                thenReturn("true", "false");
+
+        ThrottleProperties throttleProperties = new ThrottleProperties();
+        PowerMockito.when(amConfig.getThrottleProperties()).thenReturn(throttleProperties);
+
+    }
     
     public static ServiceReferenceHolder getServiceReferenceHolder() {
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         ServiceReferenceHolder sh = PowerMockito.mock(ServiceReferenceHolder.class);
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);
         return sh;
+    }
+
+    public static void mockAPICacheClearence() {
+        PowerMockito.mockStatic(Caching.class);
+        CacheManager cacheManager = Mockito.mock(CacheManager.class);
+        PowerMockito.when(Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)).thenReturn(cacheManager);
+        Cache<Object, Object> cache = Mockito.mock(Cache.class);
+        Mockito.when(cacheManager.getCache(APIConstants.RECENTLY_ADDED_API_CACHE_NAME)).thenReturn(cache);
+        Mockito.doNothing().when(cache).removeAll();
+    }
+
+    public static ApiMgtDAO getApiMgtDAO() {
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+        return apiMgtDAO;
+    }
+
+    /**
+     * Return unique subscription policy with rate limit
+     *
+     * @return unique subscription policy
+     */
+    public static SubscriptionPolicy getUniqueSubscriptionPolicyWithRequestCountLimit() {
+        SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(UUID.randomUUID().toString());
+        Limit limit = new RequestCountLimit();
+        limit.setTimeUnit("seconds");
+        limit.setUnitTime(10);
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setLimit(limit);
+        subscriptionPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        return subscriptionPolicy;
+    }
+
+    /**
+     * Return unique subscription policy with Bandwidth limit
+     *
+     * @return unique subscription policy
+     */
+    public static SubscriptionPolicy getUniqueSubscriptionPolicyWithBandwidthLimit() {
+        SubscriptionPolicy subscriptionPolicy = new SubscriptionPolicy(UUID.randomUUID().toString());
+        Limit limit = new BandwidthLimit();
+        limit.setTimeUnit("seconds");
+        limit.setUnitTime(10);
+        QuotaPolicy quotaPolicy = new QuotaPolicy();
+        quotaPolicy.setLimit(limit);
+        subscriptionPolicy.setDefaultQuotaPolicy(quotaPolicy);
+        return subscriptionPolicy;
+    }
+
+    public static TenantManager getTenantManager(){
+        ServiceReferenceHolder serviceReferenceHolder = getServiceReferenceHolder();
+        RealmService realmService = Mockito.mock(RealmService.class);
+        TenantManager tenantManager = Mockito.mock(TenantManager.class);
+        PowerMockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+        PowerMockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+        return tenantManager;
     }
 }
