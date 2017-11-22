@@ -1294,11 +1294,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 if (!query.contains(KEY_VALUE_DELIMITER)) {
                     isFullTextSearch = true;
                 } else {
-                    log.info("Search query: " + query);
+                    log.debug("Search query: " + query);
                     for (String attribute : attributes) {
                         searchAttribute = attribute.split(KEY_VALUE_DELIMITER)[0];
                         searchValue = attribute.split(KEY_VALUE_DELIMITER)[1];
-                        log.info(searchAttribute + KEY_VALUE_DELIMITER + searchValue);
+                        log.debug(searchAttribute + KEY_VALUE_DELIMITER + searchValue);
                         attributeMap.put(searchAttribute, searchValue);
                     }
                 }
@@ -1306,7 +1306,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 if (isFullTextSearch) {
                     apiResults = getApiDAO().searchAPIs(roles, user, query, offset, limit);
                 } else {
-                    log.info("Attributes:", attributeMap.toString());
+                    log.debug("Attributes:", attributeMap.toString());
                     apiResults = getApiDAO().attributeSearchAPIs(roles, user, attributeMap, offset, limit);
                 }
 
