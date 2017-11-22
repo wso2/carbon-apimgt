@@ -31,15 +31,14 @@ public class ApplicationImportExportManager {
      */
     public Application getApplicationDetails(String query, String username) throws
     APIManagementException {
-
-        Application application = apiStore.getApplication(query,username);
-        if (application == null ){
-            log.error("No applications found matching the provided applicationId");
+        Application application = null;
+        if (query == null || query.isEmpty()) {
+            return application;
+        } else {
+            application = apiStore.getApplication(query,username);
         }
         return application;
-
     }
-
 
     /**
      * Update details of an existing Application when imported

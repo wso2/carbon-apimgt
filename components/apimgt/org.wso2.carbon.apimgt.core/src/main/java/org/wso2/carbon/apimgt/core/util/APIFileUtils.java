@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
-import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.FileApi;
 
@@ -116,7 +115,6 @@ public class APIFileUtils {
         } catch (IOException e) {
             String msg = "Error while writing the object to the file path " + filePath;
             log.error(msg, e);
-            throw new APIMgtDAOException(msg, e);
         }
     }
 
@@ -380,7 +378,6 @@ public class APIFileUtils {
         } catch (IOException e) {
             String errorMsg = "Error in Creating archive from data.";
             log.error(errorMsg, e);
-            throw new APIMgtDAOException(errorMsg, e);
         }
 
     }
@@ -494,44 +491,6 @@ public class APIFileUtils {
     }
 
     /**
-     * Extracts the Application to the file system by reading the incoming {@link InputStream} object
-     * uploadedApplicationArchiveInputStream
-     *
-     * @param uploadedAppArchiveInputStream Incoming {@link InputStream}
-     * @param importedDirectoryName         directory to extract the archive
-     * @param appArchiveLocation            full path of the archive location
-     * @param extractLocation               full path to the location to which the archive will be written
-     * @return location to which Applications were extracted
-     * @throws APIMgtDAOException if an error occurs while extracting the archive
-     */
-    public static String extractUploadedArchiveApplication(InputStream uploadedAppArchiveInputStream,
-                                                           String importedDirectoryName,
-                                                           String appArchiveLocation, String extractLocation)
-            throws APIMgtDAOException {
-        String archiveExtractLocation;
-        String archiveName;
-        String extractedFilePath;
-        try {
-            // create api import directory structure
-            APIFileUtils.createDirectory(extractLocation);
-            // create archive
-            createArchiveFromInputStream(uploadedAppArchiveInputStream, appArchiveLocation);
-            // extract the archive
-            archiveExtractLocation = extractLocation + File.separator + importedDirectoryName;
-            archiveName = extractArchive(appArchiveLocation, archiveExtractLocation);
-            extractedFilePath = archiveExtractLocation + File.separator + archiveName + File.separator +
-            archiveName + ".json";
-
-        } catch (APIMgtDAOException e) {
-            APIFileUtils.deleteDirectory(extractLocation);
-            String errorMsg = "Error in accessing uploaded API archive";
-            log.error(errorMsg, e);
-            throw new APIMgtDAOException(errorMsg, e);
-        }
-        return extractedFilePath;
-    }
-
-    /**
      * Creates a zip archive from of a directory
      *
      * @param sourceDirectory directory to create zip archive from
@@ -552,7 +511,6 @@ public class APIFileUtils {
             String errorMsg = "Error while writing archive file " + directoryToZip.getPath() + " to archive " +
                     archiveLocation;
             log.error(errorMsg, e);
-            throw new APIMgtDAOException(errorMsg, e);
         }
         if (log.isDebugEnabled()) {
             log.debug("Archived API generated successfully" + archiveName);
@@ -576,7 +534,6 @@ public class APIFileUtils {
         } catch (IOException e) {
             String errorMsg = "Error while listing directories under " + path;
             log.error(errorMsg, e);
-            throw new APIMgtDAOException(errorMsg, e);
         }
         return directoryNames;
     }
@@ -642,24 +599,6 @@ public class APIFileUtils {
              // write the current file to the destination
              FileOutputStream outputStream = new FileOutputStream(destinationFile)) {
             IOUtils.copy(inputStream, outputStream);
-        }
-    }
-
-    /**
-     * write the given Application details to file system
-     *
-     * @param application    {@link Application} object to be exported
-     * @param exportLocation file system location to write the Application Details
-     * @throws APIMgtDAOException if an error occurs while writing the Application Details
-     */
-    public static void exportApplicationDetailsToFileSystem(Application application, String exportLocation)
-            throws APIMgtDAOException {
-        String applicationFileLocation = exportLocation + File.separator + application.getName() +
-                APIMgtConstants.APIFileUtilConstants.JSON_EXTENSION;
-
-        APIFileUtils.writeObjectAsJsonToFile(application, applicationFileLocation);
-        if (log.isDebugEnabled()) {
-            log.debug("Successfully saved Application details for application: " + application.getName());
         }
     }
 }

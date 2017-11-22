@@ -1,0 +1,39 @@
+{
+  "name": "sampleApp",
+  "uuid": "2628b26e-2031-4534-a22c-4a6092891803",
+  "description": "sample app",
+  "policy": {
+    "policyName": "50PerMin",
+    "isDeployed": false
+  },
+  "status": "APPROVED",
+  "createdUser": "admin",
+  "createdTime": {
+    "date": {
+      "year": 2017,
+      "month": 11,
+      "day": 20
+    },
+    "time": {
+      "hour": 10,
+      "minute": 9,
+      "second": 22,
+      "nano": 420000000
+    }
+  },
+  "updatedUser": "admin",
+  "updatedTime": {
+    "date": {
+      "year": 2017,
+      "month": 11,
+      "day": 20
+    },
+    "time": {
+      "hour": 10,
+      "minute": 9,
+      "second": 23,
+      "nano": 28000000
+    }
+  },
+  "applicationKeys": []
+}
