@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIListPaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
@@ -44,6 +45,7 @@ import org.wso2.carbon.user.api.UserStoreException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -118,13 +120,43 @@ public class ApisApiServiceImpl extends ApisApiService {
             } else {
                 newSearchQuery = APIUtil.getSingleSearchCriteria(inputSearchQuery);
             }
-            String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
-            Map allMatchedApisMap = apiConsumer.searchPaginatedAPIs(newSearchQuery, tenantDomain, offset, limit, false);
+
+            // Append LC state query criteria if the search is not doc or subcontext
+            // based
+            if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX2.startsWith(newSearchQuery) &&
+                    !APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.startsWith(newSearchQuery)) {
+                boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
+
+                String [] statusList = {APIConstants.PUBLISHED, APIConstants.PROTOTYPED};
+                if (displayAPIsWithMultipleStatus) {
+                    statusList = new String[]{APIConstants.PUBLISHED, APIConstants.PROTOTYPED, APIConstants.DEPRECATED};
+                }
+
+                String lcCriteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY;
+                lcCriteria = lcCriteria + APIUtil.getORBasedSearchCriteria(statusList);
+
+                newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + lcCriteria;
+            }
+
+            Map allMatchedApisMap = apiConsumer
+                    .searchPaginatedAPIs(newSearchQuery, requestedTenantDomain, offset, limit, false);
             Set<API> sortedSet = (Set<API>) allMatchedApisMap.get("apis"); // This is a SortedSet
             ArrayList<API> allMatchedApis = new ArrayList<>(sortedSet);
 
             apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, offset, limit);
             APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, allMatchedApis.size());
+
+            //Add pagination section in the response
+            Object totalLength = allMatchedApisMap.get("length");
+            Integer length = 0;
+            if(totalLength != null) {
+                length = (Integer) totalLength;
+            }
+            APIListPaginationDTO paginationDTO = new APIListPaginationDTO();
+            paginationDTO.setOffset(offset);
+            paginationDTO.setLimit(limit);
+            paginationDTO.setTotal(length);
+            apiListDTO.setPagination(paginationDTO);
 
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
@@ -189,6 +221,9 @@ public class ApisApiServiceImpl extends ApisApiService {
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (UnsupportedEncodingException e) {
+            String errorMessage = "Error while Decoding apiId" + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -240,6 +275,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (UnsupportedEncodingException e) {
+            String errorMessage = "Error while Decoding apiId" + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -360,6 +398,9 @@ public class ApisApiServiceImpl extends ApisApiService {
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }catch (UnsupportedEncodingException e) {
+            String errorMessage = "Error while Decoding apiId" + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -402,6 +443,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }catch (UnsupportedEncodingException e) {
+            String errorMessage = "Error while Decoding apiId" + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -449,6 +493,9 @@ public class ApisApiServiceImpl extends ApisApiService {
         } catch (UserStoreException e) {
             String errorMessage = "Error while checking availability of tenant " + requestedTenantDomain;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }catch (UnsupportedEncodingException e) {
+            String errorMessage = "Error while Decoding apiId" + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -473,6 +520,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, xWSO2Tenant);
         } catch (APIManagementException e) {
             RestApiUtil.handleResourceNotFoundInTenantError(RestApiConstants.RESOURCE_API, apiId, log, xWSO2Tenant);
+        } catch (UnsupportedEncodingException e) {
+            String errorMessage = "Error while Decoding apiId" + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         if (apiIdentifier == null) {
             RestApiUtil.handleResourceNotFoundInTenantError(RestApiConstants.RESOURCE_API, apiId, log, xWSO2Tenant);

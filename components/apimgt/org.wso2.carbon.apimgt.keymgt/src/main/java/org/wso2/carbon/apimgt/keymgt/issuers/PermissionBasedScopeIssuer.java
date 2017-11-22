@@ -67,7 +67,7 @@ public class PermissionBasedScopeIssuer extends AbstractScopesIssuer {
         try {
 
             Map<String, String> appScopes;
-            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            ApiMgtDAO apiMgtDAO = getApiMgtDAOInstance();
 
             //Get all the scopes and permissions against the scopes defined for the APIs subscribed to the application.
             appScopes = apiMgtDAO.getScopeRolesOfApplication(consumerKey);
@@ -75,18 +75,17 @@ public class PermissionBasedScopeIssuer extends AbstractScopesIssuer {
             //Add API Manager rest API scopes set. This list should be loaded at server start up and keep
             //in memory and add it to each and every request coming.
             String tenantDomain = tokReqMsgCtx.getAuthorizedUser().getTenantDomain();
-            restAPIScopesOfCurrentTenant = (Map) Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+            restAPIScopesOfCurrentTenant = (Map) getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
                     .getCache(REST_API_SCOPE_CACHE)
                     .get(tenantDomain);
             if (restAPIScopesOfCurrentTenant != null) {
                 appScopes.putAll(restAPIScopesOfCurrentTenant);
             } else {
-                restAPIScopesOfCurrentTenant = APIUtil.
-                        getRESTAPIScopesFromConfig(APIUtil.getTenantRESTAPIScopesConfig(tenantDomain));
+                restAPIScopesOfCurrentTenant = getRESTAPIScopesFromConfig(getTenantRESTAPIScopesConfig(tenantDomain));
 
                 //then put cache
                 appScopes.putAll(restAPIScopesOfCurrentTenant);
-                Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
                         .getCache(REST_API_SCOPE_CACHE)
                         .put(tenantDomain, restAPIScopesOfCurrentTenant);
             }
@@ -134,14 +133,14 @@ public class PermissionBasedScopeIssuer extends AbstractScopesIssuer {
         int tenantId;
         String username = tokReqMsgCtx.getAuthorizedUser().getUserName();
         String tenantDomain = tokReqMsgCtx.getAuthorizedUser().getTenantDomain();
-        RealmService realmService = APIKeyMgtDataHolder.getRealmService();
+        RealmService realmService = getRealmService();
 
         try {
             tenantId = realmService.getTenantManager().getTenantId(tenantDomain);
 
             // If tenant Id is not set in the tokenReqContext, deriving it from username.
             if (tenantId == 0 || tenantId == -1) {
-                tenantId = IdentityTenantUtil.getTenantIdOfUser(username);
+                tenantId = getTenantIdOfUser(username);
             }
 
             UserRealm userRealm = realmService.getTenantUserRealm(tenantId);

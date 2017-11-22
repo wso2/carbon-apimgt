@@ -417,7 +417,7 @@ public class SQLConstants {
 
     public static final String ADD_SUBSCRIPTION_SQL =
             " INSERT INTO " +
-            "   AM_SUBSCRIPTION (TIER_ID,API_ID,APPLICATION_ID,SUB_STATUS,SUBS_CREATE_STATE,CREATED_BY,CREATED_TIME," +
+            "   AM_SUBSCRIPTION (TIER_ID,API_ID,APPLICATION_ID,SUB_STATUS,SUBS_CREATE_STATE,CREATED_BY,CREATED_TIME, " +
                     "UPDATED_TIME, UUID) " +
             " VALUES (?,?,?,?,?,?,?,?,?)";
 
@@ -766,6 +766,8 @@ public class SQLConstants {
     public static final String GET_PRODUCTION_KEYS_OF_APPLICATION_PREFIX =
             "   ICA.CONSUMER_KEY AS CONSUMER_KEY," +
             "   ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
+            "   ICA.GRANT_TYPES AS GRANT_TYPES," +
+            "   ICA.CALLBACK_URL AS CALLBACK_URL," +
             "   IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
             "   IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
             "   ISAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
@@ -792,6 +794,8 @@ public class SQLConstants {
             " SELECT " +
             "   CONSUMER_KEY, " +
             "   CONSUMER_SECRET, " +
+            "   GRANT_TYPES, " +
+            "   CALLBACK_URL, " +
             "   ACCESS_TOKEN, " +
             "   VALIDITY_PERIOD, " +
             "   TOKEN_SCOPE, " +
@@ -801,6 +805,8 @@ public class SQLConstants {
             "   SELECT " +
             "       ICA.CONSUMER_KEY AS CONSUMER_KEY, " +
             "       ICA.CONSUMER_SECRET AS CONSUMER_SECRET, " +
+            "       ICA.GRANT_TYPES AS GRANT_TYPES, " +
+            "       ICA.CALLBACK_URL AS CALLBACK_URL, " +
             "       IAT.ACCESS_TOKEN AS ACCESS_TOKEN, " +
             "       IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD, " +
             "       ISAT.TOKEN_SCOPE AS TOKEN_SCOPE, " +
@@ -826,6 +832,8 @@ public class SQLConstants {
     public static final String GET_SANDBOX_KEYS_OF_APPLICATION_PREFIX =
             "   ICA.CONSUMER_KEY AS CONSUMER_KEY," +
             "   ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
+            "   ICA.GRANT_TYPES AS GRANT_TYPES," +
+            "   ICA.CALLBACK_URL AS CALLBACK_URL," +
             "   IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
             "   IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
             "   ISAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
@@ -851,6 +859,8 @@ public class SQLConstants {
             " SELECT " +
             "   ICA.CONSUMER_KEY AS CONSUMER_KEY," +
             "   ICA.CONSUMER_SECRET AS CONSUMER_SECRET," +
+            "   ICA.GRANT_TYPES AS GRANT_TYPES, " +
+            "   ICA.CALLBACK_URL AS CALLBACK_URL, " +
             "   IAT.ACCESS_TOKEN AS ACCESS_TOKEN," +
             "   IAT.VALIDITY_PERIOD AS VALIDITY_PERIOD," +
             "   ISAT.TOKEN_SCOPE AS TOKEN_SCOPE," +
@@ -1228,7 +1238,7 @@ public class SQLConstants {
 
     public static final String APP_APPLICATION_SQL =
             " INSERT INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, " +
-            "   CALLBACK_URL, DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_TIME," +
+            "   CALLBACK_URL, DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_TIME, " +
                     "UUID)" +
             " VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
@@ -1720,7 +1730,7 @@ public class SQLConstants {
             "   AM_SUBSCRIPTION AMS," +
             "   AM_APPLICATION AMA " +
             "WHERE " +
-            "   TIER_ID=? " +
+            "   AMS.TIER_ID=? " +
             "   AND AMS.APPLICATION_ID=AMA.APPLICATION_ID";
 
     public static final String GET_URL_TEMPLATES_SQL =
@@ -2102,10 +2112,10 @@ public class SQLConstants {
             "DELETE FROM AM_SUBSCRIPTION WHERE API_ID = ? AND APPLICATION_ID = ? ";
 
     public static final String GET_API_NAME_NOT_MATCHING_CONTEXT_SQL =
-            "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE API_NAME = ? AND CONTEXT NOT LIKE ?";
+            "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND CONTEXT NOT LIKE ?";
 
     public static final String GET_API_NAME_MATCHING_CONTEXT_SQL =
-            "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE API_NAME = ? AND CONTEXT LIKE ?";
+            "SELECT COUNT(API_ID) AS API_COUNT FROM AM_API WHERE LOWER(API_NAME) = LOWER(?) AND CONTEXT LIKE ?";
 
     public static final String GET_ACTIVE_TOKEN_OF_CONSUMER_KEY_SQL =
             " SELECT " +
@@ -2704,5 +2714,20 @@ public class SQLConstants {
      
         public static final String TIER_ATTACHED_TO_APPLICATION = " SELECT count(APPLICATION_TIER) as c FROM AM_APPLICATION where APPLICATION_TIER = ? and CREATED_BY like ? ";
 
+    }
+
+    public static class CertificateConstants {
+        public static final String INSERT_CERTIFICATE = "INSERT INTO AM_CERTIFICATE_METADATA " +
+                "(TENANT_ID, END_POINT, ALIAS) VALUES(?, ?, ?)";
+
+        public static final String GET_CERTIFICATES = "SELECT * FROM AM_CERTIFICATE_METADATA WHERE TENANT_ID=?";
+
+        public static final String GET_CERTIFICATE_ALL_TENANTS = "SELECT * FROM AM_CERTIFICATE_METADATA WHERE " +
+                "(ALIAS=? OR END_POINT=?)";
+        public static final String GET_CERTIFICATE_TENANT = "SELECT * FROM AM_CERTIFICATE_METADATA WHERE TENANT_ID=? " +
+                "AND (ALIAS=? OR END_POINT=?)";
+
+        public static final String DELETE_CERTIFICATES = "DELETE FROM AM_CERTIFICATE_METADATA WHERE TENANT_ID=? " +
+                "AND (ALIAS=? OR END_POINT=?)";
     }
 }

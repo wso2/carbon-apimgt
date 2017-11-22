@@ -55,6 +55,8 @@ public class ApplicationKeyMappingUtil {
                     if (supportedGrantTypes != null) {
                         applicationKeyDTO.setSupportedGrantTypes(Arrays.asList(supportedGrantTypes.split(" ")));
                     }
+                    String callbackUrl = (String) appDetailsJsonObj.get(ApplicationConstants.OAUTH_REDIRECT_URIS);
+                    applicationKeyDTO.setCallbackUrl(callbackUrl);
                 }
             }
 
@@ -81,7 +83,12 @@ public class ApplicationKeyMappingUtil {
         applicationKeyDTO.setConsumerKey(apiKey.getConsumerKey());
         applicationKeyDTO.setConsumerSecret(apiKey.getConsumerSecret());
         applicationKeyDTO.setKeyState(apiKey.getState());
-        applicationKeyDTO.setSupportedGrantTypes(null); //this is not supported by impl yet
+        if (apiKey.getGrantTypes() != null) {
+            applicationKeyDTO.setSupportedGrantTypes(Arrays.asList(apiKey.getGrantTypes().split(" ")));
+        } else {
+            applicationKeyDTO.setSupportedGrantTypes(null);
+        }
+        applicationKeyDTO.setCallbackUrl(apiKey.getCallbackUrl());
 
         TokenDTO tokenDTO = new TokenDTO();
         if (apiKey.getTokenScope() != null) {

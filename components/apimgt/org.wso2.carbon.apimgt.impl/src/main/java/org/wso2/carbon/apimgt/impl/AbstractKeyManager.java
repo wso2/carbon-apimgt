@@ -45,9 +45,7 @@ public abstract class AbstractKeyManager implements KeyManager {
             throws APIManagementException {
 
         if (jsonInput == null || jsonInput.isEmpty()) {
-            if (log.isDebugEnabled()) {
-                log.debug("JsonInput is null or Empty.");
-            }
+            log.debug("JsonInput is null or Empty.");
             return tokenRequest;
         }
 
@@ -55,9 +53,7 @@ public abstract class AbstractKeyManager implements KeyManager {
         JSONObject jsonObject;
 
         if (tokenRequest == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Input request is null. Creating a new Request Object.");
-            }
+            log.debug("Input request is null. Creating a new Request Object.");
             tokenRequest = new AccessTokenRequest();
         }
 

@@ -450,7 +450,7 @@ var drawAPIUsage = function () {
                     });
                     }
                 }else{
-                    $('#pie-chart').html($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div></div>'));
+                    $('#pie-chart').html($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>'+i18n.t("No Data Available")+'</h4></div></div>'));
                 }
             } else {
                 if (json.message == "AuthenticateError") {

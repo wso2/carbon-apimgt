@@ -4,6 +4,7 @@ apiStore = jagg.module("manager").getAPIStoreObj(),
 usageClient = jagg.module("manager").getUsageClient(),
 user = jagg.getUser();
 var gson = com.google.gson.Gson();
+var site = require("/site/conf/site.json");
 
 function getFirstAccessTime(providerName, server) {
     var usage = [];
@@ -141,8 +142,14 @@ function getProviderAPIUsage(subscriberName,from,to, server) {
 function getTopAppUsers(subscriberName,from,to, server) {
     var usage = [];
     var usageout = [];
+    var chartlimit = -1;
+
+    if (site.statistics != null && site.statistics.topAppUserLimit != null) {
+        chartlimit = site.statistics.topAppUserLimit; 
+    }
+
     try {
-        usage = usageClient.getTopAppUsers(subscriberName,server,from,to,10 );
+        usage = usageClient.getTopAppUsers(subscriberName,server,from,to,chartlimit);
         if (log.isDebugEnabled()) {
             log.debug("getTopAppUsers for : " + server);
         }

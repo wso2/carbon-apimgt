@@ -51,6 +51,8 @@ public abstract class PublisherDTO {
 
     private String clientIp;
     private String applicationOwner;
+    private String keyType;
+    private String correlationID;
 
     public String getClientIp() {
         return clientIp;
@@ -192,5 +194,21 @@ public abstract class PublisherDTO {
 
     public String getApplicationOwner() {
         return applicationOwner;
+    }
+
+    public String getKeyType() {
+        return keyType;
+    }
+
+    public void setKeyType(String keyType) {
+        this.keyType = keyType;
+    }
+
+    public String getCorrelationID() {
+        return correlationID;
+    }
+
+    public void setCorrelationID(String correlationID) {
+        this.correlationID = correlationID;
     }
 }

@@ -58,8 +58,7 @@ public class OAuth2TokenValidationServiceClient {
 
         try {
             ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(null, null);
-            oAuth2TokenValidationServiceStub = new OAuth2TokenValidationServiceStub(ctx, serviceURL +
-                    "OAuth2TokenValidationService");
+            oAuth2TokenValidationServiceStub = getOAuth2TokenValidationServiceStub(serviceURL, ctx);
 
             ServiceClient client = oAuth2TokenValidationServiceStub._getServiceClient();
             Options options = client.getOptions();
@@ -76,11 +75,15 @@ public class OAuth2TokenValidationServiceClient {
         }
     }
 
+    protected OAuth2TokenValidationServiceStub getOAuth2TokenValidationServiceStub(String serviceURL,
+            ConfigurationContext ctx) throws AxisFault {
+        return new OAuth2TokenValidationServiceStub(ctx, serviceURL +
+                "OAuth2TokenValidationService");
+    }
 
     public OAuth2ClientApplicationDTO validateAuthenticationRequest(String accessTokenIdentifier)
             throws APIManagementException {
-        CarbonUtils.setBasicAccessSecurityHeaders(username, password,
-                true, oAuth2TokenValidationServiceStub._getServiceClient());
+        CarbonUtils.setBasicAccessSecurityHeaders(username, password, oAuth2TokenValidationServiceStub._getServiceClient());
         if (cookie != null) {
             oAuth2TokenValidationServiceStub._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING,
                     cookie);

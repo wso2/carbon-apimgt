@@ -124,8 +124,7 @@ public class WebsocketWSClient {
 	public APIKeyValidationInfoDTO getAPIKeyData(String context, String apiVersion, String apiKey)
 			throws APISecurityException {
 
-		CarbonUtils.setBasicAccessSecurityHeaders(username, password, true,
-		                                          keyValidationServiceStub._getServiceClient());
+		CarbonUtils.setBasicAccessSecurityHeaders(username, password, keyValidationServiceStub._getServiceClient());
 
 		try {
 			org.wso2.carbon.apimgt.impl.dto.xsd.APIKeyValidationInfoDTO dto =
@@ -133,9 +132,11 @@ public class WebsocketWSClient {
 			return toDTO(dto);
 		} catch (Exception e) {
 			throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-			                               "Error while accessing backend services for API key validation",
-			                               e);
+			                               "Error while accessing backend services for API key validation", e);
 		}
 	}
 
+	protected void setKeyValidationServiceStub(APIKeyValidationServiceStub keyValidationServiceStub) {
+		this.keyValidationServiceStub = keyValidationServiceStub;
+	}
 }

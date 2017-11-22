@@ -40,10 +40,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class GatewayUtils {
@@ -261,5 +258,26 @@ public class GatewayUtils {
     public static String getAPIEndpointSecretAlias(String apiProviderName, String apiName, String version) {
         String secureVaultAlias = apiProviderName + "--" + apiName + version;
         return secureVaultAlias;
+    }
+
+    /**
+     * return existing correlation ID in the message context or set new correlation ID to the message context.
+     *
+     * @param messageContext synapse message context
+     * @return correlation ID
+     */
+    public static String getAndSetCorrelationID(org.apache.synapse.MessageContext messageContext) {
+        Object correlationObj = messageContext.getProperty(APIMgtGatewayConstants.AM_CORRELATION_ID);
+        String correlationID;
+        if (correlationObj != null) {
+            correlationID = (String) correlationObj;
+        } else {
+            correlationID = UUID.randomUUID().toString();
+            messageContext.setProperty(APIMgtGatewayConstants.AM_CORRELATION_ID, correlationID);
+            if (log.isDebugEnabled()) {
+                log.debug("Setting correlation ID to message context.");
+            }
+        }
+        return correlationID;
     }
 }

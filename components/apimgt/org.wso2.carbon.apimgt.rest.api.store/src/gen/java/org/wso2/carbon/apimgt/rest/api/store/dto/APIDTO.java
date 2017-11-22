@@ -108,8 +108,9 @@ public class APIDTO  {
 
   
   /**
+   * Name of the API
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "Name of the API")
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -120,8 +121,9 @@ public class APIDTO  {
 
   
   /**
+   * A brief description about the API
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "A brief description about the API")
   @JsonProperty("description")
   public String getDescription() {
     return description;
@@ -132,8 +134,9 @@ public class APIDTO  {
 
   
   /**
+   * A string that represents thecontext of the user's request
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "A string that represents thecontext of the user's request")
   @JsonProperty("context")
   public String getContext() {
     return context;
@@ -144,8 +147,9 @@ public class APIDTO  {
 
   
   /**
+   * The version of the API
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "The version of the API")
   @JsonProperty("version")
   public String getVersion() {
     return version;
@@ -195,8 +199,9 @@ public class APIDTO  {
 
   
   /**
+   * This describes in which status of the lifecycle the API is.
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "This describes in which status of the lifecycle the API is.")
   @JsonProperty("status")
   public String getStatus() {
     return status;
@@ -231,8 +236,9 @@ public class APIDTO  {
 
   
   /**
+   * Search keywords related to the API
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Search keywords related to the API")
   @JsonProperty("tags")
   public List<String> getTags() {
     return tags;
@@ -243,8 +249,9 @@ public class APIDTO  {
 
   
   /**
+   * The subscription tiers selected for the particular API
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "The subscription tiers selected for the particular API")
   @JsonProperty("tiers")
   public List<String> getTiers() {
     return tiers;

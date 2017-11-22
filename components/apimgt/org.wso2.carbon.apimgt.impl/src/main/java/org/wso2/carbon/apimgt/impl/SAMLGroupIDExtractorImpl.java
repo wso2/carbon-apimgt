@@ -59,7 +59,7 @@ public class SAMLGroupIDExtractorImpl implements LoginPostExecutor {
         String organization = "";
         try {
             String claim = "http://wso2.org/claims/organization";
-            samlResponseStream = new ByteArrayInputStream(loginResponse.getBytes());
+            samlResponseStream = getByteArrayInputStream(loginResponse);
             DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
             builderFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             builderFactory.setNamespaceAware(true);
@@ -120,6 +120,10 @@ public class SAMLGroupIDExtractorImpl implements LoginPostExecutor {
             }
         }
         return organization;
+    }
+
+    protected ByteArrayInputStream getByteArrayInputStream(String loginResponse) {
+        return new ByteArrayInputStream(loginResponse.getBytes());
     }
 
 }

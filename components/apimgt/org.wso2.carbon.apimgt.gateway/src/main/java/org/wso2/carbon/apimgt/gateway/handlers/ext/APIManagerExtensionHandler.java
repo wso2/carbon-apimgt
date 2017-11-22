@@ -24,7 +24,6 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
@@ -70,31 +69,37 @@ public class APIManagerExtensionHandler extends AbstractHandler {
     }
 
     public boolean handleRequest(MessageContext messageContext) {
-        Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
-                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), DIRECTION_IN));
-        Timer.Context context = timer.start();
+        Timer.Context context = startMetricTimer(DIRECTION_IN);
         long executionStartTime = System.nanoTime();
         try {
             return mediate(messageContext, DIRECTION_IN);
         } finally {
             messageContext.setProperty(APIMgtGatewayConstants.REQUEST_MEDIATION_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
-            context.stop();
+            stopMetricTimer(context);
         }
     }
 
     public boolean handleResponse(MessageContext messageContext) {
-        Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
-                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), DIRECTION_OUT));
-        Timer.Context context = timer.start();
+        Timer.Context context = startMetricTimer(DIRECTION_OUT);
         long executionStartTime = System.nanoTime();
         try {
             return mediate(messageContext, DIRECTION_OUT);
         } finally {
             messageContext.setProperty(APIMgtGatewayConstants.RESPONSE_MEDIATION_LATENCY,
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - executionStartTime));
-            context.close();
+            stopMetricTimer(context);
         }
     }
+
+	protected void stopMetricTimer(Timer.Context context) {
+		context.stop();
+	}
+
+	protected Timer.Context startMetricTimer(String direction) {
+		Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO,
+				MetricManager.name(APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), direction));
+		return timer.start();
+	}
 }
 

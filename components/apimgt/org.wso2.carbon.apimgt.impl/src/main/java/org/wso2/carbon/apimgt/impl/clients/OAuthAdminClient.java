@@ -51,7 +51,7 @@ public class OAuthAdminClient {
 
         try {
             ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(null, null);
-            oAuthAdminServiceStub = new OAuthAdminServiceStub(ctx, serviceURL + "OAuthAdminService");
+            oAuthAdminServiceStub = getOAuthAdminServiceStub(serviceURL, ctx);
 
             ServiceClient client = oAuthAdminServiceStub._getServiceClient();
             Options options = client.getOptions();
@@ -64,6 +64,11 @@ public class OAuthAdminClient {
         } catch (AxisFault axisFault) {
             throw new APIManagementException("Error while initializing the OAuth admin service stub", axisFault);
         }
+    }
+
+    protected OAuthAdminServiceStub getOAuthAdminServiceStub(String serviceURL, ConfigurationContext ctx)
+            throws AxisFault {
+        return new OAuthAdminServiceStub(ctx, serviceURL + "OAuthAdminService");
     }
 
     public OAuthConsumerAppDTO getOAuthApplicationData(String consumerKey, String username) throws Exception {

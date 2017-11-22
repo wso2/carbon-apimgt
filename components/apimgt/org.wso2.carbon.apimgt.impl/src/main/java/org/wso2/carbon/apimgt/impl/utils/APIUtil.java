@@ -303,7 +303,12 @@ public final class APIUtil {
             api.setEndpointSecured(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED)));
             api.setEndpointAuthDigest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST)));
             api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
-            api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
+            if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
+                    .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)))) {
+                api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
+            } else { //If APIEndpointPasswordRegistryHandler is enabled take password from the registry hidden property
+                api.setEndpointUTPassword(getActualEpPswdFromHiddenProperty(api, registry));
+            }
             api.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
             api.setInSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE));
             api.setOutSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE));
@@ -483,7 +488,12 @@ public final class APIUtil {
             api.setEndpointSecured(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED)));
             api.setEndpointAuthDigest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST)));
             api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
-            api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
+            if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
+                    .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)))) {
+                api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
+            } else { //If APIEndpointPasswordRegistryHandler is enabled take password from the registry hidden property
+                api.setEndpointUTPassword(getActualEpPswdFromHiddenProperty(api, registry));
+            }
             api.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
             api.setInSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE));
             api.setOutSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE));
@@ -872,8 +882,6 @@ public final class APIUtil {
             artifact.setAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE, api.getContextTemplate());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION_TYPE, "context");
             artifact.setAttribute(APIConstants.API_OVERVIEW_TYPE, api.getType());
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
 
             StringBuilder policyBuilder = new StringBuilder();
             for (Tier tier : api.getAvailableTiers()) {
@@ -982,21 +990,14 @@ public final class APIUtil {
             Documentation.DocumentSourceType docSourceType = Documentation.DocumentSourceType.INLINE;
             String artifactAttribute = artifact.getAttribute(APIConstants.DOC_SOURCE_TYPE);
 
-            if (artifactAttribute.equals(Documentation.DocumentSourceType.URL.name())) {
+            if (Documentation.DocumentSourceType.URL.name().equals(artifactAttribute)) {
                 docSourceType = Documentation.DocumentSourceType.URL;
-            } else if (artifactAttribute.equals(Documentation.DocumentSourceType.FILE.name())) {
-                docSourceType = Documentation.DocumentSourceType.FILE;
-            }
-
-            documentation.setSourceType(docSourceType);
-            if ("URL".equals(artifact.getAttribute(APIConstants.DOC_SOURCE_TYPE))) {
                 documentation.setSourceUrl(artifact.getAttribute(APIConstants.DOC_SOURCE_URL));
-            }
-
-            if (docSourceType == Documentation.DocumentSourceType.FILE) {
+            } else if (Documentation.DocumentSourceType.FILE.name().equals(artifactAttribute)) {
+                docSourceType = Documentation.DocumentSourceType.FILE;
                 documentation.setFilePath(prependWebContextRoot(artifact.getAttribute(APIConstants.DOC_FILE_PATH)));
             }
-
+            documentation.setSourceType(docSourceType);
             if (documentation.getType() == DocumentationType.OTHER) {
                 documentation.setOtherTypeName(artifact.getAttribute(APIConstants.DOC_OTHER_TYPE_NAME));
             }
@@ -1242,7 +1243,7 @@ public final class APIUtil {
                     apiId.getApiName() + RegistryConstants.PATH_SEPARATOR + apiId.getVersion();
             artifact.setAttribute(APIConstants.DOC_API_BASE_PATH, basePath);
         } catch (GovernanceException e) {
-            String msg = "Filed to create doc artifact content from :" + documentation.getName();
+            String msg = "Failed to create doc artifact content from :" + documentation.getName();
             log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
@@ -2473,7 +2474,12 @@ public final class APIUtil {
             api.setEndpointSecured(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED)));
             api.setEndpointAuthDigest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST)));
             api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
-            api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
+            if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
+                    .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)))) {
+                api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
+            } else { //If APIEndpointPasswordRegistryHandler is enabled take password from the registry hidden property
+                api.setEndpointUTPassword(getActualEpPswdFromHiddenProperty(api, registry));
+            }
             api.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
 
             api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
@@ -5934,40 +5940,6 @@ public final class APIUtil {
         return list;
     }
 
-
-    /**
-     * check whether policy is content aware
-     *
-     * @param policy
-     * @return
-     */
-    public static boolean isContentAwarePolicy(Policy policy) {
-        boolean status = false;
-        if (policy instanceof APIPolicy) {
-            APIPolicy apiPolicy = (APIPolicy) policy;
-            status = isDefaultQuotaPolicyContentAware(apiPolicy);
-            if (!status) {
-                //only go and check the pipelines if default quota is not content aware
-                //check if atleast one pipeline is content aware
-                for (Pipeline pipeline : apiPolicy.getPipelines()) { // add each pipeline data to AM_CONDITION table
-                    if (PolicyConstants.BANDWIDTH_TYPE.equals(pipeline.getQuotaPolicy().getType())) {
-                        status = true;
-                        break;
-                    }
-                }
-            }
-        } else if (policy instanceof ApplicationPolicy) {
-            ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
-            status = isDefaultQuotaPolicyContentAware(appPolicy);
-        } else if (policy instanceof SubscriptionPolicy) {
-            SubscriptionPolicy subPolicy = (SubscriptionPolicy) policy;
-            status = isDefaultQuotaPolicyContentAware(subPolicy);
-        } else if (policy instanceof GlobalPolicy) {
-            status = false;
-        }
-        return status;
-    }
-
     private static boolean isDefaultQuotaPolicyContentAware(Policy policy) {
         if (PolicyConstants.BANDWIDTH_TYPE.equalsIgnoreCase(policy.getDefaultQuotaPolicy().getType())) {
             return true;
@@ -6632,5 +6604,20 @@ public final class APIUtil {
                         modifiedExp)).
                 setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
                         accessExp)).setStoreByValue(false).build();
+    }
+
+    /**
+     * This method is used to get the actual endpoint password of an API from the hidden property
+     * in the case where the handler APIEndpointPasswordRegistryHandler is enabled in registry.xml
+     *
+     * @param api      The API
+     * @param registry The registry object
+     * @return The actual password of the endpoint if exists
+     * @throws RegistryException Throws if the api resource doesn't exist
+     */
+    private static String getActualEpPswdFromHiddenProperty(API api, Registry registry) throws RegistryException {
+        String apiPath = APIUtil.getAPIPath(api.getId());
+        Resource apiResource = registry.get(apiPath);
+        return apiResource.getProperty(APIConstants.REGISTRY_HIDDEN_ENDPOINT_PROPERTY);
     }
 }

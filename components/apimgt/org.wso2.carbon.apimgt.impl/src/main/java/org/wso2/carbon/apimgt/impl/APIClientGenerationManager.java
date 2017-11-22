@@ -24,7 +24,6 @@ import io.swagger.codegen.config.CodegenConfigurator;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +38,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -46,7 +46,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -110,8 +109,7 @@ public class APIClientGenerationManager {
         int tenantId = 0;
 
         try {
-            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(requestedTenant);
+            tenantId = getTenantId(requestedTenant);
         } catch (UserStoreException e) {
             handleSDKGenException("Error occurred when retrieving the tenant ID for tenant : " + requestedTenant, e);
         }
@@ -129,8 +127,7 @@ public class APIClientGenerationManager {
             }
             Registry requiredRegistry = null;
             try {
-                requiredRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry
-                        (apiProvider, tenantId);
+                requiredRegistry = getGovernanceUserRegistry(apiProvider, tenantId);
             } catch (RegistryException e) {
                 handleSDKGenException("Error occurred when retrieving the tenant registry for tenant : " +
                         requestedTenant + " tenant ID : " + tenantId, e);
@@ -202,11 +199,6 @@ public class APIClientGenerationManager {
         return sdkDataMap;
     }
 
-    /**
-     * This method will delete the files and directories in a given location
-     *
-     * @param tempDirectoryPath location of the directory to be cleaned
-     */
     public void cleanTempDirectory(String tempDirectoryPath) {
         if (StringUtils.isNotBlank(tempDirectoryPath)) {
             try {
@@ -226,9 +218,7 @@ public class APIClientGenerationManager {
      * @return supported languages for SDK generation
      */
     public String getSupportedSDKLanguages() {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-
+        APIManagerConfiguration config = getAPIManagerConfiguration();
         String supportedLanguages = config.getFirstProperty(APIConstants.CLIENT_CODEGEN_SUPPORTED_LANGUAGES);
         return supportedLanguages;
 
@@ -244,8 +234,7 @@ public class APIClientGenerationManager {
      */
     private void generateClient(String apiName, String specLocation, String sdkLanguage, String temporaryOutputPath) {
 
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
+        APIManagerConfiguration config = getAPIManagerConfiguration();
         CodegenConfigurator codegenConfigurator = new CodegenConfigurator();
         codegenConfigurator.setGroupId(config.getFirstProperty(APIConstants.CLIENT_CODEGEN_GROUPID));
         codegenConfigurator.setArtifactId(config.getFirstProperty(APIConstants.CLIENT_CODEGEN_ARTIFACTID) + apiName);
@@ -281,5 +270,40 @@ public class APIClientGenerationManager {
     private void handleSDKGenException(String errorMessage, Throwable throwable) throws APIClientGenerationException {
         log.error(errorMessage, throwable);
         throw new APIClientGenerationException(errorMessage, throwable);
+    }
+
+    /**
+     * Returns the tenantId given tenant name.
+     *
+     * @param requestedTenant Tenant domain
+     * @return Tenant Id
+     * @throws UserStoreException if an error occurs when getting tenant ID
+     */
+    protected int getTenantId(String requestedTenant) throws UserStoreException {
+        return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(requestedTenant);
+    }
+
+    /**
+     * Get governance user registry
+     *
+     * @param apiProvider API Provider name
+     * @param tenantId Tenant ID
+     * @return User Registry
+     * @throws RegistryException if an error occurs when getting UserRegistry
+     */
+    protected UserRegistry getGovernanceUserRegistry(String apiProvider, int tenantId) throws RegistryException {
+        return ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(apiProvider,
+                tenantId);
+
+    }
+
+    /**
+     * Returns API manager configurations.
+     *
+     * @return APIManagerConfiguration object
+     */
+    protected APIManagerConfiguration getAPIManagerConfiguration() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
     }
 }

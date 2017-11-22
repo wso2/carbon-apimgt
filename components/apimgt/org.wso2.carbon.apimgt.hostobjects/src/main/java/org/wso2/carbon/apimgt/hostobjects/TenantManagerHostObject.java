@@ -87,15 +87,14 @@ public class TenantManagerHostObject extends ScriptableObject {
         }
 
         //extract the zip file to store directory
-        deployTenantTheme(uploadFile, tenant);
-
-        return true;
+        return deployTenantTheme(uploadFile, tenant);
     }
 
     //would be nice to have zip4j
-    private static void deployTenantTheme(FileHostObject themeFile, String tenant)throws APIManagementException{
+    private static boolean deployTenantTheme(FileHostObject themeFile, String tenant)throws APIManagementException{
         ZipInputStream zis=null;
         byte[] buffer = new byte[1024];
+        boolean success = true;
 
         String outputFolder = TenantManagerHostObject.getStoreTenantThemesPath()+tenant;
 
@@ -150,6 +149,7 @@ public class TenantManagerHostObject extends ScriptableObject {
                         fos.close();
                     }else{
                         log.warn("Unsupported file is uploaded with tenant theme by " + tenant + " : file name : "+ ze.getName());
+                        success = false;
                     }
 
                 }
@@ -167,6 +167,7 @@ public class TenantManagerHostObject extends ScriptableObject {
             IOUtils.closeQuietly(zis);
             IOUtils.closeQuietly(zipInputStream);
         }
+        return success;
     }
 
 }

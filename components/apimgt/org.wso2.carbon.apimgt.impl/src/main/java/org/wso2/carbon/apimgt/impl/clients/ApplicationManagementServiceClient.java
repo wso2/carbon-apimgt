@@ -57,8 +57,7 @@ public class ApplicationManagementServiceClient {
         try {
 
             ConfigurationContext ctx = ConfigurationContextFactory.createConfigurationContextFromFileSystem(null, null);
-            identityApplicationManagementServiceStub = new IdentityApplicationManagementServiceStub(ctx, serviceURL
-                    + "IdentityApplicationManagementService");
+            identityApplicationManagementServiceStub = getIdentityApplicationManagementServiceStub(serviceURL, ctx);
             ServiceClient client = identityApplicationManagementServiceStub._getServiceClient();
             Options options = client.getOptions();
             options.setTimeOutInMilliSeconds(TIMEOUT_IN_MILLIS);
@@ -70,6 +69,12 @@ public class ApplicationManagementServiceClient {
         } catch (AxisFault axisFault) {
             throw new APIManagementException("Error while initializing the OAuth admin service stub", axisFault);
         }
+    }
+
+    protected IdentityApplicationManagementServiceStub getIdentityApplicationManagementServiceStub(String serviceURL,
+            ConfigurationContext ctx) throws AxisFault {
+        return new IdentityApplicationManagementServiceStub(ctx, serviceURL
+                + "IdentityApplicationManagementService");
     }
 
     /**

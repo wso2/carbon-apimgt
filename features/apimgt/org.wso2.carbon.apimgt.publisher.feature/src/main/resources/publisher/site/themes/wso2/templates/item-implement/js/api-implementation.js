@@ -20,6 +20,14 @@ $(document).ready(function(){
         config : endpoint_config
     });
 
+    var certificate_data;
+    if ($('#cert-data').val() != "") {
+        certificate_data = jQuery.parseJSON($('#cert-data').val());
+    }
+    $("#cert-config").certUi({
+        config: {"cert_data": certificate_data, "ep_data": endpoint_config}
+    });
+
     $('a.help_popup').popover({
         html : true,
         container: 'body',
@@ -146,7 +154,7 @@ $(document).ready(function(){
     var v = $("#prototype_form").validate({
         submitHandler: function(form) {        
         var designer = APIDesigner();
-        var endpoint_config = {"production_endpoints":{"url": $("#prototype_endpoint").val().trim(),"config":null},"endpoint_type":"http","implementation_status":"prototyped"}
+        var endpoint_config = {"production_endpoints":{"url": $("#prototype_endpoint").val().trim(),"config":null},"sandbox_endpoints":{"url":$("#prototype_endpoint").val().trim(),"config":null},"endpoint_type":"http","implementation_status":"prototyped"}
         $('.swagger').val(JSON.stringify(designer.api_doc));
         $('.prototype_config').val(JSON.stringify(endpoint_config));
         $('#corsConfigurationPrototyped').val(JSON.stringify($(".cors-ui-prototype-container").data("plugin_corsUi").get_cors_config()));

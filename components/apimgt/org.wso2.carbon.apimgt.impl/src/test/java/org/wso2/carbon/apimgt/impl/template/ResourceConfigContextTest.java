@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.template;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
@@ -36,6 +37,38 @@ public class ResourceConfigContextTest {
         API api = new API(new APIIdentifier("admin", "TestAPI", "1.0.0"));
         api.setStatus(APIStatus.CREATED);
         api.setContextTemplate("/");
+        api.setUriTemplates(setAPIUriTemplates());
+        ConfigContext configcontext = new APIConfigContext(api);
+        ResourceConfigContext resourceConfigContext = new ResourceConfigContext(configcontext, api);
+        resourceConfigContext.validate();
+        Assert.assertNotNull(resourceConfigContext.getContext().get("resources"));
+        Assert.assertNotNull(resourceConfigContext.getContext().get("apiStatus"));
+        //assign an empty URITemplate set and check the result
+        Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
+        api.setUriTemplates(uriTemplates);
+        configcontext = new APIConfigContext(api);
+        resourceConfigContext = new ResourceConfigContext(configcontext, api);
+        String errorClass = "org.wso2.carbon.apimgt.api.APIManagementException";
+        String expectedErrorMessage = "At least one resource is required";
+        try {
+            resourceConfigContext.validate();
+        } catch (APIManagementException e) {
+            Assert.assertTrue(errorClass.equalsIgnoreCase(e.getClass().getName()));
+            Assert.assertTrue(expectedErrorMessage.equalsIgnoreCase(e.getMessage()));
+        }
+        //set a null value for URITemplate and check the result
+        api.setUriTemplates(null);
+        configcontext = new APIConfigContext(api);
+        resourceConfigContext = new ResourceConfigContext(configcontext, api);
+        try {
+            resourceConfigContext.validate();
+        } catch (APIManagementException e) {
+            Assert.assertTrue(errorClass.equalsIgnoreCase(e.getClass().getName()));
+            Assert.assertTrue(expectedErrorMessage.equalsIgnoreCase(e.getMessage()));
+        }
+    }
+
+    private Set<URITemplate> setAPIUriTemplates(){
         Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
         URITemplate template = new URITemplate();
         template.setUriTemplate("/test");
@@ -45,11 +78,6 @@ public class ResourceConfigContextTest {
         template.setResourceURI("http://maps.googleapis.com/maps/api/geocode/json?address=Colombo");
         template.setResourceSandboxURI("http://maps.googleapis.com/maps/api/geocode/json?address=Colombo");
         uriTemplates.add(template);
-        api.setUriTemplates(uriTemplates);
-        ConfigContext configcontext = new APIConfigContext(api);
-        ResourceConfigContext resourceConfigContext = new ResourceConfigContext(configcontext, api);
-        resourceConfigContext.validate();
-        Assert.assertNotNull(resourceConfigContext.getContext().get("resources"));
-        Assert.assertNotNull(resourceConfigContext.getContext().get("apiStatus"));
+        return  uriTemplates;
     }
 }

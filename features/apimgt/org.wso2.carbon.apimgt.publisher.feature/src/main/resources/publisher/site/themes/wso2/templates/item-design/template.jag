@@ -438,6 +438,13 @@
             $("#resource_url_pattern").focus();
         }
     });
+    jQuery.ajax({
+        url: "site/themes/wso2/libs/swagger-editor/dist/bundle.js",
+        type: "get",
+        cache: true,
+        async: true,
+        dataType: "script"
+     });
 </script>
 <div id="swaggerEditer" class="modal" editor-url="<%= jagg.getAbsoluteUrl("/site/themes/wso2/libs/swagger-editor/#/")%>" style="display:none; z-index:9000; top:0; left:0; height:100%; width:100%">
     <div class="swagger_editer_header">

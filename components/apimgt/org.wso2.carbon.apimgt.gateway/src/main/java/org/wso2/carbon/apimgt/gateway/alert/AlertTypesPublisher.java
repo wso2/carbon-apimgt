@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.gateway.alert;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
@@ -32,14 +33,18 @@ import java.sql.SQLException;
 
 public class AlertTypesPublisher {
     private static final Log log = LogFactory.getLog(AlertTypesPublisher.class);
-    private boolean enabled;
-    private volatile APIMgtUsageDataPublisher publisher;
-    private boolean skipEventReceiverConnection;
+    protected boolean enabled;
+    protected volatile APIMgtUsageDataPublisher publisher;
+    protected boolean skipEventReceiverConnection;
 
     public AlertTypesPublisher() {
         enabled = APIUtil.isAnalyticsEnabled();
         skipEventReceiverConnection = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
                 isSkipEventReceiverConnection();
+    }
+
+    protected APIManagerAnalyticsConfiguration getApiManagerAnalyticsConfiguration() {
+        return DataPublisherUtil.getApiManagerAnalyticsConfiguration();
     }
 
     public void saveAndPublishAlertTypesEvent(String checkedAlertList, String emailList, String userName, String agent,
@@ -54,7 +59,7 @@ public class AlertTypesPublisher {
                 this.initializeDataPublisher();
             }
 
-            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            ApiMgtDAO apiMgtDAO = getApiMgtDao();
             //data persist in the database.
             apiMgtDAO.addAlertTypesConfigInfo(userName, emailList, checkedAlertList, agent);
             //set DTO
@@ -80,6 +85,10 @@ public class AlertTypesPublisher {
 
     }
 
+    protected ApiMgtDAO getApiMgtDao() {
+        return ApiMgtDAO.getInstance();
+    }
+
     protected void initializeDataPublisher() {
 
         if (!enabled || skipEventReceiverConnection) {
@@ -88,7 +97,7 @@ public class AlertTypesPublisher {
         if (publisher == null) {
             synchronized (this) {
                 if (publisher == null) {
-                    String publisherClass = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getPublisherClass();
+                    String publisherClass = getApiManagerAnalyticsConfiguration().getPublisherClass();
                     try {
                         log.debug("Instantiating Data Publisher");
                         PrivilegedCarbonContext.startTenantFlow();
@@ -129,7 +138,7 @@ public class AlertTypesPublisher {
                 this.initializeDataPublisher();
             }
 
-            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            ApiMgtDAO apiMgtDAO = getApiMgtDao();
             //data persist in the database.
             apiMgtDAO.unSubscribeAlerts(userName, agent);
             //set DTO

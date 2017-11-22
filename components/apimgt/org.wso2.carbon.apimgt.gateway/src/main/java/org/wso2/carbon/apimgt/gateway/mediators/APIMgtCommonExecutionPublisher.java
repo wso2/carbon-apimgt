@@ -23,10 +23,14 @@ import org.apache.synapse.mediators.AbstractMediator;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.rest.RESTUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
-import org.wso2.carbon.apimgt.usage.publisher.dto.ExecutionTimePublisherDTO;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.usage.publisher.APIMgtUsageDataPublisher;
 import org.wso2.carbon.apimgt.usage.publisher.DataPublisherUtil;
+import org.wso2.carbon.apimgt.usage.publisher.dto.ExecutionTimePublisherDTO;
 import org.wso2.carbon.apimgt.usage.publisher.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -64,6 +68,8 @@ public class APIMgtCommonExecutionPublisher extends AbstractMediator {
                 tenantDomain = org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
             }
             String provider = APIUtil.getAPIProviderFromRESTAPI(apiName, tenantDomain);
+            String keyType = (String) messageContext.getProperty(APIConstants.API_KEY_TYPE);
+            String correlationID = GatewayUtils.getAndSetCorrelationID(messageContext);
 
             ExecutionTimePublisherDTO executionTimePublisherDTO = new ExecutionTimePublisherDTO();
             executionTimePublisherDTO.setApiName(APIUtil.getAPINamefromRESTAPI(apiName));
@@ -92,6 +98,8 @@ public class APIMgtCommonExecutionPublisher extends AbstractMediator {
             executionTimePublisherDTO.setBackEndLatency(backendLatency == null ? 0 :
                     ((Number) backendLatency).longValue());
             executionTimePublisherDTO.setEventTime(System.currentTimeMillis());
+            executionTimePublisherDTO.setKeyType(keyType);
+            executionTimePublisherDTO.setCorrelationID(correlationID);
             publisher.publishEvent(executionTimePublisherDTO);
         }
         return true;
@@ -99,16 +107,14 @@ public class APIMgtCommonExecutionPublisher extends AbstractMediator {
 
     protected void initializeDataPublisher() {
         enabled = APIUtil.isAnalyticsEnabled();
-        skipEventReceiverConnection = DataPublisherUtil.getApiManagerAnalyticsConfiguration().
-                isSkipEventReceiverConnection();
+        skipEventReceiverConnection = getApiManagerAnalyticsConfiguration().isSkipEventReceiverConnection();
         if (!enabled) {
             return;
         }
         if (publisher == null) {
             synchronized (this) {
                 if (publisher == null) {
-                    String publisherClass = DataPublisherUtil.getApiManagerAnalyticsConfiguration()
-                            .getPublisherClass();
+                    String publisherClass = getApiManagerAnalyticsConfiguration().getPublisherClass();
                     try {
                         log.debug("Instantiating Data Publisher");
                         PrivilegedCarbonContext.startTenantFlow();
@@ -130,5 +136,9 @@ public class APIMgtCommonExecutionPublisher extends AbstractMediator {
                 }
             }
         }
+    }
+
+    protected APIManagerAnalyticsConfiguration getApiManagerAnalyticsConfiguration() {
+        return DataPublisherUtil.getApiManagerAnalyticsConfiguration();
     }
 }

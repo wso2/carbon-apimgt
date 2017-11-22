@@ -15,14 +15,15 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.databridge.agent.DataPublisher;
 
-import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.TreeMap;
+import javax.xml.stream.XMLStreamException;
 
 /**
  * This class is responsible for executing data publishing logic. This class implements runnable interface and
@@ -35,7 +36,10 @@ public class DataProcessAndPublishingAgent implements Runnable {
 
     private static String streamID = "org.wso2.throttle.request.stream:1.0.0";
     private MessageContext messageContext;
-    private DataPublisher dataPublisher = ThrottleDataPublisher.getDataPublisher();
+    private DataPublisher dataPublisher;
+
+
+
     String applicationLevelThrottleKey;
     String applicationLevelTier;
     String apiLevelThrottleKey;
@@ -56,6 +60,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
 
     public DataProcessAndPublishingAgent() {
 
+        dataPublisher = getDataPublisher();
     }
 
     /**
@@ -115,7 +120,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
         this.apiName = APIUtil.getAPINamefromRESTAPI(apiName);
 
 
-        if (ServiceReferenceHolder.getInstance().getThrottleProperties().isEnableHeaderConditions()) {
+        if (getThrottleProperties().isEnableHeaderConditions()) {
             org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
                     .getAxis2MessageContext();
             TreeMap<String, String> transportHeaderMap = (TreeMap<String, String>) axis2MessageContext
@@ -155,7 +160,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
         }
 
         //Setting query parameters
-        if (ServiceReferenceHolder.getInstance().getThrottleProperties().isEnableQueryParamConditions()) {
+        if (getThrottleProperties().isEnableQueryParamConditions()) {
             Map<String, String> queryParams = GatewayUtils.getQueryParams(axis2MessageContext);
             if (queryParams != null) {
                 jsonObMap.putAll(queryParams);
@@ -164,7 +169,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
         }
 
         //Publish jwt claims
-        if (ServiceReferenceHolder.getInstance().getThrottleProperties().isEnableJwtConditions()) {
+        if (getThrottleProperties().isEnableJwtConditions()) {
             if (authenticationContext.getCallerToken() != null) {
                 Map assertions = GatewayUtils.getJWTClaims(authenticationContext);
                 if (assertions != null) {
@@ -186,7 +191,7 @@ public class DataProcessAndPublishingAgent implements Runnable {
                 messageSizeInBytes = Integer.parseInt(contentLength.toString());
             } else {
                 try {
-                    RelayUtils.buildMessage(axis2MessageContext);
+                    buildMessage(axis2MessageContext);
                 } catch (IOException ex) {
                     //In case of an exception, it won't be propagated up,and set response size to 0
                     log.error("Error occurred while building the message to" +
@@ -220,4 +225,15 @@ public class DataProcessAndPublishingAgent implements Runnable {
         dataPublisher.tryPublish(event);
     }
 
+    protected void buildMessage(org.apache.axis2.context.MessageContext axis2MessageContext) throws IOException,
+            XMLStreamException {
+        RelayUtils.buildMessage(axis2MessageContext);
+    }
+
+    protected ThrottleProperties getThrottleProperties() {
+        return ServiceReferenceHolder.getInstance().getThrottleProperties();
+    }
+    protected DataPublisher getDataPublisher() {
+        return ThrottleDataPublisher.getDataPublisher();
+    }
 }

@@ -32,7 +32,7 @@ if(request.getParameter("type") == "prototyped"){
             <li><a href="<%=jagg.getMappedUrl("/site/pages/list-apis.jag")%>?type=prototyped<%=tenantPostfix%>"><%=i18n.localize("Prototyped")%></a></li>
           </ul>
       </div>
-      <input type="text" class="form-control appm-content-search" title="apim_search" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}%> name="query" id="query" placeholder="<%=i18n.localize("Search")%>...">
+      <input type="text" class="form-control appm-content-search" title="apim_search" onkeydown="key_down(event)" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}%> name="query" id="query" placeholder="<%=i18n.localize("Search")%>...">
       <div class="input-group-btn">
         <button class="btn btn-default wrap-input-right" id="searchAPI" type="submit" title="<%=i18n.localize("Search")%>">
           <i class="fw fw-search" aria-hidden="true"></i>
@@ -92,5 +92,14 @@ if(request.getParameter("type") == "prototyped"){
   <div class="col-md-6 api-search "><a href="#" title="<%=i18n.localize("Search Options")%>" class="help-text" data-placement="bottom" rel="popover" data-popover-content="#apiSearchHelp"><i class="fa fa-question-circle"></i> <%=i18n.localize("Search Options")%></a>
 </div>
 </div -->
+
+<script>
+	function key_down(e) {
+		if(e.key == "Enter"){
+			$("#searchAPI")[0].click();
+		}
+  	}
+</script>
+
 
 <% }); %>

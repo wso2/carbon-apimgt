@@ -26,74 +26,87 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.config.xml.rest.VersionStrategyFactory;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.rest.*;
+import org.apache.synapse.rest.API;
+import org.apache.synapse.rest.AbstractHandler;
+import org.apache.synapse.rest.RESTConstants;
+import org.apache.synapse.rest.RESTUtils;
+import org.apache.synapse.rest.Resource;
 import org.apache.synapse.rest.dispatch.RESTDispatcher;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class CORSRequestHandler extends AbstractHandler implements ManagedLifecycle {
 
-	private static final Log log = LogFactory.getLog(CORSRequestHandler.class);
-	private String apiImplementationType;
-	private String allowHeaders;
-	private String allowCredentials;
-	private Set<String> allowedOrigins;
-	private boolean initializeHeaderValues;
-	private String allowedMethods;
-	private boolean allowCredentialsEnabled;
-	public void init(SynapseEnvironment synapseEnvironment) {
-		if (log.isDebugEnabled()) {
-			log.debug("Initializing CORSRequest Handler instance");
-		}
-		if (ServiceReferenceHolder.getInstance().getApiManagerConfigurationService() != null) {
-			 initializeHeaders();
-		}
-	}
+    private static final Log log = LogFactory.getLog(CORSRequestHandler.class);
+    private String apiImplementationType;
+    private String allowHeaders;
+    private String allowCredentials;
+    private Set<String> allowedOrigins;
+    private boolean initializeHeaderValues;
+    private String allowedMethods;
+    private boolean allowCredentialsEnabled;
 
-	/**
-	 * This method used to Initialize  header values
-	 *
-	 * @return true after Initialize the values
-	 */
-	void initializeHeaders() {
-		if (allowHeaders == null) {
-			allowHeaders = APIUtil.getAllowedHeaders();
-		}
-		if (allowedOrigins == null) {
-			String allowedOriginsList = APIUtil.getAllowedOrigins();
-			if (!allowedOriginsList.isEmpty()) {
-				allowedOrigins = new HashSet<String>(Arrays.asList(allowedOriginsList.split(",")));
-			}
-		}
-		if (allowCredentials == null) {
-			allowCredentialsEnabled = APIUtil.isAllowCredentials();
-		}
-		if (allowedMethods == null) {
-			allowedMethods = APIUtil.getAllowedMethods();
-		}
+    public void init(SynapseEnvironment synapseEnvironment) {
+        if (log.isDebugEnabled()) {
+            log.debug("Initializing CORSRequest Handler instance");
+        }
+        if (getApiManagerConfigurationService() != null) {
+            initializeHeaders();
+        }
+    }
 
-		initializeHeaderValues =  true;
-	}
+    protected APIManagerConfigurationService getApiManagerConfigurationService() {
+        return ServiceReferenceHolder.getInstance().getApiManagerConfigurationService();
+    }
 
-	public void destroy() {
-		if (log.isDebugEnabled()) {
-			log.debug("Destroying CORSRequest Handler instance");
-		}
-	}
+    /**
+     * This method used to Initialize  header values
+     *
+     * @return true after Initialize the values
+     */
+    void initializeHeaders() {
+        if (allowHeaders == null) {
+            allowHeaders = APIUtil.getAllowedHeaders();
+        }
+        if (allowedOrigins == null) {
+            String allowedOriginsList = APIUtil.getAllowedOrigins();
+            if (!allowedOriginsList.isEmpty()) {
+                allowedOrigins = new HashSet<String>(Arrays.asList(allowedOriginsList.split(",")));
+            }
+        }
+        if (allowCredentials == null) {
+            allowCredentialsEnabled = APIUtil.isAllowCredentials();
+        }
+        if (allowedMethods == null) {
+            allowedMethods = APIUtil.getAllowedMethods();
+        }
 
-	public boolean handleRequest(MessageContext messageContext) {
+        initializeHeaderValues = true;
+    }
 
-		long executionStartTime = System.currentTimeMillis();
-		Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
-                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName()));
-        Timer.Context context = timer.start();
+    public void destroy() {
+        if (log.isDebugEnabled()) {
+            log.debug("Destroying CORSRequest Handler instance");
+        }
+    }
+
+    public boolean handleRequest(MessageContext messageContext) {
+
+        long executionStartTime = System.currentTimeMillis();
+        Timer.Context context = startMetricTimer();
 
         try {
             if (!initializeHeaderValues) {
@@ -101,38 +114,38 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             }
             String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
             String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-			String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
-			String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
+            String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
+            String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
                     getProperty(Constants.Configuration.HTTP_METHOD);
-			API selectedApi = messageContext.getConfiguration().getAPI(apiName);
+            API selectedApi = messageContext.getConfiguration().getAPI(apiName);
             Resource selectedResource = null;
-			String subPath = null;
-            String path = RESTUtils.getFullRequestPath(messageContext);
-			if(selectedApi != null) {
-				if (VersionStrategyFactory.TYPE_URL.equals(selectedApi.getVersionStrategy().getVersionType())) {
-					subPath = path.substring(
-							selectedApi.getContext().length() + selectedApi.getVersionStrategy().getVersion().length() + 1);
-				} else {
-					subPath = path.substring(selectedApi.getContext().length());
-				}
-			}
+            String subPath = null;
+            String path = getFullRequestPath(messageContext);
+            if (selectedApi != null) {
+                if (VersionStrategyFactory.TYPE_URL.equals(selectedApi.getVersionStrategy().getVersionType())) {
+                    subPath = path.substring(
+                            selectedApi.getContext().length() + selectedApi.getVersionStrategy().getVersion().length() + 1);
+                } else {
+                    subPath = path.substring(selectedApi.getContext().length());
+                }
+            }
             if ("".equals(subPath)) {
                 subPath = "/";
             }
             messageContext.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, subPath);
 
-            if(selectedApi != null){
+            if (selectedApi != null) {
                 Resource[] allAPIResources = selectedApi.getResources();
 
-				Set<Resource> acceptableResources = new LinkedHashSet<Resource>();
+                Set<Resource> acceptableResources = new LinkedHashSet<Resource>();
 
-				for(Resource resource : allAPIResources){
-					//If the requesting method is OPTIONS or if the Resource contains the requesting method
-					if (RESTConstants.METHOD_OPTIONS.equals(httpMethod) ||
-							(resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
-						acceptableResources.add(resource);
-					}
-				}
+                for (Resource resource : allAPIResources) {
+                    //If the requesting method is OPTIONS or if the Resource contains the requesting method
+                    if (RESTConstants.METHOD_OPTIONS.equals(httpMethod) ||
+                            (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
+                        acceptableResources.add(resource);
+                    }
+                }
 
                 if (acceptableResources.size() > 0) {
                     for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
@@ -143,20 +156,20 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                         }
                     }
                 }
-				//If no acceptable resources are found
-				else{
-					//We're going to send a 405 or a 404. Run the following logic to determine which.
-					handleResourceNotFound(messageContext, Arrays.asList(allAPIResources));
-					return false;
-				}
+                //If no acceptable resources are found
+                else {
+                    //We're going to send a 405 or a 404. Run the following logic to determine which.
+                    handleResourceNotFound(messageContext, Arrays.asList(allAPIResources));
+                    return false;
+                }
 
-				//No matching resource found
-				if(selectedResource == null){
-					//Respond with a 404
-					onResourceNotFoundError(messageContext, HttpStatus.SC_NOT_FOUND,
-							APIMgtGatewayConstants.RESOURCE_NOT_FOUND_ERROR_MSG);
-					return false;
-				}
+                //No matching resource found
+                if (selectedResource == null) {
+                    //Respond with a 404
+                    onResourceNotFoundError(messageContext, HttpStatus.SC_NOT_FOUND,
+                            APIMgtGatewayConstants.RESOURCE_NOT_FOUND_ERROR_MSG);
+                    return false;
+                }
             }
 
             String resourceString = selectedResource.getDispatcherHelper().getString();
@@ -165,171 +178,190 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, resourceString);
             messageContext.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
 
-			//If this is an OPTIONS request
-			if (APIConstants.SupportedHTTPVerbs.OPTIONS.name().equalsIgnoreCase(httpMethod)) {
-				//If the OPTIONS method is explicity specified in the resource
-				if (Arrays.asList(selectedResource.getMethods()).contains(
-						APIConstants.SupportedHTTPVerbs.OPTIONS.name())) {
-					//We will not handle the CORS headers, let the back-end do it.
-					return true;
-				}
-				setCORSHeaders(messageContext, selectedResource);
-				Mediator corsSequence = messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME);
-				if (corsSequence != null) {
-					corsSequence.mediate(messageContext);
-				}
-				Utils.send(messageContext, HttpStatus.SC_OK);
-				return false;
-			}
-			else if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(apiImplementationType)) {
-				setCORSHeaders(messageContext, selectedResource);
-				messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME).mediate(messageContext);
-			}
-			setCORSHeaders(messageContext, selectedResource);
-			return true;
-		} finally {
-            context.stop();
+            //If this is an OPTIONS request
+            if (APIConstants.SupportedHTTPVerbs.OPTIONS.name().equalsIgnoreCase(httpMethod)) {
+                //If the OPTIONS method is explicity specified in the resource
+                if (Arrays.asList(selectedResource.getMethods()).contains(
+                        APIConstants.SupportedHTTPVerbs.OPTIONS.name())) {
+                    //We will not handle the CORS headers, let the back-end do it.
+                    return true;
+                }
+                setCORSHeaders(messageContext, selectedResource);
+                Mediator corsSequence = messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME);
+                if (corsSequence != null) {
+                    corsSequence.mediate(messageContext);
+                }
+                Utils.send(messageContext, HttpStatus.SC_OK);
+                return false;
+            } else if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(apiImplementationType)) {
+                setCORSHeaders(messageContext, selectedResource);
+                messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME).mediate(messageContext);
+            }
+            setCORSHeaders(messageContext, selectedResource);
+            return true;
+        } finally {
+            stopMetricTimer(context);
         }
     }
 
-	public boolean handleResponse(MessageContext messageContext) {
-		Mediator corsSequence = messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME);
-		if (corsSequence != null) {
-			corsSequence.mediate(messageContext);
-		}
-		return true;
-	}
+    protected String getFullRequestPath(MessageContext messageContext) {
+        return RESTUtils.getFullRequestPath(messageContext);
+    }
 
-	private void handleResourceNotFound(MessageContext messageContext, List<Resource> allAPIResources) {
+    protected Timer.Context startMetricTimer() {
+        Timer timer = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
+                APIConstants.METRICS_PREFIX, this.getClass().getSimpleName()));
+        return timer.start();
+    }
 
-		Resource uriMatchingResource = null;
+    protected void stopMetricTimer(Timer.Context context) {
+        context.stop();
+    }
 
-		for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
-			uriMatchingResource = dispatcher.findResource(messageContext, allAPIResources);
-			//If a resource with a matching URI was found.
-			if (uriMatchingResource != null) {
-				onResourceNotFoundError(messageContext, HttpStatus.SC_METHOD_NOT_ALLOWED,
-						APIMgtGatewayConstants.METHOD_NOT_FOUND_ERROR_MSG);
-				return;
-			}
-		}
+    public boolean handleResponse(MessageContext messageContext) {
+        Mediator corsSequence = messageContext.getSequence(APIConstants.CORS_SEQUENCE_NAME);
+        if (corsSequence != null) {
+            corsSequence.mediate(messageContext);
+        }
+        return true;
+    }
 
-		//If a resource with a matching URI was not found.
-		if(uriMatchingResource == null){
-			//Respond with a 404.
-			onResourceNotFoundError(messageContext, HttpStatus.SC_NOT_FOUND,
-					APIMgtGatewayConstants.RESOURCE_NOT_FOUND_ERROR_MSG);
-			return;
-		}
-	}
+    private void handleResourceNotFound(MessageContext messageContext, List<Resource> allAPIResources) {
 
-	private void onResourceNotFoundError(MessageContext messageContext, int statusCode, String errorMessage){
-		messageContext.setProperty(APIConstants.CUSTOM_HTTP_STATUS_CODE, statusCode);
-		messageContext.setProperty(APIConstants.CUSTOM_ERROR_CODE, statusCode);
-		messageContext.setProperty(APIConstants.CUSTOM_ERROR_MESSAGE, errorMessage);
-		Mediator resourceMisMatchedSequence = messageContext.getSequence(RESTConstants.NO_MATCHING_RESOURCE_HANDLER);
-		if (resourceMisMatchedSequence != null) {
-			resourceMisMatchedSequence.mediate(messageContext);
-		}
-	}
+        Resource uriMatchingResource = null;
 
-	/**
-	 * This method used to set CORS headers into message context
-	 *
-	 * @param messageContext   message context for set cors headers as properties
-	 * @param selectedResource resource according to the request
-	 */
-	public void setCORSHeaders(MessageContext messageContext, Resource selectedResource) {
-		org.apache.axis2.context.MessageContext axis2MC =
-				((Axis2MessageContext) messageContext).getAxis2MessageContext();
-		Map<String, String> headers =
-				(Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-		String requestOrigin = headers.get("Origin");
-		String allowedOrigin = getAllowedOrigins(requestOrigin);
+        for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
+            uriMatchingResource = dispatcher.findResource(messageContext, allAPIResources);
+            //If a resource with a matching URI was found.
+            if (uriMatchingResource != null) {
+                onResourceNotFoundError(messageContext, HttpStatus.SC_METHOD_NOT_ALLOWED,
+                        APIMgtGatewayConstants.METHOD_NOT_FOUND_ERROR_MSG);
+                return;
+            }
+        }
 
-		//Set the access-Control-Allow-Credentials header in the response only if it is specified to true in the api-manager configuration
-		//and the allowed origin is not the wildcard (*)
+        //If a resource with a matching URI was not found.
+        if (uriMatchingResource == null) {
+            //Respond with a 404.
+            onResourceNotFoundError(messageContext, HttpStatus.SC_NOT_FOUND,
+                    APIMgtGatewayConstants.RESOURCE_NOT_FOUND_ERROR_MSG);
+            return;
+        }
+    }
+
+    private void onResourceNotFoundError(MessageContext messageContext, int statusCode, String errorMessage) {
+        messageContext.setProperty(APIConstants.CUSTOM_HTTP_STATUS_CODE, statusCode);
+        messageContext.setProperty(APIConstants.CUSTOM_ERROR_CODE, statusCode);
+        messageContext.setProperty(APIConstants.CUSTOM_ERROR_MESSAGE, errorMessage);
+        Mediator resourceMisMatchedSequence = messageContext.getSequence(RESTConstants.NO_MATCHING_RESOURCE_HANDLER);
+        if (resourceMisMatchedSequence != null) {
+            resourceMisMatchedSequence.mediate(messageContext);
+        }
+    }
+
+    /**
+     * This method used to set CORS headers into message context
+     *
+     * @param messageContext   message context for set cors headers as properties
+     * @param selectedResource resource according to the request
+     */
+    public void setCORSHeaders(MessageContext messageContext, Resource selectedResource) {
+        org.apache.axis2.context.MessageContext axis2MC =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        Map<String, String> headers =
+                (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        String requestOrigin = headers.get("Origin");
+        String allowedOrigin = getAllowedOrigins(requestOrigin);
+
+        //Set the access-Control-Allow-Credentials header in the response only if it is specified to true in the api-manager configuration
+        //and the allowed origin is not the wildcard (*)
         if (allowCredentialsEnabled && !"*".equals(allowedOrigin)) {
             messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, Boolean.TRUE);
         }
 
-		messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
-		String allowedMethods = "";
-		StringBuffer allowedMethodsBuffer = new StringBuffer();
-		if (selectedResource != null) {
-			String[] methods = selectedResource.getMethods();
-			for (String method : methods) {
-				allowedMethodsBuffer.append(method).append(',');
-				}
-			allowedMethods = allowedMethodsBuffer.toString();
-			if (methods.length != 0) {
-				allowedMethods = allowedMethods.substring(0, allowedMethods.length() - 1);
-			}
-		} else {
-			allowedMethods = this.allowedMethods;
-		}
-		if ("*".equals(allowHeaders)) {
-			allowHeaders = headers.get("Access-Control-Request-Headers");
+        messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
+        String allowedMethods = "";
+        StringBuffer allowedMethodsBuffer = new StringBuffer();
+        if (selectedResource != null) {
+            String[] methods = selectedResource.getMethods();
+            for (String method : methods) {
+                allowedMethodsBuffer.append(method).append(',');
+            }
+            allowedMethods = allowedMethodsBuffer.toString();
+            if (methods.length != 0) {
+                allowedMethods = allowedMethods.substring(0, allowedMethods.length() - 1);
+            }
+        } else {
+            allowedMethods = this.allowedMethods;
+        }
+        if ("*".equals(allowHeaders)) {
+            allowHeaders = headers.get("Access-Control-Request-Headers");
 
-		}
-		messageContext.setProperty(APIConstants.CORS_CONFIGURATION_ENABLED, APIUtil.isCORSEnabled());
-		messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, allowedMethods);
-		messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, allowHeaders);
-	}
+        }
+        messageContext.setProperty(APIConstants.CORS_CONFIGURATION_ENABLED, isCorsEnabled());
+        messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_METHODS, allowedMethods);
+        messageContext.setProperty(APIConstants.CORSHeaders.ACCESS_CONTROL_ALLOW_HEADERS, allowHeaders);
+    }
+
+    protected boolean isCorsEnabled() {
+        return APIUtil.isCORSEnabled();
+    }
 
 
-	public String getAllowHeaders() {
-		return allowHeaders;
-	}
+    public String getAllowHeaders() {
+        return allowHeaders;
+    }
 
-	public void setAllowHeaders(String allowHeaders) {
-		this.allowHeaders = allowHeaders;
-	}
+    public void setAllowHeaders(String allowHeaders) {
+        this.allowHeaders = allowHeaders;
+    }
 
-	public String getAllowedOrigins(String origin) {
-		if (allowedOrigins.contains("*")) {
-			return "*";
-		} else if (allowedOrigins.contains(origin)) {
-			return origin;
-		} else {
-			return null;
-		}
-	}
+    public String getAllowedOrigins(String origin) {
+        if (allowedOrigins.contains("*")) {
+            return "*";
+        } else if (allowedOrigins.contains(origin)) {
+            return origin;
+        } else {
+            return null;
+        }
+    }
 
     public void setAllowedOrigins(String allowedOrigins) {
         this.allowedOrigins = new HashSet<String>(Arrays.asList(allowedOrigins.split(",")));
     }
 
-	public String getApiImplementationType() {
-		return apiImplementationType;
-	}
+    public String getApiImplementationType() {
+        return apiImplementationType;
+    }
 
-	public void setApiImplementationType(String apiImplementationType) {
-		this.apiImplementationType = apiImplementationType;
-	}
+    public void setApiImplementationType(String apiImplementationType) {
+        this.apiImplementationType = apiImplementationType;
+    }
 
-	// For backward compatibility with 1.9.0 since the property name is inline
-	public String getInline() { return getApiImplementationType(); }
+    // For backward compatibility with 1.9.0 since the property name is inline
+    public String getInline() {
+        return getApiImplementationType();
+    }
 
-	// For backward compatibility with 1.9.0 since the property name is inline
-	public void setInline(String inlineType) {
-		setApiImplementationType(inlineType);
-	}
+    // For backward compatibility with 1.9.0 since the property name is inline
+    public void setInline(String inlineType) {
+        setApiImplementationType(inlineType);
+    }
 
-	public String isAllowCredentials() {
-		return allowCredentials;
-	}
+    public String isAllowCredentials() {
+        return allowCredentials;
+    }
 
-	public void setAllowCredentials(String allowCredentials) {
-		this.allowCredentialsEnabled = Boolean.parseBoolean(allowCredentials);
-		this.allowCredentials = allowCredentials;
-	}
+    public void setAllowCredentials(String allowCredentials) {
+        this.allowCredentialsEnabled = Boolean.parseBoolean(allowCredentials);
+        this.allowCredentials = allowCredentials;
+    }
 
-	public String getAllowedMethods() {
-		return allowedMethods;
-	}
+    public String getAllowedMethods() {
+        return allowedMethods;
+    }
 
-	public void setAllowedMethods(String allowedMethods) {
-		this.allowedMethods = allowedMethods;
-	}
+    public void setAllowedMethods(String allowedMethods) {
+        this.allowedMethods = allowedMethods;
+    }
 }

@@ -1,24 +1,3 @@
-;(function( $ ) {
-    $.fn.zclip = function() {
-        if(typeof ZeroClipboard == 'function'){
-            var client = new ZeroClipboard( this );
-            client.on( "ready", function( readyEvent ) {
-              client.on( "aftercopy", function( event ) {
-                var target = $(event.target);
-                target.attr("title","Copied!")
-                target.tooltip('enable');
-                target.tooltip("show");
-                target.tooltip('disable');
-              });
-            });
-        }else{
-            console.warn('Warning : Dependency missing - ZeroClipboard Library');
-        }
-        return this;
-    };
-}( jQuery ));
-
-
 var GrantTypes = function (available) {
     //order will be preserved in the response map
     this.config = {
@@ -356,9 +335,8 @@ GrantTypes.prototype.getMap = function(selected){
             this.app.provide_keys = this.options.provide_keys;
 
             this.element.html(template(this.app));
-            this.element.find(".copy-button").zclip();
-            this.element.find(".selectpicker").selectpicker({dropupAuto:false}); 
-            this.element.find(".curl_command").codeHighlight();           
+            this.element.find(".selectpicker").selectpicker({dropupAuto:false});
+            this.element.find(".curl_command").codeHighlight();
         }
     };
 
@@ -379,7 +357,31 @@ GrantTypes.prototype.getMap = function(selected){
 
 
 $(document).ready(function() {
+    $('.copy-button').click(function(event) {
+        var text = this.getAttribute("data-clipboard-text");
 
+        if (document.queryCommandSupported('copy')) {
+            try {
+                var temp = $("<input>");
+                var target = $(event.target);
+                $("body").append(temp);
+                temp.val(text).select();
+                document.execCommand("copy");
+                temp.remove();
+                target.attr("title","Copied!")
+                target.tooltip('enable');
+                target.tooltip("show");
+                target.tooltip('disable');
+                target.attr("title","Copy")
+            } catch(e) {
+                // Copy command failed. Therefore prompting user to manually copy the text
+                window.prompt("Press : Ctrl+C and hit Enter to copy the value", text);
+            }
+        } else {
+            // Copy command not supported. Therefore prompting user to manually copy the text
+            window.prompt("Press : Ctrl+C and hit Enter to copy the value", text);
+        }
+    });
 $("#subscription-actions").each(function(){
     var source   = $("#subscription-actions").html();
     var subscription_actions = Handlebars.compile(source);
@@ -557,7 +559,3 @@ $(document).on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
 });
 
 });
-
-
-
-

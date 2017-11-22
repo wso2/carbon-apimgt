@@ -55,9 +55,9 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             String streamID= DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamName()+":"
                              +DataPublisherUtil.getApiManagerAnalyticsConfiguration().getRequestStreamVersion();
             //Publish Request Data
-            dataPublisher.tryPublish( streamID ,
-                                  System.currentTimeMillis(), new Object[]{"external"}, null,
-                                  (Object[]) dataBridgeRequestPublisherDTO.createPayload());
+            dataPublisher.tryPublish(streamID, System.currentTimeMillis(),
+                    (Object[]) dataBridgeRequestPublisherDTO.createMetaData(), null,
+                    (Object[]) dataBridgeRequestPublisherDTO.createPayload());
         } catch(Exception e){
             log.error("Error while publishing Request event", e);
         }
@@ -71,9 +71,9 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
                               + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getResponseStreamVersion();
             dataBridgeResponsePublisherDTO.createPayload();
             //Publish Response Data
-            dataPublisher.tryPublish(streamID,
-                                  System.currentTimeMillis(), new Object[]{"external"}, null,
-                                  (Object[]) dataBridgeResponsePublisherDTO.createPayload());
+            dataPublisher.tryPublish(streamID, System.currentTimeMillis(),
+                    (Object[]) dataBridgeResponsePublisherDTO.createMetaData(), null,
+                    (Object[]) dataBridgeResponsePublisherDTO.createPayload());
 
         } catch (Exception e) {
             log.error("Error while publishing Response event", e);
@@ -87,9 +87,9 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamName() + ":"
                               + DataPublisherUtil.getApiManagerAnalyticsConfiguration().getFaultStreamVersion();
             //Publish Fault Data
-            dataPublisher.tryPublish(streamID,
-                                  System.currentTimeMillis(), new Object[]{"external"}, null,
-                                  (Object[]) dataBridgeFaultPublisherDTO.createPayload());
+            dataPublisher.tryPublish(streamID, System.currentTimeMillis(),
+                    (Object[]) dataBridgeFaultPublisherDTO.createMetaData(), null,
+                    (Object[]) dataBridgeFaultPublisherDTO.createPayload());
 
         } catch (Exception e) {
             log.error("Error while publishing Fault event", e);
@@ -104,9 +104,9 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamName() + ":" +
                               DataPublisherUtil.getApiManagerAnalyticsConfiguration().getThrottleStreamVersion();
             //Publish Throttle data
-            dataPublisher.tryPublish(streamID,
-                                  System.currentTimeMillis(), new Object[]{"external"}, null,
-                                  (Object[]) dataBridgeThrottlePublisherDTO.createPayload());
+            dataPublisher.tryPublish(streamID, System.currentTimeMillis(),
+                    (Object[]) dataBridgeThrottlePublisherDTO.createMetaData(), null,
+                    (Object[]) dataBridgeThrottlePublisherDTO.createPayload());
 
         } catch (Exception e) {
             log.error("Error while publishing Throttle exceed event", e);
@@ -120,7 +120,8 @@ public class APIMgtUsageDataBridgeDataPublisher implements APIMgtUsageDataPublis
             String streamID = DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamName() + ":" +
                     DataPublisherUtil.getApiManagerAnalyticsConfiguration().getExecutionTimeStreamVersion();
 
-            dataPublisher.tryPublish(streamID,System.currentTimeMillis(), new Object[]{"external"}, null,
+            dataPublisher.tryPublish(streamID, System.currentTimeMillis(),
+                    (Object[]) dataBridgeExecutionTimePublisherDTO.createMetaData(), null,
                     (Object[]) dataBridgeExecutionTimePublisherDTO.createPayload());
         } catch (Exception e) {
             log.error("Error while publishing Execution time events", e);

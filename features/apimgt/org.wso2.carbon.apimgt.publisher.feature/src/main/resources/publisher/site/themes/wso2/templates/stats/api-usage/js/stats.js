@@ -452,7 +452,7 @@ var drawProviderAPIUsage = function(from,to){
                 } else {
                     $('#apiTable').hide();
                     $('#apiChart').css("fontSize", 14);
-                    $('#noData').html($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="' + i18n.t("No Stats") + '"></i>' + i18n.t("No Data Available.") + '</h4></div></div>'));
+                    $('#noData').html($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="' + i18n.t("No Stats") + '"></i>' + i18n.t("No Data Available") + '</h4></div></div>'));
                 }
 
             } else {

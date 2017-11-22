@@ -61,6 +61,20 @@ include("/jagg/jagg.jag");
             apiProvider = null;
         }
 
+        var apiResult = jagg.module("api").getAPIDescription({
+            name:apiName,
+            version:apiVersion,
+            provider:apiProvider
+        }, user.username);
+
+        if (apiResult.error) {
+            print({
+                error:true,
+                message:msg.error.forbidAction(action)
+            });
+            return;
+        }
+        
         mod = jagg.module("sdk");
         result = mod.generateClientSDK(language, apiName, apiVersion, apiProvider);
 

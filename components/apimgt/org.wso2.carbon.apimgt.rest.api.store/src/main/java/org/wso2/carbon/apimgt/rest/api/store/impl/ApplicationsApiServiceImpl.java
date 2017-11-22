@@ -18,14 +18,18 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -36,16 +40,18 @@ import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Map;
+import javax.ws.rs.core.Response;
 
 /**
  * This is the service implementation class for Store application related operations
@@ -183,6 +189,10 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                     String[] accessAllowDomainsArray = body.getAccessAllowDomains().toArray(new String[1]);
                     JSONObject jsonParamObj = new JSONObject();
                     jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
+                    String grantTypes = StringUtils.join(body.getSupportedGrantTypes(), ',');
+                    if (!StringUtils.isEmpty(grantTypes)) {
+                        jsonParamObj.put(APIConstants.JSON_GRANT_TYPES, grantTypes);
+                    }
                     String jsonParams = jsonParamObj.toString();
                     String tokenScopes = StringUtils.join(body.getScopes(), " ");
 
@@ -242,6 +252,88 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             }
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving application " + applicationId, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieve Keys of an application by key type
+     *
+     * @param applicationId Application Id
+     * @param keyType       Key Type (Production | Sandbox)
+     * @param groupId       Group id of application (if any)
+     * @param accept       Accept header
+     * @return Application Key Information
+     */
+    @Override
+    public Response applicationsApplicationIdKeysKeyTypeGet(String applicationId, String keyType, String groupId,
+                                                            String accept) {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            if (application != null) {
+                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    for (APIKey apiKey : application.getKeys()) {
+                        if (keyType != null && keyType.equals(apiKey.getType())) {
+                            ApplicationKeyDTO appKeyDTO = ApplicationKeyMappingUtil.fromApplicationKeyToDTO(apiKey);
+                            return Response.ok().entity(appKeyDTO).build();
+                        }
+                    }
+                } else {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while retrieving application " + applicationId, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Update grant types/callback URL
+     *
+     * @param applicationId Application Id
+     * @param keyType       Key Type (Production | Sandbox)
+     * @param body          Grant type and callback URL information
+     * @return Updated Key Information
+     */
+    @Override
+    public Response applicationsApplicationIdKeysKeyTypePut(String applicationId, String keyType, ApplicationKeyDTO body) {
+        String username = RestApiUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            if (application != null) {
+                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    String grantTypes = StringUtils.join(body.getSupportedGrantTypes(), ',');
+                    JsonObject jsonParams = new JsonObject();
+                    jsonParams.addProperty(APIConstants.JSON_GRANT_TYPES, grantTypes);
+                    jsonParams.addProperty(APIConstants.JSON_USERNAME, username);
+                    OAuthApplicationInfo updatedData = apiConsumer.updateAuthClient(username, application.getName(),
+                            keyType, body.getCallbackUrl(), null, null, null, body.getGroupId(),
+                            new Gson().toJson(jsonParams));
+                    ApplicationKeyDTO applicationKeyDTO = new ApplicationKeyDTO();
+                    applicationKeyDTO.setCallbackUrl(updatedData.getCallBackURL());
+                    JsonObject json = new Gson().fromJson(updatedData.getJsonString(), JsonObject.class);
+                    if (json.get(APIConstants.JSON_GRANT_TYPES) != null) {
+                        String[] updatedGrantTypes = json.get(APIConstants.JSON_GRANT_TYPES).getAsString().split(" ");
+                        applicationKeyDTO.setSupportedGrantTypes(Arrays.asList(updatedGrantTypes));
+                    }
+                    applicationKeyDTO.setConsumerKey(updatedData.getClientId());
+                    applicationKeyDTO.setConsumerSecret(updatedData.getClientSecret());
+                    applicationKeyDTO.setKeyType(ApplicationKeyDTO.KeyTypeEnum.valueOf(keyType));
+                    return Response.ok().entity(applicationKeyDTO).build();
+                } else {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while updating application " + applicationId, e, log);
         }
         return null;
     }
@@ -338,6 +430,52 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     }
 
     /**
+     * Retrieves the scopes related with particular applications based on subscribed APIs.
+     *
+     * @param applicationId     Application Identifier.
+     * @param filterByUserRoles Whether to filter scope by user roles.
+     * @param accept            accepted media type of the client
+     * @param ifNoneMatch       If-None-Match header value
+     * @param ifModifiedSince   If-Modified-Since header value.
+     * @return the scopes
+     */
+    @Override
+    public Response applicationsApplicationScopesGet(String applicationId, boolean filterByUserRoles,
+            String accept,String ifNoneMatch, String ifModifiedSince) {
+        String userName = RestApiUtil.getLoggedInUsername();
+        try {
+            APIConsumer apiConsumer = RestApiUtil.getConsumer(userName);
+            if (log.isDebugEnabled()) {
+                log.debug("Scope retrieval request received from the " + userName + " for the application id "
+                        + applicationId + " with the query parameter('filterByUserRoles) value " + filterByUserRoles);
+            }
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            if (application != null) {
+                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                    ScopeListDTO filteredScopes = RestAPIStoreUtils
+                            .getScopesForApplication(userName, application, filterByUserRoles);
+
+                    return Response.ok().entity(filteredScopes).build();
+                } else {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+        } catch (APIManagementException e) {
+            if (e.getMessage()!= null && e.getMessage().contains("MultiTenantUserAdmin")) {
+                RestApiUtil.handleInternalServerError(
+                        "MultiTenantUserAdmin admin service error while getting scopes related with application " +
+                                applicationId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError(
+                        "Error while getting scopes related with application " + applicationId, e, log);
+            }
+        }
+        return null;
+    }
+
+    /**
      * get the lastUpdatedTime for an application
      *
      * @param applicationId
@@ -349,6 +487,18 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
     @Override
     public String applicationsApplicationIdGetGetLastUpdatedTime(String applicationId, String accept, String ifNoneMatch, String ifModifiedSince) {
         return RestAPIStoreUtils.getLastUpdatedTimeByApplicationId(applicationId);
+    }
+
+    @Override
+    public String applicationsApplicationIdKeysKeyTypeGetGetLastUpdatedTime(String applicationId, String keyType,
+                                                                            String groupId, String accept) {
+        return null;
+    }
+
+    @Override
+    public String applicationsApplicationIdKeysKeyTypePutGetLastUpdatedTime(String applicationId, String keyType,
+                                                                            ApplicationKeyDTO body) {
+        return null;
     }
 
     /**

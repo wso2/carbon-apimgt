@@ -136,7 +136,13 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             }
 
             // Append the username before Application name to make application name unique across two users.
-            String displayName = applicationName.substring(0, applicationName.lastIndexOf("_"));
+            String displayName;
+            if (applicationName.endsWith("_" + APIConstants.API_KEY_TYPE_PRODUCTION) || applicationName.endsWith("_"
+                    + APIConstants.API_KEY_TYPE_SANDBOX)) {
+                displayName = applicationName.substring(0, applicationName.lastIndexOf("_"));
+            } else {
+                displayName = applicationName;
+            }
             applicationName = APIUtil.replaceEmailDomain(userNameForSP) + "_" + applicationName;
 
             // Create the Service Provider

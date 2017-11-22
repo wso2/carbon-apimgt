@@ -55,7 +55,7 @@ public class APIMRegistryServiceImpl implements APIMRegistryService {
 
             if (registry.resourceExists(registryLocation)) {
                 Resource resource = registry.get(registryLocation);
-                content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                content = getString(resource);
             }
         } catch (APIManagementException e) {
             log.error("Error occurred while loading tenant configuration for '" + tenantDomain + "'");
@@ -65,6 +65,10 @@ public class APIMRegistryServiceImpl implements APIMRegistryService {
         }
 
         return content;
+    }
+
+    protected String getString(Resource resource) throws RegistryException {
+        return new String((byte[]) resource.getContent(), Charset.defaultCharset());
     }
 
     @Override
@@ -84,7 +88,7 @@ public class APIMRegistryServiceImpl implements APIMRegistryService {
 
             if (registry.resourceExists(registryLocation)) {
                 Resource resource = registry.get(registryLocation);
-                content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                content = getString(resource);
             }
         }
         finally {

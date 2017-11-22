@@ -17,6 +17,7 @@ jagg.block("theme-upload-task", {
         var log = new Log();
         var error = false;
         var success = false;
+        var warning = "";
         var file = request.getFile("theme");
         var apimanager = require("tenantmanager");
         if(user.userDomain != null && user.userDomain !=''){
@@ -29,8 +30,12 @@ jagg.block("theme-upload-task", {
                 else{
                     var managerHostObj = new apimanager.APIManager();
                     try{
-                    var status = managerHostObj.addTenantTheme(file, user.userDomain);
-                    success = true;
+                        var status = managerHostObj.addTenantTheme(file, user.userDomain);
+                        if(!status) {
+                            warning="Zip file contains unsupported files. Deployed only the supported files."
+                         }else {
+                            success = true;
+                         }
                     }catch(err){
                         error = "Error while deploying theme.";
                     }
@@ -42,7 +47,8 @@ jagg.block("theme-upload-task", {
         }
         return {
             "error": error,
-            "success":success
+            "success":success,
+            "warning":warning
         }
     }
 

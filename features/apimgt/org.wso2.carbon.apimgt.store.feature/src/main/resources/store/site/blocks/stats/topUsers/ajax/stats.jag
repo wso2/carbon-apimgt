@@ -42,6 +42,37 @@ log = new Log();
                 message:msg.error.backendError(action)
             };
         } else {
+            //processing the data for the charts.
+            var chartlimit = -1;
+            if (site.statistics != null && site.statistics.topAppUserPieChartLimit != null) {
+                chartlimit = site.statistics.topAppUserPieChartLimit; 
+            }
+            
+            for (var k = 0; k < result.usage.length; k++){
+
+                    var dataLength = result.usage[k].userCountArray.length;
+                    var chartData=[];
+                    var chartTableRows = '';
+                    var i = 0;
+                    var largeDataSet = false;
+                    for (i = 0; i < dataLength; i++) {
+
+                        chartTableRows += '<tr><td>' +  result.usage[k].userCountArray[i].user + '</td><td class="tdNumberCell">' +result.usage[k].userCountArray[i].count + '</td></tr>';
+                        if(chartlimit == -1 || i < chartlimit){
+                            chartData.push({"userName":result.usage[k].userCountArray[i].user,
+                                "count":parseInt( result.usage[k].userCountArray[i].count)});
+                        }
+
+                    }
+                    if(dataLength >= 1000){
+                        largeDataSet = true;
+                    }
+                    result.usage[k].chartTableRows = chartTableRows;
+                    result.usage[k].chartData = chartData;
+                    result.usage[k].largeDataSet = largeDataSet;
+
+
+                }
             obj = {
                 error:false,
                 usage:result.usage

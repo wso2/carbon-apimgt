@@ -127,15 +127,30 @@ public class ApisApiServiceImpl extends ApisApiService {
                 }
             }
 
+            //We should send null as the provider, Otherwise searchAPIs will return all APIs of the provider
+            // instead of looking at type and query
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
             Map<String, Object> result = apiProvider.searchPaginatedAPIs(searchContent, tenantDomain,
-                    offset, limit, false);
+                                        offset, limit, false);
             Set<API> apis = (Set<API>) result.get("apis");
             allMatchedApis.addAll(apis);
 
             apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, offset, limit);
             APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, allMatchedApis.size());
+
+            //Add pagination section in the response
+            Object totalLength = result.get("length");
+            Integer length = 0;
+            if(totalLength != null) {
+                length = (Integer) totalLength;
+            }
+            APIListPaginationDTO paginationDTO = new APIListPaginationDTO();
+            paginationDTO.setOffset(offset);
+            paginationDTO.setLimit(limit);
+            paginationDTO.setTotal(length);
+            apiListDTO.setPagination(paginationDTO);
+
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving APIs";
@@ -173,6 +188,11 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             if (body.getContext().endsWith("/")) {
                 RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
+            }
+
+            if(apiProvider.isApiNameExist(body.getName())) {
+                RestApiUtil.handleBadRequest("Error occurred while adding API. API with name " +
+                        body.getName() + " already exists." , log);
             }
 
             //Get all existing versions of  api been adding

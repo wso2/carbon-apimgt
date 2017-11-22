@@ -37,5 +37,16 @@ public class EndpointBckConfigContextTest {
         ConfigContext configcontext = new APIConfigContext(api);
         EndpointBckConfigContext endpointBckConfigContext = new EndpointBckConfigContext(configcontext, api);
         Assert.assertTrue(api.getEndpointConfig().contains(url));
+        //setting an empty string as the endpoint config and checking the value which is returned
+        api.setEndpointConfig("");
+        String endpoint_config = "{\"production_endpoints\":{\"url\":\"" + api.getUrl() + "\", \"config\":null}," +
+                "\"sandbox_endpoint\":{\"url\":\"" + api.getSandboxUrl() + "\"," +
+                "\"config\":null},\"endpoint_type\":\"http\"}";
+        EndpointBckConfigContext secondEndpointBckConfigContext = new EndpointBckConfigContext(configcontext, api);
+        Assert.assertTrue(api.getEndpointConfig().contains(endpoint_config));
+        //setting null as the endpoint config and checking the value which is returned
+        api.setEndpointConfig(null);
+        EndpointBckConfigContext thirdEndpointBckConfigContext = new EndpointBckConfigContext(configcontext, api);
+        Assert.assertTrue(api.getEndpointConfig().contains(endpoint_config));
     }
 }

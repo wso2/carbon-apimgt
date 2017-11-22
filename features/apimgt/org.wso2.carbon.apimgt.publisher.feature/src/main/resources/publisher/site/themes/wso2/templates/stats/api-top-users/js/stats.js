@@ -164,7 +164,7 @@ var drawTopAPIUsersTable = function () {
         if ($dataTable.DataTable().data().length === 0) {
             $('#tableContainer').hide();
             $noDataContainer.html('');
-            $noDataContainer.append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>No Data Available.</h4></div></div>'));
+            $noDataContainer.append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="No Stats"></i>'+i18n.t("No Data Available")+'</h4></div></div>'));
         } else {
             $('#tableContainer').show();
             $noDataContainer.html('');

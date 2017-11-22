@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
+import org.apache.axiom.om.OMException;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.AxisFault;
@@ -41,6 +42,7 @@ import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.PolicyDeploymentFailureException;
 import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -67,6 +69,10 @@ import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
+import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
+import org.wso2.carbon.apimgt.impl.certificatemgt.GatewayCertificateManager;
+import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.clients.RegistryCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.clients.TierCacheInvalidationClient;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -152,6 +158,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.cache.Cache;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
@@ -628,6 +635,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void addAPI(API api) throws APIManagementException {
         try {
+            validateApiInfo(api);
             createAPI(api);
 
             if (log.isDebugEnabled()) {
@@ -677,6 +685,37 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (APIManagementException e) {
             throw new APIManagementException("Error in adding API :" + api.getId().getApiName(), e);
         }
+    }
+
+    /**
+     * Validates the name and version of api against illegal characters.
+     *
+     * @param api API info object
+     * @throws APIManagementException
+     */
+    private void validateApiInfo(API api) throws APIManagementException {
+        String apiName = api.getId().getApiName();
+        String apiVersion = api.getId().getVersion();
+        if (containsIllegals(apiName)) {
+            handleException("API Name contains one or more illegal characters  " +
+                    "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )");
+        }
+        if (containsIllegals(apiVersion)) {
+            handleException("API Version contains one or more illegal characters  " +
+                    "( " + APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA + " )");
+        }
+    }
+
+    /**
+     * Check whether a string contains illegal charactersA
+     *
+     * @param toExamine string to examine for illegal characters
+     * @return true if found illegal characters, else false
+     */
+    public boolean containsIllegals(String toExamine) {
+        Pattern pattern = Pattern.compile(APIConstants.REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA);
+        Matcher matcher = pattern.matcher(toExamine);
+        return matcher.find();
     }
 
     /**
@@ -820,9 +859,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void updateAPI(API api) throws APIManagementException, FaultGatewaysException {
 
     	boolean isValid = isAPIUpdateValid(api);
-    	if(!isValid){
-    		throw new APIManagementException(" User doesn't have permission for update");
-    	}
+        if (!isValid) {
+            throw new APIManagementException(" User doesn't have permission for update");
+        }
 
         Map<String, Map<String, String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
         API oldApi = getAPI(api.getId());
@@ -842,9 +881,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     if (!api.isDefaultVersion()) {// default api tick is removed
                         // todo: if it is ok, these two variables can be put to the top of the function to remove
                         // duplication
-                        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                        String gatewayType = config.getFirstProperty(APIConstants.API_GATEWAY_TYPE);
+                        String gatewayType = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
+                                getAPIManagerConfiguration().getFirstProperty(APIConstants.API_GATEWAY_TYPE);
                         if (APIConstants.API_GATEWAY_TYPE_SYNAPSE.equalsIgnoreCase(gatewayType)) {
                             removeDefaultAPIFromGateway(api);
                         }
@@ -1347,6 +1385,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         if (APIStatus.PUBLISHED.equals(newStatus) || APIStatus.DEPRECATED.equals(newStatus)
                             || APIStatus.BLOCKED.equals(newStatus) || APIStatus.PROTOTYPED.equals(newStatus)) {
                             failedGateways = publishToGateway(api);
+                            //Sending Notifications to existing subscribers
+                            if (APIStatus.PUBLISHED.equals(newStatus)){
+                                List<APIIdentifier> oldPublishedAPIList = getOldPublishedAPIList(api);
+                                sendEmailNotification(api, oldPublishedAPIList);
+                            }
                         } else { // API Status : RETIRED or CREATED
                             failedGateways = removeFromGateway(api);
                         }
@@ -1522,28 +1565,85 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private Map<String, String> publishToGateway(API api) throws APIManagementException {
         Map<String, String> failedEnvironment;
-        APITemplateBuilder builder = null;
         String tenantDomain = null;
         if (api.getId().getProviderName().contains("AT")) {
             String provider = api.getId().getProviderName().replace("-AT-", "@");
             tenantDomain = MultitenantUtils.getTenantDomain( provider);
         }
 
-        try{
-            builder = getAPITemplateBuilder(api);
-        }catch(Exception e){
-            handleException("Error while publishing to Gateway ", e);
-        }
-
-
-        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        failedEnvironment = gatewayManager.publishToGateway(api, builder, tenantDomain);
+        failedEnvironment = publishToGateway(api, tenantDomain);
         if (log.isDebugEnabled()) {
             String logMessage = "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
                     + " published to gateway";
             log.debug(logMessage);
         }
         return failedEnvironment;
+    }
+
+    /**
+     * This method returns a list of previous versions of a given API
+     * @param api
+     * @return oldPublishedAPIList
+     * @throws APIManagementException
+     */
+    private List<APIIdentifier> getOldPublishedAPIList(API api) throws APIManagementException {
+        List<APIIdentifier> oldPublishedAPIList = new ArrayList<APIIdentifier>();
+        List<API> apiList = getAPIsByProvider(api.getId().getProviderName());
+        APIVersionComparator versionComparator = new APIVersionComparator();
+        for (API oldAPI : apiList) {
+            if (oldAPI.getId().getApiName().equals(api.getId().getApiName()) &&
+                    versionComparator.compare(oldAPI, api) < 0 &&
+                    (oldAPI.getStatus().equals(APIStatus.PUBLISHED))) {
+                oldPublishedAPIList.add(oldAPI.getId());
+            }
+        }
+
+        return oldPublishedAPIList;
+    }
+
+    /**
+     * This method used to send notifications to the previous subscribers of older versions of a given API
+     * @param api
+     * @param apiIdentifiers
+     * @throws APIManagementException
+     */
+    private void sendEmailNotification(API api, List<APIIdentifier> apiIdentifiers) throws APIManagementException {
+        try {
+            String isNotificationEnabled = "false";
+            Registry configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
+                    getConfigSystemRegistry(tenantId);
+            if (configRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                Resource resource = configRegistry.get(APIConstants.API_TENANT_CONF_LOCATION);
+                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                if (content != null) {
+                    JSONObject tenantConfig = (JSONObject) new JSONParser().parse(content);
+                    isNotificationEnabled = (String) tenantConfig.get(NotifierConstants.NOTIFICATIONS_ENABLED);
+                }
+            }
+            if (JavaUtils.isTrueExplicitly(isNotificationEnabled)) {
+                for (APIIdentifier oldAPI : apiIdentifiers) {
+                    Properties prop = new Properties();
+                    prop.put(NotifierConstants.API_KEY, oldAPI);
+                    prop.put(NotifierConstants.NEW_API_KEY, api.getId());
+
+                    Set<Subscriber> subscribersOfAPI = apiMgtDAO.getSubscribersOfAPI(oldAPI);
+                    prop.put(NotifierConstants.SUBSCRIBERS_PER_API, subscribersOfAPI);
+
+                    NotificationDTO notificationDTO = new NotificationDTO(prop,
+                            NotifierConstants.NOTIFICATION_TYPE_NEW_VERSION);
+                    notificationDTO.setTenantID(tenantId);
+                    notificationDTO.setTenantDomain(tenantDomain);
+                    new NotificationExecutor().sendAsyncNotifications(notificationDTO);
+                }
+            }
+        } catch (NotificationException e) {
+            log.error(e.getMessage(), e);
+        } catch (RegistryException re) {
+            handleException("Error while getting the tenant-config.json", re);
+        } catch (ParseException e) {
+            String msg = "Couldn't Create json Object from Swagger object for email notification";
+            handleException(msg, e);
+        }
     }
 
     private void validateAndSetTransports(API api) throws APIManagementException {
@@ -1576,8 +1676,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             tenantDomain = MultitenantUtils.getTenantDomain( provider);
         }
 
-        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
-        failedEnvironment = gatewayManager.removeFromGateway(api, tenantDomain);
+        failedEnvironment = removeFromGateway(api, tenantDomain);
         if (log.isDebugEnabled()) {
             String logMessage = "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
                     + " deleted from gateway";
@@ -1798,6 +1897,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             artifact.setId(UUID.randomUUID().toString());
             artifact.setAttribute(APIConstants.API_OVERVIEW_VERSION, newVersion);
 
+            //If the APIEndpointPasswordRegistryHandler is enabled set the endpoint password from the registry hidden
+            // property
+            if ((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
+                    .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD))) {
+                artifact.setAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD,
+                        apiSourceArtifact.getProperty(APIConstants.REGISTRY_HIDDEN_ENDPOINT_PROPERTY));
+            }
+
             //Check the status of the existing api,if its not in 'CREATED' status set
             //the new api status as "CREATED"
             String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
@@ -1999,7 +2106,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             int tenantId;
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
             try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+                tenantId = getTenantId(tenantDomain);
             } catch (UserStoreException e) {
                 throw new APIManagementException("Error in retrieving Tenant Information while adding api :"
                         +api.getId().getApiName(),e);
@@ -2012,44 +2119,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if(log.isDebugEnabled()) {
                 String logMessage = "Successfully created new version : " + newVersion + " of : " + api.getId().getApiName();
                 log.debug(logMessage);
-            }
-
-            //Sending Notifications to existing subscribers
-            try {
-                String isNotificationEnabled = "false";
-                Registry configRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
-                        getConfigSystemRegistry(tenantId);
-                if (configRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                    Resource resource = configRegistry.get(APIConstants.API_TENANT_CONF_LOCATION);
-                    String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                    if(content !=null ){
-                        JSONObject tenantConfig= (JSONObject) new JSONParser().parse(content);
-                        isNotificationEnabled = (String) tenantConfig.get(NotifierConstants.NOTIFICATIONS_ENABLED);
-                    }
-                }
-
-                if (JavaUtils.isTrueExplicitly(isNotificationEnabled)){
-
-                    Properties prop = new Properties();
-                    prop.put(NotifierConstants.API_KEY, api.getId());
-                    prop.put(NotifierConstants.NEW_API_KEY, newAPI.getId());
-
-                    Set<Subscriber> subscribersOfAPI = apiMgtDAO.getSubscribersOfAPI(api.getId());
-                    prop.put(NotifierConstants.SUBSCRIBERS_PER_API, subscribersOfAPI);
-
-                    Set<Subscriber> subscribersOfProvider = apiMgtDAO.getSubscribersOfProvider(api.getId()
-                            .getProviderName());
-                    prop.put(NotifierConstants.SUBSCRIBERS_PER_API, subscribersOfProvider);
-
-                    NotificationDTO notificationDTO=new NotificationDTO(prop,NotifierConstants
-                            .NOTIFICATION_TYPE_NEW_VERSION);
-                    notificationDTO.setTenantID(tenantId);
-                    notificationDTO.setTenantDomain(tenantDomain);
-                    new NotificationExecutor().sendAsyncNotifications(notificationDTO);
-
-                }
-            } catch (NotificationException e) {
-                log.error(e.getMessage(), e);
             }
 
         } catch (DuplicateAPIException e)   {
@@ -2340,7 +2409,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param api API
      * @throws APIManagementException if failed to create API
      */
-    private void createAPI(API api) throws APIManagementException {
+    protected void createAPI(API api) throws APIManagementException {
         GenericArtifactManager artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
 
         //Validate Transports
@@ -2644,9 +2713,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 contextCache.remove(context);
                 contextCache.put(context, Boolean.FALSE);
             }
-
             apiMgtDAO.deleteAPI(identifier);
-
             if (log.isDebugEnabled()) {
                 String logMessage =
                         "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
@@ -3220,8 +3287,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	                String[] inSeqChildPaths = inSeqCollection.getChildren();
                     for (String inSeqChildPath : inSeqChildPaths)    {
                         Resource inSequence = registry.get(inSeqChildPath);
-                        OMElement seqElment = APIUtil.buildOMElement(inSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(inSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + inSeqChildPath + "' from the registry.", e);
+                        }
                     }
                 }
             }
@@ -3235,8 +3306,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     String[] inSeqChildPaths = inSeqCollection.getChildren();
                     for (String inSeqChildPath : inSeqChildPaths)    {
                         Resource inSequence = registry.get(inSeqChildPath);
-                        OMElement seqElment = APIUtil.buildOMElement(inSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(inSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + inSeqChildPath + "' from the registry.", e);
+                        }
                     }
                 }
             }
@@ -3283,8 +3358,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	                String[] outSeqChildPaths = outSeqCollection.getChildren();
                     for (String childPath : outSeqChildPaths)   {
                         Resource outSequence = registry.get(childPath);
-                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + childPath + "' from the registry.", e);
+                        }
                     }
                 }
             }
@@ -3298,8 +3377,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     String[] outSeqChildPaths = outSeqCollection.getChildren();
                     for (String outSeqChildPath : outSeqChildPaths)    {
                         Resource outSequence = registry.get(outSeqChildPath);
-                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + outSeqChildPath + "' from the registry.", e);
+                        }
                     }
                 }
             }
@@ -3325,14 +3408,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
             if (registry.resourceExists(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION)) {
-                org.wso2.carbon.registry.api.Collection faultSeqCollection =
+                org.wso2.carbon.registry.api.Collection inSeqCollection =
                         (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_INSEQUENCE_LOCATION);
-                if (faultSeqCollection !=null) {
-                    String[] faultSeqChildPaths = faultSeqCollection.getChildren();
-                    for (String faultSeqChildPath : faultSeqChildPaths) {
-                        Resource outSequence = registry.get(faultSeqChildPath);
-                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                if (inSeqCollection !=null) {
+                    String[] inSeqChildPaths = inSeqCollection.getChildren();
+                    for (String inSeqChildPath : inSeqChildPaths) {
+                        Resource inSequence = registry.get(inSeqChildPath);
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(inSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + inSeqChildPath + "' from the registry.", e);
+                        }
                     }
 
                 }
@@ -3365,14 +3452,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
             if (registry.resourceExists(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION)) {
-                org.wso2.carbon.registry.api.Collection faultSeqCollection =
+                org.wso2.carbon.registry.api.Collection outSeqCollection =
                         (org.wso2.carbon.registry.api.Collection) registry.get(APIConstants.API_CUSTOM_OUTSEQUENCE_LOCATION);
-                if (faultSeqCollection !=null) {
-                    String[] faultSeqChildPaths = faultSeqCollection.getChildren();
-                    for (String faultSeqChildPath : faultSeqChildPaths) {
-                        Resource outSequence = registry.get(faultSeqChildPath);
-                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                if (outSeqCollection !=null) {
+                    String[] outSeqChildPaths = outSeqCollection.getChildren();
+                    for (String outSeqChildPath : outSeqChildPaths) {
+                        Resource outSequence = registry.get(outSeqChildPath);
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + outSeqChildPath + "' from the registry.", e);
+                        }
                     }
 
                 }
@@ -3412,10 +3503,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     String[] faultSeqChildPaths = faultSeqCollection.getChildren();
                     for (String faultSeqChildPath : faultSeqChildPaths) {
                         Resource outSequence = registry.get(faultSeqChildPath);
+                        try {
                         OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
                         sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + faultSeqChildPath + "' from the registry.", e);
+                        }
                     }
-
                 }
             }
 
@@ -3468,8 +3562,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     String[] faultSeqChildPaths = faultSeqCollection.getChildren();
                     for (String faultSeqChildPath : faultSeqChildPaths) {
                         Resource outSequence = registry.get(faultSeqChildPath);
-                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + faultSeqChildPath
+                                    + "' from the registry.", e);
+                        }
                     }
 
                 }
@@ -3479,14 +3578,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                                       APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
 
             if(registry.resourceExists(customOutSeqFileLocation))    {
-                org.wso2.carbon.registry.api.Collection outSeqCollection =
+                org.wso2.carbon.registry.api.Collection faultSeqCollection =
                         (org.wso2.carbon.registry.api.Collection) registry.get(customOutSeqFileLocation);
-                if (outSeqCollection != null) {
-                    String[] outSeqChildPaths = outSeqCollection.getChildren();
-                    for (String outSeqChildPath : outSeqChildPaths)    {
-                        Resource outSequence = registry.get(outSeqChildPath);
-                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                if (faultSeqCollection != null) {
+                    String[] faultSeqChildPaths = faultSeqCollection.getChildren();
+                    for (String faultSeqChildPath : faultSeqChildPaths)    {
+                        Resource faultSequence = registry.get(faultSeqChildPath);
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(faultSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + faultSeqChildPath
+                                    + "' from the registry.", e);
+                        }
                     }
                 }
             }
@@ -3537,17 +3641,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             UserRegistry registry = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getGovernanceSystemRegistry(tenantId);
-            String customOutSeqFileLocation = APIUtil.getSequencePath(apiIdentifier,
-                    APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
-            if(registry.resourceExists(customOutSeqFileLocation))    {
-                org.wso2.carbon.registry.api.Collection outSeqCollection =
-                        (org.wso2.carbon.registry.api.Collection) registry.get(customOutSeqFileLocation);
-                if (outSeqCollection != null) {
-                    String[] outSeqChildPaths = outSeqCollection.getChildren();
-                    for (String outSeqChildPath : outSeqChildPaths)    {
-                        Resource outSequence = registry.get(outSeqChildPath);
-                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+            String customInSeqFileLocation = APIUtil
+                    .getSequencePath(apiIdentifier, APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN);
+            if (registry.resourceExists(customInSeqFileLocation)) {
+                org.wso2.carbon.registry.api.Collection inSeqCollection = (org.wso2.carbon.registry.api.Collection) registry
+                        .get(customInSeqFileLocation);
+                if (inSeqCollection != null) {
+                    String[] inSeqChildPaths = inSeqCollection.getChildren();
+                    for (String inSeqChildPath : inSeqChildPaths) {
+                        Resource outSequence = registry.get(inSeqChildPath);
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + inSeqChildPath
+                                    + "' from the registry.", e);
+                        }
                     }
                 }
             }
@@ -3606,8 +3715,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     String[] outSeqChildPaths = outSeqCollection.getChildren();
                     for (String outSeqChildPath : outSeqChildPaths)    {
                         Resource outSequence = registry.get(outSeqChildPath);
-                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + outSeqChildPath
+                                    + "' from the registry.", e);
+                        }
                     }
                 }
             }
@@ -3659,14 +3773,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String customOutSeqFileLocation = APIUtil.getSequencePath(apiIdentifier,
                     APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT);
             if(registry.resourceExists(customOutSeqFileLocation))    {
-                org.wso2.carbon.registry.api.Collection outSeqCollection =
-                        (org.wso2.carbon.registry.api.Collection) registry.get(customOutSeqFileLocation);
-                if (outSeqCollection != null) {
-                    String[] outSeqChildPaths = outSeqCollection.getChildren();
-                    for (String outSeqChildPath : outSeqChildPaths)    {
-                        Resource outSequence = registry.get(outSeqChildPath);
-                        OMElement seqElment = APIUtil.buildOMElement(outSequence.getContentStream());
-                        sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                org.wso2.carbon.registry.api.Collection faultSeqCollection = (org.wso2.carbon.registry.api.Collection) registry
+                        .get(customOutSeqFileLocation);
+                if (faultSeqCollection != null) {
+                    String[] faultSeqChildPaths = faultSeqCollection.getChildren();
+                    for (String faultSeqChildPath : faultSeqChildPaths) {
+                        Resource faultSequence = registry.get(faultSeqChildPath);
+                        try {
+                            OMElement seqElment = APIUtil.buildOMElement(faultSequence.getContentStream());
+                            sequenceList.add(seqElment.getAttributeValue(new QName("name")));
+                        } catch (OMException e) {
+                            log.info("Error occurred when reading the sequence '" + faultSeqChildPath
+                                    + "' from the registry.", e);
+                        }
                     }
                 }
             }
@@ -4380,6 +4499,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     policiesToUndeploy.add(policyFile + "_condition_" +  existingPolicy.getPipelines().get(i).getId());
                 }
                 policyLevel = PolicyConstants.POLICY_LEVEL_API;
+
+                APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                        .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                Map<String, Environment> gatewayEns = config.getApiGatewayEnvironments();
+                for (Environment environment : gatewayEns.values()) {
+                    try {
+                        APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Calling invalidation cache for API Policy for tenant ");
+                        }
+                        String policyContext = APIConstants.POLICY_CACHE_CONTEXT + "/t/" + apiPolicy.getTenantDomain()
+                                + "/";
+                        client.invalidateResourceCache(policyContext, null, null, null);
+
+                    } catch (AxisFault ex) {
+                        /*
+                         * didn't throw this exception to handle multiple gateway publishing feature therefore
+                         * this didn't break invalidating cache from the all the gateways if one gateway is
+                         * unreachable
+                         */
+                        log.error("Error while invalidating from environment " + environment.getName(), ex);
+                    }
+                }
             } else if (policy instanceof ApplicationPolicy) {
                 ApplicationPolicy appPolicy = (ApplicationPolicy) policy;
                 String policyString = policyBuilder.getThrottlePolicyForAppLevel(appPolicy);
@@ -4811,6 +4953,77 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return apiMgtDAO.getExternalWorkflowReferenceForSubscription(subscriptionId);
     }
 
+    @Override
+    public int addCertificate(String userName, String certificate, String alias, String endpoint)
+            throws APIManagementException {
+        ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        CertificateManager certificateManager = new CertificateManagerImpl();
+        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+        ;
+        try {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            responseCode = certificateManager
+                    .addCertificateToParentNode(certificate, alias, endpoint, tenantId);
+
+            if (responseCode == ResponseCode.SUCCESS) {
+                //Get the gateway manager and add the certificate to gateways.
+                GatewayCertificateManager gatewayCertificateManager = new GatewayCertificateManager();
+                gatewayCertificateManager.addToGateways(certificate, alias);
+            } else {
+                log.error("Adding certificate to the Publisher node is failed. No certificate changes will be " +
+                        "affected.");
+            }
+        } catch (UserStoreException e) {
+            handleException("Error while reading tenant information", e);
+        }
+        return responseCode.getResponseCode();
+    }
+
+    @Override
+    public int deleteCertificate(String userName, String alias, String endpoint) throws APIManagementException {
+        ResponseCode responseCode = ResponseCode.INTERNAL_SERVER_ERROR;
+        CertificateManager certificateManager = new CertificateManagerImpl();
+        String tenantDomain = MultitenantUtils.getTenantDomain(userName);
+
+        try {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+            responseCode = certificateManager.deleteCertificateFromParentNode(alias, endpoint, tenantId);
+
+            if (responseCode == ResponseCode.SUCCESS) {
+                //Get the gateway manager and remove the certificate from gateways.
+                GatewayCertificateManager gatewayCertificateManager = new GatewayCertificateManager();
+                gatewayCertificateManager.removeFromGateways(alias);
+            } else {
+                log.error("Removing the certificate from Publisher node is failed. No certificate changes will "
+                        + "be affected.");
+            }
+        } catch (UserStoreException e) {
+            handleException("Error while reading tenant information", e);
+        }
+        return responseCode.getResponseCode();
+    }
+
+    @Override
+    public boolean isConfigured() {
+        CertificateManager certificateManager = new CertificateManagerImpl();
+        return certificateManager.isConfigured();
+    }
+
+    @Override
+    public List<CertificateMetadataDTO> getCertificates(String userName) throws APIManagementException {
+        CertificateManager certificateManager = new CertificateManagerImpl();
+        int tenantId = 0;
+        try {
+            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
+        } catch (UserStoreException e) {
+            handleException("Error while reading tenant information", e);
+        }
+        return certificateManager.getCertificates(tenantId);
+    }
+
     /**
      * Get the workflow status information for the given api for the given workflow type
      * 
@@ -4852,5 +5065,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if(wfDTO != null && WorkflowStatus.CREATED == wfDTO.getStatus()){
             apiStateChangeWFExecutor.cleanUpPendingTask(wfDTO.getExternalWorkflowReference());
         }
+    }
+    
+    protected Map<String, String> publishToGateway(API api, String tenantDomain) throws APIManagementException {
+        APITemplateBuilder builder = null;
+        try {
+            builder = getAPITemplateBuilder(api);
+        } catch (Exception e) {
+            handleException("Error while publishing to Gateway ", e);
+        }
+
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        return gatewayManager.publishToGateway(api, builder, tenantDomain);
+    }
+
+    protected Map<String, String> removeFromGateway(API api, String tenantDomain) {
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        return gatewayManager.removeFromGateway(api, tenantDomain);
+    }
+    
+    protected int getTenantId(String tenantDomain) throws UserStoreException {
+        return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+    }
+    
+    protected void sendAsncNotification(NotificationDTO notificationDTO) throws NotificationException {
+        new NotificationExecutor().sendAsyncNotifications(notificationDTO);
+        
     }
 }

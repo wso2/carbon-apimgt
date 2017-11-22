@@ -16,13 +16,13 @@ public class APIEndpointURLsDTO  {
   
   
   
-  private APIEnvironmentURLsDTO environmentURLs = null;
-  
-  
   private String environmentName = null;
   
   
   private String environmentType = null;
+  
+  
+  private APIEnvironmentURLsDTO environmentURLs = null;
 
   private String lastUpdatedTime = null;
 
@@ -55,18 +55,6 @@ public class APIEndpointURLsDTO  {
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("environmentURLs")
-  public APIEnvironmentURLsDTO getEnvironmentURLs() {
-    return environmentURLs;
-  }
-  public void setEnvironmentURLs(APIEnvironmentURLsDTO environmentURLs) {
-    this.environmentURLs = environmentURLs;
-  }
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
   @JsonProperty("environmentName")
   public String getEnvironmentName() {
     return environmentName;
@@ -88,15 +76,27 @@ public class APIEndpointURLsDTO  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("environmentURLs")
+  public APIEnvironmentURLsDTO getEnvironmentURLs() {
+    return environmentURLs;
+  }
+  public void setEnvironmentURLs(APIEnvironmentURLsDTO environmentURLs) {
+    this.environmentURLs = environmentURLs;
+  }
+
+  
 
   @Override
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIEndpointURLsDTO {\n");
     
-    sb.append("  environmentURLs: ").append(environmentURLs).append("\n");
     sb.append("  environmentName: ").append(environmentName).append("\n");
     sb.append("  environmentType: ").append(environmentType).append("\n");
+    sb.append("  environmentURLs: ").append(environmentURLs).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

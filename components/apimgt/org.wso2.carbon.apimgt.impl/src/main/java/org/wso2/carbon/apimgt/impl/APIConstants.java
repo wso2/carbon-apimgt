@@ -330,6 +330,11 @@ public final class APIConstants {
     public static final String REVOKE_API_URL = OAUTH_CONFIGS + "RevokeAPIURL";
     public static final String ENCRYPT_TOKENS_ON_PERSISTENCE = OAUTH_CONFIGS + "EncryptPersistedTokens";
 
+    public static final String DEFAULT_MODIFIED_ENDPOINT_PASSWORD = "*****"; //5 stars
+    public static final String REGISTRY_HIDDEN_ENDPOINT_PROPERTY = "registry.HiddenEpProperty";
+    public static final String OVERVIEW_ELEMENT = "overview";
+    public static final String ENDPOINT_PASSWORD_ELEMENT = "endpointPpassword";
+
     //documentation rxt
 
     public static final String DOC_NAME = "overview_name";
@@ -445,6 +450,7 @@ public final class APIConstants {
     public static final String TOKEN_CACHE_EXPIRY = CACHE_CONFIGS + "TokenCacheExpiry";
     public static final String STORE_TAG_CACHE_DURATION = CACHE_CONFIGS + "TagCacheDuration";
     public static final String API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE = CACHE_CONFIGS + "EnableRecentlyAddedAPICache";
+    public static final String SCOPE_CACHE_ENABLED = CACHE_CONFIGS + "EnableScopeCache";
     public static final String DEFAULT_CACHE_TIMEOUT = "Cache.DefaultCacheTimeout";
 
     public static final String API_KEY_VALIDATOR = "APIKeyValidator.";
@@ -522,6 +528,7 @@ public final class APIConstants {
     public static final String API_STORE_DISABLE_PERMISSION_CHECK = API_STORE + "DisablePermissionCheck";
     public static final String API_STORE_APIS_PER_PAGE = API_STORE + "APIsPerPage";
     public static final String API_STORE_FORUM_ENABLED = API_STORE + "isStoreForumEnabled";
+    public static final String MULTI_TENANT_USER_ADMIN_SERVICE = "MultiTenantUserAdminService";
 
 
     public static final String API_PUBLISHER = "APIPublisher.";
@@ -737,6 +744,7 @@ public final class APIConstants {
     public static final String API_MANAGER_CACHE_MANAGER = "API_MANAGER_CACHE";
     public static final String API_CONTEXT_CACHE_MANAGER = "API_CONTEXT_CACHE_MANAGER";
     public static final String RESOURCE_CACHE_NAME = "resourceCache";
+    public static final String POLICY_CACHE_CONTEXT = "POLICY:";
     public static final String GATEWAY_KEY_CACHE_NAME = "gatewayKeyCache";
     public static final String GATEWAY_TOKEN_CACHE_NAME = "GATEWAY_TOKEN_CACHE";
     public static final String KEY_CACHE_NAME = "keyCache";
@@ -746,6 +754,8 @@ public final class APIConstants {
     public static final String TIERS_CACHE = "tiersCache";
     public static final int API_CONTEXT_CACHE_EXPIRY_TIME_IN_DAYS = 3650;
     public static final String CLAIMS_APIM_CACHE = "claimsLocalCache";
+    public static final String APP_SUBSCRIPTION_SCOPE_CACHE = "appSubscriptionScopeCache";
+    public static final String APP_SUBSCRIPTION_FILTERED_SCOPE_CACHE = "appSubscriptionFilteredScopeCache";
 
     //URI Authentication Schemes
     public static final Set<String> SUPPORTED_METHODS =
@@ -1291,4 +1301,7 @@ public final class APIConstants {
         HTTP, WS,
     }
 
+    public static final String JSON_GRANT_TYPES = "grant_types";
+    public static final String JSON_USERNAME = "username";
+    public static final String REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA = "[~!@#;%^*()+={}|<>\"\',\\[\\]&/$\\\\]";
 }

@@ -1,7 +1,7 @@
 <APIManager>
     <DataSourceName>java:/comp/env/jdbc/WSO2AM_DB</DataSourceName>
     <Database>
-        <URL>jdbc:h2:target/repository/database/WSO2AM_DB</URL>
+        <URL>jdbc:h2:target/repository/database/WSO2AM_DB;AUTO_SERVER=TRUE</URL>
         <Username>wso2carbon</Username>
         <Password>wso2carbon</Password>
         <Driver>org.h2.Driver</Driver>
@@ -16,7 +16,7 @@
     <APIUsageTracking>
         <Enabled>false</Enabled>
         <ThriftPort>7612</ThriftPort>
-        <BAMServerURL>https://localhost:9444/</BAMServerURL>
+        <BAMServerURL>https://localh22ost:9444/</BAMServerURL>
         <BAMUsername>admin</BAMUsername>
         <BAMPassword>admin</BAMPassword>
     </APIUsageTracking>
@@ -58,5 +58,18 @@
     <ThrottlingConfigurations>
         <EnableAdvanceThrottling>true</EnableAdvanceThrottling>
     </ThrottlingConfigurations>
+
+    <SwaggerCodegen>
+        <ClientGeneration>
+            <GroupId>org.wso2</GroupId>
+            <ArtifactId>org.wso2.client.</ArtifactId>
+            <ModelPackage>org.wso2.client.model.</ModelPackage>
+            <ApiPackage>org.wso2.client.api.</ApiPackage>
+            <!-- Configure supported languages/Frameworks as comma separated values,
+             Supported Languages/Frameworks : android, java, scala, csharp, cpp, dart, flash, go, groovy, javascript, jmeter,
+             nodejs, perl, php, python, ruby, swift, clojure, aspNet5, asyncScala, spring, csharpDotNet2, haskell-->
+            <SupportedLanguages>java,android</SupportedLanguages>
+        </ClientGeneration>
+    </SwaggerCodegen>
 
 </APIManager>

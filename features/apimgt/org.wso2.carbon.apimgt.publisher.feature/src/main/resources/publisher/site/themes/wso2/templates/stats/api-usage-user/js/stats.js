@@ -213,7 +213,7 @@ var drawAPIUsage = function (from,to,apiFilter) {
                         		$('div#apiSelectTable_wrapper.dataTables_wrapper.no-footer').remove();
                         		$('#apiUsageByUserTable').hide();
                                 $('#noData').html('');
-                                $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="'+ i18n.t('No Stats') + '"></i>'+ i18n.t('No Data Available.') + '</h4></div></div>'));
+                                $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="'+ i18n.t('No Stats') + '"></i>'+ i18n.t('No Data Available') + '</h4></div></div>'));
 
                         }
                     }
@@ -245,7 +245,7 @@ var drawChart = function (from, to) {
                 if (length == 0){
                     $('#apiUsageByUserTable').hide();
                     $('#noData').html('');
-                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="'+ i18n.t('No Stats') + '"></i>'+ i18n.t('No Data Available.') + '</h4></div></div>'));
+                    $('#noData').append($('<div class="center-wrapper"><div class="col-sm-4"/><div class="col-sm-4 message message-info"><h4><i class="icon fw fw-info" title="'+ i18n.t('No Stats') + '"></i>'+ i18n.t('No Data Available') + '</h4></div></div>'));
 
                 } else {
                     $('#apiUsage_note').removeClass('hide');

@@ -41,7 +41,7 @@
             </div>
 
         <div id="noData" class="hide message message-info">
-			<h4><i class="icon fw fw-info"></i>No Data Available.</h4>
+			<h4><i class="icon fw fw-info"></i><%=i18n.localize("No Data Available.")%></h4>
 		</div>
     <%
         }

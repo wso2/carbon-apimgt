@@ -34,7 +34,27 @@ var login = function (username, password, tenantMode) {
         var end = result.indexOf("</ns:return");
         var isLogged = result.substring(start, end).split(">")[1];
 
-        var isAllowed = isUserAllowed(username);
+	//To check if user is allowed we need to pass domain aware user name when we have users coming from secondary user store.
+	//Hence in addition to default login call we will log user with authentication admin service via store host object login method.
+	//Then use that domain aware user name for permission validation.
+	//Fixing https://wso2.org/jira/browse/APIMANAGER-5172
+	store.login(username, password);
+	loginResponse = store.login(username, password);
+	if (loginResponse.error) {
+        	if (log.isDebugEnabled()) {
+        	    	log.debug("Error while authenticating user : " + username);
+        	}
+        	message = loginResponse.detail.split('!')[1];
+        	if (message == null) {
+        		message = loginResponse.detail;
+        	}
+        	return {
+        	    	error:loginResponse.error,
+        	    	cookie:null,
+        	    	message:message
+        	};
+    	}
+    	var isAllowed = isUserAllowed(loginResponse.user);
         if (isAllowed) {
             getWorkflowCookie(username, password);
             var auth = getAuthorizationHeaderCredentials(username, password);
@@ -61,7 +81,7 @@ var login = function (username, password, tenantMode) {
                     userDomain: username.split("@")[1],
                     auth: auth
                 });
-
+                getWorkflowCookie(username, password);
 
                 return {
                     error: false,

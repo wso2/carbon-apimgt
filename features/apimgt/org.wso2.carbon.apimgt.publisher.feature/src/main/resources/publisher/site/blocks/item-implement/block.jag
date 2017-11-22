@@ -5,7 +5,7 @@ jagg.block("item-implement", {
     },
 
     getOutputs:function (inputs) {
-        var name, version, api, result, mod,isPermitted,isCreatePermitted,tenant;
+        var name, version, api, result, mod,isPermitted,isCreatePermitted,tenant, isConfigured, certificates = [];
 
         name = request.getParameter("name");
         version = request.getParameter("version");
@@ -23,11 +23,18 @@ jagg.block("item-implement", {
         isCreatePermitted = jagg.getCreatePermitted().permitted;
         result = mod.getAPI({name:name, version:version, provider:provider});
         api = result.api;
+        isConfigured = mod.isConfigured().isConfigured; //Check whether the server is configured..
+        //If configured, get the existing certificates.
+        if (isConfigured) {
+            certificates = mod.getCertificates().certificates;
+        }
         return {
             "api":api,
             "isPermitted":isPermitted,
             "isCreatePermitted":isCreatePermitted,
-            "tenant":tenant
+            "tenant":tenant,
+            "isConfigured":isConfigured,
+            "certificates":certificates
         }
     }
 

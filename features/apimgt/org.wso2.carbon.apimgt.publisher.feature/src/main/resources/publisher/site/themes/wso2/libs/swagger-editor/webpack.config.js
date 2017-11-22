@@ -65,7 +65,7 @@ var config = {
       },
       {
         test: /\.(ttf|eot|svg|woff|woff2|otf)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-        loader: 'url-loader'
+        loader: 'file?publicPath= ./'
       },
       {
         test: /\.html$/,

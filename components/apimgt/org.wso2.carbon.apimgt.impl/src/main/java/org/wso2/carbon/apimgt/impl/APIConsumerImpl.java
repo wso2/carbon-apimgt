@@ -25,16 +25,29 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
-import org.wso2.carbon.apimgt.api.*;
+import org.wso2.carbon.apimgt.api.APIConsumer;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.LoginPostExecutor;
+import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidator;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dto.*;
+import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.*;
-import org.wso2.carbon.apimgt.impl.workflow.*;
+import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
+import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
+import org.wso2.carbon.apimgt.impl.workflow.AbstractApplicationRegistrationWorkflowExecutor;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
+import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
@@ -43,8 +56,12 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactFilter;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
-import org.wso2.carbon.registry.core.*;
-import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.common.TermData;
+import org.wso2.carbon.registry.core.ActionConstants;
+import org.wso2.carbon.registry.core.Association;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.pagination.PaginationContext;
@@ -57,12 +74,20 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import org.wso2.carbon.registry.common.TermData;
-
 import javax.cache.Caching;
-
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -94,7 +119,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private volatile long lastUpdatedTimeForTagApi;
     private final Object tagCacheMutex = new Object();
     private final Object tagWithAPICacheMutex = new Object();
-    private APIMRegistryService apimRegistryService;
+    protected APIMRegistryService apimRegistryService;
 
     public APIConsumerImpl() throws APIManagementException {
         super();
@@ -108,8 +133,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     private void readTagCacheConfigs() {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                getAPIManagerConfiguration();
+        APIManagerConfiguration config = getAPIManagerConfiguration();
         String enableTagCache = config.getFirstProperty(APIConstants.STORE_TAG_CACHE_DURATION);
         if (enableTagCache == null) {
             isTagCacheEnabled = false;
@@ -171,24 +195,19 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 		try {
             //start the tenant flow prior to loading registry
             if (requestedTenant != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenant)) {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenant, true);
-                isTenantFlowStarted = true;
+                isTenantFlowStarted = startTenantFlowForTenantDomain(requestedTenantDomain);
             }
 
             if ((isTenantMode && this.tenantDomain == null) ||
                 (isTenantMode && isTenantDomainNotMatching(requestedTenantDomain))) {//Tenant store anonymous mode
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                                                     .getTenantId(requestedTenantDomain);
+                int tenantId = getTenantId(requestedTenantDomain);
                 // explicitly load the tenant's registry
                 APIUtil.loadTenantRegistry(tenantId);
-                userRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
-                        getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().
-                        setUsername(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
+                userRegistry = getGovernanceUserRegistry(tenantId);
+                setUsernameToThreadLocalCarbonContext(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
             } else {
                 userRegistry = registry;
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
+                setUsernameToThreadLocalCarbonContext(this.username);
             }
 
             apisWithTag = getAPIsWithTag(userRegistry, tagName);
@@ -210,12 +229,26 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 			handleException("Failed to get api by the tag", e);
 		} finally {
             if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
+                endTenantFlow();
             }
         }
 
 		return apisWithTag;
 	}
+
+    protected void setUsernameToThreadLocalCarbonContext(String username) {
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(username);
+    }
+
+    protected UserRegistry getGovernanceUserRegistry(int tenantId) throws RegistryException {
+        return ServiceReferenceHolder.getInstance().getRegistryService().
+                getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
+    }
+
+    protected int getTenantId(String requestedTenantDomain) throws UserStoreException {
+        return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                                             .getTenantId(requestedTenantDomain);
+    }
 
     /**
      * Returns the set of APIs with the given tag from the taggedAPIs Map.
@@ -310,10 +343,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Registry userRegistry;
             boolean isTenantMode=(tenantDomain != null);
             if ((isTenantMode && this.tenantDomain==null) || (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant store anonymous mode
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-                userRegistry = ServiceReferenceHolder.getInstance().
-                        getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
+                int tenantId = getTenantId(tenantDomain);
+                userRegistry = getGovernanceUserRegistry(tenantId);
             } else {
                 userRegistry = registry;
             }
@@ -394,7 +425,16 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Deprecated
     public Map<String,Object> getAllPaginatedPublishedAPIs(String tenantDomain,int start,int end)
             throws APIManagementException {
-    	Boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
+        Boolean displayAPIsWithMultipleStatus = false;
+        try {
+            if (tenantDomain != null) {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
+        }finally {
+            endTenantFlow();
+        }
     	Map<String, List<String>> listMap = new HashMap<String, List<String>>();
         //Check the api-manager.xml config file entry <DisplayAllAPIs> value is false
         if (!displayAPIsWithMultipleStatus) {
@@ -415,18 +455,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             boolean isTenantMode = (tenantDomain != null);
             if ((isTenantMode && this.tenantDomain == null) ||
                 (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant store anonymous mode
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
+                int tenantId = getTenantId(tenantDomain);
                 // explicitly load the tenant's registry
                 APIUtil.loadTenantRegistry(tenantId);
-                userRegistry = ServiceReferenceHolder.getInstance().
-                        getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME,
-                                                                       tenantId);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(
-                        CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
+                userRegistry = getGovernanceUserRegistry(tenantId);
+                setUsernameToThreadLocalCarbonContext(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
             } else {
                 userRegistry = registry;
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
+                setUsernameToThreadLocalCarbonContext(this.username);
             }
             this.isTenantModeStoreView = isTenantMode;
             this.requestedTenant = tenantDomain;
@@ -517,16 +553,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Registry userRegistry;
             boolean isTenantMode=(tenantDomain != null);
             if ((isTenantMode && this.tenantDomain==null) || (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant store anonymous mode
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
+                int tenantId = getTenantId(tenantDomain);
                 // explicitly load the tenant's registry
                 APIUtil.loadTenantRegistry(tenantId);
-                userRegistry = ServiceReferenceHolder.getInstance().
-                        getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
+                userRegistry = getGovernanceUserRegistry(tenantId);
+                setUsernameToThreadLocalCarbonContext(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
             } else {
                 userRegistry = registry;
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
+                setUsernameToThreadLocalCarbonContext(this.username);
             }
             this.isTenantModeStoreView = isTenantMode;
             this.requestedTenant = tenantDomain;
@@ -535,9 +569,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             List<API> multiVersionedAPIs = new ArrayList<API>();
             Comparator<API> versionComparator = new APIVersionComparator();
             Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
-            String paginationLimit = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                                                           .getAPIManagerConfiguration()
-                                                           .getFirstProperty(APIConstants.API_STORE_APIS_PER_PAGE);
+            String paginationLimit = getAPIManagerConfiguration().
+                    getFirstProperty(APIConstants.API_STORE_APIS_PER_PAGE);
 
             // If the Config exists use it to set the pagination limit
             final int maxPaginationLimit;
@@ -671,6 +704,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     @Deprecated
 	public Map<String, Object> getAllPaginatedAPIsByStatus(String tenantDomain,
 			int start, int end, final String apiStatus, boolean returnAPITags) throws APIManagementException {
+        try {
+            if (tenantDomain != null) {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+        }finally {
+            endTenantFlow();
+        }
     	Boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
     	Map<String, List<String>> listMap = new HashMap<String, List<String>>();
         //Check the api-manager.xml config file entry <DisplayAllAPIs> value is false
@@ -698,16 +739,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Registry userRegistry;
             boolean isTenantMode=(tenantDomain != null);
             if ((isTenantMode && this.tenantDomain==null) || (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant store anonymous mode
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
+                int tenantId = getTenantId(tenantDomain);
                 // explicitly load the tenant's registry
                 APIUtil.loadTenantRegistry(tenantId);
-                userRegistry = ServiceReferenceHolder.getInstance().
-                        getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
+                userRegistry = getGovernanceUserRegistry(tenantId);
+                setUsernameToThreadLocalCarbonContext(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
             } else {
                 userRegistry = registry;
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
+                setUsernameToThreadLocalCarbonContext(this.username);
             }
             this.isTenantModeStoreView = isTenantMode;
             this.requestedTenant = tenantDomain;
@@ -716,8 +755,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             List<API> multiVersionedAPIs = new ArrayList<API>();
             Comparator<API> versionComparator = new APIVersionComparator();
             Boolean displayMultipleVersions = APIUtil.isAllowDisplayMultipleVersions();
-            String paginationLimit = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                                                           .getAPIManagerConfiguration()
+            String paginationLimit = getAPIManagerConfiguration()
                                                            .getFirstProperty(APIConstants.API_STORE_APIS_PER_PAGE);
 
             // If the Config exists use it to set the pagination limit
@@ -862,6 +900,12 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             // Populating additional parameters.
             tokenRequest = ApplicationUtils.populateTokenRequest(jsonInput, tokenRequest);
             KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+
+            JSONObject appLogObject = new JSONObject();
+            appLogObject.put("Re-Generated Keys for application with client Id", clientId);
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+                    APIConstants.AuditLogConstants.UPDATED, this.username);
+
             return keyManager.getNewApplicationAccessToken(tokenRequest);
         } catch (APIManagementException e) {
             log.error("Error while re-generating AccessToken", e);
@@ -886,14 +930,12 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Registry userRegistry;
             boolean isTenantMode=(tenantDomain != null);
             if ((isTenantMode && this.tenantDomain==null) || (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant store anonymous mode
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
-                userRegistry = ServiceReferenceHolder.getInstance().
-                        getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
+                int tenantId = getTenantId(tenantDomain);
+                userRegistry = getGovernanceUserRegistry(tenantId);
+                setUsernameToThreadLocalCarbonContext(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
             } else {
                 userRegistry = registry;
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
+                setUsernameToThreadLocalCarbonContext(this.username);
             }
             this.isTenantModeStoreView = isTenantMode;
             this.requestedTenant = tenantDomain;
@@ -1081,8 +1123,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         SortedSet<API> recentlyAddedAPIs = new TreeSet<API>(new APINameComparator());
         SortedSet<API> recentlyAddedAPIsWithMultipleVersions = new TreeSet<API>(new APIVersionComparator());
         Registry userRegistry;
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
+        APIManagerConfiguration config = getAPIManagerConfiguration();
         boolean isRecentlyAddedAPICacheEnabled =
               Boolean.parseBoolean(config.getFirstProperty(APIConstants.API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE));
 
@@ -1099,17 +1140,15 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         try {
             boolean isTenantMode = (tenantDomain != null);
             if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(tenantDomain))) {//Tenant based store anonymous mode
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
+                int tenantId = getTenantId(tenantDomain);
                 // explicitly load the tenant's registry
       	      	APIUtil.loadTenantRegistry(tenantId);
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
+                setUsernameToThreadLocalCarbonContext(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME);
                 isTenantFlowStarted = true;
-                userRegistry = ServiceReferenceHolder.getInstance().
-                        getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
+                userRegistry = getGovernanceUserRegistry(tenantId);
             } else {
                 userRegistry = registry;
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
+                setUsernameToThreadLocalCarbonContext(this.username);
                 isTenantFlowStarted = true;
             }
             if (isRecentlyAddedAPICacheEnabled) {
@@ -1204,8 +1243,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         } finally {
         	PaginationContext.destroy();
         	if (isTenantFlowStarted) {
-        		PrivilegedCarbonContext.endTenantFlow();
-        	}
+                endTenantFlow();
+            }
         }
         return recentlyAddedAPIs;
     }
@@ -1244,10 +1283,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             params.put(RegistryConstants.RESULT_TYPE_PROPERTY_NAME, RegistryConstants.TAG_SUMMARY_RESULT_TYPE);
             //as a tenant, I'm browsing my own Store or I'm browsing a Store of another tenant..
             if ((this.isTenantModeStoreView && this.tenantDomain==null) || (this.isTenantModeStoreView && isTenantDomainNotMatching(requestedTenantDomain))) {//Tenant based store anonymous mode
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(this.requestedTenant);
-                userRegistry = ServiceReferenceHolder.getInstance().
-                        getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
+                int tenantId = getTenantId(this.requestedTenant);
+                userRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
+                        getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
             } else {
                 userRegistry = registry;
             }
@@ -1256,9 +1294,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             try {
             	PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(((UserRegistry)userRegistry).getUserName());
                 if (requestedTenant != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenant)) {
-                    isTenantFlowStarted = true;
-                    PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(requestedTenant, true);
+                    isTenantFlowStarted = startTenantFlowForTenantDomain(requestedTenant);
                     PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(((UserRegistry)userRegistry).getUserName());
                 }
 
@@ -1295,7 +1331,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             } finally {
                 if (isTenantFlowStarted) {
-                    PrivilegedCarbonContext.endTenantFlow();
+                    endTenantFlow();
                 }
             }
 
@@ -1349,8 +1385,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         //get the registry instance related to the tenant domain
         UserRegistry govRegistry = null;
         try {
-            ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+            int tenantId = getTenantId(tenantDomain);
             RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
             govRegistry = registryService.getGovernanceSystemRegistry(tenantId);
         } catch (UserStoreException e) {
@@ -1507,7 +1542,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             Boolean showAllAPIs = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
 
             String providerDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(providerId));
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(providerDomain);
+            int tenantId = getTenantId(providerDomain);
             final Registry registry = ServiceReferenceHolder.getInstance().
                     getRegistryService().getGovernanceSystemRegistry(tenantId);
 
@@ -1693,7 +1728,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         return false;
     }
-    
+
     @Override
     public Map<String,Object> searchPaginatedAPIs(String searchTerm, String searchType, String requestedTenantDomain,int start,int end, boolean isLazyLoad)
             throws APIManagementException {
@@ -1756,8 +1791,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
         return result;
     }
-    
-    
+
+
     /**
 	 * Pagination API search based on solr indexing
 	 *
@@ -2128,16 +2163,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             boolean isTenantFlowStarted = false;
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
             }
 
             String applicationName = apiMgtDAO.getApplicationNameFromId(applicationId);
 
             try {
-                WorkflowExecutor addSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
-                        getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+                WorkflowExecutor addSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
 
                 SubscriptionWorkflowDTO workflowDTO = new SubscriptionWorkflowDTO();
                 workflowDTO.setStatus(WorkflowStatus.CREATED);
@@ -2163,7 +2195,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 throw new APIManagementException("Could not execute Workflow", e);
             } finally {
                 if (isTenantFlowStarted) {
-                    PrivilegedCarbonContext.endTenantFlow();
+                    endTenantFlow();
                 }
             }
 
@@ -2223,10 +2255,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
             API api = getAPI(identifier);
             SubscriptionWorkflowDTO workflowDTO;
-            WorkflowExecutor createSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
-                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
-            WorkflowExecutor removeSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
-                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
+            WorkflowExecutor createSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+            WorkflowExecutor removeSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_DELETION);
             String workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceForSubscription(identifier, applicationId);
 
             // in a normal flow workflowExtRef is null when workflows are not enabled
@@ -2285,7 +2315,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleException(errorMsg, e);
         } finally {
             if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
+                endTenantFlow();
             }
         }
 
@@ -2389,15 +2419,12 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         boolean isTenantFlowStarted = false;
         if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            isTenantFlowStarted = true;
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
         }
 
         try {
 
-            WorkflowExecutor appCreationWFExecutor = WorkflowExecutorFactory.getInstance().
-                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+            WorkflowExecutor appCreationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
             ApplicationWorkflowDTO appWFDto = new ApplicationWorkflowDTO();
             appWFDto.setApplication(application);
 
@@ -2420,7 +2447,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleException("Unable to execute Application Creation Workflow", e);
         } finally {
             if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
+                endTenantFlow();
             }
         }
 
@@ -2540,16 +2567,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
 
-            WorkflowExecutor createApplicationWFExecutor = WorkflowExecutorFactory.getInstance().
-                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
-            WorkflowExecutor createSubscriptionWFExecutor = WorkflowExecutorFactory.getInstance().
-                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
-            WorkflowExecutor createProductionRegistrationWFExecutor = WorkflowExecutorFactory.getInstance().
-                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
-            WorkflowExecutor createSandboxRegistrationWFExecutor = WorkflowExecutorFactory.getInstance().
-                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
-            WorkflowExecutor removeApplicationWFExecutor = WorkflowExecutorFactory.getInstance().
-                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
+            WorkflowExecutor createApplicationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+            WorkflowExecutor createSubscriptionWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
+            WorkflowExecutor createProductionRegistrationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+            WorkflowExecutor createSandboxRegistrationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+            WorkflowExecutor removeApplicationWFExecutor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION);
 
             workflowExtRef = apiMgtDAO.getExternalWorkflowReferenceByApplicationID(application.getId());
 
@@ -2655,7 +2677,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleException(errorMsg, e);
         } finally {
             if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
+                endTenantFlow();
             }
         }
 
@@ -2712,9 +2734,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
         try {
             if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                isTenantFlowStarted = true;
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
             }
             // initiate WorkflowExecutor
             WorkflowExecutor appRegistrationWorkflow = null;
@@ -2731,8 +2751,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 // initiate workflow type. By default simple work flow will be
                 // executed.
                 appRegistrationWorkflow =
-                        WorkflowExecutorFactory.getInstance()
-                                .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
+                        getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
                 appRegWFDto =
                         (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
                                 .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION);
@@ -2744,8 +2763,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 // SANDBOX
                 // application.
                 appRegistrationWorkflow =
-                        WorkflowExecutorFactory.getInstance()
-                                .getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
+                        getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
                 appRegWFDto =
                         (ApplicationRegistrationWorkflowDTO) WorkflowExecutorFactory.getInstance()
                                 .createWorkflowDTO(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX);
@@ -2808,13 +2826,19 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 keyDetails.put("tokenDetails", tokenInfo.getJSONString());
                 keyDetails.put("tokenScope", tokenInfo.getScopes());
             }
+
+            JSONObject appLogObject = new JSONObject();
+            appLogObject.put("Generated keys for application", application.getName());
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+                    APIConstants.AuditLogConstants.UPDATED, this.username);
+
             return keyDetails;
         } catch (WorkflowException e) {
             log.error("Could not execute Workflow", e);
             throw new APIManagementException("Could not execute Workflow", e);
         } finally {
             if (isTenantFlowStarted) {
-                PrivilegedCarbonContext.endTenantFlow();
+                endTenantFlow();
             }
         }
     }
@@ -3092,7 +3116,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 	}
 
 	public String getScopesByToken(String accessToken) throws APIManagementException {
-		return apiMgtDAO.getScopesByToken(accessToken);
+		return null;
 	}
 
 	public Set<Scope> getScopesByScopeKeys(String scopeKeys, int tenantId)
@@ -3156,25 +3180,42 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                 String tokenScope,
                                                 String groupingId,
                                                 String jsonString) throws APIManagementException {
+        boolean tenantFlowStarted = false;
+        try {
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                tenantFlowStarted = true;
+            }
+            //Create OauthAppRequest object by passing json String.
+            OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, null, callbackUrl,
+                    tokenScope, jsonString);
 
-        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-            PrivilegedCarbonContext.startTenantFlow();
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            oauthAppRequest.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
+
+            String consumerKey = apiMgtDAO.getConsumerKeyForApplicationKeyType(applicationName, userId, tokenType,
+                    groupingId);
+
+            oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
+            //get key manager instance.
+            KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
+            //call update method.
+
+            OAuthApplicationInfo updatedAppInfo = keyManager.updateApplication(oauthAppRequest);
+
+            JSONObject appLogObject = new JSONObject();
+            appLogObject.put(APIConstants.AuditLogConstants.APPLICATION_NAME, updatedAppInfo.getClientName());
+            appLogObject.put("Updated Oauth app with Call back URL", callbackUrl);
+            appLogObject.put("Updated Oauth app with grant types", jsonString);
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+                    APIConstants.AuditLogConstants.UPDATED, this.username);
+            return updatedAppInfo;
+        } finally {
+            if (tenantFlowStarted) {
+                endTenantFlow();
+            }
         }
-        //Create OauthAppRequest object by passing json String.
-        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(applicationName, null, callbackUrl,
-                                                                                 tokenScope, jsonString);
-
-        oauthAppRequest.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
-
-        String consumerKey = apiMgtDAO.getConsumerKeyForApplicationKeyType(applicationName, userId, tokenType,
-                                                                           groupingId);
-
-        oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
-        //get key manager instant.
-        KeyManager keyManager = KeyManagerHolder.getKeyManagerInstance();
-        //call update method.
-        return keyManager.updateApplication(oauthAppRequest);
 
     }
 
@@ -3217,7 +3258,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 description = (String) args[2];
             }
 
-            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
             boolean isTenantFlowStarted = false;
 
             try {
@@ -3235,9 +3275,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 String tenantDomain = workflowDTO.getTenantDomain();
                 if (tenantDomain != null && !org.wso2.carbon.utils.multitenancy.MultitenantConstants
                         .SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                    isTenantFlowStarted = true;
-                    PrivilegedCarbonContext.startTenantFlow();
-                    PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+                    isTenantFlowStarted = startTenantFlowForTenantDomain(tenantDomain);
                 }
 
                 workflowDTO.setWorkflowDescription(description);
@@ -3246,7 +3284,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 String workflowType = workflowDTO.getWorkflowType();
                 WorkflowExecutor workflowExecutor;
                 try {
-                    workflowExecutor = WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
+                    workflowExecutor = getWorkflowExecutor(workflowType);
                     workflowExecutor.complete(workflowDTO);
                 } catch (WorkflowException e) {
                     throw new APIManagementException(e);
@@ -3272,11 +3310,33 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 row.put("message", msg + e.getMessage());
             } finally {
                 if (isTenantFlowStarted) {
-                    PrivilegedCarbonContext.endTenantFlow();
+                    endTenantFlow();
                 }
             }
         }
         return row;
+    }
+
+    protected void endTenantFlow() {
+        PrivilegedCarbonContext.endTenantFlow();
+    }
+
+    protected boolean startTenantFlowForTenantDomain(String tenantDomain) {
+        boolean isTenantFlowStarted = true;
+        PrivilegedCarbonContext.startTenantFlow();
+        PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+        return isTenantFlowStarted;
+    }
+
+    /**
+     * Returns a workflow executor
+     *
+     * @param workflowType Workflow executor type
+     * @return WorkflowExecutor of given type
+     * @throws WorkflowException if an error occurred while getting WorkflowExecutor
+     */
+    protected WorkflowExecutor getWorkflowExecutor(String workflowType) throws WorkflowException {
+        return WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
     }
 
     @Override
@@ -3313,6 +3373,16 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
         }
         return false;
+    }
+
+    /**
+     * Returns API manager configurations.
+     *
+     * @return APIManagerConfiguration object
+     */
+    protected APIManagerConfiguration getAPIManagerConfiguration() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
     }
 
 }

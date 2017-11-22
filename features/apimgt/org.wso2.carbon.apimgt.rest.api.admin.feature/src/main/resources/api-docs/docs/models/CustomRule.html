@@ -27,12 +27,12 @@
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">Id of policy</p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">0c6439fd-9b16-3c2e-be6e-1086e0b9aa93</p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
@@ -42,12 +42,12 @@
                                 
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">Name of policy</p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">Policy1</p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
@@ -57,12 +57,12 @@
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">Display name of the policy</p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
@@ -72,12 +72,12 @@
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">Description of the policy</p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
@@ -87,12 +87,12 @@
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">Indicates whether the policy is deployed successfully or not.</p></td>
                         <td class="parameter">
                                 <a href="#!/models#boolean">boolean</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
@@ -102,12 +102,13 @@
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">Siddhi query which represents the custom throttling policy</p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">FROM RequestStream\nSELECT userId, ( userId &#x3D;&#x3D; &#39;admin@carbon.super&#39; ) AS isEligible , str:concat(&#39;admin@carbon.super&#39;,&#39;&#39;) as throttleKey\nINSERT INTO EligibilityStream; \n\nFROM EligibilityStream[isEligible&#x3D;&#x3D;true]#throttler:timeBatch(1 min) \nSELECT throttleKey, (count(userId) &gt;&#x3D; 10) as isThrottled, expiryTimeStamp group by throttleKey \nINSERT ALL EVENTS into ResultStream;
+</p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
@@ -117,12 +118,12 @@
                                 optional
                             </p>
                         </td>
-                        <td class="parameter"><p class="marked"></p></td>
+                        <td class="parameter"><p class="marked">The specific combination of attributes that are checked in the policy.</p></td>
                         <td class="parameter">
                                 <a href="#!/models#string">string</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">$userId</p></td>
                     </tr>
                 </tbody>
             </table>

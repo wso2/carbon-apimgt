@@ -47,8 +47,7 @@ public class SubscriberKeyMgtClient {
             ServiceClient client = subscriberServiceStub._getServiceClient();
             Options options = client.getOptions();
             options.setManageSession(true);
-            CarbonUtils.setBasicAccessSecurityHeaders(username, password,
-                                                      true, subscriberServiceStub._getServiceClient());
+            CarbonUtils.setBasicAccessSecurityHeaders(username, password, subscriberServiceStub._getServiceClient());
 
         } catch (Exception e) {
             String errorMsg = "Error when instantiating SubscriberKeyMgtClient.";
