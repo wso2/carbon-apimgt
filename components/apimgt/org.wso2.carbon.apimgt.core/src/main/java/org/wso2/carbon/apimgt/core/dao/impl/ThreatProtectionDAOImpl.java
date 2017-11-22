@@ -55,7 +55,6 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
             return getPolicies(connection);
         } catch (SQLException e) {
             String errorMsg = "Error getting Threat Protection policies";
-            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
     }
@@ -66,7 +65,6 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
             return getPolicy(policyId, connection);
         } catch (SQLException e) {
             String errorMsg = "Error getting Threat Protection policy";
-            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
     }
@@ -83,7 +81,6 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
             addPolicy(policy, connection);
         } catch (SQLException e) {
             String errorMsg = "Error adding Threat Protection policy";
-            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
     }
@@ -94,7 +91,6 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
             return isPolicyExists(policyId, connection);
         } catch (SQLException e) {
             String errorMsg = "Error checking policy existence status for PolicyId: " + policyId;
-            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
     }
@@ -105,7 +101,6 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
             return getThreatProtectionPolicyIdsForApi(apiId, connection);
         } catch (SQLException e) {
             String errorMsg = "Error getting threat protection policy ids for API_ID: " + apiId;
-            //log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
     }
@@ -116,7 +111,6 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
             updatePolicy(policy, connection);
         } catch (SQLException e) {
             String errorMsg = "Error updating policy for PolicyId: " + policy.getUuid();
-            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
     }
@@ -143,12 +137,10 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
                 return list;
             } catch (UnsupportedEncodingException e) {
                 String errorMsg = "Charset error in threat protection policy";
-                log.error(errorMsg, e);
                 throw new APIMgtDAOException(errorMsg, e);
             }
         } catch (SQLException e) {
             String errorMsg = "Error getting threat protection policies";
-            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
     }
@@ -172,12 +164,10 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
                 return policy;
             } catch (UnsupportedEncodingException e) {
                 String errorMsg = "Charset error in threat protection policy";
-                log.error(errorMsg, e);
                 throw new APIMgtDAOException(errorMsg, e);
             }
         } catch (SQLException e) {
             String errorMsg = "Error getting threat protection policy";
-            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
     }
@@ -194,11 +184,9 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             String errorMsg = "Error adding Threat Protection policy";
-            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         } catch (UnsupportedEncodingException e) {
             String errorMsg = "Charset error in threat protection policy";
-            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
     }
@@ -217,11 +205,9 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             String errorMsg = "Error updating Threat Protection policy";
-            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         } catch (UnsupportedEncodingException e) {
             String errorMsg = "Charset error in threat protection policy";
-            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
     }
@@ -236,7 +222,6 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
             }
         } catch (SQLException e) {
             String errorMsg = "Error querying policy status for PolicyId: " + policyId;
-            log.error(errorMsg, e);
             throw new APIMgtDAOException(errorMsg, e);
         }
     }

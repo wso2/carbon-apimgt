@@ -140,7 +140,7 @@ public class APIManagerFactory {
         try {
             return new APIMgtAdminServiceImpl(DAOFactory.getAPISubscriptionDAO(), DAOFactory.getPolicyDAO(),
                     DAOFactory.getApiDAO(), DAOFactory.getLabelDAO(), DAOFactory.getApplicationDAO(), new
-                    APIGatewayPublisherImpl(), DAOFactory.getWorkflowDAO());
+                    APIGatewayPublisherImpl(), DAOFactory.getWorkflowDAO(), DAOFactory.getThreatProtectionDAO());
         } catch (APIMgtDAOException e) {
             log.error("Couldn't create API Management Admin Service", e);
             throw new APIMgtDAOException("Couldn't create API Management Admin Service",
