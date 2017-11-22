@@ -10,7 +10,6 @@ import ballerina.lang.errors;
 import ballerina.lang.strings;
 import ballerina.net.uri;
 import ballerina.utils;
-import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
 
 errors:TypeCastError err;
 dto:GAnalyticsTrackingInfoDTO gAnalyticsInfo;
@@ -56,7 +55,7 @@ function buildPayload (message m) (string){
         documentHostName = strings:subString(host, 0, strings:indexOf(host, ":"));
     }
     string xForwardedFor;
-    xForwardedFor, error = gatewayUtil:extractHeaderWithName(constants:X_FORWARDED_FOR_HEADER, m);
+    xForwardedFor = messages:getHeader(m, constants:X_FORWARDED_FOR_HEADER);
 
     if (xForwardedFor != "") {
         string[] xForwardedForList = strings:split(xForwardedFor, ",");
