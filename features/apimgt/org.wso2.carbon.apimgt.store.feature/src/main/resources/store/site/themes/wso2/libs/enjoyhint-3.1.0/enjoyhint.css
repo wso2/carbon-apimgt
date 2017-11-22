@@ -266,7 +266,7 @@
 
 .enjoy_hint_label {
     position: absolute;
-    color: #fff;
+    color: #f1f1f1;
     z-index: 107;
     font-size: 22px;
     font-family: casino_handregular, Arial
@@ -278,4 +278,9 @@ div.kineticjs-content {
 
 .enjoy_hint_disable_scroll {
     overflow: hidden;
+}
+
+.enjoy_hint_emphasize_text {
+    color: #5cb85c;
+    font-weight: bold ;
 }
