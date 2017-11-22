@@ -420,7 +420,6 @@ class StarRatingBar extends React.Component {
         let promised_api = api.getAPIById(this.props.apiIdProp);
         promised_api.then(
             response => {
-                console.info(response.obj);
             }
         );
 
