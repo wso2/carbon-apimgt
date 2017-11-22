@@ -46,10 +46,15 @@ class Overview extends Component {
             dropDownApplications: null,
             dropDownPolicies: null,
             notFound: false,
-            tabValue: "Social Sites"
+            tabValue: "Social Sites",
+            comment: '',
+            commentList:null
         };
         this.api_uuid = this.props.match.params.api_uuid;
         this.handleTabChange = this.handleTabChange.bind(this);
+        this.updateCommentString = this.updateCommentString.bind(this);
+        this.handleAddComment = this.handleAddComment.bind(this);
+        this.handleGetAllComments = this.handleGetAllComments.bind(this);
     }
 
     componentDidMount() {
@@ -132,6 +137,8 @@ class Overview extends Component {
                 }
             }
         );
+
+        this.handleGetAllComments();
     }
 
     populateApplicationDropdown(){
@@ -148,6 +155,44 @@ class Overview extends Component {
     handleTabChange = (event, tabValue) => {
         this.setState({ tabValue : tabValue });
     };
+
+    updateCommentString(event) {
+        this.setState({comment : event.target.value});
+    }
+
+    handleAddComment() {
+        var api = new Api();
+        let commentInfo = {"commentText" : this.state.comment};
+        let promise = api.addComment(this.api_uuid, commentInfo);
+        promise.then(
+            response => {
+                this.handleGetAllComments();
+                this.setState({comment : ''});
+                message.success("Comment added successfully");
+            }).catch (
+                 error => {
+                     message.error("Error occurred while adding comments!");
+                 }
+             );
+    }
+
+    handleGetAllComments() {
+        var api = new Api();
+        let promise_get = api.getAllComments(this.api_uuid);
+        promise_get.then(
+            response => {
+                var index = 0;
+                var comments = [];
+                this.setState({commentList : response.obj.list});
+            }).catch (
+                 error => {
+                     message.error("Error occurred while retrieving comments!");
+                 }
+            );
+    }
+
+
+
     render() {
         const formItemLayout = {
             labelCol: {span: 6},
@@ -229,7 +274,27 @@ class Overview extends Component {
                             {this.state.tabValue === 'Embed' && <div>{'Item Two'}</div>}
                             {this.state.tabValue === 'Email' && <div>{'Item Three'}</div>}
 
+                            <div>
+                                <p>Comments</p>
+                                <Row>
+                                    <textarea cols="180" rows="4" value={this.state.comment} onChange={this.updateCommentString}> </textarea>
+                                </Row>
+                                <Row>
+                                    <Button onClick={this.handleAddComment}>Add</Button>
+                                </Row>
+                            </div>
+                            <div>
+                                {this.state.commentList ? this.state.commentList.map((comment) => {
+                                    return <div><Row>
+                                            <Card bodyStyle={{padding: 5}} style={{background : "#e0d9d8"}}><p>{comment.commentText}</p></Card>
+                                           </Row>
 
+                                           <Row>
+                                           <p>Posted By {comment.createdBy} at {comment.createdTime}</p>
+                                          </Row><br /></div>
+                                    }) : <br></br>
+                                }
+                            </div>
                         </Paper>
 
                     </Grid>
