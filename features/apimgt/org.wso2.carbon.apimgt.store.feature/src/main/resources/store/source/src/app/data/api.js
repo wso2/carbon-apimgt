@@ -454,6 +454,35 @@ class API {
         return promise_labels;
     }
 
+    /**
+     * Get the SDK generation supported languages.
+     * @returns {Promise} List of languages that supports SDK generation by swagger-codegen
+     */
+    getSdkLanguages() {
+        var promise_languages = this.client.then(
+            (client) => {
+                return client.apis["SDK Language list."].get_sdk_gen_languages(
+                    {}, this._requestMetaData());
+            }
+        );
+        return promise_languages;
+    }
+
+    /**
+     * Get the SDK for the API with the specified apiId and language.
+     * @returns {Promise} Zip file for the generated SDK.
+     */
+    getSdk(apiId, language) {
+        let payload = {apiId: apiId, language:language}
+        var promise_sdk = this.client.then(
+            (client) => {
+                return client.apis["API (individual)"].get_apis__apiId__sdks__language_(
+                    payload, this._requestMetaData());
+            }
+        );
+        return promise_sdk;
+    }
+
 }
 
 export default API
