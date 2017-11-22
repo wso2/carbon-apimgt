@@ -290,18 +290,18 @@ function retrieveUserInfo (string token) (json) {
 }
 
 function isSubscriptionBlocked (dto:SubscriptionDto subscriptionDto, message response, dto:APIDTO apiDto)
-                                                                                                (boolean, message) {
+(boolean, message) {
     if (subscriptionDto.status == constants:SUBSCRIPTION_STATUS_BLOCKED) {
         gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
         return true, response;
     } else if ((subscriptionDto.status == constants:SUBSCRIPTION_STATUS_PROD_ONLY_BLOCKED) &&
-    (subscriptionDto.keyEnvType == constants:ENV_TYPE_PRODUCTION)) {
-            gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
-            return true, response;
+               (subscriptionDto.keyEnvType == constants:ENV_TYPE_PRODUCTION)) {
+        gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
+        return true, response;
     } else if ((subscriptionDto.status == constants:SUBSCRIPTION_STATUS_SANDBOX_ONLY_BLOCKED)
-      && (subscriptionDto.keyEnvType == constants:ENV_TYPE_SANDBOX)) {
-            gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
-            return true, response;
+               && (subscriptionDto.keyEnvType == constants:ENV_TYPE_SANDBOX)) {
+        gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
+        return true, response;
     }
     return false, response;
 }

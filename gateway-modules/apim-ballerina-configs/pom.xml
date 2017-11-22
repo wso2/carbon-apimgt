@@ -108,6 +108,22 @@
                         </configuration>
                     </execution>
                     <execution>
+                        <id>microgateway</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>org.wso2.carbon.apimgt.plugin.GenerateArchives</mainClass>
+                            <arguments>
+                                <argument>service</argument>
+                                <argument>${project.basedir}/configs</argument>
+                                <argument>org/wso2/carbon/apimgt/gateway/microgateway/</argument>
+                                <argument>${project.build.directory}/microgateway</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>analytics</id>
                         <phase>package</phase>
                         <goals>

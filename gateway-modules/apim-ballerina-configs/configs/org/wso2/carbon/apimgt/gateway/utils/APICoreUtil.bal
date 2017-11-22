@@ -12,7 +12,6 @@ import org.wso2.carbon.apimgt.ballerina.util as apimgtUtil;
 import ballerina.lang.strings;
 import org.wso2.carbon.apimgt.ballerina.util;
 function registerGateway () (json) {
-
     json labelInfoPayload = {};
     message request = {};
     message response = {};
@@ -44,12 +43,11 @@ function loadAPIs () {
     json apiList = apis.list;
 
     while (index < count) {
-
         dto:APIDTO api = fromJSONToAPIDTO(apiList[index]);
-
         //Retrieve API configuration
         string apiConfig;
         int status;
+
         status, apiConfig = getAPIServiceConfig(api.id);
         int maxRetries = 3;
         int i = 0;
@@ -71,7 +69,6 @@ function loadAPIs () {
 }
 
 function getAPIs () (json) {
-
     string apiCoreURL;
     message request = {};
     message response = {};
@@ -89,7 +86,6 @@ function getAPIs () (json) {
     return apiList;
 }
 function getEndpoints () (json) {
-
     string apiCoreURL;
     message request = {};
     message response = {};
@@ -106,8 +102,8 @@ function getEndpoints () (json) {
     }
     return endpointList;
 }
-function getBlockConditions () (json) {
 
+function getBlockConditions () (json) {
     string apiCoreURL;
     message request = {};
     message response = {};
@@ -125,7 +121,6 @@ function getBlockConditions () (json) {
     return blockConditionList;
 }
 function loadGlobalEndpoints () {
-
     json endpoints = getEndpoints();
     int index = 0;
     errors:TypeCastError err;
@@ -141,7 +136,6 @@ function loadGlobalEndpoints () {
     }
 }
 function loadBlockConditions () {
-
     json blockConditions = getBlockConditions();
     int index = 0;
     errors:TypeCastError err;
@@ -212,6 +206,7 @@ function fromJsonToEndpointDto (json endpointConfig) (dto:EndpointDto) {
     }
     return endpointDto;
 }
+
 function getAPICoreURL () (string) {
     string apiCoreURL;
 
@@ -222,7 +217,6 @@ function getAPICoreURL () (string) {
     }
     return apiCoreURL;
 }
-
 
 function deployService (dto:APIDTO api, string config) {
     string fileName = api.id + ".bal";
