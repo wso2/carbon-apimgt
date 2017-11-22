@@ -22,6 +22,7 @@ import qs from 'qs'
 import Configs from './ConfigManager'
 import Utils from './utils'
 import User from './User'
+import SingleClient from './SingleClient'
 
 const context = "store";
 
@@ -119,6 +120,7 @@ class AuthManager {
     static getUser() {
         const userData = localStorage.getItem(User.CONST.LOCALSTORAGE_USER);
         const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1);
+        debugger;
         if (!(userData && partialToken)) {
             return null;
         }
@@ -188,8 +190,10 @@ class AuthManager {
         };
         const promisedLogout = axios.post(url, null, {headers: headers});
         return promisedLogout.then(response => {
-            Utils.delete_cookie("WSO2_AM_TOKEN_1");
-            localStorage.removeItem("wso2_user");
+            debugger;
+            Utils.delete_cookie("WSO2_AM_TOKEN_1",this.contextPath);
+            localStorage.removeItem(User.CONST.LOCALSTORAGE_USER);
+            SingleClient._instance = null; // Single client should be re initialize after log out
         });
     }
 
