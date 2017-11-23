@@ -40,7 +40,7 @@ public class RegularExpressionProtector extends AbstractMediator {
     private Boolean enabledCheckPathParam = false;
 
     /**
-     * This mediate method get the message context and validate against the special characters.
+     * This mediate method gets the message context and validate against the special characters.
      *
      * @param messageContext contains the message properties of the relevant API request which was
      *                       enabled the regexValidator message mediation in flow.
@@ -80,7 +80,7 @@ public class RegularExpressionProtector extends AbstractMediator {
     }
 
     /**
-     * This method check whether the request body contains matching vulnerable key words.
+     * This method checks whether the request body contains matching vulnerable key words.
      *
      * @param messageContext contains the message properties of the relevant API request which was
      *                       enabled the regexValidator message mediation in flow.
@@ -104,7 +104,7 @@ public class RegularExpressionProtector extends AbstractMediator {
     }
 
     /**
-     * This method check whether the request header contains matching vulnerable keywords.
+     * This method checks whether the request header contains matching vulnerable keywords.
      * * @param messageContext contains the message properties of the relevant API request which was
      * enabled the regexValidator message mediation in flow.
      */
@@ -125,7 +125,7 @@ public class RegularExpressionProtector extends AbstractMediator {
     }
 
     /**
-     * This method check whether the request path contains matching vulnerable keywords.
+     * This method checks whether the request path contains matching vulnerable keywords.
      *
      * @param messageContext contains the message properties of the relevant API request which was
      *                       enabled the regexValidator message mediation in flow.
