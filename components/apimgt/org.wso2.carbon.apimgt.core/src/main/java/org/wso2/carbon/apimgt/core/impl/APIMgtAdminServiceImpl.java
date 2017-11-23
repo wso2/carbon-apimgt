@@ -60,7 +60,8 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     private ThreatProtectionDAO threatProtectionDAO;
 
     public APIMgtAdminServiceImpl(APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, ApiDAO apiDAO,
-                                  LabelDAO labelDAO, ApplicationDAO applicationDAO, APIGateway apiGateway, WorkflowDAO workflowDAO, ThreatProtectionDAO threatProtectionDAO) {
+                                  LabelDAO labelDAO, ApplicationDAO applicationDAO, APIGateway apiGateway,
+                                  WorkflowDAO workflowDAO, ThreatProtectionDAO threatProtectionDAO) {
         this.apiSubscriptionDAO = apiSubscriptionDAO;
         this.policyDAO = policyDAO;
         this.apiDAO = apiDAO;

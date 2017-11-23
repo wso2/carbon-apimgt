@@ -41,6 +41,7 @@ public class JSONAnalyzer implements APIMThreatAnalyzer {
 
     private JsonFactory factory;
 
+    //0 means unlimited
     private int maxFieldCount = 0;
     private int maxStringLength = 0;
     private int maxArrayElementCount = 0;
@@ -140,6 +141,9 @@ public class JSONAnalyzer implements APIMThreatAnalyzer {
      * @throws APIMThreatAnalyzerException if currentDepth is greater than maxDepth
      */
     public void analyzeDepth(int maxDepth, int currentDepth, String apiContext) throws APIMThreatAnalyzerException {
+        if (maxDepth == 0) {
+            return;
+        }
         if (currentDepth > maxDepth) {
             logger.error(JSON_THREAT_PROTECTION_MSG_PREFIX + apiContext + " - Depth Limit Reached");
             throw new APIMThreatAnalyzerException(JSON_THREAT_PROTECTION_MSG_PREFIX
@@ -163,13 +167,13 @@ public class JSONAnalyzer implements APIMThreatAnalyzer {
             return;
         }
 
-        if (field.length() > maxFieldLength) {
+        if (maxFieldLength > 0 && field.length() > maxFieldLength) {
             logger.error(JSON_THREAT_PROTECTION_MSG_PREFIX + apiContext + " - Max Key Length Reached");
             throw new APIMThreatAnalyzerException(JSON_THREAT_PROTECTION_MSG_PREFIX + apiContext
                     + " - Max Key Length Reached");
         }
 
-        if (currentFieldCount > maxFieldCount) {
+        if (maxFieldCount > 0 && currentFieldCount > maxFieldCount) {
             logger.error(JSON_THREAT_PROTECTION_MSG_PREFIX +  apiContext
                     + " - Max Property Count Reached");
             throw new APIMThreatAnalyzerException(JSON_THREAT_PROTECTION_MSG_PREFIX
@@ -186,7 +190,7 @@ public class JSONAnalyzer implements APIMThreatAnalyzer {
      * @throws APIMThreatAnalyzerException if string length is greater than maximum length provided
      */
     private void analyzeString(String value, int maxLength, String apiContext) throws APIMThreatAnalyzerException {
-        if (value == null) {
+        if (value == null || maxLength == 0) {
             return;
         }
 
@@ -229,6 +233,9 @@ public class JSONAnalyzer implements APIMThreatAnalyzer {
                 }
 
                 arrayElementCount += 1;
+                if (maxArrayElementCount == 0) {
+                    continue;
+                }
                 if (arrayElementCount > maxArrayElementCount) {
                     logger.error(JSON_THREAT_PROTECTION_MSG_PREFIX + apiContext
                             + " - Max Array Length Reached");

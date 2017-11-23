@@ -32,6 +32,7 @@ import java.io.StringReader;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 
 /**
@@ -41,7 +42,8 @@ public class XMLAnalyzer implements APIMThreatAnalyzer {
     private static final String XML_THREAT_PROTECTION_MSG_PREFIX = "Threat Protection-XML: ";
 
     private XMLInputFactory factory;
-    private Logger logger = LoggerFactory.getLogger(XMLAnalyzer.class);
+    private XMLConfig config;
+    private Logger log = LoggerFactory.getLogger(XMLAnalyzer.class);
 
     public XMLAnalyzer() {
         factory = WstxInputFactory.newInstance();
@@ -51,6 +53,7 @@ public class XMLAnalyzer implements APIMThreatAnalyzer {
      * Create a XMLAnalyzer using default configuration values
      */
     public void configure(XMLConfig config) {
+        this.config = config;
         boolean dtdEnabled = config.isDtdEnabled();
         boolean externalEntitiesEnabled = config.isExternalEntitiesEnabled();
         int maxDepth = config.getMaxDepth();
@@ -83,31 +86,50 @@ public class XMLAnalyzer implements APIMThreatAnalyzer {
     @Override
     public void analyze(String payload, String apiContext) throws APIMThreatAnalyzerException {
         Reader reader = null;
-        XMLEventReader xmlEventReaderReader = null;
+        XMLStreamReader xmlStreamReader = null;
         try {
             reader = new StringReader(payload);
-            xmlEventReaderReader = factory.createXMLEventReader(reader);
-            while (xmlEventReaderReader.hasNext()) {
-                xmlEventReaderReader.nextEvent();
+            xmlStreamReader = factory.createXMLStreamReader(reader);
+            while (xmlStreamReader.hasNext()) {
+                int xmlStreamEvent = xmlStreamReader.next();
+
+                //By default, stream parsing does not enforce attribute limits on the xml content.
+                //see: https://stackoverflow.com/a/7447769
+                //So, we are manually checking attribute length and count
+                if (xmlStreamEvent == XMLStreamReader.START_ELEMENT) {
+                    int currentAttributeCount = xmlStreamReader.getAttributeCount();
+                    if (currentAttributeCount > config.getMaxAttributeCount()) {
+                        throw new APIMThreatAnalyzerException(XML_THREAT_PROTECTION_MSG_PREFIX + apiContext
+                                + " - XML Validation Failed: Maximum attribute limit reached.");
+                    }
+
+                    for (int i=0; i<currentAttributeCount; i++) {
+                        String attributeValue = xmlStreamReader.getAttributeValue(i);
+                        if (attributeValue.length() > config.getMaxAttributeLength()) {
+                            throw new APIMThreatAnalyzerException(XML_THREAT_PROTECTION_MSG_PREFIX + apiContext
+                                    + " - XML Validation Failed: Maximum attribute length reached.");
+                        }
+                    }
+                }
             }
         } catch (XMLStreamException e) {
-            logger.error(XML_THREAT_PROTECTION_MSG_PREFIX + apiContext + " - XML Validation Failed: "
+            log.error(XML_THREAT_PROTECTION_MSG_PREFIX + apiContext + " - XML Validation Failed: "
                     + e.getMessage(), e);
             throw new APIMThreatAnalyzerException(XML_THREAT_PROTECTION_MSG_PREFIX + apiContext
                     + " - XML Validation Failed: " + e.getMessage(), e);
         } finally {
             try {
-                if (xmlEventReaderReader != null) {
-                    xmlEventReaderReader.close();
+                if (xmlStreamReader != null) {
+                    xmlStreamReader.close();
                 }
                 if (reader != null) {
                     reader.close();
                 }
             } catch (XMLStreamException e) {
-                logger.warn(XML_THREAT_PROTECTION_MSG_PREFIX + apiContext
+                log.warn(XML_THREAT_PROTECTION_MSG_PREFIX + apiContext
                         + " - Failed to close XMLEventReader", e);
             } catch (IOException e) {
-                logger.warn(XML_THREAT_PROTECTION_MSG_PREFIX + apiContext
+                log.warn(XML_THREAT_PROTECTION_MSG_PREFIX + apiContext
                         + " - Failed to close payload StringReader", e);
             }
         }

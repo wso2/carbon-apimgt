@@ -57,7 +57,7 @@ public class ThreatProtectionApiServiceImplTestCase {
         list.add(SampleTestObjectCreator.createUniqueThreatProtectionPolicy());
         list.add(SampleTestObjectCreator.createUniqueThreatProtectionPolicy());
 
-        Mockito.when(apiMgtAdminService.getThreatProtectionPolicyList()).thenReturn(list);
+        PowerMockito.when(apiMgtAdminService.getThreatProtectionPolicyList()).thenReturn(list);
 
         ThreatProtectionApiServiceImpl threatProtectionApiService = new ThreatProtectionApiServiceImpl();
         Response response = threatProtectionApiService.threatProtectionPoliciesGet(getRequest());
@@ -81,6 +81,11 @@ public class ThreatProtectionApiServiceImplTestCase {
         Response response = threatProtectionApiService.threatProtectionPoliciesGet(getRequest());
 
         Assert.assertEquals(response.getStatus(), Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+    }
+
+    @Test
+    public void threatProtectionApisApiIdPolicyGetTestCase() throws Exception {
+        //to-do
     }
 
     private Request getRequest() throws Exception {
