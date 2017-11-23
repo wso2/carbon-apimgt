@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.gateway.mediators;
 
+import org.apache.axiom.om.OMElement;
+import org.apache.axiom.soap.SOAPBody;
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
@@ -33,11 +36,11 @@ import java.util.regex.Pattern;
  * special key words in the request headers, query/path parameters and body.
  */
 public class RegularExpressionProtector extends AbstractMediator {
-    private Boolean enabledCheckBody = false;
+    private Boolean enabledCheckBody = true;
     private String threatType = null;
     private Pattern pattern = null;
-    private Boolean enabledCheckHeaders = false;
-    private Boolean enabledCheckPathParam = false;
+    private Boolean enabledCheckHeaders;
+    private Boolean enabledCheckPathParam;
 
     /**
      * This mediate method gets the message context and validate against the special characters.
@@ -86,19 +89,32 @@ public class RegularExpressionProtector extends AbstractMediator {
      *                       enabled the regexValidator message mediation in flow.
      */
     private void checkRequestBody(MessageContext messageContext) {
+        SOAPEnvelope soapEnvelope;
+        SOAPBody soapBody;
+        OMElement omElement;
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
                 messageContext).getAxis2MessageContext();
         if (enabledCheckBody) {
-            if (axis2MC.getEnvelope().getBody().getFirstElement() != null) {
-                String payload = axis2MC.getEnvelope().getBody().getFirstElement().toString();
-                if (pattern != null && payload != null && pattern.matcher(payload).find()) {
-                    if (log.isDebugEnabled()) {
-                        log.debug(String.format("Threat detected in request payload [ %s ] by regex [ %s ]))",
-                                payload, pattern));
-                    }
-                    GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
-                            threatType + " " + APIMgtGatewayConstants.PAYLOAD_THREAT_MSG);
+            soapEnvelope = axis2MC.getEnvelope();
+            if (soapEnvelope == null) {
+                return;
+            }
+            soapBody = soapEnvelope.getBody();
+            if (soapBody == null) {
+                return;
+            }
+            omElement = soapBody.getFirstElement();
+            if (omElement == null) {
+                return;
+            }
+            String payload = omElement.toString();
+            if (pattern != null && payload != null && pattern.matcher(payload).find()) {
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format("Threat detected in request payload [ %s ] by regex [ %s ]))",
+                            payload, pattern));
                 }
+                GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
+                        threatType + " " + APIMgtGatewayConstants.PAYLOAD_THREAT_MSG);
             }
         }
     }
@@ -151,6 +167,7 @@ public class RegularExpressionProtector extends AbstractMediator {
      * If a client ask to check the message body,Method returns true else It will return false.
      * If the {isContainetAware} method returns false, The request message payload wont be build.
      * Building a payload will directly affect to the performance.
+     *
      * @return If enabledCheckBody is true,The method returns true else it returns false
      */
     public boolean isContentAware() {
