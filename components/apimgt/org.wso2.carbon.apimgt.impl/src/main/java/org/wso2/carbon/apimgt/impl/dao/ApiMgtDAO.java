@@ -173,14 +173,6 @@ public class ApiMgtDAO {
         return versionList;
     }
 
-    /**
-     * This is an inner class to hold the instance of the ApiMgtDAO.
-     * The reason for writing it like this is to guarantee that only one instance would be created.
-     * ref: Initialization-on-demand holder idiom
-     */
-//    private static class ApiMgtDAOHolder {
-//        private static final ApiMgtDAO INSTANCE = new ApiMgtDAO();
-//    }
 
     /**
      * Method to get the instance of the ApiMgtDAO.
@@ -676,15 +668,6 @@ public class ApiMgtDAO {
 
         try {
             String dbProdName = conn.getMetaData().getDatabaseProductName();
-            /*if("oracle".equalsIgnoreCase(dbProdName.toLowerCase()) || conn.getMetaData().getDriverName().toLowerCase().contains("oracle")){
-                sqlQuery = sqlQuery.replaceAll("\\+", "union all");
-				sqlQuery = sqlQuery.replaceFirst("select", "select sum(c) from ");
-			}else if(dbProdName.toLowerCase().contains("microsoft") && dbProdName.toLowerCase().contains("sql")){
-				sqlQuery = sqlQuery.replaceAll("\\+", "union all");
-				sqlQuery = sqlQuery.replaceFirst("select", "select sum(c) from ");
-				sqlQuery = sqlQuery + " x";
-            }*/
-
             ps = conn.prepareStatement(sqlQuery);
             ps.setString(1, apiPolicy);
             ps.setInt(2, subscriptionTenantId);
@@ -4628,6 +4611,7 @@ public class ApiMgtDAO {
         PreparedStatement ps = null;
         try {
             connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
             String deleteRegistrationEntry = SQLConstants.REMOVE_FROM_APPLICATION_REGISTRANTS_SQL;
 
             if (log.isDebugEnabled()) {
@@ -5308,7 +5292,6 @@ public class ApiMgtDAO {
         String query = SQLConstants.ADD_URL_MAPPING_SQL;
         String scopeQuery = SQLConstants.ADD_OAUTH2_RESOURCE_SCOPE_SQL;
         try {
-            //connection = APIMgtDBUtil.getConnection();
             prepStmt = connection.prepareStatement(query);
             scopePrepStmt = connection.prepareStatement(scopeQuery);
 
@@ -5800,7 +5783,6 @@ public class ApiMgtDAO {
             //Header change check not required here as we update API level throttling tier
             //from same call.
             //TODO review and run tier update as separate query if need.
-            //if (api.isApiHeaderChanged()) {
             prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, api.getContext());
             String contextTemplate = api.getContextTemplate();
