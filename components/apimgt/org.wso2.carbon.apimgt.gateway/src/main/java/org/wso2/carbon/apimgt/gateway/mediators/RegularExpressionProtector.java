@@ -33,14 +33,15 @@ import java.util.regex.Pattern;
  * special key words in the request headers, query/path parameters and body.
  */
 public class RegularExpressionProtector extends AbstractMediator {
-    private Boolean enabledCheckBody = true;
+    private Boolean enabledCheckBody = false;
     private String threatType = null;
     private Pattern pattern = null;
-    private Boolean enabledCheckHeaders = true;
-    private Boolean enabledCheckPathParam = true;
+    private Boolean enabledCheckHeaders = false;
+    private Boolean enabledCheckPathParam = false;
 
     /**
      * This mediate method get the message context and validate against the special characters.
+     *
      * @param messageContext contains the message properties of the relevant API request which was
      *                       enabled the regexValidator message mediation in flow.
      * @return A boolean value.True if successful and false if not.
@@ -80,29 +81,32 @@ public class RegularExpressionProtector extends AbstractMediator {
 
     /**
      * This method check whether the request body contains matching vulnerable key words.
+     *
      * @param messageContext contains the message properties of the relevant API request which was
      *                       enabled the regexValidator message mediation in flow.
      */
     private void checkRequestBody(MessageContext messageContext) {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
                 messageContext).getAxis2MessageContext();
-        if (enabledCheckBody && axis2MC.getEnvelope() != null) {
-            String payload = axis2MC.getEnvelope().getBody().getFirstElement().toString();
-            if (pattern != null && payload != null && pattern.matcher(payload).find()) {
-                if (log.isDebugEnabled()) {
-                    log.debug(String.format("Threat detected in request payload [ %s ] by regex [ %s ]))",
-                            payload, pattern));
+        if (enabledCheckBody) {
+            if (axis2MC.getEnvelope().getBody().getFirstElement() != null) {
+                String payload = axis2MC.getEnvelope().getBody().getFirstElement().toString();
+                if (pattern != null && payload != null && pattern.matcher(payload).find()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug(String.format("Threat detected in request payload [ %s ] by regex [ %s ]))",
+                                payload, pattern));
+                    }
+                    GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
+                            threatType + " " + APIMgtGatewayConstants.PAYLOAD_THREAT_MSG);
                 }
-                GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
-                        threatType + " " + APIMgtGatewayConstants.PAYLOAD_THREAT_MSG);
             }
         }
     }
 
     /**
      * This method check whether the request header contains matching vulnerable keywords.
-     ** @param messageContext contains the message properties of the relevant API request which was
-     *                       enabled the regexValidator message mediation in flow.
+     * * @param messageContext contains the message properties of the relevant API request which was
+     * enabled the regexValidator message mediation in flow.
      */
     private void checkRequestPath(MessageContext messageContext) {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
@@ -118,13 +122,13 @@ public class RegularExpressionProtector extends AbstractMediator {
                         threatType + " " + APIMgtGatewayConstants.QPARAM_THREAT_MSG);
             }
         }
-
     }
 
     /**
      * This method check whether the request path contains matching vulnerable keywords.
+     *
      * @param messageContext contains the message properties of the relevant API request which was
-     *                   enabled the regexValidator message mediation in flow.
+     *                       enabled the regexValidator message mediation in flow.
      */
     private void checkRequestHeaders(MessageContext messageContext) {
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext)
@@ -145,6 +149,7 @@ public class RegularExpressionProtector extends AbstractMediator {
     /**
      * This method checks the status of the {enabledCheckBody} property which comes from the custom sequence.
      * If client ask to check the message body,returns true else It will return false.
+     *
      * @return If enabledCheckBody is true,The method returns true else it returns false to avoid the message build.
      */
     public boolean isContentAware() {
