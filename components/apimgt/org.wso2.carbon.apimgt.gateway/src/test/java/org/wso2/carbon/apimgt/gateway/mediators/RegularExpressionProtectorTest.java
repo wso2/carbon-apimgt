@@ -137,8 +137,8 @@ public class RegularExpressionProtectorTest {
                 (String.valueOf(enabledStatus));
         regularExpressionProtector = new RegularExpressionProtector();
         regularExpressionProtector.mediate(messageContext);
-        String enableBuild = String.valueOf(regularExpressionProtector.isContentAware());
-        Assert.assertEquals(enabledStatus, enableBuild);
+        String enabledBuild = String.valueOf(regularExpressionProtector.isContentAware());
+        Assert.assertEquals(enabledStatus, enabledBuild);
         log.info("Successfully completed testIsContentAware test case.");
     }
 }
