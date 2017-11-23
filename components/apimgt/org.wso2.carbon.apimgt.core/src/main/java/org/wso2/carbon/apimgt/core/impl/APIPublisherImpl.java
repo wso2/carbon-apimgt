@@ -2104,7 +2104,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                  * and call ServiceDiscoverer Impl class's #listServices method accordingly
                  */
                 String namespaceFilter = serviceDiscoverer.getNamespaceFilter();
-                HashMap<String, String> criteriaFilter = serviceDiscoverer.getCriteriaFilter();
+                Map<String, String> criteriaFilter = serviceDiscoverer.getCriteriaFilter();
                 List<Endpoint> subDiscoveredEndpointList;
 
                 if (namespaceFilter == null && criteriaFilter == null) {

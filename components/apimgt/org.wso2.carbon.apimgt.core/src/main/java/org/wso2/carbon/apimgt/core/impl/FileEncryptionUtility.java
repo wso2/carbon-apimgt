@@ -55,8 +55,10 @@ import static org.wso2.carbon.apimgt.core.util.APIMgtConstants.EncryptionConstan
 public class FileEncryptionUtility {
     private static final Logger log = LoggerFactory.getLogger(FileEncryptionUtility.class);
     private static final FileEncryptionUtility instance = new FileEncryptionUtility();
-    public static final String SECURITY_DIR = File.separator + "resources" + File.separator + "security";
     private static final int AES_Key_Size = 128;
+
+    public static final String CARBON_HOME = "carbon.home";
+    public static final String SECURITY_DIR = File.separator + "resources" + File.separator + "security";
 
     private FileEncryptionConfigurations config;
     private String aesKeyFileLocation;
@@ -157,8 +159,8 @@ public class FileEncryptionUtility {
      */
     public void encryptFiles() throws APIManagementException {
         List<String> namesOfFilesToEncrypt = getConfig().getFilesToEncrypt();
-        String encryptedFilesLocation = System.getProperty("carbon.home") + SECURITY_DIR + File.separator;
-        for (String filename: namesOfFilesToEncrypt) {
+        String encryptedFilesLocation = System.getProperty(CARBON_HOME) + SECURITY_DIR + File.separator;
+        for (String filename : namesOfFilesToEncrypt) {
             String originalFile = encryptedFilesLocation + filename;
             String encryptedFile = encryptedFilesLocation + "encrypted" + filename;
             encryptFile(originalFile, encryptedFile);
@@ -231,7 +233,7 @@ public class FileEncryptionUtility {
     }
 
     void setAesKeyFileLocation() {
-        this.aesKeyFileLocation = System.getProperty("carbon.home") + SECURITY_DIR + File.separator
+        this.aesKeyFileLocation = System.getProperty(CARBON_HOME) + SECURITY_DIR + File.separator
                 + EncryptionConstants.ENCRYPTED_AES_KEY_FILE;
     }
 

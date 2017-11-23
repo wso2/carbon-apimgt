@@ -43,7 +43,6 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -66,6 +65,8 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
     private static final String EXTERNAL_NAME = "ExternalName";
     private static final String LOAD_BALANCER = "LoadBalancer";
     private static final String EXTERNAL_IP = "ExternalIP";
+    private static final String TRY_KUBE_CONFIG = "kubernetes.auth.tryKubeConfig";
+    private static final String TRY_SERVICE_ACCOUNT = "kubernetes.auth.tryServiceAccount";
 
     private OpenShiftClient client;
     private Boolean includeClusterIP;
@@ -74,11 +75,11 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
     /**
      * Initializes OpenShiftClient (extended KubernetesClient) and sets the necessary parameters
      *
-     * @param implParameters implementation parameters added by the super class #initImpl(java.util.HashMap) method
+     * @param implParameters implementation parameters added by the super class #initImpl(java.util.Map) method
      * @throws ServiceDiscoveryException if an error occurs while initializing the client
      */
     @Override
-    public void initImpl(HashMap<String, String> implParameters) throws ServiceDiscoveryException {
+    public void initImpl(Map<String, String> implParameters) throws ServiceDiscoveryException {
         try {
             setClient(new DefaultOpenShiftClient(buildConfig(implParameters)));
         } catch (KubernetesClientException | APIMgtDAOException e) {
@@ -103,11 +104,11 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
      * @return {@link io.fabric8.kubernetes.client.Config} object to build the client
      * @throws ServiceDiscoveryException if an error occurs while building the config using externally stored token
      */
-    private Config buildConfig(HashMap<String, String> implParameters)
+    private Config buildConfig(Map<String, String> implParameters)
             throws ServiceDiscoveryException, APIMgtDAOException {
 
-        System.setProperty("kubernetes.auth.tryKubeConfig", "false");
-        System.setProperty("kubernetes.auth.tryServiceAccount", "true");
+        System.setProperty(TRY_KUBE_CONFIG, "false");
+        System.setProperty(TRY_SERVICE_ACCOUNT, "true");
 
         /*
          *  Common to both situations,
@@ -142,8 +143,8 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
     private String resolveToken(String encryptedTokenFileName) throws ServiceDiscoveryException {
         String token;
         try {
-            String externalSATokenFilePath = System.getProperty("carbon.home") + FileEncryptionUtility.SECURITY_DIR
-                    + File.separator + encryptedTokenFileName;
+            String externalSATokenFilePath = System.getProperty(FileEncryptionUtility.CARBON_HOME)
+                    + FileEncryptionUtility.SECURITY_DIR + File.separator + encryptedTokenFileName;
             token = FileEncryptionUtility.getInstance().readFromEncryptedFile(externalSATokenFilePath);
         } catch (APIManagementException e) {
             String msg = "Error occurred while resolving externally stored token";
@@ -197,7 +198,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
      * {@inheritDoc}
      */
     @Override
-    public List<Endpoint> listServices(String namespace, HashMap<String, String> criteria)
+    public List<Endpoint> listServices(String namespace, Map<String, String> criteria)
             throws ServiceDiscoveryException {
         List<Endpoint> endpointList = new ArrayList<>();
         if (client != null) {
@@ -223,7 +224,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
      * {@inheritDoc}
      */
     @Override
-    public List<Endpoint> listServices(HashMap<String, String> criteria) throws ServiceDiscoveryException {
+    public List<Endpoint> listServices(Map<String, String> criteria) throws ServiceDiscoveryException {
         List<Endpoint> endpointList = new ArrayList<>();
         if (client != null) {
             log.debug("Looking for services, with the specified labels, in all namespaces");

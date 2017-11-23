@@ -98,7 +98,6 @@ export default class EndpointsDiscover extends Component {
             }
         ).catch(
             error => {
-                console.error("Error while retrieving stored endpoints");
                 message.error("Error while retrieving stored endpoints");
             }
         );

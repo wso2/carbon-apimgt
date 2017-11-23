@@ -24,8 +24,8 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.kernel.annotations.Configuration;
 import org.wso2.carbon.kernel.annotations.Element;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Class to hold Implementation specific Service Discovery configurations
@@ -36,7 +36,7 @@ public class ServiceDiscoveryImplConfig {
     @Element(description = "implementation class")
     private String implClass = APIMgtConstants.ServiceDiscoveryConstants.KUBERNETES_SERVICE_DISCOVERER;
     @Element(description = "implementation specific parameters")
-    private HashMap<String, String> implParameters = new LinkedHashMap<>();
+    private Map<String, String> implParameters = new LinkedHashMap<>();
 
     public ServiceDiscoveryImplConfig() {
         implParameters.put(ServiceDiscovererKubernetes.MASTER_URL, "");
@@ -57,11 +57,11 @@ public class ServiceDiscoveryImplConfig {
         this.implClass = implClass;
     }
 
-    public HashMap<String, String> getImplParameters() {
+    public Map<String, String> getImplParameters() {
         return implParameters;
     }
 
-    public void setImplParameters(HashMap<String, String> implParameters) {
+    public void setImplParameters(Map<String, String> implParameters) {
         this.implParameters = implParameters;
     }
 }

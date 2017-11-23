@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * Class to hold Service Discovery configurations and Generate YAML file
  */
-@Configuration(namespace = "wso2.carbon.apimgt.serviceDiscovery",
+@Configuration(namespace = "wso2.carbon.apimgt.servicediscovery",
         description = "APIM Service Discovery Configuration Parameters")
 public class ServiceDiscoveryConfigurations {
 

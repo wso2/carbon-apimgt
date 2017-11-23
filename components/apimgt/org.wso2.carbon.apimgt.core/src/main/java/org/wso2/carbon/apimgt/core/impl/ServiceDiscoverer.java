@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants.ServiceDiscoveryConstant
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Abstract class to discover and list services in a cluster
@@ -31,24 +32,24 @@ import java.util.List;
 public abstract class ServiceDiscoverer {
 
     private String namespaceFilter;
-    private HashMap<String, String> criteriaFilter;
+    private Map<String, String> criteriaFilter;
     int serviceEndpointIndex;
 
     /**
      * Initializes the parameters namespaceFilter, criteriaFilter,
-     * and calls #initImpl(java.util.HashMap) method
+     * and calls #initImpl(java.util.Map) method
      *
      * @param implParameters  implementation parameters provided in the configuration
      * @throws ServiceDiscoveryException if an error occurs in the implementation's initImpl method
      */
-    public void init(HashMap<String, String> implParameters) throws ServiceDiscoveryException {
+    public void init(Map<String, String> implParameters) throws ServiceDiscoveryException {
         this.namespaceFilter = implParameters.get(ServiceDiscoveryConstants.NAMESPACE);
 
         // Convert the criteria that is passed in as a string into a map and then set the instance criteriaFilter
         String criteriaString = implParameters.get(ServiceDiscoveryConstants.CRITERIA);
         if (criteriaString != null) {
             String[] criteriaArray = criteriaString.split(",");
-            HashMap<String, String> criteriaMap = new HashMap<>();
+            Map<String, String> criteriaMap = new HashMap<>();
             for (String pair : criteriaArray) {
                 String[] entry = pair.split("=");
                 criteriaMap.put(entry[0].trim(), entry[1].trim());
@@ -62,10 +63,10 @@ public abstract class ServiceDiscoverer {
     /**
      * Initialization method for all implementation classes
      *
-     * @param implParameters implementation parameters added by #init(java.util.HashMap) method
+     * @param implParameters implementation parameters added by #init(java.util.Map) method
      * @throws ServiceDiscoveryException if an error occurs while initializing
      */
-    abstract void initImpl(HashMap<String, String> implParameters) throws ServiceDiscoveryException;
+    abstract void initImpl(Map<String, String> implParameters) throws ServiceDiscoveryException;
 
     /**
      * Gives a list of endpoints without any filtering.
@@ -91,7 +92,7 @@ public abstract class ServiceDiscoverer {
      * @return List of Endpoints with the specified criteria
      * @throws ServiceDiscoveryException if an error occurs while listing
      */
-    public abstract List<Endpoint> listServices(HashMap<String, String> criteria) throws ServiceDiscoveryException;
+    public abstract List<Endpoint> listServices(Map<String, String> criteria) throws ServiceDiscoveryException;
 
     /**
      * Gives a list of endpoints filtered by both namespace and criteria.
@@ -101,7 +102,7 @@ public abstract class ServiceDiscoverer {
      * @return List of Endpoints with the specified namespace and criteria
      * @throws ServiceDiscoveryException if an error occurs while listing
      */
-    public abstract List<Endpoint> listServices(String namespace, HashMap<String, String> criteria)
+    public abstract List<Endpoint> listServices(String namespace, Map<String, String> criteria)
             throws ServiceDiscoveryException;
 
     /**
@@ -145,7 +146,7 @@ public abstract class ServiceDiscoverer {
      *
      * @return criteria map
      */
-    public HashMap<String, String> getCriteriaFilter() {
+    public Map<String, String> getCriteriaFilter() {
         return criteriaFilter;
     }
 }

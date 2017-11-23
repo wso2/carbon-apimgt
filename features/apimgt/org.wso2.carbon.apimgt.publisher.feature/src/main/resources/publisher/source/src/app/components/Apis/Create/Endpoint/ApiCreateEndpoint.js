@@ -72,10 +72,6 @@ class ApiCreateEndpoint extends React.Component {
         apiFields["selectedPolicies"] = policies;
         this.setState({apiFields:apiFields});
     }
-    componentWillMount(){
-        //Do the call to service discovery endpoint
-        console.info('print the response json');
-    }
 
     createAPICallback = (response) => {
         let uuid = JSON.parse(response.data).id;

@@ -14,6 +14,7 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Test that has to be included in APIPublisherImplTestCase.
@@ -31,21 +32,21 @@ public class ServiceDiscoveryInPublisherTestCase {
         sdImplConfig.setImplParameters(new HashMap<>());
 
         /* Create a impl config with a namespace set */
-        HashMap<String, String> implParamWithNamespace = new HashMap<>();
+        Map<String, String> implParamWithNamespace = new HashMap<>();
         implParamWithNamespace.put(APIMgtConstants.ServiceDiscoveryConstants.NAMESPACE, "dev");
         ServiceDiscoveryImplConfig sdImplConfigWithNamespace = new ServiceDiscoveryImplConfig();
         sdImplConfigWithNamespace.setImplClass("org.wso2.carbon.apimgt.core.impl.ServiceDiscovererTestClass");
         sdImplConfigWithNamespace.setImplParameters(implParamWithNamespace);
 
         /* Create a impl config with a criteria set */
-        HashMap<String, String> implParamWithCriteria = new HashMap<>();
+        Map<String, String> implParamWithCriteria = new HashMap<>();
         implParamWithCriteria.put(APIMgtConstants.ServiceDiscoveryConstants.CRITERIA, "app=web");
         ServiceDiscoveryImplConfig sdImplConfigWitCriteria = new ServiceDiscoveryImplConfig();
         sdImplConfigWitCriteria.setImplClass("org.wso2.carbon.apimgt.core.impl.ServiceDiscovererTestClass");
         sdImplConfigWitCriteria.setImplParameters(implParamWithCriteria);
 
         /* Create a impl config with both a namespace and a criteria is set */
-        HashMap<String, String> implParamWithNamespaceAndCriteria = new HashMap<>();
+        Map<String, String> implParamWithNamespaceAndCriteria = new HashMap<>();
         implParamWithNamespaceAndCriteria.put(APIMgtConstants.ServiceDiscoveryConstants.NAMESPACE, "dev");
         implParamWithNamespaceAndCriteria.put(APIMgtConstants.ServiceDiscoveryConstants.CRITERIA, "app=web");
         ServiceDiscoveryImplConfig sdImplConfigWithNamespaceNCriteria = new ServiceDiscoveryImplConfig();

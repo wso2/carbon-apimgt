@@ -40,6 +40,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ServiceDiscovererKubernetesTestCase {
 
@@ -79,7 +80,7 @@ public class ServiceDiscovererKubernetesTestCase {
     public void testListServicesWhileClientIsNull() throws Exception {
         ServiceDiscovererKubernetes sdKubernetes = new ServiceDiscovererKubernetes();
         String namespace = "dev";
-        HashMap<String, String> criteria = new HashMap<>();
+        Map<String, String> criteria = new HashMap<>();
 
         //list method called without init method
         Assert.assertEquals(true, sdKubernetes.listServices().isEmpty());
@@ -152,7 +153,7 @@ public class ServiceDiscovererKubernetesTestCase {
         sdKubernetes.setClient(openShiftClient);
         sdKubernetes.setIncludeClusterIP(true);                 //Include ClusterIPs
         sdKubernetes.setIncludeExternalNameTypeServices(false); //Not include ExternalNames
-        HashMap<String, String> oneLabel = createOneLabelHashMap();
+        Map<String, String> oneLabel = createOneLabelHashMap();
 
         NonNamespaceOperation nonNamespaceOperation = Mockito.mock(NonNamespaceOperation.class);
         BaseOperation baseOperation = Mockito.mock(BaseOperation.class);
@@ -173,7 +174,7 @@ public class ServiceDiscovererKubernetesTestCase {
         sdKubernetes.setClient(openShiftClient);
         sdKubernetes.setIncludeClusterIP(true);                 //Include ClusterIPs
         sdKubernetes.setIncludeExternalNameTypeServices(true);  //Include ExternalNames
-        HashMap<String, String> oneLabel = createOneLabelHashMap();
+        Map<String, String> oneLabel = createOneLabelHashMap();
 
         NonNamespaceOperation nonNamespaceOperation = Mockito.mock(NonNamespaceOperation.class);
         BaseOperation baseOperation = Mockito.mock(BaseOperation.class);
@@ -230,7 +231,7 @@ public class ServiceDiscovererKubernetesTestCase {
      */
     @BeforeTest(description = "Create a list of services with all combinations included")
     void init() {
-        HashMap<String, String> oneLabel = createOneLabelHashMap();
+        Map<String, String> oneLabel = createOneLabelHashMap();
 
         ServicePortBuilder httpPortBuilder = new ServicePortBuilder().withName("http").withPort(80);
         ServicePort httpPort = httpPortBuilder.build();
@@ -240,6 +241,10 @@ public class ServiceDiscovererKubernetesTestCase {
         List<LoadBalancerIngress> ipIngresses = new ArrayList<>();
         LoadBalancerIngress ingressWithIP = new LoadBalancerIngressBuilder().withIp("100.1.1.2").build();
         ipIngresses.add(ingressWithIP);
+
+        List<LoadBalancerIngress> hostnameIngresses = new ArrayList<>();
+        LoadBalancerIngress ingressWithHostname = new LoadBalancerIngressBuilder().withHostname("abc.com").build();
+        hostnameIngresses.add(ingressWithHostname);
 
         Service service0 = new ServiceBuilder().withNewMetadata()
                 .withName("service0").withNamespace("dev").withLabels(oneLabel).and()
@@ -271,7 +276,7 @@ public class ServiceDiscovererKubernetesTestCase {
                 .withName("service4").withNamespace("prod").and()
                 .withNewSpec()
                 .withType("LoadBalancer").withClusterIP("1.1.1.4").withPorts(nodePort4).and()
-                .withNewStatus().withNewLoadBalancer().withIngress(ipIngresses).endLoadBalancer().and()
+                .withNewStatus().withNewLoadBalancer().withIngress(hostnameIngresses).endLoadBalancer().and()
                 .build();
 
         List<Service> servicesList = new ArrayList<>();
@@ -289,8 +294,8 @@ public class ServiceDiscovererKubernetesTestCase {
      * @param externalTokenFileName external token file name to be added
      * @return  implParameters map
      */
-    private HashMap<String, String> createImplParametersMap(String externalTokenFileName) {
-        HashMap<String, String> implParameters = new HashMap<>();
+    private Map<String, String> createImplParametersMap(String externalTokenFileName) {
+        Map<String, String> implParameters = new HashMap<>();
         implParameters.put(ServiceDiscovererKubernetes.EXTERNAL_SA_TOKEN_FILE_NAME, externalTokenFileName);
         implParameters.put(ServiceDiscovererKubernetes.POD_MOUNTED_SA_TOKEN_FILE_PATH,
                 "/var/run/secrets/kubernetes.io/serviceaccount/token");
@@ -298,12 +303,12 @@ public class ServiceDiscovererKubernetesTestCase {
     }
 
     /**
-     * Creates a HashMap which contains only one label
+     * Creates a Map which contains only one label
      *
-     * @return  HashMap with one label
+     * @return Map with one label
      */
-    private HashMap<String, String> createOneLabelHashMap() {
-        HashMap<String, String> oneLabel = new HashMap<>();
+    private Map<String, String> createOneLabelHashMap() {
+        Map<String, String> oneLabel = new HashMap<>();
         oneLabel.put("app", "web");
         return oneLabel;
     }
@@ -361,9 +366,6 @@ public class ServiceDiscovererKubernetesTestCase {
      */
     private ServiceList createMalformedServiceList(String portType) {
         ServicePort port = new ServicePortBuilder().withName(portType).withPort(80).withNodePort(30005).build();
-        List<LoadBalancerIngress> hostnameIngresses = new ArrayList<>();
-        LoadBalancerIngress ingressWithHostname = new LoadBalancerIngressBuilder().withHostname("abc.com").build();
-        hostnameIngresses.add(ingressWithHostname);
 
         Service malformedService5 = new ServiceBuilder().withNewMetadata()
                 .withName("service5").withNamespace("prod").and()
