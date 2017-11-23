@@ -41,15 +41,15 @@ import org.wso2.carbon.user.api.UserStoreException;
 public class APIProviderImplWrapper extends APIProviderImpl {
 
     private API api;
-    private List<Documentation> documentationList = new ArrayList<Documentation>();
+    private Map<String, Map<String,String>> failedGateways;
+    private List<Documentation> documentationList;
 
-    public APIProviderImplWrapper(ApiMgtDAO apiMgtDAO, List<Documentation> documentationList)
-            throws APIManagementException {
+    public APIProviderImplWrapper(ApiMgtDAO apiMgtDAO, List<Documentation> documentationList,
+                                  Map<String, Map<String,String>> failedGateways) throws APIManagementException {
         super(null);
         this.apiMgtDAO = apiMgtDAO;
-        if (documentationList != null) {
-            this.documentationList = documentationList;
-        }
+        this.documentationList = documentationList;
+        this.failedGateways = failedGateways;
     }
 
     @Override
