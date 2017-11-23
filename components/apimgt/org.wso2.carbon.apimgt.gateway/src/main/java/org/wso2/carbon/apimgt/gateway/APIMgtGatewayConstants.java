@@ -64,7 +64,7 @@ public class APIMgtGatewayConstants {
      */
     public static final String REGEX_PATTERN = "regex";
     public static final String ENABLED_CHECK_BODY = "enabledCheckBody";
-    public static final String ENABLED_CHECK_PATHPARAM = "enabledCheckQueryParams";
+    public static final String ENABLED_CHECK_PATHPARAM = "enabledCheckPathParams";
     public static final String ENABLED_CHECK_HEADERS  = "enabledCheckHeaders";
     public static final String REST_URL_POSTFIX = "REST_URL_POSTFIX";
     public static final String TRANSPORT_HEADERS = "TRANSPORT_HEADERS";
