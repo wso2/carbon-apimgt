@@ -19,10 +19,15 @@
 
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
-import {Table, Icon, Dropdown, Button, Menu, message, Radio} from 'antd';
+import {Table, message, Radio} from 'antd';
 const RadioGroup = Radio.Group;
 const RadioButton = Radio.Button;
 import Typography from 'material-ui/Typography';
+import Button from 'material-ui/Button';
+import ArrowDropDown from 'material-ui-icons/ArrowDropDown';
+import { MenuItem } from 'material-ui/Menu';
+import Popover from 'material-ui/Popover';
+import Select from 'material-ui/Select';
 
 import './discover.css'
 import API from '../../../data/api'
@@ -33,9 +38,10 @@ export default class EndpointsDiscover extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            anchorElEndpointsMenu: null,
             discoveredEndpoints: null,
             viewableEndpoints: null,
-            filterType: "",
+            filterType: "namespace",
             filterText: "",
             storedEndpoints: null,
             endpointBeingAdded: false,
@@ -43,6 +49,14 @@ export default class EndpointsDiscover extends Component {
         this.handleFilterTextInputChange = this.handleFilterTextInputChange.bind(this);
         this.handleRadioButtonChange = this.handleRadioButtonChange.bind(this);
     }
+
+    handleGlobalEndpointButtonClick = event => {
+        this.setState({ anchorElEndpointsMenu: event.target });
+    };
+
+    handleCloseGlEndpointMenu = () => {
+        this.setState({ anchorElEndpointsMenu: null });
+      };
 
     handleRadioButtonChange(e) {
         this.setState({
@@ -110,6 +124,7 @@ export default class EndpointsDiscover extends Component {
 
     render() {
         const {viewableEndpoints} = this.state;
+        const globalEndpointMenuOpen = !!this.state.anchorElEndpointsMenu;
         const columns = [{
             title: 'Name  |  Namespace  |  Criteria',
             dataIndex: 'name',
@@ -154,17 +169,6 @@ export default class EndpointsDiscover extends Component {
             render: (text, record) => <ButtonCell record={record} storedEndpoints={this.state.storedEndpoints}/>
         }];
 
-        const serviceEndpointsListAndCreateMenu = (
-            <Menu className="ed-font">
-                <Menu.Item className="ed-font" key="0">
-                    <Link to="/endpoints">View all</Link>
-                </Menu.Item>
-                <Menu.Item className="ed-font" key="1">
-                    <Link to="/endpoints/create">Create custom endpoint</Link>
-                </Menu.Item>
-            </Menu>
-        );
-
         return (
             <ScopeValidation resourcePath={resourcePath.SERVICE_DISCOVERY} resourceMethod={resourceMethod.GET}>
                 <div className="ed-body">
@@ -173,9 +177,25 @@ export default class EndpointsDiscover extends Component {
                              Discovered Service Endpoints
                         </Typography>
                         <div className="ed-global-endpoints-button-div">
-                            <Dropdown overlay={serviceEndpointsListAndCreateMenu}>
-                                <Button size='large' className="ed-global-endpoints-button" icon="down">Global Endpoints</Button>
-                            </Dropdown>
+                            <Button raised
+                                className="ed-global-endpoints-button"
+                                onClick={this.handleGlobalEndpointButtonClick}
+                            >
+                                Global Endpoints
+                                <span className="ed-drop-down-arrow">  <ArrowDropDown className="more-arrow-shift ed-drop-down-arrow"/></span>
+                            </Button>
+                            <Popover
+                                open={globalEndpointMenuOpen}
+                                anchorEl={this.state.anchorElEndpointsMenu}
+                                anchorOrigin={{horizontal: 'right', vertical: 'top'}}
+                                transformOrigin={{horizontal: 'left', vertical: 'top'}}
+                                onRequestClose={this.handleCloseGlEndpointMenu}
+                            >
+                                <div>
+                                    <MenuItem component={Link} to='/endpoints'>View all</MenuItem>
+                                    <MenuItem component={Link} to='/endpoints/create'>Create custom endpoint</MenuItem>
+                                </div>
+                            </Popover>
                         </div>
                         <div className="ed-filter-area">
                             <input
@@ -184,13 +204,16 @@ export default class EndpointsDiscover extends Component {
                               placeholder="Type here to filter.."
                               onChange={this.handleFilterTextInputChange}
                             />
-                            <div className="ed-filter-area-radio-buttons-div">
+                            <div className="ed-filter-area-select-div">
                                 <span className="ed-filter-area-inline-text"> Filter by</span>
-                                <RadioGroup size='large' onChange={this.handleRadioButtonChange} defaultValue="name">
-                                    <RadioButton className="ed-font" value="namespace">Namespace</RadioButton>
-                                    <RadioButton className="ed-font" value="criteria">Criteria</RadioButton>
-                                    <RadioButton className="ed-font" value="name">Service Name</RadioButton>
-                                </RadioGroup>
+                                <Select className="ed-filter-select"
+                                    value={this.state.filterType}
+                                    onChange={this.handleRadioButtonChange}
+                                >
+                                    <MenuItem className="ed-menu-item" value="namespace" >Namespace</MenuItem>
+                                    <MenuItem value="criteria">Criteria</MenuItem>
+                                    <MenuItem value="name">Service Name</MenuItem>
+                                </Select>
                             </div>
                         </div>
                     </div>
@@ -213,20 +236,20 @@ class ButtonCell extends Component {
         this.state = {
             record: this.props.record,
             storedEndpoints: this.props.storedEndpoints,
-            actionButton: <Button type="primary" size="large" className="ed-font" loading>Loading...</Button>
+            actionButton: <Button raised color="primary" loading>Loading...</Button>
         };
     }
 
     getAddButton() {
         return (
-            <Button type="primary" size="large" className="ed-font" onClick={() =>this.handleAddEndpointToDB()}>
+            <Button raised color="primary" onClick={() =>this.handleAddEndpointToDB()}>
             Add as Global Endpoint </Button>
         );
     }
 
     getUpdateButton() {
         return (
-            <Button type="secondary" size="large" className="ed-font" onClick={() =>this.handleUpdateEndpoint()}>
+            <Button raised color="secondary" onClick={() =>this.handleUpdateEndpoint()}>
             Update added Endpoint </Button>
         );
     }

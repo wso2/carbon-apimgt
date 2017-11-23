@@ -19,8 +19,13 @@
 }
 
 .ed-global-endpoints-button {
-    font-size: 14px;
-    font-family: sans-serif;
+    background-color: white;
+}
+
+.ed-drop-down-arrow {
+    margin: 0px;
+    text-align: center;
+    padding: 0px 0px 0px 5px;
 }
 
 .ed-filter-area {
@@ -37,13 +42,29 @@
     font-size: 14px;
 }
 
+.ed-filter-area-select-div {
+    margin-left: 16px;
+    display: inline-block;
+}
+
 .ed-filter-area-inline-text {
     margin-right: 16px;
 }
 
-.ed-filter-area-radio-buttons-div {
-    margin-left: 16px;
-    display: inline-block;
+.ed-filter-select {
+    font-size: 14px;
+    width: 150px;
+    height: 33px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    border: 1px solid #4c5768;
+    margin: 0px 5px;
+    padding: 0px 10px;
+}
+
+.ed-menu-item {
+
 }
 
 th.ed-table-first-column {
