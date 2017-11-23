@@ -58,6 +58,7 @@ import org.wso2.carbon.apimgt.core.models.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants.WorkflowConstants;
@@ -1441,5 +1442,17 @@ public class SampleTestObjectCreator {
             stream.close();
         }
         return definition;
+    }
+
+    public static ThreatProtectionPolicy createUniqueThreatProtectionPolicy() {
+        ThreatProtectionPolicy policy = new ThreatProtectionPolicy();
+        policy.setUuid(UUID.randomUUID().toString());
+        policy.setType("JSON");
+        policy.setName("POLICY" + UUID.randomUUID().toString());
+        String policyString = "{\"maxFieldLength\": 20, \"maxDepth\": 20, \"maxFieldCount\": 20, " +
+                "\"maxStringLength\": 100, \"maxArrayElementCount\": 100}";
+        policy.setPolicy(policyString);
+
+        return policy;
     }
 }

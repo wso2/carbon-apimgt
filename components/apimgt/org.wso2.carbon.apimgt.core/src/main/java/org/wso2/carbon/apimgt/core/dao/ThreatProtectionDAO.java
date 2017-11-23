@@ -76,6 +76,12 @@ public interface ThreatProtectionDAO {
      */
     boolean isPolicyExists(String policyId) throws APIMgtDAOException;
 
+    /**
+     * Get a Set of threat protection policy ids associated to an API
+     * @param apiId API_ID
+     * @return  Set of threat protection policy ids
+     * @throws APIMgtDAOException if failed to retrieve policy ids
+     */
     Set<String> getThreatProtectionPolicyIdsForApi(String apiId) throws APIMgtDAOException;
 
 }

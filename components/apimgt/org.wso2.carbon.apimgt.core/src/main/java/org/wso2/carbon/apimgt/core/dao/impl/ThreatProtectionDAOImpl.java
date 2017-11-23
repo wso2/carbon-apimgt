@@ -41,6 +41,7 @@ import java.util.Set;
  */
 public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
     private static final String THREAT_PROTECTION_TABLE = "AM_THREAT_PROTECTION_POLICIES";
+
     //DB Column names
     private static final String F_UUID = "UUID";
     private static final String F_NAME = "NAME";
@@ -49,6 +50,9 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
 
     private static final Logger log = LoggerFactory.getLogger(ThreatProtectionDAOImpl.class);
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<ThreatProtectionPolicy> getPolicies() throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
@@ -59,6 +63,9 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ThreatProtectionPolicy getPolicy(String policyId) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
@@ -69,6 +76,9 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void addPolicy(ThreatProtectionPolicy policy) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
@@ -85,6 +95,9 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isPolicyExists(String policyId) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
@@ -95,6 +108,9 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Set<String> getThreatProtectionPolicyIdsForApi(String apiId) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
@@ -105,6 +121,9 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void updatePolicy(ThreatProtectionPolicy policy) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
@@ -115,9 +134,17 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void deletePolicy(String policyId) throws APIMgtDAOException {
-        //to be implemented
+        try (Connection connection = DAOUtil.getConnection()) {
+            deletePolicy(policyId, connection);
+        } catch (SQLException e) {
+            String errorMsg = "Error deleting policy for PolicyId: " + policyId;
+            throw new APIMgtDAOException(errorMsg, e);
+        }
     }
 
     private List<ThreatProtectionPolicy> getPolicies(Connection connection) throws APIMgtDAOException {
@@ -195,8 +222,8 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
         String sqlQuery = "UPDATE " + THREAT_PROTECTION_TABLE +
                 " SET `NAME` = ?, " +
                 "`TYPE` = ?, " +
-                "`POLICY` = ?, " +
-                "WHERE UUID = ?";
+                "`POLICY` = ? " +
+                "WHERE `UUID` = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
             preparedStatement.setString(1, policy.getName());
             preparedStatement.setString(2, policy.getType());
@@ -238,6 +265,14 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
             }
         }
         return policyIds;
+    }
+
+    private void deletePolicy(String policyId, Connection connection) throws SQLException {
+        final String query = "DELETE FROM " + THREAT_PROTECTION_TABLE + " WHERE UUID = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, policyId);
+            statement.executeUpdate();
+        }
     }
 
 }

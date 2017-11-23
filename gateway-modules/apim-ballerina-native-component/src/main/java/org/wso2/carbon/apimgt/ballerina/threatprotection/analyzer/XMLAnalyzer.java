@@ -29,11 +29,9 @@ import org.wso2.carbon.apimgt.ballerina.threatprotection.configurations.XMLConfi
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-
 
 /**
  * Implementation of APIMThreatAnalyzer for XML Payloads
@@ -103,7 +101,7 @@ public class XMLAnalyzer implements APIMThreatAnalyzer {
                                 + " - XML Validation Failed: Maximum attribute limit reached.");
                     }
 
-                    for (int i=0; i<currentAttributeCount; i++) {
+                    for (int i = 0; i < currentAttributeCount; i++) {
                         String attributeValue = xmlStreamReader.getAttributeValue(i);
                         if (attributeValue.length() > config.getMaxAttributeLength()) {
                             throw new APIMThreatAnalyzerException(XML_THREAT_PROTECTION_MSG_PREFIX + apiContext
