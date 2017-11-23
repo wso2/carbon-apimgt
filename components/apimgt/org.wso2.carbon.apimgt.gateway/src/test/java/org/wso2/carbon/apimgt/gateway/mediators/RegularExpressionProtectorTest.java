@@ -74,6 +74,8 @@ public class RegularExpressionProtectorTest {
                 (String.valueOf("SQL-Injection"));
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.ENABLED_CHECK_PATHPARAM)).thenReturn
                 (String.valueOf(enabledStatus));
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.ENABLED_CHECK_HEADERS)).thenReturn
+                (String.valueOf("false"));
         Mockito.when(axis2MsgContext.getProperty(APIMgtGatewayConstants.REST_URL_POSTFIX)).thenReturn
                 (String.valueOf("/drop"));
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgContext);
@@ -96,6 +98,10 @@ public class RegularExpressionProtectorTest {
         transportHeaders.put(HttpHeaders.USER_AGENT, userAgent);
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.ENABLED_CHECK_HEADERS)).thenReturn
                 (String.valueOf(enabledStatus));
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.ENABLED_CHECK_PATHPARAM)).thenReturn
+                (String.valueOf("false"));
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.ENABLED_CHECK_BODY)).thenReturn
+                (String.valueOf("false"));
         Mockito.when(axis2MsgContext.getProperty(APIMgtGatewayConstants.TRANSPORT_HEADERS)).thenReturn
                 (transportHeaders);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgContext);
@@ -115,6 +121,10 @@ public class RegularExpressionProtectorTest {
         env.getBody().addChild(fac.createOMElement("test", "Drop database", "testBody"));
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.ENABLED_CHECK_BODY)).thenReturn
                 (String.valueOf(enabledStatus));
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.ENABLED_CHECK_HEADERS)).thenReturn
+                (String.valueOf("false"));
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.ENABLED_CHECK_PATHPARAM)).thenReturn
+                (String.valueOf("false"));
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgContext);
         Mockito.doReturn(env).when(axis2MsgContext).getEnvelope();
         regularExpressionProtector = new RegularExpressionProtector();
@@ -135,6 +145,10 @@ public class RegularExpressionProtectorTest {
         Mockito.doReturn(env).when(axis2MsgContext).getEnvelope();
         Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.ENABLED_CHECK_BODY)).thenReturn
                 (String.valueOf(enabledStatus));
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.ENABLED_CHECK_HEADERS)).thenReturn
+                (String.valueOf("false"));
+        Mockito.when(messageContext.getProperty(APIMgtGatewayConstants.ENABLED_CHECK_PATHPARAM)).thenReturn
+                (String.valueOf("false"));
         regularExpressionProtector = new RegularExpressionProtector();
         regularExpressionProtector.mediate(messageContext);
         String enabledBuild = String.valueOf(regularExpressionProtector.isContentAware());
