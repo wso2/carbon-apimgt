@@ -69,7 +69,6 @@ public class APIMgtGatewayConstants {
     public static final String REST_URL_POSTFIX = "REST_URL_POSTFIX";
     public static final String TRANSPORT_HEADERS = "TRANSPORT_HEADERS";
 
-
     /**
      * Constants for handling threat protection exceptions.
      */
