@@ -87,7 +87,6 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
                 updatePolicy(policy, connection);
                 return;
             }
-            //policy.setUuid(UUID.randomUUID().toString());
             addPolicy(policy, connection);
         } catch (SQLException e) {
             String errorMsg = "Error adding Threat Protection policy";
@@ -274,5 +273,4 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
             statement.executeUpdate();
         }
     }
-
 }

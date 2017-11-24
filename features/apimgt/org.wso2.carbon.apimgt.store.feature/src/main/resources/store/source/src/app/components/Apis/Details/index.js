@@ -45,15 +45,6 @@ export default class Details extends Component {
         this.setState({ value });
         this.props.history.push({pathname: "/apis/" + this.props.match.params.api_uuid + "/" + value});
     };
-    componentDidMount() {
-        this.props.setLeftMenu(true);
-    }
-
-    componentWillUnmount() {
-        /* Hide the left side nav bar when detail page is unmount ,
-         since the left nav bar is currently only associated with details page*/
-        this.props.setLeftMenu(false);
-    }
 
     render() {
         let redirect_url = "/apis/" + this.props.match.params.api_uuid + "/overview";

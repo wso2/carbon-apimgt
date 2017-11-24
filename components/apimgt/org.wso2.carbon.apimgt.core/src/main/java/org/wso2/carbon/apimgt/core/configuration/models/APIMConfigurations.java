@@ -71,6 +71,9 @@ public class APIMConfigurations {
     @Element(description = "Analytics Configurations")
     private AnalyticsConfigurations analyticsConfigurations = new AnalyticsConfigurations();
 
+    @Element(description = "Google Analytics Tracking Configurations")
+    private GoogleAnalyticsConfigurations googleAnalyticsConfigurations = new GoogleAnalyticsConfigurations();
+
     @Element(description = "Throttling Configurations")
     private ThrottlingConfigurations throttlingConfigurations = new ThrottlingConfigurations();
 
@@ -209,6 +212,14 @@ public class APIMConfigurations {
 
     public void setAnalyticsConfigurations(AnalyticsConfigurations analyticsConfigurations) {
         this.analyticsConfigurations = analyticsConfigurations;
+    }
+
+    public GoogleAnalyticsConfigurations getGoogleAnalyticsConfigurations() {
+        return googleAnalyticsConfigurations;
+    }
+
+    public void setGoogleAnalyticsConfigurations(GoogleAnalyticsConfigurations googleAnalyticsConfigurations) {
+        this.googleAnalyticsConfigurations = googleAnalyticsConfigurations;
     }
 
     public ThrottlingConfigurations getThrottlingConfigurations() {

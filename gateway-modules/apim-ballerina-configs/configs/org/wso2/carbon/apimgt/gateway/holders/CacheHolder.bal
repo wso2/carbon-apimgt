@@ -120,6 +120,11 @@ function getAnalyticsConf () (dto:AnalyticsInfoDTO) {
     return gatewayConf.analyticsInfo;
 }
 
+function getGAnalyticsTrackingConf() (dto:GAnalyticsTrackingInfoDTO) {
+    getGatewayConf();
+    return gatewayConf.gAnalyticsTrackingInfo;
+}
+
 function getThrottleConf () (dto:ThrottlingInfoDTO) {
     getGatewayConf();
     return gatewayConf.throttlingInfo;

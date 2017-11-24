@@ -19,6 +19,7 @@
     "axios": "^0.16.1",
     "caniuse-api": "^1.6.1",
     "file-loader": "^0.11.2",
+    "js-file-download": "^0.4.1",
     "material-design-icons": "^3.0.1",
     "material-ui": "^1.0.0-beta.11",
     "material-ui-icons": "^1.0.0-beta.10",

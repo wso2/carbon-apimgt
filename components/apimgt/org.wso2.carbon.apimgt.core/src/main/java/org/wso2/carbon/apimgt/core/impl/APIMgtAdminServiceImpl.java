@@ -743,6 +743,9 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     @Override
     public void addThreatProtectionPolicy(ThreatProtectionPolicy policy) throws APIManagementException {
         try {
+            if (policy.getUuid() == null || "".equals(policy.getUuid())) {
+                policy.setUuid(UUID.randomUUID().toString());
+            }
             threatProtectionDAO.addPolicy(policy);
             apiGateway.addThreatProtectionPolicy(policy);
         } catch (APIMgtDAOException e) {

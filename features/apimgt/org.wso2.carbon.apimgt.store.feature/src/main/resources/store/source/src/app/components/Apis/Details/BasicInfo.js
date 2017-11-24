@@ -234,7 +234,6 @@ class BasicInfo extends Component {
         this.setState({matDropValue: val.value});
         console.log("Selected: " + JSON.stringify(val));
     }
-
     render() {
         const formItemLayout = {
             labelCol: {span: 6},
@@ -322,6 +321,12 @@ class BasicInfo extends Component {
                                  <TableRow>
                                     <TableCell>Default API Version</TableCell><TableCell>{api.lifeCycleStatus}</TableCell>
                                 </TableRow>
+                                <TableRow>
+                                    <TableCell>Rating</TableCell>
+                                    <TableCell>
+                                        <StarRatingBar apiIdProp = {this.api_uuid}></StarRatingBar>
+                                    </TableCell>
+                                </TableRow>
 
 
                             </TableBody>
@@ -374,5 +379,95 @@ class BasicInfo extends Component {
         );
     }
 }
+
+class Star extends React.Component {
+    constructor(props) {
+        super(props);
+
+        this.handleHoveringOver = this.handleHoveringOver.bind(this);
+    }
+
+    handleHoveringOver(event) {
+        this.props.hoverOver(this.props.name);
+    }
+
+    render() {
+        return this.props.isRated ?
+            <span onMouseOver = {this.handleHoveringOver} style={{color: 'gold'}}>
+                ★
+            </span> :
+            <span onMouseOver = {this.handleHoveringOver} style={{color: 'gold'}}>
+                ☆
+            </span>;
+    }
+}
+
+class StarRatingBar extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+                        previousRating : 0,
+                        rating : 0
+                     };
+
+        this.handleMouseOver = this.handleMouseOver.bind(this);
+        this.handleRatingUpdate = this.handleRatingUpdate.bind(this);
+        this.handleMouseOut = this.handleMouseOut.bind(this);
+    }
+
+    componentDidMount() {
+        var api = new Api();
+        let promised_api = api.getAPIById(this.props.apiIdProp);
+        promised_api.then(
+            response => {
+            }
+        );
+
+        //get user rating
+        let promised_rating = api.getRatingFromUser(this.props.apiIdProp, null);
+        promised_rating.then(
+            response => {
+                this.setState({rating :response.obj.userRating});
+                this.setState({previousRating :response.obj.userRating});
+            }
+        );
+    }
+
+    handleMouseOver(index) {
+        this.setState({rating : index});
+    }
+
+    handleMouseOut() {
+        this.setState({rating : this.state.previousRating});
+    }
+
+    handleRatingUpdate() {
+        this.setState({previousRating : this.state.rating});
+        this.setState({rating : this.state.rating});
+
+        var api = new Api();
+        let ratingInfo = {"rating" : this.state.rating};
+        let promise = api.addRating(this.props.apiIdProp, ratingInfo);
+        promise.then(
+            response => {
+                message.success("Rating updated successfully");
+            }).catch (
+                 error => {
+                     message.error("Error occurred while adding ratings!");
+                 }
+             );
+    }
+
+    render() {
+        return (<div onClick = {this.handleRatingUpdate} onMouseOut = {this.handleMouseOut}>
+                <Star name = {1} isRated = {this.state.rating >= 1} hoverOver = {this.handleMouseOver} > </Star>
+                <Star name = {2} isRated = {this.state.rating >= 2} hoverOver = {this.handleMouseOver} > </Star>
+                <Star name = {3} isRated = {this.state.rating >= 3} hoverOver = {this.handleMouseOver} > </Star>
+                <Star name = {4} isRated = {this.state.rating >= 4} hoverOver = {this.handleMouseOver} > </Star>
+                <Star name = {5} isRated = {this.state.rating >= 5} hoverOver = {this.handleMouseOver} > </Star>
+               </div>);
+    }
+}
+
 
 export default BasicInfo

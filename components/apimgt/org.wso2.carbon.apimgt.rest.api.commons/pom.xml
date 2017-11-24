@@ -152,6 +152,10 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.rest.api.configurations</artifactId>
+        </dependency>
     </dependencies>
     <properties>
         <import.package>
@@ -160,6 +164,7 @@
             org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
             javax.ws.rs.*; version="${javax.ws.rs.import.version.range}",
             org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.version}",
+            org.wso2.carbon.apimgt.rest.api.configurations.*; version="${carbon.apimgt.version}",
             org.apache.commons.lang3.*; version="${apache.commons.lang3.import.version.range}",
             org.wso2.carbon.security.caas.*; version="${org.wso2.carbon.security.caas.import.version.range}",
             org.wso2.carbon.messaging.*;version="${carbon.messaging.package.import.version.range}",

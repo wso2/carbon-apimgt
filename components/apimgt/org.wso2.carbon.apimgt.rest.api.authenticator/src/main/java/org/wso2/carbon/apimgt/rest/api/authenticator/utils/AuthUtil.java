@@ -22,6 +22,7 @@ import org.wso2.carbon.apimgt.rest.api.authenticator.constants.AuthenticatorCons
 import org.wso2.carbon.apimgt.rest.api.authenticator.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
+import org.wso2.carbon.apimgt.rest.api.configurations.ConfigurationService;
 import org.wso2.carbon.messaging.Headers;
 import org.wso2.msf4j.Request;
 
@@ -131,11 +132,16 @@ public class AuthUtil {
         } else {
             return null;
         }
+
+        //Append unique environment name in deployment.yaml
+        String environmentName = ConfigurationService.getEnvironmentName();
         String cookie = headers.get(AuthenticatorConstants.COOKIE_HEADER);
         if (cookie != null) {
             cookie = cookie.trim();
             String[] cookies = cookie.split(";");
-            String tokenFromCookie = Arrays.stream(cookies).filter(name -> name.contains(cookieHeader)).findFirst()
+            String tokenFromCookie = Arrays.stream(cookies).filter(
+                    name -> name.contains(cookieHeader + "_" + environmentName))
+                    .findFirst()
                     .orElse("");
             String[] tokenParts = tokenFromCookie.split("=");
             if (tokenParts.length == 2) {
@@ -168,7 +174,10 @@ public class AuthUtil {
         if (expiresIn != null && !expiresIn.isEmpty()) {
             stringBuilder.append(COOKIE_VALUE_SEPERATOR).append(expiresIn);
         }
-        return new NewCookie(name, stringBuilder.toString());
+
+        //Append unique environment name in deployment.yaml
+        String environmentName = ConfigurationService.getEnvironmentName();
+        return new NewCookie(name + "_" + environmentName, stringBuilder.toString());
     }
 
 }

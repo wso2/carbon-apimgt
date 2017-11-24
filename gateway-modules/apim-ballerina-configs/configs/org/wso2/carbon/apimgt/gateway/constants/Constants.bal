@@ -74,3 +74,12 @@ const string SUBSCRIPTION_STATUS_PROD_ONLY_BLOCKED="PROD_ONLY_BLOCKED";
 const string ENV_TYPE_PRODUCTION = "PRODUCTION";
 const string ENV_TYPE_SANDBOX = "SANDBOX";
 const string ENDPOINT_CACHE = "ENDPOINT_CACHE";
+
+const string GOOGLE_ANALYTICS_HTTP_ENDPOINT = "http://www.google-analytics.com/collect";
+const string GOOGLE_ANALYTICS_HTTPS_ENDPOINT = "https://ssl.google-analytics.com/collect";
+const string GOOGLE_ANALYTICS_VERSION = "1";
+const string ANONYMOUS_USER_ID = "anonymous";
+const string GOOGLE_ANALYTICS_HIT_TYPE_PAGEVIEW = "pageView";
+const string X_FORWARDED_FOR_HEADER = "X-Forwarded-For";
+const string HTTP_HOST_HEADER = "HOST";
+const string HTTP_METHOD = "HTTP_METHOD";
