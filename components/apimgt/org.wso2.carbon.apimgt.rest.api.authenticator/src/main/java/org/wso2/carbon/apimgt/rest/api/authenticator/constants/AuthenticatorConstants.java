@@ -24,7 +24,6 @@ package org.wso2.carbon.apimgt.rest.api.authenticator.constants;
  */
 public class AuthenticatorConstants {
 
-    public static final String ACCESS_TOKEN_1 = "WSO2_AM_TOKEN_1";
     public static final String ACCESS_TOKEN_2 = "WSO2_AM_TOKEN_2";
     public static final String REFRESH_TOKEN_1 = "WSO2_AM_REFRESH_TOKEN_1";
     public static final String REFRESH_TOKEN_2 = "WSO2_AM_REFRESH_TOKEN_2";
@@ -50,4 +49,6 @@ public class AuthenticatorConstants {
     public static final String ADMIN_APPLICATION = "admin";
     public static final String EDITOR_APPLICATION = "editor";
     public static final String AUTHORIZATION_CODE_CALLBACK_URL = "login/callback/";
+    public static final String URL_PATH_SEPERATOR = "/";
+    public static final String LOGOUT_SERVICE_CONTEXT = "/login/logout";
 }
