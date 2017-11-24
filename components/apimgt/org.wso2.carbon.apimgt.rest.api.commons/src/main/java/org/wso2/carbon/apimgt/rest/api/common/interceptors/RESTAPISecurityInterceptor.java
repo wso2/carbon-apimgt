@@ -29,11 +29,13 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.api.RESTAPIAuthenticator;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.configurations.utils.ConfigUtils;
 import org.wso2.msf4j.Interceptor;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.Response;
@@ -48,7 +50,6 @@ import static org.wso2.carbon.messaging.Constants.PROTOCOL;
 
 /**
  * Security Interceptor that does basic authentication for REST ApI requests.
- *
  */
 @Component(
         name = "org.wso2.carbon.apimgt.rest.api.common.interceptors.RESTAPISecurityInterceptor",
@@ -78,6 +79,25 @@ public class RESTAPISecurityInterceptor implements Interceptor {
             APIMgtSecurityException {
         ErrorHandler errorHandler = null;
         boolean isAuthenticated = false;
+
+        //CORS for Environments - Add allowed Origin when User-Agent sent 'Origin' header.
+        String origin = request.getHeader(RestApiConstants.ORIGIN_HEADER);
+        if (origin != null) {
+            String allowedOrigin = ConfigUtils.getAllowedOrigin(origin);
+            response.setHeader(RestApiConstants.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, allowedOrigin)
+                    .setHeader(RestApiConstants.ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER, "true");
+        }
+
+        //CORS for Environments - Add allowed Methods and Headers when 'OPTIONS' method is called.
+        if (request.getHttpMethod().equalsIgnoreCase(APIConstants.HTTP_OPTIONS)) {
+            //TODO[rnk] Get defined http methods for the resource path for 'Access-Control-Allow-Methods'
+            response.setHeader(RestApiConstants.ACCESS_CONTROL_ALLOW_METHODS_HEADER, "POST, GET, OPTIONS, PUT, DELETE, HEAD")
+                    .setHeader(RestApiConstants.ACCESS_CONTROL_ALLOW_HEADERS_HEADER,
+                            RestApiConstants.ACCESS_CONTROL_ALLOW_HEADERS_LIST)
+                    .setStatus(javax.ws.rs.core.Response.Status.OK.getStatusCode()).send();
+            return false;
+        }
+
         /* TODO: Following string contains check is done to avoid checking security headers in non API requests.
          * Consider this as a tempory fix until MSF4J support context based interceptor registration */
         String requestURI = request.getUri().toLowerCase(Locale.ENGLISH);
@@ -155,7 +175,7 @@ public class RESTAPISecurityInterceptor implements Interceptor {
                         (swagger)).setMediaType(MediaType.APPLICATION_JSON).send();
                 return false;
             }
-        }  else if (requestURI.contains("/editor") || requestURI.contains("keyserver") || requestURI.contains("core")) {
+        } else if (requestURI.contains("/editor") || requestURI.contains("keyserver") || requestURI.contains("core")) {
             return true;
         } else if (requestURI.contains("/admin")) {
             if (requestURI.contains("swagger.json")) {
@@ -238,6 +258,7 @@ public class RESTAPISecurityInterceptor implements Interceptor {
 
     /**
      * Handles error condition
+     *
      * @param errorHandler Security error code
      * @param responder    HttpResponder instance which is used send error messages back to the client
      */
