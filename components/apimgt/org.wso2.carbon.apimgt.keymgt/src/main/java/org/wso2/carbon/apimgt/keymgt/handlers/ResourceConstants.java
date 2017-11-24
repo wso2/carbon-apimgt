@@ -36,7 +36,7 @@ public final class ResourceConstants {
     public static final String ATTRIBUTE_VALUE_SEPERATER = ",";
 
     public static final String RESOURCE_PARAMS = "keymgt_resource_params";
-    public static final String INTROSPECTURI = "http://localhost:8080/openid-connect-server-webapp/introspect";
+    public static final String INTROSPECTURI = "http://localhost:18080/openid-connect-server-webapp/introspect";
     public static final String AUTH_TOKEN_PARAM_NAME = "token";
     public static final String AUTHORIZATION_PARAM_NAME = "Authorization";
     public static final String BASIC_TOKEN_NAME = "Basic";
