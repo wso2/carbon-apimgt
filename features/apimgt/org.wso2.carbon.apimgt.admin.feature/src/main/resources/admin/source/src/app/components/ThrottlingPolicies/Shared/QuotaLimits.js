@@ -63,6 +63,15 @@
       selectedIndexUnit: 0
     }
 
+    //get the index values to load the menus
+    componentWillReceiveProps(nextProps){
+      //get the relevent id related to bandwith limit units.
+      var quotaIndex  = bandwidthUnits.indexOf(nextProps.policy.defaultLimit.bandwidthLimit.dataUnit);
+      //get the relevent id related to quota limit unit.
+      var unitIndex = unitTimeMap.indexOf(nextProps.policy.defaultLimit.timeUnit);
+      this.setState({ selectedIndexQuota: quotaIndex, selectedIndexUnit: unitIndex});
+    }
+
     handleDefaultQuotaChange = name => event => {
       this.props.handleDefaultQuotaChangeChild(name, event.target.value);
     };
@@ -95,13 +104,14 @@
       let quota = null;
       if ("BandwidthLimit" === this.props.policy.defaultLimit.type) {
         quota =
-           <Grid item xs={3} className="grid-item" >
+           <Grid item xs={6} className="grid-item" >
              <div className="container">
               <TextField
                 id="quotaLimits"
+                required
                 label="Data Bandwidth"
                 value={this.props.policy.defaultLimit.bandwidthLimit.dataAmount}
-                onChange={this.handleDefaultQuotaChange('bandwidthLimit')}
+                onChange={this.handleDefaultQuotaChange('BandwidthLimit')}
                 className="text-field-half"
                 margin="normal"
 
@@ -144,9 +154,10 @@
             <Grid item xs={6} className="grid-item" >
                 <TextField
                   id="quotaLimits"
+                  required
                   label="Request Count"
                   value={this.props.policy.defaultLimit.requestCountLimit.requestCount}
-                  onChange={this.handleDefaultQuotaChange('requestCountLimit')}
+                  onChange={this.handleDefaultQuotaChange('RequestCountLimit')}
                   className="text-field-full"
                   margin="normal"
 
@@ -191,6 +202,7 @@
                 onChange={this.handleDefaultQuotaChange('unitTime')}
                 className="text-field-half"
                 margin="normal"
+                required
               />
 
               <List>

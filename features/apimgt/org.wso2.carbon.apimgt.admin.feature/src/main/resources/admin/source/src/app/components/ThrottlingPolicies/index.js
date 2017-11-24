@@ -22,8 +22,14 @@ import {Switch, Route} from 'react-router-dom'
 
 
 import BusinessPlan from './Details/BusinessPlan'
+import APIPolicy from './Details/APIPolicy'
+import ApplicationPolicy from './Details/ApplicationPolicy'
 import CreateBusinessPlan from './Create/CreateBusinessPlan'
+import CreateAPIPolicy from './Create/CreateAPIPolicy'
+import CreateApplicationPolicy from './Create/CreateApplicationPolicy'
 import BusinessPlans from './BusinessPlans'
+import APIPolicies from './APIPolicies'
+import ApplicationPolicies from './ApplicationPolicies'
 
 import {PageNotFound} from '../Base/Errors'
 
@@ -33,6 +39,12 @@ const ThrottlingPolicies = () => {
             <Route path={"/policies/business_plans/create"} component={CreateBusinessPlan}/>
             <Route path={"/policies/business_plans/:policy_uuid/"} component={BusinessPlan}/>
             <Route path={"/policies/business_plans"} render={props => (<BusinessPlans/>)}/>
+            <Route path={"/policies/api_policies/create"} component={CreateAPIPolicy}/>
+            <Route path={"/policies/api_policies/:policy_uuid/"} component={APIPolicy}/>
+            <Route path={"/policies/api_policies"} render={props => (<APIPolicies/>)}/>
+            <Route path={"/policies/application_policies/create"} component={CreateApplicationPolicy}/>
+            <Route path={"/policies/application_policies/:policy_uuid/"} component={ApplicationPolicy}/>
+            <Route path={"/policies/application_policies"} render={props => (<ApplicationPolicies/>)}/>
             <Route component={PageNotFound}/>
         </Switch>
     );
