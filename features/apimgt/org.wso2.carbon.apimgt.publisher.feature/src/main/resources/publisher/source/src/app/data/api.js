@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 "use strict";
 import AuthManager from './AuthManager'
-import SingleClient from './SingleClient'
+import APIClientFactory from "./APIClientFactory";
 
 /**
  * An abstract representation of an API
@@ -26,7 +27,7 @@ class API {
      * @param {string} access_key - Access key for invoking the backend REST API call.
      */
     constructor() {
-        this.client = new SingleClient().client;
+        this.client = new APIClientFactory().getAPIClient().client;
     }
 
     /**

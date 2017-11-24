@@ -91,7 +91,6 @@ class ApiCreateEndpoint extends React.Component {
         e.preventDefault();
         const values = this.state.apiFields;
         //Check for form errors manually
-debugger;
         if( !values.apiName || !values.apiVersion || !values.apiContext ){
             this.setState({ messageOpen: true });
             this.setState({message: 'Please fill all required fields'});

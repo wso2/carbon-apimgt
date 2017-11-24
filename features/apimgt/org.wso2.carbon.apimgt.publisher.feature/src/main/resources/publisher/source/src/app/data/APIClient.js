@@ -16,33 +16,35 @@
  * under the License.
  */
 "use strict";
-import Swagger from 'swagger-client'
+import SwaggerClient from 'swagger-client'
 import AuthManager from './AuthManager'
+import Utils from "./Utils";
 
 /**
  * This class expose single swaggerClient instance created using the given swagger URL (Publisher, Store, ect ..)
  * it's highly unlikely to change the REST API Swagger definition (swagger.json) file on the fly,
  * Hence this singleton class help to preserve consecutive swagger client object creations saving redundant IO operations.
  */
-class SingleClient {
-    /**
-     * Check for already created instance of the class, in the `SingleClient._instance` variable,
-     * and return single instance if already exist, else assign `SingleClient._instance` to current instance and return
-     * @param {{}} args : Accept as an optional argument for SwaggerClient constructor.Merge the given args with default args.
-     * @returns {SingleClient|*|null}
+class APIClient {
+    /**--------
+     * Check for already created instance of the class, in the `APIClient._instance` variable,
+     * and return single instance if already exist, else assign `APIClient._instance` to current instance and return
+     * @param {{}} args : Accept as an optional argument for APIClient constructor.Merge the given args with default args.
+     * @returns {APIClient|*|null}
      */
-    constructor(args = {}) {
-        if (SingleClient._instance) {
-            return SingleClient._instance;
-        }
+    constructor(host, args = {}) {
+        host = host || location.host;
+        this.host = host;
+
         const authorizations = {
             OAuth2Security: {
                 token: {access_token: AuthManager.getUser().getPartialToken()}
             }
         };
-        let promisedResolve = Swagger.resolve({url: SingleClient._getSwaggerURL()});
-        SingleClient.spec = promisedResolve;
-        this._client = promisedResolve.then(
+
+        let promisedResolve = SwaggerClient.resolve({url: Utils.getSwaggerURL()});
+        APIClient.spec = promisedResolve;
+        let promisedSwaggerClient = promisedResolve.then(
             resolved => {
                 const argsv = Object.assign(args,
                     {
@@ -51,11 +53,17 @@ class SingleClient {
                         requestInterceptor: this._getRequestInterceptor(),
                         responseInterceptor: this._getResponseInterceptor()
                     });
-                return new Swagger(argsv);
+                return new SwaggerClient(argsv);
             }
         );
-        this._client.catch(AuthManager.unauthorizedErrorHandler);
-        SingleClient._instance = this;
+        promisedSwaggerClient.catch(AuthManager.unauthorizedErrorHandler);
+
+        this._client = promisedSwaggerClient.then(swaggerClient => {
+            swaggerClient.http.withCredentials = true;
+            return swaggerClient;
+        });
+
+        APIClient._instance = this;
     }
 
     /**
@@ -67,7 +75,7 @@ class SingleClient {
      * @private
      */
     _fixSpec(spec) {
-        spec.host = window.location.host; //TODO: Set hostname according to the APIM environment selected by user ~tmkb
+        spec.host = this.host;
         return spec;
     }
 
@@ -93,7 +101,7 @@ class SingleClient {
     _getResponseInterceptor() {
         return (data) => {
             if (data.headers.etag) {
-                SingleClient.addETag(data.url, data.headers.etag);
+                APIClient.addETag(data.url, data.headers.etag);
             }
             return data;
         }
@@ -101,8 +109,8 @@ class SingleClient {
 
     _getRequestInterceptor() {
         return (data) => {
-            if (SingleClient.getETag(data.url) && (data.method === "PUT" || data.method === "DELETE" || data.method === "POST")) {
-                data.headers["If-Match"] = SingleClient.getETag(data.url);
+            if (APIClient.getETag(data.url) && (data.method === "PUT" || data.method === "DELETE" || data.method === "POST")) {
+                data.headers["If-Match"] = APIClient.getETag(data.url);
             }
             return data;
         }
@@ -110,15 +118,10 @@ class SingleClient {
 
     /**
      * Expose the private _client property to public
-     * @returns {SwaggerClient} an instance of SwaggerClient class
+     * @returns {APIClient} an instance of APIClient class
      */
     get client() {
         return this._client;
-    }
-
-    static _getSwaggerURL() {
-        /* TODO: Read this from configuration ~tmkb*/
-        return window.location.protocol + "//" + window.location.host + "/api/am/publisher/v1.0/apis/swagger.yaml";
     }
 
     /**
@@ -128,10 +131,10 @@ class SingleClient {
      * @param resourceMethod resource method of the action
      */
     static getScopeForResource(resourcePath, resourceMethod) {
-        if(!SingleClient.spec){
-            SingleClient.spec = Swagger.resolve({url: SingleClient._getSwaggerURL()});
+        if (!APIClient.spec) {
+            APIClient.spec = SwaggerClient.resolve({url: Utils.getSwaggerURL()});
         }
-        return SingleClient.spec.then(
+        return APIClient.spec.then(
             resolved => {
                 return resolved.spec.paths[resourcePath] && resolved.spec.paths[resourcePath][resourceMethod] && resolved.spec.paths[resourcePath][resourceMethod].security[0].OAuth2Security[0];
             }
@@ -139,7 +142,6 @@ class SingleClient {
     }
 }
 
-SingleClient._instance = null; // A private class variable to preserve the single instance of a swaggerClient
-SingleClient.spec = null;
+APIClient.spec = null;
 
-export default SingleClient
+export default APIClient;

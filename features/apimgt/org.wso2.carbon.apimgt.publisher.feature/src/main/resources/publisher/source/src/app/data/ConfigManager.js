@@ -49,8 +49,8 @@ const ConfigRequestMethods = {
         if (ConfigManager._promised_environments) {
             return ConfigManager._promised_environments;
         }
-        let host = window.location.origin;
-        let requestUrl = host + ConfigRequestPaths.ENVIRONMENT_CONFIG_PATH;
+        let origin = window.location.origin;
+        let requestUrl = origin + ConfigRequestPaths.ENVIRONMENT_CONFIG_PATH;
 
         ConfigManager._promised_environments = axios.get(requestUrl);
         return ConfigManager._promised_environments;

@@ -18,7 +18,7 @@
 
 import React, {Component} from 'react'
 import './login.css'
-import {Switch, Redirect} from 'react-router-dom'
+import {Redirect, Switch} from 'react-router-dom'
 import AuthManager from '../../data/AuthManager'
 import qs from 'qs'
 import TextField from 'material-ui/TextField';
@@ -27,6 +27,7 @@ import Button from 'material-ui/Button';
 import Typography from 'material-ui/Typography';
 import Snackbar from 'material-ui/Snackbar';
 import User from '../../data/User'
+import ConfigManager from "../../data/ConfigManager";
 
 class Login extends Component {
 
@@ -41,8 +42,17 @@ class Login extends Component {
             password: '',
             validate: false,
             messageOpen: false,
-            message:''
+            message:'',
+            environments: {},
+            environmentId: 0
         };
+
+        //Get Environments
+        let promised_environments = ConfigManager.getConfigs().environments.then(response => {
+            this.setState({
+                environments: response.data.environments
+            });
+        });
     }
 
 
@@ -52,12 +62,15 @@ class Login extends Component {
         this.setState({validate: true});
         let username = this.state.username;
         let password = this.state.password;
+        let environment = this.state.environments[this.state.environmentId];
+
         if(!username || !password){
             this.setState({ messageOpen: true });
             this.setState({message: 'Please fill both username and password fields'});
             return;
         }
-        let loginPromise = this.authManager.authenticateUser(username, password);
+
+        let loginPromise = this.authManager.authenticateUser(username, password, environment);
         loginPromise.then((response) => {
             this.setState({isLogin: AuthManager.getUser(), loading: false});
         }).catch((error) => {
@@ -91,13 +104,27 @@ class Login extends Component {
 
     handleUsernameChange = (event) => {
         this.setState({
-           username : event.target.value
+            username : event.target.value
         });
     };
     handlePasswordChange = (event) => {
         this.setState({
-           password : event.target.value
+            password : event.target.value
         });
+    };
+
+    handleEnvironmentChange = (event) => {
+        this.setState({
+            environmentId : event.target.value
+        });
+    };
+
+    handleClickEnvironmentMenu = (event) => {
+        this.setState({ openEnvironmentMenu: true, anchorElEnvironmentMenu: event.currentTarget });
+    };
+
+    handleRequestCloseEnvironmentMenu = (event) => {
+        this.setState({ openEnvironmentMenu: false});
     };
 
     handleRequestClose = () => {
@@ -106,64 +133,76 @@ class Login extends Component {
     render() {
         if (!this.state.isLogin) { // If not logged in, go to login page
             return (
-            <div className="login-flex-container">
-                <Snackbar
-                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-                    open={this.state.messageOpen}
-                    onRequestClose={this.handleRequestClose}
-                    SnackbarContentProps={{
-                        'aria-describedby': 'message-id',
-                    }}
-                    message={<span id="message-id">{this.state.message}</span>}
-                />
-                <div className="login-main-content">
-                    <Paper className="login-paper">
+                <div className="login-flex-container">
+                    <Snackbar
+                        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                        open={this.state.messageOpen}
+                        onRequestClose={this.handleRequestClose}
+                        SnackbarContentProps={{
+                            'aria-describedby': 'message-id',
+                        }}
+                        message={<span id="message-id">{this.state.message}</span>}
+                    />
+                    <div className="login-main-content">
+                        <Paper className="login-paper">
 
-                        <form onSubmit={this.handleSubmit} className="login-form">
-                            <div>
-                                <img className="brand" src="/publisher/public/images/logo.svg" alt="wso2-logo"/>
-                                <Typography type="subheading" gutterBottom>
-                                    API Publisher
-                                </Typography>
-                                <Typography type="caption" gutterBottom>
-                                    Login to continue
-                                </Typography>
-                            </div>
+                            <form onSubmit={this.handleSubmit} className="login-form">
+                                <div>
+                                    <img className="brand" src="/publisher/public/images/logo.svg" alt="wso2-logo"/>
+                                    <Typography type="subheading" gutterBottom>
+                                        API Publisher
+                                    </Typography>
+                                    <Typography type="caption" gutterBottom>
+                                        Login to continue
+                                    </Typography>
+                                </div>
 
-                            <TextField
-                                error={!this.state.username && this.state.validate}
-                                id="username"
-                                label="Username"
-                                type="text"
-                                autoComplete="username"
-                                margin="normal"
-                                style={{width:"100%"}}
-                                onChange={this.handleUsernameChange}
-                            />
-                            <TextField
-                                error={!this.state.password && this.state.validate}
-                                id="password"
-                                label="Password"
-                                type="password"
-                                autoComplete="current-password"
-                                margin="normal"
-                                style={{width:"100%"}}
-                                onChange={this.handlePasswordChange}
-                            />
+                                <TextField
+                                    error={!this.state.username && this.state.validate}
+                                    id="username"
+                                    label="Username"
+                                    type="text"
+                                    autoComplete="username"
+                                    margin="normal"
+                                    style={{width:"100%"}}
+                                    onChange={this.handleUsernameChange}
+                                />
+                                <TextField
+                                    error={!this.state.password && this.state.validate}
+                                    id="password"
+                                    label="Password"
+                                    type="password"
+                                    autoComplete="current-password"
+                                    margin="normal"
+                                    style={{width:"100%"}}
+                                    onChange={this.handlePasswordChange}
+                                />
 
-                            <Button type="submit" raised color="primary"  className="login-form-submit">
-                                Login
-                            </Button>
+                                {/*Environments*/}
+                                {this.state.environments && this.state.environments.length > 1 &&
+                                <div>
+                                    <label>Environment </label>
+                                    <select id="environment" onChange={this.handleEnvironmentChange}>
+                                        {this.state.environments.map((environment, index) =>
+                                            <option value={index} key={index}>{environment.label}</option>
+                                        )}
+                                    </select>
+                                </div>
+                                }
 
-                        </form>
-                    </Paper>
+                                <Button type="submit" raised color="primary"  className="login-form-submit">
+                                    Login
+                                </Button>
+
+                            </form>
+                        </Paper>
+                    </div>
+                    <div className="login-footer">
+                        WSO2 | © 2017
+                        <a href="http://wso2.com/" target="_blank"><i
+                            className="icon fw fw-wso2"/> Inc</a>.
+                    </div>
                 </div>
-                <div className="login-footer">
-                    WSO2 | © 2017
-                    <a href="http://wso2.com/" target="_blank"><i
-                        className="icon fw fw-wso2"/> Inc</a>.
-                </div>
-            </div>
 
             );
         } else {// If logged in, redirect to /apis page
