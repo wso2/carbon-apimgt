@@ -19,15 +19,12 @@
 
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
-import {Table, message, Radio} from 'antd';
-const RadioGroup = Radio.Group;
-const RadioButton = Radio.Button;
+import {Table, message} from 'antd';
 import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
 import ArrowDropDown from 'material-ui-icons/ArrowDropDown';
 import { MenuItem } from 'material-ui/Menu';
 import Popover from 'material-ui/Popover';
-import Select from 'material-ui/Select';
 
 import './discover.css'
 import API from '../../../data/api'
@@ -63,6 +60,7 @@ export default class EndpointsDiscover extends Component {
             filterType: e.target.value,
             viewableEndpoints: this.filterEndpoints(e.target.value, this.state.filterText)
         })
+        console.log(e.target.value);
     }
 
     handleFilterTextInputChange(e) {
@@ -204,17 +202,35 @@ export default class EndpointsDiscover extends Component {
                               placeholder="Type here to filter.."
                               onChange={this.handleFilterTextInputChange}
                             />
-                            <div className="ed-filter-area-select-div">
-                                <span className="ed-filter-area-inline-text"> Filter by</span>
-                                <Select className="ed-filter-select"
-                                    value={this.state.filterType}
-                                    onChange={this.handleRadioButtonChange}
-                                >
-                                    <MenuItem className="ed-menu-item" value="namespace" >Namespace</MenuItem>
-                                    <MenuItem value="criteria">Criteria</MenuItem>
-                                    <MenuItem value="name">Service Name</MenuItem>
-                                </Select>
-                            </div>
+                            <span className="ed-filter-area-inline-text"> Filter by</span>
+                            <ul className="ed-radio">
+                                <li>
+                                    <input type="radio" name="amount" id="namespace"
+                                        value="namespace"
+                                        checked={this.state.filterType === 'namespace'}
+                                        onChange={this.handleRadioButtonChange}
+                                    />
+                                    <label htmlFor="namespace">namespace</label>
+                                </li>
+                                <div className="ed-radio-divider">|</div>
+                                <li>
+                                    <input type="radio" name="amount" id="criteria"
+                                        value="criteria"
+                                        checked={this.state.filterType === 'criteria'}
+                                        onChange={this.handleRadioButtonChange}
+                                        />
+                                    <label htmlFor="criteria">criteria</label>
+                                </li>
+                                <div className="ed-radio-divider">|</div>
+                                <li>
+                                    <input type="radio" name="amount" id="name"
+                                        value="name"
+                                        checked={this.state.filterType === 'name'}
+                                        onChange={this.handleRadioButtonChange}
+                                        />
+                                    <label htmlFor="name">name</label>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                     <Table loading={viewableEndpoints === null || this.state.storedEndpoints === null}
