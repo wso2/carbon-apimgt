@@ -19,6 +19,8 @@ package org.wso2.carbon.apimgt.rest.api.configurations;
 import org.wso2.carbon.apimgt.rest.api.configurations.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.configurations.models.EnvironmentConfigurations;
 
+import java.util.List;
+
 /**
  * Service class for get configurations
  */
@@ -34,8 +36,12 @@ public class ConfigurationService {
         return instance;
     }
 
-    public static String getEnvironmentName(){
-        return getInstance().getEnvironmentConfigurations().getEnvironmentName();
+    public static String getEnvironmentLabel(){
+        return getInstance().getEnvironmentConfigurations().getEnvironmentLabel();
+    }
+
+    public static List<String> getClientHosts(){
+        return getInstance().getEnvironmentConfigurations().getClientHosts();
     }
 
     public EnvironmentConfigurations getEnvironmentConfigurations() {

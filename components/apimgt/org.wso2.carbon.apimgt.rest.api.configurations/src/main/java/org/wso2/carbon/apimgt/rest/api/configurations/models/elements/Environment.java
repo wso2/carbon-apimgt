@@ -14,25 +14,22 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.configurations.models;
+package org.wso2.carbon.apimgt.rest.api.configurations.models.elements;
 
 import org.wso2.carbon.config.annotation.Configuration;
 import org.wso2.carbon.config.annotation.Element;
 
 /**
- * Class to hold environment configurations
+ * Class to hold environment element in environment configurations
  */
 
-@Configuration(description = "Environment and Key Management Configurations")
+@Configuration(description = "environment and key management configurations")
 public class Environment {
 
-    @Element(description = "APIM Host-name and Port", required = true)
     private String host = "";
 
-    @Element(description = "Token Endpoint URL")
     private String loginTokenPath = "/login/token";
 
-    @Element(description = "Unique Environment-name", required = true)
     private String label = "Default";
 
     public String getHost() {

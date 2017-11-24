@@ -165,7 +165,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
      */
     private String extractPartialAccessTokenFromCookie(String cookie) {
         //Append unique environment name in deployment.yaml
-        String environmentName = ConfigurationService.getEnvironmentName();
+        String environmentName = ConfigurationService.getEnvironmentLabel();
 
         if (cookie != null) {
             cookie = cookie.trim();
@@ -187,7 +187,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
         String token2 = null;
 
         //Append unique environment name in deployment.yaml
-        String environmentName = ConfigurationService.getEnvironmentName();
+        String environmentName = ConfigurationService.getEnvironmentLabel();
         if (cookie != null) {
             cookie = cookie.trim();
             String[] cookies = cookie.split(";");

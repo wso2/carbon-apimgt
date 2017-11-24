@@ -16,7 +16,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.configurations.utils.bean;
 
-import org.wso2.carbon.apimgt.rest.api.configurations.models.Environment;
+import org.wso2.carbon.apimgt.rest.api.configurations.models.elements.Environment;
 
 import java.util.ArrayList;
 import java.util.List;

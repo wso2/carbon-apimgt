@@ -17,10 +17,11 @@
 package org.wso2.carbon.apimgt.rest.api.configurations.models;
 
 
+import org.wso2.carbon.apimgt.rest.api.configurations.constants.ConfigurationConstants;
+import org.wso2.carbon.apimgt.rest.api.configurations.models.elements.Environment;
 import org.wso2.carbon.config.annotation.Configuration;
 import org.wso2.carbon.config.annotation.Element;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -30,19 +31,34 @@ import java.util.List;
 @Configuration(namespace = "wso2.carbon.apimgt.environments", description = "Environment Configurations")
 public class EnvironmentConfigurations {
 
-    //Unique name for environment to set cookies by backend
-    @Element(description = "Unique Environment-name")
-    private String environmentName = "Default";
+    @Element(description = "list of web clients (eg: 127.0.0.1:9292) to allow make requests to current environment\n" +
+            "(use '" +ConfigurationConstants.ALL_ORIGINS + "' to allow any web client)")
+    private List<String> clientHosts = Arrays.asList(new String[]{ConfigurationConstants.ALL_ORIGINS});
 
-    @Element(description = "List of all Environments")
+    //Unique name for environment to set cookies by backend
+    @Element(description = "current environment's label from the list of environments")
+    private String environmentLabel = "Default";
+
+    @Element(description = "list of environments\n" +
+            "  ◆ host           - host of a environment (eg 127.0.0.1:9292, use '<empty-string>' for current host)\n" +
+            "  ◆ loginTokenPath - token endpoint URL\n" +
+            "  ◆ label          - environment label to uniquely identify a environment")
     private List<Environment> environments = Arrays.asList(new Environment());
 
-    public String getEnvironmentName() {
-        return environmentName;
+    public List<String> getClientHosts() {
+        return clientHosts;
     }
 
-    public void setEnvironmentName(String environmentName) {
-        this.environmentName = environmentName;
+    public void setClientHosts(List<String> clientHosts) {
+        this.clientHosts = clientHosts;
+    }
+
+    public String getEnvironmentLabel() {
+        return environmentLabel;
+    }
+
+    public void setEnvironmentLabel(String environmentLabel) {
+        this.environmentLabel = environmentLabel;
     }
 
     public List<Environment> getEnvironments() {

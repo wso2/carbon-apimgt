@@ -134,7 +134,7 @@ public class AuthUtil {
         }
 
         //Append unique environment name in deployment.yaml
-        String environmentName = ConfigurationService.getEnvironmentName();
+        String environmentName = ConfigurationService.getEnvironmentLabel();
         String cookie = headers.get(AuthenticatorConstants.COOKIE_HEADER);
         if (cookie != null) {
             cookie = cookie.trim();
@@ -176,7 +176,7 @@ public class AuthUtil {
         }
 
         //Append unique environment name in deployment.yaml
-        String environmentName = ConfigurationService.getEnvironmentName();
+        String environmentName = ConfigurationService.getEnvironmentLabel();
         return new NewCookie(name + "_" + environmentName, stringBuilder.toString());
     }
 
