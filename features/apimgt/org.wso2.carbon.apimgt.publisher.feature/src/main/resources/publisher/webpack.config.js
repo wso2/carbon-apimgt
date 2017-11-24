@@ -46,6 +46,10 @@ const config = {
                 loader: 'url-loader?limit=100000'
             }
         ]
+    },
+    //TODO[rnk] remove this after swagger-js issue fixed
+    externals: {
+        "swagger-client": 'SwaggerClient'
     }
 };
 
