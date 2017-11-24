@@ -1740,7 +1740,7 @@ public class APIProviderImplTest {
 
     }
 
-    /*@Test
+    @Test
     public void testCreateNewAPIVersion_ForDefaultVersion() throws Exception {
         //Create Original API
         APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.0");
@@ -1762,7 +1762,7 @@ public class APIProviderImplTest {
 
         PowerMockito.when(APIUtil.getApiStatus("PUBLISHED")).thenReturn(APIStatus.PUBLISHED);
 
-        final APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
+        final APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, new ArrayList<Documentation>(), null);
 
         Mockito.when(artifactManager.newGovernanceArtifact(Matchers.any(QName.class))).thenReturn(artifact);
         Mockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenReturn(artifact);
@@ -1876,7 +1876,7 @@ public class APIProviderImplTest {
 
         Assert.assertEquals(newVersion, apiProvider.getAPI(newApi.getId()).getId().getVersion());
 
-    }*/
+    }
 
     @Test (expected = DuplicateAPIException.class)
     public void testCreateNewAPIVersion_DuplicateAPI() throws RegistryException, UserStoreException,
@@ -2423,7 +2423,7 @@ public class APIProviderImplTest {
         apiProvider.updateAPI(api);
     }
 
-    /*@Test(expected = FaultGatewaysException.class)
+    @Test(expected = FaultGatewaysException.class)
     public void testUpdateAPI_WithFailedGWs() throws RegistryException, UserStoreException, APIManagementException,
             FaultGatewaysException {
         APIIdentifier identifier = new APIIdentifier("admin-AT-carbon.super", "API1", "1.0.0");
@@ -2527,130 +2527,13 @@ public class APIProviderImplTest {
         Map<String, String> failedToUnPubGWEnv = new HashMap<String, String>();
         failedToUnPubGWEnv.put("Production", "Failed to unpublish");
 
-
-       *//* Mockito.when(gatewayManager.publishToGateway(Matchers.any(API.class), Matchers.any(APITemplateBuilder.class),
-                Matchers.anyString())).thenReturn(failedToPubGWEnv);
-        Mockito.when(gatewayManager.removeFromGateway(Matchers.any(API.class),
-                Matchers.anyString())).thenReturn(failedToUnPubGWEnv);
-*//*      Mockito.doReturn(failedToPubGWEnv).when(gatewayManager).publishToGateway(Matchers.any(API.class), Matchers.any(APITemplateBuilder.class),
-                Matchers.anyString());
-        Mockito.doReturn(failedToUnPubGWEnv).when(gatewayManager).removeFromGateway(Matchers.any(API.class),
-                Matchers.anyString());
-        apiProvider.updateAPI(api);
-    }*/
-
-
-   /* @Test(expected = FaultGatewaysException.class)
-    public void testUpdateAPI_WithFailedGWs2() throws RegistryException, UserStoreException, APIManagementException,
-            FaultGatewaysException {
-        APIIdentifier identifier = new APIIdentifier("admin-AT-carbon.super", "API1", "1.0.0");
-        Set<String> environments = new HashSet<String>();
-        Set<URITemplate> uriTemplates = new HashSet<URITemplate>();
-        Set<URITemplate> newUriTemplates = new HashSet<URITemplate>();
-
-        URITemplate uriTemplate1 = new URITemplate();
-        uriTemplate1.setHTTPVerb("POST");
-        uriTemplate1.setAuthType("Application");
-        uriTemplate1.setUriTemplate("/add");
-        uriTemplate1.setThrottlingTier("Gold");
-        uriTemplates.add(uriTemplate1);
-
-        URITemplate uriTemplate2 = new URITemplate();
-        uriTemplate2.setHTTPVerb("PUT");
-        uriTemplate2.setAuthType("Application");
-        uriTemplate2.setUriTemplate("/update");
-        uriTemplate2.setThrottlingTier("Gold");
-        newUriTemplates.add(uriTemplate1);
-        newUriTemplates.add(uriTemplate2);
-
-        final API api = new API(identifier);
-        api.setStatus(APIStatus.PUBLISHED);
-        api.setVisibility("public");
-        api.setTransports("http,https");
-        api.setContext("/test");
-        api.setEnvironments(environments);
-        api.setUriTemplates(newUriTemplates);
-
-        API oldApi = new API(identifier);
-        oldApi.setStatus(APIStatus.PUBLISHED);
-        oldApi.setVisibility("public");
-        oldApi.setContext("/test");
-        oldApi.setEnvironments(environments);
-        api.setUriTemplates(uriTemplates);
-
-        PowerMockito.when(APIUtil.getApiStatus("PUBLISHED")).thenReturn(APIStatus.PUBLISHED);
-
-        final APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
-
-        Mockito.when(artifactManager.newGovernanceArtifact(Matchers.any(QName.class))).thenReturn(artifact);
-        Mockito.when(APIUtil.createAPIArtifactContent(artifact, oldApi)).thenReturn(artifact);
-
-        GenericArtifact artifactNew = Mockito.mock(GenericArtifact.class);
-        Mockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenReturn(artifactNew);
-        apiProvider.addAPI(oldApi);
-
-        //mock API artifact retrieval for has permission check
-        Resource apiSourceArtifact = Mockito.mock(Resource.class);
-        Mockito.when(apiSourceArtifact.getUUID()).thenReturn("12640983654");
-        String apiSourcePath = "path";
-        PowerMockito.when(APIUtil.getAPIPath(api.getId())).thenReturn(apiSourcePath);
-        PowerMockito.when(APIUtil.getAPIPath(oldApi.getId())).thenReturn(apiSourcePath);
-        PowerMockito.when(apiProvider.registry.get(apiSourcePath)).thenReturn(apiSourceArtifact);
-
-        //API Status is CREATED and user has permission
-        Mockito.when(artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS)).thenReturn("CREATED");
-        Mockito.when(artifactManager.getGenericArtifact(apiSourceArtifact.getUUID())).thenReturn(artifact);
-
-        PowerMockito.when(APIUtil.hasPermission(null, APIConstants.Permissions.API_PUBLISH)).thenReturn(true);
-        PowerMockito.when(APIUtil.hasPermission(null, APIConstants.Permissions.API_CREATE)).thenReturn(true);
-
-        Mockito.when(apimgtDAO.getDefaultVersion(identifier)).thenReturn("1.0.0");
-        Mockito.when(apimgtDAO.getPublishedDefaultVersion(identifier)).thenReturn("1.0.0");
-
-        //updateDefaultAPIInRegistry
-        String defaultAPIPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                identifier.getProviderName() +
-                RegistryConstants.PATH_SEPARATOR + identifier.getApiName() +
-                RegistryConstants.PATH_SEPARATOR + identifier.getVersion() +
-                APIConstants.API_RESOURCE_NAME;
-        Resource defaultAPISourceArtifact = Mockito.mock(Resource.class);
-        String defaultAPIUUID = "12640983600";
-        Mockito.when(defaultAPISourceArtifact.getUUID()).thenReturn(defaultAPIUUID);
-        Mockito.when(apiProvider.registry.get(defaultAPIPath)).thenReturn(defaultAPISourceArtifact);
-        GenericArtifact defaultAPIArtifact = Mockito.mock(GenericArtifact.class);
-        Mockito.when(artifactManager.getGenericArtifact(defaultAPIUUID)).thenReturn(defaultAPIArtifact);
-        Mockito.doNothing().when(artifactManager).updateGenericArtifact(defaultAPIArtifact);
-        TestUtils.mockAPIMConfiguration(APIConstants.API_GATEWAY_TYPE, APIConstants.API_GATEWAY_TYPE_SYNAPSE, -1234);
-
-        //updateApiArtifact
-        Mockito.when(artifact.getId()).thenReturn("12640983654");
-        PowerMockito.when(GovernanceUtils.getArtifactPath(apiProvider.registry, "12640983654")).
-                thenReturn(apiSourcePath);
-        //Mock Updating API
-        Mockito.doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                apiProvider.createAPI(api);
-                return null;
-            }
-        }).when(artifactManager).updateGenericArtifact(artifact);
-
-        Mockito.when(gatewayManager.isAPIPublished(api, "carbon.super")).thenReturn(false);
-
-
-        //Mock faulty GWs
-        Map<String, String> failedToPubGWEnv = new HashMap<String, String>();
-        failedToPubGWEnv.put("Production", "Failed to publish");
-        Map<String, String> failedToUnPubGWEnv = new HashMap<String, String>();
-        failedToUnPubGWEnv.put("Production", "Failed to unpublish");
-
         Mockito.when(gatewayManager.removeFromGateway(Matchers.any(API.class),
                 Matchers.anyString())).thenReturn(failedToUnPubGWEnv);
         Mockito.when(gatewayManager.publishToGateway(Matchers.any(API.class), Matchers.any(APITemplateBuilder.class),
                 Matchers.anyString())).thenReturn(failedToPubGWEnv);
 
         apiProvider.updateAPI(api);
-    }*/
+    }
 
     @Test
     public void testDeleteAPI() throws RegistryException, UserStoreException, APIManagementException,
@@ -2817,7 +2700,7 @@ public class APIProviderImplTest {
         }
     }
 
-   /* @Test
+    @Test
     public void testAddPolicy_APIType() throws RegistryException, UserStoreException, APIManagementException {
 
         APIPolicy policy = getPolicyAPILevelPerUser();
@@ -2827,9 +2710,9 @@ public class APIProviderImplTest {
         Mockito.when(apimgtDAO.addAPIPolicy(policy)).thenReturn(policy);
 
         apiProvider.addPolicy(policy);
-    }*/
+    }
 
-    /*@Test
+    @Test
     public void testAddPolicy_APPType() throws RegistryException, UserStoreException, APIManagementException {
 
         ApplicationPolicy policy = getPolicyAppLevel();
@@ -2837,9 +2720,9 @@ public class APIProviderImplTest {
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
 
         apiProvider.addPolicy(policy);
-    }*/
+    }
 
-    /*@Test
+    @Test
     public void testAddPolicy_SubsType() throws RegistryException, UserStoreException, APIManagementException {
 
         SubscriptionPolicy policy = getPolicySubscriptionLevelperUser();
@@ -2847,9 +2730,9 @@ public class APIProviderImplTest {
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
 
         apiProvider.addPolicy(policy);
-    }*/
+    }
 
-   /* @Test
+    @Test
     public void testAddPolicy_GlobalType() throws RegistryException, UserStoreException, APIManagementException,
             APITemplateException {
         GlobalPolicy policy = getPolicyGlobalLevel();
@@ -2863,7 +2746,7 @@ public class APIProviderImplTest {
         Mockito.when(manager.validateExecutionPlan(policyString)).thenReturn(true);
 
         apiProvider.addPolicy(policy);
-    }*/
+    }
 
     @Test
     public void testAddPolicy_WrongType() throws RegistryException, UserStoreException, APIManagementException,
@@ -2879,7 +2762,7 @@ public class APIProviderImplTest {
         }
     }
 
-   /* @Test
+    @Test
     public void testUpdatePolicy_APIType() throws RegistryException, UserStoreException, APIManagementException {
 
         APIPolicy policy = getPolicyAPILevelPerUser();
@@ -2891,8 +2774,8 @@ public class APIProviderImplTest {
 
         apiProvider.updatePolicy(policy);
     }
-*/
-    /*@Test
+
+    @Test
     public void testUpdatePolicy_AppType() throws RegistryException, UserStoreException, APIManagementException {
 
         SubscriptionPolicy policy = getPolicySubscriptionLevelperUser();
@@ -2903,9 +2786,9 @@ public class APIProviderImplTest {
         Mockito.doNothing().when(apimgtDAO).updateSubscriptionPolicy(policy);
 
         apiProvider.updatePolicy(policy);
-    }*/
+    }
 
-    /*@Test
+    @Test
     public void testUpdatePolicy_GlobalType() throws RegistryException, UserStoreException, APIManagementException,
             APITemplateException {
 
@@ -2923,9 +2806,9 @@ public class APIProviderImplTest {
         Mockito.when(manager.validateExecutionPlan(policyString)).thenReturn(true);
 
         apiProvider.updatePolicy(policy);
-    }*/
+    }
 
-   /* @Test
+    @Test
     public void testUpdatePolicy_GlobalTypeInvalidPlan() throws RegistryException, UserStoreException,
             APIManagementException, APITemplateException {
 
@@ -2947,9 +2830,9 @@ public class APIProviderImplTest {
         } catch(Exception e) {
             Assert.assertEquals("Invalid Execution Plan", e.getMessage());
         }
-    }*/
+    }
 
-   /* @Test
+    @Test
     public void testUpdatePolicy_GlobalTypeAlreadyExist() throws RegistryException, UserStoreException,
             APIManagementException, APITemplateException {
 
@@ -2973,9 +2856,9 @@ public class APIProviderImplTest {
         } catch(Exception e) {
             Assert.assertEquals("Key Template Already Exist", e.getMessage());
         }
-    }*/
+    }
 
-   /* @Test
+    @Test
     public void testUpdatePolicy_SubsType() throws RegistryException, UserStoreException, APIManagementException {
 
         ApplicationPolicy policy = getPolicyAppLevel();
@@ -2987,7 +2870,7 @@ public class APIProviderImplTest {
 
         apiProvider.updatePolicy(policy);
     }
-*/
+
     @Test
     public void testUpdatePolicy_WrongType() throws RegistryException, UserStoreException, APIManagementException {
 
@@ -3002,7 +2885,7 @@ public class APIProviderImplTest {
         }
     }
 
-   /* @Test
+    @Test
     public void testUpdatePolicy_APITypeErrorWhileDeploying() throws RegistryException, UserStoreException,
             APIManagementException {
 
@@ -3024,7 +2907,7 @@ public class APIProviderImplTest {
             Assert.assertEquals("Error while deploying policy to gateway", e.getMessage());
             Assert.assertEquals(PolicyDeploymentFailureException.class, e.getClass());
         }
-    }*/
+    }
 
     @Test
     public void testDeletePolicy_APIType() throws RegistryException, UserStoreException, APIManagementException {

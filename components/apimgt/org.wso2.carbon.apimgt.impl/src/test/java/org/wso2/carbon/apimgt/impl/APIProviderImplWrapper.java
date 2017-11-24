@@ -48,7 +48,9 @@ public class APIProviderImplWrapper extends APIProviderImpl {
                                   Map<String, Map<String,String>> failedGateways) throws APIManagementException {
         super(null);
         this.apiMgtDAO = apiMgtDAO;
-        this.documentationList = documentationList;
+        if (documentationList != null) {
+            this.documentationList = documentationList;
+        }
         this.failedGateways = failedGateways;
     }
 

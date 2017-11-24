@@ -112,6 +112,15 @@ public class TestUtils {
         PowerMockito.when(amConfigService.getAPIManagerConfiguration()).thenReturn(amConfig);
         PowerMockito.when(amConfig.getFirstProperty(propertyName)).thenReturn(value);
 
+        Map<String, Environment> apiGatewayEnvironments = new HashMap<String, Environment>();
+        Environment env1 = new Environment();
+        apiGatewayEnvironments.put("PROD", env1);
+        //Mocking some commonly used configs
+        PowerMockito.when(amConfig.getApiGatewayEnvironments()).thenReturn(apiGatewayEnvironments);
+        PowerMockito.when(amConfig.getFirstProperty(APIConstants.API_GATEWAY_TYPE)).
+                thenReturn(APIConstants.API_GATEWAY_TYPE_SYNAPSE);
+        PowerMockito.when(amConfig.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS)).
+                thenReturn("true", "false");
         return sh;
     }
 
