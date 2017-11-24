@@ -2,7 +2,7 @@
  var application = outputs.application;
  var oauthapp = outputs.oauthapp;
  jagg.log(outputs.tiers);
-
+ var user = jagg.getUser();
 var app_tier;
 for(var i=0;i < outputs.tiers.length; i++){
   if(outputs.tiers[i].tierName == application.tier){
@@ -18,7 +18,7 @@ for(var i=0;i < outputs.tiers.length; i++){
     <ul class="nav nav-tabs" role="tablist">
       <li role="presentation" id="details-tab" class="active"><a title="<%=i18n.localize("Details")%>" href="#details" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Details")%></a></li>
       <% if(application.status == "APPROVED"){ %>
-      <li role="presentation" id="production-keys-tab"><a title="<%=i18n.localize("Production Keys")%>" href="#production" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Production Keys")%></a></li>
+      <li role="presentation" id="production-keys-tab"><a title="<%=i18n.localize("Production Keys")%>" id="actionLink-productionKeys" href="#production" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Production Keys")%></a></li>
       <li role="presentation" id="sandbox-keys-tab"><a title="<%=i18n.localize("Sandbox Keys")%>" href="#sandbox" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Sandbox Keys")%></a></li>
       <li role="presentation" id="subscriptions-tab"><a title="<%=i18n.localize("Subscriptions")%>" href="#subscription" aria-controls="profile" role="tab" data-toggle="tab"><%=i18n.localize("Subscriptions")%></a></li>
       <% } %>
@@ -132,7 +132,33 @@ for(var i=0;i < outputs.tiers.length; i++){
                 runEnjoyHintScript(enjoyhint_instance, generate_production_keys_data);
             }
         }
+        else {
+          runIntractiveTutorialForUser();
+        }
     });
+
+    // API Store Intractive Tutorial 
+    function runIntractiveTutorialForUser() { 
+      var enjoyHintApplicationViewInstance = null;
+      var isTutorialCompleted = localStorage.getItem("isTutorialCompleted");
+      var isNewUserInteractiveTutorialStarted = localStorage.getItem("isNewUserInteractiveTutorialStarted");
+      var isApplicationSubscribed = localStorage.getItem("isApplicationSubscribed");
+      var isSubscriptionViewed = localStorage.getItem("isSubscriptionViewed");
+      var isAccessKeyGeneratedForTheUser = localStorage.getItem("isAccessKeyGeneratedForTheUser");
+      var prodKey = '<%=oauthapp.prodKey%>';
+      if (<%=user%> && !isTutorialCompleted && isApplicationSubscribed && isNewUserInteractiveTutorialStarted) {
+        if (!isSubscriptionViewed) {
+          if (prodKey != undefined && prodKey != 'null') {
+            runEnjoyHintScript(enjoyHintApplicationViewInstance, api_store_view_application_subscriptions_for_generated_keys);
+          }
+          else {
+            runEnjoyHintScript(enjoyHintApplicationViewInstance, api_store_view_application_subscriptions);
+          }
+          localStorage.setItem("isAccessKeyGeneratedForTheUser", true);
+          localStorage.setItem("isSubscriptionViewed", true);
+        }
+      }
+    }
   </script>
   <% jagg.includeBlock("application/application-keys", { "app" : prodapp, "type": "" , "gatewayurl":outputs.gatewayurl} ); %>
   <% } %>

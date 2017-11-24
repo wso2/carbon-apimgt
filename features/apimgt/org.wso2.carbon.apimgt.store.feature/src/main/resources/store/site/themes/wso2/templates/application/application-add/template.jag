@@ -11,11 +11,22 @@
  var mod = jagg.module("manager");
  var httpsUrl= mod.getHTTPsURL();
  var i=0, tiers = outputs.tiers;
-
+ var user = jagg.getUser();
  %>
  <script>
  var apiViewUrl = '<%= jagg.url('/apis/info') %>';
  var urlPrefix = '<%=jagg.getTenantURLPrefix("&") %>';
+
+ var isTutorialCompleted = localStorage.getItem("isTutorialCompleted");
+ var isNewUserInteractiveTutorialStarted = localStorage.getItem("isNewUserInteractiveTutorialStarted");
+ var isNewApplicationClicked = localStorage.getItem("isNewApplicationClicked");
+ var isUserCreatedNewApplication = localStorage.getItem("isUserCreatedNewApplication");
+ if (<%=user%> && !isTutorialCompleted && isNewUserInteractiveTutorialStarted && isNewApplicationClicked) {
+    var enjoyHintApplicationAddInstance = null;
+    localStorage.setItem("isUserCreatedNewApplication", true);
+    runEnjoyHintScript(enjoyHintApplicationAddInstance, api_store_application_page_add_tutorial);
+ }
+
  </script>
 
 <div class="page-header" id="Message">
