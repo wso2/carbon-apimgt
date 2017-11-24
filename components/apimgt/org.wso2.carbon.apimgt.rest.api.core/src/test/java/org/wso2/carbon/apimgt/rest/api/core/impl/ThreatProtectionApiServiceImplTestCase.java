@@ -85,7 +85,17 @@ public class ThreatProtectionApiServiceImplTestCase {
 
     @Test
     public void threatProtectionApisApiIdPolicyGetTestCase() throws Exception {
-        //to-do
+//        PowerMockito.mockStatic(DAOFactory.class);
+//        ThreatProtectionDAO dao = Mockito.mock(ThreatProtectionDAOImpl.class);
+//        Set<String> set = new HashSet<>();
+//        set.add("A");
+//        set.add("B");
+//        Mockito.when(dao.getThreatProtectionPolicyIdsForApi(Mockito.anyString())).thenReturn(set);
+//        Mockito.when(DAOFactory.getThreatProtectionDAO()).thenReturn(dao);
+//
+//        ThreatProtectionApiServiceImpl apiService = new ThreatProtectionApiServiceImpl();
+//        Response response = apiService.threatProtectionApisApiIdPolicyGet("UUID", getRequest());
+//        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     }
 
     private Request getRequest() throws Exception {

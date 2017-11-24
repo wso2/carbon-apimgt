@@ -139,7 +139,4 @@ public class ThreatProtectionDAOImplTestCase extends DAOIntegrationTestBase {
         threatProtectionDAO.deletePolicy(policy.getUuid());
         dao.deleteAPI(builder.getId());
     }
-
-
-
 }
