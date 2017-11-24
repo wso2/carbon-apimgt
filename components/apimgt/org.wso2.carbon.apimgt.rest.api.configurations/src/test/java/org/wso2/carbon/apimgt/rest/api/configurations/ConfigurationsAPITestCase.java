@@ -26,7 +26,7 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.models.WorkflowConfig;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExtensionsConfigBuilder;
 import org.wso2.carbon.apimgt.rest.api.configurations.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.rest.api.configurations.models.Environment;
+import org.wso2.carbon.apimgt.rest.api.configurations.models.elements.Environment;
 import org.wso2.carbon.apimgt.rest.api.configurations.models.EnvironmentConfigurations;
 import org.wso2.carbon.apimgt.rest.api.configurations.utils.bean.EnvironmentConfigBean;
 import org.wso2.carbon.config.ConfigurationException;
@@ -78,7 +78,8 @@ public class ConfigurationsAPITestCase {
 
         ////Custom configurations
         EnvironmentConfigurations environmentConfigurations = ConfigurationService.getInstance().getEnvironmentConfigurations();
-        environmentConfigurations.setEnvironmentName("Development");
+        environmentConfigurations.setClientHosts(Arrays.asList(new String[]{"localhost:9292"}));
+        environmentConfigurations.setEnvironmentLabel("Development");
         environmentConfigurations.setEnvironments(getSampleEnvironments());
 
         response = configurationsAPI.environments();

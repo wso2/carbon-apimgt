@@ -21,9 +21,9 @@ package org.wso2.carbon.apimgt.rest.api.configurations;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.rest.api.configurations.internal.ConfigurationActivator;
-import org.wso2.carbon.apimgt.rest.api.configurations.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.configurations.models.EnvironmentConfigurations;
+
+import java.util.List;
 
 public class ConfigurationServiceTestCase {
 
@@ -35,8 +35,14 @@ public class ConfigurationServiceTestCase {
 
     @Test(description = "Test whether environment name is empty")
     public void testGetEnvironmentName() {
-        String environmentName = ConfigurationService.getEnvironmentName();
+        String environmentName = ConfigurationService.getEnvironmentLabel();
         Assert.assertFalse(environmentName.isEmpty());
+    }
+
+    @Test(description = "Test whether client host list is empty")
+    public void testGetClientHosts(){
+        List<String> clientList = ConfigurationService.getClientHosts();
+        Assert.assertFalse(clientList.isEmpty());
     }
 
     @Test(description = "Test for Environment Configurations")
