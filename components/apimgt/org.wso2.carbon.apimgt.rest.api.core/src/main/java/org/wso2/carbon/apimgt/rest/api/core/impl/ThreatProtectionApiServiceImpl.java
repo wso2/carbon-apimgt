@@ -98,7 +98,6 @@ public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
     public Response threatProtectionPolicyThreatProtectionPolicyIdPost(String threatProtectionPolicyId
             , ThreatProtectionPolicyDTO threatProtectionPolicy
             ,Request request) throws NotFoundException {
-        // do some magic!
-        return Response.ok().entity(new ApiResponseMessage(ApiResponseMessage.OK, "magic!")).build();
+        return threatProtectionPolicyPost(threatProtectionPolicy, request);
     }
 }

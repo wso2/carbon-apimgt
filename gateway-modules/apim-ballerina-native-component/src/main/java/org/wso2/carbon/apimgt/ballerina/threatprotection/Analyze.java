@@ -75,11 +75,6 @@ public class Analyze extends AbstractNativeFunction {
             return getBValues(new BBoolean(false), new BString("Unknown Payload Type"));
         }
 
-        //skip analyzing if analyzer is disabled by configs
-//        if (!analyzer.isEnabled()) {
-//            return getBValues(new BBoolean(true), new BString(null));
-//        }
-        //add meaningful name
         boolean noThreatsDetected = true;
         String errMessage = null;
         try {
@@ -88,7 +83,7 @@ public class Analyze extends AbstractNativeFunction {
             noThreatsDetected = false;
             errMessage = e.getMessage();
         }
-        //return analyzer to the pool
+
         AnalyzerHolder.returnObject(analyzer);
         return getBValues(new BBoolean(noThreatsDetected), new BString(errMessage));
     }

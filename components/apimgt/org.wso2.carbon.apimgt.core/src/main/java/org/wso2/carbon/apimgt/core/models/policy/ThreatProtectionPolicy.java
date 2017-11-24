@@ -53,7 +53,6 @@ public class ThreatProtectionPolicy {
 
     public String getPolicy() {
         return policy;
-
     }
 
     public void setPolicy(String policy) {

@@ -13,13 +13,14 @@ import ballerina.doc;
 @doc:Return { value: "string: error information" }
 native function analyze(string payloadType, string payload, string apiContext, string policyId) (boolean, string);
 
-@doc:Description { value: "Configures the analyzers" }
+@doc:Description { value: "Configures the JSON analyzer" }
 @doc:Param { value: "jsonInfo: ballerina struct containing JSONAnalyzer configurations" }
+@doc:Param {value: "event: Threat Protection Policy event (add/delete/update"}
+@doc:Return { value: "boolean: true if success, false otherwise" }
+native function configureJsonAnalyzer(any jsonInfo, string event) (boolean);
+
+@doc:Description { value: "Configures the XML analyzer" }
 @doc:Param { value: "xmlInfo: ballerina struct containing XMLAnalyzer configurations" }
 @doc:Param {value: "event: Threat Protection Policy event (add/delete/update"}
 @doc:Return { value: "boolean: true if success, false otherwise" }
-native function configure(any jsonInfo, any xmlInfo, string event) (boolean);
-
-native function configureJsonAnalyzer(any jsonInfo, string event) (boolean);
-
 native function configureXmlAnalyzer(any xmlInfo, string event) (boolean);
