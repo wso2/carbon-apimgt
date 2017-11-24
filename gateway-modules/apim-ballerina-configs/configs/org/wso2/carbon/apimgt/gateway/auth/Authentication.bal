@@ -43,7 +43,6 @@ function authenticate (message m) (boolean, message) {
     //todo need to have elected resource to be in properties
     string uriTemplate = "/";
     string httpVerb = strings:toUpperCase(http:getMethod(m));
-
     string authHeader;
     string apikeyHeader;
     errors:Error authErr = null;
@@ -52,7 +51,6 @@ function authenticate (message m) (boolean, message) {
     //check api status
     string apiIdentifier = apiContext + ":" + version;
     dto:APIDTO apiDto = holder:getFromAPICache(apiIdentifier);
-
     if (apiDto == null){
         http:setStatusCode(response, 404);
         return false, response;
@@ -62,9 +60,7 @@ function authenticate (message m) (boolean, message) {
         gatewayUtil:constructAPIIsInMaintenance(response);
         return false, response;
     }
-
     resourceDto = validateResource(apiContext, version, uriTemplate, httpVerb);
-
     if (resourceDto == null) {
         http:setStatusCode(response, 404);
         return false, response;
