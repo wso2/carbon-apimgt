@@ -9,7 +9,7 @@
 .text-field-half{
   display: flex;
   align-items: stretch;
-  width:50%;
+  width:75%;
 }
 .container{
   display: flex;
