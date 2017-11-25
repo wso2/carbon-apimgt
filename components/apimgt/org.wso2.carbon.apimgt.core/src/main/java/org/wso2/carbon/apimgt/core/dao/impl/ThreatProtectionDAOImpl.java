@@ -1,6 +1,6 @@
 /*
  *
- *   Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *   WSO2 Inc. licenses this file to you under the Apache License,
  *   Version 2.0 (the "License"); you may not use this file except
@@ -146,6 +146,12 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
         }
     }
 
+    /**
+     * Get a list of all threat protection policies
+     * @param connection SQL Connection
+     * @return  List of threat protection policies
+     * @throws APIMgtDAOException if failed to retrieve the list of policies
+     */
     private List<ThreatProtectionPolicy> getPolicies(Connection connection) throws APIMgtDAOException {
         final String sqlQuery = "SELECT `UUID`, `NAME`, `TYPE`, `POLICY` " +
                 " FROM " + THREAT_PROTECTION_TABLE;
@@ -171,6 +177,13 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
         }
     }
 
+    /**
+     * Get a single threat protection policy
+     * @param policyId Threat protection policy id
+     * @param connection SQL Connection
+     * @return The threat protection policy with policy id. null if not found.
+     * @throws APIMgtDAOException If failed to retrieve the policy
+     */
     private ThreatProtectionPolicy getPolicy(String policyId, Connection connection) throws APIMgtDAOException {
         final String sqlQuery = "SELECT `UUID`, `NAME`, `TYPE`, `POLICY` " +
                 " FROM " + THREAT_PROTECTION_TABLE + " WHERE UUID = ?";
@@ -198,6 +211,12 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
         }
     }
 
+    /**
+     * Add a threat protection policy to database
+     * @param policy Threat protection policy
+     * @param connection SQL Connection
+     * @throws APIMgtDAOException If failed to add policy
+     */
     private void addPolicy(ThreatProtectionPolicy policy, Connection connection) throws APIMgtDAOException {
         final String sqlQuery = "INSERT INTO " + THREAT_PROTECTION_TABLE +
                 " (`UUID`, `NAME`, `TYPE`, `POLICY`) " +
@@ -217,6 +236,12 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
         }
     }
 
+    /**
+     * Update a threat protection policy
+     * @param policy Policy to be updated
+     * @param connection SQL Connection
+     * @throws APIMgtDAOException If failed to update policy
+     */
     private void updatePolicy(ThreatProtectionPolicy policy, Connection connection) throws APIMgtDAOException {
         final String sqlQuery = "UPDATE " + THREAT_PROTECTION_TABLE +
                 " SET `NAME` = ?, " +
@@ -238,6 +263,13 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
         }
     }
 
+    /**
+     * Check whether a threat protection policy exists
+     * @param policyId PolicyId to be checked
+     * @param connection SQL Connection
+     * @return True if policy exists, false otherwise
+     * @throws APIMgtDAOException
+     */
     private boolean isPolicyExists(String policyId, Connection connection) throws APIMgtDAOException {
         final String sqlQuery = "SELECT UUID FROM " + THREAT_PROTECTION_TABLE + " WHERE " +
                 "UUID = ?";
@@ -252,6 +284,13 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
         }
     }
 
+    /**
+     * Get a list of threat protection policyIds associated with an API
+     * @param apiId ApiId to be checked
+     * @param connection SQL Connection
+     * @return A list of threat protection policy ids
+     * @throws SQLException If failed to retrieve the list of ids
+     */
     private Set<String> getThreatProtectionPolicyIdsForApi(String apiId, Connection connection) throws SQLException {
         final String query = "SELECT POLICY_ID FROM AM_THREAT_PROTECTION_ASSOCIATIONS WHERE API_ID = ?";
         Set<String> policyIds = new HashSet<>();
@@ -266,6 +305,12 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
         return policyIds;
     }
 
+    /**
+     * Delete a threat protection policy
+     * @param policyId ID of the policy to be deleted
+     * @param connection SQL Connection
+     * @throws SQLException If failed to delete the policy
+     */
     private void deletePolicy(String policyId, Connection connection) throws SQLException {
         final String query = "DELETE FROM " + THREAT_PROTECTION_TABLE + " WHERE UUID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {

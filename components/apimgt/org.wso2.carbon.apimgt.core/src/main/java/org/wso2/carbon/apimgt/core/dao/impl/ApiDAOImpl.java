@@ -2298,6 +2298,13 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
+    /**
+     * Associate a list of threat protection policy ids with an API
+     * @param connection SQL Connection
+     * @param apiId ApiId of the API
+     * @param policies Set of threat protection policies
+     * @throws SQLException If failed to associate policies
+     */
     private void addThreatProtectionPolicies(Connection connection, String apiId, Set<String> policies)
             throws SQLException {
         final String query = "INSERT INTO AM_THREAT_PROTECTION_ASSOCIATIONS (API_ID, POLICY_ID) VALUES(?,?)";
@@ -2398,6 +2405,12 @@ public class ApiDAOImpl implements ApiDAO {
         }
     }
 
+    /**
+     * Delete threat protection policies from an API
+     * @param connection SQL Connection
+     * @param apiId ApiId of the API
+     * @throws SQLException If failed to delete policies
+     */
     private void deleteThreatProtectionPolicies(Connection connection, String apiId) throws SQLException {
         final String query = "DELETE FROM AM_THREAT_PROTECTION_ASSOCIATIONS WHERE API_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -3176,6 +3189,13 @@ public class ApiDAOImpl implements ApiDAO {
         return transports;
     }
 
+    /**
+     * Get a list threat protection policy ids associated with an API
+     * @param connection SQL Connection
+     * @param apiId ApiId of the API
+     * @return Set of threat protection policy ids
+     * @throws SQLException If failed to retrieve the set of ids
+     */
     private Set<String> getThreatProtectionPolicies(Connection connection, String apiId) throws SQLException {
         Set<String> policies = new HashSet<>();
         final String query = "SELECT POLICY_ID FROM AM_THREAT_PROTECTION_ASSOCIATIONS WHERE API_ID = ?";
