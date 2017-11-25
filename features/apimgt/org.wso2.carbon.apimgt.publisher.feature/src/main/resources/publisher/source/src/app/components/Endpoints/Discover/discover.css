@@ -47,6 +47,9 @@ input[type=text] {
     font-size: 16px;
 }
 
+input[type=text]:focus {
+    border: 1px solid #1E90FF;
+}
 
 .ed-filter-area-inline-text {
     display:inline-block;
@@ -83,26 +86,31 @@ input[type=text] {
     color: #1E90FF;
 }
 
-.ed-radio-divider {
-    display:inline-block;
-    padding: 0px;
-    color: #1E90FF;
+
+.ed-loading {
+    text-align: center;
+    margin-top: 20%;
 }
 
-th.ed-table-first-column {
-    padding-left: 18px !important;
-    word-spacing: 10px !important;
-    font-size: 14px !important;
+.ed-table-head {
+    background-color: #F5F5F5;
 }
 
-tr.ed-table-first-column,
-.ed-table-first-column {
-    padding-left: 18px !important;
-    font-size: 14px !important;
+.ed-fixed-slim-column {
+    width: 50px;
+}
+.ed-slim-column {
+    width: 7%;
+}
+.ed-regular-column {
+    width: 10%;
+}
+.ed-button-column {
+    text-align: center;
 }
 
-th.ed-font,
-tr.ed-font,
-.ed-font {
-    font-size: 14px !important;
+.ed-button {
+    font-size: 13px !important;
+    padding: 3px 13px;
+    border-radius: 4px;
 }

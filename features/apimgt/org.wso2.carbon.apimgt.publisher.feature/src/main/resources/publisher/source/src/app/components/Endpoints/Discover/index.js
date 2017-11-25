@@ -19,12 +19,14 @@
 
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
-import {Table, message} from 'antd';
+import {message} from 'antd';
 import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
 import ArrowDropDown from 'material-ui-icons/ArrowDropDown';
 import { MenuItem } from 'material-ui/Menu';
 import Popover from 'material-ui/Popover';
+import { CircularProgress } from 'material-ui/Progress';
+import Table, { TableBody, TableCell, TableHead, TableRow, TableFooter, TablePagination} from 'material-ui/Table';
 
 import './discover.css'
 import API from '../../../data/api'
@@ -42,6 +44,8 @@ export default class EndpointsDiscover extends Component {
             filterText: "",
             storedEndpoints: null,
             endpointBeingAdded: false,
+            page: 0,
+            rowsPerPage: 5,
         };
         this.handleFilterTextInputChange = this.handleFilterTextInputChange.bind(this);
         this.handleRadioButtonChange = this.handleRadioButtonChange.bind(this);
@@ -60,7 +64,6 @@ export default class EndpointsDiscover extends Component {
             filterType: e.target.value,
             viewableEndpoints: this.filterEndpoints(e.target.value, this.state.filterText)
         })
-        console.log(e.target.value);
     }
 
     handleFilterTextInputChange(e) {
@@ -120,52 +123,23 @@ export default class EndpointsDiscover extends Component {
         this.getStoredEndpoints();
     }
 
+    handleChangePage = (event, page) => {
+        this.setState({ page });
+    };
+
+    handleChangeRowsPerPage = event => {
+        this.setState({ rowsPerPage: event.target.value });
+    };
+
     render() {
-        const {viewableEndpoints} = this.state;
+        const {viewableEndpoints, rowsPerPage, page} = this.state;
         const globalEndpointMenuOpen = !!this.state.anchorElEndpointsMenu;
-        const columns = [{
-            title: 'Name  |  Namespace  |  Criteria',
-            dataIndex: 'name',
-            key: 'age',
-            width: '40%',
-            sorter: (a, b) => a.name.length - b.name.length,
-            className: 'ed-table-first-column',
-            render: (text, record) => (
-                <span>
-                    {text}
-                    <span className="ant-divider" />
-                    {JSON.parse(record.endpointConfig).namespace}
-                    <span className="ant-divider" />
-                    {JSON.parse(record.endpointConfig).criteria}
-                </span>
-            )
-        }, {
-            title: 'Type',
-            dataIndex: 'type',
-            className: 'ed-font'
-        }, {
-            title: 'Service URL',
-            dataIndex: 'endpointConfig',
-            className: 'ed-font',
-            render: (text, record) => (
-                <span>
-                    {JSON.parse(text).serviceUrl}
-                    <span className="ant-divider" />
-                    {JSON.parse(text).urlType}
-                </span>
-            )
-        }, {
-            title: 'Max TPS',
-            dataIndex: 'maxTps',
-            className: 'ed-font',
-            sorter: (a, b) => a.maxTps - b.maxTps,
-        }, {
-            title: 'Action',
-            key: 'action',
-            dataIndex: 'id',
-            className: 'ed-font',
-            render: (text, record) => <ButtonCell record={record} storedEndpoints={this.state.storedEndpoints}/>
-        }];
+
+        if (viewableEndpoints === null) {
+            return (
+                <div className="ed-loading"><CircularProgress /></div>
+            );
+        }
 
         return (
             <ScopeValidation resourcePath={resourcePath.SERVICE_DISCOVERY} resourceMethod={resourceMethod.GET}>
@@ -210,34 +184,74 @@ export default class EndpointsDiscover extends Component {
                                         checked={this.state.filterType === 'namespace'}
                                         onChange={this.handleRadioButtonChange}
                                     />
-                                    <label htmlFor="namespace">namespace</label>
+                                    <label htmlFor="namespace">Namespace</label>
                                 </li>
-                                <div className="ed-radio-divider">|</div>
+                                |
                                 <li>
                                     <input type="radio" name="amount" id="criteria"
                                         value="criteria"
                                         checked={this.state.filterType === 'criteria'}
                                         onChange={this.handleRadioButtonChange}
                                         />
-                                    <label htmlFor="criteria">criteria</label>
+                                    <label htmlFor="criteria">Criteria</label>
                                 </li>
-                                <div className="ed-radio-divider">|</div>
+                                |
                                 <li>
                                     <input type="radio" name="amount" id="name"
                                         value="name"
                                         checked={this.state.filterType === 'name'}
                                         onChange={this.handleRadioButtonChange}
                                         />
-                                    <label htmlFor="name">name</label>
+                                    <label htmlFor="name">Service Name</label>
                                 </li>
                             </ul>
                         </div>
                     </div>
-                    <Table loading={viewableEndpoints === null || this.state.storedEndpoints === null}
-                        columns={columns}
-                        dataSource={viewableEndpoints}
-                        rowKey="id"
-                        size="large"/>
+                    <Table>
+                        <TableHead className="ed-table-head">
+                            <TableRow>
+                                <TableCell padding='dense' className="ed-regular-column">Name</TableCell>
+                                <TableCell padding='dense' className="ed-regular-column">Namespace</TableCell>
+                                <TableCell padding='dense' className="ed-regular-column">Criteria</TableCell>
+                                <TableCell padding='dense' className="ed-fixed-slim-column">Type</TableCell>
+                                <TableCell padding='dense' >Service URL</TableCell>
+                                <TableCell padding='dense' className="ed-slim-column">Max TPS</TableCell>
+                                <TableCell padding='dense' className="ed-button-column">Action</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {viewableEndpoints.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(record => {
+                                return (
+                                    <TableRow key={record.id}>
+                                        <TableCell padding='dense' className="ed-regular-column">{record.name}</TableCell>
+                                        <TableCell padding='dense' className="ed-regular-column">{JSON.parse(record.endpointConfig).namespace}</TableCell>
+                                        <TableCell padding='dense' className="ed-regular-column">{JSON.parse(record.endpointConfig).criteria}</TableCell>
+                                        <TableCell padding='dense' className="ed-fixed-slim-column">{record.type}</TableCell>
+                                        <TableCell padding='dense' >
+                                            <span>
+                                                {JSON.parse(record.endpointConfig).serviceUrl}
+                                                &emsp;|&emsp;
+                                                {JSON.parse(record.endpointConfig).urlType}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell padding='dense' className="ed-slim-column">{record.maxTps}</TableCell>
+                                        <TableCell padding='dense' className="ed-button-column"><ButtonCell record={record} storedEndpoints={this.state.storedEndpoints}/></TableCell>
+                                    </TableRow>
+                                );
+                            })}
+                        </TableBody>
+                        <TableFooter>
+                            <TableRow>
+                                <TablePagination
+                                  count={viewableEndpoints.length}
+                                  rowsPerPage={rowsPerPage}
+                                  page={page}
+                                  onChangePage={this.handleChangePage}
+                                  onChangeRowsPerPage={this.handleChangeRowsPerPage}
+                                />
+                            </TableRow>
+                        </TableFooter>
+                      </Table>
                 </div>
             </ScopeValidation>
         );
@@ -252,20 +266,20 @@ class ButtonCell extends Component {
         this.state = {
             record: this.props.record,
             storedEndpoints: this.props.storedEndpoints,
-            actionButton: <Button raised color="primary" loading>Loading...</Button>
+            actionButton: <Button raised color="primary" className="ed-button">Loading...</Button>
         };
     }
 
     getAddButton() {
         return (
-            <Button raised color="primary" onClick={() =>this.handleAddEndpointToDB()}>
+            <Button raised color="primary" className="ed-button" onClick={() =>this.handleAddEndpointToDB()}>
             Add as Global Endpoint </Button>
         );
     }
 
     getUpdateButton() {
         return (
-            <Button raised color="secondary" onClick={() =>this.handleUpdateEndpoint()}>
+            <Button raised color="secondary" className="ed-button" onClick={() =>this.handleUpdateEndpoint()}>
             Update added Endpoint </Button>
         );
     }
