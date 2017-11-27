@@ -62,8 +62,6 @@ public class GetKeysTestCase {
         Assert.assertTrue(returns[3] instanceof BStringArray);
         Assert.assertEquals(((BStringArray) returns[3]).size(), 0);
 
-//        Assert.assertTrue(returns[4] instanceof BStringArray);
-//        Assert.assertEquals(((BStringArray) returns[4]).size(), 0);
     }
 
 }

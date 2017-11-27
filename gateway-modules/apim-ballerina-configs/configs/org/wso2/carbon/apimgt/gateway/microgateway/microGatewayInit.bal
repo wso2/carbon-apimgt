@@ -10,9 +10,7 @@ service<http> gatewayInitService {
     boolean isCacheInitialized = holder:initializeCache();
     boolean isMapsAdded = holder:addThrottleMaps();
     boolean isReady = initGateway();
-
     boolean subscriptionsInitialized = retrieveOfflineSubscriptions();
-
 }
 
 function initGateway () (boolean) {

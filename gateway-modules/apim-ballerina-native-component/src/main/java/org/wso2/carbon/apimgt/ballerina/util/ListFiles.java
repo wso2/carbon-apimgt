@@ -16,8 +16,7 @@
  * under the License.
  */
 package org.wso2.carbon.apimgt.ballerina.util;
-//import org.apache.commons.logging.Log;
-//import org.apache.commons.logging.LogFactory;
+
 import org.ballerinalang.bre.Context;
 import org.ballerinalang.model.types.TypeEnum;
 import org.ballerinalang.model.values.BStringArray;
@@ -58,17 +57,14 @@ import java.util.Locale;
         value = "json file array")})
 
 public class ListFiles extends AbstractNativeFunction  {
-    //private static final Log log = LogFactory.getLog(ListFiles.class);
 
     @Override
     public BValue[] execute(Context context) {
         String directoryPath = getStringArgument(context, 0);
         File directory = new File(directoryPath);
         File[] fList = directory.listFiles();
-
         List<String> list = new ArrayList<String>();
         if (fList != null) {
-            //log.info("not null");
             for (File file : fList) {
                 if (file.isFile() && file.getName().toLowerCase(Locale.ENGLISH).endsWith(".json")) {
                     list.add(file.getName());
@@ -81,23 +77,9 @@ public class ListFiles extends AbstractNativeFunction  {
                 balArray.add(i, list.get(i));
                 i = i + 1;
             }
-
             return getBValues(balArray);
         } else {
             return getBValues(new BStringArray());
         }
-
-
-//        if (fList != null) {
-//            BStringArray balArray = new BStringArray();
-//            balArray.add(0, "a");
-//            balArray.add(1, "b");
-//            return getBValues(balArray);
-//        } else {
-//            BStringArray baArray = new BStringArray();
-//            baArray.add(0, "A");
-//            baArray.add(1, "B");
-//            return getBValues(baArray);
-//        }
     }
 }

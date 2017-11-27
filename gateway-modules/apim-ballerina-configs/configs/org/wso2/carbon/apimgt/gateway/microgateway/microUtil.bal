@@ -45,11 +45,9 @@ function readFromJSONFile (string filePath) (json) {
     try {
         files:File jsonFile = {path:gwHome + "/microgateway/" + filePath};
         files:open(jsonFile, "r");
-
         var content, n = files:read(jsonFile, 100000000);
         string strAPIData = blobs:toString(content, "utf-8");
         json apiData = util:parse(strAPIData);
-
         return apiData;
     } catch (errors:Error err) {
         system:println("ERROR: " + err.msg);

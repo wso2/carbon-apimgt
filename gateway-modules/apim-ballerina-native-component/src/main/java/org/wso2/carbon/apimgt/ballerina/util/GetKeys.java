@@ -67,25 +67,18 @@ public class GetKeys extends AbstractNativeFunction {
     public BValue[] execute(Context ctx) {
 
         List<String> keys = new ArrayList<String>();
-//        try {
-            // Accessing Parameters.
-            BJSON json = (BJSON) getRefArgument(ctx, 0);
-//            if (json == null) {
-//                return getBValues(new BStringArray());
-//            }
-            JsonNode node = json.value();
 
-            if (node.getNodeType() != JsonNodeType.OBJECT) {
-                return getBValues(new BStringArray());
-            }
+        BJSON json = (BJSON) getRefArgument(ctx, 0);
+        JsonNode node = json.value();
 
-            Iterator<String> keysItr = ((ObjectNode) node).fieldNames();
-            while (keysItr.hasNext()) {
-                keys.add(keysItr.next());
-            }
-//        } catch (Throwable e) {
-//            ErrorHandler.handleJsonException("get keys from json", e);
-//        }
+        if (node.getNodeType() != JsonNodeType.OBJECT) {
+            return getBValues(new BStringArray());
+        }
+
+        Iterator<String> keysItr = ((ObjectNode) node).fieldNames();
+        while (keysItr.hasNext()) {
+            keys.add(keysItr.next());
+        }
 
         return getBValues(new BStringArray(keys.toArray(new String[keys.size()])));
     }
