@@ -1,9 +1,9 @@
 .ed-body{
-    font-size: 14px;
+    margin: 15px 15px 5px 15px;
 }
 
 .ed-top-section {
-    margin: 15px 15px 5px 15px;
+    margin-bottom: 5px;
 }
 
 .ed-title {
@@ -17,11 +17,9 @@
     display: inline-block;
     float: right;
 }
-
 .ed-global-endpoints-button {
     background-color: white;
 }
-
 .ed-drop-down-arrow {
     margin: 0px;
     text-align: center;
@@ -35,22 +33,19 @@
     text-align: left;
     padding: 10px 5px 10px 0px;
 }
-
 input[type=text] {
     display:inline-block;
-    width: 200px;
-    padding: 8px;
+    width: 240px;
+    padding: 8px 20px;
     margin-bottom: 20px;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
     font-size: 16px;
 }
-
 input[type=text]:focus {
     border: 1px solid #1E90FF;
 }
-
 .ed-filter-area-inline-text {
     display:inline-block;
     margin-bottom: 30px;
@@ -58,18 +53,15 @@ input[type=text]:focus {
     padding-right: 30px;
     font-size: 16px;
 }
-
 .ed-radio {
      display:inline-block;
      padding: 0px;
      border: 1px solid #ccc;
      border-radius: 4px;
 }
-
 .ed-radio li{
      display:inline-block;
 }
-
 .ed-radio label {
     display:inline-block;
     padding: 7px 13px 7px 13px;
@@ -77,27 +69,40 @@ input[type=text]:focus {
     font-size: 16px;
     font-weight: bold;
 }
-
 .ed-radio input[type=radio] {
     display: none;
 }
-
 .ed-radio input[type=radio]:checked + label {
     color: #1E90FF;
 }
-
 
 .ed-loading {
     text-align: center;
     margin-top: 20%;
 }
 
-.ed-table-head {
-    background-color: #F5F5F5;
+.ed-message-section {
+    margin: 0px 0px 5px 0px;
+    font-size: 16px;
+}
+.ed-message-info {
+    color: #3399ff;
+    background-color: #e6f2ff;
+    padding: 13px 20px;
+}
+.ed-message-success {
+    color: #00cc66;
+    background-color: #f2ffcc;
+    padding: 13px 20px;
+}
+.ed-message-error {
+    color: #ff3333;
+    background-color: #ffe6e6;
+    padding: 13px 20px;
 }
 
-.ed-fixed-slim-column {
-    width: 50px;
+.ed-table-head {
+    background-color: #F5F5F5;
 }
 .ed-slim-column {
     width: 7%;
@@ -110,7 +115,9 @@ input[type=text]:focus {
 }
 
 .ed-button {
-    font-size: 13px !important;
-    padding: 3px 13px;
     border-radius: 4px;
+    width: 105px;
+    text-align: center;
+    font-size: 13px;
+    padding: 3px 10px;
 }

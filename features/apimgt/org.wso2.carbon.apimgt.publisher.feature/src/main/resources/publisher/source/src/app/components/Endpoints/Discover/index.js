@@ -19,13 +19,15 @@
 
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
-import {message} from 'antd';
+
 import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
 import ArrowDropDown from 'material-ui-icons/ArrowDropDown';
+import AddIcon from 'material-ui-icons/Add';
+import UpdateIcon from 'material-ui-icons/Update';
 import { MenuItem } from 'material-ui/Menu';
 import Popover from 'material-ui/Popover';
-import { CircularProgress } from 'material-ui/Progress';
+import { CircularProgress, LinearProgress } from 'material-ui/Progress';
 import Table, { TableBody, TableCell, TableHead, TableRow, TableFooter, TablePagination} from 'material-ui/Table';
 
 import './discover.css'
@@ -43,12 +45,14 @@ export default class EndpointsDiscover extends Component {
             filterType: "namespace",
             filterText: "",
             storedEndpoints: null,
-            endpointBeingAdded: false,
+            messageType: "info",
+            messageString: "Listing discovered endpoints",
             page: 0,
             rowsPerPage: 5,
         };
         this.handleFilterTextInputChange = this.handleFilterTextInputChange.bind(this);
         this.handleRadioButtonChange = this.handleRadioButtonChange.bind(this);
+        this.changeMessage = this.changeMessage.bind(this);
     }
 
     handleGlobalEndpointButtonClick = event => {
@@ -58,6 +62,42 @@ export default class EndpointsDiscover extends Component {
     handleCloseGlEndpointMenu = () => {
         this.setState({ anchorElEndpointsMenu: null });
       };
+
+    componentDidMount() {
+        this.discoverServices();
+        this.getStoredEndpoints();
+    }
+
+    discoverServices() {
+        const api = new API();
+        const promised_discoveredEndpoints = api.discoverServices();
+        promised_discoveredEndpoints.then(
+            response => {
+                const list = response.obj.list;
+                this.setState({
+                    discoveredEndpoints: list,
+                    viewableEndpoints: list,
+                });
+            }
+        )
+    }
+
+    getStoredEndpoints() {
+        const api = new API();
+        const promised_storedEndpoints = api.getEndpoints();
+        promised_storedEndpoints.then(
+            response => {
+                this.setState({
+                    storedEndpoints: response.obj.list,
+                    databaseChecked: true,
+                });
+            }
+        ).catch(
+            error => {
+                this.changeMessage("error", "Error while retrieving stored endpoints");
+            }
+        );
+    }
 
     handleRadioButtonChange(e) {
         this.setState({
@@ -87,40 +127,11 @@ export default class EndpointsDiscover extends Component {
         }
     }
 
-    discoverServices() {
-        const api = new API();
-        const promised_discoveredEndpoints = api.discoverServices();
-        promised_discoveredEndpoints.then(
-            response => {
-                const list = response.obj.list;
-                this.setState({
-                    discoveredEndpoints: list,
-                    viewableEndpoints: list,
-                });
-            }
-        )
-    }
-
-    getStoredEndpoints() {
-        const api = new API();
-        const promised_storedEndpoints = api.getEndpoints();
-        promised_storedEndpoints.then(
-            response => {
-                this.setState({
-                    storedEndpoints: response.obj.list,
-                    databaseChecked: true,
-                });
-            }
-        ).catch(
-            error => {
-                message.error("Error while retrieving stored endpoints");
-            }
-        );
-    }
-
-    componentDidMount() {
-        this.discoverServices();
-        this.getStoredEndpoints();
+    changeMessage(typeOfMessage, stringOfMessage) {
+        this.setState({
+            messageType: typeOfMessage,
+            messageString: stringOfMessage
+        });
     }
 
     handleChangePage = (event, page) => {
@@ -146,7 +157,7 @@ export default class EndpointsDiscover extends Component {
                 <div className="ed-body">
                     <div className="ed-top-section">
                         <Typography className="page-title ed-title" type="title">
-                             Discovered Service Endpoints
+                             Add Global Endpoints Via Service Discovery
                         </Typography>
                         <div className="ed-global-endpoints-button-div">
                             <Button raised
@@ -207,13 +218,16 @@ export default class EndpointsDiscover extends Component {
                             </ul>
                         </div>
                     </div>
+                    <div className="ed-message-section">
+                        <MessageSection type={this.state.messageType} message={this.state.messageString} />
+                    </div>
                     <Table>
                         <TableHead className="ed-table-head">
                             <TableRow>
                                 <TableCell padding='dense' className="ed-regular-column">Name</TableCell>
                                 <TableCell padding='dense' className="ed-regular-column">Namespace</TableCell>
-                                <TableCell padding='dense' className="ed-regular-column">Criteria</TableCell>
-                                <TableCell padding='dense' className="ed-fixed-slim-column">Type</TableCell>
+                                <TableCell padding='dense' >Criteria</TableCell>
+                                <TableCell padding='dense' className="ed-slim-column">Type</TableCell>
                                 <TableCell padding='dense' >Service URL</TableCell>
                                 <TableCell padding='dense' className="ed-slim-column">Max TPS</TableCell>
                                 <TableCell padding='dense' className="ed-button-column">Action</TableCell>
@@ -225,8 +239,8 @@ export default class EndpointsDiscover extends Component {
                                     <TableRow key={record.id}>
                                         <TableCell padding='dense' className="ed-regular-column">{record.name}</TableCell>
                                         <TableCell padding='dense' className="ed-regular-column">{JSON.parse(record.endpointConfig).namespace}</TableCell>
-                                        <TableCell padding='dense' className="ed-regular-column">{JSON.parse(record.endpointConfig).criteria}</TableCell>
-                                        <TableCell padding='dense' className="ed-fixed-slim-column">{record.type}</TableCell>
+                                        <TableCell padding='dense' >{JSON.parse(record.endpointConfig).criteria}</TableCell>
+                                        <TableCell padding='dense' className="ed-slim-column">{record.type}</TableCell>
                                         <TableCell padding='dense' >
                                             <span>
                                                 {JSON.parse(record.endpointConfig).serviceUrl}
@@ -235,7 +249,13 @@ export default class EndpointsDiscover extends Component {
                                             </span>
                                         </TableCell>
                                         <TableCell padding='dense' className="ed-slim-column">{record.maxTps}</TableCell>
-                                        <TableCell padding='dense' className="ed-button-column"><ButtonCell record={record} storedEndpoints={this.state.storedEndpoints}/></TableCell>
+                                        <TableCell padding='dense' className="ed-button-column">
+                                            <ButtonCell
+                                                record={record}
+                                                storedEndpoints={this.state.storedEndpoints}
+                                                changeMessage={this.changeMessage}
+                                            />
+                                        </TableCell>
                                     </TableRow>
                                 );
                             })}
@@ -273,20 +293,22 @@ class ButtonCell extends Component {
     getAddButton() {
         return (
             <Button raised color="primary" className="ed-button" onClick={() =>this.handleAddEndpointToDB()}>
-            Add as Global Endpoint </Button>
+            <AddIcon />&nbsp; Add</Button>
         );
     }
 
     getUpdateButton() {
         return (
-            <Button raised color="secondary" className="ed-button" onClick={() =>this.handleUpdateEndpoint()}>
-            Update added Endpoint </Button>
+            <Button raised className="ed-button" onClick={() =>this.handleUpdateEndpoint()}>
+            <UpdateIcon />&nbsp; Update</Button>
         );
     }
 
     handleAddEndpointToDB = () => {
+        this.props.changeMessage("loading", "Adding the Endpoint ...");
         let record = this.state.record;
         let configObject = JSON.parse(record.endpointConfig);
+
         let endpointDefinition = {
             name: configObject.namespace + "-" + record.name + "-"
                     + record.type + "-" + configObject.urlType,
@@ -301,32 +323,30 @@ class ButtonCell extends Component {
             response => {
                 const {name, id} = response.obj;
                 this.state.storedEndpoints.push(response.obj);
-                message.success("New endpoint " + name + " created successfully");
+                debugger;
                 this.setState({
                     actionButton: this.getUpdateButton()
                 });
+                this.props.changeMessage("success", "New endpoint " + name + " created successfully");
             }
         ).catch(
             error => {
                 console.error(error);
-                message.error("Error occurred while creating the endpoint!");
-                this.setState({
-                    endpointBeingAdded: false
-                });
+                this.props.changeMessage("error", "Error occurred while creating the endpoint!");
             }
         )
     }
 
     handleUpdateEndpoint = () => {
-        const hideMessage = message.loading("Updating the Endpoint ...", 0);
+        this.props.changeMessage("loading", "Updating the Endpoint ...");
         let record = this.state.record;
         let configObject = JSON.parse(record.endpointConfig);
         let endpointName = configObject.namespace + "-" + record.name + "-"
                             + record.type + "-" + configObject.urlType;
         let storedEndpoint = this.state.storedEndpoints.find(el => el.name === endpointName);
         if (storedEndpoint === null) {
-            message.error("Error while updating. Could not find the " + endpointName + " Endpoint!");
-            hideMessage();
+            this.props.changeMessage("error",
+                "Error while updating. Could not find the " + endpointName + " Endpoint!");
             return;
         }
         let endpointDefinition = {
@@ -342,14 +362,16 @@ class ButtonCell extends Component {
         promised_update.then(
             response => {
                 if (response.status !== 200) {
-                    console.log("logging");
-                    console.log(response);
-                    message.error("Something went wrong while updating the " + endpointName + " Endpoint!");
-                    hideMessage();
+                    this.props.changeMessage("error",
+                        "Something went wrong while updating the " + endpointName + " Endpoint!");
                     return;
                 }
-                message.success(endpointName + " Endpoint updated successfully!");
-                hideMessage();
+                this.props.changeMessage("success", "Endpoint " + endpointName + " updated successfully!");
+            }
+        ).catch(
+            error => {
+                console.error(error);
+                this.props.changeMessage("error", "Error occurred while trying to update the endpoint!");
             }
         );
     }
@@ -381,3 +403,70 @@ class ButtonCell extends Component {
     }
 }
 
+
+class MessageSection extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            type: this.props.type,
+            message: this.props.message,
+        };
+    }
+
+    getInfoMessage() {
+        return (
+            <div className="ed-message-info">
+                {this.state.message}
+            </div>
+        );
+    }
+
+    getSuccessMessage() {
+        return (
+            <div className="ed-message-success">
+                {this.state.message}
+            </div>
+        );
+    }
+
+    getErrorMessage() {
+        return (
+            <div className="ed-message-error">
+                {this.state.message}
+            </div>
+        );
+    }
+
+    getLoadingMessage() {
+        return (
+            <div>
+                {this.state.message}
+                <br />
+                <LinearProgress mode="query" />
+            </div>
+        );
+    }
+
+    componentWillReceiveProps(props) {
+        this.setState({
+            type: props.type,
+            message: props.message
+        });
+    }
+
+    render() {
+        let type = this.state.type;
+
+        if (type === "info") {
+            return this.getInfoMessage();
+        } else if (type === "success") {
+            return this.getSuccessMessage();
+        } else if (type === "error") {
+            return this.getErrorMessage();
+        } else if (type === "loading") {
+            return this.getLoadingMessage();
+        } else {
+            return (<div></div>);
+        }
+    }
+}
