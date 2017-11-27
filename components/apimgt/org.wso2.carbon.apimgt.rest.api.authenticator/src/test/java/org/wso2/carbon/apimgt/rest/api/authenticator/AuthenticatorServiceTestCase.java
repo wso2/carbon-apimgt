@@ -24,6 +24,7 @@ import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.dao.SystemApplicationDao;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
@@ -41,6 +42,8 @@ public class AuthenticatorServiceTestCase {
     public void testGetAuthenticationConfigurations() throws Exception {
         // Happy Path - 200
         //// Mocked response object from DCR api
+        SystemApplicationDao systemApplicationDao = Mockito.mock(SystemApplicationDao.class);
+        Mockito.when(systemApplicationDao.isConsumerKeyExistForApplication("store")).thenReturn(false);
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         oAuthApplicationInfo.setClientId("xxx-client-id-xxx");
         oAuthApplicationInfo.setCallBackURL("https://localhost/9292/login/callback/store");
@@ -50,12 +53,13 @@ public class AuthenticatorServiceTestCase {
         String scopes = "apim:subscribe openid";
         oAuthData.addProperty(KeyManagerConstants.OAUTH_CLIENT_ID, oAuthApplicationInfo.getClientId());
         oAuthData.addProperty(KeyManagerConstants.OAUTH_CALLBACK_URIS, oAuthApplicationInfo.getCallBackURL());
-        oAuthData.addProperty(KeyManagerConstants.TOKEN_SCOPES , scopes);
+        oAuthData.addProperty(KeyManagerConstants.TOKEN_SCOPES, scopes);
         oAuthData.addProperty(KeyManagerConstants.AUTHORIZATION_ENDPOINT, "https://localhost:9443/oauth2/authorize");
-        oAuthData.addProperty(AuthenticatorConstants.SSO_ENABLED, ServiceReferenceHolder.getInstance().getAPIMAppConfiguration().isSsoEnabled());
+        oAuthData.addProperty(AuthenticatorConstants.SSO_ENABLED, ServiceReferenceHolder.getInstance()
+                .getAPIMAppConfiguration().isSsoEnabled());
 
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager);
+        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
 
         //// Get data object to be passed to the front-end
         Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(oAuthApplicationInfo);
@@ -81,6 +85,8 @@ public class AuthenticatorServiceTestCase {
     public void testGetAuthenticationConfigurationsForPublisher() throws Exception {
         // Happy Path - 200
         //// Mocked response object from DCR api
+        SystemApplicationDao systemApplicationDao = Mockito.mock(SystemApplicationDao.class);
+        Mockito.when(systemApplicationDao.isConsumerKeyExistForApplication("store")).thenReturn(false);
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         oAuthApplicationInfo.setClientId("xxx-client-id-xxx");
         oAuthApplicationInfo.setCallBackURL("https://localhost/9292/login/callback/publisher");
@@ -97,7 +103,7 @@ public class AuthenticatorServiceTestCase {
                 ServiceReferenceHolder.getInstance().getAPIMAppConfiguration().isSsoEnabled());
 
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager);
+        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
 
         //// Get data object to be passed to the front-end
         Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(oAuthApplicationInfo);
@@ -138,13 +144,16 @@ public class AuthenticatorServiceTestCase {
         tokenInfo.setValidityPeriod(-2L);
 
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager);
+        SystemApplicationDao systemApplicationDao = Mockito.mock(SystemApplicationDao.class);
+        Mockito.when(systemApplicationDao.isConsumerKeyExistForApplication("store")).thenReturn(false);
+        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
         Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(oAuthApplicationInfo);
 
         //// Actual response - When authorization code is not null
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
-        AccessTokenInfo tokenInfoResponseForValidAuthCode = authenticatorService.getTokens("store", "https://localhost:9292/auth/callback/store?code=xxx-auth-code-xxx&session_state=xxx-session-state-xxx", "authorization_code",
-                null, null, null, 0);
+        AccessTokenInfo tokenInfoResponseForValidAuthCode = authenticatorService.getTokens("store",
+                "https://localhost:9292/auth/callback/store?code=xxx-auth-code-xxx&session_state=xxx-session-state" +
+                        "-xxx", "authorization_code", null, null, null, 0);
         Assert.assertEquals(tokenInfoResponseForValidAuthCode, tokenInfo);
 
         // Error Path - 500 - Authorization code grant type
@@ -153,7 +162,9 @@ public class AuthenticatorServiceTestCase {
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(emptyTokenInfo);
         AccessTokenInfo tokenInfoResponseForInvalidAuthCode = new AccessTokenInfo();
         try {
-            tokenInfoResponseForInvalidAuthCode = authenticatorService.getTokens("store", "https://localhost:9292/auth/callback/store?error=access_denied&session_state=xxx-session-state-xxx", "authorization_code",
+            tokenInfoResponseForInvalidAuthCode = authenticatorService.getTokens("store",
+                    "https://localhost:9292/auth/callback/store?error=access_denied&session_state=xxx-session-state" +
+                            "-xxx", "authorization_code",
                     null, null, null, 0);
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "No Authorization Code available.");
@@ -185,7 +196,8 @@ public class AuthenticatorServiceTestCase {
         // Happy Path
         //// AccessTokenInfo object
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
-        accessTokenInfo.setIdToken("eyJ4NXQiOiJObUptT0dVeE16WmxZak0yWkRSaE5UWmxZVEExWXpkaFpUUmlPV0UwTldJMk0ySm1PVGMxWkEiLCJraWQiOiJkMGVjNTE0YTMyYjZmODhjMGFiZDEyYTI4NDA2OTliZGQzZGViYTlkIiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiWGg3bFZpSDZDS2pZLXRIT09JaWN5QSIsInN1YiI6ImFkbWluIiwiYXVkIjpbInR6NlJGQnhzdV93Z0RCd3FyUThvVmo3d25FTWEiXSwiYXpwIjoidHo2UkZCeHN1X3dnREJ3cXJROG9Wajd3bkVNYSIsImF1dGhfdGltZSI6MTUwMTczMzQ1NiwiaXNzIjoiaHR0cHM6XC9cL2xvY2FsaG9zdDo5NDQzXC9vYXV0aDJcL3Rva2VuIiwiZXhwIjoxNTAxNzM3MDU3LCJpYXQiOjE1MDE3MzM0NTd9.XXX-XXX");
+        accessTokenInfo.setIdToken
+                ("eyJ4NXQiOiJObUptT0dVeE16WmxZak0yWkRSaE5UWmxZVEExWXpkaFpUUmlPV0UwTldJMk0ySm1PVGMxWkEiLCJraWQiOiJkMGVjNTE0YTMyYjZmODhjMGFiZDEyYTI4NDA2OTliZGQzZGViYTlkIiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiWGg3bFZpSDZDS2pZLXRIT09JaWN5QSIsInN1YiI6ImFkbWluIiwiYXVkIjpbInR6NlJGQnhzdV93Z0RCd3FyUThvVmo3d25FTWEiXSwiYXpwIjoidHo2UkZCeHN1X3dnREJ3cXJROG9Wajd3bkVNYSIsImF1dGhfdGltZSI6MTUwMTczMzQ1NiwiaXNzIjoiaHR0cHM6XC9cL2xvY2FsaG9zdDo5NDQzXC9vYXV0aDJcL3Rva2VuIiwiZXhwIjoxNTAxNzM3MDU3LCJpYXQiOjE1MDE3MzM0NTd9.XXX-XXX");
         accessTokenInfo.setValidityPeriod(-2L);
         accessTokenInfo.setScopes("apim:subscribe openid");
 
@@ -199,12 +211,14 @@ public class AuthenticatorServiceTestCase {
         expectedAuthResponseBean.setIdToken(accessTokenInfo.getIdToken());
 
         KeyManager keyManager = Mockito.mock(KeyManager.class);
-        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager);
+        SystemApplicationDao systemApplicationDao = Mockito.mock(SystemApplicationDao.class);
+        Mockito.when(systemApplicationDao.isConsumerKeyExistForApplication("store")).thenReturn(false);
+        AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
 
         //// Actual response
         AuthResponseBean authResponseBean = new AuthResponseBean();
         authResponseBean = authenticatorService.setAccessTokenData(authResponseBean, accessTokenInfo);
-        Assert.assertTrue(EqualsBuilder.reflectionEquals(expectedAuthResponseBean,authResponseBean));
+        Assert.assertTrue(EqualsBuilder.reflectionEquals(expectedAuthResponseBean, authResponseBean));
 
         // Happy Path - When id token is null
         //// AccessTokenInfo object with null id token

@@ -204,7 +204,8 @@ public enum ExceptionCodes implements ErrorHandler {
     BLOCK_CONDITION_UNSUPPORTED_API_CONTEXT(900977, "Block Condition Error", 400, "API Context does not exist"),
     BLOCK_CONDITION_UNSUPPORTED_APP_ID_NAME(900978, "Block Condition Error", 400, "Application ID or Name does not " +
             "exist"),
-    BLOCK_CONDITION_ALREADY_EXISTS(900979, "The Block Condition exists.", 409, " The Block Condition already exists");
+    BLOCK_CONDITION_ALREADY_EXISTS(900979, "The Block Condition exists.", 409, " The Block Condition already exists"),
+    SYSTEM_APP_NOT_FOUND(900980, "System Application not found", 409, "System Application not found");
 
     private final long errorCode;
     private final String errorMessage;

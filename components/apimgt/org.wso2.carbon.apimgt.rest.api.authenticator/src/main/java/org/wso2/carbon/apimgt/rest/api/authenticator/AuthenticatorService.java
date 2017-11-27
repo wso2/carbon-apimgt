@@ -25,7 +25,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.dao.SystemApplicationDao;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
@@ -57,13 +60,15 @@ public class AuthenticatorService {
     private static final Logger log = LoggerFactory.getLogger(AuthenticatorAPI.class);
 
     private KeyManager keyManager;
+    private SystemApplicationDao systemApplicationDao;
 
     /**
      * Constructor.
      * @param keyManager KeyManager object
      */
-    public AuthenticatorService(KeyManager keyManager) {
+    public AuthenticatorService(KeyManager keyManager,SystemApplicationDao systemApplicationDao) {
         this.keyManager = keyManager;
+        this.systemApplicationDao = systemApplicationDao;
     }
 
     /**
@@ -312,8 +317,16 @@ public class AuthenticatorService {
             // This value is not related to DCR application creation.
             OAuthAppRequest oAuthAppRequest = new OAuthAppRequest(clientName,
                     callBackURL, AuthenticatorConstants.APPLICATION_KEY_TYPE, grantTypes);
-            oAuthApplicationInfo = getKeyManager().createApplication(oAuthAppRequest);
-        } catch (KeyManagementException e) {
+            if (systemApplicationDao.isConsumerKeyExistForApplication(clientName)) {
+                String consumerKey = systemApplicationDao.getConsumerKeyForApplication(clientName);
+                oAuthApplicationInfo = getKeyManager().retrieveApplication(consumerKey);
+            } else {
+                oAuthApplicationInfo = getKeyManager().createApplication(oAuthAppRequest);
+                if (oAuthApplicationInfo != null){
+                    systemApplicationDao.addApplicationKey(clientName, oAuthApplicationInfo.getClientId());
+                }
+            }
+        } catch (KeyManagementException | APIMgtDAOException e) {
             String errorMsg = "Error while creating the keys for OAuth application : " + clientName;
             log.error(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
             throw new APIManagementException(errorMsg, e, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);

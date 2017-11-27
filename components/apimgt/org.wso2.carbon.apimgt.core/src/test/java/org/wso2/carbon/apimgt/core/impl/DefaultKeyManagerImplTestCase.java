@@ -31,7 +31,6 @@ import org.wso2.carbon.apimgt.core.auth.dto.DCRClientInfo;
 import org.wso2.carbon.apimgt.core.auth.dto.OAuth2IntrospectionResponse;
 import org.wso2.carbon.apimgt.core.auth.dto.OAuth2TokenInfo;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
-import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
@@ -68,16 +67,20 @@ public class DefaultKeyManagerImplTestCase {
         dcrClientInfo.setClientName(oauthAppRequest.getClientName() + '_' + oauthAppRequest.getKeyType());
         dcrClientInfo.setGrantTypes(oauthAppRequest.getGrantTypes());
         dcrClientInfo.addCallbackUrl(oauthAppRequest.getCallBackURL());
+/*
         dcrClientInfo.setUserinfoSignedResponseAlg(ServiceReferenceHolder.getInstance().getAPIMConfiguration()
                 .getKeyManagerConfigs().getOidcUserinfoJWTSigningAlgo());
+*/
 
         ////mocked response object from dcr api
         DCRClientInfo dcrClientInfoResponse = new DCRClientInfo();
         dcrClientInfoResponse.setClientName(oauthAppRequest.getClientName());
         dcrClientInfoResponse.setGrantTypes(oauthAppRequest.getGrantTypes());
         dcrClientInfoResponse.addCallbackUrl(oauthAppRequest.getCallBackURL());
+/*
         dcrClientInfoResponse.setUserinfoSignedResponseAlg(ServiceReferenceHolder.getInstance().getAPIMConfiguration()
                 .getKeyManagerConfigs().getOidcUserinfoJWTSigningAlgo());
+*/
         dcrClientInfoResponse.setClientId("xxx-xxx-xxx-xxx");
         dcrClientInfoResponse.setClientSecret("yyy-yyy-yyy-yyy");
         dcrClientInfoResponse.setClientIdIssuedAt("now");
@@ -159,8 +162,10 @@ public class DefaultKeyManagerImplTestCase {
         dcrClientInfo.setClientName(oAuthApplicationInfo.getClientName());
         dcrClientInfo.setGrantTypes(oAuthApplicationInfo.getGrantTypes());
         dcrClientInfo.addCallbackUrl(oAuthApplicationInfo.getCallBackURL());
+/*
         dcrClientInfo.setUserinfoSignedResponseAlg(ServiceReferenceHolder.getInstance().getAPIMConfiguration()
                 .getKeyManagerConfigs().getOidcUserinfoJWTSigningAlgo());
+*/
         dcrClientInfo.setClientId(oAuthApplicationInfo.getClientId());
         dcrClientInfo.setClientSecret(oAuthApplicationInfo.getClientSecret());
 
