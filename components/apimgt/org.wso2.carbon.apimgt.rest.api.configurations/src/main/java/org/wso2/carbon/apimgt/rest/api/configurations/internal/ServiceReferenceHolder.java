@@ -20,11 +20,9 @@ package org.wso2.carbon.apimgt.rest.api.configurations.internal;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.rest.api.configurations.models.EnvironmentConfigurations;
+import org.wso2.carbon.apimgt.rest.api.configurations.models.APIMUIConfigurations;
 import org.wso2.carbon.config.ConfigurationException;
 import org.wso2.carbon.config.provider.ConfigProvider;
-
-import java.util.Map;
 
 /**
  * Class used to hold the APIM store/publisher configurations.
@@ -33,7 +31,7 @@ public class ServiceReferenceHolder {
     private static final Logger log = LoggerFactory.getLogger(ServiceReferenceHolder.class);
     private static ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private ConfigProvider configProvider;
-    private EnvironmentConfigurations environmentConfigurations = null;
+    private APIMUIConfigurations apimUIConfigurations = null;
 
     private ServiceReferenceHolder() {
     }
@@ -46,10 +44,10 @@ public class ServiceReferenceHolder {
         this.configProvider = configProvider;
     }
 
-    public EnvironmentConfigurations getEnvironmentConfigurations() {
+    public APIMUIConfigurations getApimUIConfigurations() {
         try {
             if (configProvider != null) {
-                environmentConfigurations = configProvider.getConfigurationObject(EnvironmentConfigurations.class);
+                apimUIConfigurations = configProvider.getConfigurationObject(APIMUIConfigurations.class);
             } else {
                 log.error("Configuration provider is null");
             }
@@ -57,11 +55,11 @@ public class ServiceReferenceHolder {
             log.error("Error getting config : org.wso2.carbon.apimgt.rest.api.configurations.models.EnvironmentConfigurations", e);
         }
 
-        if (environmentConfigurations == null) {
-            environmentConfigurations = new EnvironmentConfigurations();
+        if (apimUIConfigurations == null) {
+            apimUIConfigurations = new APIMUIConfigurations();
             log.info("Setting default configurations...");
         }
 
-        return environmentConfigurations;
+        return apimUIConfigurations;
     }
 }

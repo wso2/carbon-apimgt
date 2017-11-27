@@ -47,7 +47,7 @@ const config = {
             }
         ]
     },
-    //TODO[rnk] remove this after swagger-js issue fixed
+    //TODO: [rnk] remove this after swagger-js issue fixed
     externals: {
         "swagger-client": 'SwaggerClient'
     }

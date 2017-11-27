@@ -16,56 +16,42 @@
 
 package org.wso2.carbon.apimgt.rest.api.configurations.models;
 
-
-import org.wso2.carbon.apimgt.rest.api.configurations.constants.ConfigurationConstants;
-import org.wso2.carbon.apimgt.rest.api.configurations.models.elements.Environment;
 import org.wso2.carbon.config.annotation.Configuration;
 import org.wso2.carbon.config.annotation.Element;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
- * Class to hold Environment configuration parameters
+ * Class to hold environment configurations
  */
-@Configuration(namespace = "wso2.carbon.apimgt.environments", description = "Environment Configurations")
+@Configuration(description = "environment and key management configurations")
 public class EnvironmentConfigurations {
 
-    @Element(description = "list of web clients (eg: 127.0.0.1:9292) to allow make requests to current environment\n" +
-            "(use '" +ConfigurationConstants.ALL_ORIGINS + "' to allow any web client)")
-    private List<String> clientHosts = Arrays.asList(new String[]{ConfigurationConstants.ALL_ORIGINS});
+    private String host = "";
 
-    //Unique name for environment to set cookies by backend
-    @Element(description = "current environment's label from the list of environments")
-    private String environmentLabel = "Default";
+    private String loginTokenPath = "/login/token";
 
-    @Element(description = "list of environments\n" +
-            "  ◆ host           - host of a environment (eg 127.0.0.1:9292, use '<empty-string>' for current host)\n" +
-            "  ◆ loginTokenPath - token endpoint URL\n" +
-            "  ◆ label          - environment label to uniquely identify a environment")
-    private List<Environment> environments = Arrays.asList(new Environment());
+    private String label = "Default";
 
-    public List<String> getClientHosts() {
-        return clientHosts;
+    public String getHost() {
+        return host;
     }
 
-    public void setClientHosts(List<String> clientHosts) {
-        this.clientHosts = clientHosts;
+    public void setHost(String host) {
+        this.host = host;
     }
 
-    public String getEnvironmentLabel() {
-        return environmentLabel;
+    public String getLoginTokenPath() {
+        return loginTokenPath;
     }
 
-    public void setEnvironmentLabel(String environmentLabel) {
-        this.environmentLabel = environmentLabel;
+    public void setLoginTokenPath(String loginTokenPath) {
+        this.loginTokenPath = loginTokenPath;
     }
 
-    public List<Environment> getEnvironments() {
-        return environments;
+    public String getLabel() {
+        return label;
     }
 
-    public void setEnvironments(List<Environment> environments) {
-        this.environments = environments;
+    public void setLabel(String label) {
+        this.label = label;
     }
 }

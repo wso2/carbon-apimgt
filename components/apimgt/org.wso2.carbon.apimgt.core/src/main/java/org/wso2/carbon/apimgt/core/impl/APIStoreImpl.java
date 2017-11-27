@@ -1099,7 +1099,8 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 // TODO: currently only HTTPS endpoint considered. Websocket APIs and http transport should considered
                 endpointDTO.setTransportType(APIMgtConstants.HTTPS);
                 // TODO: replace host with gateway domain host
-                String endpointUrl = APIMgtConstants.HTTPS + "://" + config.getHostname() + "/" + api.getContext()
+                String endpointUrl = APIMgtConstants.HTTPS + APIMgtConstants.WEB_PROTOCOL_SUFFIX +
+                        config.getHostname() + "/" + api.getContext()
                         + "/" + api.getVersion();
                 endpointDTO.setEndpointUrl(endpointUrl);
                 endpointDTOs.add(endpointDTO);

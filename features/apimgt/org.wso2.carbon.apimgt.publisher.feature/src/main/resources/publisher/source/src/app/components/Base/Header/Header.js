@@ -96,7 +96,7 @@ class Header extends React.Component {
 
     handleEnvironmentChange = event => {
         this.setState({ openEnvironmentMenu: false });
-        //TODO[rnk] Render all
+        //TODO: [rnk] Render all
         let environmentId = parseInt(event.target.id);
         this.setState({environmentId});
         Utils.setEnvironment(this.state.environments[environmentId]);

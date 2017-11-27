@@ -19,9 +19,7 @@
 package org.wso2.carbon.apimgt.rest.api.configurations;
 
 import org.osgi.service.component.annotations.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.rest.api.configurations.models.EnvironmentConfigurations;
+import org.wso2.carbon.apimgt.rest.api.configurations.models.APIMUIConfigurations;
 import org.wso2.carbon.apimgt.rest.api.configurations.utils.bean.EnvironmentConfigBean;
 import org.wso2.msf4j.Microservice;
 
@@ -39,10 +37,8 @@ import javax.ws.rs.core.Response;
         service = Microservice.class,
         immediate = true
 )
-@Path("/configService") //TODO[rnk] change url :Design Review
+@Path("/configService") //TODO: [rnk] change url :Design Review
 public class ConfigurationsAPI implements Microservice {
-
-    private static final Logger log = LoggerFactory.getLogger(ConfigurationsAPI.class);
 
     /**
      * Get environment configurations from deployement.yaml and returns the list of environments
@@ -53,10 +49,10 @@ public class ConfigurationsAPI implements Microservice {
     @Path("/environments")
     @Produces(MediaType.APPLICATION_JSON)
     public Response environments() {
-        EnvironmentConfigurations environmentConfigurations = ConfigurationService.getInstance().getEnvironmentConfigurations();
+        APIMUIConfigurations apimUIConfigurations = ConfigurationService.getInstance().getApimUIConfigurations();
 
         EnvironmentConfigBean environmentConfigBean = new EnvironmentConfigBean();
-        environmentConfigBean.setEnvironments(environmentConfigurations.getEnvironments());
+        environmentConfigBean.setEnvironments(apimUIConfigurations.getEnvironments());
 
         return Response.ok(environmentConfigBean, MediaType.APPLICATION_JSON).build();
     }

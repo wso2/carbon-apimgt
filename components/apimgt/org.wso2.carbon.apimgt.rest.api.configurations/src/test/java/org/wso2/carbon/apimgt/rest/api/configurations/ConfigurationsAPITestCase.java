@@ -26,7 +26,7 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.models.WorkflowConfig;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExtensionsConfigBuilder;
 import org.wso2.carbon.apimgt.rest.api.configurations.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.rest.api.configurations.models.elements.Environment;
+import org.wso2.carbon.apimgt.rest.api.configurations.models.APIMUIConfigurations;
 import org.wso2.carbon.apimgt.rest.api.configurations.models.EnvironmentConfigurations;
 import org.wso2.carbon.apimgt.rest.api.configurations.utils.bean.EnvironmentConfigBean;
 import org.wso2.carbon.config.ConfigurationException;
@@ -38,7 +38,7 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 
 public class ConfigurationsAPITestCase {
-    private List<Environment> sampleEnvironments;
+    private List<EnvironmentConfigurations> sampleEnvironments;
 
     @BeforeTest
     public void setup() throws Exception {
@@ -77,10 +77,8 @@ public class ConfigurationsAPITestCase {
         Assert.assertFalse(environmentConfigBean.getEnvironments().get(0).getLoginTokenPath().isEmpty());
 
         ////Custom configurations
-        EnvironmentConfigurations environmentConfigurations = ConfigurationService.getInstance().getEnvironmentConfigurations();
-        environmentConfigurations.setClientHosts(Arrays.asList(new String[]{"localhost:9292"}));
-        environmentConfigurations.setEnvironmentLabel("Development");
-        environmentConfigurations.setEnvironments(getSampleEnvironments());
+        APIMUIConfigurations apimUIConfigurations = ConfigurationService.getInstance().getApimUIConfigurations();
+        apimUIConfigurations.setEnvironments(getSampleEnvironments());
 
         response = configurationsAPI.environments();
         environmentConfigBean = (EnvironmentConfigBean) response.getEntity();
@@ -100,27 +98,27 @@ public class ConfigurationsAPITestCase {
      *
      * @return List of mocked environments
      */
-    private List<Environment> getSampleEnvironments() {
+    private List<EnvironmentConfigurations> getSampleEnvironments() {
         if (sampleEnvironments != null) {
             return sampleEnvironments;
         }
 
-        //Sample values for environments
+        //Sample values for environmentConfigurations
         String[] labels = {"Development", "Production", "Staged"};
         String[] hosts = {"dev.sample.com:9292", "prod.sample.com:9292", "staged.sample.com:9292"};
         String loginTokenPath = "/login/token";
 
-        //Sample environments with sample values
-        Environment[] environments = new Environment[labels.length];
-        for (int i = 0; i < environments.length; i++) {
-            Environment environment = new Environment();
-            environment.setHost(hosts[i]);
-            environment.setLabel(labels[i]);
-            environment.setLoginTokenPath(loginTokenPath);
-            environments[i] = environment;
+        //Sample environmentConfigurations with sample values
+        EnvironmentConfigurations[] environmentConfigurations = new EnvironmentConfigurations[labels.length];
+        for (int i = 0; i < environmentConfigurations.length; i++) {
+            EnvironmentConfigurations environmentConfiguration = new EnvironmentConfigurations();
+            environmentConfiguration.setHost(hosts[i]);
+            environmentConfiguration.setLabel(labels[i]);
+            environmentConfiguration.setLoginTokenPath(loginTokenPath);
+            environmentConfigurations[i] = environmentConfiguration;
         }
 
-        sampleEnvironments = Arrays.asList(environments);
+        sampleEnvironments = Arrays.asList(environmentConfigurations);
         return sampleEnvironments;
     }
 }

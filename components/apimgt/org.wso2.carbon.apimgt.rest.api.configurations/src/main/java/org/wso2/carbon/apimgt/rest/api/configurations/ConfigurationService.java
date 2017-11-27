@@ -17,34 +17,24 @@
 package org.wso2.carbon.apimgt.rest.api.configurations;
 
 import org.wso2.carbon.apimgt.rest.api.configurations.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.rest.api.configurations.models.EnvironmentConfigurations;
-
-import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.configurations.models.APIMUIConfigurations;
 
 /**
  * Service class for get configurations
  */
 public class ConfigurationService {
     private static ConfigurationService instance = new ConfigurationService();
-    private EnvironmentConfigurations environmentConfigurations;
+    private APIMUIConfigurations apimUIConfigurations;
 
     private ConfigurationService() {
-        environmentConfigurations = ServiceReferenceHolder.getInstance().getEnvironmentConfigurations();
+        apimUIConfigurations = ServiceReferenceHolder.getInstance().getApimUIConfigurations();
     }
 
     public static ConfigurationService getInstance() {
         return instance;
     }
 
-    public static String getEnvironmentLabel(){
-        return getInstance().getEnvironmentConfigurations().getEnvironmentLabel();
-    }
-
-    public static List<String> getClientHosts(){
-        return getInstance().getEnvironmentConfigurations().getClientHosts();
-    }
-
-    public EnvironmentConfigurations getEnvironmentConfigurations() {
-        return environmentConfigurations;
+    public APIMUIConfigurations getApimUIConfigurations() {
+        return apimUIConfigurations;
     }
 }

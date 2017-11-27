@@ -96,7 +96,7 @@ public class APIMWSDLUtils {
         if (endpoints.size() > 0) {
             for (String ep : endpoints) {
                 URL url = new URL(ep);
-                if ("https".equalsIgnoreCase(url.getProtocol())) {
+                if (APIMgtConstants.HTTPS.equalsIgnoreCase(url.getProtocol())) {
                     return ep;
                 }
             }

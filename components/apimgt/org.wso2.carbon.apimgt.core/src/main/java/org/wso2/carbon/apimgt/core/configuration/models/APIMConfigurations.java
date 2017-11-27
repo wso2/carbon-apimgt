@@ -64,7 +64,6 @@ public class APIMConfigurations {
     @Element(description = "Notification Configurations")
     private NotificationConfigurations notificationConfigurations = new NotificationConfigurations();
 
-
     @Element(description = "JWT Configurations")
     private JWTConfigurations jwtConfigurations = new JWTConfigurations();
 
@@ -90,6 +89,9 @@ public class APIMConfigurations {
     private List<String> wsdlProcessors = Arrays.asList(
             "org.wso2.carbon.apimgt.core.impl.WSDL11ProcessorImpl",
             "org.wso2.carbon.apimgt.core.impl.WSDL20ProcessorImpl");
+
+    @Element(description = "Environment Configurations")
+    private EnvironmentConfigurations environmentConfigurations = new EnvironmentConfigurations();
 
     @Element(description = "SDK Generation Language Configurations")
     private SdkLanguageConfigurations sdkLanguageConfigurations = new SdkLanguageConfigurations();
@@ -249,7 +251,6 @@ public class APIMConfigurations {
         this.commentModeratorRole = commentModeratorRole;
     }
 
-
     public int getCommentMaxLength() {
         return commentMaxLength;
     }
@@ -272,5 +273,13 @@ public class APIMConfigurations {
 
     public void setWsdlProcessors(List<String> wsdlProcessors) {
         this.wsdlProcessors = wsdlProcessors;
+    }
+
+    public EnvironmentConfigurations getEnvironmentConfigurations() {
+        return environmentConfigurations;
+    }
+
+    public void setEnvironmentConfigurations(EnvironmentConfigurations environmentConfigurations) {
+        this.environmentConfigurations = environmentConfigurations;
     }
 }
