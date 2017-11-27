@@ -1,7 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.store.utils;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -10,15 +8,15 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
-import org.wso2.carbon.apimgt.core.dao.impl.ApplicationDAOImpl;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.impl.APIStoreImpl;
 import org.wso2.carbon.apimgt.core.models.Application;
-import org.wso2.carbon.apimgt.core.workflow.Workflow;
-
 
 import java.util.UUID;
 
@@ -28,65 +26,62 @@ public class ApplicationImportExportManagerTestCase {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationImportExportManagerTestCase.class);
 
-    APIStore consumer = Mockito.mock(APIStoreImpl.class);
+    APIStore apiStore = Mockito.mock(APIStoreImpl.class);
     String USER = "admin";
-    @Before
-    public void setUp() throws Exception {
-
-    }
-
-    @After
-    public void tearDown() throws Exception {
-    }
+    ApplicationImportExportManager applicationImportExportManager = new ApplicationImportExportManager(apiStore);
 
     @Test
     public void testGetApplicationDetails() throws Exception {
         printTestMethodName();
+        Application testApp = Mockito.mock(Application.class);
         String appId = UUID.randomUUID().toString();
-        ApplicationImportExportManager applicationImportExportManager = new ApplicationImportExportManager(consumer);
-        applicationImportExportManager.getApplicationDetails(appId, USER);
+        Mockito.when(apiStore.getApplication(appId, USER)).thenReturn(testApp);
+        testApp = applicationImportExportManager.getApplicationDetails(appId, USER);
+        Assert.assertNotNull(testApp);
     }
 
-    /*@Test
-    public void updateApplication() throws Exception {
+    @Test
+    public void testGetApplicationDetailsNotFound() throws Exception {
         printTestMethodName();
-        ApplicationImportExportManager applicationImportExportManager = new ApplicationImportExportManager(consumer);
-        //String appId = UUID.randomUUID().toString();
-        //Application importedApp = applicationImportExportManager.getApplicationDetails(appId, USER);
-        Application importedApp = Mockito.mock(Application.class);
+        Application testApp = Mockito.mock(Application.class);
+        Mockito.when(apiStore.getApplication("", USER)).thenReturn(null);
+        testApp = applicationImportExportManager.getApplicationDetails("", USER);
+        Assert.assertEquals(testApp, null);
+    }
+
+    @Test
+    public void testUpdateApplication() throws Exception {
+        printTestMethodName();
+        Application testApp = Mockito.mock(Application.class);
         PowerMockito.mockStatic(DAOFactory.class);
         ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
         PowerMockito.when(DAOFactory.getApplicationDAO()).thenReturn(applicationDAO);
         PowerMockito.when(applicationDAO.isApplicationNameExists(Mockito.anyString())).thenReturn(true);
-        APIStoreImpl apiStore =Mockito.mock(APIStoreImpl.class);
+        Mockito.when(apiStore.getApplicationByName(testApp.getName(), USER)).thenReturn(testApp);
         WorkflowResponse workflowResponse = Mockito.mock(WorkflowResponse.class);
-        Mockito.when(apiStore.updateApplication(Mockito.anyString(), importedApp)).thenReturn(workflowResponse);
-        applicationImportExportManager.updateApplication(importedApp, USER);
-        //Application importApp = Mockito.mock(Application.class);
-        applicationImportExportManager.updateApplication(importedApp, USER);
-        //check for a non-existing application
-        //Assert.assertFalse(applicationDAO.isApplicationNameExists("ExistingApp"));
-
+        Mockito.when(apiStore.updateApplication(testApp.getUuid(), testApp)).thenReturn(workflowResponse);
+        Mockito.when(apiStore.getApplication(testApp.getUuid(), USER)).thenReturn(testApp);
+        testApp = applicationImportExportManager.updateApplication(testApp, USER);
+        Assert.assertNotNull(testApp);
     }
 
-    @Test
-    public void updateApplicationError() throws Exception {
+    @Test(expected = APIManagementException.class)
+    public void testUpdateApplicationError() throws Exception {
         printTestMethodName();
-        Application application =Mockito.mock(Application.class);
-
+        Application testApp = Mockito.mock(Application.class);
         PowerMockito.mockStatic(DAOFactory.class);
-        //ApplicationDAOImpl applicationDAO = Mockito.mock(ApplicationDAOImpl.class);
-        //Mockito.when(applicationDAO.isApplicationNameExists(Mockito.anyString())).thenReturn(true);
-       // ApplicationImportExportManager applicationImportExportManager = new ApplicationImportExportManager(consumer);
-        //applicationImportExportManager.updateApplication(application, USER);
-        PowerMockito.when(DAOFactory.getApplicationDAO().isApplicationNameExists(Mockito.anyString())).thenReturn(true);
+        ApplicationDAO applicationDAO = Mockito.mock(ApplicationDAO.class);
+        PowerMockito.when(DAOFactory.getApplicationDAO()).thenReturn(applicationDAO);
+        PowerMockito.when(applicationDAO.isApplicationNameExists(Mockito.anyString())).thenReturn(true);
+        Mockito.when(apiStore.getApplicationByName(testApp.getName(), USER)).thenReturn(testApp);
+        WorkflowResponse workflowResponse = Mockito.mock(WorkflowResponse.class);
+        Mockito.when(apiStore.updateApplication(testApp.getUuid(), testApp)).thenReturn(workflowResponse);
+        Mockito.when(apiStore.getApplication(testApp.getUuid(), USER)).thenThrow
+                (new APIMgtDAOException("Error occurred while finding application matching the provided name"));
+        applicationImportExportManager.updateApplication(testApp, USER);
+    }
 
-        //check for a non-existing application
-        //Assert.assertFalse(applicationDAO.isApplicationNameExists("ExistingApp"));
-    }*/
-
-
-    private static void printTestMethodName () {
+    private static void printTestMethodName() {
         log.info("------------------ Test method: " + Thread.currentThread().getStackTrace()[2].getMethodName() +
                 " ------------------");
     }

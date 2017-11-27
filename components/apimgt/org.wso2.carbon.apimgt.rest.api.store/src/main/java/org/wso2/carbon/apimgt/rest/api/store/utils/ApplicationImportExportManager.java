@@ -1,3 +1,22 @@
+/*
+ *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ *
+ */
+
 package org.wso2.carbon.apimgt.rest.api.store.utils;
 
 import org.slf4j.Logger;
@@ -18,24 +37,26 @@ public class ApplicationImportExportManager {
 
     private APIStore apiStore;
 
-    public ApplicationImportExportManager(APIStore apiStore) {this.apiStore = apiStore;}
+    public ApplicationImportExportManager(APIStore apiStore) {
+        this.apiStore = apiStore;
+    }
 
 
     /**
      * Retrieve all the details of an Application for a given search query.
      *
-     * @param query searchQuery
+     * @param query    searchQuery
      * @param username logged in user
      * @return {@link Application} instance
      * @throws APIManagementException if an error occurs while retrieving Application details
      */
     public Application getApplicationDetails(String query, String username) throws
-    APIManagementException {
+            APIManagementException {
         Application application = null;
         if (query == null || query.isEmpty()) {
             return application;
         } else {
-            application = apiStore.getApplication(query,username);
+            application = apiStore.getApplication(query, username);
         }
         return application;
     }
@@ -47,18 +68,19 @@ public class ApplicationImportExportManager {
      * @param username
      * @throws APIManagementException
      */
-    public void updateApplication (Application importedApplication, String username)
+    public Application updateApplication(Application importedApplication, String username)
             throws APIManagementException {
+        Application updatedApp = null;
         try {
-            if(getApplicationDAO().isApplicationNameExists(importedApplication.getName())){
+            if (getApplicationDAO().isApplicationNameExists(importedApplication.getName())) {
                 Application existingApplication = apiStore.getApplicationByName(importedApplication.getName(),
                         username);
                 apiStore.updateApplication(existingApplication.getUuid(), importedApplication);
-            }else {
-                log.error("No applications found matching the provided application name");
+                updatedApp = apiStore.getApplication(existingApplication.getUuid(), username);
             }
+            return updatedApp;
         } catch (APIMgtDAOException e) {
-            String errorMsg = "Error occurred while updating the application";
+            String errorMsg = "Error occurred while finding application matching the provided name";
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         }

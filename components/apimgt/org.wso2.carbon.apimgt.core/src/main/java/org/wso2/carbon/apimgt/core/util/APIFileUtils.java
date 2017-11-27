@@ -511,6 +511,7 @@ public class APIFileUtils {
             String errorMsg = "Error while writing archive file " + directoryToZip.getPath() + " to archive " +
                     archiveLocation;
             log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg);
         }
         if (log.isDebugEnabled()) {
             log.debug("Archived API generated successfully" + archiveName);

@@ -1,84 +1,60 @@
 package org.wso2.carbon.apimgt.rest.api.store.utils;
 
-
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.api.APIStore;
+import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.APIMgtEntityImportExportException;
 import org.wso2.carbon.apimgt.core.models.Application;
+import org.wso2.carbon.apimgt.core.util.APIFileUtils;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
-
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({Application.class, APIFileUtils.class})
 public class FileBasedApplicationImportExportManagerTestCase {
 
     private final static Logger log = LoggerFactory.getLogger(FileBasedApplicationImportExportManagerTestCase.class);
     private static String importExportRootDirectory = System.getProperty("java.io.tmpdir") + File.separator +
             "import-export-test";
-    private APIStore apiStore;
-    private static final String USER = "admin";
-    //private static String path =
+    private APIStore apiStore = Mockito.mock(APIStore.class);
 
 
-    @BeforeClass
-    protected void setUp() throws Exception {
-        //log.info("Test directory: " + importExportRootDirectory);
+    @Test(expected = APIMgtEntityImportExportException.class)
+    public void testExportApplicationErrorPath() throws Exception {
+        printTestMethodName();
+        Application testApp = Mockito.mock(Application.class);
+        FileBasedApplicationImportExportManager importExportManager = new FileBasedApplicationImportExportManager
+                (apiStore, "");
+        importExportManager.exportApplication(testApp, "exported-apps");
+    }
+
+    @Test(expected = APIMgtEntityImportExportException.class)
+    public void testCreateArchiveFromExportedAppArtifactsError() throws Exception {
+        printTestMethodName();
+        FileBasedApplicationImportExportManager importExportManager = new FileBasedApplicationImportExportManager
+                (apiStore, importExportRootDirectory);
+        importExportManager.createArchiveFromExportedAppArtifacts("testDir", "testLoc", "testName");
+    }
+
+    private static void printTestMethodName() {
+        log.info("------------------ Test method: " + Thread.currentThread().getStackTrace()[2].getMethodName() +
+                " ------------------");
     }
 
     @AfterClass
-    public void tearDown() throws Exception {
-    }
-
-    @Test
-    public void testImportExportApplication() throws Exception {
-        printTestMethodName();
-        APIStore apiStore = Mockito.mock(APIStore.class);
-        testExportApplication(importExportRootDirectory);
-        testImportApplication(importExportRootDirectory);
-
-    }
-
-    @Test
-    public void testExportApplication(String exportDir) throws Exception {
-       // Files.createDirectories(Path.);
-    }
-
-    @Test
-    public void testCreateArchiveFromExportedAppArtifacts() throws Exception {
-        /*Application application = Mockito.mock(Application.class);
-        apiStore = Mockito.mock(APIStore.class);
-        FileBasedApplicationImportExportManager importExportManager = new FileBasedApplicationImportExportManager
-                (apiStore, importExportRootDirectory);
-        String sourceDirectory = "exported-Apps";
-        String archiveLocation = importExportManager.exportApplication(application, sourceDirectory);
-        importExportManager.createArchiveFromExportedAppArtifacts(sourceDirectory, archiveLocation,
-                "exportedApp");*/
-    }
-
-    @Test
-    public void testImportApplication(String impportDir) throws Exception {
-    }
-
-    @Test
-    public void testParseApplicationFile() throws Exception {
-    }
-
-    @Test
-    public void testExportApplicationDetailsToFileSystem() throws Exception {
-    }
-
-    @Test
-    public void testExtractUploadedArchiveApplication() throws Exception {
-    }
-
-    private static void printTestMethodName () {
-        log.info("------------------ Test method: " + Thread.currentThread().getStackTrace()[2].getMethodName() +
-                " ------------------");
+    protected void tearDown() {
+        try {
+            APIFileUtils.deleteDirectory(importExportRootDirectory);
+        } catch (APIMgtDAOException e) {
+            log.warn("Unable to delete directory " + importExportRootDirectory);
+        }
     }
 
 }
