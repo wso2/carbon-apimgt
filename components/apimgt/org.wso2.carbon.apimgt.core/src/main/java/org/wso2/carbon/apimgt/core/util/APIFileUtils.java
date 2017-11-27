@@ -115,6 +115,7 @@ public class APIFileUtils {
         } catch (IOException e) {
             String msg = "Error while writing the object to the file path " + filePath;
             log.error(msg, e);
+            throw new APIMgtDAOException(msg, e);
         }
     }
 
@@ -378,6 +379,7 @@ public class APIFileUtils {
         } catch (IOException e) {
             String errorMsg = "Error in Creating archive from data.";
             log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
         }
 
     }
@@ -511,7 +513,7 @@ public class APIFileUtils {
             String errorMsg = "Error while writing archive file " + directoryToZip.getPath() + " to archive " +
                     archiveLocation;
             log.error(errorMsg, e);
-            throw new APIMgtDAOException(errorMsg);
+            throw new APIMgtDAOException(errorMsg, e);
         }
         if (log.isDebugEnabled()) {
             log.debug("Archived API generated successfully" + archiveName);
@@ -535,6 +537,7 @@ public class APIFileUtils {
         } catch (IOException e) {
             String errorMsg = "Error while listing directories under " + path;
             log.error(errorMsg, e);
+            throw new APIMgtDAOException(errorMsg, e);
         }
         return directoryNames;
     }
