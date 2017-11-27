@@ -24,6 +24,8 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.dao.SystemApplicationDao;
+import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
@@ -84,7 +86,8 @@ public class AuthenticatorAPI implements Microservice {
             @FormDataParam ("remember_me") boolean isRememberMe, @FormDataParam ("scopes") String scopesList) {
         try {
             KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
-            AuthenticatorService authenticatorService = new AuthenticatorService(keyManager);
+            SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
+            AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
             AuthResponseBean authResponseBean = new AuthResponseBean();
             String appContext = "/" + appName;
             String restAPIContext;
@@ -184,7 +187,8 @@ public class AuthenticatorAPI implements Microservice {
         if (accessToken != null) {
             try {
                 KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
-                AuthenticatorService authenticatorService = new AuthenticatorService(keyManager);
+                SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
+                AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
                 authenticatorService.revokeAccessToken(appContext.substring(1), accessToken);
                 // Lets invalidate all the cookies saved.
                 NewCookie appContextCookie = AuthUtil
@@ -225,7 +229,8 @@ public class AuthenticatorAPI implements Microservice {
     public Response redirect(@Context Request request, @PathParam("appName") String appName) {
         try {
             KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
-            AuthenticatorService authenticatorService = new AuthenticatorService(keyManager);
+            SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
+            AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
             JsonObject oAuthData = authenticatorService.getAuthenticationConfigurations(appName);
             if (oAuthData.size() == 0) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -265,7 +270,8 @@ public class AuthenticatorAPI implements Microservice {
         String grantType = KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE;
         try {
             KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
-            AuthenticatorService authenticatorService = new AuthenticatorService(keyManager);
+            SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
+            AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
             AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appName, requestURL, grantType,
                     null, null, null, 0);
             if (StringUtils.isEmpty(accessTokenInfo.toString())) {

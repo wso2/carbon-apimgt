@@ -30,7 +30,7 @@ public class KeyMgtConfigurations {
     @Element(description = "Key Manager Implementation class")
     private String keyManagerImplClass = "org.wso2.carbon.apimgt.core.impl.DefaultKeyManagerImpl";
     @Element(description = "DCR Endpoint URL")
-    private String dcrEndpoint = "https://localhost:9443/identity/connect/register";
+    private String dcrEndpoint = "https://localhost:9443/api/identity/oauth2/dcr/v1.0/register";
     @Element(description = "Token Endpoint URL")
     private String tokenEndpoint = "https://localhost:9443/oauth2/token";
     @Element(description = "Revoke Endpoint URL")
