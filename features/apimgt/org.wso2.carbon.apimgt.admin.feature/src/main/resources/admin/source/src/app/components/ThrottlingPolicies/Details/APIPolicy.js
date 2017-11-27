@@ -40,11 +40,12 @@
  import '../Shared/Shared.css'
 
  const messages = {
-   success: 'Created business plan successfully',
-   failure: 'Error while creating business plan'
+   success: 'Update API rate limit successfully',
+   failure: 'Error while updating API rate',
+   retrieveError: 'Error while retrieving API rate limits'
  };
 
- class CreateBusinessPlan extends Component{
+ class APIPolicy extends Component{
         state = {
           policy: {
             id: '',
@@ -52,10 +53,6 @@
             displayName: '',
             description: '',
             isDeployed:true,
-            rateLimitCount: 0,
-            rateLimitTimeUnit:'sec',
-            stopOnQuotaReach: true,
-            billingPlan:'FREE',
             defaultLimit: {
               bandwidthLimit: {
                 dataAmount: 0,
@@ -68,9 +65,31 @@
               timeUnit: "min",
               unitTime: 0
             },
-            customAttributes:[]
+            conditionalGroups:[]
           }
         };
+
+        componentDidMount() {
+            const api = new API();
+
+            const promised_policy = api.getAPILevelPolicy(this.props.match.params.policy_uuid);
+            promised_policy.then(
+                response => {
+                   var policy = response.obj
+                   //there is either bandwidthLimit or requestCountLimit in the response. add missing one
+                   if("RequestCountLimit" == policy.defaultLimit.type) {
+                     policy.defaultLimit.bandwidthLimit = this.state.policy.defaultLimit.bandwidthLimit;
+                   } else {
+                     policy.defaultLimit.requestCountLimit = this.state.policy.defaultLimit.requestCountLimit;
+                   }
+                   this.setState({policy: policy});
+                }
+            ).catch(
+                error => {
+                  this.msg.error(message.retrieveError);
+                }
+            );
+        }
 
         setBandwithDataUnit = (value) => {
           var policy = this.state.policy;
@@ -102,6 +121,14 @@
           });
         };
 
+        handleAttributeChange = (attributes) => {
+          var policy = this.state.policy;
+          policy.customAttributes = attributes;
+          this.setState({
+            policy: policy
+          });
+        }
+
         handleDefaultQuotaChangeChild = (name, value) => {
           var policy = this.state.policy;
           var intValue = parseInt(value);
@@ -118,18 +145,10 @@
           });
         }
 
-        handleAttributeChange = (attributes) => {
-          var policy = this.state.policy;
-          policy.customAttributes = attributes;
-          this.setState({
-            policy: policy
-          });
-        }
-
-        handlePolicySave = () => {
+        handlePolicyUpdate = () => {
           const api = new API();
-          const promised_policies = api.createSubscriptionLevelPolicy(this.state.policy);
-          var props = this.props;
+          var uuid = this.props.match.params.policy_uuid;
+          const promised_policies = api.updateAPILevelPolicy(uuid, this.state.policy);
           promised_policies.then(
               response => {
                 this.msg.info(messages.success);
@@ -149,7 +168,7 @@
                          <IconButton color="contrast" aria-label="Menu">
                              <MenuIcon />
                          </IconButton>
-                         <Link to={"/policies/business_plans"}>
+                         <Link to={"/policies/api_policies"}>
                               <Button color="contrast">Go Back</Button>
                          </Link>
                      </Toolbar>
@@ -159,7 +178,7 @@
                     <Grid container className="root" direction="column">
                        <Grid item xs={12} className="grid-item">
                          <Typography className="page-title" type="display1" gutterBottom>
-                            Create Business Plan
+                            Edit API Rate Limit
                          </Typography>
                        </Grid>
                        <GeneralDetails policy={this.state.policy} handleChangeChild={this.handleChangeChild} />
@@ -169,22 +188,16 @@
                                handleDefaultQuotaChangeChild={this.handleDefaultQuotaChangeChild}
                                setRateLimitUnit={this.setRateLimitUnit} />
 
-                       <BurstControl policy={this.state.policy} handleChangeChild={this.handleChangeChild} />
-
-                       <PolicyFlags policy={this.state.policy} handleChangeChild={this.handleChangeChild} />
-
-                       <CustomAttributes attributes={this.state.policy.customAttributes}
-                               handleAttributeChange={this.handleAttributeChange}/>
 
                        <Paper elevation ={20}>
                            <Grid item xs={6} className="grid-item">
                                <Divider />
                                <div >
                                 <Button raised color="primary" onClick = {
-                                  () => this.handlePolicySave()}>
-                                Save
+                                  () => this.handlePolicyUpdate()}>
+                                Update
                                 </Button>
-                                <Link to={"/policies/business_plans"}>
+                                <Link to={"/policies/api_policies"}>
                                      <Button raised>Cancel</Button>
                                 </Link>
                                </div>
@@ -197,4 +210,4 @@
      }
  }
 
- export default CreateBusinessPlan;
+ export default APIPolicy;

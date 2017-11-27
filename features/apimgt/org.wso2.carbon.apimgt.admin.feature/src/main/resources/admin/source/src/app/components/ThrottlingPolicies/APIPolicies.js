@@ -36,12 +36,12 @@ import Message from '../Shared/Message'
 import Confirm from '../Shared/Confirm'
 
 const messages = {
-  success: 'Deleted business plan successfully',
-  failure: 'Error while deleting business plan',
-  retrieveError: 'Error while retrieving business plans'
+  success: 'Deleted API rate limit successfully',
+  failure: 'Error while deleting API rate limit',
+  retrieveError: 'Error while retrieving API rate limits'
 };
 
-export default class BusinessPlans extends Component {
+export default class APIPolicies extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -54,7 +54,8 @@ export default class BusinessPlans extends Component {
     }
     deletePolicy(id) {
       const api = new API();
-      const promised_policies = api.deleteSubscriptionLevelPolicy(id);
+      debugger;
+      const promised_policies = api.deleteAPILevelPolicy(id);
       promised_policies.then(
           response => {
             this.msg.info(messages.success);
@@ -69,7 +70,7 @@ export default class BusinessPlans extends Component {
     componentDidMount() {
         const api = new API();
 
-        const promised_policies = api.getSubscriptionLevelPolicies();
+        const promised_policies = api.getAPILevelPolicies();
         /* TODO: Handle catch case , auth errors and ect ~tmkb*/
         promised_policies.then(
             response => {
@@ -96,8 +97,8 @@ export default class BusinessPlans extends Component {
                         <IconButton color="contrast" aria-label="Menu">
                             <MenuIcon />
                         </IconButton>
-                        <Link to={"/policies/business_plans/create/"}>
-                             <Button color="contrast">Add Plan</Button>
+                        <Link to={"/policies/api_policies/create/"}>
+                             <Button color="contrast">Add Policy</Button>
                         </Link>
                     </Toolbar>
                 </AppBar>
@@ -106,7 +107,7 @@ export default class BusinessPlans extends Component {
                     <Grid item xs={12}>
                         <Paper>
                             <Typography className="page-title" type="display1" gutterBottom>
-                               Business Plans
+                               API Rate Limits
                             </Typography>
                             <Typography type="caption" gutterBottom align="left" className="page-title-help">
                             Discription goes here.
@@ -131,8 +132,7 @@ export default class BusinessPlans extends Component {
                                   <TableCell>Quota Policy</TableCell>
                                   <TableCell>Quota</TableCell>
                                   <TableCell>Unit Time</TableCell>
-                                  <TableCell>Rate Limit</TableCell>
-                                  <TableCell>Time Unit</TableCell>
+
                                   <TableCell></TableCell>
                                 </TableRow>
                               </TableHead>
@@ -147,11 +147,9 @@ export default class BusinessPlans extends Component {
                                             : n.defaultLimit.bandwidthLimit.dataAmount + " "
                                                 + n.defaultLimit.bandwidthLimit.dataUnit}</TableCell>
                                       <TableCell>{n.defaultLimit.unitTime} {n.defaultLimit.timeUnit}</TableCell>
-                                      <TableCell>{n.rateLimitCount}</TableCell>
-                                      <TableCell>{n.rateLimitTimeUnit}</TableCell>
                                       <TableCell>
                                       <span>
-                                         <Link to={"/policies/business_plans/" + n.id}>
+                                         <Link to={"/policies/api_policies/" + n.id}>
                                               <Button color="primary">Edit</Button>
                                          </Link>
                                          <Button color="accent"

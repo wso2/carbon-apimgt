@@ -40,37 +40,32 @@
  import '../Shared/Shared.css'
 
  const messages = {
-   success: 'Created business plan successfully',
-   failure: 'Error while creating business plan'
+   success: 'Created Application rate limit successfully',
+   failure: 'Error while creating Application rate limit'
  };
 
- class CreateBusinessPlan extends Component{
-        state = {
-          policy: {
-            id: '',
-            policyName: '',
-            displayName: '',
-            description: '',
-            isDeployed:true,
-            rateLimitCount: 0,
-            rateLimitTimeUnit:'sec',
-            stopOnQuotaReach: true,
-            billingPlan:'FREE',
-            defaultLimit: {
-              bandwidthLimit: {
-                dataAmount: 0,
-                dataUnit:'MB'
-              },
-              requestCountLimit: {
-                requestCount: 0
-              },
-              type: 'RequestCountLimit',
-              timeUnit: "min",
-              unitTime: 0
-            },
-            customAttributes:[]
-          }
-        };
+ class CreateApplicationPolicy extends Component{
+         state = {
+           policy: {
+             policyName: '',
+             displayName: '',
+             description: '',
+             isDeployed:true,
+             defaultLimit: {
+               bandwidthLimit: {
+                 dataAmount: 0,
+                 dataUnit:'MB'
+               },
+               requestCountLimit: {
+                 requestCount: 0
+               },
+               type: 'RequestCountLimit',
+               timeUnit: "min",
+               unitTime: 0
+             }
+           }
+         };
+
 
         setBandwithDataUnit = (value) => {
           var policy = this.state.policy;
@@ -128,7 +123,7 @@
 
         handlePolicySave = () => {
           const api = new API();
-          const promised_policies = api.createSubscriptionLevelPolicy(this.state.policy);
+          const promised_policies = api.createApplicationLevelPolicy(this.state.policy);
           var props = this.props;
           promised_policies.then(
               response => {
@@ -149,7 +144,7 @@
                          <IconButton color="contrast" aria-label="Menu">
                              <MenuIcon />
                          </IconButton>
-                         <Link to={"/policies/business_plans"}>
+                         <Link to={"/policies/application_policies"}>
                               <Button color="contrast">Go Back</Button>
                          </Link>
                      </Toolbar>
@@ -159,7 +154,7 @@
                     <Grid container className="root" direction="column">
                        <Grid item xs={12} className="grid-item">
                          <Typography className="page-title" type="display1" gutterBottom>
-                            Create Business Plan
+                            Create Application Rate Limit
                          </Typography>
                        </Grid>
                        <GeneralDetails policy={this.state.policy} handleChangeChild={this.handleChangeChild} />
@@ -169,12 +164,6 @@
                                handleDefaultQuotaChangeChild={this.handleDefaultQuotaChangeChild}
                                setRateLimitUnit={this.setRateLimitUnit} />
 
-                       <BurstControl policy={this.state.policy} handleChangeChild={this.handleChangeChild} />
-
-                       <PolicyFlags policy={this.state.policy} handleChangeChild={this.handleChangeChild} />
-
-                       <CustomAttributes attributes={this.state.policy.customAttributes}
-                               handleAttributeChange={this.handleAttributeChange}/>
 
                        <Paper elevation ={20}>
                            <Grid item xs={6} className="grid-item">
@@ -184,7 +173,7 @@
                                   () => this.handlePolicySave()}>
                                 Save
                                 </Button>
-                                <Link to={"/policies/business_plans"}>
+                                <Link to={"/policies/application_policies"}>
                                      <Button raised>Cancel</Button>
                                 </Link>
                                </div>
@@ -197,4 +186,4 @@
      }
  }
 
- export default CreateBusinessPlan;
+ export default CreateApplicationPolicy;

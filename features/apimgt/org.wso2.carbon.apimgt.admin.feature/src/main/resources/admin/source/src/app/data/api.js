@@ -97,6 +97,46 @@ class API {
     }
 
     /**
+     * Get subscription level policy.
+     * @returns {Promise} Promised policies response
+     */
+    getSubscriptionLevelPolicy(id) {
+        return this.client.then(
+            (client) => {
+                return client.apis["Subscription Policies"].get_policies_throttling_subscription__id_(
+                    {id: id}, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
+     * Delete subscription level policy.
+     * @returns {Promise} Promised policies response
+     */
+    deleteSubscriptionLevelPolicy(id) {
+        return this.client.then(
+            (client) => {
+                return client.apis["Subscription Policies"].delete_policies_throttling_subscription__id_(
+                    {id: id}, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
+     * update subscription level policy.
+     * @returns {Promise} Promised policies response
+     */
+    updateSubscriptionLevelPolicy(id, body) {
+      let payload = {id: id, body: body, "Content-Type": "application/json"};
+        return this.client.then(
+            (client) => {
+                return client.apis["Subscription Policies"].put_policies_throttling_subscription__id_(
+                    payload, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
      * Create subscription level policy
      * @returns {Promise} Promised policies response
      */
@@ -105,6 +145,140 @@ class API {
         return this.client.then(
             (client) => {
                 return client.apis["Subscription Policies"].post_policies_throttling_subscription(
+                    payload, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
+     * Get api level policies.
+     * @returns {Promise} Promised policies response
+     */
+    getAPILevelPolicies() {
+        return this.client.then(
+            (client) => {
+                return client.apis["Advanced Policies"].get_policies_throttling_advanced(
+                    {}, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
+     * Get api level policy.
+     * @returns {Promise} Promised policies response
+     */
+    getAPILevelPolicy(id) {
+        return this.client.then(
+            (client) => {
+                return client.apis["Advanced Policies"].get_policies_throttling_advanced__id_(
+                    {id: id}, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
+     * Delete API level policy.
+     * @returns {Promise} Promised policies response
+     */
+    deleteAPILevelPolicy(id) {
+        return this.client.then(
+            (client) => {
+                return client.apis["Advanced Policies"].delete_policies_throttling_advanced__id_(
+                    {id: id}, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
+     * update API level policy.
+     * @returns {Promise} Promised policies response
+     */
+    updateAPILevelPolicy(id, body) {
+      let payload = {id: id, body: body, "Content-Type": "application/json"};
+        return this.client.then(
+            (client) => {
+                return client.apis["Advanced Policies"].put_policies_throttling_advanced__id_(
+                    payload, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
+     * Create API level policy
+     * @returns {Promise} Promised policies response
+     */
+    createAPILevelPolicy(body) {
+      let payload = {body: body, "Content-Type": "application/json"};
+        return this.client.then(
+            (client) => {
+                return client.apis["Advanced Policies"].post_policies_throttling_advanced(
+                    payload, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
+     * Get Application level policies.
+     * @returns {Promise} Promised policies response
+     */
+    getApplicationLevelPolicies() {
+        return this.client.then(
+            (client) => {
+                return client.apis["Application Policies"].get_policies_throttling_application(
+                    {}, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
+     * Get Application level policy.
+     * @returns {Promise} Promised policies response
+     */
+    getApplicationLevelPolicy(id) {
+        return this.client.then(
+            (client) => {
+                return client.apis["Application Policies"].get_policies_throttling_application__id_(
+                    {id: id}, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
+     * Delete Application level policy.
+     * @returns {Promise} Promised policies response
+     */
+    deleteApplicationLevelPolicy(id) {
+        return this.client.then(
+            (client) => {
+                return client.apis["Application Policies"].delete_policies_throttling_application__id_(
+                    {id: id}, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
+     * update Application level policy.
+     * @returns {Promise} Promised policies response
+     */
+    updateApplicationLevelPolicy(id, body) {
+      let payload = {id: id, body: body, "Content-Type": "application/json"};
+        return this.client.then(
+            (client) => {
+                return client.apis["Application Policies"].put_policies_throttling_application__id_(
+                    payload, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
+     * Create Application level policy
+     * @returns {Promise} Promised policies response
+     */
+    createApplicationLevelPolicy(body) {
+      let payload = {body: body, "Content-Type": "application/json"};
+        return this.client.then(
+            (client) => {
+                return client.apis["Application Policies"].post_policies_throttling_application(
                     payload, this._requestMetaData());
             }
         );

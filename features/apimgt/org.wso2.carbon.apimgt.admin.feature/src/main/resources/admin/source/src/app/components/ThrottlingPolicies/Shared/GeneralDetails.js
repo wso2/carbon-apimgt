@@ -47,6 +47,7 @@
                 <Divider />
                 <TextField
                   id="policyName"
+                  required
                   label="Name"
                   value={this.props.policy.policyName}
                   onChange={this.handleChange('policyName')}
@@ -65,7 +66,7 @@
                   rowsMax="4"
                   margin="normal"
                 />
-            </Grid>    
+            </Grid>
           </Paper>
       );
     }

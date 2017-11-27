@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.FunctionDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.dao.SystemApplicationDao;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
 import org.wso2.carbon.apimgt.core.dao.ThreatProtectionDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
@@ -368,6 +369,10 @@ public class DAOFactory {
             throw new APIMgtDAOException("Unhandled DB Type detected");
         }
         return analyticsDAO;
+    }
+
+    public static SystemApplicationDao getSystemApplicationDao() throws APIMgtDAOException {
+        return new SystemApplicationDaoImpl();
     }
 
     private static void setup() throws APIMgtDAOException {
