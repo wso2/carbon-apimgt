@@ -67,7 +67,7 @@ public class APIKeyValidatorClientTest {
     public static void setTrustManager() throws KeyStoreException, IOException, CertificateException,
             NoSuchAlgorithmException, UnrecoverableKeyException, KeyManagementException {
         wireMockConfiguration.trustStoreType("JKS").keystoreType("JKS").keystorePath(KEYSTORE_FILE_PATH)
-                .trustStorePath(TRUSTSTORE_FILE_PATH).httpsPort(18082).trustStorePassword("wso2carbon")
+                .trustStorePath(TRUSTSTORE_FILE_PATH).port(18081).httpsPort(18082).trustStorePassword("wso2carbon")
                 .keystorePassword("wso2carbon");
         ;
         InputStream inputStream = new FileInputStream("src/test/resources/jks/wso2carbon.jks");
