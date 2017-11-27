@@ -1400,7 +1400,7 @@ public class APIProviderImplTest {
         Assert.assertFalse(status);
     }
 
-    /*@Test
+    @Test
     public void testPropergateAPIStatusChangeToGateways() throws RegistryException, UserStoreException,
             APIManagementException {
         APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.0");
@@ -1424,8 +1424,15 @@ public class APIProviderImplTest {
 
         Map<String, Map<String,String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
 
-
+        PowerMockito.when(APIUtil.getArtifactManager(Matchers.any(Registry.class), Matchers.anyString()))
+                .thenReturn(artifactManager);
+        Mockito.when(artifactManager.newGovernanceArtifact(Matchers.any(QName.class))).thenReturn(artifact);
+        Mockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenReturn(artifact);
+        Mockito.doNothing().when(artifact).attachLifecycle(APIConstants.API_LIFE_CYCLE);
         APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
+        String artifactPath = "artifact/path";
+        PowerMockito.when(GovernanceUtils.getArtifactPath(apiProvider.registry, artifact.getId())).
+                thenReturn(artifactPath);
         apiProvider.addAPI(api);
 
         //No state changes
@@ -1461,6 +1468,8 @@ public class APIProviderImplTest {
         failedGWEnv.put("Production", "Failed to publish");
         failedGateways.put("PUBLISHED",failedGWEnv);
 
+        Mockito.when(gatewayManager.publishToGateway(Matchers.any(API.class), Matchers.any(APITemplateBuilder.class),
+                Matchers.anyString())).thenReturn(failedGWEnv);
         failedGatewaysReturned = apiProvider.propergateAPIStatusChangeToGateways(apiId, APIStatus.PUBLISHED);
         Assert.assertEquals(1, failedGatewaysReturned.size());
         Assert.assertEquals(APIStatus.PUBLISHED, api.getStatus());
@@ -1476,13 +1485,15 @@ public class APIProviderImplTest {
         //Change to RETIRED state and error thrown while un-publishing
         api.setStatus(APIStatus.CREATED);
         failedGateways.put("UNPUBLISHED",failedGWEnv);
+        Mockito.when(gatewayManager.removeFromGateway(Matchers.any(API.class),
+                Matchers.anyString())).thenReturn(failedGWEnv);
 
         failedGatewaysReturned = apiProvider.propergateAPIStatusChangeToGateways(apiId, APIStatus.RETIRED);
         Assert.assertEquals(1, failedGatewaysReturned.size());
         Assert.assertEquals(APIStatus.RETIRED, api.getStatus());
-    }*/
+    }
 
-   /* @Test
+    @Test
     public void testEmailSentWhenPropergateAPIStatusChangeToGateways() throws Exception {
         APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.0");
         API api = new API(apiId);
@@ -1490,31 +1501,26 @@ public class APIProviderImplTest {
         api.setStatus(APIStatus.CREATED);
 
         TestUtils.mockRegistryAndUserRealm(-1);
-
-        PowerMockito.mockStatic(ApiMgtDAO.class);
-        ApiMgtDAO apimgtDAO = PowerMockito.mock(ApiMgtDAO.class);
         Resource resource = PowerMockito.mock(Resource.class);
-        String content = PowerMockito.mock(String.class);
         JSONObject tenantConfig = PowerMockito.mock(JSONObject.class);
-        JSONParser jsonParser = PowerMockito.mock(JSONParser.class);
         NotificationExecutor notificationExecutor = PowerMockito.mock(NotificationExecutor.class);
         NotificationDTO notificationDTO = PowerMockito.mock(NotificationDTO.class);
         UserRegistry configRegistry = PowerMockito.mock(UserRegistry.class);
         RegistryService registryService = PowerMockito.mock(RegistryService.class);
-        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apimgtDAO);
         PowerMockito.doNothing().when(apimgtDAO).addAPI(api, -1);
+        Mockito.when(artifactManager.newGovernanceArtifact(Matchers.any(QName.class))).thenReturn(artifact);
+        Mockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenReturn(artifact);
+        Map<String, String> failedToPubGWEnv = new HashMap<String, String>();
+        Mockito.when(gatewayManager.publishToGateway(Matchers.any(API.class), Matchers.any(APITemplateBuilder.class),
+                Matchers.anyString())).thenReturn(failedToPubGWEnv);
 
-        PowerMockito.mockStatic(APIUtil.class);
-        PowerMockito.when(APIUtil.replaceEmailDomain(apiId.getProviderName())).thenReturn("admin");
-        PowerMockito.when(APIUtil.replaceEmailDomainBack(api.getId().getProviderName())).thenReturn("admin");
-
-        Map<String, Map<String,String>> failedGateways = new ConcurrentHashMap<String, Map<String, String>>();
-
-        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, failedGateways);
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
         apiProvider.addAPI(api);
 
-        ServiceReferenceHolder serviceReferenceHolder = TestUtils.mockAPIMConfiguration(APIConstants.API_GATEWAY_TYPE,
-                APIConstants.API_GATEWAY_TYPE_SYNAPSE, -1);
+        PowerMockito.when(APIUtil.replaceEmailDomain(apiId.getProviderName())).thenReturn("admin");
+        PowerMockito.when(APIUtil.replaceEmailDomainBack(api.getId().getProviderName())).thenReturn("admin");
+        ServiceReferenceHolder sh = TestUtils.getServiceReferenceHolder();
+        PowerMockito.when(sh.getRegistryService()).thenReturn(registryService);
         PowerMockito.when(apimgtDAO.getPublishedDefaultVersion(api.getId())).thenReturn("1.0.0");
 
         //Change to PUBLISHED state
@@ -1524,19 +1530,24 @@ public class APIProviderImplTest {
         API api2 = new API(new APIIdentifier("admin", "API2", "1.0.0"));
 
         prepareForGetAPIsByProvider(artifactManager, apiProvider, "admin", api1, api2);
-        PowerMockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
         PowerMockito.when(registryService.getConfigSystemRegistry(-1)).thenReturn(configRegistry);
         PowerMockito.when(configRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(true);
         PowerMockito.when(configRegistry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(resource);
-        PowerMockito.whenNew(String.class).withAnyArguments().thenReturn(content);
-        PowerMockito.whenNew(JSONParser.class).withAnyArguments().thenReturn(jsonParser);
-        PowerMockito.when(jsonParser.parse(content)).thenReturn(tenantConfig);
+        Mockito.when(resource.getContent()).thenReturn(getTenantConfigContent());
         PowerMockito.when(tenantConfig.get(NotifierConstants.NOTIFICATIONS_ENABLED)).thenReturn("true");
+        PowerMockito.when(tenantConfig.get(APIConstants.EXTENSION_HANDLER_POSITION)).thenReturn("bottom");
         PowerMockito.whenNew(NotificationDTO.class).withAnyArguments().thenReturn(notificationDTO);
         PowerMockito.whenNew(NotificationExecutor.class).withAnyArguments().thenReturn(notificationExecutor);
+
+        APIManagerConfigurationService amConfigService = Mockito.mock(APIManagerConfigurationService.class);
+        APIManagerConfiguration amConfig = Mockito.mock(APIManagerConfiguration.class);
+        PowerMockito.when(sh.getAPIManagerConfigurationService()).thenReturn(amConfigService);
+        PowerMockito.when(amConfigService.getAPIManagerConfiguration()).thenReturn(amConfig);
+        PowerMockito.when(amConfig.getFirstProperty(APIConstants.API_GATEWAY_TYPE)).thenReturn(APIConstants.API_GATEWAY_TYPE_SYNAPSE);
+
         apiProvider.propergateAPIStatusChangeToGateways(apiId, APIStatus.PUBLISHED);
         Mockito.verify(notificationExecutor).sendAsyncNotifications(notificationDTO);
-    }*/
+    }
 
     @Test
     public void testPropergateAPIStatusChangeToGateways_InvalidAPIID() throws RegistryException, UserStoreException,
