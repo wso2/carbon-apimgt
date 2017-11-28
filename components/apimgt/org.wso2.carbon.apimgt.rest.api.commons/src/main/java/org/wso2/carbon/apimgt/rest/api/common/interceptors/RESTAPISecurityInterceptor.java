@@ -82,8 +82,8 @@ public class RESTAPISecurityInterceptor implements Interceptor {
 
         //CORS for Environments - Add allowed Origin when User-Agent sent 'Origin' header.
         String origin = request.getHeader(RestApiConstants.ORIGIN_HEADER);
-        if (origin != null) {
-            String allowedOrigin = EnvironmentUtils.getAllowedOrigin(origin);
+        String allowedOrigin = EnvironmentUtils.getAllowedOrigin(origin);
+        if (allowedOrigin != null) {
             response.setHeader(RestApiConstants.ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, allowedOrigin)
                     .setHeader(RestApiConstants.ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER, "true");
         }

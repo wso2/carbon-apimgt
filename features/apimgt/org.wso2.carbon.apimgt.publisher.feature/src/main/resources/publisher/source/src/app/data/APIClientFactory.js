@@ -28,16 +28,15 @@ class APIClientFactory {
         this._APIClientMap = new Map();
     }
 
-    getAPIClient() {
-        let environmentName = Utils.getEnvironment().label;
-        let api_Client = this._APIClientMap.get(environmentName);
+    getAPIClient(environmentLabel) {
+        let api_Client = this._APIClientMap.get(environmentLabel);
 
         if (api_Client) {
             return api_Client;
         }
 
         api_Client = new APIClient(Utils.getEnvironment().host);
-        this._APIClientMap.set(environmentName, api_Client);
+        this._APIClientMap.set(environmentLabel, api_Client);
         return api_Client;
     }
 }

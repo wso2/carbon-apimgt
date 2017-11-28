@@ -188,6 +188,7 @@ class AuthManager {
             user.scopes = response.data.scopes.split(" ");
             AuthManager.setUser(user);
         }).catch(error => {
+            console.log("Authentication Error:\n", error);
             Utils.setEnvironment(previous_environment);
         });
         return promised_response;
@@ -207,9 +208,9 @@ class AuthManager {
         };
         const promisedLogout = axios.post(url, null, {headers: headers});
         return promisedLogout.then(response => {
-            Utils.delete_cookie("WSO2_AM_TOKEN_1", Utils.CONST.CONTEXT_PATH);
+            Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, Utils.CONST.CONTEXT_PATH);
             localStorage.removeItem(User.CONST.LOCALSTORAGE_USER);
-            new APIClientFactory().getAPIClient()._instance = null; // Single client should be re initialize after log out
+            new APIClientFactory().getAPIClient(Utils.getEnvironment().label)._instance = null; // Single client should be re initialize after log out
         });
     }
 

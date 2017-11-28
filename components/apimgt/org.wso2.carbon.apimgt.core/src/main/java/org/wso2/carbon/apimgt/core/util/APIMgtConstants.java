@@ -308,7 +308,6 @@ public class APIMgtConstants {
      */
     public static class CORSAllowOriginConstants {
         public static final String ALLOW_ALL_ORIGINS = "*";
-        public static final String NOT_ALLOWED_ORIGIN = "NOT ALLOWED";
     }
 
     /**

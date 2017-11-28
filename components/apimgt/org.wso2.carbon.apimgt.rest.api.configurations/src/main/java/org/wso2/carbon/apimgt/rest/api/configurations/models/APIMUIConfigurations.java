@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.rest.api.configurations.models;
 import org.wso2.carbon.kernel.annotations.Configuration;
 import org.wso2.carbon.kernel.annotations.Element;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -33,7 +33,7 @@ public class APIMUIConfigurations {
             "  ◆ host           - host of a environment (eg 127.0.0.1:9292, use '<empty-string>' for current host)\n" +
             "  ◆ loginTokenPath - token endpoint URL\n" +
             "  ◆ label          - environment label to uniquely identify a environment")
-    private List<EnvironmentConfigurations> environments = Arrays.asList(new EnvironmentConfigurations());
+    private List<EnvironmentConfigurations> environments = Collections.singletonList(new EnvironmentConfigurations());
 
     public List<EnvironmentConfigurations> getEnvironments() {
         return environments;

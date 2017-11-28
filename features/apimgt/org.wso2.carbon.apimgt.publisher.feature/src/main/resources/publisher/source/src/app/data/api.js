@@ -17,6 +17,7 @@
 "use strict";
 import AuthManager from './AuthManager'
 import APIClientFactory from "./APIClientFactory";
+import Utils from "./Utils";
 
 /**
  * An abstract representation of an API
@@ -27,7 +28,7 @@ class API {
      * @param {string} access_key - Access key for invoking the backend REST API call.
      */
     constructor() {
-        this.client = new APIClientFactory().getAPIClient().client;
+        this.client = new APIClientFactory().getAPIClient(Utils.getEnvironment().label).client;
     }
 
     /**

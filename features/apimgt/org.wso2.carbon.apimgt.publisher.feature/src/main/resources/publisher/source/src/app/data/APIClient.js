@@ -33,8 +33,7 @@ class APIClient {
      * @returns {APIClient|*|null}
      */
     constructor(host, args = {}) {
-        host = host || location.host;
-        this.host = host;
+        this.host = host || location.host;
 
         const authorizations = {
             OAuth2Security: {
@@ -44,7 +43,7 @@ class APIClient {
 
         let promisedResolve = SwaggerClient.resolve({url: Utils.getSwaggerURL()});
         APIClient.spec = promisedResolve;
-        let promisedSwaggerClient = promisedResolve.then(
+        this._client = promisedResolve.then(
             resolved => {
                 const argsv = Object.assign(args,
                     {
@@ -53,15 +52,12 @@ class APIClient {
                         requestInterceptor: this._getRequestInterceptor(),
                         responseInterceptor: this._getResponseInterceptor()
                     });
-                return new SwaggerClient(argsv);
+                let swaggerClient = new SwaggerClient(argsv);
+                swaggerClient.then(client => {client.http.withCredentials = true});
+                return swaggerClient;
             }
         );
-        promisedSwaggerClient.catch(AuthManager.unauthorizedErrorHandler);
-
-        this._client = promisedSwaggerClient.then(swaggerClient => {
-            swaggerClient.http.withCredentials = true;
-            return swaggerClient;
-        });
+        this._client.catch(AuthManager.unauthorizedErrorHandler);
 
         APIClient._instance = this;
     }

@@ -49,9 +49,8 @@ class Utils {
      * @param {String} name : Name of the cookie which need to be deleted
      */
     static delete_cookie(name, path) {
-        //Append environment name to cookie
-        let environmentName = "_" + Utils.getEnvironment().label;
-        document.cookie = name + environmentName + '=; path=' + path + '; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        //Environment name is appended to the cookie name
+        document.cookie = `${name}_${Utils.getEnvironment().label}=; path=${path}; expires=Thu, 01 Jan 1970 00:00:01 GMT`;
     }
 
     /**
@@ -64,17 +63,15 @@ class Utils {
      * @param {boolean} secured : secured parameter is set
      */
     static setCookie(name, value, validityPeriod, path = "/", secured = true) {
-        let expires = "";
+        let expiresDirective = "";
         const securedDirective = secured ? "; Secure" : "";
         if (validityPeriod) {
             const date = new Date();
             date.setTime(date.getTime() + validityPeriod * 1000);
-            expires = "; expires=" + date.toUTCString();
+            expiresDirective = "; expires=" + date.toUTCString();
         }
 
-        //Append environment name to cookie
-        let environmentName = "_" + Utils.getEnvironment().label;
-        document.cookie = name + environmentName + "=" + value + expires + "; path=" + path + securedDirective;
+        document.cookie = `${name}_${Utils.getEnvironment().label}=${value}; path=${path}${expiresDirective}${securedDirective}`;
     }
 
     /**

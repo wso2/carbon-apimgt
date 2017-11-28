@@ -12,11 +12,11 @@ public class EnvironmentUtils {
      * Check for allowed origin list from configurations and return origin if exists
      *
      * @param origin Origin to check with the allowed origin list
-     * @return allowed origin
+     * @return origin or null
      */
     public static String getAllowedOrigin(String origin) {
         if (origin == null) {
-            return "";
+            return null;
         }
 
         String host = origin.split(APIMgtConstants.WEB_PROTOCOL_SUFFIX)[1];
@@ -27,6 +27,7 @@ public class EnvironmentUtils {
             return origin;
         }
 
-        return APIMgtConstants.CORSAllowOriginConstants.ALLOW_ALL_ORIGINS;
+        //origin is not within the allowed origin list
+        return null;
     }
 }

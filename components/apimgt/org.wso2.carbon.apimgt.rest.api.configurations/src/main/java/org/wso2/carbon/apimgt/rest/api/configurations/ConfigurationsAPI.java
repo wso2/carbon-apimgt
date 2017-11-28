@@ -37,13 +37,16 @@ import javax.ws.rs.core.Response;
         service = Microservice.class,
         immediate = true
 )
-@Path("/configService") //TODO: [rnk] change url :Design Review
+@Path("/configService")
 public class ConfigurationsAPI implements Microservice {
 
     /**
      * Get environment configurations from deployement.yaml and returns the list of environments
      *
-     * @return Response List of configured environments
+     * @return Response List of environments: {"environments":[
+     *     {"host":"localhost:9292","loginTokenPath":"/login/token","label":"Development"},
+     *     {"host":"localhost:9293","loginTokenPath":"/login/token","label":"Production"}
+     * ]}
      */
     @GET
     @Path("/environments")
