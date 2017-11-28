@@ -101,17 +101,15 @@ class Login extends Component {
         }
     }
 
+    handleInputChange = (event) => {
+        const target = event.target;
+        const value = target.type === 'checkbox' ? target.checked : target.value;
+        const name = target.id;
 
-    handleUsernameChange = (event) => {
         this.setState({
-            username : event.target.value
+            [name]: value
         });
-    };
-    handlePasswordChange = (event) => {
-        this.setState({
-            password : event.target.value
-        });
-    };
+    }
 
     handleEnvironmentChange = (event) => {
         this.setState({
@@ -165,7 +163,7 @@ class Login extends Component {
                                     autoComplete="username"
                                     margin="normal"
                                     style={{width:"100%"}}
-                                    onChange={this.handleUsernameChange}
+                                    onChange={this.handleInputChange}
                                 />
                                 <TextField
                                     error={!this.state.password && this.state.validate}
@@ -175,7 +173,7 @@ class Login extends Component {
                                     autoComplete="current-password"
                                     margin="normal"
                                     style={{width:"100%"}}
-                                    onChange={this.handlePasswordChange}
+                                    onChange={this.handleInputChange}
                                 />
 
                                 {/*Environments*/}
