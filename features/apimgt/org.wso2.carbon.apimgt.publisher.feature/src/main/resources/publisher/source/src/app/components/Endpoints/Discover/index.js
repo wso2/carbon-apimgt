@@ -165,7 +165,9 @@ export default class EndpointsDiscover extends Component {
                                 onClick={this.handleGlobalEndpointButtonClick}
                             >
                                 Global Endpoints
-                                <span className="ed-drop-down-arrow">  <ArrowDropDown className="more-arrow-shift ed-drop-down-arrow"/></span>
+                                <span className="ed-drop-down-arrow">
+                                    <ArrowDropDown className="more-arrow-shift ed-drop-down-arrow"/>
+                                </span>
                             </Button>
                             <Popover
                                 open={globalEndpointMenuOpen}
@@ -279,7 +281,6 @@ export default class EndpointsDiscover extends Component {
 }
 
 
-
 class ButtonCell extends Component {
     constructor(props) {
         super(props);
@@ -331,7 +332,6 @@ class ButtonCell extends Component {
             }
         ).catch(
             error => {
-                console.error(error);
                 this.props.changeMessage("error", "Error occurred while creating the endpoint!");
             }
         )

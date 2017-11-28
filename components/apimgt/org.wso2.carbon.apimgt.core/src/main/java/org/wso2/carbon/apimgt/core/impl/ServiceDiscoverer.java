@@ -110,7 +110,7 @@ public abstract class ServiceDiscoverer {
      *
      * @param id                Temporary id to be used by the UI
      * @param name              Name of the service
-     * @param endpointConfig    Json string containing endpoint URL, namespace, criteria
+     * @param endpointConfig    Json string containing "serviceUrl", "namespace", "criteria" keys
      * @param maxTps            MaxTps
      * @param type              Application level protocol (eg. http/https)
      * @param endpointSecurity  Json string on endpoint security necessarily including "enabled" boolean key
