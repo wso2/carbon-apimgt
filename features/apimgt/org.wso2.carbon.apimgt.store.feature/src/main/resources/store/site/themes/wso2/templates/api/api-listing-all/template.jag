@@ -1,6 +1,8 @@
 <% jagg.template("api/api-listing-all", function(inputs, outputs, jagg) { %>
 
 <%
+          var apps = outputs.applications;
+          var user = jagg.getUser();
           var tenant=request_tenant;          
           var urlPrefix = jagg.getTenantURLPrefix("&");
 if (outputs.error) { %>
@@ -43,6 +45,30 @@ if(length==0){
 }
 
 var reqUrl = request.getRequestURI();
+if (jagg.getUser() != null) {
+    var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+    tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
+}
+// used for the API Store intractive tutorial
+var tenantDomains_forTutorial = require("/site/conf/interactiveTutorial.json");
+var isEnabledTutorial = tenantDomains_forTutorial.isEnabledTutorial;
+var blackListedTenantDomains_forTutorial = stringify(tenantDomains_forTutorial.blackListedTenantDomainsFor_IntractiveTutorial);
+var apisCount = outputs.apis.length;
+var isEnabledTutorialForThisTenant = true;
+if (isEnabledTutorial && user && apisCount > 0) {
+    if (blackListedTenantDomains_forTutorial.indexOf(tenantDomain) > 0) {
+        isEnabledTutorialForThisTenant = false;
+    }
+    else {
+        var isAPIStoreWalkthroughClicked = false;
+        if (request.getParameter('storeInteractiveTutorial') != null) {
+            isAPIStoreWalkthroughClicked = request.getParameter('storeInteractiveTutorial');
+        }
+    }
+}
+else {
+    var isEnabledTutorialForThisTenant = false;
+}
  %>
  
  <!-- Recently Added APIs -->
@@ -50,7 +76,38 @@ var reqUrl = request.getRequestURI();
 	<%jagg.includeBlock("api/recently-added",null);%>
  <%} %>
   <!-- Recently Added APIs -->
-  
+
+<script>
+// Check about the blackListedTenant Domains for this tutorial
+if (<%=isEnabledTutorialForThisTenant%>) {
+    var enjoyHintApplicationMenuInstance = null;
+    // start tutorial from the button
+    if (<%=isAPIStoreWalkthroughClicked%>) {
+        removeLocalStorageVariablesForNewUser();
+    }
+
+    var isNewUserInteractiveTutorialStarted = localStorage.getItem("isNewUserInteractiveTutorialStarted");
+    var isFirstTimeTutorialViewed = localStorage.getItem("isFirstTimeTutorialViewed");
+    var isApplicationSelectedForSubscribe = localStorage.getItem("isApplicationSelectedForSubscribe");
+    if (!isFirstTimeTutorialViewed && !isNewUserInteractiveTutorialStarted && !isApplicationSelectedForSubscribe) {
+        if (<%=isAPIStoreWalkthroughClicked%>) {
+            launchInteractiveTutorial();
+        }
+        else {
+            // auto launch the tutorial for the new users
+            if (<%=apps.length <=1 %>) {
+                launchInteractiveTutorial();
+            }
+        }
+    }
+  }
+ 
+  function launchInteractiveTutorial() {
+      localStorage.setItem("isNewUserInteractiveTutorialStarted", true);
+      runEnjoyHintScript(enjoyHintApplicationMenuInstance, api_store_select_one_api);
+  }
+</script> 
+
 <div class="page-header">
      <%
 
@@ -403,7 +460,23 @@ $(window).load(function(){
         });
     });
 
+function catchTheFirstAPINameForTutorial() {
+    var isNewUserInteractiveTutorialStarted = localStorage.getItem("isNewUserInteractiveTutorialStarted");
+    if (isNewUserInteractiveTutorialStarted) {
+      var apiName = $('.page-content').parent().find('.white-wrapper').children().find('.truncate')[0].textContent;
+      if (apiName == 'undefined') {
+          apiName = $('.page-content').parent().find('.white-wrapper').children().find('.apiNameWrap')[0].textContent;
+          
+      }
+      localStorage.setItem("selectedAPIName", apiName);
+    }
+}
+catchTheFirstAPINameForTutorial();
+
 });
+
+
+
 </script>
 
 <%

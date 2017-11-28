@@ -85,7 +85,27 @@ var EnjoyHint = function (_options) {
                 }, 250);
                 $(document.body).scrollTo(step_data.selector, step_data.scrollAnimationSpeed || 250, {offset: -100});
                 setTimeout(function () {
-                    var $element = $(step_data.selector);
+                    if (step_data.selectNextElement) {
+                        if (step_data.targetNext) {
+                            if (step_data.targetNext === 'INSIDE_PARENT') {
+                                var $element = $(step_data.selector).parent().find(step_data.selectNextElement);
+                            } 
+                            else {
+                                var $element = $(step_data.selector).next().find(step_data.selectNextElement);
+                            }
+                        }
+                        else {
+                            var $element = $(step_data.selector);
+                        }
+                    }
+                    else {
+                        if (step_data.targetNext === 'PARENT') {
+                            var $element = $(step_data.selector).parent();
+                        }
+                        else {
+                            var $element = $(step_data.selector);
+                        }
+                    }
                     var event = makeEventName(step_data.event);
 
                     $body.enjoyhint('show');
@@ -196,6 +216,13 @@ var EnjoyHint = function (_options) {
                     }
                     $body.enjoyhint('render_label_with_shape', shape_data);
                 }, step_data.scrollAnimationSpeed + 20 || 270);
+                //added for the scroll problem
+                if (step_data.selector) {
+                    $('html, body').animate({
+                        scrollTop: $(step_data.selector).offset().top / 2
+                    }, -100);
+                    $(step_data.selector).focus();
+                }
             }, timeout);
         } else {
             $body.enjoyhint('hide');
@@ -387,6 +414,7 @@ var EnjoyHint = function (_options) {
 
                 that.$close_btn = $('<div>', {'class': that.cl.close_btn}).appendTo(that.enjoyhint).html('').click(function (e){
                     localStorage.setItem("interactiveTutorialEnabled", false);
+                    localStorage.setItem("isTutorialCompleted", true);
                     that.hide();
                     that.options.onSkipClick();
                 });

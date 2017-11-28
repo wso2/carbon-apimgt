@@ -55,6 +55,22 @@ function removeLocalStorageVariables() {
     }
 }
 
+
+function removeLocalStorageVariablesForNewUser() {
+    localStorage.removeItem("isTutorialCompleted");
+    localStorage.removeItem("isNewUserInteractiveTutorialStarted");
+    localStorage.removeItem("isApplicationSelectedForSubscribe");
+    localStorage.removeItem("isApplicationSubscribed");
+    localStorage.removeItem("isAccessKeyGeneratedForTheUser");
+    localStorage.removeItem("isAPIConsoleCompleted");
+    localStorage.removeItem("isNewApplicationClicked");
+    localStorage.removeItem("isUserCreatedNewApplication");
+    localStorage.removeItem("isFirstTimeTutorialViewed");
+    localStorage.removeItem("isSubscriptionViewed");
+    localStorage.removeItem("intractiveTutorialHTTPMethod");
+    localStorage.removeItem("selectedAPIName");
+}
+
 // Intercept Enter key press
 $(document).keypress(function(e) {
     if (e.which == 13) {
