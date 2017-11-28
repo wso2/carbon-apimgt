@@ -34,13 +34,11 @@ import static org.wso2.carbon.apimgt.core.dao.impl.DAOFactory.getApplicationDAO;
 public class ApplicationImportExportManager {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationImportExportManager.class);
-
     private APIStore apiStore;
 
     public ApplicationImportExportManager(APIStore apiStore) {
         this.apiStore = apiStore;
     }
-
 
     /**
      * Retrieve all the details of an Application for a given search query.
@@ -85,5 +83,4 @@ public class ApplicationImportExportManager {
             throw new APIManagementException(errorMsg, e, e.getErrorHandler());
         }
     }
-
 }

@@ -50,12 +50,10 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
     private static final String IMPORTED_APPLICATIONS_DIRECTORY_NAME = "imported-applications";
     private String path;
 
-
     public FileBasedApplicationImportExportManager(APIStore apiStore, String path) {
         super(apiStore);
         this.path = path;
     }
-
 
     /**
      * Export a given Application to a file system as zip archive.
@@ -78,47 +76,45 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
             log.error(errorMsg, e);
             throw new APIMgtEntityImportExportException(errorMsg, e);
         }
-
         Application exportApplication = application;
         String applicationExportDirectory = applicationArtifactBaseDirectoryPath + File.separator +
                 exportApplication.getName();
-
         try {
             //create directory per application
             Files.createDirectories(Paths.get(applicationExportDirectory));
-
             //export application details
             exportApplicationDetailsToFileSystem(exportApplication,
                     applicationExportDirectory);
-
         } catch (IOException e) {
             log.error("Error while exporting Application: " + exportApplication.getName(), e);
         }
-
         // Check if no application is exported
         try {
             if (APIFileUtils.getDirectoryList(applicationArtifactBaseDirectoryPath).isEmpty()) {
                 // cleanup the archive root directory
                 APIFileUtils.deleteDirectory(path);
-                String errorMsg = "No Applications exported";
-                throw new APIMgtEntityImportExportException(errorMsg, ExceptionCodes.APPLICATION_EXPORT_ERROR);
             }
         } catch (APIManagementException e) {
             String errorMsg = "Unable to find Application Details at: " + applicationArtifactBaseDirectoryPath;
-            throw new APIMgtEntityImportExportException(errorMsg, ExceptionCodes.APPLICATION_IMPORT_ERROR);
+            throw new APIMgtEntityImportExportException(errorMsg, ExceptionCodes.APPLICATION_EXPORT_ERROR);
         }
-
         return applicationArtifactBaseDirectoryPath;
     }
 
-    //create a zip archive of the export directory
+    /**
+     * Creates an archive of the contained application details.
+     *
+     * @param sourceDirectory Directory which contains source file
+     * @param archiveLocation Directory to generate the zip archive
+     * @param archiveName     Name of the zip archive
+     * @return path to the created archive file
+     * @throws APIMgtEntityImportExportException
+     */
     public String createArchiveFromExportedAppArtifacts(String sourceDirectory, String archiveLocation,
                                                         String archiveName) throws APIMgtEntityImportExportException {
-
         String archivedFilePath = null;
         try {
             APIFileUtils.archiveDirectory(sourceDirectory, archiveLocation, archiveName);
-
         } catch (APIManagementException e) {
             // cleanup the archive root directory
             try {
@@ -129,7 +125,6 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
             String errorMsg = "Error while archiving directory " + sourceDirectory;
             throw new APIMgtEntityImportExportException(errorMsg, e, ExceptionCodes.APPLICATION_EXPORT_ERROR);
         }
-
         archivedFilePath = archiveLocation + File.separator + archiveName + ".zip";
         return archivedFilePath;
     }
@@ -138,7 +133,7 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
      * Import a given Application from an InputStream
      *
      * @param uploadedAppArchiveInputStream Content stream of the zip file which contains exported Application
-     * @return details of the imported application
+     * @return the imported application
      * @throws APIMgtEntityImportExportException
      */
     public Application importApplication(InputStream uploadedAppArchiveInputStream)
@@ -156,12 +151,17 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
             log.error(errorMsg, e);
             throw new APIMgtEntityImportExportException(errorMsg, e, ExceptionCodes.APPLICATION_IMPORT_ERROR);
         }
-
         Application applicationDetails = parseApplicationFile(archiveExtractLocation);
         return applicationDetails;
-
     }
 
+    /**
+     * Extracts the details of an Application from a json file
+     *
+     * @param applicationDetailsFilePath Directory which contains the json file
+     * @return an application object containing the details extracted from the json file
+     * @throws APIMgtEntityImportExportException
+     */
     private Application parseApplicationFile(String applicationDetailsFilePath)
             throws APIMgtEntityImportExportException {
         String applicationDetailsString;
@@ -172,14 +172,11 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
             String errorMsg = "Unable to read application details from file at " + applicationDetailsFilePath;
             throw new APIMgtEntityImportExportException(errorMsg, e);
         }
-
         //convert to bean
         Gson gson = new GsonBuilder().create();
         //returns an application object from a json string
         Application applicationDetails = gson.fromJson(applicationDetailsString, Application.class);
-
         return applicationDetails;
-
     }
 
     /**
@@ -193,15 +190,12 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
             throws IOException {
         String applicationFileLocation = exportLocation + File.separator + application.getName() +
                 APIMgtConstants.APIFileUtilConstants.JSON_EXTENSION;
-
         Gson gson = new Gson();
-
         try (FileOutputStream fileOutputStream = new FileOutputStream(applicationFileLocation);
              OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream,
                      StandardCharsets.UTF_8)) {
             gson.toJson(application, outputStreamWriter);
         }
-
     }
 
     /**
@@ -222,7 +216,6 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
         String archiveExtractLocation;
         String archiveName;
         String extractedFilePath = null;
-
         // create api import directory structure
         APIFileUtils.createDirectory(extractLocation);
         // create archive
@@ -232,9 +225,7 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
         archiveName = APIFileUtils.extractArchive(appArchiveLocation, archiveExtractLocation);
         extractedFilePath = archiveExtractLocation + File.separator + archiveName + File.separator +
                 archiveName + ".json";
-
         return extractedFilePath;
     }
-
 }
 

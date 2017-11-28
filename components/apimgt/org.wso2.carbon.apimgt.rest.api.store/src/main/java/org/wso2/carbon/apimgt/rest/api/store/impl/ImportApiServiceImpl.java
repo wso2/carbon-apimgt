@@ -38,7 +38,6 @@ import java.io.InputStream;
 import java.util.UUID;
 import javax.ws.rs.core.Response;
 
-
 public class ImportApiServiceImpl extends ImportApiService {
 
     private static final Logger log = LoggerFactory.getLogger(ImportApiServiceImpl.class);
@@ -74,7 +73,6 @@ public class ImportApiServiceImpl extends ImportApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-
     }
 
     @Override
@@ -83,7 +81,6 @@ public class ImportApiServiceImpl extends ImportApiService {
 
         APIStore consumer = null;
         String username = RestApiUtil.getLoggedInUsername(request);
-
         try {
             consumer = RestApiUtil.getConsumer(RestApiUtil.getLoggedInUsername(request));
             FileBasedApplicationImportExportManager importExportManager = new FileBasedApplicationImportExportManager
@@ -100,7 +97,5 @@ public class ImportApiServiceImpl extends ImportApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler());
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
         }
-
     }
-
 }

@@ -2171,7 +2171,7 @@ paths:
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\"
       https://localhost:9292/api/am/store/v1.0/export/applications?appId=xxx > exported-application.zip"
       x-wso2-request: |
-        GET https://127.0.0.1:9292/api/am/store/v1.0/export/applications?query=xxx
+        GET https://127.0.0.1:9292/api/am/store/v1.0/export/applications?appId=xxx
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK\n Connection: keep-alive\n  Content-Disposition: attachment;
        filename=\"exported-applications.zip\"\n  Content-Type: application/zip"
@@ -2186,7 +2186,7 @@ paths:
           required: true
           type: string
       tags:
-        - Export Configuration
+        - Application (Individual)
       responses:
         200:
           description: |
@@ -2202,7 +2202,7 @@ paths:
         404:
           description: |
             Not Found.
-            Requested API does not exist.
+            Requested Application does not exist.
           schema:
             $ref: '#/definitions/Error'
         406:
@@ -2234,7 +2234,7 @@ paths:
       x-wso2-request: |
         PUT https://127.0.0.1:9292/api/am/store/v1.0/import/applications
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\"name\":\"sampleApp2\",\"uuid\":\"5e3ac21a-cc14-4404-95f1-659900c165c4\",\"description\":\"sample app 2\",\"policy\":{\"uuid\":\"5b74ec82-264e-4104-91ef-fdd41b981798\",\"policyName\":\"50PerMin\",\"isDeployed\":false},\"status\":\"APPROVED\",\"createdUser\":\"admin\",\"createdTime\":{\"date\":{\"year\":2017,\"month\":11,\"day\":8},\"time\":{\"hour\":4,\"minute\":10,\"second\":4,\"nano\":434000000}}}"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type:application/json\n\n{\"applicationUUID\":\"645b8e32-3643-48e5-ab42-aed853a8cd77\",\"workflowResponse\":{\"workflowStatus\":\"APPROVED\"}}"
       summary: Imports an Updates an Application.
       description: |
         This operation can be used to import an existing Application.
@@ -2246,7 +2246,7 @@ paths:
           required: true
           type: file
       tags:
-        - Import Configuration
+        - Application (Individual)
       responses:
         200:
           description: |

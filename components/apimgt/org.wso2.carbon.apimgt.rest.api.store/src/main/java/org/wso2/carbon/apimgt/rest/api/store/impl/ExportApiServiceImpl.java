@@ -49,7 +49,6 @@ public class ExportApiServiceImpl extends ExportApiService {
      * @return Zip file containing exported Applications
      * @throws NotFoundException When the particular resource does not exist in the system
      */
-
     @Override
     public Response exportApplicationsGet(String appId, Request request)
             throws NotFoundException {
@@ -60,7 +59,6 @@ public class ExportApiServiceImpl extends ExportApiService {
         String exportedAppDirName = "exported-application";
         String pathToExportDir = System.getProperty("java.io.tmpdir") + File.separator + "exported-app-archives-" +
                 UUID.randomUUID().toString(); //creates a directory in default temporary-file directory
-
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             consumer = RestApiUtil.getConsumer(username);
@@ -95,7 +93,6 @@ public class ExportApiServiceImpl extends ExportApiService {
                 .header("Content-Disposition", "attachment; filename=\"" + exportedApplicationArchiveFile
                         .getName() + "\"");
         Response response = responseBuilder.build();
-
         return response;
     }
 }
