@@ -62,7 +62,7 @@ public class ServiceDiscovererKubernetesTestCase {
         }
     }
 
-    @Test(description = "Test init method while external service account token file name is Given")
+    @Test(description = "Test init method with external service account token file name")
     public void testInitWhileExternalTokenFileNameGiven() throws Exception {
         OpenShiftClient openShiftClient = Mockito.mock(OpenShiftClient.class);
 
@@ -72,7 +72,7 @@ public class ServiceDiscovererKubernetesTestCase {
             sdKubernetes.initImpl(createImplParametersMap("TestK8Token"));
         } catch (ServiceDiscoveryException e) {
             Assert.assertEquals(e.getCause().getMessage(),
-                    "File to encrypt does not exist");
+                    "File to decrypt does not exist");
         }
     }
 

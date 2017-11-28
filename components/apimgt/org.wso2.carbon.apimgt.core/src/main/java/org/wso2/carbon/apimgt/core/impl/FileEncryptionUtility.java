@@ -98,24 +98,26 @@ public class FileEncryptionUtility {
      * @throws APIManagementException  if an error occurs encrypting the file
      */
     public void encryptFile(String inputFilePath, String outputFilePath) throws APIManagementException {
+        InputStream inputStream = null;
+        CipherOutputStream cipherOutStream = null;
         try {
             Cipher aesCipher = Cipher.getInstance(EncryptionConstants.AES);
             SecretKeySpec aesKeySpec = new SecretKeySpec(getAESKey(), EncryptionConstants.AES);
             aesCipher.init(Cipher.ENCRYPT_MODE, aesKeySpec);
 
             Files.deleteIfExists(Paths.get(outputFilePath));
-            InputStream inputStream = APIFileUtils.readFileContentAsStream(inputFilePath);
-            CipherOutputStream cipherOutStream = new CipherOutputStream(
+            inputStream = APIFileUtils.readFileContentAsStream(inputFilePath);
+            cipherOutStream = new CipherOutputStream(
                     new FileOutputStream(outputFilePath), aesCipher);
             IOUtils.copy(inputStream, cipherOutStream);
-            inputStream.close();
-            cipherOutStream.close();
             APIFileUtils.deleteFile(inputFilePath);
             log.debug("Successfully encrypted file using stored AES key");
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | IOException | InvalidKeyException e) {
             String msg = "Error while encrypting the file at " + inputFilePath;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+            IOUtils.closeQuietly(cipherOutStream);
         }
     }
 
@@ -127,27 +129,29 @@ public class FileEncryptionUtility {
      * @throws APIManagementException if an error occurs while reading from the encrypted file
      */
     public String readFromEncryptedFile(String inputFilePath) throws APIManagementException {
+        CipherInputStream cipherInStream = null;
+        ByteArrayOutputStream byteArrayOutStream = null;
         try {
             if (!Files.exists(Paths.get(inputFilePath))) {
-                throw new APIManagementException("File to encrypt does not exist");
+                throw new APIManagementException("File to decrypt does not exist");
             }
             Cipher aesCipher = Cipher.getInstance(EncryptionConstants.AES);
             SecretKeySpec aesKeySpec = new SecretKeySpec(getAESKey(), EncryptionConstants.AES);
             aesCipher.init(Cipher.DECRYPT_MODE, aesKeySpec);
 
-            CipherInputStream cipherInStream = new CipherInputStream(
+            cipherInStream = new CipherInputStream(
                     APIFileUtils.readFileContentAsStream(inputFilePath), aesCipher);
-            ByteArrayOutputStream byteArrayOutStream = new ByteArrayOutputStream();
+            byteArrayOutStream = new ByteArrayOutputStream();
             IOUtils.copy(cipherInStream, byteArrayOutStream);
             byte[] outByteArray = byteArrayOutStream.toByteArray();
-            cipherInStream.close();
-            byteArrayOutStream.close();
             log.debug("Successfully decrypted file using stored AES key");
             return new String(SecureVaultUtils.toChars(outByteArray));
         } catch (IOException | InvalidKeyException | NoSuchPaddingException | NoSuchAlgorithmException e) {
             String msg = "Error while decrypting file " + inputFilePath;
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
+        } finally {
+            IOUtils.closeQuietly(cipherInStream);
+            IOUtils.closeQuietly(byteArrayOutStream);
         }
     }
 
@@ -190,7 +194,6 @@ public class FileEncryptionUtility {
         } catch (NoSuchAlgorithmException | SecureVaultException | NullPointerException |
                 APIMgtDAOException | IOException e) {
             String msg = "Error while creating or storing created AES key";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
     }
@@ -210,11 +213,9 @@ public class FileEncryptionUtility {
             aesKey = getSecureVault().decrypt(encryptedAesKeyB);
         } catch (APIMgtDAOException e) {
             String msg = "Error while retrieving stored AES key";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         } catch (SecureVaultException e) {
             String msg = "Error while decrypting AES key";
-            log.error(msg, e);
             throw new APIManagementException(msg, e);
         }
         return aesKey;

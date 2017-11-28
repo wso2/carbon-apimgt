@@ -2127,11 +2127,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             }
         } catch (ServiceDiscoveryException e) {
             String msg = "Error while Discovering Service Endpoints";
-            log.error(msg, e);
             throw new APIManagementException(msg, e, e.getErrorHandler());
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             String msg = "Error while Loading Service Discovery Impl Class";
-            log.error(msg, e);
             throw new APIManagementException(msg, e, ExceptionCodes.ERROR_LOADING_SERVICE_DISCOVERY_IMPL_CLASS);
         }
         return discoveredEndpointList;

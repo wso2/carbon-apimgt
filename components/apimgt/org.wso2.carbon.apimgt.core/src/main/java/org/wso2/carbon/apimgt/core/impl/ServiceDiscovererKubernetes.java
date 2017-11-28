@@ -84,11 +84,9 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
             setClient(new DefaultOpenShiftClient(buildConfig(implParameters)));
         } catch (KubernetesClientException | APIMgtDAOException e) {
             String msg = "Error occurred while creating Kubernetes client";
-            log.error(msg, e);
             throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_INITIALIZING_SERVICE_DISCOVERY);
         } catch (ArrayIndexOutOfBoundsException e) {
             String msg = "Error occurred while reading filtering criteria from the configuration";
-            log.error(msg, e);
             throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_INITIALIZING_SERVICE_DISCOVERY);
         }
         includeClusterIP = Boolean.parseBoolean(implParameters.get(INCLUDE_CLUSTER_IPS));
@@ -148,8 +146,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
             token = FileEncryptionUtility.getInstance().readFromEncryptedFile(externalSATokenFilePath);
         } catch (APIManagementException e) {
             String msg = "Error occurred while resolving externally stored token";
-            log.error(msg, e);
-            throw new ServiceDiscoveryException(msg, e);
+            throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_INITIALIZING_SERVICE_DISCOVERY);
         }
         return token;
     }
@@ -167,7 +164,6 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
                 addServicesToEndpointList(serviceList, endpointList);
             } catch (KubernetesClientException | MalformedURLException e) {
                 String msg = "Error occurred while trying to list services using Kubernetes client";
-                log.error(msg, e);
                 throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_TRYING_TO_DISCOVER_SERVICES);
             }
         }
@@ -187,7 +183,6 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
                 addServicesToEndpointList(serviceList, endpointList);
             } catch (KubernetesClientException | MalformedURLException e) {
                 String msg = "Error occurred while trying to list services using Kubernetes client";
-                log.error(msg, e);
                 throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_TRYING_TO_DISCOVER_SERVICES);
             }
         }
@@ -209,11 +204,9 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
                 addServicesToEndpointList(serviceList, endpointList);
             } catch (KubernetesClientException | MalformedURLException e) {
                 String msg = "Error occurred while trying to list services using Kubernetes client";
-                log.error(msg, e);
                 throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_TRYING_TO_DISCOVER_SERVICES);
             } catch (NoSuchMethodError e) {
                 String msg = "Filtering criteria in the deployment yaml includes unwanted characters";
-                log.error(msg, e);
                 throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_TRYING_TO_DISCOVER_SERVICES);
             }
         }
@@ -235,11 +228,9 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
                 addServicesToEndpointList(serviceList, endpointList);
             } catch (KubernetesClientException | MalformedURLException e) {
                 String msg = "Error occurred while trying to list services using Kubernetes client";
-                log.error(msg, e);
                 throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_TRYING_TO_DISCOVER_SERVICES);
             } catch (NoSuchMethodError e) {
                 String msg = "Filtering criteria in the deployment yaml includes unwanted characters";
-                log.error(msg, e);
                 throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_WHILE_TRYING_TO_DISCOVER_SERVICES);
             }
         }
