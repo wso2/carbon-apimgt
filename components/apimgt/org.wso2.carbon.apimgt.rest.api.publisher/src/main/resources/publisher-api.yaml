@@ -3323,7 +3323,6 @@ definitions:
           - PUBLIC
           - PRIVATE
           - RESTRICTED
-          - CONTROLLED
         example: PUBLIC
       visibleRoles:
         type: array
