@@ -26,7 +26,7 @@ function loadConfigs () {
             dto:GatewayConfDTO gatewayConfDTO = gatewayUtil:fromJsonToGatewayConfDTO(conf);
             holders:setGatewayConf(gatewayConfDTO);
         } catch (errors:Error error) {
-            system:println("WARNING : analytics configuration not found");
+            system:println("WARNING : gateway configuration not found");
         }
     }
 }

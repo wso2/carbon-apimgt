@@ -225,9 +225,19 @@ function validateScopes (dto:ResourceDto resourceDto, dto:IntrospectDto introspe
 function constructAPIKeyValidationDto (dto:SubscriptionDto subscriptionDto, dto:ResourceDto resourceDto) (dto:KeyValidationDto ) {
     dto:KeyValidationDto keyValidationInfoDTO = {};
     dto:ApplicationDto applicationDto = holder:getFromApplicationCache(subscriptionDto.applicationId);
-    keyValidationInfoDTO.username = applicationDto.applicationOwner;
-    dto:PolicyDto applicationPolicy = holder:getFromPolicyCache(applicationDto.applicationPolicy);
-    keyValidationInfoDTO.applicationPolicy = applicationPolicy.name;
+
+    if (applicationDto != null) {
+        keyValidationInfoDTO.username = applicationDto.applicationOwner;
+        dto:PolicyDto applicationPolicy = holder:getFromPolicyCache(applicationDto.applicationPolicy);
+        keyValidationInfoDTO.applicationPolicy = applicationPolicy.name;
+        keyValidationInfoDTO.applicationName = applicationDto.applicationName;
+        keyValidationInfoDTO.subscriber = applicationDto.applicationOwner;
+    } else {
+        keyValidationInfoDTO.username = subscriptionDto.consumerKey;
+        keyValidationInfoDTO.applicationPolicy = "";
+        keyValidationInfoDTO.applicationName = "";
+        keyValidationInfoDTO.subscriber ="";
+    }
     dto:PolicyDto subscriptionPolicy = holder:getFromPolicyCache(subscriptionDto.subscriptionPolicy);
     keyValidationInfoDTO.subscriptionPolicy = subscriptionPolicy.name;
     keyValidationInfoDTO.stopOnQuotaReach = subscriptionPolicy.stopOnQuotaReach;
@@ -241,10 +251,9 @@ function constructAPIKeyValidationDto (dto:SubscriptionDto subscriptionDto, dto:
     keyValidationInfoDTO.apiContext = subscriptionDto.apiContext;
     keyValidationInfoDTO.apiVersion = subscriptionDto.apiVersion;
     keyValidationInfoDTO.applicationId = subscriptionDto.applicationId;
-    keyValidationInfoDTO.applicationName = applicationDto.applicationName;
     keyValidationInfoDTO.keyType = subscriptionDto.keyEnvType;
-    keyValidationInfoDTO.subscriber = applicationDto.applicationOwner;
     keyValidationInfoDTO.resourcePath = resourceDto.uriTemplate;
+
     return keyValidationInfoDTO;
 }
 

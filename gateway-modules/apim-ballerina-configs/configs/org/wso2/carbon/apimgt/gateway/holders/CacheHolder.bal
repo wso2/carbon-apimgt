@@ -138,15 +138,14 @@ function putIntoApplicationCache (dto:ApplicationDto applicationDto) {
     caching:putCacheEntry(constants:APPLICATION_CACHE, applicationDto.applicationId, applicationDto);
 }
 function getFromApplicationCache (string applicationId) (dto:ApplicationDto) {
-        any application = caching:getCacheEntry(constants:APPLICATION_CACHE, applicationId);
-        if (application != null) {
-            dto:ApplicationDto dto;
-            errors:TypeCastError err;
-            dto, err = (dto:ApplicationDto)application;
-            return dto;
-        } else {
-            dto:ApplicationDto emptyDto = {};
-            return emptyDto;
+    any application = caching:getCacheEntry(constants:APPLICATION_CACHE, applicationId);
+    if (application != null) {
+        dto:ApplicationDto dto;
+        errors:TypeCastError err;
+        dto, err = (dto:ApplicationDto)application;
+        return dto;
+    } else {
+        return null;
     }
 }
 
