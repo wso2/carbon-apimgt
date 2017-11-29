@@ -27,6 +27,7 @@ function getFromTokenCache (string key) (dto:IntrospectDto) {
 function putIntoTokenCache (string key, dto:IntrospectDto introspectDto) {
     caching:putCacheEntry(constants:TOKEN_CACHE, key, introspectDto);
 }
+
 function getFromSubscriptionCache (string apiContext, string version, string consumerKey) (dto:SubscriptionDto) {
     string key = apiContext + ":" + version + ":" + consumerKey;
     any subscription = caching:getCacheEntry(constants:SUBSCRIPTION_CACHE, key);
@@ -39,11 +40,14 @@ function getFromSubscriptionCache (string apiContext, string version, string con
         return null;
     }
 }
+
 function putIntoSubscriptionCache (dto:SubscriptionDto subscriptionDto) {
     string key = subscriptionDto.apiContext + ":" + subscriptionDto.apiVersion + ":" + subscriptionDto.consumerKey;
     caching:putCacheEntry(constants:SUBSCRIPTION_CACHE, key, subscriptionDto);
 }
-function getFromResourceCache (string apiContext, string apiVersion, string resourceUri, string httpVerb) (dto:ResourceDto) {
+function getFromResourceCache (string apiContext, string apiVersion, string resourceUri, string httpVerb)
+(dto:ResourceDto) {
+
     string internalKey = resourceUri + ":" + httpVerb;
     string key = apiContext + ":" + apiVersion;
     any resourceMapEntry = caching:getCacheEntry(constants:RESOURCE_CACHE, key);
@@ -144,6 +148,7 @@ function getFromApplicationCache (string applicationId) (dto:ApplicationDto) {
         return null;
     }
 }
+
 function removeApplicationFromCache (string applicationId) {
     caching:removeCacheEntry(constants:APPLICATION_CACHE, applicationId);
 }
@@ -194,15 +199,16 @@ function putIntoPolicyCache (dto:PolicyDto policyDto) {
     caching:putCacheEntry(constants:POLICY_CACHE, policyDto.id, policyDto);
 }
 function getFromPolicyCache (string id) (dto:PolicyDto) {
-    any policy = caching:getCacheEntry(constants:POLICY_CACHE, id);
-    if (policy != null) {
-        dto:PolicyDto dto;
-        errors:TypeCastError err;
-        dto, err = (dto:PolicyDto)policy;
-        return dto;
-    } else {
-        return null;
-    }
+            any policy = caching:getCacheEntry(constants:POLICY_CACHE, id);
+            if (policy != null) {
+                dto:PolicyDto dto;
+                errors:TypeCastError err;
+                dto, err = (dto:PolicyDto)policy;
+                return dto;
+            } else {
+                dto:PolicyDto emptyDto = {};
+                return emptyDto;
+            }
 }
 function removeFromPolicyCache (string id) {
     caching:removeCacheEntry(constants:POLICY_CACHE, id);

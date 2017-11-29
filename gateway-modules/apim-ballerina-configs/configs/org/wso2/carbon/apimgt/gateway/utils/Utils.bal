@@ -7,7 +7,6 @@ import ballerina.net.http;
 import org.wso2.carbon.apimgt.gateway.dto as dto;
 import org.wso2.carbon.apimgt.gateway.holders as holders;
 import org.wso2.carbon.apimgt.gateway.constants;
-
 errors:TypeCastError err;
 
 function constructAccessTokenNotFoundPayload (message response) {
@@ -115,7 +114,6 @@ function putIntoSubscriptionCache (json subscriptions) {
         holders:putIntoSubscriptionCache(subscriptionDto);
         i = i + 1;
     }
-
 }
 
 function removeFromSubscriptionCache (json subscriptions) {
@@ -146,6 +144,7 @@ function retrieveResources (string apiContext, string apiVersion) {
         i = i + 1;
     }
 }
+
 function retrieveApplications () (boolean) {
     string query = "/api/am/core/v1.0/applications";
     message request = {};
@@ -164,6 +163,7 @@ function retrieveApplications () (boolean) {
     }
     return true;
 }
+
 function retrievePolicies () (boolean) {
     string query = "/api/am/core/v1.0/policies";
     message request = {};
@@ -220,15 +220,14 @@ function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO) {
     json keyManagerCredentials = keyManagerInfo.credentials;
     keyManagerCredentialsDTO.username, err = (string)keyManagerCredentials.username;
     keyManagerCredentialsDTO.password, err = (string)keyManagerCredentials.password;
-    gatewayConf.keyManagerInfo = keyManagerInfoDTO;
     keyManagerInfoDTO.credentials = keyManagerCredentialsDTO;
+    gatewayConf.keyManagerInfo = keyManagerInfoDTO;
     //Extract JWT information and populate JWTInfoDTO to be cached
     json jwTInfo = conf.jwTInfo;
     dto:JWTInfoDTO jwtInfoDTO = {};
     jwtInfoDTO.enableJWTGeneration, err = (boolean)jwTInfo.enableJWTGeneration;
     jwtInfoDTO.jwtHeader, err = (string)jwTInfo.jwtHeader;
     gatewayConf.jwtInfo = jwtInfoDTO;
-
     //todo: pass the missed attributes from APIM core
     //Extract Analytics Server information and populate AnalyticsInfoDTO to be cached
     json analyticsInfo = conf.analyticsInfo;
@@ -243,7 +242,6 @@ function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO) {
     analyticsServerCredentialsDTO.password, err = (string)analyticsServerCredentials.password;
     analyticsInfoDTO.credentials = analyticsServerCredentialsDTO;
     gatewayConf.analyticsInfo = analyticsInfoDTO;
-
     //Extract Throttling Server information and populate ThrottlingInfoDTO to be cached
     json throttlingInfo = conf.throttlingInfo;
     dto:ThrottlingInfoDTO throttlingInfoDTO = {};
@@ -257,14 +255,12 @@ function fromJsonToGatewayConfDTO (json conf) (dto:GatewayConfDTO) {
     throttlingServerCredentialsDTO.password, err = (string)throttlingServerCredentials.password;
     throttlingInfoDTO.credentials = throttlingServerCredentialsDTO;
     gatewayConf.throttlingInfo = throttlingInfoDTO;
-
     //Extract Google Analytics Tracking information and populate GAnalyticsTrackingInfoDTO
     json googleAnalyticsTrackingInfo = conf.googleAnalyticsTrackingInfo;
     dto:GAnalyticsTrackingInfoDTO gAnalyticsTrackingInfoDTO = {};
     gAnalyticsTrackingInfoDTO.enabled, err = (boolean)googleAnalyticsTrackingInfo.enabled;
     gAnalyticsTrackingInfoDTO.trackingID, err = (string)googleAnalyticsTrackingInfo.trackingID;
     gatewayConf.gAnalyticsTrackingInfo = gAnalyticsTrackingInfoDTO;
-
     return gatewayConf;
 }
 

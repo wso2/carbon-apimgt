@@ -190,7 +190,6 @@ function setInvalidUser(message msg){
 
 function publishEvent(message m, string userId, string applicationId, string apiContext, string apiVersion,string apiTier,
                       string applicationTier, string subscriptionTier, string resourceLevelThrottleKey, string resourceTier,string ip) {
-
     string messageID = "messageID";
     string appKey = applicationId+ ":" + userId;
     string subscriptionKey = applicationId + ":" + apiContext + ":" + apiVersion;

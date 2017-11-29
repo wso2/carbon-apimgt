@@ -87,7 +87,6 @@ function handleThrottleUpdateMessage(json event){
 
 
 function handleKeyTemplateMessage(json event) {
-
     string eventMsg;
     errors:TypeCastError err;
     eventMsg, err = (string )event[Constants:KEY_TEMPLATE_KEY];

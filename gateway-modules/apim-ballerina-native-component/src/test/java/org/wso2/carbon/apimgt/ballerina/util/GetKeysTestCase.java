@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.ballerina.util;
 
-import org.ballerinalang.model.values.BBoolean;
+import org.ballerinalang.model.values.BStringArray;
 import org.ballerinalang.model.values.BValue;
 import org.ballerinalang.util.codegen.ProgramFile;
 import org.ballerinalang.util.program.BLangFunctions;
@@ -28,36 +28,40 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.ballerina.caching.util.BTestUtils;
 
 /**
- * Cache Test class which handles caching test for ballerina     native cache implementation for API Manager
+ * Cache Test class which handles caching test for ballerina native cache implementation for API Manager
  *
  * @since 0.10-SNAPSHOT
  */
-public class JSONParseTestCase {
+
+public class GetKeysTestCase {
     private ProgramFile bLangProgram;
-    private static final String s1 = "WSO2 Inc.";
 
     @BeforeClass
     public void setup() {
-        bLangProgram = BTestUtils.parseBalFile("samples/util/jsonParse.bal");
+        bLangProgram = BTestUtils.parseBalFile("samples/util/jsonGetKeys.bal");
     }
 
-    @Test
-    public void testSetProperty() {
-        //Create arguments to initiate cache
+    @Test(description = "Get keys from a JSON object")
+    public void testGetKeys() {
         BValue[] args = {};
-        //Test ballerina cache create, put and get
-        BValue[] returns = BLangFunctions.invokeNew(bLangProgram, "testParseJson", args);
-        //Assert if cache entry is BValue
-        Assert.assertTrue(returns[0] instanceof BBoolean);
-        Assert.assertTrue(((BBoolean) returns[0]).booleanValue());
+        BValue[] returns = BLangFunctions.invokeNew(bLangProgram, "testGetKeys", args);
+
+        Assert.assertTrue(returns[0] instanceof BStringArray);
+        BStringArray keys = (BStringArray) returns[0];
+        Assert.assertEquals(keys.size(), 3);
+        Assert.assertEquals(keys.get(0), "fname");
+        Assert.assertEquals(keys.get(1), "lname");
+        Assert.assertEquals(keys.get(2), "age");
+
+        Assert.assertTrue(returns[1] instanceof BStringArray);
+        Assert.assertEquals(((BStringArray) returns[1]).size(), 0);
+
+        Assert.assertTrue(returns[2] instanceof BStringArray);
+        Assert.assertEquals(((BStringArray) returns[2]).size(), 0);
+
+        Assert.assertTrue(returns[3] instanceof BStringArray);
+        Assert.assertEquals(((BStringArray) returns[3]).size(), 0);
+
     }
 
-    @Test
-    public void testInvalidJson() {
-        BValue[] args = {};
-        //Test ballerina json parse
-        BValue[] returns = BLangFunctions.invokeNew(bLangProgram, "testInvalidJson", args);
-        Assert.assertTrue(returns[0] instanceof BBoolean);
-        Assert.assertFalse(((BBoolean) returns[0]).booleanValue());
-    }
 }

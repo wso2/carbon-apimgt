@@ -43,7 +43,6 @@ function authenticate (message m) (boolean, message) {
     //todo need to have elected resource to be in properties
     string uriTemplate = "/";
     string httpVerb = strings:toUpperCase(http:getMethod(m));
-
     string authHeader;
     string apikeyHeader;
     errors:Error authErr = null;
@@ -52,7 +51,6 @@ function authenticate (message m) (boolean, message) {
     //check api status
     string apiIdentifier = apiContext + ":" + version;
     dto:APIDTO apiDto = holder:getFromAPICache(apiIdentifier);
-
     if (apiDto == null){
         http:setStatusCode(response, 404);
         return false, response;
@@ -62,9 +60,7 @@ function authenticate (message m) (boolean, message) {
         gatewayUtil:constructAPIIsInMaintenance(response);
         return false, response;
     }
-
     resourceDto = validateResource(apiContext, version, uriTemplate, httpVerb);
-
     if (resourceDto == null) {
         http:setStatusCode(response, 404);
         return false, response;
@@ -229,9 +225,19 @@ function validateScopes (dto:ResourceDto resourceDto, dto:IntrospectDto introspe
 function constructAPIKeyValidationDto (dto:SubscriptionDto subscriptionDto, dto:ResourceDto resourceDto) (dto:KeyValidationDto ) {
     dto:KeyValidationDto keyValidationInfoDTO = {};
     dto:ApplicationDto applicationDto = holder:getFromApplicationCache(subscriptionDto.applicationId);
-    keyValidationInfoDTO.username = applicationDto.applicationOwner;
-    dto:PolicyDto applicationPolicy = holder:getFromPolicyCache(applicationDto.applicationPolicy);
-    keyValidationInfoDTO.applicationPolicy = applicationPolicy.name;
+
+    if (applicationDto != null) {
+        keyValidationInfoDTO.username = applicationDto.applicationOwner;
+        dto:PolicyDto applicationPolicy = holder:getFromPolicyCache(applicationDto.applicationPolicy);
+        keyValidationInfoDTO.applicationPolicy = applicationPolicy.name;
+        keyValidationInfoDTO.applicationName = applicationDto.applicationName;
+        keyValidationInfoDTO.subscriber = applicationDto.applicationOwner;
+    } else {
+        keyValidationInfoDTO.username = subscriptionDto.consumerKey;
+        keyValidationInfoDTO.applicationPolicy = "";
+        keyValidationInfoDTO.applicationName = "";
+        keyValidationInfoDTO.subscriber ="";
+    }
     dto:PolicyDto subscriptionPolicy = holder:getFromPolicyCache(subscriptionDto.subscriptionPolicy);
     keyValidationInfoDTO.subscriptionPolicy = subscriptionPolicy.name;
     keyValidationInfoDTO.stopOnQuotaReach = subscriptionPolicy.stopOnQuotaReach;
@@ -245,10 +251,9 @@ function constructAPIKeyValidationDto (dto:SubscriptionDto subscriptionDto, dto:
     keyValidationInfoDTO.apiContext = subscriptionDto.apiContext;
     keyValidationInfoDTO.apiVersion = subscriptionDto.apiVersion;
     keyValidationInfoDTO.applicationId = subscriptionDto.applicationId;
-    keyValidationInfoDTO.applicationName = applicationDto.applicationName;
     keyValidationInfoDTO.keyType = subscriptionDto.keyEnvType;
-    keyValidationInfoDTO.subscriber = applicationDto.applicationOwner;
     keyValidationInfoDTO.resourcePath = resourceDto.uriTemplate;
+
     return keyValidationInfoDTO;
 }
 
@@ -290,18 +295,18 @@ function retrieveUserInfo (string token) (json) {
 }
 
 function isSubscriptionBlocked (dto:SubscriptionDto subscriptionDto, message response, dto:APIDTO apiDto)
-                                                                                                (boolean, message) {
+(boolean, message) {
     if (subscriptionDto.status == constants:SUBSCRIPTION_STATUS_BLOCKED) {
         gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
         return true, response;
     } else if ((subscriptionDto.status == constants:SUBSCRIPTION_STATUS_PROD_ONLY_BLOCKED) &&
-    (subscriptionDto.keyEnvType == constants:ENV_TYPE_PRODUCTION)) {
-            gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
-            return true, response;
+               (subscriptionDto.keyEnvType == constants:ENV_TYPE_PRODUCTION)) {
+        gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
+        return true, response;
     } else if ((subscriptionDto.status == constants:SUBSCRIPTION_STATUS_SANDBOX_ONLY_BLOCKED)
-      && (subscriptionDto.keyEnvType == constants:ENV_TYPE_SANDBOX)) {
-            gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
-            return true, response;
+               && (subscriptionDto.keyEnvType == constants:ENV_TYPE_SANDBOX)) {
+        gatewayUtil:constructSubscriptionBlocked(response, apiDto.context, apiDto.version);
+        return true, response;
     }
     return false, response;
 }
