@@ -1006,7 +1006,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     Map<String, Environment> gatewayEns = config.getApiGatewayEnvironments();
                     for (Environment environment : gatewayEns.values()) {
                         try {
-                            if(resourceVerbs != null){
+                            if (resourceVerbs != null) {
                                 for (URITemplate resourceVerb : resourceVerbs) {
                                     String resourceURLContext = resourceVerb.getUriTemplate();
                                     invalidateResourceCache(api.getContext(), api.getId().getVersion(),

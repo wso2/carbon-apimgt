@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.impl;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -108,7 +107,7 @@ public class APIProviderImplWrapper extends APIProviderImpl {
         final String POLICY_LOCATION = "src" + File.separator + "test" + File.separator + "resources"
                 + File.separator + "repository" + File.separator + "resources" + File.separator + "policy_templates"
                 + File.separator + "";
-        ThrottlePolicyTemplateBuilder policyBuilder =  new ThrottlePolicyTemplateBuilder();
+        ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
         policyBuilder.setPolicyTemplateLocation(POLICY_LOCATION);
         return policyBuilder;
     }

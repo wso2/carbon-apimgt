@@ -204,7 +204,7 @@ public class TestUtils {
         return subscriptionPolicy;
     }
 
-    public static TenantManager getTenantManager(){
+    public static TenantManager getTenantManager() {
         ServiceReferenceHolder serviceReferenceHolder = getServiceReferenceHolder();
         RealmService realmService = Mockito.mock(RealmService.class);
         TenantManager tenantManager = Mockito.mock(TenantManager.class);
