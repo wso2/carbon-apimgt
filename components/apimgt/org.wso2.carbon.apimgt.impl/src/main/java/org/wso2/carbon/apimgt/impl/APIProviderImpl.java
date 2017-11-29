@@ -1195,9 +1195,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // Throwing an error from this level will mask the original exception
                 log.error("Error while rolling back the transaction for API: " + api.getId().getApiName(), re);
             }
-            String msg = "Error while performing registry transaction operation";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            handleException("Error while performing registry transaction operation", e);
         } finally {
             try {
                 if (!transactionCommitted) {
@@ -1265,14 +1263,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             .getContext());
                 }
             } else {
-                String msg = "Couldn't find an API with the name-" + name + "version-" + version;
-                log.error(msg);
-                throw new APIManagementException(msg);
+                handleException("Couldn't find an API with the name-" + name + "version-" + version);
             }
         } catch (FaultGatewaysException e) {
-            String msg = "Error while publishing to/un-publishing from  API gateway";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            handleException("Error while publishing to/un-publishing from  API gateway", e);
+            return false;
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -2783,13 +2778,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             */
         } catch (RegistryException e) {
-            String msg = "Failed to remove the API from : " + path;
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            handleException("Failed to remove the API from : " + path, e);
         } catch (WorkflowException e) {
-            String msg = "Failed to execute workflow cleanup task ";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            handleException("Failed to execute workflow cleanup task ", e);
         }
     }
 
@@ -2854,9 +2845,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 foundApiList = searchAPIs(searchTerm, searchType);
 			}
 		} catch (APIManagementException e) {
-            String msg = "Failed to search APIs with type";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+		    handleException("Failed to search APIs with type", e);
 		}
 		Collections.sort(foundApiList, new APINameComparator());
 		return foundApiList;
@@ -2942,9 +2931,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 			}
 		} catch (RegistryException e) {
-            String msg = "Failed to search APIs with type";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+		    handleException("Failed to search APIs with type", e);
 		} finally {
 			if (isTenantFlowStarted) {
 				PrivilegedCarbonContext.endTenantFlow();
@@ -3334,9 +3321,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
 		} catch (Exception e) {
-            String msg = "Issue is in getting custom InSequences from the Registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+		    handleException("Issue is in getting custom InSequences from the Registry", e);
 		} finally {
 			if (isTenantFlowStarted) {
 				PrivilegedCarbonContext.endTenantFlow();
@@ -3408,9 +3393,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
 		} catch (Exception e) {
-            String msg = "Issue is in getting custom OutSequences from the Registry";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+		    handleException("Issue is in getting custom OutSequences from the Registry", e);
 		} finally {
 			if (isTenantFlowStarted) {
 				PrivilegedCarbonContext.endTenantFlow();
@@ -4362,13 +4345,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
         } catch (RegistryException e) {
-            String msg = "Failed to get all APIs";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            handleException("Failed to get all APIs", e);
         } catch (UserStoreException e) {
-            String msg = "Failed to get all APIs";
-            log.error(msg, e);
-            throw new APIManagementException(msg, e);
+            handleException("Failed to get all APIs", e);
         } finally {
             PaginationContext.destroy();
             if (isTenantFlowStarted) {
