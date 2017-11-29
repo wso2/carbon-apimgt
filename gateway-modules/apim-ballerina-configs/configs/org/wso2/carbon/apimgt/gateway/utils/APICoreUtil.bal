@@ -42,7 +42,7 @@ function getThreatProtectionPolicies() (json) {
         message response = http:ClientConnector.get(client, "/api/am/core/v1.0/threat-protection/policies", request);
         threatProtectionJsonPolicyList = messages:getJsonPayload(response);
     } catch (errors:Error error) {
-        system:println("Error occurred while retrieving ThreatProtection JSON Policy List from API Core. " + error.msg);
+        system:println("Error occurred while retrieving ThreatProtection Policy List from API Core. " + error.msg);
         throw error;
     }
     return threatProtectionJsonPolicyList;
