@@ -1,4 +1,4 @@
 {
     "isEnabledTutorial" : true,
-    "blackListedTenantDomainsFor_IntractiveTutorial" : []
+    "blackListedTenantDomains" : []
 }
