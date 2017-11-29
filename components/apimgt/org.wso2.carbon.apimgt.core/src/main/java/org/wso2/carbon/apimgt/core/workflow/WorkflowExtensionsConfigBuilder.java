@@ -43,7 +43,7 @@ public class WorkflowExtensionsConfigBuilder {
         try {
             workflowConfig = configProvider.getConfigurationObject(WorkflowConfig.class);
         } catch (CarbonConfigurationException e) {
-            logger.error("Error while loading the configuration for worlflow ", e);
+            logger.error("Error while loading the configuration for workflow ", e);
             //build default executors
             workflowConfig = new WorkflowConfig();
         }

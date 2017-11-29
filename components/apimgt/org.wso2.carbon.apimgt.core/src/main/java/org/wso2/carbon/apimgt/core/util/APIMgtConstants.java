@@ -515,5 +515,23 @@ public class APIMgtConstants {
     public static class LabelConstants {
         public static final String DEFAULT = "Default";
     }
-    
+
+    /**
+     * Service Discovery related constants
+     */
+    public static class ServiceDiscoveryConstants {
+        public static final String KUBERNETES_SERVICE_DISCOVERER =
+                "org.wso2.carbon.apimgt.core.impl.ServiceDiscovererKubernetes";
+
+        public static final String NAMESPACE = "namespace";
+        public static final String CRITERIA = "criteria";
+    }
+
+    /**
+     * Encryption related constants
+     */
+    public static class EncryptionConstants {
+        public static final String AES = "AES";
+        public static final String ENCRYPTED_AES_KEY_FILE = "encryptedAESKeyFile";
+    }
 }

@@ -500,7 +500,7 @@ public class MappingUtil {
 
     /**
      * Map WSDLInfo to APIDefinitionValidationResponseDTO
-     * 
+     *
      * @param info WSDLInfo object
      * @return {@link APIDefinitionValidationResponseDTO} based on provided {@link WSDLInfo} object
      */

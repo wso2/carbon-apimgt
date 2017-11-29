@@ -43,15 +43,15 @@ public class DefaultWorkflowExecutorTestCase {
         APIGateway apiGateway = Mockito.mock(APIGateway.class);
         Workflow workflow = new SubscriptionCreationWorkflow(apiSubscriptionDAO, workflowDAO, apiGateway);
    
-        WorkflowResponse respone = executor.execute(workflow);
+        WorkflowResponse response = executor.execute(workflow);
         
-        Assert.assertEquals(respone.getJSONPayload(), "");
-        Assert.assertEquals(respone.getWorkflowStatus(), WorkflowStatus.APPROVED);
+        Assert.assertEquals(response.getJSONPayload(), "");
+        Assert.assertEquals(response.getWorkflowStatus(), WorkflowStatus.APPROVED);
         
         workflow.setStatus(WorkflowStatus.APPROVED);
-        respone = executor.complete(workflow);
+        response = executor.complete(workflow);
         
-        Assert.assertEquals(respone.getWorkflowStatus(), WorkflowStatus.APPROVED);
+        Assert.assertEquals(response.getWorkflowStatus(), WorkflowStatus.APPROVED);
         
         executor.cleanUpPendingTask(workflow.getExternalWorkflowReference());
         

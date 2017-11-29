@@ -87,9 +87,7 @@ public class APIDTO   {
     
     PRIVATE("PRIVATE"),
     
-    RESTRICTED("RESTRICTED"),
-    
-    CONTROLLED("CONTROLLED");
+    RESTRICTED("RESTRICTED");
 
     private String value;
 

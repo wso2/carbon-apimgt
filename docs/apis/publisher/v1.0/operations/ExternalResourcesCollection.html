@@ -1,0 +1,180 @@
+<div class="main-content">
+    <h1><a name="External Resources (Collection)"></a>External Resources (Collection)</h1>
+
+            <hr/>
+            <h3 class="operation-heading"><a name="externalResourcesServicesGet"></a>Get all service endpoints after service discovery <br><small>GET https://apis.wso2.com/api/am/publisher/v1.0/external-resources/services</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to retrieve the list of service endpoints available in the cluster after a process of service discovery.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:external_services_discover</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:external_services_discover' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-externalResourcesServicesGet">
+                <h4 class="section-heading">
+                    Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+
+                <div id="request-externalResourcesServicesGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9292/api/am/publisher/v1.0/external-resources/services
+Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+</code></div>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-externalResourcesServicesGet">
+                <h4 class="section-heading">
+                    Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+                <div id="response-externalResourcesServicesGet" class="pre collapse in"><code class="json">HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  &quot;list&quot;: [
+    {
+      &quot;id&quot;: &quot;ds-0&quot;,
+      &quot;name&quot;: &quot;service-1&quot;,
+      &quot;endpointConfig&quot;: {
+        &quot;serviceUrl&quot;: &quot;http://192.168.56.1:8281&quot;,
+        &quot;serviceType&quot;: &quot;NodePort&quot;,
+        &quot;namespace&quot;: &quot;default&quot;
+      },
+      &quot;endpointSecurity&quot;: {
+        &quot;enabled&quot;: false
+      },
+      &quot;maxTps&quot;: 1000,
+      &quot;type&quot;: &quot;http&quot;
+    }
+  ],
+  &quot;count&quot;: 1
+}</code></div>
+
+            <h4 class="section-heading">Sample CURL</h4>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://127.0.0.1:9292/api/am/publisher/v1.0/external-resources/services&quot;</code></div>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-None-Match</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
+variant of the resourec.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>If-Modified-Since</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
+formerly retrieved variant of the resource.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. Service Endpoint list is returned with other details. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#EndPointList">EndPointList</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">304</p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+</div>

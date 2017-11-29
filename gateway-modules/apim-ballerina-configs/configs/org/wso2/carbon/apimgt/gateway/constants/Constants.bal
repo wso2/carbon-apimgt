@@ -83,3 +83,7 @@ const string GOOGLE_ANALYTICS_HIT_TYPE_PAGEVIEW = "pageView";
 const string X_FORWARDED_FOR_HEADER = "X-Forwarded-For";
 const string HTTP_HOST_HEADER = "HOST";
 const string HTTP_METHOD = "HTTP_METHOD";
+const string PRODUCTION = "PRODUCTION";
+const string SANDBOX = "SANDBOX";
+const string PUBLISHED = "PUBLISHED";
+

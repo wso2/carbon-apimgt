@@ -49,7 +49,8 @@ const resourcePath = {
     ENDPOINTS : "/endpoints",
     ENDPOINT : "/endpoints/{endpointId}",
     LABLES : "/labels",
-    WORKFLOW : "/workflows/{workflowReferenceId}"
+    WORKFLOW : "/workflows/{workflowReferenceId}",
+    SERVICE_DISCOVERY : "/external-resources/services"
 };
 
 const resourceMethod = {

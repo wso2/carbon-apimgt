@@ -240,6 +240,18 @@
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.squareup.okio</groupId>
+            <artifactId>okio</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
+            <artifactId>okhttp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.fabric8</groupId>
+            <artifactId>kubernetes-client</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

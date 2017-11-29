@@ -481,7 +481,7 @@ class API {
     getEndpoint(id) {
         return this.client.then(
             (client) => {
-                return client.apis["Endpoint (individual)"].get_endpoints_endpointId(
+                return client.apis["Endpoint (individual)"].get_endpoints__endpointId_(
                     {
                         endpointId: id,
                         'Content-Type': 'application/json'
@@ -498,13 +498,43 @@ class API {
     updateEndpoint(data) {
         return this.client.then(
             (client) => {
-                return client.apis["Endpoint (individual)"].put_endpoints_endpointId(
+                return client.apis["Endpoint (individual)"].put_endpoints__endpointId_(
                     {
                         endpointId: data.id,
                         body: data,
                         'Content-Type': 'application/json'
                     }, this._requestMetaData());
-            });
+            }
+        );
+    }
+
+    /**
+     * Check if an endpoint name already exists.
+     * @param name {String} Name of the Endpoint
+     * @returns {Promise.<TResult>}
+     */
+    checkIfEndpointExists(endpointName) {
+        return this.client.then(
+            (client) => {
+                return client.apis["Endpoint (Collection)"].head_endpoints(
+                    {
+                        name: endpointName
+                    }, this._requestMetaData());
+            }
+        );
+    }
+
+    /**
+     * Discovered Service Endpoints.
+     * @returns {Promise} Promised list of discovered services
+     */
+    discoverServices() {
+        return this.client.then(
+            (client) => {
+                return client.apis["External Resources (Collection)"].get_external_resources_services(
+                    {}, this._requestMetaData());
+            }
+        );
     }
 
 

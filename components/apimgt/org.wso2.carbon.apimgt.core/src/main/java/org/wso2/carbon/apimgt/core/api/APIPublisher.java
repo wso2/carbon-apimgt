@@ -586,4 +586,12 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException if failed to retrieve the policy
      */
     ThreatProtectionPolicy getThreatProtectionPolicy(String policyId) throws APIManagementException;
+
+    /**
+     * Discover and Return a list of service endpoints
+     *
+     * @return {@code List<Endpoint>}
+     * @throws APIManagementException If an error occurred while discovering services
+     */
+    List<Endpoint> discoverServiceEndpoints() throws APIManagementException;
 }
