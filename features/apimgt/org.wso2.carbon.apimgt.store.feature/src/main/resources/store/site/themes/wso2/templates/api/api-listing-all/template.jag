@@ -52,7 +52,7 @@ if (jagg.getUser() != null) {
 // used for the API Store intractive tutorial
 var tenantDomains_forTutorial = require("/site/conf/interactiveTutorial.json");
 var isEnabledTutorial = tenantDomains_forTutorial.isEnabledTutorial;
-var blackListedTenantDomains_forTutorial = stringify(tenantDomains_forTutorial.blackListedTenantDomainsFor_IntractiveTutorial);
+var blackListedTenantDomains_forTutorial = stringify(tenantDomains_forTutorial.blackListedTenantDomains);
 var apisCount = outputs.apis.length;
 var isEnabledTutorialForThisTenant = true;
 if (isEnabledTutorial && user && apisCount > 0) {

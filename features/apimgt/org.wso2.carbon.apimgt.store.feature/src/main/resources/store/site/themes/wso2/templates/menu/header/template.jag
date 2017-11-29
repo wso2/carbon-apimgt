@@ -23,7 +23,7 @@ if (jagg.getUser() != null) {
 }
 // used for the intractive tutorial
 var tenantDomains_forTutorial = require("/site/conf/interactiveTutorial.json");
-var blackListedTenantDomains_forTutorial = stringify(tenantDomains_forTutorial.blackListedTenantDomainsFor_IntractiveTutorial);
+var blackListedTenantDomains_forTutorial = stringify(tenantDomains_forTutorial.blackListedTenantDomains);
 var isEnabledTutorialForUsers = true;
 if (blackListedTenantDomains_forTutorial.indexOf(tenantDomain)>0) {
     isEnabledTutorialForUsers = false;
