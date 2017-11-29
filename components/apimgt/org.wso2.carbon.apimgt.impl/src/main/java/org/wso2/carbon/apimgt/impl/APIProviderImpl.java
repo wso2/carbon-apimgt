@@ -1006,18 +1006,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     Map<String, Environment> gatewayEns = config.getApiGatewayEnvironments();
                     for (Environment environment : gatewayEns.values()) {
                         try {
-                        APIAuthenticationAdminClient client =
-                                new APIAuthenticationAdminClient(environment);
-                        if(resourceVerbs != null){
-                            for (URITemplate resourceVerb : resourceVerbs) {
-                                String resourceURLContext = resourceVerb.getUriTemplate();
-                                client.invalidateResourceCache(api.getContext(), api.getId().getVersion(),
-                                        resourceURLContext, resourceVerb.getHTTPVerb());
-                                if (log.isDebugEnabled()) {
-                                    log.debug("Calling invalidation cache");
+                            if (resourceVerbs != null) {
+                                for (URITemplate resourceVerb : resourceVerbs) {
+                                    String resourceURLContext = resourceVerb.getUriTemplate();
+                                    invalidateResourceCache(api.getContext(), api.getId().getVersion(),
+                                            resourceURLContext, resourceVerb.getHTTPVerb(), environment);
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Calling invalidation cache");
+                                    }
                                 }
                             }
-                        }
                         } catch (AxisFault ex) {
                              /*
                             didn't throw this exception to handle multiple gateway publishing feature therefore
@@ -1566,12 +1564,20 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private Map<String, String> publishToGateway(API api) throws APIManagementException {
         Map<String, String> failedEnvironment;
         String tenantDomain = null;
+        APITemplateBuilder builder = null;
         if (api.getId().getProviderName().contains("AT")) {
             String provider = api.getId().getProviderName().replace("-AT-", "@");
             tenantDomain = MultitenantUtils.getTenantDomain( provider);
         }
 
-        failedEnvironment = publishToGateway(api, tenantDomain);
+        try {
+            builder = getAPITemplateBuilder(api);
+        } catch (Exception e) {
+            handleException("Error while publishing to Gateway ", e);
+        }
+
+        APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
+        failedEnvironment = gatewayManager.publishToGateway(api, builder, tenantDomain);
         if (log.isDebugEnabled()) {
             String logMessage = "API Name: " + api.getId().getApiName() + ", API Version " + api.getId().getVersion()
                     + " published to gateway";
@@ -2839,7 +2845,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 foundApiList = searchAPIs(searchTerm, searchType);
 			}
 		} catch (APIManagementException e) {
-			handleException("Failed to search APIs with type", e);
+		    handleException("Failed to search APIs with type", e);
 		}
 		Collections.sort(foundApiList, new APINameComparator());
 		return foundApiList;
@@ -2925,7 +2931,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 			}
 		} catch (RegistryException e) {
-			handleException("Failed to search APIs with type", e);
+		    handleException("Failed to search APIs with type", e);
 		} finally {
 			if (isTenantFlowStarted) {
 				PrivilegedCarbonContext.endTenantFlow();
@@ -2944,8 +2950,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String extensionHandlerPosition = null;
         APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
         try {
-            String content = apimRegistryService.getConfigRegistryResourceContent(tenantDomain, APIConstants
-                    .API_TENANT_CONF_LOCATION);
+            String content = getTenantConfigContent();
             if (content != null) {
                 JSONParser jsonParser = new JSONParser();
                 JSONObject tenantConf = (JSONObject) jsonParser.parse(content);
@@ -3316,7 +3321,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
 		} catch (Exception e) {
-			handleException("Issue is in getting custom InSequences from the Registry", e);
+		    handleException("Issue is in getting custom InSequences from the Registry", e);
 		} finally {
 			if (isTenantFlowStarted) {
 				PrivilegedCarbonContext.endTenantFlow();
@@ -3388,7 +3393,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
 		} catch (Exception e) {
-			handleException("Issue is in getting custom OutSequences from the Registry", e);
+		    handleException("Issue is in getting custom OutSequences from the Registry", e);
 		} finally {
 			if (isTenantFlowStarted) {
 				PrivilegedCarbonContext.endTenantFlow();
@@ -4370,7 +4375,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void addPolicy(Policy policy) throws APIManagementException {
 
         ThrottlePolicyDeploymentManager manager = ThrottlePolicyDeploymentManager.getInstance();
-        ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
+        ThrottlePolicyTemplateBuilder policyBuilder = getThrottlePolicyTemplateBuilder();
         Map<String, String> executionFlows = new HashMap<String, String>();
         String policyLevel = null;
 
@@ -4450,7 +4455,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void updatePolicy(Policy policy) throws APIManagementException {
 
         ThrottlePolicyDeploymentManager deploymentManager = ThrottlePolicyDeploymentManager.getInstance();
-        ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
+        ThrottlePolicyTemplateBuilder policyBuilder = getThrottlePolicyTemplateBuilder();
         Map<String, String> executionFlows = new HashMap<String, String>();
         String policyLevel = null;
         String oldKeyTemplate = null;
@@ -4505,13 +4510,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 Map<String, Environment> gatewayEns = config.getApiGatewayEnvironments();
                 for (Environment environment : gatewayEns.values()) {
                     try {
-                        APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
                         if (log.isDebugEnabled()) {
                             log.debug("Calling invalidation cache for API Policy for tenant ");
                         }
                         String policyContext = APIConstants.POLICY_CACHE_CONTEXT + "/t/" + apiPolicy.getTenantDomain()
                                 + "/";
-                        client.invalidateResourceCache(policyContext, null, null, null);
+                        invalidateResourceCache(policyContext, null, null, null, environment);
 
                     } catch (AxisFault ex) {
                         /*
@@ -5066,7 +5070,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiStateChangeWFExecutor.cleanUpPendingTask(wfDTO.getExternalWorkflowReference());
         }
     }
-    
+
+    protected String getTenantConfigContent() throws RegistryException, UserStoreException {
+        APIMRegistryService apimRegistryService = new APIMRegistryServiceImpl();
+
+        return apimRegistryService
+                .getConfigRegistryResourceContent(tenantDomain, APIConstants.API_TENANT_CONF_LOCATION);
+    }
+
     protected Map<String, String> publishToGateway(API api, String tenantDomain) throws APIManagementException {
         APITemplateBuilder builder = null;
         try {
@@ -5083,7 +5094,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         return gatewayManager.removeFromGateway(api, tenantDomain);
     }
-    
+
     protected int getTenantId(String tenantDomain) throws UserStoreException {
         return ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
     }
@@ -5091,5 +5102,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     protected void sendAsncNotification(NotificationDTO notificationDTO) throws NotificationException {
         new NotificationExecutor().sendAsyncNotifications(notificationDTO);
         
+    }
+
+    protected void invalidateResourceCache(String apiContext, String apiVersion, String resourceURLContext,
+                                           String httpVerb, Environment environment) throws AxisFault {
+        APIAuthenticationAdminClient client = new APIAuthenticationAdminClient(environment);
+        client.invalidateResourceCache(apiContext, apiVersion, resourceURLContext, httpVerb);
+    }
+
+    protected ThrottlePolicyTemplateBuilder getThrottlePolicyTemplateBuilder() {
+        return new ThrottlePolicyTemplateBuilder();
     }
 }
