@@ -61,7 +61,7 @@ public class APIMConfigurations {
     @Element(description = "Broker Configurations")
     private BrokerConfigurations brokerConfigurations = new BrokerConfigurations();
 
-    @Element(description = "Notificaton Configurations")
+    @Element(description = "Notification Configurations")
     private NotificationConfigurations notificationConfigurations = new NotificationConfigurations();
 
 
@@ -93,6 +93,17 @@ public class APIMConfigurations {
 
     @Element(description = "SDK Generation Language Configurations")
     private SdkLanguageConfigurations sdkLanguageConfigurations = new SdkLanguageConfigurations();
+
+    @Element(description = "File Encryption Configurations")
+    private FileEncryptionConfigurations fileEncryptionConfigurations = new FileEncryptionConfigurations();
+
+    public FileEncryptionConfigurations getFileEncryptionConfigurations() {
+        return fileEncryptionConfigurations;
+    }
+
+    public void setFileEncryptionConfigurations(FileEncryptionConfigurations fileEncryptionConfigurations) {
+        this.fileEncryptionConfigurations = fileEncryptionConfigurations;
+    }
 
     public SdkLanguageConfigurations getSdkLanguageConfigurations() {
         return sdkLanguageConfigurations;

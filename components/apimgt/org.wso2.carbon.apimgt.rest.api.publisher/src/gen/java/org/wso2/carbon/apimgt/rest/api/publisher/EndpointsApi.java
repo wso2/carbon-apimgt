@@ -45,7 +45,6 @@ import javax.ws.rs.core.Response;
 public class EndpointsApi implements Microservice  {
    private final EndpointsApiService delegate = EndpointsApiServiceFactory.getEndpointsApi();
 
-    @OPTIONS
     @DELETE
     @Path("/{endpointId}")
     @Consumes({ "application/json" })

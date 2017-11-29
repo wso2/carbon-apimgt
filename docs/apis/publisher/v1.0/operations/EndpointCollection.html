@@ -32,17 +32,22 @@ Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 Content-Type: application/json
 
 {
-   &quot;list&quot;: [   {
-      &quot;showInApiConsole&quot;: true,
-      &quot;serverUrl&quot;: &quot;https://192.168.56.1:9444//services/&quot;,
-      &quot;endpoints&quot;:       {
-         &quot;http&quot;: &quot;http://192.168.56.1:8281&quot;,
-         &quot;https&quot;: &quot;https://192.168.56.1:8244&quot;
+  &quot;list&quot;: [
+    {
+      &quot;id&quot;: &quot;01234567-0123-0123-0123-012345678901&quot;,
+      &quot;name&quot;: &quot;Endpoint 1&quot;,
+      &quot;endpointConfig&quot;: {
+        &quot;serviceUrl&quot;: &quot;http://192.168.56.1:8281&quot;,
+        &quot;timeout&quot;: 1000
       },
-      &quot;name&quot;: &quot;Production and Sandbox&quot;,
-      &quot;type&quot;: &quot;hybrid&quot;
-   }],
-   &quot;count&quot;: 1
+      &quot;endpointSecurity&quot;: {
+        &quot;enabled&quot;: false
+      },
+      &quot;maxTps&quot;: 1000,
+      &quot;type&quot;: &quot;http&quot;
+    }
+  ],
+  &quot;count&quot;: 1
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
