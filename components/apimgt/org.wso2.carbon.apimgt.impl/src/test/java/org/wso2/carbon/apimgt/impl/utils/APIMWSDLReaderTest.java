@@ -1,0 +1,137 @@
+/*
+ *
+ *   Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *   WSO2 Inc. licenses this file to you under the Apache License,
+ *   Version 2.0 (the "License"); you may not use this file except
+ *   in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ *  KIND, either express or implied.  See the License for the
+ *  specific language governing permissions and limitations
+ *  under the License.
+ *
+ */
+
+package org.wso2.carbon.apimgt.impl.utils;
+
+import org.apache.axiom.om.OMElement;
+import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ServiceReferenceHolder.class})
+
+public class APIMWSDLReaderTest {
+    private static ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+    private static APIManagerConfigurationService apimConfigService = Mockito
+            .mock(APIManagerConfigurationService.class);
+    private static APIManagerConfiguration apimConfig = Mockito.mock(APIManagerConfiguration.class);
+
+    @Test
+    public void testReadAndCleanWsdl() throws Exception {
+        doMockStatics();
+
+        APIMWSDLReader wsdlReader = new APIMWSDLReader(
+                Thread.currentThread().getContextClassLoader()
+                        .getResource("wsdls/stockQuote.wsdl").toExternalForm());
+        wsdlReader.validateBaseURI();
+        OMElement element = wsdlReader.readAndCleanWsdl(getAPIForTesting());
+        Assert.assertFalse("Endpoints are not properly replaced",
+                element.toString().contains("location=\"http://www.webservicex.net/stockquote.asmx\""));
+        Assert.assertTrue("Endpoints does not include GW endpoint",
+                element.toString().contains("https://localhost:8243/abc"));
+    }
+
+    @Test
+    public void testReadAndCleanWsdl2() throws Exception {
+        doMockStatics();
+        
+        APIMWSDLReader wsdlReader = new APIMWSDLReader(
+                Thread.currentThread().getContextClassLoader()
+                        .getResource("wsdls/wsdl2-sample.wsdl").toExternalForm());
+        wsdlReader.validateBaseURI();
+        Assert.assertTrue(wsdlReader.isWSDL2BaseURI());
+        OMElement element = wsdlReader.readAndCleanWsdl2(getAPIForTesting());
+        Assert.assertFalse("Endpoints are not properly replaced",
+                element.toString().contains("address = \"http://yoursite.com/MyService\""));
+        Assert.assertTrue("Endpoints does not include GW endpoint",
+                element.toString().contains("https://localhost:8243/abc"));
+    }
+    
+    @Test
+    public void testUpdateWsdl() throws Exception {
+        doMockStatics();
+
+        APIMWSDLReader wsdlReader = new APIMWSDLReader("");
+        byte[] content = IOUtils.toByteArray(Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("wsdls/stockQuote.wsdl"));
+        OMElement element = wsdlReader.updateWSDL(content, getAPIForTesting());
+        Assert.assertFalse("Endpoints are not properly replaced",
+                element.toString().contains("location=\"http://www.webservicex.net/stockquote.asmx\""));
+        Assert.assertTrue("Endpoints does not include GW endpoint",
+                element.toString().contains("https://localhost:8243/abc"));
+    }
+
+    @Test
+    public void testUpdateWsdl2() throws Exception {
+        doMockStatics();
+
+        APIMWSDLReader wsdlReader = new APIMWSDLReader("");
+        byte[] content = IOUtils.toByteArray(Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("wsdls/wsdl2-sample.wsdl"));
+        OMElement element = wsdlReader.updateWSDL2(content, getAPIForTesting());
+        Assert.assertFalse("Endpoints are not properly replaced",
+                element.toString().contains("address = \"http://yoursite.com/MyService\""));
+        Assert.assertTrue("Endpoints does not include GW endpoint",
+                element.toString().contains("https://localhost:8243/abc"));
+    }
+
+    public static void doMockStatics() {
+        Map<String, Environment> gatewayEnvironments = new HashMap<String, Environment>();
+        Environment env1 = new Environment();
+        env1.setType("hybrid");
+        env1.setApiGatewayEndpoint("http://localhost:8280,https://localhost:8243");
+        gatewayEnvironments.put("e1", env1);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService()).thenReturn(apimConfigService);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration()).thenReturn(apimConfig);
+
+        PowerMockito.when(ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration()
+                .getApiGatewayEnvironments()).thenReturn(gatewayEnvironments);
+    }
+    
+    public static API getAPIForTesting() {
+        API api = new API(new APIIdentifier("admin", "api1", "1.0.0"));
+        api.setTransports("https");
+        api.setContext("/abc");
+        return api;
+    }
+}

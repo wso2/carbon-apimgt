@@ -67,7 +67,7 @@ public class APIKeyValidatorClientTest {
     public static void setTrustManager() throws KeyStoreException, IOException, CertificateException,
             NoSuchAlgorithmException, UnrecoverableKeyException, KeyManagementException {
         wireMockConfiguration.trustStoreType("JKS").keystoreType("JKS").keystorePath(KEYSTORE_FILE_PATH)
-                .trustStorePath(TRUSTSTORE_FILE_PATH).httpsPort(8082).trustStorePassword("wso2carbon")
+                .trustStorePath(TRUSTSTORE_FILE_PATH).httpsPort(18082).trustStorePassword("wso2carbon")
                 .keystorePassword("wso2carbon");
         ;
         InputStream inputStream = new FileInputStream("src/test/resources/jks/wso2carbon.jks");
@@ -126,7 +126,7 @@ public class APIKeyValidatorClientTest {
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl
                 (apiManagerConfiguration));
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL)).thenReturn
-                ("https://localhost:" + 8082 + "/services/");
+                ("https://localhost:" + 18082 + "/services/");
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME)).thenReturn
                 ("admin");
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD)).thenReturn
@@ -200,7 +200,7 @@ public class APIKeyValidatorClientTest {
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl
                 (apiManagerConfiguration));
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL)).thenReturn
-                ("https://localhost:" + 8082 + "/services/");
+                ("https://localhost:" + 18082 + "/services/");
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME)).thenReturn
                 ("admin");
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD)).thenReturn
@@ -274,7 +274,7 @@ public class APIKeyValidatorClientTest {
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl
                 (apiManagerConfiguration));
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL)).thenReturn
-                ("https://localhost:" + 8082 + "/services/");
+                ("https://localhost:" + 18082 + "/services/");
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME)).thenReturn
                 ("admin");
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD)).thenReturn
@@ -346,7 +346,7 @@ public class APIKeyValidatorClientTest {
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(new APIManagerConfigurationServiceImpl
                 (apiManagerConfiguration));
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_URL)).thenReturn
-                ("https://localhost:" + 8082 + "/services/");
+                ("https://localhost:" + 18082 + "/services/");
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME)).thenReturn
                 ("admin");
         Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD)).thenReturn
