@@ -24,7 +24,7 @@
                 </h4>
             </div>
 
-                <div id="request-apisApiIdGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/store/v0.11/apis/c43a325c-260b-4302-81cb-768eafaa3aed
+                <div id="request-apisApiIdGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.11/apis/c43a325c-260b-4302-81cb-768eafaa3aed
 </code></div>
 
             <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdGet">
@@ -52,8 +52,8 @@ Content-Type: application/json
       &quot;environmentName&quot;: &quot;Production and Sandbox&quot;,
       &quot;environmentType&quot;: &quot;hybrid&quot;,
       &quot;environmentURLs&quot;:       {
-         &quot;http&quot;: &quot;http://10.100.7.77:8280//pizzashack/1.0.0&quot;,
-         &quot;https&quot;: &quot;https://10.100.7.77:8243//pizzashack/1.0.0&quot;
+         &quot;http&quot;: &quot;http://localhost:8280//pizzashack/1.0.0&quot;,
+         &quot;https&quot;: &quot;https://localhost:8243//pizzashack/1.0.0&quot;
       }
    }],
    &quot;transport&quot;:    [
@@ -71,7 +71,7 @@ Content-Type: application/json
 }  </code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl https://127.0.0.1:9443/api/am/store/v0.11/apis/c43a325c-260b-4302-81cb-768eafaa3aed</code></div>
+                <div class="pre"><code class="bash">curl https://localhost:9443/api/am/store/v0.11/apis/c43a325c-260b-4302-81cb-768eafaa3aed</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -107,7 +107,7 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
 The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
 Should be formatted as **provider-name-version**.
 </p>
@@ -166,7 +166,7 @@ Should be formatted as **provider-name-version**.
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resourec.
+variant of the resource.
 </p>
                         </td>
                         <td>
@@ -195,7 +195,7 @@ variant of the resourec.
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
-formerly retrieved variant of the resource.
+formerly retrieved variant of the resource (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -265,7 +265,7 @@ formerly retrieved variant of the resource.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     
@@ -300,7 +300,7 @@ formerly retrieved variant of the resource.
             <p class="marked">You can use this operation to retrieve the swagger definition of an API.
 
  &#x60;X-WSO2-Tenant&#x60; header can be used to retrive the swagger definition an API of a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
- 
+
 **NOTE:**
 * This operation does not require an Authorization header by default. But in order to see a restricted API&#39;s swagger definition, you need to provide Authorization header.
 </p>
@@ -315,7 +315,7 @@ formerly retrieved variant of the resource.
                 </h4>
             </div>
 
-                <div id="request-apisApiIdSwaggerGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/store/v0.11/apis/c43a325c-260b-4302-81cb-768eafaa3aed/swagger
+                <div id="request-apisApiIdSwaggerGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.11/apis/c43a325c-260b-4302-81cb-768eafaa3aed/swagger
 </code></div>
 
             <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdSwaggerGet">
@@ -348,7 +348,7 @@ Content-Type: application/json
 </code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl https://127.0.0.1:9443/api/am/store/v0.11/apis/c43a325c-260b-4302-81cb-768eafaa3aed/swagger</code></div>
+                <div class="pre"><code class="bash">curl https://localhost:9443/api/am/store/v0.11/apis/c43a325c-260b-4302-81cb-768eafaa3aed/swagger</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -384,7 +384,7 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
 The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
 Should be formatted as **provider-name-version**.
 </p>
@@ -443,7 +443,7 @@ Should be formatted as **provider-name-version**.
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resourec.
+variant of the resource.
 </p>
                         </td>
                         <td>
@@ -472,7 +472,7 @@ variant of the resourec.
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
-formerly retrieved variant of the resource.
+formerly retrieved variant of the resource (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -542,7 +542,7 @@ formerly retrieved variant of the resource.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     
@@ -575,8 +575,10 @@ formerly retrieved variant of the resource.
 
             <p class="marked">This operation can be used to download a thumbnail image of an API.
 
+&#x60;X-WSO2-Tenant&#x60; header can be used to retrive a thumbnail of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user&#39;s tenant associated with the access token will be used.
+
 **NOTE:**
-* This operation does not require an Authorization header by default. But in order to see a restricted API&#39;s thumbnail, you need to provide Authorization header.        
+* This operation does not require an Authorization header by default. But in order to see a restricted API&#39;s thumbnail, you need to provide Authorization header.
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
@@ -589,7 +591,7 @@ formerly retrieved variant of the resource.
                 </h4>
             </div>
 
-                <div id="request-apisApiIdThumbnailGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/store/v0.11/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail
+                <div id="request-apisApiIdThumbnailGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/store/v0.11/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail
 </code></div>
 
             <div class="pointer" data-toggle="collapse" data-target="#response-apisApiIdThumbnailGet">
@@ -604,7 +606,7 @@ Content-Type: image/jpeg
 [image content]</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl https://127.0.0.1:9443/api/am/store/v0.11/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail &gt; image.jpg</code></div>
+                <div class="pre"><code class="bash">curl https://localhost:9443/api/am/store/v0.11/apis/e93fb282-b456-48fc-8981-003fb89086ae/thumbnail &gt; image.jpg</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -640,9 +642,38 @@ Content-Type: image/jpeg
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
 The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
 Should be formatted as **provider-name-version**.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>X-WSO2-Tenant</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
+  retirieved from.
 </p>
                         </td>
                         <td>
@@ -699,7 +730,7 @@ Should be formatted as **provider-name-version**.
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resourec.
+variant of the resource.
 </p>
                         </td>
                         <td>
@@ -728,7 +759,7 @@ variant of the resourec.
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
-formerly retrieved variant of the resource.
+formerly retrieved variant of the resource (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -769,7 +800,7 @@ formerly retrieved variant of the resource.
                     </tr>
                     <tr>
                         <td class="parameter"><p class="marked">304</p></td>
-                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). </p></td>
+                        <td class="parameter"><p class="marked">Not Modified. Empty body because the client has already the latest version of the requested resource. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     
@@ -779,6 +810,204 @@ formerly retrieved variant of the resource.
                     <tr>
                         <td class="parameter"><p class="marked">404</p></td>
                         <td class="parameter"><p class="marked">Not Found. Requested Document does not exist. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">406</p></td>
+                        <td class="parameter"><p class="marked">Not Acceptable. The requested media type is not supported </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <hr/>
+            <h3 class="operation-heading"><a name="apisGenerateSdkPost"></a>Generate SDK for an API
+ <br><small>POST https://apis.wso2.com/api/am/store/v0.11/apis/generate-sdk/</small></h3>
+            <p class="marked"></p>
+
+            <p class="marked">This operation can be used to generate SDK for an API by providing the id of the API along with the preferred language.
+</p>
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:subscribe</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:subscribe' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-apisGenerateSdkPost">
+                <h4 class="section-heading">
+                    Request
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+
+                <div id="request-apisGenerateSdkPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/store/v0.11/apis/generate-sdk
+Authorization: Bearer 2e29904b-f3b0-366e-ba13-b469abedd88e
+</code></div>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-apisGenerateSdkPost">
+                <h4 class="section-heading">
+                    Response
+                        <span class="glyphicon glyphicon-collapse-down" aria-hidden="true"></span>
+                </h4>
+            </div>
+                <div id="response-apisGenerateSdkPost" class="pre collapse in"><code class="json">HTTP/1.1 200 OK 
+Content-Disposition: attachment; filename&#x3D;&quot;PizzaShackAPI_1.0.0_java.zip&quot;
+Content-Type: application/zip
+
+[zip content]</code></div>
+
+            <h4 class="section-heading">Sample CURL</h4>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer 2e29904b-f3b0-366e-ba13-b469abedd88e&quot; -X POST &#39;https://localhost:9443/api/am/store/v0.11/apis/generate-sdk?apiId&#x3D;5721d128-76d0-4cb9-b300-2bd9578beddb&amp;language&#x3D;java&#39; &gt; PizzaAPI_Java_SDK.zip</code></div>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
+The combination of the provider of the API, name of the API and the version is also accepted as a valid API I.
+Should be formatted as **provider-name-version**.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            <span class="param-in">Query </span>
+                            
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>language</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">Programming language to generate SDK.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            
+                            <span class="param-in">Header </span>
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>X-WSO2-Tenant</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
+  retirieved from.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">OK. SDK generated successfully. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">400</p></td>
+                        <td class="parameter"><p class="marked">Bad request. SDK language is not supported. </p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#Error">Error</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">Not Found. Requested API does not exist. </p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     <a href="#!/models#Error">Error</a>

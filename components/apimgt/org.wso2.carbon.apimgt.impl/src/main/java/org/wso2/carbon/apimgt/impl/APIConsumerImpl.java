@@ -1284,7 +1284,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             //as a tenant, I'm browsing my own Store or I'm browsing a Store of another tenant..
             if ((this.isTenantModeStoreView && this.tenantDomain==null) || (this.isTenantModeStoreView && isTenantDomainNotMatching(requestedTenantDomain))) {//Tenant based store anonymous mode
                 int tenantId = getTenantId(this.requestedTenant);
-                userRegistry = getGovernanceUserRegistry(tenantId);
+                userRegistry = ServiceReferenceHolder.getInstance().getRegistryService().
+                        getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantId);
             } else {
                 userRegistry = registry;
             }
@@ -2706,7 +2707,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         String tenantDomain = MultitenantUtils.getTenantDomain(userId);
         int tenantId = MultitenantConstants.INVALID_TENANT_ID;
         try {
-            tenantId = getTenantId(tenantDomain);
+            tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(tenantDomain);
         } catch (UserStoreException e) {
             handleException("Unable to retrieve the tenant information of the current user.", e);
         }

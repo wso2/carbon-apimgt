@@ -1,5 +1,6 @@
 <% jagg.template("item-implement", function(inputs, outputs, jagg) { %>
-<% 
+<%
+    var CryptoUtil = Packages.org.wso2.carbon.core.util.CryptoUtil;
     var api = outputs.api;
     var permitted=outputs.isPermitted;
     var isCreatePermitted=outputs.isCreatePermitted;
@@ -16,7 +17,7 @@
     var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
     var tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
 
-	var corsJson = JSON.parse(api.corsConfiguration);
+	var corsJson = JSON.parse(stringify(api.corsConfiguration));
 %>
 <script language="javascript">
     var VERBS = [ 'GET' , 'POST' , 'PUT' , 'DELETE', 'PATCH', 'OPTIONS'];
@@ -411,14 +412,26 @@
 							                            </select>
 							                            </div>
 							                        </div>
-
+                                                                                <%
+                                                                                  var inputString = api.epPassword;
+                                                                                  if (inputString != null && inputString != "") {
+                                                                                    var byteArray = [];
+                                                                                    for (var i = 0; i < inputString.length; ++i) {
+                                                                                        byteArray.push(inputString.charCodeAt(i));
+                                                                                    }
+                                                                                    var base64EncodedEncryptedPassword = CryptoUtil.getDefaultCryptoUtil().encryptAndBase64Encode(byteArray);
+                                                                                    session.put(api.name + "-" + api.version + "-epPassword", base64EncodedEncryptedPassword);
+                                                                                  } else {
+                                                                                    session.put(api.name + "-" + api.version + "-epPassword", inputString);
+                                                                                  }
+                                                                                %>
 							                        <div class="form-group" id="credentials" <%if(api.endpointTypeSecured=="false"){%>style="display: none;"<%}%>>
 							                            <label class="control-label col-sm-3" for="credentials"><%=i18n.localize("Credentials")%>:<span class="requiredAstrix">*</span></label>
 							                            <div class="col-sm-2">
 							                                <input type="text" class="form-control required validInput" id="epUsername" name="epUsername" placeholder="Username" value="<%=api.epUsername%>">
 														</div>
 														<div class="col-sm-2">
-							                                <input type="password" class="form-control required" id="epPassword" name="epPassword" placeholder="Password" value="<%=api.epPassword%>" autocomplete="off">
+							                                <input type="password" class="form-control required" id="epPassword" name="epPassword" placeholder="Password" <% if(api.epPassword != null && api.epPassword != "") {%> value="*****" <%}%> autocomplete="off">
 							                            </div>
 							                        </div>
 

@@ -50,9 +50,6 @@ import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
-import org.apache.woden.WSDLException;
-import org.apache.woden.WSDLFactory;
-import org.apache.woden.WSDLReader;
 import org.apache.xerces.util.SecurityManager;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -166,13 +163,11 @@ import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.xml.sax.SAXException;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -303,7 +298,12 @@ public final class APIUtil {
             api.setEndpointSecured(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED)));
             api.setEndpointAuthDigest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST)));
             api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
-            api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
+            if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
+                    .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)))) {
+                api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
+            } else { //If APIEndpointPasswordRegistryHandler is enabled take password from the registry hidden property
+                api.setEndpointUTPassword(getActualEpPswdFromHiddenProperty(api, registry));
+            }
             api.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
             api.setInSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE));
             api.setOutSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE));
@@ -483,7 +483,12 @@ public final class APIUtil {
             api.setEndpointSecured(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED)));
             api.setEndpointAuthDigest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST)));
             api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
-            api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
+            if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
+                    .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)))) {
+                api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
+            } else { //If APIEndpointPasswordRegistryHandler is enabled take password from the registry hidden property
+                api.setEndpointUTPassword(getActualEpPswdFromHiddenProperty(api, registry));
+            }
             api.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
             api.setInSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_INSEQUENCE));
             api.setOutSequence(artifact.getAttribute(APIConstants.API_OVERVIEW_OUTSEQUENCE));
@@ -1424,49 +1429,13 @@ public final class APIUtil {
     /**
      * Given a URL, this method checks if the underlying document is a WSDL2
      *
-     * @param url
-     * @return
-     * @throws Exception
+     * @param url URL to check
+     * @return true if the underlying document is a WSDL2
+     * @throws APIManagementException if error occurred while validating the URI
      */
     public static boolean isWSDL2Document(String url) throws APIManagementException {
-        URL wsdl = null;
-        boolean isWsdl2 = false;
-        try {
-            wsdl = new URL(url);
-        } catch (MalformedURLException e) {
-            throw new APIManagementException("Malformed URL encountered", e);
-        }
-        BufferedReader in = null;
-        try {
-            in = new BufferedReader(new InputStreamReader(wsdl.openStream(), Charset.defaultCharset()));
-
-            String inputLine;
-            StringBuilder urlContent = new StringBuilder();
-            while ((inputLine = in.readLine()) != null) {
-                String wsdl2NameSpace = "http://www.w3.org/ns/wsdl";
-                urlContent.append(inputLine);
-                isWsdl2 = urlContent.indexOf(wsdl2NameSpace) > 0;
-            }
-            in.close();
-            if (isWsdl2) {
-                WSDLReader wsdlReader20 = null;
-                wsdlReader20 = WSDLFactory.newInstance().newWSDLReader();
-                wsdlReader20.readWSDL(url);
-            }
-        } catch (IOException e) {
-            throw new APIManagementException("Error Reading Input from Stream from " + url, e);
-        } catch (WSDLException e) {
-            throw new APIManagementException("Error while reading WSDL Document from " + url, e);
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    log.error("Error when closing input stream", e);
-                }
-            }
-        }
-        return isWsdl2;
+        APIMWSDLReader wsdlReader = new APIMWSDLReader(url);
+        return wsdlReader.isWSDL2BaseURI();
     }
 
     /**
@@ -2464,7 +2433,12 @@ public final class APIUtil {
             api.setEndpointSecured(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_SECURED)));
             api.setEndpointAuthDigest(Boolean.parseBoolean(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_AUTH_DIGEST)));
             api.setEndpointUTUsername(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_USERNAME));
-            api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
+            if (!((APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD)
+                    .equals(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD)))) {
+                api.setEndpointUTPassword(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_PASSWORD));
+            } else { //If APIEndpointPasswordRegistryHandler is enabled take password from the registry hidden property
+                api.setEndpointUTPassword(getActualEpPswdFromHiddenProperty(api, registry));
+            }
             api.setTransports(artifact.getAttribute(APIConstants.API_OVERVIEW_TRANSPORTS));
 
             api.setEndpointConfig(artifact.getAttribute(APIConstants.API_OVERVIEW_ENDPOINT_CONFIG));
@@ -6589,5 +6563,20 @@ public final class APIUtil {
                         modifiedExp)).
                 setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
                         accessExp)).setStoreByValue(false).build();
+    }
+
+    /**
+     * This method is used to get the actual endpoint password of an API from the hidden property
+     * in the case where the handler APIEndpointPasswordRegistryHandler is enabled in registry.xml
+     *
+     * @param api      The API
+     * @param registry The registry object
+     * @return The actual password of the endpoint if exists
+     * @throws RegistryException Throws if the api resource doesn't exist
+     */
+    private static String getActualEpPswdFromHiddenProperty(API api, Registry registry) throws RegistryException {
+        String apiPath = APIUtil.getAPIPath(api.getId());
+        Resource apiResource = registry.get(apiPath);
+        return apiResource.getProperty(APIConstants.REGISTRY_HIDDEN_ENDPOINT_PROPERTY);
     }
 }

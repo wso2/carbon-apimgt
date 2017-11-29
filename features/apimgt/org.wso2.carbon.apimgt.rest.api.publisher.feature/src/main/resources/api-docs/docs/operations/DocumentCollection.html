@@ -18,7 +18,7 @@
                 </h4>
             </div>
 
-                <div id="request-apisApiIdDocumentsGet"class="pre collapse in"><code class="json">GET https://127.0.0.1:9443/api/am/publisher/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents
+                <div id="request-apisApiIdDocumentsGet"class="pre collapse in"><code class="json">GET https://localhost:9443/api/am/publisher/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 </code></div>
 
@@ -60,7 +60,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; &quot;https://localhost:9443/api/am/publisher/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -96,7 +96,7 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
 The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
 Should be formatted as **provider-name-version**.
 </p>
@@ -211,7 +211,7 @@ Should be formatted as **provider-name-version**.
                         </td>
                         <td>
                             <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resourec.
+variant of the resource (Will be supported in future).
 </p>
                         </td>
                         <td>
@@ -296,7 +296,7 @@ variant of the resourec.
                 </h4>
             </div>
 
-                <div id="request-apisApiIdDocumentsPost"class="pre collapse in"><code class="json">POST https://127.0.0.1:9443/api/am/publisher/v0.11/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents
+                <div id="request-apisApiIdDocumentsPost"class="pre collapse in"><code class="json">POST https://localhost:9443/api/am/publisher/v0.11/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents
 Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
 Content-Type: application/json
 
@@ -317,7 +317,7 @@ Content-Type: application/json
                 </h4>
             </div>
                 <div id="response-apisApiIdDocumentsPost" class="pre collapse in"><code class="json">HTTP/1.1 201 Created
-Location: https://127.0.0.1:9443/api/am/publisher/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058
+Location: https://localhost:9443/api/am/publisher/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058
 Content-Type: application/json
 
 {
@@ -332,7 +332,7 @@ Content-Type: application/json
 }</code></div>
 
             <h4 class="section-heading">Sample CURL</h4>
-                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json &quot;https://127.0.0.1:9443/api/am/publisher/v0.11/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents&quot;</code></div>
+                <div class="pre"><code class="bash">curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -H &quot;Content-Type: application/json&quot; -X POST -d @data.json &quot;https://localhost:9443/api/am/publisher/v0.11/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/documents&quot;</code></div>
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
@@ -368,7 +368,7 @@ Content-Type: application/json
                             </p>
                         </td>
                         <td>
-                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API. Using the **UUID** in the API call is recommended.
 The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
 Should be formatted as **provider-name-version**.
 </p>

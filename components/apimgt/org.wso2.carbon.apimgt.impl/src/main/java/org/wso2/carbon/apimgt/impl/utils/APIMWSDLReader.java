@@ -21,16 +21,21 @@ import com.ibm.wsdl.extensions.http.HTTPAddressImpl;
 import com.ibm.wsdl.extensions.soap.SOAPAddressImpl;
 import com.ibm.wsdl.extensions.soap12.SOAP12AddressImpl;
 import org.apache.axiom.om.OMElement;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.woden.WSDLSource;
 import org.apache.woden.wsdl20.Endpoint;
 import org.apache.woden.wsdl20.xml.EndpointElement;
+import org.apache.xerces.impl.Constants;
+import org.apache.xerces.util.SecurityManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import javax.wsdl.Definition;
 import javax.wsdl.Port;
@@ -43,10 +48,18 @@ import javax.wsdl.xml.WSDLWriter;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -67,8 +80,13 @@ public class APIMWSDLReader {
 
 	private static final String JAVAX_WSDL_VERBOSE_MODE = "javax.wsdl.verbose";
 
+    private static final int ENTITY_EXPANSION_LIMIT = 0;
+
 	private static final Log log = LogFactory.getLog(APIMWSDLReader.class);
 
+	private static final String WSDL20_NAMESPACE = "http://www.w3.org/ns/wsdl";
+	private static final String WSDL11_NAMESPACE = "http://schemas.xmlsoap.org/wsdl/";
+	
 	public APIMWSDLReader(String baseURI) {
 		this.baseURI = baseURI;
 	}
@@ -125,7 +143,6 @@ public class APIMWSDLReader {
             writer.writeWSDL(wsdlDefinition.toElement(), byteArrayOutputStream);
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream( byteArrayOutputStream.toByteArray());
             return APIUtil.buildOMElement(byteArrayInputStream);
-//            String wsdlDoc = toString(byteArrayInputStream);
         } catch (Exception e) {
             String msg = " Error occurs when change the addres URL of the WSDL";
             log.error(msg);
@@ -134,10 +151,93 @@ public class APIMWSDLReader {
 
     }
 
-	/**
-	 * Update WSDL 1.0 service definitions saved in registry
-	 *
-	 * @param wsdl 	byte array of registry content
+    /**
+     * Validate the base URI of the WSDL reader
+     *
+     * @throws APIManagementException When error occurred while parsing the content from the URL
+     */
+    public void validateBaseURI() throws APIManagementException {
+        if (baseURI.startsWith(APIConstants.WSDL_REGISTRY_LOCATION_PREFIX)) {
+            baseURI = APIUtil.getServerURL() + baseURI;
+        }
+
+        boolean isWsdl20 = false;
+        boolean isWsdl11 = false;
+
+        BufferedReader in = null;
+        try {
+            String inputLine;
+            StringBuilder urlContent = new StringBuilder();
+            URL wsdl = new URL(baseURI);
+            in = new BufferedReader(new InputStreamReader(wsdl.openStream(), Charset.defaultCharset()));
+            while ((inputLine = in.readLine()) != null) {
+                urlContent.append(inputLine);
+                isWsdl20 = urlContent.indexOf(WSDL20_NAMESPACE) > 0;
+                isWsdl11 = urlContent.indexOf(WSDL11_NAMESPACE) > 0;
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading WSDL from base URI " + baseURI, e);
+        } finally {
+            IOUtils.closeQuietly(in);
+        }
+
+        try {
+            if (isWsdl11) {
+                readAndValidateWSDL11();
+            } else if (isWsdl20) {
+                readAndValidateWSDL20();
+            } else {
+                throw new APIManagementException("URL is not in format of wsdl1.1 or wsdl2.0");
+            }
+        } catch (WSDLException e) {
+            throw new APIManagementException("Error while parsing WSDL content", e);
+        } catch (org.apache.woden.WSDLException e) {
+            throw new APIManagementException("Error while parsing WSDL content", e);
+        }
+    }
+
+    /**
+     * Given a URL, this method checks if the underlying document is a WSDL2
+     *
+     * @return true if the underlying document is a WSDL2
+     * @throws APIManagementException if error occurred while checking whether baseURI is WSDL2.0
+     */
+    public boolean isWSDL2BaseURI() throws APIManagementException {
+        URL wsdl;
+        boolean isWsdl2 = false;
+        BufferedReader in = null;
+        try {
+            wsdl = new URL(baseURI);
+            in = new BufferedReader(new InputStreamReader(wsdl.openStream(), Charset.defaultCharset()));
+
+            String inputLine;
+            StringBuilder urlContent = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                urlContent.append(inputLine);
+                isWsdl2 = urlContent.indexOf(WSDL20_NAMESPACE) > 0;
+            }
+        } catch (MalformedURLException e) {
+            throw new APIManagementException("Malformed URL encountered", e);
+        } catch (IOException e) {
+            throw new APIManagementException("Error Reading Input from Stream from " + baseURI, e);
+        } finally {
+            IOUtils.closeQuietly(in);
+        }
+
+        try {
+            if (isWsdl2) {
+                readAndValidateWSDL20();
+            }
+        } catch (org.apache.woden.WSDLException e) {
+            throw new APIManagementException("Error while reading WSDL Document from " + baseURI, e);
+        }
+        return isWsdl2;
+    }
+
+    /**
+     * Update WSDL 1.0 service definitions saved in registry
+     *
+     * @param wsdl 	byte array of registry content
 	 * @param api 	API object
 	 * @return 		the OMElemnt of the new WSDL content
 	 * @throws APIManagementException
@@ -150,7 +250,7 @@ public class APIMWSDLReader {
 			// switch off the verbose mode
 			wsdlReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
 			wsdlReader.setFeature("javax.wsdl.importDocuments", false);
-			Definition wsdlDefinition = wsdlReader.readWSDL(null, new InputSource(new ByteArrayInputStream(wsdl)));
+			Definition wsdlDefinition = wsdlReader.readWSDL(null, getSecuredParsedDocumentFromContent(wsdl));
 
 			// Update transports
 			setServiceDefinition(wsdlDefinition, api);
@@ -180,9 +280,7 @@ public class APIMWSDLReader {
 
 		try {
 			// Generate wsdl document from registry data
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-			factory.setNamespaceAware(true);
+			DocumentBuilderFactory factory = getSecuredDocumentBuilder();
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			org.apache.woden.WSDLFactory wsdlFactory = org.apache.woden.WSDLFactory.newInstance();
 			org.apache.woden.WSDLReader reader = wsdlFactory.newWSDLReader();
@@ -204,10 +302,31 @@ public class APIMWSDLReader {
 
 		} catch (Exception e) {
 			String msg = " Error occurs when updating WSDL ";
-			log.error(msg);
+			log.error(msg, e);
 			throw new APIManagementException(msg, e);
 		}
 	}
+
+    private static DocumentBuilderFactory getSecuredDocumentBuilder() {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setNamespaceAware(true);
+        dbf.setXIncludeAware(false);
+        dbf.setExpandEntityReferences(false);
+        try {
+            dbf.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE, false);
+            dbf.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE, false);
+            dbf.setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.LOAD_EXTERNAL_DTD_FEATURE, false);
+            dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        } catch (ParserConfigurationException e) {
+            // Skip throwing the error as this exception doesn't break actual DocumentBuilderFactory creation
+            log.error("Failed to load XML Processor Feature " + Constants.EXTERNAL_GENERAL_ENTITIES_FEATURE + " or "
+                    + Constants.EXTERNAL_PARAMETER_ENTITIES_FEATURE + " or " + Constants.LOAD_EXTERNAL_DTD_FEATURE, e);
+        }
+        SecurityManager securityManager = new SecurityManager();
+        securityManager.setEntityExpansionLimit(ENTITY_EXPANSION_LIMIT);
+        dbf.setAttribute(Constants.XERCES_PROPERTY_PREFIX + Constants.SECURITY_MANAGER_PROPERTY, securityManager);
+        return dbf;
+    }
 
     private org.apache.woden.wsdl20.Description readWSDL2File() throws APIManagementException, WSDLException {
         WSDLReader reader = getWsdlFactoryInstance().newWSDLReader();
@@ -217,9 +336,11 @@ public class APIMWSDLReader {
             org.apache.woden.WSDLFactory wFactory = org.apache.woden.WSDLFactory.newInstance();
             org.apache.woden.WSDLReader wReader = wFactory.newWSDLReader();
             wReader.setFeature(org.apache.woden.WSDLReader.FEATURE_VALIDATION, true);
-//            wReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
-//            wReader.setFeature("javax.wsdl.importDocuments", false);
-            return wReader.readWSDL(baseURI);
+            Document document = getSecuredParsedDocumentFromURL(baseURI);
+            Element domElement = document.getDocumentElement();
+            WSDLSource wsdlSource = wReader.createWSDLSource();
+            wsdlSource.setSource(domElement);
+            return wReader.readWSDL(wsdlSource);
         } catch (org.apache.woden.WSDLException e) {
             String error = "Error occurred reading wsdl document.";
             log.error(error, e);
@@ -276,10 +397,90 @@ public class APIMWSDLReader {
 		if (log.isDebugEnabled()) {
 			log.debug("Reading  the WSDL. Base uri is " + baseURI);
 		}
-		return reader.readWSDL(baseURI);
-	}
+		return reader.readWSDL(null, getSecuredParsedDocumentFromURL(baseURI));
+    }
 
-	/**
+    /**
+     * Returns an "XXE safe" built DOM XML object by reading the content from the provided URL.
+     *
+     * @param url URL to fetch the content
+     * @return an "XXE safe" built DOM XML object by reading the content from the provided URL
+     * @throws APIManagementException When error occurred while reading from URL
+     */
+    private Document getSecuredParsedDocumentFromURL(String url) throws APIManagementException {
+        URL wsdl;
+        String errorMsg = "Error while reading WSDL document";
+        InputStream inputStream = null;
+        try {
+            wsdl = new URL(url);
+            DocumentBuilderFactory factory = getSecuredDocumentBuilder();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            inputStream = wsdl.openStream();
+            return builder.parse(inputStream);
+        } catch (ParserConfigurationException e) {
+            throw new APIManagementException(errorMsg, e);
+        } catch (IOException e) {
+            throw new APIManagementException(errorMsg, e);
+        } catch (SAXException e) {
+            throw new APIManagementException(errorMsg, e);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+    }
+
+    /**
+     * Returns an "XXE safe" built DOM XML object by reading the content from the byte array.
+     *
+     * @param content xml content
+     * @return an "XXE safe" built DOM XML object by reading the content from the byte array
+     * @throws APIManagementException When error occurred while reading from the byte array
+     */
+    private Document getSecuredParsedDocumentFromContent(byte[] content) throws APIManagementException {
+        String errorMsg = "Error while reading WSDL document";
+        InputStream inputStream = null;
+        try {
+            DocumentBuilderFactory factory = getSecuredDocumentBuilder();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            inputStream = new ByteArrayInputStream(content);
+            return builder.parse(inputStream);
+        } catch (ParserConfigurationException e) {
+            throw new APIManagementException(errorMsg, e);
+        } catch (IOException e) {
+            throw new APIManagementException(errorMsg, e);
+        } catch (SAXException e) {
+            throw new APIManagementException(errorMsg, e);
+        } finally {
+            IOUtils.closeQuietly(inputStream);
+        }
+    }
+
+    /**
+     * Reads baseURI and validate if it is WSDL 2.0 resource.
+     * 
+     * @throws org.apache.woden.WSDLException When error occurred while parsing/validating base URI
+     * @throws APIManagementException When error occurred while parsing/validating base URI
+     */
+    private void readAndValidateWSDL20() throws org.apache.woden.WSDLException, APIManagementException {
+        org.apache.woden.WSDLReader wsdlReader20 = org.apache.woden.WSDLFactory.newInstance().newWSDLReader();
+        Document document = getSecuredParsedDocumentFromURL(baseURI);
+        Element domElement = document.getDocumentElement();
+        WSDLSource wsdlSource = wsdlReader20.createWSDLSource();
+        wsdlSource.setSource(domElement);
+        wsdlReader20.readWSDL(wsdlSource);
+    }
+    
+    /**
+     * Reads baseURI and validate if it is WSDL 1.1 resource.
+     *
+     * @throws WSDLException When error occurred while parsing/validating base URI
+     * @throws APIManagementException When error occurred while parsing/validating base URI
+     */
+    private void readAndValidateWSDL11() throws WSDLException, APIManagementException {
+        javax.wsdl.xml.WSDLReader wsdlReader11 = javax.wsdl.factory.WSDLFactory.newInstance().newWSDLReader();
+        wsdlReader11.readWSDL(null, getSecuredParsedDocumentFromURL(baseURI));
+    }
+
+    /**
 	 * Clear the actual service Endpoint and use Gateway Endpoint instead of the
 	 * actual Endpoint.
 	 *

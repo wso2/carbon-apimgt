@@ -1,5 +1,7 @@
 <%
 include("/jagg/jagg.jag");
+var encode = require('encode');
+encode = new encode.Encode();
 
 (function () {
     var site = require("/site/conf/site.json");
@@ -116,7 +118,7 @@ include("/jagg/jagg.jag");
             obj = {
                 error:false,
                 applications:result.applications,
-                draw:draw,
+                draw:encode.forHtml(draw),
                 iTotalRecords:totalRecordsCount,
                 iTotalDisplayRecords:totalRecordsCount
             }

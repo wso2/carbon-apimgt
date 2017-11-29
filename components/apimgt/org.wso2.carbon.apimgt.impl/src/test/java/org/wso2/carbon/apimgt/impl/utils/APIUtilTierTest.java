@@ -19,6 +19,7 @@
  */
 package org.wso2.carbon.apimgt.impl.utils;
 
+import com.google.common.net.InetAddresses;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
@@ -45,11 +46,16 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.ApiMgtDAOMockCreator;
 import org.wso2.carbon.apimgt.impl.ServiceReferenceHolderMockCreator;
+import org.wso2.carbon.apimgt.impl.TestUtils;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyDeploymentManager;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,17 +64,19 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.eq;
 
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({LogFactory.class, ApiMgtDAO.class, ServiceReferenceHolder.class, APIManagerConfigurationService.class, APIManagerConfiguration.class, ThrottlePolicyDeploymentManager.class, ThrottlePolicyTemplateBuilder.class, APIUtil.class})
 public class APIUtilTierTest {
+    private static byte[] tenantConf;
     private final String[] validTierNames = {"Gold", "Silver", "Bronze", "Platinum", "Medium", "100PerMinute", "50PerMinute", APIConstants.UNLIMITED_TIER};
     private final String[] tiersReturned = {"policy1", "gold", APIConstants.UNLIMITED_TIER};
-    private static byte[] tenantConf;
 
     @BeforeClass
     public static void setup() throws IOException {
@@ -108,12 +116,12 @@ public class APIUtilTierTest {
 
         Assert.assertTrue("Expected FREE but received " + tier.getTierPlan(), "FREE".equals(tier.getTierPlan()));
 
-        if("key1".equals(tier.getTierAttributes().get("name"))){
+        if ("key1".equals(tier.getTierAttributes().get("name"))) {
             Assert.assertTrue("Expected to have 'value1' as the value of 'key1' but found " +
                             tier.getTierAttributes().get("value"),
                     tier.getTierAttributes().get("value").equals("value1"));
         }
-        if("key2".equals(tier.getTierAttributes().get("name"))){
+        if ("key2".equals(tier.getTierAttributes().get("name"))) {
             Assert.assertTrue("Expected to have 'value2' as the value of 'key2' but found " +
                             tier.getTierAttributes().get("value"),
                     tier.getTierAttributes().get("value").equals("value2"));
@@ -180,7 +188,7 @@ public class APIUtilTierTest {
             Assert.assertEquals(policy.getDescription(), tier.getDescription());
 
         }
-        
+
     }
 
     @Test
@@ -251,7 +259,7 @@ public class APIUtilTierTest {
                 daoMockHolder.getServiceReferenceHolderMockCreator();
 
         serviceReferenceHolderMockCreator.initRegistryServiceMockCreator(true, tenantConf);
-        
+
         APIPolicy[] policies = generateApiPoliciesBandwidth(tiersReturned);
         Mockito.when(apiMgtDAO.getAPIPolicies(tenantId)).thenReturn(policies);
 
@@ -595,6 +603,62 @@ public class APIUtilTierTest {
                 addAPIPolicy(Mockito.any(APIPolicy.class));
         Mockito.verify(apiMgtDAO, Mockito.never()).
                 setPolicyDeploymentStatus(eq(PolicyConstants.POLICY_LEVEL_API), Mockito.anyString(), eq(tenantId), eq(true));
+    }
+
+    @Test
+    public void testGetAllTiers() throws APIManagementException, RegistryException {
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        APIManagerConfigurationService amConfigService = Mockito.mock(APIManagerConfigurationService.class);
+        APIManagerConfiguration amConfig = Mockito.mock(APIManagerConfiguration.class);
+        ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
+        ThrottleProperties throttleProperties = Mockito.mock(ThrottleProperties.class);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(ApiMgtDAO.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(amConfigService);
+        Mockito.when(amConfigService.getAPIManagerConfiguration()).thenReturn(amConfig);
+        Mockito.when(amConfig.getThrottleProperties()).thenReturn(throttleProperties);
+        Mockito.when(throttleProperties.isEnabled()).thenReturn(true);
+        Mockito.when(throttleProperties.isEnableUnlimitedTier()).thenReturn(true);
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        Mockito.when(registryService.getGovernanceSystemRegistry()).thenReturn(userRegistry);
+
+        SubscriptionPolicy policies[] = new SubscriptionPolicy[3];
+        policies[0] = TestUtils.getUniqueSubscriptionPolicyWithBandwidthLimit();
+        policies[1] = TestUtils.getUniqueSubscriptionPolicyWithRequestCountLimit();
+        policies[2] = TestUtils.getUniqueSubscriptionPolicyWithBandwidthLimit();
+        Mockito.when(apiMgtDAO.getSubscriptionPolicies(Mockito.anyInt())).thenReturn(policies);
+
+        //IsEnabled true scenario
+        Assert.assertEquals(3, APIUtil.getAllTiers().size());
+
+        // IsEnabled false scenario
+        Mockito.when(throttleProperties.isEnabled()).thenReturn(false);
+        Assert.assertEquals(0, APIUtil.getAllTiers().size());
+
+        // Error path
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenThrow(RegistryException.class);
+        try {
+            APIUtil.getAllTiers();
+            fail("Registry exception is not thrown");
+        } catch (APIManagementException e) {
+            Assert.assertEquals(APIConstants.MSG_TIER_RET_ERROR, e.getMessage());
+        }
+
+    }
+
+    @Test
+    public void TestIPToLong() {
+        String ipString = InetAddresses.fromInteger(new Random().nextInt()).getHostAddress();
+        long ipLong = APIUtil.ipToLong(ipString);
+        Assert.assertEquals(ipString, longToIp(ipLong));
+    }
+
+    private String longToIp(long ip) {
+        return ((ip >> 24) & 0xFF) + "." + ((ip >> 16) & 0xFF) + "." + ((ip >> 8) & 0xFF) + "." + (ip & 0xFF);
     }
 
     private SubscriptionPolicy[] generateSubscriptionPolicies(String[] policyNames) {

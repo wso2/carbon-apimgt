@@ -78,6 +78,15 @@ jagg.block("api/api-listing-all", {
         ratingResult = jagg.module("rating").isRatingActivated();
         isRatingActivated = ratingResult.allow;
 
+        // added for intractive tutorial
+        var applicationsResult = {};
+        var user = jagg.getUser();
+        if (user) {
+            if (user.username) {
+                applicationsResult = jagg.module("application").getApplications(user.username).applications;
+            }
+        }
+
         return {
             "apis":apis,
             "totalLength":response.result.totalLength,
@@ -85,7 +94,8 @@ jagg.block("api/api-listing-all", {
             "isMonetizationEnabled":isMonetizationEnabled,
             "error":error,
             "message":message,
-            "isRatingActivated":isRatingActivated
+            "isRatingActivated":isRatingActivated,
+            "applications":applicationsResult
         };
     }
 });

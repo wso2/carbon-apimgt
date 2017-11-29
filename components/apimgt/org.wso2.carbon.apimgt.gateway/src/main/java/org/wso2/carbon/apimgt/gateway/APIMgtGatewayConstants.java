@@ -58,5 +58,32 @@ public class APIMgtGatewayConstants {
     public static final String RESPONSE_MEDIATION_LATENCY = "response_mediation_latency";
     public static final String OTHER_LATENCY = "other_latency";
     public static final String AM_CORRELATION_ID = "am.correlationID";
+
+    /**
+     * Constants for regex protector.
+     */
+    public static final String REGEX_PATTERN = "regex";
+    public static final String ENABLED_CHECK_BODY = "enabledCheckBody";
+    public static final String ENABLED_CHECK_PATHPARAM = "enabledCheckPathParams";
+    public static final String ENABLED_CHECK_HEADERS  = "enabledCheckHeaders";
+    public static final String REST_URL_POSTFIX = "REST_URL_POSTFIX";
+    public static final String TRANSPORT_HEADERS = "TRANSPORT_HEADERS";
+
+    /**
+     * Constants for handling threat protection exceptions.
+     */
+    public static final String HTTP_SC_CODE = "400";
+    public static final String HTTP_HEADER_THREAT_MSG = "Threat detected in HTTP Headers";
+    public static final String QPARAM_THREAT_MSG = "Threat detected in Query Parameters";
+    public static final String PAYLOAD_THREAT_MSG = "Threat detected in Payload";
+    public static final String THREAT_FOUND = "THREAT_FOUND";
+    public static final String THREAT_CODE = "THREAT_CODE";
+    public static final String THREAT_MSG = "THREAT_MSG";
+    public static final String THREAT_DESC = "THREAT_DESC";
+    public static final String BAD_REQUEST = "Bad Request";
+    public static final String THREAT_OCCURRED = "threat";
+    public static final String ERROR = "error";
+    public static final String THREAT_TYPE = "threatType";
+
 }
 

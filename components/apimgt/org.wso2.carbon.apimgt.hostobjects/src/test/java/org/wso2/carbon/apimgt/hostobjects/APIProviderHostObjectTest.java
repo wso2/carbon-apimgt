@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import java.io.File;
 
@@ -62,7 +61,8 @@ public class APIProviderHostObjectTest {
     @Test
     public void testMutualSSLEnabledBackend() {
         wireMockRule = new WireMockRule(wireMockConfig()
-                .httpsPort(8081)
+                .port(18082)
+                .httpsPort(18081)
                 .needClientAuth(true)
                 .trustStoreType("JKS")
                 .keystoreType("JKS")
@@ -84,7 +84,7 @@ public class APIProviderHostObjectTest {
         System.setProperty("javax.net.ssl.trustStore", TRUSTSTORE_FILE_PATH_CLIENT);
         System.setProperty("javax.net.ssl.trustStorePassword", "wso2carbon");
         org.mozilla.javascript.NativeObject obj =
-                HostObjectUtils.sendHttpHEADRequest("https://localhost:8081/test",
+                HostObjectUtils.sendHttpHEADRequest("https://localhost:18081/test",
                         "404");
         Assert.assertEquals("success", obj.get("response"));
         wireMockRule.resetAll();

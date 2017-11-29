@@ -92,8 +92,7 @@ public class RemoteAuthorizationManagerClient implements AuthorizationManagerCli
      * @throws APIManagementException If and error occurs while accessing the admin service
      */
     public boolean isUserAuthorized(String user, String permission) throws APIManagementException {
-        CarbonUtils.setBasicAccessSecurityHeaders(username, password,
-                true, authorizationManager._getServiceClient());
+        CarbonUtils.setBasicAccessSecurityHeaders(username, password, authorizationManager._getServiceClient());
         if (cookie != null) {
             authorizationManager._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
         }
@@ -121,8 +120,7 @@ public class RemoteAuthorizationManagerClient implements AuthorizationManagerCli
      * @throws APIManagementException If and error occurs while accessing the admin service
      */
     public String[] getRolesOfUser(String user) throws APIManagementException {
-        CarbonUtils.setBasicAccessSecurityHeaders(username, password,
-                true, userStoreManager._getServiceClient());
+        CarbonUtils.setBasicAccessSecurityHeaders(username, password, userStoreManager._getServiceClient());
         if (cookie != null) {
             userStoreManager._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
         }
@@ -149,8 +147,7 @@ public class RemoteAuthorizationManagerClient implements AuthorizationManagerCli
      * @throws APIManagementException If and error occurs while accessing the admin service
      */
     public String[] getRoleNames() throws APIManagementException {
-        CarbonUtils.setBasicAccessSecurityHeaders(username, password,
-                                                  true, userStoreManager._getServiceClient());
+        CarbonUtils.setBasicAccessSecurityHeaders(username, password, userStoreManager._getServiceClient());
         if (cookie != null) {
             userStoreManager._getServiceClient().getOptions().setProperty(HTTPConstants.COOKIE_STRING, cookie);
         }

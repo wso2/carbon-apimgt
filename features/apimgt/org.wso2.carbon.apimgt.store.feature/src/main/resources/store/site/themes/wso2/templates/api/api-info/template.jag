@@ -9,7 +9,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
 
 %>
 <%if(api!=null){
-
+    
     var displayOwner = api.provider;
     if(api.isAdvertiseOnly && api.apiOwner != null) {
     	displayOwner = api.apiOwner;
@@ -197,7 +197,7 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                                            }
                                         }
                                 %>
-                                        <div class="form-group">
+                                        <div class="form-group" id="application-selection-list">
                                             <label for="application-list"><%=i18n.localize("Applications")%></label>
                                             <select id="application-list" class="form-control">
                                                 <%if(!subscribedToDefault){%>
@@ -378,6 +378,59 @@ $(window).load(function(){
             }
         }
     }
+    else {
+        startAPIStoreInteractiveTutorial();
+    }
+
+function startAPIStoreInteractiveTutorial() {
+// API Store Intractive Tutorial 
+  var isTutorialCompleted = localStorage.getItem("isTutorialCompleted");
+  var isNewUserInteractiveTutorialStarted = localStorage.getItem("isNewUserInteractiveTutorialStarted");
+  var isApplicationSelectedForSubscribe = localStorage.getItem("isApplicationSelectedForSubscribe");
+  var isApplicationSubscribed = localStorage.getItem("isApplicationSubscribed");
+  var isAccessKeyGeneratedForTheUser = localStorage.getItem("isAccessKeyGeneratedForTheUser");
+  var isAPIConsoleCompleted = localStorage.getItem("isAPIConsoleCompleted");
+  var isNewApplicationClicked = localStorage.getItem("isNewApplicationClicked");
+  var isUserCreatedNewApplication = localStorage.getItem("isUserCreatedNewApplication");
+  var enjoyHintApiInfoInstance = null;
+
+  if (<%=outputs.user%> && !isTutorialCompleted && isNewUserInteractiveTutorialStarted) {
+      if (!isAccessKeyGeneratedForTheUser && !isApplicationSubscribed ) {
+          if (!isApplicationSelectedForSubscribe && !isNewApplicationClicked) {
+            if (<%=subscribedToDefault%>) {
+                localStorage.setItem("isApplicationSubscribed", true);
+                runEnjoyHintScript(enjoyHintApiInfoInstance, api_store_subscribe_to_default_application);
+            }
+            else {
+                localStorage.setItem("isNewApplicationClicked",true);
+                runEnjoyHintScript(enjoyHintApiInfoInstance, api_store_subscribe_to_new_application);
+            }
+            localStorage.setItem("isApplicationSelectedForSubscribe", true);
+          }
+          else {
+              if (isNewApplicationClicked && isUserCreatedNewApplication) {
+                localStorage.setItem("isApplicationSubscribed", true);
+                runEnjoyHintScript(enjoyHintApiInfoInstance, api_store_api_info_page_subscribe);
+              }
+          }
+      }
+      else {
+          if (!isAPIConsoleCompleted) {
+            runEnjoyHintScript(enjoyHintApiInfoInstance, api_store_api_info_page_api_console);
+            localStorage.setItem("isAPIConsoleCompleted", true);
+            localStorage.setItem("isTutorialCompleted", true);
+          }
+      }
+      getHTTPMethod();
+  }
+}
+
+function getHTTPMethod() {
+    if (!localStorage.getItem("intractiveTutorialHTTPMethod")) {
+        var httpMethod = $('#default_endpoint_list').children().find('.heading').find(".http_method").find(".toggleOperation")[0].textContent;
+        localStorage.setItem("intractiveTutorialHTTPMethod", httpMethod);
+    }
+}
 
 });
 </script>

@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -81,7 +82,7 @@ public class APIManagerConfiguration {
     private boolean initialized;
     private ThrottleProperties throttleProperties = new ThrottleProperties();
     private WorkflowProperties workflowProperties = new WorkflowProperties();
-    private Map<String, Environment> apiGatewayEnvironments = new HashMap<String, Environment>();
+    private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
     private Set<APIStore> externalAPIStores = new HashSet<APIStore>();
 
     public Map<String, Map<String, String>> getLoginConfiguration() {
@@ -183,7 +184,7 @@ public class APIManagerConfiguration {
                 addToConfiguration(key, APIUtil.replaceSystemProperty(value));
             } else if ("Environments".equals(localName)) {
                 Iterator environmentIterator = element.getChildrenWithLocalName("Environment");
-                apiGatewayEnvironments = new HashMap<String, Environment>();
+                apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
 
                 while (environmentIterator.hasNext()) {
                     Environment environment = new Environment();

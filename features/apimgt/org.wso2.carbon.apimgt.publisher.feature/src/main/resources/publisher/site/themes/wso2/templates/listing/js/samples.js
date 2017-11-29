@@ -14,9 +14,8 @@ function APISamples () {
     "\"/menu\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":" +
     "\"" + "$.{defaultResourceLevelTier}" + "\",\"description\":\"Return a list of available menu items\"," +
     "\"parameters\":" +
-    "[],\"responses\":{\"200\":{\"headers\"" + ":{},\"schema\":{\"title\":\"Menu\"," + "\"properties\":{" +
-    "\"list\":{\"items\":{\"$ref\":\"#/definitions/MenuItem\"},\"type\":\"array\"}},\"type\":" +
-    "\"object\"},\"description\":\"OK. List of APIs is returned.\"},\"304\":{\"description\":" +
+    "[],\"responses\":{\"200\":{\"headers\"" + ":{},\"schema\":{\"items\":{\"$ref\":\"#/definitions/MenuItem\"}," +
+    "\"type\":\"array\"},\"description\":\"OK. List of APIs is returned.\"},\"304\":{\"description\":" +
     "\"Not Modified. Empty body because the client has already the latest version of the requested " +
     "resource.\"},\"406\":{\"schema\":{\"$ref\":\"#/definitions/Error\"},\"description\":" +
     "\"Not Acceptable. The requested media type is not supported\"}}}},\"/order/{orderId}\"" +
