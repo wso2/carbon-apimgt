@@ -234,7 +234,6 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     updateApplication(application, callback = null) {
-        //debugger;
         var promise_get = this.client.then(
             (client) => {
                 let payload = {applicationId: application.id, body: application};
@@ -257,12 +256,12 @@ class API {
     addComment(api_id, commentInfo, callback = null) {
         var promise = this.client.then(
             (client) => {
-                return client.apis["API (individual)"].post_apis__apiId__comments(
+                return client.apis["API (Individual)"].post_apis__apiId__comments(
                     {apiId: api_id, body: commentInfo}, this._requestMetaData());
             }
         ).catch(
              error => {
-                 alert(error);
+                 console.error(error);
              }
          );
         if (callback) {
@@ -275,12 +274,12 @@ class API {
     getRatingFromUser(api_id, callback = null) {
         var promise_get = this.client.then(
             (client) => {
-                return client.apis["API (individual)"].get_apis__apiId__ratings(
+                return client.apis["API (Individual)"].get_apis__apiId__ratings(
                       {apiId: api_id}, this._requestMetaData());
             }
         ).catch(
               error => {
-                  alert(error);
+                  console.error(error);
               }
          );
          if (callback) {
@@ -293,12 +292,12 @@ class API {
     getAllComments(api_id, callback = null) {
         var promise_get = this.client.then(
             (client) => {
-                return client.apis["Comments Collection"].get_apis__apiId__comments(
+                return client.apis["Comment (Collection)"].get_apis__apiId__comments(
                     {apiId: api_id}, this._requestMetaData());
             }
         ).catch(
              error => {
-                 alert(error);
+                 console.error(error);
              }
         );
         if (callback) {
@@ -312,8 +311,7 @@ class API {
     addRating(api_id, ratingInfo, callback = null) {
         var promise = this.client.then(
             (client) => {
-                console.log(client.apis["API (individual)"]);
-                return client.apis["API (individual)"].put_apis__apiId__user_rating(
+                return client.apis["API (Individual)"].put_apis__apiId__user_rating(
                     {apiId: api_id, body: ratingInfo}, this._requestMetaData());
             }
         ).catch(
@@ -336,7 +334,6 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     generateKeys(applicationId, request_content, callback = null) {
-        //debugger;
         var promise_get = this.client.then(
             (client) => {
                 let payload = {applicationId: applicationId, body: request_content};
@@ -359,7 +356,6 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     generateToken(applicationId, request_content, callback = null) {
-        //debugger;
         var promise_get = this.client.then(
             (client) => {
                 let payload = {applicationId: applicationId, body: request_content};
@@ -381,7 +377,6 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getKeys(applicationId, callback = null) {
-        //debugger;
         var promise_get = this.client.then(
             (client) => {
                 return client.apis["Application (Individual)"].get_applications__applicationId__keys(
@@ -402,7 +397,6 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getSubscriptions(apiId, applicationId, callback = null) {
-        //debugger;
         var promise_get = this.client.then(
             (client) => {
                 return client.apis["Subscription (Collection)"].get_subscriptions(
@@ -476,7 +470,7 @@ class API {
         let payload = {apiId: apiId, language:language}
         var promise_sdk = this.client.then(
             (client) => {
-                return client.apis["API (individual)"].get_apis__apiId__sdks__language_(
+                return client.apis["API (Individual)"].get_apis__apiId__sdks__language_(
                     payload, this._requestMetaData());
             }
         );
