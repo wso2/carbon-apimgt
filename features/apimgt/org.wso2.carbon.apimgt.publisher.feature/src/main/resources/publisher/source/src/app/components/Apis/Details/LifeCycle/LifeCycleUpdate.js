@@ -65,10 +65,7 @@ export default class LifeCycleUpdate extends Component {
         let promisedUpdate;
         const newState = event.currentTarget.getAttribute("data-value");
         const apiUUID = this.props.api.id;
-        const lifecycleChecklist = this.state.checkList.map(item => {
-                return item.checked && (item.value + ":true")
-            }
-        );
+        const lifecycleChecklist = this.state.checkList.map(item => item.value + ":" + item.checked);
         if (lifecycleChecklist.length > 0) {
             promisedUpdate = this.api.updateLcState(apiUUID, newState, lifecycleChecklist);
         } else {

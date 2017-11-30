@@ -69,7 +69,6 @@ class Listing extends React.Component {
                     tires.push(tier);
                 }
                 this.setState({tiers: tires});
-                debugger;
             }
         ).catch(error => {
             let status = error.status;
@@ -85,7 +84,6 @@ class Listing extends React.Component {
 
         let promised_apis = api.getAllAPIs();
         promised_apis.then((response) => {
-            //debugger
             this.setState({apis: response.obj});
         }).catch(error => {
             let status = error.status;
