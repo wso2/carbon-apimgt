@@ -248,6 +248,19 @@
                         </configuration>
                     </execution>
                 </executions>
+
+                <dependencies>
+                    <dependency>
+                        <groupId>org.wso2.carbon.apimgt</groupId>
+                        <artifactId>org.wso2.carbon.apimgt.rest.api.commons</artifactId>
+                        <version>${carbon.apimgt.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>com.atlassian.commonmark</groupId>
+                        <artifactId>commonmark</artifactId>
+                        <version>${atlassian.commonmark.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <!-- End of REST API documentation generation -->
 
