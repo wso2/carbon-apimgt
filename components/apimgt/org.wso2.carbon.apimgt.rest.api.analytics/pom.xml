@@ -198,6 +198,7 @@
                     </execution>
                 </executions>
             </plugin>
+<!--
             <plugin>
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-codegen-maven-plugin</artifactId>
@@ -230,6 +231,7 @@
                     </dependency>
                 </dependencies>
             </plugin>
+-->
             <!-- End of REST API documentation generation -->
 
         </plugins>
