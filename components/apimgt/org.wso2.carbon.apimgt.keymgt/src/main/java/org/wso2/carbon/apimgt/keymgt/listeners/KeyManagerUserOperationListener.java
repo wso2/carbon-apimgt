@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
@@ -115,36 +116,28 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
             // exception is not thrown to the caller since this is a event Identity(IS) listener
             log.error("Error while cleaning up workflow task for the user: " + username, e);
         }
+        APIUtil.clearRoleCache(getUserName(username, userStoreManager));
         return !isEnable() || removeGatewayKeyCache(username, userStoreManager);
     }
 
     @Override
     public boolean doPreUpdateRoleListOfUser(String username, String[] deletedRoles, String[] newRoles,
                                              UserStoreManager userStoreManager) {
-
+        APIUtil.clearRoleCache(getUserName(username, userStoreManager));
         return !isEnable() || removeGatewayKeyCache(username, userStoreManager);
     }
 
     @Override
-    public boolean doPreUpdateUserListOfRole(String username, String[] deletedRoles, String[] newRoles,
-                                             UserStoreManager userStoreManager) {
-
-        return !isEnable() || removeGatewayKeyCache(username, userStoreManager);
+    public boolean doPreUpdateUserListOfRole(String roleName, String[] deletedUsers, String[] newUsers,
+            UserStoreManager userStoreManager) {
+        boolean isRemoveGatewayKeyCache = invalidateMultipleCacheKeys(deletedUsers, userStoreManager, true);
+        isRemoveGatewayKeyCache = invalidateMultipleCacheKeys(newUsers, userStoreManager, isRemoveGatewayKeyCache);
+        return !isEnable() || isRemoveGatewayKeyCache;
     }
 
+
     private boolean removeGatewayKeyCache(String username, UserStoreManager userStoreManager) {
-
-        String userStoreDomain = getUserStoreDomainName(userStoreManager);
-        String tenantDomain = getTenantDomain();
-
-        username = UserCoreUtil.addDomainToName(username, userStoreDomain);
-        username = UserCoreUtil.addTenantDomainToEntry(username, tenantDomain);
-
-        //If the username is not case sensitive
-        if (!isUserStoreInUsernameCaseSensitive(username)) {
-            username = username.toLowerCase();
-        }
-
+        username = getUserName(username, userStoreManager);
         APIManagerConfiguration config = getApiManagerConfiguration();
 
         if (config.getApiGatewayEnvironments().size() <= 0) {
@@ -228,6 +221,47 @@ public class KeyManagerUserOperationListener extends IdentityOathEventListener {
 
     protected ApiMgtDAO getDAOInstance() {
         return ApiMgtDAO.getInstance();
+    }
+
+    /**
+     * To get the fully qualified username with the user store domain.
+     *
+     * @param username         Name of the User.
+     * @param userStoreManager User store manager, which the user is belong to.
+     * @return fully qualified username.
+     */
+    private String getUserName(String username, UserStoreManager userStoreManager) {
+        String userStoreDomain = getUserStoreDomainName(userStoreManager);
+        String tenantDomain = getTenantDomain();
+
+        username = UserCoreUtil.addDomainToName(username, userStoreDomain);
+        username = UserCoreUtil.addTenantDomainToEntry(username, tenantDomain);
+
+        //If the username is not case sensitive
+        if (!isUserStoreInUsernameCaseSensitive(username)) {
+            username = username.toLowerCase();
+        }
+        return username;
+    }
+
+    /**
+     * To invalidate multiple cache entries when there is an update/
+     *
+     * @param users               User list that was updated.
+     * @param userStoreManager    User Store Manager which the User is belongs to.
+     * @param removedGatewayCache current status of removing gateway cache.
+     * @return removedGatewayCache result.
+     */
+    private boolean invalidateMultipleCacheKeys(String[] users, UserStoreManager userStoreManager, boolean
+            removedGatewayCache) {
+        for (String username : users) {
+            username = getUserName(username, userStoreManager);
+            APIUtil.clearRoleCache(username);
+            if (isEnable()) {
+                removedGatewayCache = removedGatewayCache && removeGatewayKeyCache(username, userStoreManager);
+            }
+        }
+        return removedGatewayCache;
     }
 
 }

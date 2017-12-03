@@ -25,6 +25,7 @@ import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,10 +66,7 @@ import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
-import org.wso2.carbon.registry.core.Association;
-import org.wso2.carbon.registry.core.Collection;
-import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.*;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
@@ -91,9 +89,10 @@ import javax.xml.stream.XMLStreamReader;
     GovernanceUtils.class, PrivilegedCarbonContext.class, WorkflowExecutorFactory.class, JavaUtils.class,
     APIProviderImpl.class})
 public class APIProviderImplTest {
+    private ApiMgtDAO apimgtDAO;
 
     @BeforeClass
-    public static void setup() throws IOException {
+    public static void setup() throws IOException, UserStoreException, RegistryException {
         System.setProperty("carbon.home", "");
     }
     
@@ -112,6 +111,7 @@ public class APIProviderImplTest {
         ApiMgtDAO apimgtDAO = Mockito.mock(ApiMgtDAO.class);
         PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apimgtDAO);
         Mockito.doNothing().when(apimgtDAO).addAPI(api, -1234);
+        apimgtDAO = Mockito.mock(ApiMgtDAO.class);
         
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.when(APIUtil.isAPIManagementEnabled()).thenReturn(false);
@@ -1200,4 +1200,41 @@ public class APIProviderImplTest {
        return tenantConf.getBytes();
     }
 
+
+    /**
+     * This method tests the behaviour of the searchAPISByUrlpattern method.
+     *
+     * @throws APIManagementException API Management Exception.
+     * @throws UserStoreException     User Store Exception.
+     * @throws RegistryException      Registry Exception.
+     */
+    @Test
+    public void testSearchAPIsByURLPattern() throws APIManagementException, UserStoreException, RegistryException {
+        TestUtils.mockRegistryAndUserRealm(-1234, true);
+        PowerMockito.mockStatic(APIUtil.class);
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null);
+        Registry registry = Mockito.mock(Registry.class);
+        Assert.assertEquals("Search APIs By url pattern returns wrong list of APIs", 0,
+                apiProvider.searchAPIsByURLPattern(registry, "test", 0, 10).get("length"));
+    }
+
+    /**
+     * This method tests the behaviour of getSearchQuery method under different circumstances.
+     *
+     * @throws UserStoreException     UserStore Exception.
+     * @throws RegistryException      Registry Exception.
+     * @throws APIManagementException API Management Exception.
+     */
+    @Test
+    public void testSearchQuery() throws UserStoreException, RegistryException, APIManagementException {
+        TestUtils.mockRegistryAndUserRealm(-1234, true);
+        PowerMockito.mockStatic(APIUtil.class);
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null);
+        Assert.assertTrue("When the access control is enabled, search query includes role query",
+                apiProvider.getSearchQuery("").contains("(null)"));
+        TestUtils.mockRegistryAndUserRealm(-1234);
+        apiProvider = new APIProviderImplWrapper(apimgtDAO, null);
+        Assert.assertFalse("When the access control is enabled, search query includes role query",
+                apiProvider.getSearchQuery("").contains("(null)"));
+    }
 }

@@ -186,6 +186,13 @@ public class ApisApiServiceImpl extends ApisApiService {
                 }
             }
 
+            if (body.getAccessControlRoles() != null) {
+                String errorMessage = RestApiPublisherUtils.validateUserRoles(body.getAccessControlRoles());
+
+                if (!errorMessage.isEmpty()) {
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+            }
             if (body.getContext().endsWith("/")) {
                 RestApiUtil.handleBadRequest("Context cannot end with '/' character", log);
             }
@@ -332,6 +339,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while updating the lifecycle of API " + apiId, e, log);
             } else {
                 RestApiUtil.handleInternalServerError("Error while updating lifecycle of API " + apiId, e, log);
             }
@@ -377,6 +387,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             } else if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while copying API : " + apiId, e, log);
             } else {
                 String errorMessage = "Error while copying API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -410,6 +422,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             // to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("User is not authorized to access the API", e, log);
             } else {
                 String errorMessage = "Error while retrieving API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -454,6 +468,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             // to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving mediation policies of API " + apiId, e, log);
             } else {
                 String errorMessage = "Error while retrieving all api specific mediation policies" +
                         " of API : " + apiId;
@@ -498,6 +515,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             // to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while deleting mediation policies of API " + apiId, e, log);
             } else {
                 String errorMessage = "Error while deleting API specific mediation policy : " +
                         mediationPolicyId + "of API " + apiId;
@@ -546,6 +566,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             // to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while getting mediation policy with uuid " + mediationPolicyId
+                                + " of API " + apiId, e, log);
             } else {
                 String errorMessage = "Error while getting mediation policy with uuid "
                         + mediationPolicyId + " of API " + apiId;
@@ -629,6 +653,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             // to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while updating the mediation policy with uuid " + mediationPolicyId
+                                + " of API " + apiId, e, log);
             } else {
                 String errorMessage = "Error occurred while updating the mediation policy with uuid " +
                         mediationPolicyId + " of API " + apiId;
@@ -711,6 +739,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             // to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while adding mediation policay for the API " + apiId, e, log);
             } else {
                 String errorMessage = "Error while adding the mediation policy : " + body.getName() +
                         "of API " + apiId;
@@ -774,6 +805,12 @@ public class ApisApiServiceImpl extends ApisApiService {
                 RestApiUtil.handleBadRequest(
                         "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
             }
+            if (body.getAccessControlRoles() != null) {
+                String errorMessage = RestApiPublisherUtils.validateUserRoles(body.getAccessControlRoles());
+                if (!errorMessage.isEmpty()) {
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                }
+            }
             API apiToUpdate = APIMappingUtil.fromDTOtoAPI(body, apiIdentifier.getProviderName());
             apiProvider.updateAPI(apiToUpdate);
 
@@ -788,6 +825,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             // to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while updating API : " + apiId, e, log);
             } else {
                 String errorMessage = "Error while updating API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -830,6 +869,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + apiId, e, log);
             } else {
                 String errorMessage = "Error while deleting API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -871,6 +912,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving documents of API : " + apiId, e, log);
             } else {
                 String msg = "Error while retrieving documents of API " + apiId;
                 RestApiUtil.handleInternalServerError(msg, e, log);
@@ -924,6 +968,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil
+                        .handleAuthorizationFailure("Authorization failure while adding documents of API : " + apiId, e,
+                                log);
             } else {
                 String errorMessage = "Error while adding the document for API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -964,6 +1012,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving document : " + documentId + " of API " + apiId, e, log);
             } else {
                 String errorMessage = "Error while retrieving document : " + documentId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1023,6 +1074,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while updating document : " + documentId + " of API " + apiId, e, log);
             } else {
                 String errorMessage = "Error while updating the document " + documentId + " for API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1060,6 +1114,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while deleting : " + documentId + " of API " + apiId, e, log);
             } else {
                 String errorMessage = "Error while retrieving API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1121,6 +1178,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving document : " + documentId + " of API " + apiId, e, log);
             } else {
                 String errorMessage = "Error while retrieving document " + documentId + " of the API " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1192,6 +1252,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while adding content to the document: " + documentId + " of API "
+                                + apiId, e, log);
             } else {
                 RestApiUtil.handleInternalServerError("Failed to add content to the document " + documentId, e, log);
             }
@@ -1226,6 +1290,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil
+                        .handleAuthorizationFailure("Authorization failure while retrieving swagger of API : " + apiId,
+                                e, log);
             } else {
                 String errorMessage = "Error while retrieving swagger of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1265,6 +1333,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while retrieving thumbnail of API : " + apiId, e, log);
             } else {
                 String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1330,6 +1401,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil
+                        .handleAuthorizationFailure("Authorization failure while adding thumbnail for API : " + apiId,
+                                e, log);
             } else {
                 String errorMessage = "Error while retrieving thumbnail of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1375,6 +1450,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             // to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil
+                        .handleAuthorizationFailure("Authorization failure while retrieving wsdl of API: " + apiId, e,
+                                log);
             } else {
                 String errorMessage = "Error while retrieving wsdl of API: " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1419,6 +1498,10 @@ public class ApisApiServiceImpl extends ApisApiService {
             // to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil
+                        .handleAuthorizationFailure("Authorization failure while uploading wsdl for API: " + apiId, e,
+                                log);
             } else {
                 String errorMessage = "Error while uploading wsdl of API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1462,6 +1545,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             // to expose the existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while updating swagger definition of API: " + apiId, e, log);
             } else {
                 String errorMessage = "Error while retrieving API : " + apiId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1495,5 +1581,16 @@ public class ApisApiServiceImpl extends ApisApiService {
             log.error("Error occurred while parsing config json string in to json object", e);
         }
         return null;
+    }
+
+    /**
+     * To check whether a particular exception is due to access control restriction.
+     *
+     * @param e Exception object.
+     * @return true if the the exception is caused due to authorization failure.
+     */
+    private boolean isAuthorizationFailure(Exception e) {
+        String errorMessage = e.getMessage();
+        return errorMessage != null && errorMessage.contains(APIConstants.UN_AUTHORIZED_ERROR_MESSAGE);
     }
 }

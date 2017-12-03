@@ -34,6 +34,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.TierDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.APIMappingUtil;
@@ -46,6 +48,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  *  This class contains REST API Publisher related utility operations
@@ -166,4 +169,45 @@ public class RestApiPublisherUtils {
 
         return isValid;
     }
+
+    /**
+     * To validate the roles against user roles and tenant roles.
+     *
+     * @param inputRoles Input roles.
+     * @return relevant error string or empty string.
+     * @throws APIManagementException API Management Exception.
+     */
+    public static String validateUserRoles(List<String> inputRoles) throws APIManagementException {
+        String userName = RestApiUtil.getLoggedInUsername();
+        String[] tenantRoleList = APIUtil.getRoleNames(userName);
+        boolean isMatched = false;
+        String[] userRoleList = null;
+
+        if (APIUtil.hasPermission(userName, APIConstants.Permissions.APIM_ADMIN, true)) {
+            isMatched = true;
+        } else {
+            userRoleList = APIUtil.getListOfRoles(userName, true);
+
+        }
+        if (inputRoles != null && !inputRoles.isEmpty()) {
+            if (tenantRoleList != null || userRoleList != null) {
+                for (String inputRole : inputRoles) {
+                    if (!isMatched && userRoleList != null && APIUtil.compareRoleList(userRoleList, inputRole)) {
+                        isMatched = true;
+                    }
+                    if (tenantRoleList != null && !APIUtil.compareRoleList(tenantRoleList, inputRole)) {
+                        return "Invalid user roles found in accessControlRole list";
+                    }
+                }
+                return isMatched ?
+                        "" :
+                        "The publisher does not contain at-least one role from the publisher "
+                                + "accessControl list entered";
+            } else {
+                return "Invalid user roles found";
+            }
+        }
+        return "";
+    }
+
 }

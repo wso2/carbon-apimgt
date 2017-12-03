@@ -1,4 +1,5 @@
 <%
+var apiManagerConfig = null;
 var hasCreatePermission = function () {
     var success, log = new Log(),
             provider = jagg.module("manager").getAPIProviderObj();
@@ -189,4 +190,32 @@ var updatePermissionCache = function (username) {
         };
     }
 };
+
+/**
+ Function to check whether publisher access control is enabled in api-manager.xml
+ */
+var isPublisherAccessControlEnabled = function () {
+    var log = new Log();
+    var carbon = require('carbon');
+    try {
+        var utils = require('utils').xml;
+        if (apiManagerConfig == null) {
+            apiManagerConfig = carbon.server.loadConfig('api-manager.xml');
+        }
+        var xmlString = utils.convertE4XtoJSON(apiManagerConfig);
+        var enableAccessControl = xmlString.APIPublisher[0].EnableAccessControl;
+
+        if (enableAccessControl != null) {
+            return String(enableAccessControl[0].EnableAccessControl).toLowerCase() == "true";
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("PublisherAccessControl is not enabled in api-manager.xml");
+            }
+        }
+        return false;
+    } catch (e) {
+        log.error("Cannot load api-manager config file " + e);
+        return false;
+    }
+}
 %>

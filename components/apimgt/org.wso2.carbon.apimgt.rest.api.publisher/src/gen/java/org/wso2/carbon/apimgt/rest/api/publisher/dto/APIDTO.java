@@ -89,7 +89,14 @@ public class APIDTO  {
   
   
   private List<String> visibleRoles = new ArrayList<String>();
-  
+
+  public enum AccessControlEnum {
+    NONE,  RESTRICTED
+  };
+
+  private AccessControlEnum accessControl = null;
+
+  private List<String> accessControlRoles = new ArrayList<String>();
   
   private List<String> visibleTenants = new ArrayList<String>();
   
@@ -385,7 +392,29 @@ public class APIDTO  {
     this.visibleRoles = visibleRoles;
   }
 
-  
+  /**
+   * Publisher access control related parameters getters and setters.
+   *
+   */
+  @ApiModelProperty(value = "AccessControl")
+  @JsonProperty("accessControl")
+  public AccessControlEnum getAccessControl() {
+    return accessControl;
+  }
+
+  public void setAccessControl(AccessControlEnum accessControl) {
+    this.accessControl = accessControl;
+  }
+
+  @ApiModelProperty(value = "The user roles that are able to access the API in publisher")
+  @JsonProperty("accessControlRoles")
+  public List<String> getAccessControlRoles() {
+    return accessControlRoles;
+  }
+  public void setAccessControlRoles(List<String> accessControlRoles) {
+    this.accessControlRoles = accessControlRoles;
+  }
+
   /**
    **/
   @ApiModelProperty(value = "")

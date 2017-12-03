@@ -16,12 +16,22 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
+import org.wso2.carbon.registry.core.Registry;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
-import java.util.Map;
+import java.io.InputStream;
+import java.util.*;
+
+import static org.wso2.carbon.apimgt.impl.APIConstants.UN_AUTHORIZED_ERROR_MESSAGE;
 
 /**
  * User aware APIProvider implementation which ensures that the invoking user has the
@@ -34,12 +44,16 @@ import java.util.Map;
  * when the object had been created in the anonymous mode, an exception will be thrown.
  */
 public class UserAwareAPIProvider extends APIProviderImpl {
-
-    private String username;
+    protected String username;
+    private static final Log log = LogFactory.getLog(UserAwareAPIProvider.class);
 
     UserAwareAPIProvider(String username) throws APIManagementException {
         super(username);
         this.username = username;
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        isAccessControlRestrictionEnabled = Boolean
+                .parseBoolean(config.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_ACCESS_CONTROL_LEVELS));
     }
 
     @Override
@@ -51,13 +65,40 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     @Override
     public void createNewAPIVersion(API api, String newVersion) throws DuplicateAPIException, APIManagementException {
         checkCreatePermission();
+        if (api != null) {
+            checkAccessControlPermission(api.getId());
+        }
         super.createNewAPIVersion(api, newVersion);
+    }
+
+    @Override
+    public List<String> getCustomInSequences(APIIdentifier apiIdentifier) throws APIManagementException {
+        checkAccessControlPermission(apiIdentifier);
+        return super.getCustomInSequences(apiIdentifier);
     }
 
     @Override
     public void updateAPI(API api) throws APIManagementException, FaultGatewaysException {
         checkCreatePermission();
+        if (api != null) {
+            checkAccessControlPermission(api.getId());
+        }
         super.updateAPI(api);
+    }
+
+    @Override
+    public String getWsdl(APIIdentifier apiId) throws APIManagementException {
+        checkAccessControlPermission(apiId);
+        return super.getWsdl(apiId);
+    }
+
+    @Override
+    public boolean updateAPIStatus(APIIdentifier identifier, String status, boolean publishToGateway,
+            boolean deprecateOldVersions, boolean makeKeysForwardCompatible)
+            throws APIManagementException, FaultGatewaysException {
+        checkAccessControlPermission(identifier);
+        return super
+                .updateAPIStatus(identifier, status, publishToGateway, deprecateOldVersions, makeKeysForwardCompatible);
     }
 
     @Override
@@ -69,34 +110,117 @@ public class UserAwareAPIProvider extends APIProviderImpl {
             throw new APIManagementException("User '" + username + "' does not have the " +
                     "required permission: " + permission);
         }
+        if (api != null) {
+            checkAccessControlPermission(api.getId());
+        }
         super.updateAPI(api);
     }
 
     @Override
     public void deleteAPI(APIIdentifier identifier) throws APIManagementException {
         checkCreatePermission();
+        checkAccessControlPermission(identifier);
         super.deleteAPI(identifier);
+    }
+
+    @Override
+    public boolean updateAPIsInExternalAPIStores(API api, Set<APIStore> apiStoreSet, boolean apiOlderVersionExist)
+            throws APIManagementException {
+        if (api != null) {
+            checkAccessControlPermission(api.getId());
+        }
+        return super.updateAPIsInExternalAPIStores(api, apiStoreSet, apiOlderVersionExist);
+    }
+
+    @Override
+    public List<String> getCustomOutSequences(APIIdentifier apiIdentifier) throws APIManagementException {
+        checkAccessControlPermission(apiIdentifier);
+        return super.getCustomOutSequences(apiIdentifier);
+    }
+
+    @Override
+    public List<String> getCustomApiFaultSequences(APIIdentifier apiIdentifier) throws APIManagementException {
+        checkAccessControlPermission(apiIdentifier);
+        return super.getCustomApiFaultSequences(apiIdentifier);
+    }
+
+    @Override
+    public List<String> getCustomFaultSequences(APIIdentifier apiIdentifier) throws APIManagementException {
+        checkAccessControlPermission(apiIdentifier);
+        return super.getCustomFaultSequences(apiIdentifier);
     }
 
     @Override
     public void changeAPIStatus(API api, APIStatus status, String userId,
                                 boolean updateGatewayConfig) throws APIManagementException, FaultGatewaysException {
         checkPublishPermission();
+        if (api != null) {
+            checkAccessControlPermission(api.getId());
+        }
         super.changeAPIStatus(api, status, userId, updateGatewayConfig);
+    }
+
+    @Override
+    public Map<String, String> propergateAPIStatusChangeToGateways(APIIdentifier identifier, APIStatus newStatus)
+            throws APIManagementException {
+        checkAccessControlPermission(identifier);
+        return super.propergateAPIStatusChangeToGateways(identifier, newStatus);
+    }
+
+    @Override
+    public boolean updateAPIforStateChange(APIIdentifier identifier, APIStatus newStatus,
+            Map<String, String> failedGatewaysMap) throws APIManagementException, FaultGatewaysException {
+        checkAccessControlPermission(identifier);
+        return super.updateAPIforStateChange(identifier, newStatus, failedGatewaysMap);
+    }
+
+    @Override
+    public void addFileToDocumentation(APIIdentifier apiId, Documentation documentation, String filename,
+            InputStream content, String contentType) throws APIManagementException {
+        checkAccessControlPermission(apiId);
+        super.addFileToDocumentation(apiId, documentation, filename, content, contentType);
     }
 
     @Override
     public void addDocumentation(APIIdentifier apiId,
                                  Documentation documentation) throws APIManagementException {
         checkCreatePermission();
+        checkAccessControlPermission(apiId);
         super.addDocumentation(apiId, documentation);
     }
 
     @Override
-    public void removeDocumentation(APIIdentifier apiId, String docName,
-                                    String docType) throws APIManagementException {
+    public API getLightweightAPIByUUID(String uuid, String requestedTenantDomain) throws APIManagementException {
+        API api = super.getLightweightAPIByUUID(uuid, requestedTenantDomain);
+        if (api != null) {
+            checkAccessControlPermission(api.getId());
+        }
+        return api;
+    }
+
+    @Override
+    public API getLightweightAPI(APIIdentifier identifier) throws APIManagementException {
+        checkAccessControlPermission(identifier);
+        return super.getLightweightAPI(identifier);
+    }
+
+    @Override
+    public String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException {
+        checkAccessControlPermission(apiId);
+        return super.getSwagger20Definition(apiId);
+    }
+
+    @Override
+    public void removeDocumentation(APIIdentifier apiId, String docName, String docType) throws APIManagementException {
         checkCreatePermission();
+        checkAccessControlPermission(apiId);
         super.removeDocumentation(apiId, docName, docType);
+    }
+
+    @Override
+    public void removeDocumentation(APIIdentifier apiId, String docId) throws APIManagementException {
+        checkAccessControlPermission(apiId);
+        super.removeDocumentation(apiId, docId);
     }
 
     @Override
@@ -108,6 +232,7 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public void updateDocumentation(APIIdentifier apiId,
                                     Documentation documentation) throws APIManagementException {
         checkCreatePermission();
+        checkAccessControlPermission(apiId);
         super.updateDocumentation(apiId, documentation);
     }
    
@@ -115,13 +240,23 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public void addDocumentationContent(API api, String documentationName,
                                         String text) throws APIManagementException {
         checkCreatePermission();
+        if (api != null) {
+            checkAccessControlPermission(api.getId());
+        }
         super.addDocumentationContent(api, documentationName, text);
     }
 
     @Override
     public void copyAllDocumentation(APIIdentifier apiId, String toVersion) throws APIManagementException {
         checkCreatePermission();
+        checkAccessControlPermission(apiId);
         super.copyAllDocumentation(apiId, toVersion);
+    }
+
+    @Override
+    public List<LifeCycleEvent> getLifeCycleEvents(APIIdentifier apiId) throws APIManagementException {
+        checkAccessControlPermission(apiId);
+        return super.getLifeCycleEvents(apiId);
     }
 
     @Override
@@ -145,16 +280,230 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     public APIStateChangeResponse changeLifeCycleStatus(APIIdentifier apiIdentifier, String targetStatus)
             throws APIManagementException, FaultGatewaysException {
         checkPublishPermission();
+        checkAccessControlPermission(apiIdentifier);
         return super.changeLifeCycleStatus(apiIdentifier, targetStatus);
+    }
+
+    @Override
+    public boolean checkAndChangeAPILCCheckListItem(APIIdentifier apiIdentifier, String checkItemName,
+            boolean checkItemValue) throws APIManagementException {
+        checkAccessControlPermission(apiIdentifier);
+        return super.checkAndChangeAPILCCheckListItem(apiIdentifier, checkItemName, checkItemValue);
     }
 
     public boolean changeAPILCCheckListItems(APIIdentifier apiIdentifier, int checkItem, boolean checkItemValue)
             throws APIManagementException {
         checkPublishPermission();
+        checkAccessControlPermission(apiIdentifier);
         return super.changeAPILCCheckListItems(apiIdentifier, checkItem, checkItemValue);
     }
 
+    @Override
     public Map<String, Object> getAPILifeCycleData(APIIdentifier apiId) throws APIManagementException {
+        checkAccessControlPermission(apiId);
         return super.getAPILifeCycleData(apiId);
+    }
+
+    @Override
+    public API getAPI(APIIdentifier identifier) throws APIManagementException {
+        checkAccessControlPermission(identifier);
+        return super.getAPI(identifier);
+    }
+
+    @Override
+    public Set<Subscriber> getSubscribersOfAPI(APIIdentifier identifier) throws APIManagementException {
+        checkAccessControlPermission(identifier);
+        return super.getSubscribersOfAPI(identifier);
+    }
+
+    @Override
+    public String getAPILifeCycleStatus(APIIdentifier apiIdentifier) throws APIManagementException {
+        checkAccessControlPermission(apiIdentifier);
+        return super.getAPILifeCycleStatus(apiIdentifier);
+    }
+
+    @Override
+    public long getAPISubscriptionCountByAPI(APIIdentifier identifier) throws APIManagementException {
+        checkAccessControlPermission(identifier);
+        return super.getAPISubscriptionCountByAPI(identifier);
+    }
+
+    @Override
+    public String getDefaultVersion(APIIdentifier apiid) throws APIManagementException {
+        checkAccessControlPermission(apiid);
+        return super.getDefaultVersion(apiid);
+    }
+
+    public String[] getConsumerKeys(APIIdentifier apiIdentifier) throws APIManagementException {
+        checkAccessControlPermission(apiIdentifier);
+        return super.getConsumerKeys(apiIdentifier);
+    }
+
+    @Override
+    public void saveSwagger20Definition(APIIdentifier apiId, String jsonText) throws APIManagementException {
+        checkAccessControlPermission(apiId);
+        super.saveSwagger20Definition(apiId, jsonText);
+    }
+
+    @Override
+    public List<Documentation> getAllDocumentation(APIIdentifier apiId) throws APIManagementException {
+        checkAccessControlPermission(apiId);
+        return super.getAllDocumentation(apiId);
+    }
+
+    @Override
+    public String getDocumentationContent(APIIdentifier identifier, String documentationName)
+            throws APIManagementException {
+        checkAccessControlPermission(identifier);
+        return super.getDocumentationContent(identifier, documentationName);
+    }
+
+    @Override
+    public List<Mediation> getAllApiSpecificMediationPolicies(APIIdentifier apiIdentifier)
+            throws APIManagementException {
+        checkAccessControlPermission(apiIdentifier);
+        return super.getAllApiSpecificMediationPolicies(apiIdentifier);
+    }
+
+    @Override
+    public boolean isAPIUpdateValid(API api) throws APIManagementException {
+        if (api != null) {
+            checkAccessControlPermission(api.getId());
+        }
+        return super.isAPIUpdateValid(api);
+    }
+
+    @Override
+    public String addResourceFile(String resourcePath, ResourceFile resourceFile) throws APIManagementException {
+        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifier(resourcePath);
+        checkAccessControlPermission(apiIdentifier);
+        return super.addResourceFile(resourcePath, resourceFile);
+    }
+
+    @Override
+    protected API getAPI(GenericArtifact apiArtifact) throws APIManagementException {
+        API api = APIUtil.getAPI(apiArtifact, registry);
+        if (api != null) {
+            checkAccessControlPermission(api.getId());
+        }
+        return api;
+    }
+
+    @Override
+    public ResourceFile getIcon(APIIdentifier identifier) throws APIManagementException {
+        checkAccessControlPermission(identifier);
+        return super.getIcon(identifier);
+    }
+
+    @Override
+    protected GenericArtifact getAPIArtifact(APIIdentifier apiIdentifier) throws APIManagementException {
+        checkAccessControlPermission(apiIdentifier);
+        return super.getAPIArtifact(apiIdentifier);
+    }
+
+    @Override
+    public Map<Documentation, API> searchAPIDoc(Registry registry, int tenantID, String username, String searchTerm)
+            throws APIManagementException {
+        Map<Documentation, API> apiByDocumentation = APIUtil
+                .searchAPIsByDoc(registry, tenantId, username, searchTerm, APIConstants.PUBLISHER_CLIENT);
+        Map<Documentation, API> filteredAPIDocumentation = new HashMap<Documentation, API>();
+        if (apiByDocumentation != null) {
+            for (Map.Entry<Documentation, API> entry : apiByDocumentation.entrySet()) {
+                API api = entry.getValue();
+                if (api != null) {
+                    checkAccessControlPermission(api.getId());
+                    filteredAPIDocumentation.put(entry.getKey(), api);
+                }
+            }
+            return filteredAPIDocumentation;
+        }
+        return null;
+    }
+
+    @Override
+    public Boolean deleteApiSpecificMediationPolicy(String apiResourcePath, String mediationPolicyId)
+            throws APIManagementException {
+        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifier(apiResourcePath);
+        checkAccessControlPermission(apiIdentifier);
+        return super.deleteApiSpecificMediationPolicy(apiResourcePath, mediationPolicyId);
+    }
+
+    @Override
+    public Mediation getApiSpecificMediationPolicy(String apiResourcePath, String mediationPolicyId)
+            throws APIManagementException {
+        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifier(apiResourcePath);
+        checkAccessControlPermission(apiIdentifier);
+        return super.getApiSpecificMediationPolicy(apiResourcePath, mediationPolicyId);
+    }
+
+    @Override
+    public Resource getApiSpecificMediationResourceFromUuid(String uuid, String resourcePath)
+            throws APIManagementException {
+        APIIdentifier apiIdentifier = APIUtil.getAPIIdentifier(resourcePath);
+        checkAccessControlPermission(apiIdentifier);
+        return super.getApiSpecificMediationResourceFromUuid(uuid, resourcePath);
+    }
+
+    @Override
+    protected void checkAccessControlPermission(APIIdentifier identifier) throws APIManagementException {
+        if (identifier == null || !isAccessControlRestrictionEnabled) {
+            if (!isAccessControlRestrictionEnabled && log.isDebugEnabled()) {
+                log.debug("Publisher access control restriction is not enabled. Hence the API " + identifier
+                        + " can be editable and viewable by all the API publishers and creators.");
+            }
+            return;
+        }
+        String apiPath = APIUtil.getAPIPath(identifier);
+        try {
+            if (!registry.resourceExists(apiPath)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Resource does not exist in the path : " + apiPath + " this can happen if this in the "
+                            + "middle of the new API creation, hence not checking the access control");
+                }
+                return;
+            }
+            Resource apiResource = registry.get(apiPath);
+            if (apiResource == null) {
+                return;
+            }
+            String accessControlProperty = apiResource.getProperty(APIConstants.ACCESS_CONTROL);
+            if (accessControlProperty == null || accessControlProperty.trim().isEmpty() || accessControlProperty
+                    .equalsIgnoreCase(APIConstants.NO_ACCESS_CONTROL)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("API in the path  " + apiPath + " does not have any access control restriction");
+                }
+                return;
+            }
+            if (APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN, true)) {
+                return;
+            }
+            String publisherAccessControlRoles = apiResource.getProperty(APIConstants.PUBLISHER_ROLES);
+            if (publisherAccessControlRoles != null && !publisherAccessControlRoles.trim().isEmpty()) {
+                String[] accessControlRoleList = publisherAccessControlRoles.replaceAll("\\s+", "").split(",");
+                if (log.isDebugEnabled()) {
+                    log.debug("API has restricted access to creators and publishers with the roles : " + Arrays
+                            .toString(accessControlRoleList));
+                }
+                String[] userRoleList = APIUtil.getListOfRoles(username, true);
+                if (log.isDebugEnabled()) {
+                    log.debug("User " + username + " has roles " + Arrays.toString(userRoleList));
+                }
+                for (String role : accessControlRoleList) {
+                    if (!role.equalsIgnoreCase(APIConstants.NULL_USER_ROLE_LIST) && APIUtil
+                            .compareRoleList(userRoleList, role)) {
+                        return;
+                    }
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("API " + identifier + " cannot be accessed by user '" + username + "'. It "
+                            + "has a publisher access control restriction");
+                }
+                throw new APIManagementException(UN_AUTHORIZED_ERROR_MESSAGE + " view or modify the API " + identifier);
+            }
+        } catch (RegistryException e) {
+            throw new APIManagementException(
+                    "Registry Exception while trying to check the access control restriction of API " + identifier
+                            .getApiName(), e);
+        }
     }
 }

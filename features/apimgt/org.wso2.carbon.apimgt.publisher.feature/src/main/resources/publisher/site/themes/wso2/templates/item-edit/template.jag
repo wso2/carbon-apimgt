@@ -3,6 +3,7 @@
  var result = mod.getTiers().tiers;
  var isSynapseGateway = mod.isSynapseGateway().isSynapseGateway;
  var isDataPublishingEnabled = mod.isDataPublishingEnabled().isDataPublishingEnabled;
+ var isPublisherAccessControlEnabled = mod.isPublisherAccessControlEnabled();
  var isSuperTenant = jagg.getUser().isSuperTenant;
  var i,resCount,rowNums = [],api = outputs.api; log = new Log();
  var last_tier = result[result.length -1];
@@ -163,9 +164,39 @@ var faultSequencesLoaded = false;
                     </div>
                 </div>
             <!--Response Caching End -->
+            <% if (isPublisherAccessControlEnabled) {%>
+               <div class="control-group">
+                   <label class="control-label" for="access-control"><%=i18n.localize("Access-Control")%>:<span
+                   class="requiredAstrix">*</span></label>
+                   <div class="controls">
+                       <select class="select required" id="access-control" name="accessControl"
+                       onchange="showHidePublisherAccessControlRoles()">
+                           <option value="none" <%if(api.accessControl!="restricted"){%> selected="selected" <%}%>>
+                           <%=i18n.localize("None")%></option>
+                           <option value="restricted" <%if(api.accessControl=="restricted"){%> selected="selected"
+                           <%}%>><%=i18n.localize("Restricted by roles")%></option>
+                       </select>
+                       <a class="icon-question-sign help_popup" help_data="publisherrole_help" title="publisherrole_help"></a>
+                       <p id="publisherrole_help" class="hide">
+                       <%=i18n.localize("<strong>All :</strong> The API is viewable, modifiable by all the publishers and creators.<br/><strong>Restricted by roles :</strong> The API can be viewable and modifiable by only specific publishers and creators with the roles that you specify")%>
+                     </p>
+                   </div>
+               </div>
 
+               <div class="control-group" id="publisherRolesDiv" <%if(api.accessControl!="restricted"){%>style="display: none;
+               "<%}%>>
+                    <label class="control-label" for="publisherRoles" id="publisherRolesLabel" name="publisherRolesLabel">
+                        <%=i18n.localize("Visible to Roles")%>:<span class="requiredAstrix">*</span>
+                    </label>
+                    <div class="controls">
+                        <input type="text" class="input required validInput validateUserRoles"
+                        id="publisherRoles" name="accessControlRoles"  value="<%=api.accessControlRoles%>"/>
+                        <p class="help-block" id="rolesHelp"><%=i18n.localize("Comma-separated list (e.g.: role1,role2,role3)")%></p>
+                    </div>
+                </div>
+            <% } %>
             <div class="control-group">
-               <label class="control-label" for="visibility"><%=i18n.localize("Visibility")%>:<span
+               <label class="control-label" for="visibility"><%=i18n.localize("Visibility on Store")%>:<span
                class="requiredAstrix">*</span></label>
                <div class="controls">
                    <select class="select required" id="visibility" name="visibility" onchange="showHideRoles()">

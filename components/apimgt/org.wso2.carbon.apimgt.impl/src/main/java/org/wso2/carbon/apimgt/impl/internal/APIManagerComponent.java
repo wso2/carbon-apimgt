@@ -248,7 +248,7 @@ public class APIManagerComponent {
             KeyManagerHolder.initializeKeyManager(configuration);
             //Initialise sql constants
             SQLConstantManagerFactory.initializeSQLConstantManager();
-
+            APIUtil.init();
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         } catch (APIManagerDatabaseException e) {

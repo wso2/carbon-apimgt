@@ -109,6 +109,7 @@ import static org.wso2.carbon.utils.ServerConstants.CARBON_HOME;
 public class AbstractAPIManagerTestCase {
 
     public static final String SAMPLE_API_NAME = "test";
+    public static final String SAMPLE_API_NAME1 = "test1";
     public static final String API_PROVIDER = "admin";
     public static final String SAMPLE_API_VERSION = "1.0.0";
     public static final String SAMPLE_TENANT_DOMAIN = "carbon.super";
@@ -218,7 +219,7 @@ public class AbstractAPIManagerTestCase {
         AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(genericArtifactManager, registryService,
                 registry, tenantManager);
         abstractAPIManager.tenantDomain = SAMPLE_TENANT_DOMAIN;
-        APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION);
+        APIIdentifier identifier = getAPIIdentifier(SAMPLE_API_NAME1, API_PROVIDER, SAMPLE_API_VERSION);
         String apiPath =
                 APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + identifier.getProviderName()
                         + RegistryConstants.PATH_SEPARATOR + identifier.getApiName() + RegistryConstants.PATH_SEPARATOR
@@ -236,7 +237,7 @@ public class AbstractAPIManagerTestCase {
             Assert.assertTrue(e.getMessage().contains("Failed to get API from "));
         }
         Mockito.when(registry.get(apiPath)).thenThrow(RegistryException.class).thenReturn(resource);
-        GenericArtifact genericArtifact = getGenericArtifact(SAMPLE_API_NAME, API_PROVIDER, SAMPLE_API_VERSION,
+        GenericArtifact genericArtifact = getGenericArtifact(SAMPLE_API_NAME1, API_PROVIDER, SAMPLE_API_VERSION,
                 "sample");
         Mockito.when(genericArtifactManager.getGenericArtifact(SAMPLE_RESOURCE_ID)).thenReturn(genericArtifact);
 
@@ -255,9 +256,9 @@ public class AbstractAPIManagerTestCase {
         resource.setUUID(SAMPLE_RESOURCE_ID);
         API api = abstractAPIManager.getAPI(identifier);
         Assert.assertNotNull(api);
-        Assert.assertEquals(api.getId().getApiName(), SAMPLE_API_NAME);
+        Assert.assertEquals(api.getId().getApiName(), SAMPLE_API_NAME1);
         sampleAPI.setVisibility(APIConstants.API_GLOBAL_VISIBILITY);
-        Assert.assertEquals(abstractAPIManager.getAPI(identifier).getId().getApiName(), SAMPLE_API_NAME);
+        Assert.assertEquals(abstractAPIManager.getAPI(identifier).getId().getApiName(), SAMPLE_API_NAME1);
         abstractAPIManager.tenantDomain = null;
         UserRegistry registry = Mockito.mock(UserRegistry.class);
         Mockito.when(registryService.getGovernanceUserRegistry(Mockito.anyString(), Mockito.anyInt()))
@@ -274,7 +275,7 @@ public class AbstractAPIManagerTestCase {
         AbstractAPIManager abstractAPIManager1 = new AbstractAPIManagerWrapperExtended(genericArtifactManager,
                 registryService, registry, tenantManager);
         abstractAPIManager1.tenantDomain =SAMPLE_TENANT_DOMAIN_1;
-        Assert.assertEquals(abstractAPIManager1.getAPI(identifier).getId().getApiName(), SAMPLE_API_NAME);
+        Assert.assertEquals(abstractAPIManager1.getAPI(identifier).getId().getApiName(), SAMPLE_API_NAME1);
     }
 
     @Test
@@ -1635,8 +1636,8 @@ public class AbstractAPIManagerTestCase {
                 abstractAPIManager.searchPaginatedAPIs(APIConstants.API_OVERVIEW_PROVIDER, null, 0, 5, false)
                         .get("length"), 0);
         BDDMockito.when(GovernanceUtils
-                .findGovernanceArtifacts(APIConstants.API_OVERVIEW_OWNER, registry, APIConstants.API_RXT_MEDIA_TYPE))
-                .thenThrow(RegistryException.class).thenReturn(governanceArtifactList);
+                .findGovernanceArtifacts(Mockito.anyString(), Mockito.any(Registry.class), Mockito.anyString(),
+                        Mockito.anyBoolean())).thenThrow(RegistryException.class).thenReturn(governanceArtifactList);
         try {
             abstractAPIManager.searchPaginatedAPIs(APIConstants.API_OVERVIEW_PROVIDER, null, 0, 5, false);
             Assert.fail("APIM exception not thrown for error scenario");

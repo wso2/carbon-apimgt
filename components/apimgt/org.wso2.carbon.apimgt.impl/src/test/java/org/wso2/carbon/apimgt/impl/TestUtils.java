@@ -30,6 +30,8 @@ import org.wso2.carbon.apimgt.api.model.policy.Limit;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
@@ -39,6 +41,9 @@ import org.wso2.carbon.user.core.UserRealm;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 
+import javax.xml.ws.Service;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class TestUtils {
@@ -55,9 +60,14 @@ public class TestUtils {
         return new APIIdentifier(UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID()
                  .toString());
     }
-    
-    public static ServiceReferenceHolder mockRegistryAndUserRealm(int tenantId) throws UserStoreException, 
-                                                                                                    RegistryException {
+
+    public static ServiceReferenceHolder mockRegistryAndUserRealm(int tenantId) throws
+            UserStoreException, RegistryException {
+        return mockRegistryAndUserRealm(tenantId, false);
+    }
+
+    public static ServiceReferenceHolder mockRegistryAndUserRealm(int tenantId, boolean isAccessControlEnabled) throws
+            UserStoreException, RegistryException {
         ServiceReferenceHolder sh = getServiceReferenceHolder();
         
         RealmService realmService = Mockito.mock(RealmService.class);
@@ -84,8 +94,17 @@ public class TestUtils {
         
         PowerMockito.when(realmService.getBootstrapRealm()).thenReturn(bootstrapRealm);
         ServiceReferenceHolder.setUserRealm(bootstrapRealm);
-        
-        PowerMockito.when(tm.getTenantId("carbon.super")).thenReturn(tenantId);
+        APIManagerConfigurationService amConfigService = Mockito.mock(APIManagerConfigurationService.class);
+        APIManagerConfiguration amConfig = Mockito.mock(APIManagerConfiguration.class);
+
+        PowerMockito.when(sh.getAPIManagerConfigurationService()).thenReturn(amConfigService);
+        PowerMockito.when(amConfigService.getAPIManagerConfiguration()).thenReturn(amConfig);
+
+        if (isAccessControlEnabled) {
+            Mockito.doReturn("true").when(amConfig)
+                    .getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_ACCESS_CONTROL_LEVELS);
+            PowerMockito.when(tm.getTenantId("carbon.super")).thenReturn(tenantId);
+        }
         return sh;
     }
     

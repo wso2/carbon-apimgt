@@ -35,8 +35,8 @@ import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 
-public class APIProviderImplWrapper extends APIProviderImpl {
-    
+public class APIProviderImplWrapper extends UserAwareAPIProvider {
+
     private API api;
     private Map<String, Map<String,String>> failedGateways;
     private List<Documentation> documentationList;
@@ -47,6 +47,15 @@ public class APIProviderImplWrapper extends APIProviderImpl {
         this.apiMgtDAO = apiMgtDAO;
         this.documentationList = documentationList;
         this.failedGateways = failedGateways;
+    }
+
+    public APIProviderImplWrapper(ApiMgtDAO apiMgtDAO, List<Documentation> documentationList)
+            throws APIManagementException {
+        super(null);
+        this.apiMgtDAO = apiMgtDAO;
+        if (documentationList != null) {
+            this.documentationList = documentationList;
+        }
     }
     
     @Override

@@ -237,6 +237,8 @@ public final class APIUtil {
     private static Set<String> currentLoadingTenants = new HashSet<String>();
 
     private static volatile Set<String> whiteListedScopes;
+    private static boolean isPublisherRoleCacheEnabled = true;
+
 
     //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
     static {
@@ -248,6 +250,18 @@ public final class APIUtil {
     }
 
     private static String hostAddress = null;
+
+    /**
+     * To initialize the publisherRoleCache configurations, based on configurations.
+     */
+    public static void init() {
+        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String isPublisherRoleCacheEnabledConfiguration = apiManagerConfiguration
+                .getFirstProperty(APIConstants.PUBLISHER_ROLE_CACHE_ENABLED);
+        isPublisherRoleCacheEnabled = isPublisherRoleCacheEnabledConfiguration == null || Boolean
+                .parseBoolean(isPublisherRoleCacheEnabledConfiguration);
+    }
 
     /**
      * This method used to get API from governance artifact
@@ -462,7 +476,11 @@ public final class APIUtil {
             api.setUUID(artifact.getId());
             // set rating
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-
+            Resource apiResource = registry.get(artifactPath);
+            api.setAccessControl(apiResource.getProperty(APIConstants.ACCESS_CONTROL));
+            api.setAccessControlRoles(
+                    APIConstants.NULL_USER_ROLE_LIST.equals(apiResource.getProperty(APIConstants.PUBLISHER_ROLES)) ?
+                            null : apiResource.getProperty(APIConstants.PUBLISHER_ROLES));
             api.setRating(getAverageRating(apiId));
             //set description
             api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
@@ -1155,6 +1173,28 @@ public final class APIUtil {
                 identifier.getProviderName() + RegistryConstants.PATH_SEPARATOR +
                 identifier.getApiName() + RegistryConstants.PATH_SEPARATOR +
                 identifier.getVersion() + APIConstants.API_RESOURCE_NAME;
+    }
+
+    /**
+     * Utility method to get api identifier from api path.
+     *
+     * @param apiPath Path of the API in registry
+     * @return relevant API Identifier
+     */
+    public static APIIdentifier getAPIIdentifier(String apiPath) {
+        int length = (APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR).length();
+        if (!apiPath.contains(APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR)) {
+            length = (APIConstants.API_IMAGE_LOCATION + RegistryConstants.PATH_SEPARATOR).length();
+        }
+        if (length <= 0) {
+            length = (APIConstants.API_DOC_LOCATION + RegistryConstants.PATH_SEPARATOR).length();
+        }
+        String relativePath = apiPath.substring(length);
+        String[] values = relativePath.split(RegistryConstants.PATH_SEPARATOR);
+        if (values.length > 3) {
+            return new APIIdentifier(values[0], values[1], values[2]);
+        }
+        return null;
     }
 
     /**
@@ -2187,7 +2227,20 @@ public final class APIUtil {
      * @param permission            A valid Carbon permission
      * @throws APIManagementException If the user does not have the specified permission or if an error occurs
      */
-    public static boolean hasPermission(String userNameWithoutChange, String permission) throws APIManagementException {
+    public static boolean hasPermission(String userNameWithoutChange, String permission) throws
+            APIManagementException {
+        return hasPermission(userNameWithoutChange, permission, false);
+    }
+
+    /**
+     * Checks whether the specified user has the specified permission.
+     *
+     * @param userNameWithoutChange A username
+     * @param permission            A valid Carbon permission
+     * @throws APIManagementException If the user does not have the specified permission or if an error occurs
+     */
+    public static boolean hasPermission(String userNameWithoutChange, String permission, boolean isFromPublisher)
+            throws APIManagementException {
         boolean authorized = false;
         if (userNameWithoutChange == null) {
             throw new APIManagementException("Attempt to execute privileged operation as" +
@@ -2198,6 +2251,13 @@ public final class APIUtil {
             log.debug("Permission verification is disabled by APIStore configuration");
             authorized = true;
             return authorized;
+        }
+
+        if (isFromPublisher && APIConstants.Permissions.APIM_ADMIN.equals(permission)) {
+            Integer value = getValueFromCache(APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE, userNameWithoutChange);
+            if (value != null) {
+                return value == 1;
+            }
         }
 
         String tenantDomain = MultitenantUtils.getTenantDomain(userNameWithoutChange);
@@ -2229,6 +2289,10 @@ public final class APIUtil {
                         AuthorizationManager.getInstance()
                                 .isUserAuthorized(MultitenantUtils.getTenantAwareUsername(userNameWithoutChange),
                                         permission);
+            }
+            if (isFromPublisher && APIConstants.Permissions.APIM_ADMIN.equals(permission)) {
+                addToRolesCache(APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE, userNameWithoutChange,
+                        authorized ? 1 : 2);
             }
 
         } catch (UserStoreException e) {
@@ -2340,16 +2404,92 @@ public final class APIUtil {
     /**
      * Retrieves the role list of a user
      *
-     * @param username A username
+     * @param username Name of the username
      * @throws APIManagementException If an error occurs
      */
     public static String[] getListOfRoles(String username) throws APIManagementException {
+        return getListOfRoles(username, false);
+    }
+
+    /**
+     * Retrieves the role list of a user
+     *
+     * @param username A username
+     * @param isFromPublisher To specify whether this call is from publisher
+     * @throws APIManagementException If an error occurs
+     */
+    public static String[] getListOfRoles(String username, boolean isFromPublisher) throws APIManagementException {
         if (username == null) {
             throw new APIManagementException("Attempt to execute privileged operation as" +
                     " the anonymous user");
         }
 
-        return AuthorizationManager.getInstance().getRolesOfUser(username);
+        String[] roles = null;
+
+        if (isFromPublisher) {
+            roles = getValueFromCache(APIConstants.API_PUBLISHER_USER_ROLE_CACHE, username);
+        }
+        if (roles != null) {
+            return roles;
+        }
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        try {
+            if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+                    .equals(tenantDomain)) {
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
+                UserStoreManager manager = ServiceReferenceHolder.getInstance().getRealmService()
+                        .getTenantUserRealm(tenantId).getUserStoreManager();
+                roles = manager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
+            } else {
+                roles = AuthorizationManager.getInstance()
+                        .getRolesOfUser(MultitenantUtils.getTenantAwareUsername(username));
+            }
+            if (isFromPublisher) {
+                addToRolesCache(APIConstants.API_PUBLISHER_USER_ROLE_CACHE, username, roles);
+            }
+            return roles;
+        } catch (UserStoreException e) {
+            throw new APIManagementException("UserStoreException while trying the role list of the user " + username,
+                    e);
+        }
+    }
+
+    /**
+     * To add the value to a cache.
+     *
+     * @param cacheName - Name of the Cache
+     * @param key       - Key of the entry that need to be added.
+     * @param value     - Value of the entry that need to be added.
+     */
+    protected static <T> void addToRolesCache(String cacheName, String key, T value) {
+        if (isPublisherRoleCacheEnabled) {
+            if (log.isDebugEnabled()) {
+                log.debug("Publisher role cache is enabled, adding the roles for the " + key + " to the cache "
+                        + cacheName + "'");
+            }
+            Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(cacheName).put(key, value);
+        }
+    }
+
+    /**
+     * To get the value from the cache.
+     *
+     * @param cacheName Name of the cache.
+     * @param key       Key of the cache entry.
+     * @return Role list from the cache, if a values exists, otherwise null.
+     */
+    protected static <T> T getValueFromCache(String cacheName, String key) {
+        if (isPublisherRoleCacheEnabled) {
+            if (log.isDebugEnabled()) {
+                log.debug("Publisher role cache is enabled, retrieving the roles for  " + key + " from the cache "
+                        + cacheName + "'");
+            }
+            Cache<String, T> rolesCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER)
+                    .getCache(cacheName);
+            return rolesCache.get(key);
+        }
+        return null;
     }
 
     /**
@@ -6578,5 +6718,37 @@ public final class APIUtil {
         String apiPath = APIUtil.getAPIPath(api.getId());
         Resource apiResource = registry.get(apiPath);
         return apiResource.getProperty(APIConstants.REGISTRY_HIDDEN_ENDPOINT_PROPERTY);
+    }
+
+    /**
+     * To check whether given role exist in the array of roles.
+     *
+     * @param userRoleList      Role list to check against.
+     * @param accessControlRole Access Control Role.
+     * @return true if the Array contains the role specified.
+     */
+    public static boolean compareRoleList(String[] userRoleList, String accessControlRole) {
+        if (userRoleList != null) {
+            for (String userRole : userRoleList) {
+                if (userRole.equalsIgnoreCase(accessControlRole)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * To clear the publisherRoleCache for certain users.
+     *
+     * @param userName Names of the user.
+     */
+    public static void clearRoleCache(String userName) {
+        if (isPublisherRoleCacheEnabled) {
+            Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants
+                    .API_PUBLISHER_ADMIN_PERMISSION_CACHE).remove(userName);
+            Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants
+                    .API_PUBLISHER_USER_ROLE_CACHE).remove(userName);
+        }
     }
 }

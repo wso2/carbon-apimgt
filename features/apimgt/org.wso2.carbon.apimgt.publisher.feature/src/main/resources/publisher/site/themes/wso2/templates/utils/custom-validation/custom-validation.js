@@ -95,6 +95,17 @@ $(document).ready(function() {
         return this.optional(element) || valid == true;
     }, i18n.t('Invalid role name[s]'));
 
+    $.validator.addMethod('validateUserRoles', function(value, element) {
+        var valid = false;
+        jagg.syncPost("/site/blocks/item-add/ajax/add.jag", { action:"validateRoles", roles:value , validate:true},
+            function (result) {
+                if (!result.error) {
+                    valid = result.response;
+                }
+            });
+        return this.optional(element) || valid == true;
+    }, i18n.t('Invalid role name[s] or roles provided does not contain any of the roles of API creator.'));
+
     $.validator.addMethod('validateEndpoints', function (value, element){
         return APP.is_production_endpoint_specified() || APP.is_sandbox_endpoint_specified();
     }, i18n.t('A Production or Sandbox URL must be provided.'));

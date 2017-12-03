@@ -32,6 +32,7 @@ import org.apache.axis2.util.JavaUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -164,6 +165,8 @@ import javax.cache.Caching;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.isAllowDisplayAPIsWithMultipleStatus;
+
 /**
  * This class provides the core API provider functionality. It is implemented in a very
  * self-contained and 'pure' manner, without taking requirements like security into account,
@@ -180,6 +183,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 	private static final Log log = LogFactory.getLog(APIProviderImpl.class);
 
 	private final String userNameWithoutChange;
+    // Property to indicate whether access control restriction feature is enabled.
+    boolean isAccessControlRestrictionEnabled = false;
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);
@@ -245,7 +250,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 String apiArtifactId = resource.getUUID();
                 if (apiArtifactId != null) {
                     GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiArtifactId);
-                    apiSortedList.add(APIUtil.getAPI(apiArtifact, registry));
+                    apiSortedList.add(getAPI(apiArtifact));
                 } else {
                     throw new GovernanceException("artifact id is null of " + apiPath);
                 }
@@ -1144,6 +1149,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String apiStatus = api.getStatus().getStatus();
             saveAPIStatus(artifactPath, apiStatus);
             String[] visibleRoles = new String[0];
+            String publisherAccessControlRoles = api.getAccessControlRoles();
+            if (publisherAccessControlRoles != null) {
+                publisherAccessControlRoles = publisherAccessControlRoles.replaceAll("\\s+", "").toLowerCase();
+            }
+            updateAPIRolesRestrictions(artifactPath, publisherAccessControlRoles, api.getAccessControl());
+
             if (updatePermissions) {
                 clearResourcePermissions(artifactPath, api.getId());
                 String visibleRolesList = api.getVisibleRoles();
@@ -2015,6 +2026,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (roles != null) {
                 rolesSet = roles.split(",");
             }
+            // Adding publisher access control permissions to new version.
+            Resource apiTargetArtifact = registry.get(targetPath);
+            if (apiTargetArtifact != null) {
+                apiTargetArtifact.setProperty(APIConstants.PUBLISHER_ROLES,
+                        apiSourceArtifact.getProperty(APIConstants.PUBLISHER_ROLES));
+                apiTargetArtifact.setProperty(APIConstants.ACCESS_CONTROL,
+                        apiSourceArtifact.getProperty(APIConstants.ACCESS_CONTROL));
+                registry.put(targetPath, apiTargetArtifact);
+            }
+
             APIUtil.setResourcePermissions(api.getId().getProviderName(),
             		artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY), rolesSet, artifactPath);
             //Here we have to set permission specifically to image icon we added
@@ -2451,8 +2472,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (visibleRolesList != null) {
                 visibleRoles = visibleRolesList.split(",");
             }
+
+            String publisherAccessControlRoles = api.getAccessControlRoles();
+            if (publisherAccessControlRoles != null) {
+                // We are changing to lowercase, as registry search only supports lower-case characters.
+                publisherAccessControlRoles = publisherAccessControlRoles.replace("\\s+", "").toLowerCase();
+                if (publisherAccessControlRoles.isEmpty()) {
+                    publisherAccessControlRoles = null;
+                }
+            }
             APIUtil.setResourcePermissions(api.getId().getProviderName(), api.getVisibility(), visibleRoles,
                     artifactPath);
+            publisherAccessControlRoles = publisherAccessControlRoles == null ?
+                    APIConstants.NULL_USER_ROLE_LIST :
+                    publisherAccessControlRoles;
+            updateAPIRolesRestrictions(artifactPath, publisherAccessControlRoles, api.getAccessControl());
             registry.commitTransaction();
             transactionCommitted = true;
 
@@ -2779,7 +2813,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public Map<Documentation, API> searchAPIsByDoc(String searchTerm, String searchType) throws APIManagementException {
-        return APIUtil.searchAPIsByDoc(registry, tenantId, username, searchTerm, APIConstants.PUBLISHER_CLIENT);
+        return searchAPIDoc(registry, tenantId, username, searchTerm);
     }
 
     /**
@@ -2914,7 +2948,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 						if (value != null) {
 							matcher = pattern.matcher(value);
 							if (matcher.find()) {
-                                API resultAPI = APIUtil.getAPI(artifact, registry);
+                                API resultAPI = getAPI(artifact);
                                 if (resultAPI != null) {
                                     apiList.add(resultAPI);
                                 }
@@ -3935,7 +3969,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(this.username);
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(this.tenantDomain, true);
 
-            GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);        
+            GenericArtifact apiArtifact = getAPIArtifact(apiIdentifier);
             String targetStatus;
             if (apiArtifact != null) {
                            
@@ -4048,6 +4082,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return response;
     }
 
+    /**
+     * To get the API artifact from the registry
+     * @param apiIdentifier API den
+     * @return API artifact, if the relevant artifact exists
+     * @throws APIManagementException API Management Exception.
+     */
+    protected GenericArtifact getAPIArtifact(APIIdentifier apiIdentifier) throws APIManagementException {
+        return APIUtil.getAPIArtifact(apiIdentifier, registry);
+    }
+
     @Override
     public boolean changeAPILCCheckListItems(APIIdentifier apiIdentifier, int checkItem, boolean checkItemValue)
             throws APIManagementException {
@@ -4064,7 +4108,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 PrivilegedCarbonContext.startTenantFlow();
                 PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
             }
-            GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
+            GenericArtifact apiArtifact = getAPIArtifact(apiIdentifier);
+            String status = null;
             try {
                 if (apiArtifact != null) {
                     if (checkItemValue && !apiArtifact.isLCItemChecked(checkItem, APIConstants.API_LIFE_CYCLE)) {
@@ -4308,12 +4353,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             PaginationContext.init(start, end, "ASC", APIConstants.PROVIDER_OVERVIEW_NAME, maxPaginationLimit);
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY);
-            Map<String, List<String>> listMap = new HashMap<String, List<String>>();
 
             if (artifactManager != null) {
-                GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
+                List<GovernanceArtifact> genericArtifacts = null;
+
+                if (isAccessControlRestrictionEnabled && !APIUtil.hasPermission(userNameWithoutChange, APIConstants
+                        .Permissions.APIM_ADMIN, true)) {
+                    genericArtifacts = GovernanceUtils.findGovernanceArtifacts(getUserRoleListQuery(), userRegistry,
+                            APIConstants.API_RXT_MEDIA_TYPE, true);
+                } else {
+                    genericArtifacts = GovernanceUtils
+                            .findGovernanceArtifacts(new HashMap<String, List<String>>(), userRegistry,
+                                    APIConstants.API_RXT_MEDIA_TYPE);
+                }
                 totalLength = PaginationContext.getInstance().getLength();
-                if (genericArtifacts == null || genericArtifacts.length == 0) {
+                if (genericArtifacts == null || genericArtifacts.isEmpty()) {
                     result.put("apis", apiSortedList);
                     result.put("totalLength", totalLength);
                     return result;
@@ -4324,7 +4378,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     --totalLength; // Remove the additional 1 we added earlier when setting max pagination limit
                 }
                 int tempLength = 0;
-                for (GenericArtifact artifact : genericArtifacts) {
+                for (GovernanceArtifact artifact : genericArtifacts) {
 
                     API api = APIUtil.getAPI(artifact);
 
@@ -5092,4 +5146,142 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         new NotificationExecutor().sendAsyncNotifications(notificationDTO);
         
     }
+
+    /**
+     * To add API roles restrictions whenever the publisher access control is modified.
+     *
+     * @param artifactPath                Path of the API artifact.
+     * @param publisherAccessControlRoles Role specified for the publisher access control.
+     * @param publisherAccessControl      Publisher Access Control restriction.
+     * @throws RegistryException Registry Exception.
+     */
+    protected void updateAPIRolesRestrictions(String artifactPath, String publisherAccessControlRoles,
+            String publisherAccessControl) throws RegistryException {
+        publisherAccessControlRoles = (publisherAccessControlRoles == null || publisherAccessControlRoles.trim()
+                .isEmpty()) ? APIConstants.NULL_USER_ROLE_LIST : publisherAccessControlRoles;
+        if (publisherAccessControlRoles.equalsIgnoreCase(APIConstants.NULL_USER_ROLE_LIST)) {
+            publisherAccessControl = APIConstants.NO_ACCESS_CONTROL;
+        }
+        Resource apiResource = registry.get(artifactPath);
+        if (apiResource != null) {
+            apiResource.setProperty(APIConstants.PUBLISHER_ROLES, publisherAccessControlRoles.replaceAll("\\s+", ""));
+            apiResource.setProperty(APIConstants.ACCESS_CONTROL, publisherAccessControl);
+            apiResource.removeProperty(APIConstants.CUSTOM_API_INDEXER_PROPERTY);
+            registry.put(artifactPath, apiResource);
+        }
+    }
+
+    @Override
+    protected Map<String, Object> searchAPIsByURLPattern(Registry registry, String searchTerm, int start, int end)
+            throws APIManagementException {
+        if (!isAccessControlRestrictionEnabled || APIUtil
+                .hasPermission(userNameWithoutChange, APIConstants.Permissions.APIM_ADMIN, true)) {
+            return super.searchAPIsByURLPattern(registry, searchTerm, start, end);
+        }
+        SortedSet<API> apiSet = new TreeSet<API>(new APINameComparator());
+        List<API> apiList = new ArrayList<API>();
+        final String searchValue = searchTerm.trim();
+        Map<String, Object> result = new HashMap<String, Object>();
+        int totalLength = 0;
+        StringBuilder criteria = new StringBuilder();
+        List<GovernanceArtifact> governanceArtifacts = new ArrayList<GovernanceArtifact>();
+        GenericArtifactManager artifactManager = null;
+        try {
+            artifactManager = APIUtil.getArtifactManager(registry, APIConstants.API_KEY);
+            PaginationContext.init(0, 10000, "ASC", APIConstants.API_OVERVIEW_NAME, Integer.MAX_VALUE);
+            if (artifactManager != null) {
+                for (int i = 0; i < 20; i++) { //This need to fix in future.We don't have a way to get max value of
+                    // "url_template" entry stores in registry,unless we search in each API
+                    criteria = new StringBuilder(getUserRoleListQuery());
+                    criteria.append("&");
+                    criteria.append(APIConstants.API_URI_PATTERN).append(i).append("=").append(searchValue);
+                    List<GovernanceArtifact> governanceArtifactList = GovernanceUtils
+                            .findGovernanceArtifacts(criteria.toString(), registry, APIConstants.API_RXT_MEDIA_TYPE);
+                    if (governanceArtifactList != null && !governanceArtifactList.isEmpty()) {
+                        governanceArtifacts.addAll(governanceArtifactList);
+                    }
+                }
+                governanceArtifacts = GovernanceUtils
+                        .findGovernanceArtifacts(criteria.toString(), registry, APIConstants.API_RXT_MEDIA_TYPE);
+                if (governanceArtifacts == null || governanceArtifacts.isEmpty()) {
+                    result.put("apis", apiSet);
+                    result.put("length", 0);
+                    return result;
+                }
+                totalLength = governanceArtifacts.size();
+                StringBuilder apiNames = new StringBuilder();
+                for (GovernanceArtifact artifact : governanceArtifacts) {
+                    if (apiNames.indexOf(artifact.getAttribute(APIConstants.API_OVERVIEW_NAME)) < 0) {
+                        String status = artifact.getAttribute(APIConstants.API_OVERVIEW_STATUS);
+                        if (isAllowDisplayAPIsWithMultipleStatus()) {
+                            if (APIConstants.PUBLISHED.equals(status) || APIConstants.DEPRECATED.equals(status)) {
+                                API api = APIUtil.getAPI(artifact, registry);
+                                if (api != null) {
+                                    apiList.add(api);
+                                    apiNames.append(api.getId().getApiName());
+                                }
+                            }
+                        } else {
+                            if (APIConstants.PUBLISHED.equals(status)) {
+                                API api = APIUtil.getAPI(artifact, registry);
+                                if (api != null) {
+                                    apiList.add(api);
+                                    apiNames.append(api.getId().getApiName());
+                                }
+                            }
+                        }
+                    }
+                    totalLength = apiList.size();
+                }
+                if (totalLength <= ((start + end) - 1)) {
+                    end = totalLength;
+                }
+                for (int i = start; i < end; i++) {
+                    apiSet.add(apiList.get(i));
+                }
+            }
+        } catch (APIManagementException e) {
+            handleException("Failed to search APIs with input url-pattern", e);
+        } catch (GovernanceException e) {
+            handleException("Failed to search APIs with input url-pattern", e);
+        }
+        result.put("apis", apiSet);
+        result.put("length", totalLength);
+        return result;
+    }
+
+    /**
+     * To get the query to retrieve user role list query based on current role list.
+     *
+     * @return the query with user role list.
+     * @throws APIManagementException API Management Exception.
+     */
+    private String getUserRoleListQuery() throws APIManagementException {
+        StringBuilder rolesQuery = new StringBuilder();
+        rolesQuery.append('(');
+        rolesQuery.append(APIConstants.NULL_USER_ROLE_LIST);
+        String[] userRoles = APIUtil.getListOfRoles(userNameWithoutChange, true);
+        if (userRoles != null) {
+            for (String userRole : userRoles) {
+                rolesQuery.append(" OR ");
+                rolesQuery.append(ClientUtils.escapeQueryChars(userRole.toLowerCase()));
+            }
+        }
+        rolesQuery.append(")");
+        return  APIConstants.PUBLISHER_ROLES + "=" + rolesQuery.toString();
+    }
+
+    @Override
+    protected String getSearchQuery(String searchQuery) throws APIManagementException {
+        if (!isAccessControlRestrictionEnabled || APIUtil.hasPermission(userNameWithoutChange, APIConstants.Permissions
+                .APIM_ADMIN, true)) {
+            return searchQuery;
+        }
+        String criteria = getUserRoleListQuery();
+        if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+            criteria = criteria + "&" + searchQuery;
+        }
+        return criteria;
+    }
+
 }
