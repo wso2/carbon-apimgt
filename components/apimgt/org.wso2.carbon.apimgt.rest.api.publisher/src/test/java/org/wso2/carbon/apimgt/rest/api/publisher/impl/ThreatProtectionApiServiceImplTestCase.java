@@ -30,13 +30,16 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.msf4j.Request;
 
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @RunWith(PowerMockRunner.class)
@@ -95,6 +98,132 @@ public class ThreatProtectionApiServiceImplTestCase {
         Set<String> result = (Set<String>) response.getEntity();
         Assert.assertTrue(result.contains("AB"));
         Assert.assertTrue(result.contains("CD"));
+    }
+
+    @Test
+    public void threatProtectionApisApiIdPoliciesExceptionGetTestCase() throws Exception {
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(Mockito.any())).thenReturn("username");
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        APIPublisher publisher = Mockito.mock(APIPublisher.class);
+        Mockito.when(RestAPIPublisherUtil.getApiPublisher(Mockito.anyString())).thenReturn(publisher);
+
+        Mockito.when(publisher.getAPIbyUUID(Mockito.anyString())).thenThrow(new APIManagementException("ERROR"));
+
+        ThreatProtectionApiServiceImpl apiService = new ThreatProtectionApiServiceImpl();
+        Response response = apiService.threatProtectionApisApiIdPoliciesGet("ANY", getRequest());
+
+        Assert.assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void threatProtectionPoliciesGetTestCase() throws Exception {
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(Mockito.any())).thenReturn("username");
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        APIPublisher publisher = Mockito.mock(APIPublisher.class);
+        Mockito.when(RestAPIPublisherUtil.getApiPublisher(Mockito.anyString())).thenReturn(publisher);
+
+        List<ThreatProtectionPolicy> list = new ArrayList<>();
+        list.add(Mockito.mock(ThreatProtectionPolicy.class));
+        list.add(Mockito.mock(ThreatProtectionPolicy.class));
+
+        Mockito.when(publisher.getThreatProtectionPolicies()).thenReturn(list);
+
+        ThreatProtectionApiServiceImpl apiService = new ThreatProtectionApiServiceImpl();
+        Response response = apiService.threatProtectionPoliciesGet(getRequest());
+        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        List<ThreatProtectionPolicy> resList = (List<ThreatProtectionPolicy>) response.getEntity();
+        Assert.assertEquals(2, resList.size());
+    }
+
+    @Test
+    public void threatProtectionPoliciesExceptionGetTestCase() throws Exception {
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(Mockito.any())).thenReturn("username");
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        Mockito.when(RestAPIPublisherUtil.getApiPublisher(Mockito.anyString())).thenThrow(new APIManagementException("ERROR"));
+
+        ThreatProtectionApiServiceImpl apiService = new ThreatProtectionApiServiceImpl();
+        Response response = apiService.threatProtectionPoliciesGet(getRequest());
+        Assert.assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void threatProtectionPoliciesPolicyIdGetTestCase() throws Exception {
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(Mockito.any())).thenReturn("username");
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        APIPublisher publisher = Mockito.mock(APIPublisher.class);
+        Mockito.when(RestAPIPublisherUtil.getApiPublisher(Mockito.anyString())).thenReturn(publisher);
+
+        ThreatProtectionPolicy policy = Mockito.mock(ThreatProtectionPolicy.class);
+        Mockito.when(publisher.getThreatProtectionPolicy(Mockito.anyString())).thenReturn(policy);
+
+        ThreatProtectionApiServiceImpl apiService = new ThreatProtectionApiServiceImpl();
+        Response response = apiService.threatProtectionPoliciesPolicyIdGet("POLICY", getRequest());
+        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void threatProtectionPoliciesPolicyIdGetNullPolicyTestCase() throws Exception {
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(Mockito.any())).thenReturn("username");
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        APIPublisher publisher = Mockito.mock(APIPublisher.class);
+        Mockito.when(RestAPIPublisherUtil.getApiPublisher(Mockito.anyString())).thenReturn(publisher);
+
+        Mockito.when(publisher.getThreatProtectionPolicy(Mockito.anyString())).thenReturn(null);
+
+        ThreatProtectionApiServiceImpl apiService = new ThreatProtectionApiServiceImpl();
+        Response response = apiService.threatProtectionPoliciesPolicyIdGet("POLICY", getRequest());
+        Assert.assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void threatProtectionPoliciesPolicyIdGetExceptionTestCase() throws Exception {
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(Mockito.any())).thenReturn("username");
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        APIPublisher publisher = Mockito.mock(APIPublisher.class);
+        Mockito.when(RestAPIPublisherUtil.getApiPublisher(Mockito.anyString())).thenReturn(publisher);
+
+        Mockito.when(publisher.getThreatProtectionPolicy(Mockito.anyString())).thenThrow(
+                new APIManagementException("ERROR"));
+
+        ThreatProtectionApiServiceImpl apiService = new ThreatProtectionApiServiceImpl();
+        Response response = apiService.threatProtectionPoliciesPolicyIdGet("POLICY", getRequest());
+        Assert.assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void threatProtectionRemovePolicyApiIdPolicyIdPostTestCase() throws Exception {
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(Mockito.any())).thenReturn("username");
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        APIPublisher publisher = Mockito.mock(APIPublisher.class);
+        Mockito.when(RestAPIPublisherUtil.getApiPublisher(Mockito.anyString())).thenReturn(publisher);
+
+        ThreatProtectionApiServiceImpl apiService = new ThreatProtectionApiServiceImpl();
+        Response response = apiService.threatProtectionRemovePolicyApiIdPolicyIdPost(
+                "API", "POLICY", getRequest());
+        Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void threatProtectionRemovePolicyApiIdPolicyIdPostExceptionTestCase() throws Exception {
+        PowerMockito.mockStatic(RestApiUtil.class);
+        PowerMockito.when(RestApiUtil.getLoggedInUsername(Mockito.any())).thenReturn("username");
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        APIPublisher publisher = Mockito.mock(APIPublisher.class);
+        Mockito.when(RestAPIPublisherUtil.getApiPublisher(Mockito.anyString())).thenReturn(publisher);
+
+        Mockito.doThrow(new APIManagementException("ERROR")).when(publisher).deleteThreatProtectionPolicy(Mockito.anyString(), Mockito.anyString());
+
+        ThreatProtectionApiServiceImpl apiService = new ThreatProtectionApiServiceImpl();
+        Response response = apiService.threatProtectionRemovePolicyApiIdPolicyIdPost(
+                "API", "POLICY", getRequest());
+        Assert.assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
     }
 
     private Request getRequest() throws Exception {
