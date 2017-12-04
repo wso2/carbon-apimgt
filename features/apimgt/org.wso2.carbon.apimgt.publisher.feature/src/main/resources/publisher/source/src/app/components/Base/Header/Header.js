@@ -38,6 +38,7 @@ import InfoLightBulb from 'material-ui-icons/LightbulbOutline';
 import List, {ListItem, ListItemIcon, ListItemText,} from 'material-ui/List';
 import ConfigManager from "../../../data/ConfigManager";
 import Utils from "../../../data/Utils";
+import EnvironmentSelector from "./EnvironmentMenu";
 
 const helpTips = [
     "By API Name [Default]",
@@ -86,17 +87,9 @@ class Header extends React.Component {
         this.setState({ openUserMenu: false });
     };
 
-    handleClickEnvironmentMenu = event => {
-        this.setState({ openEnvironmentMenu: true, anchorElEnvironmentMenu: event.currentTarget });
-    };
-
-    handleRequestCloseEnvironmentMenu = () => {
-        this.setState({ openEnvironmentMenu: false });
-    };
-
     handleEnvironmentChange = event => {
         this.setState({ openEnvironmentMenu: false });
-        //TODO: [rnk] Render all
+        //TODO: [rnk] Optimize Rendering.
         let environmentId = parseInt(event.target.id);
         this.setState({environmentId});
         Utils.setEnvironment(this.state.environments[environmentId]);
@@ -236,27 +229,9 @@ class Header extends React.Component {
                                     </MenuItem>
                                 </Menu>
                                 {/* Environment menu */}
-                                {this.state.hasEnvironments = this.state.environments && this.state.environments.length > 1 &&
-                                    <Button aria-owns="simple-menu" aria-haspopup="true"
-                                            onClick={this.handleClickEnvironmentMenu}
-                                            color="contrast">
-                                        {Utils.getEnvironment().label}
-                                    </Button>}
-                                {this.state.hasEnvironments &&
-                                <Menu
-                                    id="simple-menu"
-                                    anchorEl={this.state.anchorElEnvironmentMenu}
-                                    open={this.state.openEnvironmentMenu}
-                                    onRequestClose={this.handleRequestCloseEnvironmentMenu}
-                                    style={{alignItems: "center", justifyContent: "center"}}
-                                >
-                                    {this.state.environments.map((environment, index) =>
-                                        <Link to="#">
-                                            <MenuItem onClick={this.handleEnvironmentChange} key={index}
-                                                      id={index}>{environment.label}</MenuItem>
-                                        </Link>
-                                    )}
-                                </Menu>}
+                                <EnvironmentSelector environments={this.state.environments}
+                                                     environmentLabel={Utils.getEnvironment().label}
+                                                     handleEnvironmentChange={this.handleEnvironmentChange}/>
                                 {/* User menu */}
                                 <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClickUserMenu}
                                         color="contrast">
