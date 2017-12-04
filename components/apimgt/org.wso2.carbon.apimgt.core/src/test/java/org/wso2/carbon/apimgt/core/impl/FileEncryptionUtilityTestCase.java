@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.core.configuration.models.FileEncryptionConfigurat
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
-import org.wso2.carbon.kernel.securevault.SecureVault;
+import org.wso2.carbon.secvault.SecureVault;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -62,13 +62,6 @@ public class FileEncryptionUtilityTestCase {
     public void testInitWhileSecureVaultNotAvailable() throws Exception {
         FileEncryptionUtility fileEncryptionUtility = FileEncryptionUtility.getInstance();
         fileEncryptionUtility.init();
-    }
-
-    @Test (priority = 1, description = "Test storing AES key while secure vault instance is not set",
-            expectedExceptions = APIManagementException.class)
-    public void testStoringAesKeyWhileSecureVaultNotSet() throws Exception {
-        FileEncryptionUtility fileEncryptionUtility = FileEncryptionUtility.getInstance();
-        fileEncryptionUtility.createAndStoreAESKey();
     }
 
     @Test (priority = 2, description = "Test complete flow of encrypting files")

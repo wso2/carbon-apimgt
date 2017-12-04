@@ -4,8 +4,8 @@ import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryConfigurations;
-import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
-import org.wso2.carbon.kernel.configprovider.ConfigProvider;
+import org.wso2.carbon.config.ConfigurationException;
+import org.wso2.carbon.config.provider.ConfigProvider;
 
 public class ServiceDiscoveryConfigBuilderTestCase {
 
@@ -24,7 +24,7 @@ public class ServiceDiscoveryConfigBuilderTestCase {
     @Test(description = "Test the flow where Config Provider throws an exception")
     public void testWhenExceptionThrownByConfigProvider() throws Exception {
         ConfigProvider configProvider = Mockito.mock(ConfigProvider.class);
-        Mockito.doThrow(CarbonConfigurationException.class)
+        Mockito.doThrow(ConfigurationException.class)
                 .when(configProvider).getConfigurationObject(ServiceDiscoveryConfigurations.class);
 
         ServiceDiscoveryConfigBuilder.build(configProvider);

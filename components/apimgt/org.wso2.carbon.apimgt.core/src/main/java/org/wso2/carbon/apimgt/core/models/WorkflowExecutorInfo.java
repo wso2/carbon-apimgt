@@ -16,8 +16,8 @@
 * under the License.
 */
 package org.wso2.carbon.apimgt.core.models;
-import org.wso2.carbon.kernel.annotations.Configuration;
-import org.wso2.carbon.kernel.annotations.Element;
+import org.wso2.carbon.config.annotation.Configuration;
+import org.wso2.carbon.config.annotation.Element;
 
 import java.util.List;
 /**

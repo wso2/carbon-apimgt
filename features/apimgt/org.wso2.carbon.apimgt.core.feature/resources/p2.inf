@@ -1,4 +1,6 @@
+metaRequirements.0.namespace = org.eclipse.equinox.p2.iu
+metaRequirements.0.name = org.wso2.carbon.extensions.touchpoint
 instructions.configure = \
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../lib/features/org.wso2.carbon.apimgt.core_${feature.version}/dbscripts/,target:${installFolder}/../../dbscripts/apimgt,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../lib/features/org.wso2.carbon.apimgt.core_${feature.version}/database/AM_DB.mv.db/,target:${installFolder}/../../database/AM_DB.mv.db,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.copy(source:${installFolder}/../lib/features/org.wso2.carbon.apimgt.core_${feature.version}/template/,target:${installFolder}/../../resources/template,overwrite:true);\
+org.wso2.carbon.extensions.touchpoint.copy(source:${installFolder}/../lib/features/org.wso2.carbon.apimgt.core_${feature.version}/dbscripts/,target:${installFolder}/../{runtime}/dbscripts/apimgt,overwrite:true);\
+org.wso2.carbon.extensions.touchpoint.copy(source:${installFolder}/../lib/features/org.wso2.carbon.apimgt.core_${feature.version}/database/AM_DB.mv.db/,target:${installFolder}/../{runtime}/database/AM_DB.mv.db,overwrite:true);\
+org.wso2.carbon.extensions.touchpoint.copy(source:${installFolder}/../lib/features/org.wso2.carbon.apimgt.core_${feature.version}/template/,target:${installFolder}/../{runtime}/resources/template,overwrite:true);\

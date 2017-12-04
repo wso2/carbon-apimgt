@@ -21,8 +21,8 @@ package org.wso2.carbon.apimgt.rest.api.configurations.internal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.rest.api.configurations.models.EnvironmentConfigurations;
-import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
-import org.wso2.carbon.kernel.configprovider.ConfigProvider;
+import org.wso2.carbon.config.ConfigurationException;
+import org.wso2.carbon.config.provider.ConfigProvider;
 
 import java.util.Map;
 
@@ -53,7 +53,7 @@ public class ServiceReferenceHolder {
             } else {
                 log.error("Configuration provider is null");
             }
-        } catch (CarbonConfigurationException e) {
+        } catch (ConfigurationException e) {
             log.error("Error getting config : org.wso2.carbon.apimgt.rest.api.configurations.models.EnvironmentConfigurations", e);
         }
 

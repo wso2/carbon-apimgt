@@ -34,7 +34,7 @@
             <artifactId>org.wso2.carbon.apimgt.rest.api.store</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.googlecode.json-simple.wso2</groupId>
+            <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
         </dependency>
     </dependencies>

@@ -24,8 +24,8 @@ import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.rest.api.configurations.models.EnvironmentConfigurations;
-import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
-import org.wso2.carbon.kernel.configprovider.ConfigProvider;
+import org.wso2.carbon.config.ConfigurationException;
+import org.wso2.carbon.config.provider.ConfigProvider;
 
 import java.util.Map;
 
@@ -54,14 +54,15 @@ public class ServiceReferenceHolderTestCase {
         ////CarbonConfigurationException when reading configs
         configProvider = new ConfigProvider() {
             @Override
-            public <T> T getConfigurationObject(Class<T> configClass) throws CarbonConfigurationException {
-                throw new CarbonConfigurationException("Error while creating configuration instance");
+            public <T> T getConfigurationObject(Class<T> configClass) throws ConfigurationException {
+                throw new ConfigurationException("Error while creating configuration instance");
             }
 
             @Override
-            public Map getConfigurationMap(String namespace) throws CarbonConfigurationException {
+            public Object getConfigurationObject(String s) throws ConfigurationException {
                 return null;
             }
+
         };
         instance.setConfigProvider(configProvider);
         environmentConfigurations = instance.getEnvironmentConfigurations();

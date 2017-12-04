@@ -36,7 +36,7 @@
             <artifactId>org.wso2.carbon.apimgt.rest.api.webserver</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.googlecode.json-simple.wso2</groupId>
+            <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
         </dependency>
     </dependencies>
@@ -73,8 +73,8 @@
                                     <version>${carbon.apimgt.version}</version>
                                 </bundle>
                                 <bundle>
-                                    <symbolicName>json-simple</symbolicName>
-                                    <version>${json-simple.wso2.version}</version>
+                                    <symbolicName>com.googlecode.json-simple</symbolicName>
+                                    <version>${json-simple.version}</version>
                                 </bundle>
                             </bundles>
                             <importFeatures>

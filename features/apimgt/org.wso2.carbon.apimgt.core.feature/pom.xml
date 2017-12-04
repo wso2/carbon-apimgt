@@ -69,7 +69,7 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.googlecode.json-simple.wso2</groupId>
+            <groupId>com.googlecode.json-simple</groupId>
             <artifactId>json-simple</artifactId>
         </dependency>
         <dependency>
@@ -105,7 +105,7 @@
             <artifactId>andes-client</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.geronimo.specs.wso2</groupId>
+            <groupId>org.apache.geronimo.specs</groupId>
             <artifactId>geronimo-jms_1.1_spec</artifactId>
         </dependency>
         <dependency>
@@ -158,11 +158,22 @@
             <artifactId>swagger-models</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.orbit.io.fabric8</groupId>
             <artifactId>kubernetes-client</artifactId>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>
@@ -266,7 +277,7 @@
                                         <include>dbscripts/**</include>
                                         <include>database/**</include>
                                         <include>template/**</include>
-					<include>conf/**</include>
+                                        <include>conf/**</include>
                                         <include>p2.inf</include>
                                     </includes>
                                 </resource>
@@ -324,16 +335,28 @@
                                     <version>${com.fasterxml.jackson.dataformat.version}</version>
                                 </bundle>
                                 <bundle>
+                                    <symbolicName>org.yaml.snakeyaml</symbolicName>
+                                    <version>${snakeyaml.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>com.google.guava</symbolicName>
+                                    <version>${guava.bundle.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>com.googlecode.json-simple</symbolicName>
+                                    <version>${json-simple.bundle.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>org.apache.geronimo.specs.geronimo-jms_1.1_spec</symbolicName>
+                                    <version>${geronimo-jms.version}</version>
+                                </bundle>
+                                <bundle>
                                     <symbolicName>nimbus-jose-jwt</symbolicName>
                                     <version>${nimbusds.version}</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>com.fasterxml.jackson.jaxrs.jackson-jaxrs-base</symbolicName>
                                     <version>${com.fasterxml.jackson.core.version}</version>
-                                </bundle>
-                                <bundle>
-                                    <symbolicName>json-simple</symbolicName>
-                                    <version>${json-simple.wso2.version}</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>commons-io</symbolicName>
@@ -370,10 +393,6 @@
                                 <bundle>
                                     <symbolicName>commons-collections</symbolicName>
                                     <version>${version.commons-collections}</version>
-                                </bundle>
-                                <bundle>
-                                    <symbolicName>geronimo-jms_1.1_spec</symbolicName>
-                                    <version>1.1.0.wso2v1</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>andes-client</symbolicName>

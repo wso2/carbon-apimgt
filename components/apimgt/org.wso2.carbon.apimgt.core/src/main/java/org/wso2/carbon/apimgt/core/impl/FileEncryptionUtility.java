@@ -26,9 +26,9 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.util.APIFileUtils;
-import org.wso2.carbon.kernel.securevault.SecureVault;
-import org.wso2.carbon.kernel.securevault.SecureVaultUtils;
-import org.wso2.carbon.kernel.securevault.exception.SecureVaultException;
+import org.wso2.carbon.secvault.SecureVault;
+import org.wso2.carbon.secvault.SecureVaultUtils;
+import org.wso2.carbon.secvault.exception.SecureVaultException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -191,7 +191,7 @@ public class FileEncryptionUtility {
             APIFileUtils.createFile(getAesKeyFileLocation());
             APIFileUtils.writeToFile(getAesKeyFileLocation(), encryptedKeyString);
             log.debug("AES key successfully created and stored");
-        } catch (NoSuchAlgorithmException | SecureVaultException | NullPointerException |
+        } catch (NoSuchAlgorithmException | SecureVaultException  |
                 APIMgtDAOException | IOException e) {
             String msg = "Error while creating or storing created AES key";
             throw new APIManagementException(msg, e);

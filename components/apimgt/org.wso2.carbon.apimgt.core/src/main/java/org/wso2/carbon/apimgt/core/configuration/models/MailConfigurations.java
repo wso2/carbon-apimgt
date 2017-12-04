@@ -17,8 +17,8 @@
  */
 package org.wso2.carbon.apimgt.core.configuration.models;
 
-import org.wso2.carbon.kernel.annotations.Configuration;
-import org.wso2.carbon.kernel.annotations.Element;
+import org.wso2.carbon.config.annotation.Configuration;
+import org.wso2.carbon.config.annotation.Element;
 
 /**
  * Class to hold key Mail configurations.

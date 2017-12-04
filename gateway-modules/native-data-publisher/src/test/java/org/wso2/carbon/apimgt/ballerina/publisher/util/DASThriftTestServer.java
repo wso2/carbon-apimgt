@@ -33,7 +33,6 @@ import org.wso2.carbon.databridge.core.exception.DataBridgeException;
 import org.wso2.carbon.databridge.core.exception.StreamDefinitionStoreException;
 import org.wso2.carbon.databridge.core.internal.authentication.AuthenticationHandler;
 import org.wso2.carbon.databridge.receiver.thrift.ThriftDataReceiver;
-import org.wso2.carbon.user.api.UserStoreException;
 
 import java.net.SocketException;
 import java.util.ArrayList;
@@ -101,14 +100,6 @@ public class DASThriftTestServer {
         DataBridge databridge = new DataBridge(new AuthenticationHandler() {
             public boolean authenticate(String userName, String password) {
                 return true; // allays authenticate to true
-            }
-
-            public String getTenantDomain(String userName) {
-                return tenantDomain;
-            }
-
-            public int getTenantId(String tenantDomain) throws UserStoreException {
-                return tenantId;
             }
 
             public void initContext(AgentSession agentSession) {
