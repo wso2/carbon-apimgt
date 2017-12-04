@@ -18,7 +18,7 @@
         var _tags = "";        
     }
 %>
-<script language="javascript"
+<script language="javascript">
     var VERBS = [ 'get' , 'post' , 'put' , 'delete', 'patch', 'head'];
     var AUTH_TYPES = [
       { "value": "<%=i18n.localize("None")%>", "text":"<%=i18n.localize("None")%>"} ,
