@@ -18,9 +18,9 @@
 
 import ReactDOM from 'react-dom'
 import React from 'react'
-import Publisher from "./src/App.js"
+import Store from "./src/App.js"
 import 'typeface-roboto'
 import 'material-design-icons'
 import 'material-ui-icons'
 
-ReactDOM.render(<Publisher/>, document.getElementById("react-root"));
+ReactDOM.render(<Store/>, document.getElementById("react-root"));

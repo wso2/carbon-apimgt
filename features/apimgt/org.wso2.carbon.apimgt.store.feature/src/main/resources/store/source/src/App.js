@@ -93,7 +93,7 @@ class Protected extends Component {
 /**
  * Define base routes for the application
  */
-class Publisher extends Component {
+class Store extends Component {
 
     render() {
         return (
@@ -108,4 +108,4 @@ class Publisher extends Component {
     }
 }
 
-export default Publisher;
+export default Store;

@@ -16,20 +16,21 @@
  * under the License.
  */
 
-import React, {Component} from 'react'
+import React, {Component} from 'react';
+import Paper from 'material-ui/Paper';
+import Typography from 'material-ui/Typography';
 
 const ResourceNotFound = (props) => {
     return (
-        <div>
-            <div className="message message-danger">
-                <h4><i className="icon fw fw-error"/>404 Resource Not Found!</h4>
-                <p>
-                    Can't find the resource you are looking for
-                    <span style={{color: 'green'}}> {props.response ? props.response.statusText : ""} </span>
-                </p>
-            </div>
-
-        </div>
+        <Paper elevation={4}>
+            <Typography type="headline" component="h3">
+                404 Resource Not Found!
+            </Typography>
+            <Typography type="body1" component="p">
+                Can't find the resource you are looking for
+                <span style={{color: 'green'}}> {props.response ? props.response.statusText : ""} </span>
+            </Typography>
+        </Paper>
     );
 };
 
