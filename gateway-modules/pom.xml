@@ -68,24 +68,9 @@
                 <version>${ballerina.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>apim-ballerina-plugin</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.ballerinalang</groupId>
                 <artifactId>ballerina-launcher</artifactId>
                 <version>${ballerina.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.ballerina.native</artifactId>
-                <version>${carbon.apimgt.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.wso2.carbon.apimgt</groupId>
-                <artifactId>org.wso2.carbon.apimgt.ballerina.publisher</artifactId>
-                <version>${carbon.apimgt.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.ballerinalang</groupId>
