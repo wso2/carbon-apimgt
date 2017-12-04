@@ -29,8 +29,8 @@ import org.wso2.carbon.apimgt.rest.api.configurations.internal.ServiceReferenceH
 import org.wso2.carbon.apimgt.rest.api.configurations.models.Environment;
 import org.wso2.carbon.apimgt.rest.api.configurations.models.EnvironmentConfigurations;
 import org.wso2.carbon.apimgt.rest.api.configurations.utils.bean.EnvironmentConfigBean;
-import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
-import org.wso2.carbon.kernel.configprovider.ConfigProvider;
+import org.wso2.carbon.config.ConfigurationException;
+import org.wso2.carbon.config.provider.ConfigProvider;
 
 import java.util.Arrays;
 import java.util.List;
@@ -45,15 +45,16 @@ public class ConfigurationsAPITestCase {
         WorkflowExtensionsConfigBuilder.build(new ConfigProvider() {
 
             @Override
-            public <T> T getConfigurationObject(Class<T> configClass) throws CarbonConfigurationException {
+            public <T> T getConfigurationObject(Class<T> configClass) throws ConfigurationException {
                 T workflowConfig = (T) new WorkflowConfig();
                 return workflowConfig;
             }
 
             @Override
-            public Map getConfigurationMap(String namespace) throws CarbonConfigurationException {
+            public Object getConfigurationObject(String s) throws ConfigurationException {
                 return null;
             }
+
 
         });
 

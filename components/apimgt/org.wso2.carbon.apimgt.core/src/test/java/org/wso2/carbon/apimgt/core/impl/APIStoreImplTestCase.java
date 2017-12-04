@@ -83,8 +83,8 @@ import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
 import org.wso2.carbon.apimgt.core.workflow.SubscriptionCreationWorkflow;
 import org.wso2.carbon.apimgt.core.workflow.Workflow;
 import org.wso2.carbon.apimgt.core.workflow.WorkflowExtensionsConfigBuilder;
-import org.wso2.carbon.kernel.configprovider.CarbonConfigurationException;
-import org.wso2.carbon.kernel.configprovider.ConfigProvider;
+import org.wso2.carbon.config.ConfigurationException;
+import org.wso2.carbon.config.provider.ConfigProvider;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -123,16 +123,16 @@ public class APIStoreImplTestCase {
         WorkflowExtensionsConfigBuilder.build(new ConfigProvider() {
 
             @Override
-            public <T> T getConfigurationObject(Class<T> configClass) throws CarbonConfigurationException {
+            public <T> T getConfigurationObject(Class<T> configClass) throws ConfigurationException {
                 T workflowConfig = (T) new WorkflowConfig();
                 return workflowConfig;
             }
 
             @Override
-            public Map getConfigurationMap(String namespace) throws CarbonConfigurationException {
-                // TODO Auto-generated method stub
+            public Object getConfigurationObject(String s) throws ConfigurationException {
                 return null;
             }
+
         });
 
         ConfigProvider configProvider = Mockito.mock(ConfigProvider.class);

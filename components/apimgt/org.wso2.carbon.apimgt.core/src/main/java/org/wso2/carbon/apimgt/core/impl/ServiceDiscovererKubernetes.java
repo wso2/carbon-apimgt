@@ -27,7 +27,8 @@ import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.client.DefaultOpenShiftClient;
 import io.fabric8.openshift.client.OpenShiftClient;
-import org.json.JSONObject;
+import org.apache.commons.lang3.StringUtils;
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -121,7 +122,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
          *      - if not : assume APIM is running inside a pod and look for the pod's token
          */
         String externalSATokenFileName = implParameters.get(EXTERNAL_SA_TOKEN_FILE_NAME);
-        if ("".equals(externalSATokenFileName)) {
+        if (StringUtils.isEmpty(externalSATokenFileName)) {
             log.debug("Looking for service account token in " + POD_MOUNTED_SA_TOKEN_FILE_PATH);
             String podMountedSAToken = APIFileUtils.readFileContentAsText(
                     implParameters.get(POD_MOUNTED_SA_TOKEN_FILE_PATH));
