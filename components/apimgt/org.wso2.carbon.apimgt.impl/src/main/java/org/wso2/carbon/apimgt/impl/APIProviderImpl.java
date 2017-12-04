@@ -1774,48 +1774,102 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.CORSRequestHandler", corsProperties);
         }
         if(!api.getStatus().equals(APIStatus.PROTOTYPED)) {
+            try {
 
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
-                           Collections.<String,String>emptyMap());
+                Map<String, String> authProperties = new HashMap<String, String>();
+                //Read custom OAuth2 header, removeOAuthHeader property from tenant configuration
+                Registry registryConfig = ServiceReferenceHolder.getInstance().getRegistryService()
+                        .getConfigSystemRegistry(tenantId);
+                if (registryConfig.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                    Resource resource = registryConfig.get(APIConstants.API_TENANT_CONF_LOCATION);
+                    String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                    if (content != null) {
+                        JSONObject tenantConfig = (JSONObject) new JSONParser().parse(content);
 
-            Map<String, String> properties = new HashMap<String, String>();
+                        String customOAuth2Header = "", removeOAuthHeadersFromOutMessage = "";
+                        customOAuth2Header = (String) tenantConfig.get(APIConstants.CUSTOM_OAUTH2_HEADER);
 
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration();
-            boolean isGlobalThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
-            if (api.getProductionMaxTps() != null) {
-                properties.put("productionMaxCount", api.getProductionMaxTps());
+                        if (customOAuth2Header != null && !"".equals(customOAuth2Header)){
+
+                            authProperties.put(APIConstants.CUSTOM_OAUTH2_HEADER, customOAuth2Header);
+
+                        } else {
+                            //If tenant config doesn't have a custom header, then read it from api-manager.xml
+                            APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
+                                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                            customOAuth2Header = apimConfig.getFirstProperty(APIConstants.CUSTOM_GLOBAL_OAUTH2_HEADER);
+
+                            if (customOAuth2Header != null && !"".equals(customOAuth2Header) ) {
+                                authProperties.put(APIConstants.CUSTOM_OAUTH2_HEADER, customOAuth2Header);
+                            }
+                        }
+
+                        if (tenantConfig.get(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE) != null
+                                && !"".equals(tenantConfig.get(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE)) ) {
+                            removeOAuthHeadersFromOutMessage = tenantConfig.get(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE)+"";
+                            authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE, removeOAuthHeadersFromOutMessage);
+                        } else {
+                            //If tenant config doesn't have removeOAuthHeader property, then read it from api-manager.xml
+                            APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
+                                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                            removeOAuthHeadersFromOutMessage = apimConfig.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE);
+
+                            if (removeOAuthHeadersFromOutMessage != null && !"".equals(removeOAuthHeadersFromOutMessage) ) {
+                                authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE, removeOAuthHeadersFromOutMessage);
+
+                            }
+
+                        }
+                    }
+                }
+                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
+                        authProperties);
+                Map<String, String> properties = new HashMap<String, String>();
+
+                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                        .getAPIManagerConfiguration();
+                boolean isGlobalThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
+                if (api.getProductionMaxTps() != null) {
+                    properties.put("productionMaxCount", api.getProductionMaxTps());
+                }
+
+                if (api.getSandboxMaxTps() != null) {
+                    properties.put("sandboxMaxCount", api.getSandboxMaxTps());
+                }
+
+                if(isGlobalThrottlingEnabled){
+                    vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler", properties);
+                } else {
+                    properties.put("id", "A");
+                    properties.put("policyKey", "gov:" + APIConstants.API_TIER_LOCATION);
+                    properties.put("policyKeyApplication", "gov:" + APIConstants.APP_TIER_LOCATION);
+                    properties.put("policyKeyResource", "gov:" + APIConstants.RES_TIER_LOCATION);
+
+                    vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleHandler", properties);
+                }
+
+                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtUsageHandler", Collections.<String,String>emptyMap());
+
+                properties = new HashMap<String, String>();
+                properties.put("configKey", "gov:" + APIConstants.GA_CONFIGURATION_LOCATION);
+                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtGoogleAnalyticsTrackingHandler", properties);
+
+                String extensionHandlerPosition = getExtensionHandlerPosition();
+                if (extensionHandlerPosition != null && "top".equalsIgnoreCase(extensionHandlerPosition)) {
+                    vtb.addHandlerPriority("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
+                            Collections.<String,String>emptyMap(), 0);
+                } else {
+                    vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
+                            Collections.<String,String>emptyMap());
+                }
+
+            }catch (RegistryException re) {
+                handleException("Error while getting the tenant-conf.json", re);
+            }catch (ParseException pe) {
+                String msg = "Couldn't create json object from Swagger object for custom OAuth header.";
+                handleException(msg, pe);
             }
 
-            if (api.getSandboxMaxTps() != null) {
-                properties.put("sandboxMaxCount", api.getSandboxMaxTps());
-            }
-
-            if(isGlobalThrottlingEnabled){
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.ThrottleHandler", properties);
-            } else {
-                properties.put("id", "A");
-                properties.put("policyKey", "gov:" + APIConstants.API_TIER_LOCATION);
-                properties.put("policyKeyApplication", "gov:" + APIConstants.APP_TIER_LOCATION);
-                properties.put("policyKeyResource", "gov:" + APIConstants.RES_TIER_LOCATION);
-
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleHandler", properties);
-            }
-
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtUsageHandler", Collections.<String,String>emptyMap());
-
-            properties = new HashMap<String, String>();
-            properties.put("configKey", "gov:" + APIConstants.GA_CONFIGURATION_LOCATION);
-            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.analytics.APIMgtGoogleAnalyticsTrackingHandler", properties);
-
-            String extensionHandlerPosition = getExtensionHandlerPosition();
-            if (extensionHandlerPosition != null && "top".equalsIgnoreCase(extensionHandlerPosition)) {
-                vtb.addHandlerPriority("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
-                                       Collections.<String,String>emptyMap(), 0);
-            } else {
-                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
-                               Collections.<String,String>emptyMap());
-            }
         }
 
         return vtb;
