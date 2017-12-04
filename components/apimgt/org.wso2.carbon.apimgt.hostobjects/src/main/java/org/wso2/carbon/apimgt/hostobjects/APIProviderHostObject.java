@@ -3780,6 +3780,13 @@ public class APIProviderHostObject extends ScriptableObject {
             searchTerm = searchValue;
             searchType = "default";
         }
+        String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
+        boolean isTenantFlowStarted = false;
+        if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            isTenantFlowStarted = true;
+        }
         try {
             if ("*".equals(searchTerm) || searchTerm.startsWith("*")) {
                 searchTerm = searchTerm.replaceFirst("\\*", ".*");
@@ -3845,6 +3852,10 @@ public class APIProviderHostObject extends ScriptableObject {
             }
         } catch (Exception e) {
             handleException("Error occurred while getting the searched API- " + searchValue, e);
+        } finally {
+            if(isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
         return myn;
     }
@@ -3903,6 +3914,8 @@ public class APIProviderHostObject extends ScriptableObject {
         String tenantDomain = args[0].toString();
         if (tenantDomain != null && !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             try {
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().
                         getTenantManager().getTenantId(tenantDomain);
                 APIUtil.loadTenantRegistry(tenantId);
