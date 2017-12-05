@@ -25,15 +25,11 @@ import {PageNotFound} from '../Base/Errors'
 class Applications extends Component {
     render() {
         return (
-            <div>
-                <Switch>
-                    <Route exact path={"/applications"} component={Listing}/>
-                    <Route path={"/applications/:application_uuid/"} render={ props => (
-                        <Details {...props} />)}/>
-                    <Route component={PageNotFound}/>
-                </Switch>
-
-            </div>
+            <Switch>
+                <Route exact path={"/applications"} component={Listing}/>
+                <Route path={"/applications/:application_uuid/"} render={ props => (<Details {...props} />)}/>
+                <Route component={PageNotFound}/>
+            </Switch>
         );
     }
 }

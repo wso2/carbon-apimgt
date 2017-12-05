@@ -351,7 +351,7 @@ class BasicInfo extends Component {
                             Tiers
                         </Typography>
                         {this.state.tiers &&
-                        <FormControl style={{width:"100%"}}>
+                        <FormControl style={{width:"100%"}}>`
                             <Select
                                 style={{width:"100%"}}
                                 value={this.state.policyName}

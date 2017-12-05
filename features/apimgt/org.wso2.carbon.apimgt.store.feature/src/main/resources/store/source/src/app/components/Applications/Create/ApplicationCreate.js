@@ -89,8 +89,7 @@ class ApplicationCreate extends Component {
         let application_data = {
             name: this.state.name,
             throttlingTier: this.state.quota,
-            description: this.state.description,
-            callbackUrl: "http://my.server.com/callback"
+            description: this.state.description
         };
         let new_api = new API();
         let promised_create = new_api.createApplication(application_data);
