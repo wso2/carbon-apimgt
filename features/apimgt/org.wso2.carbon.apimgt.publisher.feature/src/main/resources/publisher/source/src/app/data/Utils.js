@@ -16,6 +16,8 @@
  * under the License.
  */
 
+import AuthManager from "./AuthManager";
+
 /**
  * Utility class for Publisher application
  */
@@ -47,6 +49,7 @@ class Utils {
     /**
      * Delete a browser cookie given its name
      * @param {String} name : Name of the cookie which need to be deleted
+     * @param {String} path : Path of the cookie which need to be deleted
      */
     static delete_cookie(name, path) {
         //Environment name is appended to the cookie name
@@ -88,6 +91,10 @@ class Utils {
      * @returns {Utils.CONST.DEFAULT_ENVIRONMENT|{label, host, loginTokenPath}}
      */
     static getEnvironment() {
+        if(Utils._environment){
+            return Utils._environment;
+        }
+
         let environmentData = localStorage.getItem(Utils.CONST.LOCALSTORAGE_ENVIRONMENT);
         if (!environmentData) {
             return Utils.CONST.DEFAULT_ENVIRONMENT;
@@ -124,7 +131,14 @@ class Utils {
         if (!environment.host) {
             environment.host = location.host;
         }
+        //Store environment.
+        Utils._environment = environment;
         localStorage.setItem(Utils.CONST.LOCALSTORAGE_ENVIRONMENT, JSON.stringify(environment));
+
+        //Read the user of stored environment.
+        let user = AuthManager.getUser(true);
+        //If user is null store only in memory.
+        AuthManager.setUser(user);
     }
 
     static getAppLoginURL() {
@@ -155,4 +169,10 @@ Utils.CONST = {
     CONTEXT_PATH: '/publisher'
 };
 
+/**
+ * Current environment
+ * @type {object} environment object
+ * @private
+ */
+Utils._environment = undefined;
 export default Utils;

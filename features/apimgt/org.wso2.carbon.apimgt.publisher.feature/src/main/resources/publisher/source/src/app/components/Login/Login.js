@@ -100,7 +100,7 @@ class Login extends Component {
             this.setState({isLogin: true});
             const validityPeriod = params.validity_period; // In seconds
             const WSO2_AM_TOKEN_1 = params.partial_token;
-            const user = new User(params.user_name, params.id_token);
+            const user = new User(Utils.getEnvironment().label, params.user_name, params.id_token);
             user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/publisher");
             user.scopes = params.scopes.split(" ");
             AuthManager.setUser(user);
