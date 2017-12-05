@@ -20,7 +20,23 @@ import axios from 'axios'
 
 class ConfigManager {
 
-    constructor() {
+    /**
+     * get promised config and update the configMap
+     * @param configPath: Path to read configs from
+     * @returns {Promise Object}: promised config
+     * @private
+     */
+    static _getPromisedConfigs(configPath) {
+        let promisedConfig = ConfigManager._promisedConfigMap.get(configPath);
+        if (promisedConfig) {
+            return promisedConfig;
+        }
+        let origin = window.location.origin;
+        let requestUrl = origin + configPath;
+
+        promisedConfig = axios.get(requestUrl);
+        ConfigManager._promisedConfigMap.set(configPath, promisedConfig);
+        return promisedConfig;
     }
 
     /**
@@ -29,7 +45,7 @@ class ConfigManager {
      */
     static getConfigs() {
         return {
-            'environments': ConfigRequestMethods.promised_environments()
+            'environments': ConfigManager._getPromisedConfigs(ConfigRequestPaths.ENVIRONMENT_CONFIG_PATH)
         };
     }
 }
@@ -42,22 +58,12 @@ const ConfigRequestPaths = {
 };
 
 /**
- * @type {{'ConstRequestString': (function Request_Method())}} ConfigRequestMethods: Configuration requesting methods
+ * The map of single instance promised configs objects
+ * {key}: ConfigRequestPaths
+ * {value}: promised config
+ * @type {Map}
+ * @private
  */
-const ConfigRequestMethods = {
-    promised_environments() {
-        if (ConfigManager._promised_environments) {
-            return ConfigManager._promised_environments;
-        }
-        let origin = window.location.origin;
-        let requestUrl = origin + ConfigRequestPaths.ENVIRONMENT_CONFIG_PATH;
-
-        ConfigManager._promised_environments = axios.get(requestUrl);
-        return ConfigManager._promised_environments;
-    }
-};
-
-//List of private promised class variables to preserve single instance
-ConfigManager._promised_environments = null;
+ConfigManager._promisedConfigMap = new Map();
 
 export default ConfigManager;
