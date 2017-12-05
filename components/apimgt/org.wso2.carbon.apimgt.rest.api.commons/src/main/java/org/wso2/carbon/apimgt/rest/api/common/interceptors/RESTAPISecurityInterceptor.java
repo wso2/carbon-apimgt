@@ -105,9 +105,7 @@ public class RESTAPISecurityInterceptor implements Interceptor {
         if (!requestURI.contains("/api/am/")) {
             return true;
         }
-        if (requestURI.contains("api/am/webserver/")) {
-            return true;
-        } else if (requestURI.contains("/login/token")) {
+        if (requestURI.contains("/login/token")) {
             return true;
         }
 
