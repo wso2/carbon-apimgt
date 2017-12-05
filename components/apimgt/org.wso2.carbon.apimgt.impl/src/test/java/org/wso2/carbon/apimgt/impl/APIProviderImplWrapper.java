@@ -18,112 +18,101 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import java.util.HashMap;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.axis2.AxisFault;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
 import org.wso2.carbon.apimgt.impl.notification.exception.NotificationException;
+import org.wso2.carbon.apimgt.impl.template.ThrottlePolicyTemplateBuilder;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.user.api.UserStoreException;
 
-public class APIProviderImplWrapper extends UserAwareAPIProvider {
+public class APIProviderImplWrapper extends APIProviderImpl {
 
     private API api;
     private Map<String, Map<String,String>> failedGateways;
     private List<Documentation> documentationList;
 
     public APIProviderImplWrapper(ApiMgtDAO apiMgtDAO, List<Documentation> documentationList,
-            Map<String, Map<String,String>> failedGateways) throws APIManagementException {
-        super(null);
-        this.apiMgtDAO = apiMgtDAO;
-        this.documentationList = documentationList;
-        this.failedGateways = failedGateways;
-    }
-
-    public APIProviderImplWrapper(ApiMgtDAO apiMgtDAO, List<Documentation> documentationList)
-            throws APIManagementException {
+                                  Map<String, Map<String,String>> failedGateways) throws APIManagementException {
         super(null);
         this.apiMgtDAO = apiMgtDAO;
         if (documentationList != null) {
             this.documentationList = documentationList;
         }
+        this.failedGateways = failedGateways;
     }
-    
+
     @Override
     protected void registerCustomQueries(UserRegistry registry, String username)
             throws RegistryException, APIManagementException {
-     // do nothing
+        // do nothing
     }
-    
+
     @Override
-    protected void createAPI(API api) {
+    protected void createAPI(API api) throws APIManagementException {
         this.api = api;
+        super.createAPI(api);
     }
-    
+
     @Override
     public API getAPI(APIIdentifier identifier) throws APIManagementException {
         return api;
-        
+
     }
-    
+
     @Override
     public void makeAPIKeysForwardCompatible(API api) throws APIManagementException {
         //do nothing
     }
-    
-    public void changeAPIStatus(API api, APIStatus status, String userId, boolean updateGatewayConfig)
-            throws APIManagementException, FaultGatewaysException {
-        if (failedGateways != null && failedGateways.size() >0) {
-            throw new FaultGatewaysException(failedGateways);
-        }
-    }
-    
-    @Override
-    protected Map<String, String> publishToGateway(API api, String tenantDomain) {
-        if (failedGateways.containsKey("PUBLISHED")) {
-            return failedGateways.get("PUBLISHED");
-        } 
-        return new HashMap<String, String>();
-    }
-    
-    @Override
-    protected Map<String, String> removeFromGateway(API api, String tenantDomain) {
-        if (failedGateways.containsKey("UNPUBLISHED")) {
-            return failedGateways.get("UNPUBLISHED");
-        }
-        return new HashMap<String, String>();
-    }
-    
+
     @Override
     public List<Documentation> getAllDocumentation(APIIdentifier apiId) throws APIManagementException {
         return documentationList;
     }
-    
+
     @Override
     protected int getTenantId(String tenantDomain) {
         return -1234;
     }
-    
+
     @Override
     public String addResourceFile(String resourcePath, ResourceFile resourceFile) throws APIManagementException{
         return null;
     }
-    
+
     @Override
     protected void sendAsncNotification(NotificationDTO notificationDTO) throws NotificationException {
         //do nothing
     }
-    
-    /*protected String getTenantConfigContent() throws RegistryException, UserStoreException {
+
+    @Override
+    protected void invalidateResourceCache(String apiContext, String apiVersion, String resourceURLContext,
+                                           String httpVerb, Environment environment) throws AxisFault {
+        //do nothing
+    }
+
+    @Override
+    protected ThrottlePolicyTemplateBuilder getThrottlePolicyTemplateBuilder() {
+        final String POLICY_LOCATION = "src" + File.separator + "test" + File.separator + "resources"
+                + File.separator + "repository" + File.separator + "resources" + File.separator + "policy_templates"
+                + File.separator + "";
+        ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
+        policyBuilder.setPolicyTemplateLocation(POLICY_LOCATION);
+        return policyBuilder;
+    }
+
+    protected String getTenantConfigContent() throws RegistryException, UserStoreException {
         return "{\"EnableMonetization\":false,\"IsUnlimitedTierPaid\":false,\"ExtensionHandlerPosition\":\"bottom\","
                 + "\"RESTAPIScopes\":{\"Scope\":[{\"Name\":\"apim:api_publish\",\"Roles\":\"admin,Internal/publisher\"},"
                 + "{\"Name\":\"apim:api_create\",\"Roles\":\"admin,Internal/creator\"},{\"Name\":\"apim:api_view\","
@@ -144,6 +133,6 @@ public class APIProviderImplWrapper extends UserAwareAPIProvider {
                 + "\"DefaultRoles\":{\"PublisherRole\":{\"CreateOnTenantLoad\":true,\"RoleName\":"
                 + "\"Internal/publisher\"},\"CreatorRole\":{\"CreateOnTenantLoad\":true,\"RoleName\":"
                 + "\"Internal/creator\"},\"SubscriberRole\":{\"CreateOnTenantLoad\":true}}}";
-    }*/
+    }
 
 }

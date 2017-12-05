@@ -26,7 +26,10 @@
     JSHINT(text, options, options.globals);
     var errors = JSHINT.data().errors, result = [];
     if (errors) parseErrors(errors, result);
-    if(!errors){$('#prototyped_api').prop('disabled', false)}
+    if (!errors) {
+        $('#prototyped_api').prop('disabled', false);
+        $('#savePrototypeBtn').prop('disabled', false);
+    }
 
     return result;
   }
@@ -128,6 +131,7 @@
         console.info(error);
         if (error){
           $('#prototyped_api').prop('disabled', true);
+          $('#savePrototypeBtn').prop('disabled', true);
           output.push({message: error.description,
                        severity: error.severity,
                        from: CodeMirror.Pos(error.line - 1, start),
