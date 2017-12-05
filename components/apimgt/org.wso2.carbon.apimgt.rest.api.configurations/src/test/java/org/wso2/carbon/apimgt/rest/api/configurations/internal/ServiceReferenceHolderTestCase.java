@@ -27,8 +27,6 @@ import org.wso2.carbon.apimgt.rest.api.configurations.models.APIMUIConfiguration
 import org.wso2.carbon.config.ConfigurationException;
 import org.wso2.carbon.config.provider.ConfigProvider;
 
-import java.util.Map;
-
 public class ServiceReferenceHolderTestCase {
     @Test
     public void testGetInstance() {
@@ -58,10 +56,10 @@ public class ServiceReferenceHolderTestCase {
                 throw new ConfigurationException("Error while creating configuration instance");
             }
 
-            @Override
-            public Map getConfigurationMap(String namespace) throws CarbonConfigurationException {
-                return null;
+            @Override public Object getConfigurationObject(String s) throws ConfigurationException {
+                throw new ConfigurationException("Error while creating configuration instance");
             }
+
         };
         instance.setConfigProvider(configProvider);
         apimUIConfigurations = instance.getApimUIConfigurations();
