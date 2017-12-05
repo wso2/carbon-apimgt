@@ -19,8 +19,7 @@
 import React from 'react'
 import {Link, withRouter} from "react-router-dom";
 import AuthManager from '../../../data/AuthManager.js';
-import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation';
-import qs from 'qs'
+import {resourceMethod, resourcePath, ScopeValidation} from '../../../data/ScopeValidation';
 
 import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
@@ -28,7 +27,7 @@ import IconButton from 'material-ui/IconButton';
 import MenuIcon from 'material-ui-icons/Menu';
 import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
-import Menu, { MenuItem } from 'material-ui/Menu';
+import Menu, {MenuItem} from 'material-ui/Menu';
 import SearchIcon from 'material-ui-icons/Search';
 import AppIcon from 'material-ui-icons/Apps';
 import PlaylistAddIcon from 'material-ui-icons/PlaylistAdd';
@@ -36,11 +35,10 @@ import CloseIcon from 'material-ui-icons/Close';
 import TextField from 'material-ui/TextField';
 import InfoIcon from 'material-ui-icons/Info';
 import InfoLightBulb from 'material-ui-icons/LightbulbOutline';
-import List, {
-    ListItem,
-    ListItemIcon,
-    ListItemText,
-} from 'material-ui/List';
+import List, {ListItem, ListItemIcon, ListItemText,} from 'material-ui/List';
+import ConfigManager from "../../../data/ConfigManager";
+import Utils from "../../../data/Utils";
+import EnvironmentSelector from "./EnvironmentMenu";
 
 const helpTips = [
     "By API Name [Default]",
@@ -66,9 +64,21 @@ class Header extends React.Component {
             openMainMenu: false,
             searchVisible: false,
             openTips: false,
-            showLeftMenu: this.props.showLeftMenu
-        }
+            showLeftMenu: this.props.showLeftMenu,
+            environments: {},
+            environmentId: 0
+        };
     }
+
+    componentDidMount(){
+        //Get Environments
+        let promised_environments = ConfigManager.getConfigs().environments.then(response => {
+            this.setState({
+                environments: response.data.environments
+            });
+        });
+    }
+
     handleClickUserMenu = event => {
         this.setState({ openUserMenu: true, anchorElUserMenu: event.currentTarget });
     };
@@ -76,6 +86,15 @@ class Header extends React.Component {
     handleRequestCloseUserMenu = () => {
         this.setState({ openUserMenu: false });
     };
+
+    handleEnvironmentChange = event => {
+        this.setState({ openEnvironmentMenu: false });
+        //TODO: [rnk] Optimize Rendering.
+        let environmentId = parseInt(event.target.id);
+        this.setState({environmentId});
+        Utils.setEnvironment(this.state.environments[environmentId]);
+    };
+
     handleClickAddMenu = event => {
         this.setState({ openAddMenu: true, anchorElAddMenu: event.currentTarget });
     };
@@ -149,9 +168,9 @@ class Header extends React.Component {
                     :
                     <Toolbar>
                         {this.state.showLeftMenu ?
-                        <IconButton color="contrast" aria-label="Menu">
-                            <MenuIcon color="contrast" onClick={this.props.toggleDrawer}/>
-                        </IconButton> : <span></span> }
+                            <IconButton color="contrast" aria-label="Menu">
+                                <MenuIcon color="contrast" onClick={this.props.toggleDrawer}/>
+                            </IconButton> : <span></span> }
                         <Typography type="title" color="inherit" style={{flex: 1}}>
                             <Link to="/" style={{textDecoration: 'none'}}>
                                 <Button color="primary">
@@ -169,11 +188,11 @@ class Header extends React.Component {
                                 {/* API add menu */}
                                 {/* enable "create API" menu depending on user scopes */}
                                 <ScopeValidation resourcePath={resourcePath.APIS} resourceMethod={resourceMethod.POST}>
-                                  <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClickAddMenu}
-                                          color="contrast">
-                                      <PlaylistAddIcon />
-                                  </Button>
-                              </ScopeValidation>
+                                    <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClickAddMenu}
+                                            color="contrast">
+                                        <PlaylistAddIcon />
+                                    </Button>
+                                </ScopeValidation>
                                 <Menu
                                     id="simple-menu"
                                     anchorEl={this.state.anchorElAddMenu}
@@ -209,6 +228,10 @@ class Header extends React.Component {
                                         <Link to="/endpoints" style={{color: "#000", textDecoration: 'none'}}>Endpoints</Link>
                                     </MenuItem>
                                 </Menu>
+                                {/* Environment menu */}
+                                <EnvironmentSelector environments={this.state.environments}
+                                                     environmentLabel={Utils.getEnvironment().label}
+                                                     handleEnvironmentChange={this.handleEnvironmentChange}/>
                                 {/* User menu */}
                                 <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClickUserMenu}
                                         color="contrast">

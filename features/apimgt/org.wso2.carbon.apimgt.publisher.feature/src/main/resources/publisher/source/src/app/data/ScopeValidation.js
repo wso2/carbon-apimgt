@@ -19,7 +19,6 @@
 
 import React from 'react';
 import AuthManager from './AuthManager'
-import {Button} from 'antd'
 
 const resourcePath = {
     APIS : "/apis",

@@ -17,7 +17,7 @@
  */
 "use strict";
 
-import Utils from './utils'
+import Utils from './Utils'
 /**
  * Represent an user logged in to the application, There will be allays one user per session and
  * this user details will be persist in browser localstorage.
@@ -65,7 +65,7 @@ export default class User {
      * @param path Path which need to be set to cookie
      */
     setPartialToken(newToken, validityPeriod, path) {
-        Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1);
+        Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, path);
         Utils.setCookie(User.CONST.WSO2_AM_TOKEN_1, newToken, validityPeriod, path);
     }
 
@@ -107,5 +107,5 @@ export default class User {
     }
 }
 
-User.CONST = {WSO2_AM_TOKEN_MSF4J: "WSO2_AM_TOKEN_MSF4J", WSO2_AM_TOKEN_1: "WSO2_AM_TOKEN_1", LOCALSTORAGE_USER: "wso2_user"};
+User.CONST = {WSO2_AM_TOKEN_MSF4J: "WSO2_AM_TOKEN_MSF4J", WSO2_AM_TOKEN_1: "WSO2_AM_TOKEN_1", LOCALSTORAGE_USER: "wso2_user_publisher"};
 User._instance = null; // A private class variable to preserve the single instance of a swaggerClient

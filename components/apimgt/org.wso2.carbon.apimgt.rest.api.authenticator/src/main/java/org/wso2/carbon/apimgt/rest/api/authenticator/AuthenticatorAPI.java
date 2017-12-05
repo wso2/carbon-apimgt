@@ -48,6 +48,7 @@ import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -60,7 +61,6 @@ import javax.ws.rs.core.Response;
 
 /**
  * This class provides access token during login from store app.
- *
  */
 @Component(
         name = "org.wso2.carbon.apimgt.rest.api.authenticator.AuthenticatorAPI",
@@ -74,26 +74,28 @@ public class AuthenticatorAPI implements Microservice {
 
     /**
      * This method authenticate the user for store app.
-     *
      */
+    @OPTIONS
     @POST
-    @Path ("/token/{appName}")
-    @Produces (MediaType.APPLICATION_JSON)
-    @Consumes ({ MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA })
+    @Path("/token/{appName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes({MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA})
     public Response authenticate(@Context Request request, @PathParam("appName") String appName,
-            @FormDataParam ("username") String userName, @FormDataParam ("password") String password,
-            @FormDataParam ("grant_type") String grantType, @FormDataParam ("validity_period") String validityPeriod,
-            @FormDataParam ("remember_me") boolean isRememberMe, @FormDataParam ("scopes") String scopesList) {
+                                 @FormDataParam("username") String userName, @FormDataParam("password") String password,
+                                 @FormDataParam("grant_type") String grantType, @FormDataParam("validity_period") String validityPeriod,
+                                 @FormDataParam("remember_me") boolean isRememberMe, @FormDataParam("scopes") String scopesList) {
         try {
             KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
             SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
             AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
             AuthResponseBean authResponseBean = new AuthResponseBean();
-            String appContext = "/" + appName;
+            String appContext = AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
+            String logoutContext = AuthenticatorConstants.LOGOUT_SERVICE_CONTEXT +
+                    AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
             String restAPIContext;
             if (appContext.contains(AuthenticatorConstants.EDITOR_APPLICATION) ||
                     request.getUri().contains(AuthenticatorConstants.PUBLISHER_APPLICATION)) {
-                restAPIContext = AuthenticatorConstants.REST_CONTEXT + "/" +
+                restAPIContext = AuthenticatorConstants.REST_CONTEXT + AuthenticatorConstants.URL_PATH_SEPERATOR +
                         AuthenticatorConstants.PUBLISHER_APPLICATION;
             } else {
                 restAPIContext = AuthenticatorConstants.REST_CONTEXT + appContext;
@@ -116,17 +118,20 @@ public class AuthenticatorAPI implements Microservice {
             String accessToken = accessTokenInfo.getAccessToken();
             String refreshToken = accessTokenInfo.getRefreshToken();
 
-            // The access token is stored as two cookies in client side. One is a normal cookie and other is a http
-            // only cookie. Hence we need to split the access token
-            String part1 = accessToken.substring(0, accessToken.length() / 2);
-            String part2 = accessToken.substring(accessToken.length() / 2);
-            NewCookie cookieWithAppContext = AuthUtil
-                    .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_1, part1, appContext, true, false, "");
-            authResponseBean.setPartialToken(part1);
-            NewCookie httpOnlyCookieWithAppContext = AuthUtil
-                    .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, part2, appContext, true, true, "");
+            // The part of the access token is stored as a http only cookie. This part will be stored in two cookies
+            // with two different contexts. One in the rest api context and the one in the "/login" context
+            // Hence we need to split the access token
+            String accessTokenPart1 = accessToken.substring(0, accessToken.length() / 2);
+            String accessTokenPart2 = accessToken.substring(accessToken.length() / 2);
+
+            authResponseBean.setPartialToken(accessTokenPart1);
+            // Cookie should be set to the log out context in order to revoke the token when log out happens.
+
+            NewCookie httpOnlyCookieWithLogInContext = AuthUtil
+                    .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, accessTokenPart2, logoutContext,
+                            true, true, "");
             NewCookie restAPIContextCookie = AuthUtil
-                    .cookieBuilder(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J, part2, restAPIContext, true, true,
+                    .cookieBuilder(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J, accessTokenPart2, restAPIContext, true, true,
                             "");
             NewCookie refreshTokenCookie, refreshTokenHttpOnlyCookie;
             // Refresh token is not set to cookie if remember me is not set.
@@ -141,7 +146,7 @@ public class AuthenticatorAPI implements Microservice {
                         .cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_2, refTokenPart2, appContext, true, true,
                                 "");
                 return Response.ok(authResponseBean, MediaType.APPLICATION_JSON)
-                        .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext, restAPIContextCookie,
+                        .cookie(httpOnlyCookieWithLogInContext, restAPIContextCookie,
                                 refreshTokenCookie, refreshTokenHttpOnlyCookie).header(AuthenticatorConstants.
                                         REFERER_HEADER,
                                 (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
@@ -150,10 +155,11 @@ public class AuthenticatorAPI implements Microservice {
                                         "" :
                                         request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null ?
                                                 request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) :
-                                                "").build();
+                                                "")
+                        .build();
             } else {
                 return Response.ok(authResponseBean, MediaType.APPLICATION_JSON)
-                        .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext, restAPIContextCookie)
+                        .cookie(httpOnlyCookieWithLogInContext, restAPIContextCookie)
                         .header(AuthenticatorConstants.
                                         REFERER_HEADER,
                                 (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
@@ -162,23 +168,29 @@ public class AuthenticatorAPI implements Microservice {
                                         "" :
                                         request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null ?
                                                 request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) :
-                                                "").build();
+                                                "")
+                        .build();
             }
         } catch (APIManagementException e) {
             ErrorDTO errorDTO = AuthUtil.getErrorDTO(e.getErrorHandler(), null);
             log.error(e.getMessage(), e);
-            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO)
+                    .build();
         }
     }
 
+    @OPTIONS
     @POST
-    @Produces (MediaType.APPLICATION_JSON)
-    @Path ("/logout/{appName}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/logout/{appName}")
     public Response logout(@Context Request request, @PathParam("appName") String appName) {
-        String appContext = "/" + appName;
+        String appContext = AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
+        String logoutContext =
+                AuthenticatorConstants.LOGOUT_SERVICE_CONTEXT + AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
         String restAPIContext;
         if (appContext.contains(AuthenticatorConstants.EDITOR_APPLICATION)) {
-            restAPIContext = AuthenticatorConstants.REST_CONTEXT + "/" + AuthenticatorConstants.PUBLISHER_APPLICATION;
+            restAPIContext = AuthenticatorConstants.REST_CONTEXT + AuthenticatorConstants.URL_PATH_SEPERATOR
+                    + AuthenticatorConstants.PUBLISHER_APPLICATION;
         } else {
             restAPIContext = AuthenticatorConstants.REST_CONTEXT + appContext;
         }
@@ -191,8 +203,8 @@ public class AuthenticatorAPI implements Microservice {
                 AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
                 authenticatorService.revokeAccessToken(appContext.substring(1), accessToken);
                 // Lets invalidate all the cookies saved.
-                NewCookie appContextCookie = AuthUtil
-                        .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, "", appContext, true, true,
+                NewCookie logoutContextCookie = AuthUtil
+                        .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, "", logoutContext, true, true,
                                 AuthenticatorConstants.COOKIE_EXPIRE_TIME);
                 NewCookie restContextCookie = AuthUtil
                         .cookieBuilder(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J, "", restAPIContext, true, true,
@@ -203,7 +215,7 @@ public class AuthenticatorAPI implements Microservice {
                 NewCookie refreshTokenHttpOnlyCookie = AuthUtil
                         .cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_2, "", appContext, true, true,
                                 AuthenticatorConstants.COOKIE_EXPIRE_TIME);
-                return Response.ok().cookie(appContextCookie, restContextCookie, refreshTokenCookie,
+                return Response.ok().cookie(logoutContextCookie, restContextCookie, refreshTokenCookie,
                         refreshTokenHttpOnlyCookie).build();
             } catch (APIManagementException e) {
                 ErrorDTO errorDTO = AuthUtil.getErrorDTO(e.getErrorHandler(), null);
@@ -223,6 +235,7 @@ public class AuthenticatorAPI implements Microservice {
      * @param request Request to call the /login api
      * @return Response - Response object with OAuth data
      */
+    @OPTIONS
     @GET
     @Path("/login/{appName}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -251,11 +264,14 @@ public class AuthenticatorAPI implements Microservice {
      * @param request Request to call /callback api
      * @return Response - Response with redirect URL
      */
+    @OPTIONS
     @GET
     @Path("/callback/{appName}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response callback(@Context Request request, @PathParam("appName") String appName) {
         String appContext = "/" + appName;
+        String logoutContext =
+                AuthenticatorConstants.LOGOUT_SERVICE_CONTEXT + AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
         String restAPIContext;
         if (AuthenticatorConstants.EDITOR_APPLICATION.equals(appName) ||
                 request.getUri().contains(AuthenticatorConstants.PUBLISHER_APPLICATION)) {
@@ -284,17 +300,15 @@ public class AuthenticatorAPI implements Microservice {
                     log.debug("Received access token for " + appName + " application.");
                 }
                 // Set Access Token cookies
-                String part1 = accessToken.substring(0, accessToken.length() / 2);
-                String part2 = accessToken.substring(accessToken.length() / 2);
-                NewCookie cookieWithAppContext = AuthUtil
-                        .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_1, part1, appContext,
-                                true, false, "");
-                authResponseBean.setPartialToken(part1);
-                NewCookie httpOnlyCookieWithAppContext = AuthUtil
-                        .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, part2, appContext,
+                String accessTokenPart1 = accessToken.substring(0, accessToken.length() / 2);
+                String accessTokenPart2 = accessToken.substring(accessToken.length() / 2);
+
+                authResponseBean.setPartialToken(accessTokenPart1);
+                NewCookie httpOnlyCookieWithLogoutContext = AuthUtil
+                        .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, accessTokenPart2, logoutContext,
                                 true, true, "");
                 NewCookie restAPIContextCookie = AuthUtil
-                        .cookieBuilder(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J, part2, restAPIContext,
+                        .cookieBuilder(APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J, accessTokenPart2, restAPIContext,
                                 true, true, "");
                 String authUser = authResponseBean.getAuthUser();
                 NewCookie authUserCookie = AuthUtil
@@ -314,12 +328,12 @@ public class AuthenticatorAPI implements Microservice {
                             .replaceAll("\\+", "%20").replaceAll("%26", "&").replaceAll("%3D", "="));
                     return Response.status(Response.Status.FOUND)
                             .header(HttpHeaders.LOCATION, redirectURI)
-                            .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext, restAPIContextCookie)
+                            .cookie(httpOnlyCookieWithLogoutContext, restAPIContextCookie)
                             .build();
                 } else {
                     return Response.status(Response.Status.FOUND)
                             .header(HttpHeaders.LOCATION, targetURIForRedirection).entity(authResponseBean)
-                            .cookie(cookieWithAppContext, httpOnlyCookieWithAppContext, restAPIContextCookie, authUserCookie)
+                            .cookie(httpOnlyCookieWithLogoutContext, restAPIContextCookie, authUserCookie)
                             .build();
                 }
             }

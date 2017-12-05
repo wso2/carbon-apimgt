@@ -114,6 +114,7 @@ public class APIMgtConstants {
     public static final String GATEWAY_CONFIG = "GATEWAY_CONFIG";
     public static final String HTTP = "http";
     public static final String HTTPS = "https";
+    public static final String WEB_PROTOCOL_SUFFIX = "://";
 
     public static final String HTTP_METHOD = "HTTP_METHOD";
 
@@ -300,6 +301,13 @@ public class APIMgtConstants {
         public static final String BLOCKING_CONDITIONS_USER = "USER";
         public static final String BLOCKING_CONDITIONS_IP = "IP";
         public static final String BLOCKING_CONDITION_IP_RANGE = "IP_RANGE";
+    }
+
+    /**
+     * CORS requests 'Access-Control-Allow-Origin' header related values
+     */
+    public static class CORSAllowOriginConstants {
+        public static final String ALLOW_ALL_ORIGINS = "*";
     }
 
     /**

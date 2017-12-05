@@ -9,7 +9,7 @@
 
 **Affected Product Version:**
 
-**OS, DB, other environment details and versions:**    
+**OS, DB, other environments details and versions:**    
 
 **Steps to reproduce:**
 

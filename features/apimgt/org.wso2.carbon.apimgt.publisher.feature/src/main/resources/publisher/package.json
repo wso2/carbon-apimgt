@@ -36,7 +36,11 @@
     "react-select": "^1.0.0-rc.6",
     "react-tap-event-plugin": "^2.0.1",
     "react-toastify": "^1.7.0",
-    "swagger-client": "3.0.19",
+    "TODO[rnk]-COMMENT": {
+      "comment": "Removed the following dependancy and include the patched file in js/swagger-client",
+      "issue": "https://github.com/swagger-api/swagger-js/issues/1186",
+      "dependancy": "\"swagger-client\": \"3.3.3\""
+    },
     "typeface-roboto": "0.0.35",
     "url-loader": "^0.5.9"
   },

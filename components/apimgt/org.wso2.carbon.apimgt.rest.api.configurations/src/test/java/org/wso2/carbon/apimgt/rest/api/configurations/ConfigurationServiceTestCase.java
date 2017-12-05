@@ -21,9 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.configurations;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.rest.api.configurations.internal.ConfigurationActivator;
-import org.wso2.carbon.apimgt.rest.api.configurations.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.rest.api.configurations.models.EnvironmentConfigurations;
+import org.wso2.carbon.apimgt.rest.api.configurations.models.APIMUIConfigurations;
 
 public class ConfigurationServiceTestCase {
 
@@ -33,17 +31,11 @@ public class ConfigurationServiceTestCase {
         Assert.assertNotNull(configurationService);
     }
 
-    @Test(description = "Test whether environment name is empty")
-    public void testGetEnvironmentName() {
-        String environmentName = ConfigurationService.getEnvironmentName();
-        Assert.assertFalse(environmentName.isEmpty());
-    }
-
-    @Test(description = "Test for Environment Configurations")
+    @Test(description = "Test for EnvironmentConfigurations Configurations")
     public void testGetEnvironmentConfigurations() {
         ////Happy Path
-        EnvironmentConfigurations environmentConfigurations = ConfigurationService.getInstance()
-                .getEnvironmentConfigurations();
-        Assert.assertNotNull(environmentConfigurations);
+        APIMUIConfigurations apimUIConfigurations = ConfigurationService.getInstance()
+                .getApimUIConfigurations();
+        Assert.assertNotNull(apimUIConfigurations);
     }
 }

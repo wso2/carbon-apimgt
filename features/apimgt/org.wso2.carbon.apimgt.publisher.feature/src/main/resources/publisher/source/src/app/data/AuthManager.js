@@ -19,18 +19,15 @@
 
 import axios from 'axios'
 import qs from 'qs'
-import Configs from './ConfigManager'
-import Utils from './utils'
+import Utils from './Utils'
 import User from './User'
-import SingleClient from './SingleClient'
+import APIClient from './APIClient'
+import APIClientFactory from "./APIClientFactory";
 
 class AuthManager {
     constructor() {
-        this.host = window.location.protocol + "//" + window.location.host;
         this.isLogged = false;
         this.username = null;
-        this.userscope = null;
-        this.contextPath = "/publisher";
     }
 
     static refreshTokenOnExpire() {
@@ -130,7 +127,6 @@ class AuthManager {
             throw new Error("Invalid user object");
         }
         localStorage.setItem(User.CONST.LOCALSTORAGE_USER, JSON.stringify(user.toJson()));
-        /* TODO: IMHO it's better to get this key (`wso2_user`) from configs */
     }
 
     /**
@@ -141,12 +137,13 @@ class AuthManager {
     getTokenEndpoint(environment) {
         let loginTokenPath;
         if (environment) {
+            let origin = Utils.CONST.PROTOCOL;
             //The default value of `host` in back-end java code is an empty string.
-            let host = (environment.host) ? environment.host : this.host;
-            loginTokenPath = host + environment.loginTokenPath + this.contextPath;
+            origin += environment.host || Utils.getEnvironment().host;
+            loginTokenPath = origin + environment.loginTokenPath + Utils.CONST.CONTEXT_PATH;
         } else {
             //If no environment return default loginTokenPath
-            loginTokenPath = this.host + "/login/token" + this.contextPath;
+            loginTokenPath = Utils.getLoginTokenPath();
         }
         return loginTokenPath;
     }
@@ -173,14 +170,26 @@ class AuthManager {
             scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage '
              + 'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover'
         };
-        let promised_response = axios.post(this.getTokenEndpoint(environment), qs.stringify(data), {headers: headers});
+        let promised_response = axios(this.getTokenEndpoint(environment), {
+            method: "POST",
+            data: qs.stringify(data),
+            headers: headers,
+            withCredentials: true
+        });
+        //Set the environment that user tried to authenticate
+        let previous_environment = Utils.getEnvironment();
+        Utils.setEnvironment(environment);
+
         promised_response.then(response => {
             const validityPeriod = response.data.validityPeriod; // In seconds
             const WSO2_AM_TOKEN_1 = response.data.partialToken;
             const user = new User(response.data.authUser, response.data.idToken);
-            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, this.contextPath);
+            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Utils.CONST.CONTEXT_PATH);
             user.scopes = response.data.scopes.split(" ");
             AuthManager.setUser(user);
+        }).catch(error => {
+            console.log("Authentication Error:\n", error);
+            Utils.setEnvironment(previous_environment);
         });
         return promised_response;
     }
@@ -191,7 +200,7 @@ class AuthManager {
     logout() {
         let authHeader = "Bearer " + AuthManager.getUser().getPartialToken();
         //TODO Will have to change the logout end point url to contain the app context(i.e. publisher/store, etc.)
-        let url = this.host + "/login/logout" + this.contextPath;
+        let url = Utils.getAppLogoutURL()
         let headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -199,8 +208,9 @@ class AuthManager {
         };
         const promisedLogout = axios.post(url, null, {headers: headers});
         return promisedLogout.then(response => {
-            Utils.delete_cookie("WSO2_AM_TOKEN_1");
-            localStorage.removeItem("wso2_user");
+            Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, Utils.CONST.CONTEXT_PATH);
+            localStorage.removeItem(User.CONST.LOCALSTORAGE_USER);
+            new APIClientFactory().getAPIClient(Utils.getEnvironment().label)._instance = null; // Single client should be re initialize after log out
         });
     }
 
@@ -212,7 +222,7 @@ class AuthManager {
             ' apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover'
         };
         let referrer = (document.referrer.indexOf("https") !== -1) ? document.referrer : null;
-        let url = this.contextPath + '/auth/apis/login/token';
+        let url = Utils.CONST.CONTEXT_PATH + '/auth/apis/login/token';
         /* TODO: Fetch this from configs ~tmkb*/
         let headers = {
             'Authorization': authzHeader,
@@ -225,7 +235,7 @@ class AuthManager {
 
     static hasScopes(resourcePath, resourceMethod) {
         let userscopes = this.getUser().scopes;
-        let validScope = SingleClient.getScopeForResource(resourcePath, resourceMethod);
+        let validScope = APIClient.getScopeForResource(resourcePath, resourceMethod);
         return validScope.then(scope => {
             return userscopes.includes(scope)
         });

@@ -24,6 +24,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
+import org.wso2.carbon.apimgt.core.configuration.APIMConfigurationService;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
@@ -35,7 +36,6 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.api.RESTAPIAuthenticator;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
-import org.wso2.carbon.apimgt.rest.api.configurations.ConfigurationService;
 import org.wso2.carbon.messaging.Headers;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.Response;
@@ -165,7 +165,8 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
      */
     private String extractPartialAccessTokenFromCookie(String cookie) {
         //Append unique environment name in deployment.yaml
-        String environmentName = ConfigurationService.getEnvironmentName();
+        String environmentName = APIMConfigurationService.getInstance().getApimConfigurations()
+                .getEnvironmentConfigurations().getEnvironmentLabel();
 
         if (cookie != null) {
             cookie = cookie.trim();
@@ -187,7 +188,8 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
         String token2 = null;
 
         //Append unique environment name in deployment.yaml
-        String environmentName = ConfigurationService.getEnvironmentName();
+        String environmentName = APIMConfigurationService.getInstance().getApimConfigurations()
+                .getEnvironmentConfigurations().getEnvironmentLabel();
         if (cookie != null) {
             cookie = cookie.trim();
             String[] cookies = cookie.split(";");

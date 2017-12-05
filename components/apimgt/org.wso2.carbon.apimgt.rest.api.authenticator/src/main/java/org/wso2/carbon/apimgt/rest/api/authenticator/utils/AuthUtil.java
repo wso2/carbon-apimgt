@@ -18,11 +18,11 @@
 
 package org.wso2.carbon.apimgt.rest.api.authenticator.utils;
 
-import org.wso2.carbon.apimgt.rest.api.authenticator.constants.AuthenticatorConstants;
-import org.wso2.carbon.apimgt.rest.api.authenticator.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.core.configuration.APIMConfigurationService;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
-import org.wso2.carbon.apimgt.rest.api.configurations.ConfigurationService;
+import org.wso2.carbon.apimgt.rest.api.authenticator.constants.AuthenticatorConstants;
+import org.wso2.carbon.apimgt.rest.api.authenticator.dto.ErrorDTO;
 import org.wso2.carbon.messaging.Headers;
 import org.wso2.msf4j.Request;
 
@@ -36,7 +36,6 @@ import javax.ws.rs.core.NewCookie;
 
 /**
  * This method authenticate the user.
- *
  */
 public class AuthUtil {
 
@@ -45,7 +44,6 @@ public class AuthUtil {
 
     /**
      * This method authenticate the user.
-     *
      */
     public static String getHttpOnlyCookieHeader(Cookie cookie) {
         return cookie + "; HttpOnly";
@@ -67,11 +65,10 @@ public class AuthUtil {
 
     /**
      * This method is used to generate access token request to login for uuf apps.
-     *
      */
     public static AccessTokenRequest createAccessTokenRequest(String username, String password, String grantType,
-            String refreshToken, String accessToken, long validityPeriod, String scopes, String clientId, String
-            clientSecret) {
+                                                              String refreshToken, String accessToken, long validityPeriod, String scopes, String clientId, String
+                                                                      clientSecret) {
 
         AccessTokenRequest tokenRequest = new AccessTokenRequest();
         tokenRequest.setClientId(clientId);
@@ -112,7 +109,8 @@ public class AuthUtil {
 
     /**
      * Method used to extract refresh token from headers.
-     * @param headers  headers which contains the access token
+     *
+     * @param headers headers which contains the access token
      * @return refresh token present in the cookie and authorization header..
      */
     public static String extractTokenFromHeaders(Headers headers, String cookieHeader) {
@@ -134,7 +132,8 @@ public class AuthUtil {
         }
 
         //Append unique environment name in deployment.yaml
-        String environmentName = ConfigurationService.getEnvironmentName();
+        String environmentName = APIMConfigurationService.getInstance().getApimConfigurations()
+                .getEnvironmentConfigurations().getEnvironmentLabel();
         String cookie = headers.get(AuthenticatorConstants.COOKIE_HEADER);
         if (cookie != null) {
             cookie = cookie.trim();
@@ -153,6 +152,7 @@ public class AuthUtil {
 
     /**
      * Method used to build a cookie object.
+     *
      * @param name       Name of the cookie.
      * @param value      Value of the cookie.
      * @param path       Context to which cookie should be set.
@@ -162,7 +162,7 @@ public class AuthUtil {
      * @return Cookie object.
      */
     public static NewCookie cookieBuilder(String name, String value, String path, boolean isSecure,
-            boolean isHttpOnly, String expiresIn) {
+                                          boolean isHttpOnly, String expiresIn) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(value).append(COOKIE_PATH_SEPERATOR).append(path).append(COOKIE_VALUE_SEPERATOR);
         if (isHttpOnly) {
@@ -176,7 +176,8 @@ public class AuthUtil {
         }
 
         //Append unique environment name in deployment.yaml
-        String environmentName = ConfigurationService.getEnvironmentName();
+        String environmentName = APIMConfigurationService.getInstance().getApimConfigurations()
+                .getEnvironmentConfigurations().getEnvironmentLabel();
         return new NewCookie(name + "_" + environmentName, stringBuilder.toString());
     }
 

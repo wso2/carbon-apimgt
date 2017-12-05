@@ -16,40 +16,42 @@
 
 package org.wso2.carbon.apimgt.rest.api.configurations.models;
 
-
 import org.wso2.carbon.config.annotation.Configuration;
 import org.wso2.carbon.config.annotation.Element;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 /**
- * Class to hold Environment configuration parameters
+ * Class to hold environment configurations
  */
-@Configuration(namespace = "wso2.carbon.apimgt.environments", description = "Environment Configurations")
+@Configuration(description = "environment and key management configurations")
 public class EnvironmentConfigurations {
 
-    //Unique name for environment to set cookies by backend
-    @Element(description = "Unique Environment-name")
-    private String environmentName = "Default";
+    private String host = "";
 
-    @Element(description = "List of all Environments")
-    private List<Environment> environments = Arrays.asList(new Environment());
+    private String loginTokenPath = "/login/token";
 
-    public String getEnvironmentName() {
-        return environmentName;
+    private String label = "Default";
+
+    public String getHost() {
+        return host;
     }
 
-    public void setEnvironmentName(String environmentName) {
-        this.environmentName = environmentName;
+    public void setHost(String host) {
+        this.host = host;
     }
 
-    public List<Environment> getEnvironments() {
-        return environments;
+    public String getLoginTokenPath() {
+        return loginTokenPath;
     }
 
-    public void setEnvironments(List<Environment> environments) {
-        this.environments = environments;
+    public void setLoginTokenPath(String loginTokenPath) {
+        this.loginTokenPath = loginTokenPath;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
     }
 }

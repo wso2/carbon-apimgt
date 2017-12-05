@@ -14,19 +14,26 @@
  * limitations under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.configurations.utils.bean;
+package org.wso2.carbon.apimgt.rest.api.configurations.models;
 
-import org.wso2.carbon.apimgt.rest.api.configurations.models.EnvironmentConfigurations;
 
-import java.util.ArrayList;
+import org.wso2.carbon.kernel.annotations.Configuration;
+import org.wso2.carbon.kernel.annotations.Element;
+
+import java.util.Collections;
 import java.util.List;
 
 /**
- * Bean class for retrieving environments list
+ * Class to hold EnvironmentConfigurations configuration parameters
  */
-public class EnvironmentConfigBean {
+@Configuration(namespace = "wso2.carbon.apimgt.ui.configs", description = "APIM UI Configuration Parameters")
+public class APIMUIConfigurations {
 
-    private List<EnvironmentConfigurations> environments = new ArrayList<EnvironmentConfigurations>();
+    @Element(description = "list of environments\n" +
+            "  ◆ host           - host of a environment (eg 127.0.0.1:9292, use '<empty-string>' for current host)\n" +
+            "  ◆ loginTokenPath - token endpoint URL\n" +
+            "  ◆ label          - environment label to uniquely identify a environment")
+    private List<EnvironmentConfigurations> environments = Collections.singletonList(new EnvironmentConfigurations());
 
     public List<EnvironmentConfigurations> getEnvironments() {
         return environments;

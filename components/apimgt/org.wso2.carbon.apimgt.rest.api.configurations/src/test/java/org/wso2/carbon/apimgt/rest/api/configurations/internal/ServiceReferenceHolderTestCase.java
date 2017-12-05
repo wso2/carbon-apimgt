@@ -23,7 +23,7 @@ package org.wso2.carbon.apimgt.rest.api.configurations.internal;
 import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.wso2.carbon.apimgt.rest.api.configurations.models.EnvironmentConfigurations;
+import org.wso2.carbon.apimgt.rest.api.configurations.models.APIMUIConfigurations;
 import org.wso2.carbon.config.ConfigurationException;
 import org.wso2.carbon.config.provider.ConfigProvider;
 
@@ -43,13 +43,13 @@ public class ServiceReferenceHolderTestCase {
         ////Happy Path
         ConfigProvider configProvider = Mockito.mock(ConfigProvider.class);
         instance.setConfigProvider(configProvider);
-        EnvironmentConfigurations environmentConfigurations = instance.getEnvironmentConfigurations();
-        Assert.assertNotNull(environmentConfigurations);
+        APIMUIConfigurations apimUIConfigurations = instance.getApimUIConfigurations();
+        Assert.assertNotNull(apimUIConfigurations);
 
         ////ConfigProvider is null
         instance.setConfigProvider(null);
-        environmentConfigurations = instance.getEnvironmentConfigurations();
-        Assert.assertNotNull(environmentConfigurations);
+        apimUIConfigurations = instance.getApimUIConfigurations();
+        Assert.assertNotNull(apimUIConfigurations);
 
         ////CarbonConfigurationException when reading configs
         configProvider = new ConfigProvider() {
@@ -59,13 +59,12 @@ public class ServiceReferenceHolderTestCase {
             }
 
             @Override
-            public Object getConfigurationObject(String s) throws ConfigurationException {
+            public Map getConfigurationMap(String namespace) throws CarbonConfigurationException {
                 return null;
             }
-
         };
         instance.setConfigProvider(configProvider);
-        environmentConfigurations = instance.getEnvironmentConfigurations();
-        Assert.assertNotNull(environmentConfigurations);
+        apimUIConfigurations = instance.getApimUIConfigurations();
+        Assert.assertNotNull(apimUIConfigurations);
     }
 }

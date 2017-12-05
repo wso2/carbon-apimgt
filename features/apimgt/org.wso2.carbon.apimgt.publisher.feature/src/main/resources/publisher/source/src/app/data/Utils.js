@@ -16,21 +16,10 @@
  * under the License.
  */
 
-import AuthManager from "./AuthManager";
-
 /**
  * Utility class for Publisher application
  */
-class PublisherUtils {
-
-    /**
-     * TODO: Remove this method one the initial phase is done, This is used to continue the API class until the login page is create
-     * @returns {promise}
-     */
-    static autoLogin() {
-        let auth = new AuthManager();
-        return auth.authenticateUser('admin', 'admin');
-    }
+class Utils {
 
     /**
      * Get JavaScript accessible cookies saved in browser, by giving the cooke name.
@@ -38,13 +27,16 @@ class PublisherUtils {
      * @returns {String|null} : If found a cookie with given name , return its value,Else null value is returned
      */
     static getCookie(name) {
+        //Append environment name to cookie
+        let environmentName = "_" + Utils.getEnvironment().label;
+
         let pairs = document.cookie.split(";");
         let cookie = null;
         for (let pair of pairs) {
             pair = pair.split("=");
             let cookie_name = pair[0].trim();
             let value = encodeURIComponent(pair[1]);
-            if (cookie_name === name) {
+            if (cookie_name === name + environmentName) {
                 cookie = value;
                 break;
             }
@@ -56,8 +48,9 @@ class PublisherUtils {
      * Delete a browser cookie given its name
      * @param {String} name : Name of the cookie which need to be deleted
      */
-    static delete_cookie(name) {
-        document.cookie = name + '=; Path=' + "/" + '; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    static delete_cookie(name, path) {
+        //Environment name is appended to the cookie name
+        document.cookie = `${name}_${Utils.getEnvironment().label}=; path=${path}; expires=Thu, 01 Jan 1970 00:00:01 GMT`;
     }
 
     /**
@@ -70,14 +63,15 @@ class PublisherUtils {
      * @param {boolean} secured : secured parameter is set
      */
     static setCookie(name, value, validityPeriod, path = "/", secured = true) {
-        let expires = "";
+        let expiresDirective = "";
         const securedDirective = secured ? "; Secure" : "";
         if (validityPeriod) {
             const date = new Date();
             date.setTime(date.getTime() + validityPeriod * 1000);
-            expires = "; expires=" + date.toUTCString();
+            expiresDirective = "; expires=" + date.toUTCString();
         }
-        document.cookie = name + "=" + value + expires + "; path=" + path + securedDirective;
+
+        document.cookie = `${name}_${Utils.getEnvironment().label}=${value}; path=${path}${expiresDirective}${securedDirective}`;
     }
 
     /**
@@ -89,7 +83,52 @@ class PublisherUtils {
         return Object.keys(object).length === 0 && object.constructor === Object
     }
 
+    static getEnvironment() {
+        let environmentData = localStorage.getItem(Utils.CONST.LOCALSTORAGE_ENVIRONMENT);
+        if (!environmentData) {
+            return Utils.CONST.DEFAULT_ENVIRONMENT;
+        }
 
+        return JSON.parse(environmentData);
+    }
+
+    static setEnvironment(environment) {
+        if(!environment){
+            environment = Utils.CONST.DEFAULT_ENVIRONMENT;
+        }
+
+        if(!environment.host){
+            environment.host = location.host;
+        }
+        localStorage.setItem(Utils.CONST.LOCALSTORAGE_ENVIRONMENT, JSON.stringify(environment));
+    }
+
+    static getAppLoginURL(){
+        return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGIN + Utils.CONST.CONTEXT_PATH;
+    }
+
+    static getAppLogoutURL(){
+        return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGOUT + Utils.CONST.CONTEXT_PATH;
+    }
+
+    static getLoginTokenPath(){
+        return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGIN_TOKEN_PATH + Utils.CONST.CONTEXT_PATH;
+    }
+
+    static getSwaggerURL() {
+        return "https://" + Utils.getEnvironment().host + Utils.CONST.SWAGGER_YAML;
+    }
 }
 
-export default PublisherUtils;
+Utils.CONST = {
+    LOCALSTORAGE_ENVIRONMENT: 'environment',
+    DEFAULT_ENVIRONMENT: {label: 'Default', host: location.host, loginTokenPath: '/login/token'},
+    LOGIN: '/login/login',
+    LOGOUT: '/login/logout',
+    LOGIN_TOKEN_PATH: '/login/token',
+    SWAGGER_YAML: '/api/am/publisher/v1.0/apis/swagger.yaml',
+    PROTOCOL: 'https://',
+    CONTEXT_PATH: '/publisher'
+};
+
+export default Utils;

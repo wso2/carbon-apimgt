@@ -104,7 +104,15 @@ public class RestApiConstants {
 //    public static final String SWAGGER_GET_URL_HEADER = "Swagger-Config-Location";
 
     public static final String COOKIE_HEADER = "Cookie";
-    
+    public static final String ORIGIN_HEADER = "Origin";
+    public static final String ACCESS_CONTROL_ALLOW_ORIGIN_HEADER = "Access-Control-Allow-Origin";
+    public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS_HEADER = "Access-Control-Allow-Credentials";
+    public static final String ACCESS_CONTROL_ALLOW_METHODS_HEADER = "Access-Control-Allow-Methods";
+    public static final String ACCESS_CONTROL_ALLOW_HEADERS_HEADER = "Access-Control-Allow-Headers";
+    public static final String ACCESS_CONTROL_ALLOW_HEADERS_LIST = "Accept, Accept-Encoding, Accept-Language, " +
+            "Authorization, Content-Type, Cache-Control, Connection, Cookie, Host, Pragma, " +
+            "Referer, User-Agent";
+
     public static final String WEB_PROTOCOL_SUFFIX = "://";
     public static final String SWAGGER_HOST_ELEMENT = "host";
     public static final String RESOURCE_PATH_SUBSCRIPTION = "/subscriptions";
@@ -116,8 +124,8 @@ public class RestApiConstants {
     public static final String IMPORT_DEFINITION_WSDL_IMPL_TYPE_SOAP = "soap";
     public static final String IMPORT_DEFINITION_WSDL_IMPL_TYPE_HTTP = "httpBinding";
     public static final String WSDL_URI_TEMPLATE = "/apis/{apiId}/wsdl";
-    
-    
+
+
 
     /**
      * Type of UUF apps in system
