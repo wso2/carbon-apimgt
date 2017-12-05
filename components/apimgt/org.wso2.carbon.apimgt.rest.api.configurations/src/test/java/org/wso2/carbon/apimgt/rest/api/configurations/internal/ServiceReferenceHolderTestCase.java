@@ -56,10 +56,10 @@ public class ServiceReferenceHolderTestCase {
                 throw new ConfigurationException("Error while creating configuration instance");
             }
 
-            @Override public Object getConfigurationObject(String s) throws ConfigurationException {
+            @Override
+            public Object getConfigurationObject(String namespace) throws ConfigurationException {
                 throw new ConfigurationException("Error while creating configuration instance");
             }
-
         };
         instance.setConfigProvider(configProvider);
         apimUIConfigurations = instance.getApimUIConfigurations();

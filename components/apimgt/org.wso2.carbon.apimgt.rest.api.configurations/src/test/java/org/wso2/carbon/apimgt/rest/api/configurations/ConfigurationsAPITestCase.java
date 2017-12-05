@@ -34,7 +34,6 @@ import org.wso2.carbon.config.provider.ConfigProvider;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import javax.ws.rs.core.Response;
 
 public class ConfigurationsAPITestCase {

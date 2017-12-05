@@ -154,7 +154,6 @@
             org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
             javax.ws.rs.*; version="${javax.ws.rs.import.version.range}",
             org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.version}",
-            org.wso2.carbon.apimgt.rest.api.configurations.*; version="${carbon.apimgt.version}",
             org.apache.commons.lang3.*; version="${apache.commons.lang3.import.version.range}",
             org.wso2.carbon.messaging.*;version="${carbon.messaging.package.import.version.range}",
             org.wso2.carbon.transport.http.netty.config.*;version="${carbon.transport.package.import.version.range}",
