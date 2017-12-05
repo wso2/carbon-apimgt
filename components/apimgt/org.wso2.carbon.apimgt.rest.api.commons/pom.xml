@@ -4,7 +4,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>7.0.44-SNAPSHOT</version>
+        <version>7.0.45-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -88,10 +88,6 @@
             <artifactId>msf4j-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.security.caas</groupId>
-            <artifactId>org.wso2.carbon.security.caas</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.orbit.io.swagger</groupId>
             <artifactId>swagger-parser</artifactId>
         </dependency>
@@ -170,7 +166,6 @@
             org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.version}",
             org.wso2.carbon.apimgt.rest.api.configurations.*; version="${carbon.apimgt.version}",
             org.apache.commons.lang3.*; version="${apache.commons.lang3.import.version.range}",
-            org.wso2.carbon.security.caas.*; version="${org.wso2.carbon.security.caas.import.version.range}",
             org.wso2.carbon.messaging.*;version="${carbon.messaging.package.import.version.range}",
             org.wso2.carbon.transport.http.netty.config.*;version="${carbon.transport.package.import.version.range}",
             org.yaml.snakeyaml.*;version="${snakeyaml.version.range}",
