@@ -1444,6 +1444,10 @@ public class SampleTestObjectCreator {
         return definition;
     }
 
+    /**
+     * Creates a new {@link ThreatProtectionPolicy} for testing purposes
+     * @return {@link ThreatProtectionPolicy}
+     */
     public static ThreatProtectionPolicy createUniqueThreatProtectionPolicy() {
         ThreatProtectionPolicy policy = new ThreatProtectionPolicy();
         policy.setUuid(UUID.randomUUID().toString());

@@ -582,6 +582,8 @@ paths:
       description: "add a threat protection policy"
       parameters:
         - $ref: '#/parameters/threatProtectionPolicy'
+      tags:
+        - Add Threat Protection Policy
       responses:
         200:
           description: OK
@@ -592,6 +594,8 @@ paths:
       description: "Get one threat protection policy"
       parameters:
         - $ref: '#/parameters/threatProtectionPolicyId'
+      tags:
+        - Threat Protection Policy
       responses:
         200:
           schema:
@@ -604,6 +608,8 @@ paths:
       parameters:
         - $ref: '#/parameters/threatProtectionPolicyId'
         - $ref: '#/parameters/threatProtectionPolicy'
+      tags:
+        - Update Threat Protection Policy
       responses:
         200:
           description: Ok
@@ -613,6 +619,8 @@ paths:
       description: "Delete a threat protection policy"
       parameters:
         - $ref: '#/parameters/threatProtectionPolicyId'
+      tags:
+        - Delete Threat Protection Policy
       responses:
         200:
           description: "Ok. Policy is deleted"
@@ -624,6 +632,8 @@ paths:
     get:
       summary: "Get all threat protection policies"
       description: "all"
+      tags:
+        - All Threat Protection Policies
       responses:
         200:
           schema:
@@ -636,6 +646,8 @@ paths:
       description: "Can be used to get all policy IDs associated with an API"
       parameters:
         - $ref: '#/parameters/apiId'
+      tags:
+        - Threat Protection Policy for API
       responses:
         200:
           schema:

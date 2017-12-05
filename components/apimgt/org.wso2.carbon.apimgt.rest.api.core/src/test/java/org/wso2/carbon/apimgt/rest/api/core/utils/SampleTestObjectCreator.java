@@ -450,6 +450,10 @@ public class SampleTestObjectCreator {
         return apiBuilder;
     }
 
+    /**
+     * Creates a new {@link ThreatProtectionPolicyDTO} object for testing purposes
+     * @return {@link ThreatProtectionPolicyDTO}
+     */
     public static ThreatProtectionPolicyDTO createUniqueThreatProtectionPolicyDTO() {
         ThreatProtectionPolicyDTO dto = new ThreatProtectionPolicyDTO();
         dto.setUuid(UUID.randomUUID().toString());
@@ -464,6 +468,10 @@ public class SampleTestObjectCreator {
         return dto;
     }
 
+    /**
+     * Creates a new {@link ThreatProtectionPolicy} for testing purposes
+     * @return {@link ThreatProtectionPolicy}
+     */
     public static ThreatProtectionPolicy createUniqueThreatProtectionPolicy() {
         ThreatProtectionPolicy policy = new ThreatProtectionPolicy();
         policy.setUuid(UUID.randomUUID().toString());
