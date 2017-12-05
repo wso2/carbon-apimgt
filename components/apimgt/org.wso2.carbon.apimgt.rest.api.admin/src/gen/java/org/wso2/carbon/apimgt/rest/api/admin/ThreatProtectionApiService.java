@@ -24,6 +24,8 @@ public abstract class ThreatProtectionApiService {
   ,Request request) throws NotFoundException;
     public abstract Response threatProtectionPolicyThreatProtectionPolicyIdDelete(String threatProtectionPolicyId
   ,Request request) throws NotFoundException;
+    public abstract Response threatProtectionPolicyThreatProtectionPolicyIdGet(String threatProtectionPolicyId
+  ,Request request) throws NotFoundException;
     public abstract Response threatProtectionPolicyThreatProtectionPolicyIdPost(String threatProtectionPolicyId
  ,ThreatProtectionPolicyDTO threatProtectionPolicy
   ,Request request) throws NotFoundException;

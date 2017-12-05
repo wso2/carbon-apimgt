@@ -92,6 +92,22 @@ public class ThreatProtectionApi implements Microservice  {
     throws NotFoundException {
         return delegate.threatProtectionPolicyThreatProtectionPolicyIdDelete(threatProtectionPolicyId,request);
     }
+    @GET
+    @Path("/policy/{threatProtectionPolicyId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Get one threat protection policy", notes = "Get one threat protection policy", response = ThreatProtectionPolicyDTO.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:tier_view", description = "View Tier")
+        })
+    }, tags={ "Threat Protection Policy", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK", response = ThreatProtectionPolicyDTO.class) })
+    public Response threatProtectionPolicyThreatProtectionPolicyIdGet(@ApiParam(value = "The UUID of a Policy ",required=true) @PathParam("threatProtectionPolicyId") String threatProtectionPolicyId
+ ,@Context Request request)
+    throws NotFoundException {
+        return delegate.threatProtectionPolicyThreatProtectionPolicyIdGet(threatProtectionPolicyId,request);
+    }
     @POST
     @Path("/policy/{threatProtectionPolicyId}")
     @Consumes({ "application/json" })

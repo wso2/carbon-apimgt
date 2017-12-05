@@ -24,11 +24,14 @@ import {Switch, Route} from 'react-router-dom'
 import JSONThreatProtectionPolicies from './JSONThreatProtectionPolicies'
 import XMLThreatProtectionPolicies from './XMLThreatProtectionPolicies'
 
+import JSONThreatProtectionPolicy from './Details/JSONThreatProtectionPolicy'
+
 import {PageNotFound} from '../Base/Errors'
 
 const Security = () => {
     return (
         <Switch>
+            <Route path={"/security/json_threat_protection/:policy_uuid/"} component={JSONThreatProtectionPolicy}/>
             <Route path={"/security/json_threat_protection"} component={JSONThreatProtectionPolicies} />
             <Route path={"/security/xml_threat_protection"} component={XMLThreatProtectionPolicies} />
             <Route component={PageNotFound}/>

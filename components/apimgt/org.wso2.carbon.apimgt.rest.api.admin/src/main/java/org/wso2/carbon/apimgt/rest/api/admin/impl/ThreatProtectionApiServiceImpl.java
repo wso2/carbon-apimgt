@@ -64,6 +64,20 @@ public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
         }
         return Response.status(500).entity("Internal Server Error.").build();
     }
+
+    @Override
+    public Response threatProtectionPolicyThreatProtectionPolicyIdGet(String threatProtectionPolicyId, Request request) throws NotFoundException {
+        try {
+            APIMgtAdminService apiMgtAdminService = APIManagerFactory.getInstance().getAPIMgtAdminService();
+            ThreatProtectionPolicyDTO dto = ThreatProtectionMappingUtil.toThreatProtectionPolicyDTO(
+                    apiMgtAdminService.getThreatProtectionPolicy(threatProtectionPolicyId));
+            return Response.ok().entity(dto).build();
+        } catch (APIManagementException e) {
+            log.error(e.getMessage(), e);
+        }
+        return Response.status(500).entity("Internal Server Error.").build();
+    }
+
     @Override
     public Response threatProtectionPolicyThreatProtectionPolicyIdPost(String threatProtectionPolicyId
 , ThreatProtectionPolicyDTO threatProtectionPolicy

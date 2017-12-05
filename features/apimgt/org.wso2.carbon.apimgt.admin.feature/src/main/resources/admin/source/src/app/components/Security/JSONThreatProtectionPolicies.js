@@ -152,7 +152,7 @@ export default class JSONThreatProtectionPolicies extends Component {
                                                 <TableCell>{n.policy.maxDepth}</TableCell>
                                                 <TableCell>
                                       <span>
-                                         <Link to={"/security/json_threat_protection/edit/" + n.uuid}>
+                                         <Link to={"/security/json_threat_protection/" + n.uuid}>
                                               <Button color="primary">Edit</Button>
                                          </Link>
                                          <Button color="accent"

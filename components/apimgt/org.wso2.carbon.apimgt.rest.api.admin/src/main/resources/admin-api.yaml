@@ -1861,6 +1861,19 @@ paths:
           description: OK
 
   /threat-protection/policy/{threatProtectionPolicyId}:
+    get:
+      summary: "Get one threat protection policy"
+      description: "Get one threat protection policy"
+      parameters:
+        - $ref: '#/parameters/threatProtectionPolicyId'
+      tags:
+        - Threat Protection Policy
+      responses:
+        200:
+          schema:
+            $ref: '#/definitions/ThreatProtectionPolicy'
+          description: OK
+
     post:
       summary: "post"
       description: "desc"

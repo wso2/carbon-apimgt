@@ -15,3 +15,98 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+
+import React, {Component} from 'react'
+
+import {Link} from 'react-router-dom'
+import AppBar from 'material-ui/AppBar';
+import Toolbar from 'material-ui/Toolbar';;
+import IconButton from 'material-ui/IconButton';
+import Button from 'material-ui/Button';
+import MenuIcon from 'material-ui-icons/Menu';
+import Menu, { MenuItem } from 'material-ui/Menu';
+import Typography from 'material-ui/Typography';
+import Divider from 'material-ui/Divider';
+import Grid from 'material-ui/Grid';
+import Paper from 'material-ui/Paper';
+
+import API from '../../../data/api'
+import Message from '../../Shared/Message'
+
+import '../Shared/Shared.css'
+
+class JSONThreatProtectionPolicy extends Component {
+    state = {
+      policy: {
+          id: '',
+          name: '',
+          attributes: []
+      }
+    };
+
+    componentDidMount() {
+
+    }
+
+    handlePolicyUpdate() {
+
+    }
+
+    render() {
+        return (
+            <div>
+                <AppBar position="static" >
+                    <Toolbar style={{minHeight:'30px'}}>
+                        <IconButton color="contrast" aria-label="Menu">
+                            <MenuIcon />
+                        </IconButton>
+                        <Link to={"/security/json_threat_protection"}>
+                            <Button color="contrast">Go Back</Button>
+                        </Link>
+                    </Toolbar>
+                </AppBar>
+                <Message ref={a => this.msg = a}/>
+                <Paper>
+                    <Grid container className="root" direction="column">
+                        <Grid item xs={12} className="grid-item">
+                            <Typography className="page-title" type="display1" gutterBottom>
+                                Edit Threat Protection Policy
+                            </Typography>
+                        </Grid>
+                        {/*<GeneralDetails policy={this.state.policy} handleChangeChild={this.handleChangeChild} />*/}
+
+                        {/*<QuotaLimits policy={this.state.policy} setBandwithDataUnit={this.setBandwithDataUnit}*/}
+                                     {/*handleLimitTypeRadioButtonChild={this.handleLimitTypeRadioButtonChild}*/}
+                                     {/*handleDefaultQuotaChangeChild={this.handleDefaultQuotaChangeChild}*/}
+                                     {/*setRateLimitUnit={this.setRateLimitUnit} />*/}
+
+                        {/*<BurstControl policy={this.state.policy} handleChangeChild={this.handleChangeChild} />*/}
+
+                        {/*<PolicyFlags policy={this.state.policy} handleChangeChild={this.handleChangeChild} />*/}
+
+                        {/*<CustomAttributes attributes={this.state.policy.customAttributes}*/}
+                                          {/*handleAttributeChange={this.handleAttributeChange}/>*/}
+
+                        <Paper elevation ={20}>
+                            <Grid item xs={6} className="grid-item">
+                                <Divider />
+                                <div >
+                                    <Button raised color="primary" onClick = {
+                                        () => this.handlePolicyUpdate()}>
+                                        Update
+                                    </Button>
+                                    <Link to={"/security/json_threat_protection"}>
+                                        <Button raised>Cancel</Button>
+                                    </Link>
+                                </div>
+                            </Grid>
+                        </Paper>
+                    </Grid>
+                </Paper>
+            </div>
+        );
+    }
+}
+
+export default JSONThreatProtectionPolicy

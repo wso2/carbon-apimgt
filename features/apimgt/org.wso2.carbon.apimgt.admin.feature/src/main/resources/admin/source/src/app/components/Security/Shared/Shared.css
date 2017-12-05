@@ -1,0 +1,21 @@
+.root{
+  flexGrow: 1;
+}
+.text-field-full{
+  display: flex;
+  align-items: stretch;
+  width:100%;
+}
+.text-field-half{
+  display: flex;
+  align-items: stretch;
+  width:75%;
+}
+.container{
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.grid-item{
+  padding-left: 2%;
+}
