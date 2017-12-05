@@ -300,7 +300,7 @@ class API {
         return this.client.then(
             (client) => {
                 return client.apis["Delete Threat Protection Policy"].
-                    delete_threat_protection_policy__threatProtectionPolicyId_(id);
+                    delete_threat_protection_policy__threatProtectionPolicyId_({threatProtectionPolicyId: id});
             }
         );
     }
