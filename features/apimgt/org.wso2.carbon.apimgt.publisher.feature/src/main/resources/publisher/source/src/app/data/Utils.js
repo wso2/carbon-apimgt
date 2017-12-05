@@ -83,6 +83,10 @@ class Utils {
         return Object.keys(object).length === 0 && object.constructor === Object
     }
 
+    /**
+     * Get the current environment from local-storage
+     * @returns {Utils.CONST.DEFAULT_ENVIRONMENT|{label, host, loginTokenPath}}
+     */
     static getEnvironment() {
         let environmentData = localStorage.getItem(Utils.CONST.LOCALSTORAGE_ENVIRONMENT);
         if (!environmentData) {
@@ -92,26 +96,46 @@ class Utils {
         return JSON.parse(environmentData);
     }
 
+    /**
+     * Get current environment's index from the given environment array
+     * @param {array} environments
+     * @returns {number}
+     */
+    static getEnvironmentID(environments) {
+        let environment = Utils.getEnvironment();
+
+        for (let i = 0; i < environments.length; i++) {
+            if (environment.label === environments[i].label) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Store the given environment in local-storage
+     * @param {object} environment
+     */
     static setEnvironment(environment) {
-        if(!environment){
+        if (!environment) {
             environment = Utils.CONST.DEFAULT_ENVIRONMENT;
         }
 
-        if(!environment.host){
+        if (!environment.host) {
             environment.host = location.host;
         }
         localStorage.setItem(Utils.CONST.LOCALSTORAGE_ENVIRONMENT, JSON.stringify(environment));
     }
 
-    static getAppLoginURL(){
+    static getAppLoginURL() {
         return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGIN + Utils.CONST.CONTEXT_PATH;
     }
 
-    static getAppLogoutURL(){
+    static getAppLogoutURL() {
         return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGOUT + Utils.CONST.CONTEXT_PATH;
     }
 
-    static getLoginTokenPath(){
+    static getLoginTokenPath() {
         return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGIN_TOKEN_PATH + Utils.CONST.CONTEXT_PATH;
     }
 
