@@ -94,14 +94,14 @@
     </dependencies>
     <build>
         <plugins>
-            <!--plugin>
+            <plugin>
                 <groupId>org.wso2.maven.plugins</groupId>
                 <artifactId>swagger2msf4j-maven-plugin</artifactId>
                 <version>1.0-SNAPSHOT</version>
                 <configuration>
                     <inputSpec>${project.basedir}/src/main/resources/admin-api.yaml</inputSpec>
                 </configuration>
-            </plugin-->
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -248,7 +248,7 @@
             org.wso2.carbon.apimgt.rest.api.admin.*; version="${carbon.apimgt.version}"
         </export.package>
         <carbon.component>
-            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="4"
+            osgi.service; objectClass="org.wso2.msf4j.Microservice"; serviceCount="5"
         </carbon.component>
     </properties>
 </project>

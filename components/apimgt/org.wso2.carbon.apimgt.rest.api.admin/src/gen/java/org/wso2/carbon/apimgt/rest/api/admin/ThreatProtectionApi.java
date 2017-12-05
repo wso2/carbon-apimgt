@@ -87,7 +87,7 @@ public class ThreatProtectionApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 200, message = "Ok. Policy is deleted", response = void.class),
         
         @io.swagger.annotations.ApiResponse(code = 500, message = "Internal server error occurred during the operation", response = void.class) })
-    public Response threatProtectionPolicyThreatProtectionPolicyIdDelete(@ApiParam(value = "The UUID of a Policy ",required=true) @PathParam("ThreatProtectionPolicyId") String threatProtectionPolicyId
+    public Response threatProtectionPolicyThreatProtectionPolicyIdDelete(@ApiParam(value = "The UUID of a Policy ",required=true) @PathParam("threatProtectionPolicyId") String threatProtectionPolicyId
  ,@Context Request request)
     throws NotFoundException {
         return delegate.threatProtectionPolicyThreatProtectionPolicyIdDelete(threatProtectionPolicyId,request);
@@ -103,7 +103,7 @@ public class ThreatProtectionApi implements Microservice  {
     }, tags={ "Update Threat Protection Policy", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Ok", response = void.class) })
-    public Response threatProtectionPolicyThreatProtectionPolicyIdPost(@ApiParam(value = "The UUID of a Policy ",required=true) @PathParam("ThreatProtectionPolicyId") String threatProtectionPolicyId
+    public Response threatProtectionPolicyThreatProtectionPolicyIdPost(@ApiParam(value = "The UUID of a Policy ",required=true) @PathParam("threatProtectionPolicyId") String threatProtectionPolicyId
 ,@ApiParam(value = "Threat protection json policy request parameter " ,required=true) ThreatProtectionPolicyDTO threatProtectionPolicy
  ,@Context Request request)
     throws NotFoundException {

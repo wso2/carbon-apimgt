@@ -91,10 +91,10 @@ class NavBar extends Component {
                 {((this.state.expandedSection).includes("SECURITY")) ?
                     (<div>
                         <MenuItem>
-                            <Link name="json_threat_protection" to="/security/json-threat-protection">JSON Threat Protection Policies</Link>
+                            <Link name="json_threat_protection" to="/security/json_threat_protection">JSON Threat Protection Policies</Link>
                         </MenuItem>
                         <MenuItem>
-                            <Link name="xml_threat_protection" to="/security/xml-threat-protection">XML Threat Protection Policies</Link>
+                            <Link name="xml_threat_protection" to="/security/xml_threat_protection">XML Threat Protection Policies</Link>
                         </MenuItem>
                     </div>) : <div/>
                 }

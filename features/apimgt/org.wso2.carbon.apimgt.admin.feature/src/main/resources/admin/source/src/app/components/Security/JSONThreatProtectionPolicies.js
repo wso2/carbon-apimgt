@@ -36,6 +36,12 @@ import API from '../../data/api'
 import Message from '../Shared/Message'
 import Confirm from '../Shared/Confirm'
 
+const messages = {
+    success: 'Threat protection policy deleted successfully',
+    failure: 'Error while deleting threat protection policy',
+    retrieveError: 'Error while retrieving threat protection policies'
+};
+
 export default class JSONThreatProtectionPolicies extends Component {
     constructor(props) {
         super(props);
@@ -46,11 +52,39 @@ export default class JSONThreatProtectionPolicies extends Component {
     }
 
     componentDidMount() {
+        var api = new API();
+        var promised_policies = api.getThreatProtectionPolicies();
+        promised_policies.then(
+            response => {
+                var policies = response.obj.list.filter(item => item.type == "JSON");
 
+                //parsing policy string
+                for(var i=0; i<policies.length; i++) {
+                    policies[i].policy = JSON.parse(policies[i].policy);
+                }
+
+                this.setState({policies: policies});
+            }
+        ).catch(
+            error => {
+                this.msg.error(messages.retrieveError);
+            }
+        );
     }
 
     deletePolicy(id) {
-
+        const api = new API();
+        const promised_policies = api.deleteThreatProtectionPolicy(id);
+        promised_policies.then(
+            response => {
+                this.msg.info(messages.success);
+            }
+        ).catch(
+            error => {
+                this.msg.error(messages.failure);
+                console.log(error);
+            }
+        );
     }
 
     render() {
@@ -67,7 +101,7 @@ export default class JSONThreatProtectionPolicies extends Component {
                             <MenuIcon />
                         </IconButton>
                         <Link to={"/security/json_threat_protection/create/"}>
-                             <Button color="contrast">Add Policy</Button>
+                            <Button color="contrast">Add Policy</Button>
                         </Link>
                     </Toolbar>
                 </AppBar>
@@ -76,61 +110,61 @@ export default class JSONThreatProtectionPolicies extends Component {
                     <Grid item xs={12}>
                         <Paper>
                             <Typography className="page-title" type="display1" gutterBottom>
-                               JSON Threat Protection Policies
+                                JSON Threat Protection Policies
                             </Typography>
                             <Typography type="caption" gutterBottom align="left" className="page-title-help">
-                            Discription goes here.
+                                Discription goes here.
                             </Typography>
 
                             <Divider />
                             <div className="page-content">
-                              <TextField
-                                label="Search"
-                                margin="normal"
-                              />
+                                <TextField
+                                    label="Search"
+                                    margin="normal"
+                                />
                             </div>
                             <Divider />
                         </Paper>
                     </Grid>
                     <Grid item xs={12} className="page-content">
-                          <Paper>
+                        <Paper>
                             <Table>
-                              <TableHead>
-                                <TableRow>
-                                  <TableCell>Name</TableCell>
-                                  <TableCell>Property Limit</TableCell>
-                                  <TableCell>Max String Length</TableCell>
-                                  <TableCell>Max Array Elements</TableCell>
-                                  <TableCell>Max Property Length</TableCell>
-                                  <TableCell>Max Depth</TableCell>
-                                  <TableCell></TableCell>
-                                </TableRow>
-                              </TableHead>
-                              <TableBody>
-                                {data.map(n => {
-                                  return (
-                                    <TableRow key={n.id}>
-                                      <TableCell>{n.name}</TableCell>
-                                      <TableCell>{n.propertyCount}</TableCell>
-                                      <TableCell>{n.stringLength}</TableCell>
-                                      <TableCell>{n.arrayElementCount}</TableCell>
-                                      <TableCell>{n.keyLength}</TableCell>
-                                      <TableCell>{n.maxDepth}</TableCell>
-                                      <TableCell>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Name</TableCell>
+                                        <TableCell>Property Limit</TableCell>
+                                        <TableCell>Max String Length</TableCell>
+                                        <TableCell>Max Array Elements</TableCell>
+                                        <TableCell>Max Property Length</TableCell>
+                                        <TableCell>Max Depth</TableCell>
+                                        <TableCell></TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {data.map(n => {
+                                        return (
+                                            <TableRow key={n.uuid}>
+                                                <TableCell>{n.name}</TableCell>
+                                                <TableCell>{n.policy.maxFieldCount}</TableCell>
+                                                <TableCell>{n.policy.maxStringLength}</TableCell>
+                                                <TableCell>{n.policy.maxArrayElementCount}</TableCell>
+                                                <TableCell>{n.policy.maxFieldLength}</TableCell>
+                                                <TableCell>{n.policy.maxDepth}</TableCell>
+                                                <TableCell>
                                       <span>
-                                         <Link to={"/security/json_threat_protection/policy/" + n.id}>
+                                         <Link to={"/security/json_threat_protection/edit/" + n.uuid}>
                                               <Button color="primary">Edit</Button>
                                          </Link>
                                          <Button color="accent"
-                                              onClick={() => this.deletePolicy(n.id)} >Delete</Button>
+                                                 onClick={() => this.deletePolicy(n.uuid)} >Delete</Button>
                                       </span>
-                                      </TableCell>
-                                    </TableRow>
-                                  );
-                                })}
-                              </TableBody>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
+                                </TableBody>
                             </Table>
-                          </Paper>
+                        </Paper>
                     </Grid>
                 </Grid>
             </div>

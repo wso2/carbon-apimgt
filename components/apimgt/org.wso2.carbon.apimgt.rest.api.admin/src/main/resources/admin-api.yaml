@@ -2024,7 +2024,7 @@ parameters:
 
 #Threat protection policy ID parameter
   threatProtectionPolicyId:
-    name: ThreatProtectionPolicyId
+    name: threatProtectionPolicyId
     in: path
     description: |
       The UUID of a Policy

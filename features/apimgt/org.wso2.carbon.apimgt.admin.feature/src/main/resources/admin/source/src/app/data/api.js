@@ -283,6 +283,27 @@ class API {
             }
         );
     }
+
+    /**
+     * Get all threat protection policies
+     * @returns {Promise} promised threat protection policies response
+     */
+    getThreatProtectionPolicies() {
+        return this.client.then(
+            (client) => {
+                return client.apis["All Threat Protection Policies"].get_threat_protection_policies();
+            }
+        );
+    }
+
+    deleteThreatProtectionPolicy(id) {
+        return this.client.then(
+            (client) => {
+                return client.apis["Delete Threat Protection Policy"].
+                    delete_threat_protection_policy__threatProtectionPolicyId_(id);
+            }
+        );
+    }
 }
 
 export default API
