@@ -73,7 +73,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     private SynapseEnvironment synapseEnvironment;
 
-    private String CustomOAuth2Header = "";
+    private String CustomOAuth2Header = HttpHeaders.AUTHORIZATION;
     private boolean removeOAuthHeadersFromOutMessage = true;
     public void init(SynapseEnvironment synapseEnvironment) {
         this.synapseEnvironment = synapseEnvironment;
@@ -120,7 +120,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     protected Authenticator getAuthenticator() {
         if (authenticator == null) {
-            authenticator = new OAuthAuthenticator();
+            authenticator = new OAuthAuthenticator(CustomOAuth2Header, removeOAuthHeadersFromOutMessage);
+
         }
         return authenticator;
     }

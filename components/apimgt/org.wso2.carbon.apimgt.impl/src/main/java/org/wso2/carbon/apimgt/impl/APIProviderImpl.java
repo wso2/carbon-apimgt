@@ -1788,15 +1788,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                         String customOAuth2Header = "", removeOAuthHeadersFromOutMessage = "";
                         customOAuth2Header = (String) tenantConfig.get(APIConstants.CUSTOM_OAUTH2_HEADER);
-
+                        APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
+                                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
                         if (customOAuth2Header != null && !"".equals(customOAuth2Header)){
 
                             authProperties.put(APIConstants.CUSTOM_OAUTH2_HEADER, customOAuth2Header);
 
                         } else {
                             //If tenant config doesn't have a custom header, then read it from api-manager.xml
-                            APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
-                                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
                             customOAuth2Header = apimConfig.getFirstProperty(APIConstants.CUSTOM_GLOBAL_OAUTH2_HEADER);
 
                             if (customOAuth2Header != null && !"".equals(customOAuth2Header) ) {
@@ -1810,8 +1810,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE, removeOAuthHeadersFromOutMessage);
                         } else {
                             //If tenant config doesn't have removeOAuthHeader property, then read it from api-manager.xml
-                            APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
-                                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
                             removeOAuthHeadersFromOutMessage = apimConfig.getFirstProperty(APIConstants.REMOVE_OAUTH_HEADERS_FROM_MESSAGE);
 
                             if (removeOAuthHeadersFromOutMessage != null && !"".equals(removeOAuthHeadersFromOutMessage) ) {

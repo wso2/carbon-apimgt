@@ -63,6 +63,14 @@ public class OAuthAuthenticator implements Authenticator {
     private String clientDomainHeader = "referer";
     private String requestOrigin;
 
+    public OAuthAuthenticator(){
+    }
+    public OAuthAuthenticator(String customSecurityHeader, boolean removeOAuthHeader){
+        this.securityHeader = customSecurityHeader;
+        this.removeOAuthHeadersFromOutMessage = removeOAuthHeader;
+
+    }
+
     public void init(SynapseEnvironment env) {
         this.keyValidator = new APIKeyValidator(env.getSynapseConfiguration().getAxisConfiguration());
         initOAuthParams();
