@@ -8,7 +8,7 @@ const config = {
         path: path.resolve(__dirname, 'public/dist'),
         filename: "[name].bundle.js",
         chunkFilename: "[name].bundle.js",
-        publicPath: 'public/dist/'
+        publicPath: 'public/app/dist/'
     },
     plugins: [],
     watch: false,
