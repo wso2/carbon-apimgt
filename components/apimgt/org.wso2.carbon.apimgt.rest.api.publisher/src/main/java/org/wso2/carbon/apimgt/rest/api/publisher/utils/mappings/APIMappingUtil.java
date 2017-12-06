@@ -264,6 +264,12 @@ public class APIMappingUtil {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleTenants().split(",")));
         }
 
+        dto.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY.equals(model.getAccessControl()) ?
+                APIDTO.AccessControlEnum.RESTRICTED :
+                APIDTO.AccessControlEnum.NONE);
+        if (model.getAccessControlRoles() != null) {
+            dto.setAccessControlRoles(Arrays.asList(model.getAccessControlRoles().split(",")));
+        }
         APIBusinessInformationDTO apiBusinessInformationDTO = new APIBusinessInformationDTO();
         apiBusinessInformationDTO.setBusinessOwner(model.getBusinessOwner());
         apiBusinessInformationDTO.setBusinessOwnerEmail(model.getBusinessOwnerEmail());
@@ -456,6 +462,15 @@ public class APIMappingUtil {
         if (dto.getVisibleTenants() != null) {
             String visibleTenants = StringUtils.join(dto.getVisibleTenants(), ',');
             model.setVisibleTenants(visibleTenants);
+        }
+
+        List<String> accessControlRoles = dto.getAccessControlRoles();
+        if (accessControlRoles == null || accessControlRoles.isEmpty()) {
+            model.setAccessControl(APIConstants.NO_ACCESS_CONTROL);
+            model.setAccessControlRoles("null");
+        } else {
+            model.setAccessControlRoles(StringUtils.join(accessControlRoles, ',').toLowerCase());
+            model.setAccessControl(APIConstants.API_RESTRICTED_VISIBILITY);
         }
 
         APIBusinessInformationDTO apiBusinessInformationDTO = dto.getBusinessInformation();

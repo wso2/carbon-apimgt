@@ -70,6 +70,9 @@ jagg.module("api", {
     isAPIOlderVersionExist:function () {
         return jagg.require(jagg.getModulesDir() + "api/life-cycles.jag").isAPIOlderVersionExist.apply(this, arguments);
     },
+    isPublisherAccessControlEnabled:function () {
+        return jagg.require(jagg.getModulesDir() + "api/check-permissions.jag").isPublisherAccessControlEnabled.apply(this, arguments);
+    },
     hasCreatePermission:function () {
         return jagg.require(jagg.getModulesDir() + "api/check-permissions.jag").hasCreatePermission.apply(this, arguments);
     },

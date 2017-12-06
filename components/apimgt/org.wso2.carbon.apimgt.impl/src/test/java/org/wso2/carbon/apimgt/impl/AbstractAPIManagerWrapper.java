@@ -30,6 +30,10 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 
+import static org.wso2.carbon.apimgt.impl.AbstractAPIManagerTestCase.API_PROVIDER;
+import static org.wso2.carbon.apimgt.impl.AbstractAPIManagerTestCase.SAMPLE_API_NAME;
+import static org.wso2.carbon.apimgt.impl.AbstractAPIManagerTestCase.SAMPLE_API_VERSION;
+
 public class AbstractAPIManagerWrapper extends AbstractAPIManager {
 
     private GenericArtifactManager genericArtifactManager;
@@ -154,6 +158,16 @@ public class AbstractAPIManagerWrapper extends AbstractAPIManager {
 
     protected String getTenantAwareUsername(String username){
         return "admin";
+    }
+
+    public API getAPI(APIIdentifier identifier) throws APIManagementException {
+        if (identifier != null && identifier.getApiName().equalsIgnoreCase(SAMPLE_API_NAME) && identifier
+                .getProviderName().equalsIgnoreCase(API_PROVIDER) && SAMPLE_API_VERSION
+                .equalsIgnoreCase(identifier.getVersion())) {
+            return new API(identifier);
+        } else {
+            return super.getAPI(identifier);
+        }
     }
 
 }

@@ -451,6 +451,7 @@ public final class APIConstants {
     public static final String STORE_TAG_CACHE_DURATION = CACHE_CONFIGS + "TagCacheDuration";
     public static final String API_STORE_RECENTLY_ADDED_API_CACHE_ENABLE = CACHE_CONFIGS + "EnableRecentlyAddedAPICache";
     public static final String SCOPE_CACHE_ENABLED = CACHE_CONFIGS + "EnableScopeCache";
+    public static final String PUBLISHER_ROLE_CACHE_ENABLED = CACHE_CONFIGS + "EnablePublisherRoleCache";
     public static final String DEFAULT_CACHE_TIMEOUT = "Cache.DefaultCacheTimeout";
 
     public static final String API_KEY_VALIDATOR = "APIKeyValidator.";
@@ -536,6 +537,9 @@ public final class APIConstants {
     public static final String API_PUBLISHER_URL = API_PUBLISHER + "URL";
     public static final String API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS = API_PUBLISHER
             + "EnableAPIDocVisibilityLevels";
+    // Configuration that need to enable to add access control to APIs in publisher
+    public static final String API_PUBLISHER_ENABLE_ACCESS_CONTROL_LEVELS = API_PUBLISHER
+            + "EnableAccessControl";
     public static final String API_PUBLISHER_APIS_PER_PAGE = API_PUBLISHER + "APIsPerPage";
     public static final String WSO2_API_STORE_TYPE = "wso2";
 
@@ -756,6 +760,8 @@ public final class APIConstants {
     public static final String CLAIMS_APIM_CACHE = "claimsLocalCache";
     public static final String APP_SUBSCRIPTION_SCOPE_CACHE = "appSubscriptionScopeCache";
     public static final String APP_SUBSCRIPTION_FILTERED_SCOPE_CACHE = "appSubscriptionFilteredScopeCache";
+    public static final String API_PUBLISHER_USER_ROLE_CACHE = "appPublisherUserRoleCache";
+    public static final String API_PUBLISHER_ADMIN_PERMISSION_CACHE = "apimAdminPermissionCache";
 
     //URI Authentication Schemes
     public static final Set<String> SUPPORTED_METHODS =
@@ -1304,4 +1310,26 @@ public final class APIConstants {
     public static final String JSON_GRANT_TYPES = "grant_types";
     public static final String JSON_USERNAME = "username";
     public static final String REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA = "[~!@#;%^*()+={}|<>\"\',\\[\\]&/$\\\\]";
+
+    /**
+     * Publisher Access Control related registry properties and values.
+     */
+    public static final String PUBLISHER_ROLES = "publisher_roles";
+    public static final String ACCESS_CONTROL = "publisher_access_control";
+    public static final String NO_ACCESS_CONTROL = "all";
+    public static final String NULL_USER_ROLE_LIST = "null";
+
+    /**
+     * CustomIndexer property to indicate whether it is gone through API Custom Indexer.
+     */
+    public static final String CUSTOM_API_INDEXER_PROPERTY = "registry.customIndexer";
+
+    /**
+     * Parameter related with accessControl support.
+     */
+    public static final String ACCESS_CONTROL_PARAMETER = "accessControl";
+    public static final String ACCESS_CONTROL_ROLES_PARAMETER = "accessControlRoles";
+
+    public static final String UN_AUTHORIZED_ERROR_MESSAGE = "User is not authorized to";
+
 }

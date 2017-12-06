@@ -3057,6 +3057,21 @@ definitions:
         items:
           type: string
         example: []
+      accessControl:
+        type: string
+        description: Is the API is restricted to certain set of publishers or creators or is it visible to all the
+        publishers and creators. If the accessControl restriction is none, this API can be modified by all the
+        publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,
+         based on the restriction.
+        enum:
+          - NONE
+          - RESTRICTED
+      accessControlRoles:
+            type: array
+            description: The user roles that are able to view/modify as API publisher or creator.
+            items:
+              type: string
+            example: [admin]
       businessInformation:
         properties:
           businessOwner:

@@ -114,6 +114,14 @@ public class API implements Serializable {
 
     private String createdTime;
 
+    /**
+     * Publisher access control related parameters.
+     * AccessControl -> Specifies whether that particular API is restricted to certain set of publishers and creators.
+     * AccessControlRoles -> Specifies the roles that the particular API is visible to.
+     */
+    private String accessControl;
+    private String accessControlRoles;
+
     public Set<String> getEnvironments() {
         return environments;
     }
@@ -684,5 +692,21 @@ public class API implements Serializable {
 
     public void setCreatedTime(String createdTime) {
         this.createdTime = createdTime;
+    }
+
+    public String getAccessControlRoles() {
+        return accessControlRoles;
+    }
+
+    public void setAccessControlRoles(String accessControlRoles) {
+        this.accessControlRoles = accessControlRoles;
+    }
+
+    public String getAccessControl() {
+        return accessControl;
+    }
+
+    public void setAccessControl(String accessControl) {
+        this.accessControl = accessControl;
     }
 }

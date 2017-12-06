@@ -1,5 +1,7 @@
 <% jagg.template("item-design", function(inputs, outputs, jagg) {
     var api = outputs.api;
+    var mod = jagg.module("api");
+    var isPublisherAccessControlEnabled = mod.isPublisherAccessControlEnabled();
     var site = require("/site/conf/site.json");
     var enableRestrictByRoles = site.enableRestrictByRoles;
     var isWSAPI = api && api.type.toUpperCase() == "WS";
@@ -169,8 +171,74 @@
 														<input type="hidden" name="context" value="<%= encode.forHtml(api.context) %>" />
 											<% } %>
 
+                                            <% if (isPublisherAccessControlEnabled) { %>
+                                                <div class="form-group">
+                                                    <label class="col-sm-3  control-label" for="access-control">
+                                                    <%=i18n.localize("Access Control")%>:
+                                                    <a class="help_popup" help_data="control_help" data-trigger="hover"
+                                                    data-placement="bottom" title="control_help">
+                                                        <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                                               <i class="fw fw-circle fw-stack-2x"></i>
+                                                               <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                                        </span>
+                                                    </a>
+                                                    <p id="control_help" class="hide">
+                                                    <%=i18n.localize("<strong>All :</strong> The API is viewable, modifiable by all the publishers and creators.<br/><strong>Restricted by roles :</strong> The API can be viewable and modifiable by only specific publishers and creators with the roles that you specify")%>
+                                                    </p></label>
+                                                    <div class="col-sm-4">
+                                                        <select class="select required form-control" id="access-control"
+                                                        name="accessControl">
+                                                        <% if (api) {%>
+                                                            <option value="all" <%if(api.accessControl=="all"){%>
+                                                            selected="selected" <%}%>>
+                                                                    <%=i18n.localize("All")%>
+                                                            </option>
+                                                            <option value="restricted" <%if(api.accessControl=="restricted") {%>
+                                                                selected="selected" <%}%>>
+                                                                <%=i18n.localize("Restricted by roles")%>
+                                                            </option>
+                                                        <% } else {%>
+                                                            <option value="all"><%=i18n.localize("All")%></option>
+                                                            <option value="restricted"><%=i18n.localize("Restricted by roles")%></option>
+                                                        <%}%>
+                                                    </select>
+                                                    </div>
+                                                </div>
+
+
+                                                <%if(api) { %>
+                                                    <div class="form-group" id="publisherRolesDiv"
+                                                    <%if(api.accessControl!="restricted"){%>style="display: none;"<%}%>>
+                                                            <label class="col-sm-3 control-label" for="publisherRoles"
+                                                            id="publisherRolesLabel" name="publisherRolesLabel">
+                                                                <%=i18n.localize("Visible to Roles")%>:<span class="requiredAstrix">*</span>
+                                                            </label>
+                                                            <div class="col-sm-9">
+                                                                <input type="text" class="form-control required
+                                                                validInput validateUserRoles"
+                                                                id="publisherRoles" name="accessControlRoles"
+                                                                value="<%=api.accessControlRoles%>"
+                                                                placeholder="<%=i18n.localize("Comma-separated list (e.g.: role1,role2,role3)")%>"/>
+                                                            </div>
+                                                        </div>
+                                                <%} else {%>
+                                                    <div class="form-group" id="publisherRolesDiv" style="display: none;">
+                                                        <label class="col-sm-3 control-label" for="publisheroles"
+                                                        id="publisherRolesLabel" name="publisherRolesLabel">
+                                                            <%=i18n.localize("Visible to Roles")%>:<span class="requiredAstrix">*</span>
+                                                        </label>
+                                                        <div class="col-sm-9">
+                                                            <input type="text" class="form-control required validInput
+                                                            validateUserRoles" id="publisherRoles"
+                                                            name="accessControlRoles"
+                                                            placeholder="<%=i18n.localize("Comma-separated list (e.g.: role1,role2,role3)")%>"/>
+                                                        </div>
+                                                    </div>
+                                                 <%}%>
+                                             <% } %>
+
 											<div class="form-group">
-												<label class="col-sm-3  control-label" for="visibility"><%=i18n.localize("Visibility")%>:
+												<label class="col-sm-3  control-label" for="visibility"><%=i18n.localize("Visibility on Store")%>:
 												<a class="help_popup" help_data="role_help" data-trigger="hover" data-placement="bottom" title="role_help">
 													<span class="icon fw-stack fw-lg" style="font-size:6px">
 														   <i class="fw fw-circle fw-stack-2x"></i>
@@ -696,6 +764,16 @@
         });
 
         $('#visibility').trigger('change');
+
+         $('#access-control').change(function(){
+            var accessControl = $('#access-control').find(":selected").val();
+            if (accessControl === "all"){
+                $('#publisherRolesDiv').hide();
+            } else{
+                $('#publisherRolesDiv').show();
+            }
+        });
+        $('#access-control').trigger('change');
 
         $('#go_to_implement').click(function(e){
             $("body").unbind("api_saved");            

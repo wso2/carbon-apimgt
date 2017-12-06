@@ -186,6 +186,8 @@ if(jagg.isCSRFTokenValid())
             apiData.visibility = request.getParameter("visibility");
             apiData.visibleRoles = request.getParameter("roles","UTF-8");
             apiData.wsdl = request.getParameter("wsdl");
+            apiData.accessControl = request.getParameter("accessControl");
+            apiData.accessControlRoles = request.getParameter("accessControlRoles", "UTF-8");
 
             apiData.swagger = request.getParameter("swagger", "UTF-8");
 
@@ -464,6 +466,8 @@ if(jagg.isCSRFTokenValid())
             apiData.techOwnerEmail = request.getParameter("techOwnerMail","UTF-8");
             apiData.visibility = request.getParameter("visibility");
             apiData.visibleRoles = request.getParameter("roles","UTF-8");
+            apiData.accessControl = request.getParameter("accessControl");
+            apiData.accessControlRoles = request.getParameter("accessControlRoles", "UTF-8");
 
             apiData.swagger = stringify(parse(request.getParameter("swagger", "UTF-8")));
 

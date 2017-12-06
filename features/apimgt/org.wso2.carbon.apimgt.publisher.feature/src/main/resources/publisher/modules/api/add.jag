@@ -464,11 +464,11 @@ var getResourceTiers = function () {
     }
 };
 
-var validateRoles = function(roles,username) {
+var validateRoles = function (roles, username, validateAgainstUser) {
     var validRole, log = new Log(),
             provider = jagg.module("manager").getAPIProviderObj();
     try {
-        validRole = provider.validateRoles(roles,username);
+        validRole = provider.validateRoles(roles, username, validateAgainstUser);
         if (log.isDebugEnabled()) {
             log.debug("Invoke validateRoles function.");
         }
