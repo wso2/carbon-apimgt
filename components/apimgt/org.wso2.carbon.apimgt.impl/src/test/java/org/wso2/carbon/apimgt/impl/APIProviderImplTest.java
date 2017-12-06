@@ -2329,6 +2329,28 @@ public class APIProviderImplTest {
         Mockito.when(gatewayManager.getAPIEndpointSecurityType(Matchers.any(API.class), Matchers.anyString()))
                 .thenReturn(APIConstants.APIEndpointSecurityConstants.BASIC_AUTH,
                         APIConstants.APIEndpointSecurityConstants.DIGEST_AUTH);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        ServiceReferenceHolder sh = ServiceReferenceHolder.getInstance();
+        sh.setRegistryService(registryService);
+
+        Mockito.when(sh.getRegistryService()).thenReturn(registryService);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+
+        RealmService realmService = Mockito.mock(RealmService.class);
+        TenantManager tm = Mockito.mock(TenantManager.class);
+        Mockito.when(sh.getRealmService()).thenReturn(realmService);
+        Mockito.when(realmService.getTenantManager()).thenReturn(tm);
+        Mockito.when(tm.getTenantId(Matchers.anyString())).thenReturn(-1);
+
+        Mockito.when(registryService.getConfigSystemRegistry(-1)).thenReturn(registry);
+        Mockito.when(registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(true);
+        Mockito.when(registry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(apiSourceArtifact);
+
+        Mockito.when(apiSourceArtifact.getContent()).thenReturn(getTenantConfigContent());
+        JSONObject tenantConfig = PowerMockito.mock(JSONObject.class);
+        Mockito.when(tenantConfig.get(APIConstants.CUSTOM_OAUTH2_HEADER)).thenReturn("CustomHeader");
+        Mockito.when(tenantConfig.get(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE)).thenReturn("true");
+
         apiProvider.updateAPI(api);
         Assert.assertEquals(1, api.getEnvironments().size());
         Assert.assertEquals(true, api.getEnvironments().contains("SANDBOX"));
@@ -2547,6 +2569,29 @@ public class APIProviderImplTest {
                 Matchers.anyString())).thenReturn(failedToUnPubGWEnv);
         Mockito.when(gatewayManager.publishToGateway(Matchers.any(API.class), Matchers.any(APITemplateBuilder.class),
                 Matchers.anyString())).thenReturn(failedToPubGWEnv);
+
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        ServiceReferenceHolder sh = ServiceReferenceHolder.getInstance();
+        sh.setRegistryService(registryService);
+
+        Mockito.when(sh.getRegistryService()).thenReturn(registryService);
+        UserRegistry registry = Mockito.mock(UserRegistry.class);
+
+        RealmService realmService = Mockito.mock(RealmService.class);
+        TenantManager tm = Mockito.mock(TenantManager.class);
+        Mockito.when(sh.getRealmService()).thenReturn(realmService);
+        Mockito.when(realmService.getTenantManager()).thenReturn(tm);
+        Mockito.when(tm.getTenantId(Matchers.anyString())).thenReturn(-1);
+
+        Mockito.when(registryService.getConfigSystemRegistry(-1)).thenReturn(registry);
+        Mockito.when(registry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(true);
+        Mockito.when(registry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(apiSourceArtifact);
+
+        Mockito.when(apiSourceArtifact.getContent()).thenReturn(getTenantConfigContent());
+        JSONObject tenantConfig = PowerMockito.mock(JSONObject.class);
+        Mockito.when(tenantConfig.get(APIConstants.CUSTOM_OAUTH2_HEADER)).thenReturn("CustomHeader");
+        Mockito.when(tenantConfig.get(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE)).thenReturn("true");
+
         apiProvider.updateAPI(api);
     }
 
