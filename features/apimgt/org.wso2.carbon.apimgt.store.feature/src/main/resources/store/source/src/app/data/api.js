@@ -455,7 +455,7 @@ class API {
     getSdkLanguages() {
         var promise_languages = this.client.then(
             (client) => {
-                return client.apis["SDK Language list."].get_sdk_gen_languages(
+                return client.apis["SDK Languages"].get_sdk_gen_languages(
                     {}, this._requestMetaData());
             }
         );
