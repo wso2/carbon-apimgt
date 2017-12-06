@@ -146,8 +146,8 @@ export default class XMLThreatProtectionPolicies extends Component {
                                 {data.map(n => {
                                   return (
                                     <TableRow key={n.uuid}>
-                                      <TableCell><div>{n.name}</div></TableCell>
-                                        <TableCell><div>{n.policy.dtdEnabled.toString()}</div></TableCell>
+                                        <TableCell>{n.name + (n.uuid=="GLOBAL-XML"? " (GLOBAL)": '')}</TableCell>
+                                      <TableCell><div>{n.policy.dtdEnabled.toString()}</div></TableCell>
                                       <TableCell><div>{n.policy.externalEntitiesEnabled.toString()}</div></TableCell>
                                       <TableCell><div>{n.policy.maxDepth}</div></TableCell>
                                       <TableCell><div>{n.policy.maxElementCount}</div></TableCell>

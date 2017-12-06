@@ -40,7 +40,7 @@ class CreateXMLThreatProtectionPolicy extends Component {
         policy: {
             name: '',
             policy: {
-                dtdEnabled: true,
+                dtdEnabled: false,
                 externalEntitiesEnabled: false,
                 maxDepth: '',
                 maxElementCount: '',

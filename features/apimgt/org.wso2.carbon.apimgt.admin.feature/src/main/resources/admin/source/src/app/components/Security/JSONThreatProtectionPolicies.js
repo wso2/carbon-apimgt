@@ -42,6 +42,12 @@ const messages = {
     retrieveError: 'Error while retrieving threat protection policies'
 };
 
+const styles = theme => ({
+    globalPolicy: {
+        backgroundColor: 'blue',
+    },
+});
+
 export default class JSONThreatProtectionPolicies extends Component {
     constructor(props) {
         super(props);
@@ -145,7 +151,7 @@ export default class JSONThreatProtectionPolicies extends Component {
                                     {data.map(n => {
                                         return (
                                             <TableRow key={n.uuid}>
-                                                <TableCell>{n.name}</TableCell>
+                                                <TableCell>{n.name + (n.uuid=="GLOBAL-JSON"? " (GLOBAL)": '')}</TableCell>
                                                 <TableCell>{n.policy.maxFieldCount}</TableCell>
                                                 <TableCell>{n.policy.maxStringLength}</TableCell>
                                                 <TableCell>{n.policy.maxArrayElementCount}</TableCell>
