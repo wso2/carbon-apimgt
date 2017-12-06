@@ -5167,7 +5167,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     protected ThrottlePolicyTemplateBuilder getThrottlePolicyTemplateBuilder() {
         return new ThrottlePolicyTemplateBuilder();
     }
-<<<<<<< HEAD
+
 
     /**
      * To add API roles restrictions whenever the publisher access control is modified.
@@ -5305,7 +5305,4 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         return criteria;
     }
-
-=======
->>>>>>> upstream/6.x
 }
