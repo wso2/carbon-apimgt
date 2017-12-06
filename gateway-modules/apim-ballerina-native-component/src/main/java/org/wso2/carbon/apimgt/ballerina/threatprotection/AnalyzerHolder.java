@@ -77,7 +77,11 @@ public class AnalyzerHolder {
                 //configure per api
                 XMLConfig xmlConfig = ConfigurationHolder.getXmlConfig(policyId);
                 if (xmlConfig == null) {
-                    xmlConfig = ConfigurationHolder.getXmlConfig(policyId);
+                    xmlConfig = ConfigurationHolder.getXmlConfig("GLOBAL-XML");
+                }
+
+                if (xmlConfig == null) {
+                    return null;
                 }
                 analyzer.configure(xmlConfig);
             } catch (Exception e) {
@@ -90,7 +94,11 @@ public class AnalyzerHolder {
                 //configure per api
                 JSONConfig jsonConfig = ConfigurationHolder.getJsonConfig(policyId);
                 if (jsonConfig == null) {
-                    jsonConfig = ConfigurationHolder.getJsonConfig(ConfigurationHolder.GLOBAL_CONFIG_KEY);
+                    jsonConfig = ConfigurationHolder.getJsonConfig("GLOBAL-JSON");
+                }
+
+                if (jsonConfig == null) {
+                    return null;
                 }
                 analyzer.configure(jsonConfig);
             } catch (Exception e) {

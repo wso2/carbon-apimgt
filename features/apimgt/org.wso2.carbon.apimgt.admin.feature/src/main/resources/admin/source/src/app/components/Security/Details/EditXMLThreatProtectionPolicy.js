@@ -25,7 +25,6 @@ import Toolbar from 'material-ui/Toolbar';;
 import IconButton from 'material-ui/IconButton';
 import Button from 'material-ui/Button';
 import MenuIcon from 'material-ui-icons/Menu';
-import Menu, { MenuItem } from 'material-ui/Menu';
 import Typography from 'material-ui/Typography';
 import Divider from 'material-ui/Divider';
 import Grid from 'material-ui/Grid';
@@ -33,24 +32,52 @@ import Paper from 'material-ui/Paper';
 
 import API from '../../../data/api'
 import Message from '../../Shared/Message'
+import XMLPolicyFields from '../Shared/XMLPolicyFields'
 
-import '../Shared/Shared.css'
-
-class JSONThreatProtectionPolicy extends Component {
+class EditXMLThreatProtectionPolicy extends Component {
     state = {
-      policy: {
-          id: '',
-          name: '',
-          attributes: []
-      }
+        policy: null
     };
 
     componentDidMount() {
-
+        console.log("Mounted");
+        var api = new API();
+        const promised_policy = api.getThreatProtectionPolicy(this.props.match.params.policy_uuid);
+        promised_policy.then(
+            response => {
+                var policy = response.obj;
+                policy.policy = JSON.parse(policy.policy);
+                this.setState({policy: policy});
+            }
+        );
     }
 
-    handlePolicyUpdate() {
+    handleChangeChild(name, value) {
+        var policy = this.state.policy;
+        if (name == "name") {
+            policy.name = value;
+        } else {
+            policy.policy[name] = value;
+        }
+        this.setState({policy: policy});
+        console.log(this.state.policy);
+    }
 
+    handlePolicyUpdate(name, value) {
+        var api = new API();
+        var policy = this.state.policy;
+        policy.policy = JSON.stringify(policy.policy);
+        const promised_policy = api.addThreatProtectionPolicy(policy);
+        promised_policy.then(
+            response => {
+                if (response.status == 200) {
+                    this.msg.info("Threat protection policy updated successfully.");
+                } else {
+                    this.msg.error("Failed to update threat protection policy.");
+                    console.log(response.statusText);
+                }
+            }
+        );
     }
 
     render() {
@@ -74,20 +101,7 @@ class JSONThreatProtectionPolicy extends Component {
                                 Edit Threat Protection Policy
                             </Typography>
                         </Grid>
-                        {/*<GeneralDetails policy={this.state.policy} handleChangeChild={this.handleChangeChild} />*/}
-
-                        {/*<QuotaLimits policy={this.state.policy} setBandwithDataUnit={this.setBandwithDataUnit}*/}
-                                     {/*handleLimitTypeRadioButtonChild={this.handleLimitTypeRadioButtonChild}*/}
-                                     {/*handleDefaultQuotaChangeChild={this.handleDefaultQuotaChangeChild}*/}
-                                     {/*setRateLimitUnit={this.setRateLimitUnit} />*/}
-
-                        {/*<BurstControl policy={this.state.policy} handleChangeChild={this.handleChangeChild} />*/}
-
-                        {/*<PolicyFlags policy={this.state.policy} handleChangeChild={this.handleChangeChild} />*/}
-
-                        {/*<CustomAttributes attributes={this.state.policy.customAttributes}*/}
-                                          {/*handleAttributeChange={this.handleAttributeChange}/>*/}
-
+                        <XMLPolicyFields policy={this.state.policy} handleChangeChild={this.handleChangeChild.bind(this)} />
                         <Paper elevation ={20}>
                             <Grid item xs={6} className="grid-item">
                                 <Divider />
@@ -96,7 +110,7 @@ class JSONThreatProtectionPolicy extends Component {
                                         () => this.handlePolicyUpdate()}>
                                         Update
                                     </Button>
-                                    <Link to={"/security/json_threat_protection"}>
+                                    <Link to={"/security/xml_threat_protection"}>
                                         <Button raised>Cancel</Button>
                                     </Link>
                                 </div>
@@ -109,4 +123,4 @@ class JSONThreatProtectionPolicy extends Component {
     }
 }
 
-export default JSONThreatProtectionPolicy
+export default EditXMLThreatProtectionPolicy

@@ -93,6 +93,7 @@ export default class JSONThreatProtectionPolicies extends Component {
         if(policies) {
             data = policies;
         }
+
         return (
             <div>
                 <AppBar position="static" >

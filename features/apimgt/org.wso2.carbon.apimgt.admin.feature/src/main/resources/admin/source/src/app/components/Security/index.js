@@ -22,17 +22,23 @@ import React from 'react'
 import {Switch, Route} from 'react-router-dom'
 
 import JSONThreatProtectionPolicies from './JSONThreatProtectionPolicies'
-import XMLThreatProtectionPolicies from './XMLThreatProtectionPolicies'
+import EditJSONThreatProtectionPolicy from './Details/EditJSONThreatProtectionPolicy'
+import CreateJSONThreatProtectionPolicy from './Details/CreateJSONThreatProtectionPolicy'
 
-import JSONThreatProtectionPolicy from './Details/JSONThreatProtectionPolicy'
+import XMLThreatProtectionPolicies from './XMLThreatProtectionPolicies'
+import EditXMLThreatProtectionPolicy from './Details/EditXMLThreatProtectionPolicy'
+import CreateXMLThreatProtectionPolicy from './Details/CreateXMLThreatProtectionPolicy'
 
 import {PageNotFound} from '../Base/Errors'
 
 const Security = () => {
     return (
         <Switch>
-            <Route path={"/security/json_threat_protection/:policy_uuid/"} component={JSONThreatProtectionPolicy}/>
+            <Route path={"/security/json_threat_protection/create"} component={CreateJSONThreatProtectionPolicy}/>
+            <Route path={"/security/json_threat_protection/:policy_uuid/"} component={EditJSONThreatProtectionPolicy}/>
             <Route path={"/security/json_threat_protection"} component={JSONThreatProtectionPolicies} />
+            <Route path={"/security/xml_threat_protection/create"} component={CreateXMLThreatProtectionPolicy} />
+            <Route path={"/security/xml_threat_protection/:policy_uuid/"} component={EditXMLThreatProtectionPolicy} />
             <Route path={"/security/xml_threat_protection"} component={XMLThreatProtectionPolicies} />
             <Route component={PageNotFound}/>
         </Switch>

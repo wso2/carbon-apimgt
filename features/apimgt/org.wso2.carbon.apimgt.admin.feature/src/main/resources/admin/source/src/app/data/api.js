@@ -296,6 +296,43 @@ class API {
         );
     }
 
+    /**
+     * Get a threat protection policy
+     * @param id ID of the threat protection policy
+     * @returns {Promise} promised threat protection policy
+     */
+    getThreatProtectionPolicy(id) {
+        return this.client.then(
+            (client) => {
+                return client.apis["Threat Protection Policy"].
+                    get_threat_protection_policy__threatProtectionPolicyId_({threatProtectionPolicyId: id});
+            }
+        );
+    }
+
+    /**
+     * Add a threat protection policy
+     * @param policy Threat protection policy
+     */
+    addThreatProtectionPolicy(policy) {
+        if (policy.uuid) {
+            return this.client.then(
+                (client) => {
+                    return client.apis["Update Threat Protection Policy"].
+                        post_threat_protection_policy__threatProtectionPolicyId_(
+                            {threatProtectionPolicyId: policy.uuid, threatProtectionPolicy: policy}
+                        )
+                }
+            );
+        } else {
+
+        }
+    }
+
+    /**
+     * Delete a threat protection policy
+     * @param id ID of the threat protection policy
+     */
     deleteThreatProtectionPolicy(id) {
         return this.client.then(
             (client) => {

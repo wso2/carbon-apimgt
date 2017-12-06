@@ -36,6 +36,12 @@ import API from '../../data/api'
 import Message from '../Shared/Message'
 import Confirm from '../Shared/Confirm'
 
+const messages = {
+    success: 'Threat protection policy deleted successfully',
+    failure: 'Error while deleting threat protection policy',
+    retrieveError: 'Error while retrieving threat protection policies'
+};
+
 export default class XMLThreatProtectionPolicies extends Component {
     constructor(props) {
         super(props);
@@ -46,11 +52,38 @@ export default class XMLThreatProtectionPolicies extends Component {
     }
 
     componentDidMount() {
+        var api = new API();
+        var promised_policies = api.getThreatProtectionPolicies();
+        promised_policies.then(
+            response => {
+                var policies = response.obj.list.filter(item => item.type == "XML");
 
+                //parsing policy string
+                for(var i=0; i<policies.length; i++) {
+                    policies[i].policy = JSON.parse(policies[i].policy);
+                }
+                this.setState({policies: policies});
+            }
+        ).catch(
+            error => {
+                this.msg.error(messages.retrieveError);
+            }
+        );
     }
 
     deletePolicy(id) {
-
+        const api = new API();
+        const promised_policies = api.deleteThreatProtectionPolicy(id);
+        promised_policies.then(
+            response => {
+                this.msg.info(messages.success);
+            }
+        ).catch(
+            error => {
+                this.msg.error(messages.failure);
+                console.log(error);
+            }
+        );
     }
 
     render() {
@@ -98,38 +131,38 @@ export default class XMLThreatProtectionPolicies extends Component {
                               <TableHead>
                                 <TableRow>
                                   <TableCell>Name</TableCell>
-                                  <TableCell>DTD Enabled</TableCell>
-                                  <TableCell>Ext. Entities Enabled</TableCell>
-                                  <TableCell>Max Depth</TableCell>
+                                  <TableCell>DTD</TableCell>
+                                  <TableCell>Ext. Entities</TableCell>
+                                  <TableCell>Depth</TableCell>
                                   <TableCell>Element Count</TableCell>
-                                  <TableCell>Attribute Count</TableCell>
+                                  <TableCell>Attributes</TableCell>
                                   <TableCell>Attribute Length</TableCell>
-                                  <TableCell>Entity Expansion Limit</TableCell>
-                                  <TableCell>Children per Element</TableCell>
+                                  <TableCell>Entities</TableCell>
+                                  <TableCell>Children</TableCell>
                                   <TableCell></TableCell>
                                 </TableRow>
                               </TableHead>
                               <TableBody>
                                 {data.map(n => {
                                   return (
-                                    <TableRow key={n.id}>
-                                      <TableCell>{n.name}</TableCell>
-                                      <TableCell>{n.dtdEnabled}</TableCell>
-                                      <TableCell>{n.externalEntitiesEnabled}</TableCell>
-                                      <TableCell>{n.maxDepth}</TableCell>
-                                      <TableCell>{n.elementCount}</TableCell>
-                                      <TableCell>{n.attributeCount}</TableCell>
-                                      <TableCell>{n.attributeLength}</TableCell>
-                                      <TableCell>{n.entityExpansionLimit}</TableCell>
-                                      <TableCell>{n.childrenPerElement}</TableCell>
+                                    <TableRow key={n.uuid}>
+                                      <TableCell><div>{n.name}</div></TableCell>
+                                        <TableCell><div>{n.policy.dtdEnabled.toString()}</div></TableCell>
+                                      <TableCell><div>{n.policy.externalEntitiesEnabled.toString()}</div></TableCell>
+                                      <TableCell><div>{n.policy.maxDepth}</div></TableCell>
+                                      <TableCell><div>{n.policy.maxElementCount}</div></TableCell>
+                                      <TableCell><div>{n.policy.maxAttributeCount}</div></TableCell>
+                                      <TableCell><div>{n.policy.maxAttributeLength}</div></TableCell>
+                                      <TableCell><div>{n.policy.entityExpansionLimit}</div></TableCell>
+                                      <TableCell><div>{n.policy.maxChildrenPerElement}</div></TableCell>
                                       <TableCell>
-                                      <span>
-                                         <Link to={"/security/json_threat_protection/policy/" + n.id}>
-                                              <Button color="primary">Edit</Button>
-                                         </Link>
-                                         <Button color="accent"
-                                              onClick={() => this.deletePolicy(n.id)} >Delete</Button>
-                                      </span>
+                                          <span>
+                                             <Link to={"/security/xml_threat_protection/" + n.uuid}>
+                                                  <Button color="primary">Edit</Button>
+                                             </Link>
+                                             <Button color="accent"
+                                                  onClick={() => this.deletePolicy(n.uuid)} >Delete</Button>
+                                          </span>
                                       </TableCell>
                                     </TableRow>
                                   );
