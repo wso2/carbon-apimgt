@@ -90,7 +90,7 @@
                                 </bundle>
                                 <bundle>
                                     <symbolicName>com.fasterxml.jackson.dataformat.jackson-dataformat-yaml</symbolicName>
-                                    <version>${com.fasterxml.jackson.dataformat.version}</version>
+                                    <version>${com.fasterxml.jackson.core.version}</version>
                                 </bundle>
                                 <bundle>
                                     <symbolicName>org.yaml.snakeyaml</symbolicName>
