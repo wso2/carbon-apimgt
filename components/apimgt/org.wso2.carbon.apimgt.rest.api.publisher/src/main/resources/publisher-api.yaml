@@ -2934,7 +2934,7 @@ paths:
           schema:
             $ref: '#/definitions/ThreatProtectionPolicyList'
 
-  /threat-protection/add-policy/{apiId}/{policyId}:
+  /threat-protection/apis/{apiId}/policies/{policyId}:
     security:
       - OAuth2Security:
         - apim:api_update
@@ -2949,12 +2949,7 @@ paths:
           description: Ok. Successfully associated the policy with API
         500:
           description: Error accociating policy with API
-
-  /threat-protection/remove-policy/{apiId}/{policyId}:
-    security:
-      - OAuth2Security:
-        - apim:api_update
-    post:
+    delete:
       summary: Remove a policy accociated with an API
       description: This can be used to remove a policy associated with an API
       parameters:

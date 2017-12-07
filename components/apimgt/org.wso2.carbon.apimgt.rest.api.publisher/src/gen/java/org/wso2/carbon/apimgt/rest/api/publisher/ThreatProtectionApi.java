@@ -44,25 +44,6 @@ import javax.ws.rs.core.Response;
 public class ThreatProtectionApi implements Microservice  {
    private final ThreatProtectionApiService delegate = ThreatProtectionApiServiceFactory.getThreatProtectionApi();
 
-    @POST
-    @Path("/add-policy/{apiId}/{policyId}")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Associate a policy to an API", notes = "This can be used to asscociate a policy with an API", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
-            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
-        })
-    }, tags={  })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Ok. Successfully associated the policy with API", response = void.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 500, message = "Error accociating policy with API", response = void.class) })
-    public Response threatProtectionAddPolicyApiIdPolicyIdPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
-,@ApiParam(value = "The UUID of a Policy ",required=true) @PathParam("policyId") String policyId
- ,@Context Request request)
-    throws NotFoundException {
-        return delegate.threatProtectionAddPolicyApiIdPolicyIdPost(apiId,policyId,request);
-    }
     @GET
     @Path("/apis/{apiId}/policies")
     @Consumes({ "application/json" })
@@ -78,6 +59,44 @@ public class ThreatProtectionApi implements Microservice  {
  ,@Context Request request)
     throws NotFoundException {
         return delegate.threatProtectionApisApiIdPoliciesGet(apiId,request);
+    }
+    @DELETE
+    @Path("/apis/{apiId}/policies/{policyId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Remove a policy accociated with an API", notes = "This can be used to remove a policy associated with an API", response = void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={  })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Ok. Policy association removed.", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 500, message = "Error removing policy association.", response = void.class) })
+    public Response threatProtectionApisApiIdPoliciesPolicyIdDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
+,@ApiParam(value = "The UUID of a Policy ",required=true) @PathParam("policyId") String policyId
+ ,@Context Request request)
+    throws NotFoundException {
+        return delegate.threatProtectionApisApiIdPoliciesPolicyIdDelete(apiId,policyId,request);
+    }
+    @POST
+    @Path("/apis/{apiId}/policies/{policyId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Associate a policy to an API", notes = "This can be used to asscociate a policy with an API", response = void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={  })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Ok. Successfully associated the policy with API", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 500, message = "Error accociating policy with API", response = void.class) })
+    public Response threatProtectionApisApiIdPoliciesPolicyIdPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
+,@ApiParam(value = "The UUID of a Policy ",required=true) @PathParam("policyId") String policyId
+ ,@Context Request request)
+    throws NotFoundException {
+        return delegate.threatProtectionApisApiIdPoliciesPolicyIdPost(apiId,policyId,request);
     }
     @GET
     @Path("/policies")
@@ -111,24 +130,5 @@ public class ThreatProtectionApi implements Microservice  {
  ,@Context Request request)
     throws NotFoundException {
         return delegate.threatProtectionPoliciesPolicyIdGet(policyId,request);
-    }
-    @POST
-    @Path("/remove-policy/{apiId}/{policyId}")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Remove a policy accociated with an API", notes = "This can be used to remove a policy associated with an API", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
-            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
-        })
-    }, tags={  })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Ok. Policy association removed.", response = void.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 500, message = "Error removing policy association.", response = void.class) })
-    public Response threatProtectionRemovePolicyApiIdPolicyIdPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
-,@ApiParam(value = "The UUID of a Policy ",required=true) @PathParam("policyId") String policyId
- ,@Context Request request)
-    throws NotFoundException {
-        return delegate.threatProtectionRemovePolicyApiIdPolicyIdPost(apiId,policyId,request);
     }
 }

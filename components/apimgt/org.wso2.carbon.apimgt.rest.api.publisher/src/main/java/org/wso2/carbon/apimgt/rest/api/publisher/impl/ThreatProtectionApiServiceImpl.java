@@ -23,23 +23,6 @@ public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
     private static final Logger log = LoggerFactory.getLogger(ThreatProtectionApiServiceImpl.class);
 
     @Override
-    public Response threatProtectionAddPolicyApiIdPolicyIdPost(String apiId
-            , String threatProtectionPolicyId
-            ,Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername(request);
-        try {
-            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            apiPublisher.addThreatProtectionPolicy(apiId, threatProtectionPolicyId);
-            return Response.ok().build();
-        } catch (APIManagementException e) {
-            String errorMsg = "Error while adding threat protection policy. API_ID: " + apiId +
-                    ", POLICY_ID: " + threatProtectionPolicyId;
-            log.error(errorMsg, e);
-            return Response.status(500).entity(errorMsg).build();
-        }
-    }
-
-    @Override
     public Response threatProtectionApisApiIdPoliciesGet(String apiId, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
@@ -52,6 +35,36 @@ public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
             return Response.status(200).entity(policies).build();
         } catch (APIManagementException e) {
             String errorMsg = "Error getting threat protection policies of API (ID: " + apiId + ").";
+            return Response.status(500).entity(errorMsg).build();
+        }
+    }
+
+    @Override
+    public Response threatProtectionApisApiIdPoliciesPolicyIdDelete(String apiId, String policyId, Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            apiPublisher.deleteThreatProtectionPolicy(apiId, policyId);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            String errorMsg = "Error while deleting threat protection policy. API_ID: " + apiId +
+                    ", POLICY_ID: " + policyId;
+            log.error(errorMsg, e);
+            return Response.status(500).entity(errorMsg).build();
+        }
+    }
+
+    @Override
+    public Response threatProtectionApisApiIdPoliciesPolicyIdPost(String apiId, String policyId, Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            apiPublisher.addThreatProtectionPolicy(apiId, policyId);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            String errorMsg = "Error while adding threat protection policy. API_ID: " + apiId +
+                    ", POLICY_ID: " + policyId;
+            log.error(errorMsg, e);
             return Response.status(500).entity(errorMsg).build();
         }
     }
@@ -70,14 +83,14 @@ public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
     }
 
     @Override
-    public Response threatProtectionPoliciesPolicyIdGet(String threatProtectionPolicyId, Request request) throws NotFoundException {
+    public Response threatProtectionPoliciesPolicyIdGet(String policyId, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            ThreatProtectionPolicy policy = apiPublisher.getThreatProtectionPolicy(threatProtectionPolicyId);
+            ThreatProtectionPolicy policy = apiPublisher.getThreatProtectionPolicy(policyId);
 
             if (policy == null) {
-                return Response.status(404).entity("No policy found for PolicyID: " + threatProtectionPolicyId).build();
+                return Response.status(404).entity("No policy found for PolicyID: " + policyId).build();
             }
 
             ThreatProtectionPolicyDTO dto = MappingUtil.toThreatProtectionPolicyDTO(policy);
@@ -86,22 +99,5 @@ public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
             log.error("Error retrieving Threat Protection Policies", e);
         }
         return Response.status(500).build();
-    }
-
-    @Override
-    public Response threatProtectionRemovePolicyApiIdPolicyIdPost(String apiId
-            , String threatProtectionPolicyId
-            ,Request request) throws NotFoundException {
-        String username = RestApiUtil.getLoggedInUsername(request);
-        try {
-            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            apiPublisher.deleteThreatProtectionPolicy(apiId, threatProtectionPolicyId);
-            return Response.ok().build();
-        } catch (APIManagementException e) {
-            String errorMsg = "Error while deleting threat protection policy. API_ID: " + apiId +
-                    ", POLICY_ID: " + threatProtectionPolicyId;
-            log.error(errorMsg, e);
-            return Response.status(500).entity(errorMsg).build();
-        }
     }
 }
