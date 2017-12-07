@@ -1,24 +1,24 @@
 <div class="main-content">
-    <h1><a name="default"></a>default</h1>
+    <h1><a name="Associate a Threat Protection Policy"></a>Associate a Threat Protection Policy</h1>
 
             <hr/>
-            <h3 class="operation-heading"><a name="threatProtectionPoliciesPolicyIdGet"></a>Get a threat protection policy <br><small>GET https://apis.wso2.com/api/am/publisher/v1.0/threat-protection/policies/{policyId}</small></h3>
+            <h3 class="operation-heading"><a name="threatProtectionApisApiIdPoliciesPolicyIdPost"></a>Associate a policy to an API <br><small>POST https://apis.wso2.com/api/am/publisher/v1.0/threat-protection/apis/{apiId}/policies/{policyId}</small></h3>
             <p class="marked"></p>
 
-            
+            <p class="marked">This can be used to asscociate a policy with an API</p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
                 <code>apim:api_view</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:api_view' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
 
-            <div class="pointer" data-toggle="collapse" data-target="#request-threatProtectionPoliciesPolicyIdGet">
+            <div class="pointer" data-toggle="collapse" data-target="#request-threatProtectionApisApiIdPoliciesPolicyIdPost">
                 <h4 class="section-heading">
                     Request
                 </h4>
             </div>
 
-                <code class="bash">GET https://apis.wso2.com/api/am/publisher/v1.0/threat-protection/policies/{policyId}</code>
+                <code class="bash">POST https://apis.wso2.com/api/am/publisher/v1.0/threat-protection/apis/{apiId}/policies/{policyId}</code>
 
-            <div class="pointer" data-toggle="collapse" data-target="#response-threatProtectionPoliciesPolicyIdGet">
+            <div class="pointer" data-toggle="collapse" data-target="#response-threatProtectionApisApiIdPoliciesPolicyIdPost">
                 <h4 class="section-heading">
                     Response
                 </h4>
@@ -46,6 +46,36 @@
                     <th>Default</th>
                 </tr>
                 </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>apiId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">**API ID** consisting of the **UUID** of the API.
+The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID.
+Should be formatted as **provider-name-version**.
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
                     <tr>
                         <td class="parameter">
                             
@@ -94,16 +124,16 @@
                 <tbody>
                     <tr>
                         <td class="parameter"><p class="marked">200</p></td>
-                        <td class="parameter"><p class="marked">Ok. Policy is returned</p></td>
+                        <td class="parameter"><p class="marked">Ok. Successfully associated the policy with API</p></td>
                         <td class="parameter">
                             <span class="parameter">
-                                    <a href="#!/models#ThreatProtectionPolicy">ThreatProtectionPolicy</a>
+                                    
                             </span>
                         </td>
                     </tr>
                     <tr>
-                        <td class="parameter"><p class="marked">404</p></td>
-                        <td class="parameter"><p class="marked">No policy found for given policy ID</p></td>
+                        <td class="parameter"><p class="marked">500</p></td>
+                        <td class="parameter"><p class="marked">Error accociating policy with API</p></td>
                         <td class="parameter">
                             <span class="parameter">
                                     

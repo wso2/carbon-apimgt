@@ -20,15 +20,15 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 public abstract class ThreatProtectionApiService {
-    public abstract Response threatProtectionAddPolicyApiIdPolicyIdPost(String apiId
+    public abstract Response threatProtectionApisApiIdPoliciesGet(String apiId
+  ,Request request) throws NotFoundException;
+    public abstract Response threatProtectionApisApiIdPoliciesPolicyIdDelete(String apiId
  ,String policyId
   ,Request request) throws NotFoundException;
-    public abstract Response threatProtectionApisApiIdPoliciesGet(String apiId
+    public abstract Response threatProtectionApisApiIdPoliciesPolicyIdPost(String apiId
+ ,String policyId
   ,Request request) throws NotFoundException;
     public abstract Response threatProtectionPoliciesGet( Request request) throws NotFoundException;
     public abstract Response threatProtectionPoliciesPolicyIdGet(String policyId
-  ,Request request) throws NotFoundException;
-    public abstract Response threatProtectionRemovePolicyApiIdPolicyIdPost(String apiId
- ,String policyId
   ,Request request) throws NotFoundException;
 }

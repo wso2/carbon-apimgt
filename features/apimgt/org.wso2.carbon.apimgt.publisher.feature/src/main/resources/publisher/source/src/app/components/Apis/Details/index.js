@@ -27,6 +27,7 @@ import Resources from './Resources/Resources'
 import PermissionFormWrapper from './Permission'
 import Endpoints from './Endpoints'
 import Subscriptions from './Subscriptions/Subscriptions'
+import Security from './Security/Security'
 import NavBar from  './NavBar'
 
 
@@ -50,6 +51,7 @@ export default class Details extends Component {
                         <Route path="/apis/:api_uuid/documents" component={Documents}/>
                         <Route path="/apis/:api_uuid/endpoints" component={Endpoints}/>
                         <Route path="/apis/:api_uuid/subscriptions" component={Subscriptions}/>
+                        <Route path="/apis/:api_uuid/security" component={Security}/>
                         <Route component={PageNotFound}/>
                     </Switch>
                 </div>

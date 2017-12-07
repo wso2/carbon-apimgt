@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 public abstract class ExternalResourcesApiService {
     public abstract Response externalResourcesServicesGet(String ifNoneMatch
  ,String ifModifiedSince
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
 }

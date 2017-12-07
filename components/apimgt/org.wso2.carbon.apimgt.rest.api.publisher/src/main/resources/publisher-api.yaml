@@ -2928,13 +2928,15 @@ paths:
     get:
       summary: Get All Threat Protection Policies
       description: This can be used to get all defined threat protection policies
+      tags:
+        - Threat Protection Policies
       responses:
         200:
           description: Ok. List of policies is returned
           schema:
             $ref: '#/definitions/ThreatProtectionPolicyList'
 
-  /threat-protection/add-policy/{apiId}/{policyId}:
+  /threat-protection/apis/{apiId}/policies/{policyId}:
     security:
       - OAuth2Security:
         - apim:api_update
@@ -2944,22 +2946,21 @@ paths:
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/threatProtectionPolicyId'
+      tags:
+        - Associate a Threat Protection Policy
       responses:
         200:
           description: Ok. Successfully associated the policy with API
         500:
           description: Error accociating policy with API
-
-  /threat-protection/remove-policy/{apiId}/{policyId}:
-    security:
-      - OAuth2Security:
-        - apim:api_update
-    post:
+    delete:
       summary: Remove a policy accociated with an API
       description: This can be used to remove a policy associated with an API
       parameters:
         - $ref: '#/parameters/apiId'
         - $ref: '#/parameters/threatProtectionPolicyId'
+      tags:
+        - Remove Threat Protection Policy Association
       responses:
         200:
           description: Ok. Policy association removed.
@@ -2975,6 +2976,8 @@ paths:
       description: This can be used to get a policy associated with an API
       parameters:
         - $ref: '#/parameters/apiId'
+      tags:
+        - Associated Threat Protection Policies with an API
       responses:
         200:
           description: Ok. Associated policy is returned.
@@ -2986,6 +2989,8 @@ paths:
       summary: Get a threat protection policy
       parameters:
         - $ref: '#/parameters/threatProtectionPolicyId'
+      tags:
+
       responses:
         200:
           description: Ok. Policy is returned
@@ -3584,6 +3589,10 @@ definitions:
               type:
                 type: string
                 example: "Production"
+      threatProtectionPolicyIds:
+        type: array
+        items:
+          type: string
 
 #-----------------------------------------------------
 # The Application resource

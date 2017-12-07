@@ -18,8 +18,57 @@
 
 import React, {Component} from 'react'
 
-class Security extends Component {
+import Api from '../../../../data/api'
 
+import Typography from 'material-ui/Typography';
+import Grid from 'material-ui/Grid';
+import Paper from 'material-ui/Paper';
+
+class Security extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            api: {
+                name: ''
+            }
+        };
+        this.updateData = this.updateData.bind(this);
+    }
+
+    componentDidMount() {
+        this.updateData();
+    }
+
+    updateData() {
+        let api = new Api();
+        console.log(api);
+        let promised_api = api.get(this.props.match.params.api_uuid);
+        promised_api.then(response => {
+            this.setState({api: response.obj});
+            console.log(response.obj);
+        });
+    }
+
+    render() {
+        return (
+            <Grid container>
+                <Grid item xs={12}>
+                    <Paper>
+                        <Typography className="page-title" type="display2">
+                            {this.state.api.name} - <span>Threat Protection Policies</span>
+                        </Typography>
+                        <Typography type="caption" gutterBottom align="left" className="page-title-help">
+                           Add or Remove Threat Protection Policies from APIs
+                        </Typography>
+
+                    </Paper>
+                </Grid>
+                <Grid item xs={12}  className="page-content">
+
+                </Grid>
+            </Grid>
+        );
+    }
 }
 
 export default Security
