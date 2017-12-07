@@ -23,21 +23,21 @@ function ApiPermissionValidation(props) {
     var checkingPermissionType = props.checkingPermissionType;
     var userPermissions = props.userPermissions;
 
-    if(userPermissions.includes(checkingPermissionType)) {
+    if (userPermissions.includes(checkingPermissionType)) {
         return (props.children);
     }
     return null;
 }
 
 ApiPermissionValidation.permissionType = {
-                                             READ : "READ",
-                                             UPDATE : "UPDATE",
-                                             DELETE : "DELETE",
-                                             MANAGE_SUBSCRIPTION : "MANAGE_SUBSCRIPTION"
-                                         };
+    READ: "READ",
+    UPDATE: "UPDATE",
+    DELETE: "DELETE",
+    MANAGE_SUBSCRIPTION: "MANAGE_SUBSCRIPTION"
+};
 
 ApiPermissionValidation.defaultProps = {
-                                        checkingPermissionType: ApiPermissionValidation.permissionType.UPDATE
-                                        };
+    checkingPermissionType: ApiPermissionValidation.permissionType.UPDATE
+};
 
 export default ApiPermissionValidation;

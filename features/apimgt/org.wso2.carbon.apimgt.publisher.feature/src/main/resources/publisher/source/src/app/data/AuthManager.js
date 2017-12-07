@@ -134,10 +134,18 @@ class AuthManager {
             throw new Error("Invalid user object");
         }
 
-        if(user){
+        if (user) {
             localStorage.setItem(`${User.CONST.LOCALSTORAGE_USER}_${Utils.getEnvironment().label}`, JSON.stringify(user.toJson()));
         }
         AuthManager._user = user;
+    }
+
+    static hasScopes(resourcePath, resourceMethod) {
+        let userscopes = this.getUser().scopes;
+        let validScope = APIClient.getScopeForResource(resourcePath, resourceMethod);
+        return validScope.then(scope => {
+            return userscopes.includes(scope)
+        });
     }
 
     /**
@@ -179,7 +187,7 @@ class AuthManager {
             grant_type: 'password',
             validity_period: 3600,
             scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage '
-             + 'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover'
+            + 'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover'
         };
         let promised_response = axios(this.getTokenEndpoint(environment), {
             method: "POST",
@@ -242,14 +250,6 @@ class AuthManager {
             'X-Alt-Referer': referrer
         };
         return axios.post(url, qs.stringify(params), {headers: headers});
-    }
-
-    static hasScopes(resourcePath, resourceMethod) {
-        let userscopes = this.getUser().scopes;
-        let validScope = APIClient.getScopeForResource(resourcePath, resourceMethod);
-        return validScope.then(scope => {
-            return userscopes.includes(scope)
-        });
     }
 
 }

@@ -91,7 +91,7 @@ class Utils {
      * @returns {Utils.CONST.DEFAULT_ENVIRONMENT|{label, host, loginTokenPath}}
      */
     static getEnvironment() {
-        if(Utils._environment){
+        if (Utils._environment) {
             return Utils._environment;
         }
 
