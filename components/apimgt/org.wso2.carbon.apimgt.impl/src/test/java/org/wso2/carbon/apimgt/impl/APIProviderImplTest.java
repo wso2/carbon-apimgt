@@ -3255,11 +3255,13 @@ public class APIProviderImplTest {
         GenericArtifact genericArtifact2 = Mockito.mock(GenericArtifact.class);
         Mockito.when(APIUtil.getAPI(genericArtifact1)).thenReturn(api1);
         Mockito.when(APIUtil.getAPI(genericArtifact2)).thenReturn(api2);
-        GenericArtifact[] genericArtifacts = {genericArtifact1, genericArtifact2};
-        GenericArtifact[] genericArtifacts1 = {};
-        Mockito.when(artifactManager.findGenericArtifacts(Matchers.anyMap())).thenReturn(genericArtifacts,
-                genericArtifacts1);
-
+        List<GovernanceArtifact> governanceArtifacts = new ArrayList<GovernanceArtifact>();
+        governanceArtifacts.add(genericArtifact1);
+        governanceArtifacts.add(genericArtifact2);
+        List<GovernanceArtifact> governanceArtifacts1 = new ArrayList<GovernanceArtifact>();
+        PowerMockito.when(GovernanceUtils
+                .findGovernanceArtifacts(Mockito.anyMap(), Mockito.any(Registry.class), Mockito.anyString()))
+                .thenReturn(governanceArtifacts, governanceArtifacts1);
         Map<String, Object> result = apiProvider.getAllPaginatedAPIs("carbon.super", 0, 10);
         List<API> apiList = (List<API>) result.get("apis");
         Assert.assertEquals(2, apiList.size());

@@ -24,12 +24,20 @@ import org.apache.axis2.AxisFault;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -47,6 +55,8 @@ import java.util.UUID;
 /**
  * KeyManagerUserOperationListener Test Case
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ServiceReferenceHolder.class})
 public class KeyManagerUserOperationListenerTestCase {
 
 
@@ -71,6 +81,19 @@ public class KeyManagerUserOperationListenerTestCase {
         username = "testuser";
         tenantedUsername = username + "@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
         environmentMap = new HashMap<String, Environment>();
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito.mock(APIManagerConfigurationService
+                .class);
+        Mockito.doReturn(apiManagerConfigurationService).when(serviceReferenceHolder)
+                .getAPIManagerConfigurationService();
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.doReturn("false").when(apiManagerConfiguration).getFirstProperty(APIConstants
+                .PUBLISHER_ROLE_CACHE_ENABLED);
+        Mockito.doReturn(apiManagerConfiguration).when(apiManagerConfigurationService).getAPIManagerConfiguration();
+        APIUtil.init();
+
     }
 
     @Test

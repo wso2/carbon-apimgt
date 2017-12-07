@@ -427,6 +427,18 @@ function showHideRoles(){
 	}
 }
 
+/**
+ * To show, hide publisher access control roles.
+ */
+function showHidePublisherAccessControlRoles() {
+    var visibility = $('#access-control').find(":selected").val();
+    if (visibility == "none") {
+        $('#publisherRolesDiv').hide();
+    } else {
+        $('#publisherRolesDiv').show();
+    }
+}
+
 function showHideTenants(){
     var subscription = $('#subscriptions').find(":selected").val();
 

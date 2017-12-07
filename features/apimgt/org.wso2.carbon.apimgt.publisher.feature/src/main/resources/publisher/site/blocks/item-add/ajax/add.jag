@@ -73,6 +73,8 @@ if(jagg.isCSRFTokenValid())
             apiData.corsConfiguration=request.getParameter("corsConfiguration","UTF-8");
             apiData.apiPolicy = request.getParameter("apiTier");
             apiData.type = request.getParameter("type");
+            apiData.accessControl = request.getParameter("accessControl");
+            apiData.accessControlRoles = request.getParameter("accessControlRoles", "UTF-8");
 
             var externalAPIStoresArray = new Array();
             var externalAPIStores = request.getParameter("externalAPIStores");
@@ -207,7 +209,8 @@ if(jagg.isCSRFTokenValid())
             mod = jagg.module("api");
             var user=jagg.getUser().username;
             var roles = request.getParameter("roles");
-            result = mod.validateRoles(roles,user);
+            var validateAgainstUser = request.getParameter("validate");
+            result = mod.validateRoles(roles, user, validateAgainstUser);
             if (result.error) {
                 obj = {
                     error:true,

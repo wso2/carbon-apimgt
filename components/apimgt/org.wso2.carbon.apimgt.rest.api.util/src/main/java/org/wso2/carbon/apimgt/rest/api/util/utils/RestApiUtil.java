@@ -79,8 +79,7 @@ public class RestApiUtil {
     }
 
     public static APIProvider getLoggedInUserProvider() throws APIManagementException {
-        String loggedInUser = CarbonContext.getThreadLocalCarbonContext().getUsername();
-        return APIManagerFactory.getInstance().getAPIProvider(loggedInUser);
+        return APIManagerFactory.getInstance().getAPIProvider(getLoggedInUsername());
     }
 
     public static APIProvider getProvider(String username) throws APIManagementException {

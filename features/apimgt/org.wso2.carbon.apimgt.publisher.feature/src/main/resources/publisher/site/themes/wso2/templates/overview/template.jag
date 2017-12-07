@@ -2,8 +2,12 @@
 <% var api=outputs.api; var createPermitted=outputs.isCreatePermitted;%>
 <%var tenant= encode.forUriComponent(request.getParameter("tenant"));%>
 <%  if(api.endpointConfig){
-    var endpoint_config = parse(api.endpointConfig); 
-  } %>
+    var endpoint_config = parse(api.endpointConfig);
+  }
+    var mod = jagg.module("api");
+    var isPublisherAccessControlEnabled = mod.isPublisherAccessControlEnabled();
+
+    %>
 <div class="row">
     <div class="col-md-2">
          <% jagg.includeBlock("item-nav-list",{api:api}); %>
@@ -15,8 +19,20 @@
     <%}%>
         <table class="table table-bordered">
             <tbody>
+            <% if (isPublisherAccessControlEnabled) { %>
+                <tr>
+                    <td class="col-sm-3"><%=i18n.localize("Access Control")%></td>
+                    <td id="inUrl">
+                        <%if(api.accessControl == "restricted"){%>
+                            <%=i18n.localize("Restricted by roles, only viewable and modifiable by ") + api.accessControlRoles +"."%>
+                       <%} else{%>
+                            <%=i18n.localize(api.accessControl,api.accessControl)%>
+                       <%}%>
+                    </td>
+                </tr>
+            <% } %>
             <tr>
-                <td class="col-sm-3"><%=i18n.localize("Visibility")%></td>
+                <td class="col-sm-3"><%=i18n.localize("Visibility on Store")%></td>
                 <td id="inUrl">
                     <%if(api.visibility == "restricted"){%>
                         <%=i18n.localize("Restricted by roles, only visible to ") + api.roles +"."%><%}

@@ -323,6 +323,9 @@ public abstract class AbstractAPIManager implements APIManager {
                 API api = null;
                 try {
                     api = APIUtil.getAPI(artifact);
+                    if (api != null) {
+                        checkAccessControlPermission(api.getId());
+                    }
                 } catch (APIManagementException e) {
                     //log and continue since we want to load the rest of the APIs.
                     log.error("Error while loading API " + artifact.getAttribute(APIConstants.API_OVERVIEW_NAME), e);
@@ -343,6 +346,17 @@ public abstract class AbstractAPIManager implements APIManager {
 
         Collections.sort(apiSortedList, new APINameComparator());
         return apiSortedList;
+    }
+
+    /**
+     * To check authorization of the API against current logged in user. If the user is not authorized an exception
+     * will be thrown.
+     *
+     * @param identifier API identifier
+     * @throws APIManagementException APIManagementException
+     */
+    protected void checkAccessControlPermission(APIIdentifier identifier) throws APIManagementException {
+        // Not implemented. This is needed specifically for API Provider, for API store, we do not need to anything.
     }
 
     protected API getApi(GovernanceArtifact artifact) throws APIManagementException {
@@ -1088,6 +1102,9 @@ public abstract class AbstractAPIManager implements APIManager {
         try {
             Association[] docAssociations = registry.getAssociations(apiResourcePath,
                     APIConstants.DOCUMENTATION_ASSOCIATION);
+            if (docAssociations == null) {
+                return documentationList;
+            }
             for (Association association : docAssociations) {
                 String docPath = association.getDestinationPath();
 
@@ -1248,6 +1265,8 @@ public abstract class AbstractAPIManager implements APIManager {
             GenericArtifactManager artifactManager = getAPIGenericArtifactManagerFromUtil(registryType, APIConstants
                     .DOCUMENTATION_KEY);
             GenericArtifact artifact = artifactManager.getGenericArtifact(docId);
+            APIIdentifier apiIdentifier = APIUtil.getAPIIdentifier(artifact.getPath());
+            checkAccessControlPermission(apiIdentifier);
             if (null != artifact) {
                 documentation = APIUtil.getDocumentation(artifact);
                 documentation.setCreatedDate(registryType.get(artifact.getPath()).getCreatedTime());
@@ -1483,7 +1502,7 @@ public abstract class AbstractAPIManager implements APIManager {
                             APIConstants.API_KEY);
                     GenericArtifact artifact = artifactManager.getGenericArtifact(
                             resource.getUUID());
-                    API api = APIUtil.getAPI(artifact, registry);
+                    API api = getAPI(artifact);
                     if (api != null) {
                         apiSortedSet.add(api);
                     }
@@ -1499,6 +1518,17 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         }
         return apiSortedSet;
+    }
+
+
+    /**
+     * To get the API from generic artifact, if the user is authorized to view it.
+     *
+     * @param apiArtifact API Artifact.
+     * @return API if the user is authorized  to view this.
+     */
+    protected API getAPI(GenericArtifact apiArtifact) throws APIManagementException {
+        return APIUtil.getAPI(apiArtifact, registry);
     }
 
     /**
@@ -1831,8 +1861,7 @@ public abstract class AbstractAPIManager implements APIManager {
 
             if (searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
                 Map<Documentation, API> apiDocMap =
-                        APIUtil.searchAPIsByDoc(userRegistry, tenantIDLocal, userNameLocal, searchQuery.split("=")[1],
-                                APIConstants.STORE_CLIENT);
+                        searchAPIDoc(userRegistry, tenantIDLocal, userNameLocal, searchQuery.split("=")[1]);
                 result.put("apis", apiDocMap);
                 /*Pagination for Document search results is not supported yet, hence length is sent as end-start*/
                 if (apiDocMap.isEmpty()) {
@@ -1841,7 +1870,7 @@ public abstract class AbstractAPIManager implements APIManager {
                     result.put("length", end - start);
                 }
             } else if (searchQuery.startsWith(APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX)) {
-                result = APIUtil.searchAPIsByURLPattern(userRegistry, searchQuery.split("=")[1], start, end);
+                result = searchAPIsByURLPattern(userRegistry, searchQuery.split("=")[1], start, end);
             } else {
                 result = searchPaginatedAPIs(userRegistry, searchQuery, start, end, isLazyLoad);
             }
@@ -1856,6 +1885,20 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         }
         return result;
+    }
+
+    /**
+     * To search API With URL pattern
+     * @param registry Registry to search.
+     * @param searchTerm Term to be searched.
+     * @param start Start index
+     * @param end End index.
+     * @return All the APIs, that matches given criteria
+     * @throws APIManagementException API Management Exception.
+     */
+    protected Map<String, Object> searchAPIsByURLPattern(Registry registry, String searchTerm, int start, int end)
+            throws APIManagementException {
+        return APIUtil.searchAPIsByURLPattern(registry, searchTerm, start, end);
     }
 
     /**
@@ -2265,16 +2308,16 @@ public abstract class AbstractAPIManager implements APIManager {
             }
             PaginationContext.init(start, end, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
 
-
-            List<GovernanceArtifact> governanceArtifacts = GovernanceUtils.findGovernanceArtifacts(searchQuery,
-                    registry, APIConstants.API_RXT_MEDIA_TYPE);
+            List<GovernanceArtifact> governanceArtifacts = GovernanceUtils
+                    .findGovernanceArtifacts(getSearchQuery(searchQuery), registry, APIConstants.API_RXT_MEDIA_TYPE,
+                            true);
             totalLength = PaginationContext.getInstance().getLength();
             boolean isFound = true;
             if (governanceArtifacts == null || governanceArtifacts.size() == 0) {
                 if (searchQuery.contains(APIConstants.API_OVERVIEW_PROVIDER)) {
                     searchQuery = searchQuery.replaceAll(APIConstants.API_OVERVIEW_PROVIDER, APIConstants.API_OVERVIEW_OWNER);
-                    governanceArtifacts = GovernanceUtils.findGovernanceArtifacts(searchQuery,
-                            registry, APIConstants.API_RXT_MEDIA_TYPE);
+                    governanceArtifacts = GovernanceUtils.findGovernanceArtifacts(getSearchQuery(searchQuery), registry,
+                            APIConstants.API_RXT_MEDIA_TYPE, true);
                     if (governanceArtifacts == null || governanceArtifacts.size() == 0) {
                         isFound = false;
                     }
@@ -2394,4 +2437,27 @@ public abstract class AbstractAPIManager implements APIManager {
 
     }
 
+    /**
+     * Search Apis by Doc Content
+     *
+     * @param registry     - Registry which is searched
+     * @param tenantID     - Tenant id of logged in domain
+     * @param username     - Logged in username
+     * @param searchTerm   - Search value for doc
+     * @return - Documentation to APIs map
+     * @throws APIManagementException - If failed to get ArtifactManager for given tenant
+     */
+    public Map<Documentation, API> searchAPIDoc(Registry registry, int tenantID, String username,
+            String searchTerm) throws APIManagementException {
+        return APIUtil.searchAPIsByDoc(registry, tenantID, username, searchTerm, APIConstants.STORE_CLIENT);
+    }
+
+    /**
+     * To get the search query.
+     *
+     * @param searchQuery Initial query
+     */
+    protected String getSearchQuery(String searchQuery) throws APIManagementException {
+        return searchQuery;
+    }
 }

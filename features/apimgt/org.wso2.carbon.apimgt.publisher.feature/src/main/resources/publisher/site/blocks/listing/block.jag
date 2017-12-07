@@ -29,19 +29,26 @@ jagg.block("listing", {
         if (query) {
             mod = jagg.module("search");
             result = mod.searchAPIs(null,query,String(start),String(itemsPerPage));
-            apis = result.response.apis;
-            length = result.response.totalLength;
-            error=result.error,
-            message=result.message,
-            mode="search"
+            apis = null;
+            if (result.response != null) {
+                apis = result.response.apis;
+                length = result.response.totalLength;
+                error = result.error;
+                message = result.message;
+                mode = "search"
+            }
+
         } else {
             mod = jagg.module("api");
             result = mod.getAllPaginatedAPIs(tenantDomain,String(start),String(itemsPerPage));
-            apis = result.response.apis;
-            length = result.response.totalLength;
-            error=result.error,
-            message=result.message
-            mode="listing"
+            apis = null;
+            if (result.response != null) {
+                apis = result.response.apis;
+                length = result.response.totalLength;
+                error = result.error;
+                message = result.message;
+                mode = "listing";
+            }
         }
         var itemCount;
         if (apis != null) {
