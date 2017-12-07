@@ -53,7 +53,9 @@ class APIClient {
                         responseInterceptor: this._getResponseInterceptor()
                     });
                 let swaggerClient = new SwaggerClient(argsv);
-                swaggerClient.then(client => {client.http.withCredentials = true});
+                swaggerClient.then(client => {
+                    client.http.withCredentials = true
+                });
                 return swaggerClient;
             }
         );
@@ -63,18 +65,12 @@ class APIClient {
     }
 
     /**
-     * Temporary method to fix the hostname attribute Till following issues get fixed ~tmkb
-     * https://github.com/swagger-api/swagger-js/issues/1081
-     * https://github.com/swagger-api/swagger-js/issues/1045
-     * @param spec {JSON} : Json object of the specification
-     * @returns {JSON} : Fixed specification
-     * @private
+     * Expose the private _client property to public
+     * @returns {APIClient} an instance of APIClient class
      */
-    _fixSpec(spec) {
-        spec.host = this.host;
-        return spec;
+    get client() {
+        return this._client;
     }
-
 
     /**
      * Get the ETag of a given resource key from the session storage
@@ -94,6 +90,36 @@ class APIClient {
         sessionStorage.setItem("etag_" + key, etag);
     }
 
+    /**
+     * Get Scope for a particular resource path
+     *
+     * @param resourcePath resource path of the action
+     * @param resourceMethod resource method of the action
+     */
+    static getScopeForResource(resourcePath, resourceMethod) {
+        if (!APIClient.spec) {
+            APIClient.spec = SwaggerClient.resolve({url: Utils.getSwaggerURL()});
+        }
+        return APIClient.spec.then(
+            resolved => {
+                return resolved.spec.paths[resourcePath] && resolved.spec.paths[resourcePath][resourceMethod] && resolved.spec.paths[resourcePath][resourceMethod].security[0].OAuth2Security[0];
+            }
+        )
+    }
+
+    /**
+     * Temporary method to fix the hostname attribute Till following issues get fixed ~tmkb
+     * https://github.com/swagger-api/swagger-js/issues/1081
+     * https://github.com/swagger-api/swagger-js/issues/1045
+     * @param spec {JSON} : Json object of the specification
+     * @returns {JSON} : Fixed specification
+     * @private
+     */
+    _fixSpec(spec) {
+        spec.host = this.host;
+        return spec;
+    }
+
     _getResponseInterceptor() {
         return (data) => {
             if (data.headers.etag) {
@@ -110,31 +136,6 @@ class APIClient {
             }
             return data;
         }
-    }
-
-    /**
-     * Expose the private _client property to public
-     * @returns {APIClient} an instance of APIClient class
-     */
-    get client() {
-        return this._client;
-    }
-
-    /**
-     * Get Scope for a particular resource path
-     *
-     * @param resourcePath resource path of the action
-     * @param resourceMethod resource method of the action
-     */
-    static getScopeForResource(resourcePath, resourceMethod) {
-        if (!APIClient.spec) {
-            APIClient.spec = SwaggerClient.resolve({url: Utils.getSwaggerURL()});
-        }
-        return APIClient.spec.then(
-            resolved => {
-                return resolved.spec.paths[resourcePath] && resolved.spec.paths[resourcePath][resourceMethod] && resolved.spec.paths[resourcePath][resourceMethod].security[0].OAuth2Security[0];
-            }
-        )
     }
 }
 

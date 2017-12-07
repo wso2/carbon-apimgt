@@ -21,57 +21,59 @@ import React from 'react';
 import AuthManager from './AuthManager'
 
 const resourcePath = {
-    APIS : "/apis",
-    SINGLE_API :"/apis/{apiId}",
-    API_SWAGGER : "/apis/{apiId}/swagger",
-    API_WSDL : "/apis/{apiId}/wsdl",
-    API_GW_CONFIG : "/apis/{apiId}/gateway-config",
-    API_THUMBNAIL : "/apis/{apiId}/thumbnail",
-    API_COPY : "/apis/copy-api",
-    API_LC_HISTORY : "/apis/{apiId}/lifecycle-history",
-    API_CHANGE_LC : "/apis/change-lifecycle",
-    API_LC : "/apis/{apiId}/lifecycle",
-    API_LC_PENDING_TASK : "/apis/{apiId}/lifecycle/lifecycle-pending-task",
-    API_DEF : "/apis/import-definition",
-    API_VALIDATE_DEF : "/apis/validate-definition",
-    API_DOCS : "/apis/{apiId}/documents",
-    API_DOC : "'/apis/{apiId}/documents/{documentId}'",
-    API_DOC_CONTENT : "'/apis/{apiId}/documents/{documentId}/content'",
-    EXPORT_APIS : "/export/apis",
-    IMPORT_APIS : "/import/apis",
-    SUBSCRIPTION : "/subscriptions",
-    SUBSCRIPTIONS : "/subscriptions",
-    BLOCK_SUBSCRIPTION : "/subscriptions/block-subscription:",
-    UNBLOCK_SUBSCRIPTION : "/subscriptions/unblock-subscription",
-    POLICIES : "'/policies/{tierLevel}'",
-    POLICY : "'/policies/{tierLevel}/{tierName}'",
-    ENDPOINTS : "/endpoints",
-    ENDPOINT : "/endpoints/{endpointId}",
-    LABLES : "/labels",
-    WORKFLOW : "/workflows/{workflowReferenceId}",
-    SERVICE_DISCOVERY : "/external-resources/services"
+    APIS: "/apis",
+    SINGLE_API: "/apis/{apiId}",
+    API_SWAGGER: "/apis/{apiId}/swagger",
+    API_WSDL: "/apis/{apiId}/wsdl",
+    API_GW_CONFIG: "/apis/{apiId}/gateway-config",
+    API_THUMBNAIL: "/apis/{apiId}/thumbnail",
+    API_COPY: "/apis/copy-api",
+    API_LC_HISTORY: "/apis/{apiId}/lifecycle-history",
+    API_CHANGE_LC: "/apis/change-lifecycle",
+    API_LC: "/apis/{apiId}/lifecycle",
+    API_LC_PENDING_TASK: "/apis/{apiId}/lifecycle/lifecycle-pending-task",
+    API_DEF: "/apis/import-definition",
+    API_VALIDATE_DEF: "/apis/validate-definition",
+    API_DOCS: "/apis/{apiId}/documents",
+    API_DOC: "'/apis/{apiId}/documents/{documentId}'",
+    API_DOC_CONTENT: "'/apis/{apiId}/documents/{documentId}/content'",
+    EXPORT_APIS: "/export/apis",
+    IMPORT_APIS: "/import/apis",
+    SUBSCRIPTION: "/subscriptions",
+    SUBSCRIPTIONS: "/subscriptions",
+    BLOCK_SUBSCRIPTION: "/subscriptions/block-subscription:",
+    UNBLOCK_SUBSCRIPTION: "/subscriptions/unblock-subscription",
+    POLICIES: "'/policies/{tierLevel}'",
+    POLICY: "'/policies/{tierLevel}/{tierName}'",
+    ENDPOINTS: "/endpoints",
+    ENDPOINT: "/endpoints/{endpointId}",
+    LABLES: "/labels",
+    WORKFLOW: "/workflows/{workflowReferenceId}",
+    SERVICE_DISCOVERY: "/external-resources/services"
 };
 
 const resourceMethod = {
-    POST : "post",
-    PUT : "put",
-    GET : "get",
-    DELETE : "delete"
+    POST: "post",
+    PUT: "put",
+    GET: "get",
+    DELETE: "delete"
 }
 
 class ScopeValidation extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props);
         this.state = {};
     }
 
-    componentDidMount(){
+    componentDidMount() {
         let hasScope = AuthManager.hasScopes(this.props.resourcePath, this.props.resourceMethod);
-        hasScope.then(haveScope => {this.setState({haveScope: haveScope})})
+        hasScope.then(haveScope => {
+            this.setState({haveScope: haveScope})
+        })
     }
 
     render() {
-        if(this.state.haveScope) {
+        if (this.state.haveScope) {
             return (this.props.children);
         }
         return null;

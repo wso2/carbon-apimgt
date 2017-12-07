@@ -38,7 +38,7 @@ import InfoLightBulb from 'material-ui-icons/LightbulbOutline';
 import List, {ListItem, ListItemIcon, ListItemText,} from 'material-ui/List';
 import ConfigManager from "../../../data/ConfigManager";
 import Utils from "../../../data/Utils";
-import EnvironmentSelector from "./EnvironmentMenu";
+import EnvironmentMenu from "./EnvironmentMenu";
 
 const helpTips = [
     "By API Name [Default]",
@@ -91,8 +91,8 @@ class Header extends React.Component {
         this.setState({ openEnvironmentMenu: false });
         //TODO: [rnk] Optimize Rendering.
         let environmentId = parseInt(event.target.id);
-        this.setState({environmentId});
         Utils.setEnvironment(this.state.environments[environmentId]);
+        this.setState({environmentId});
     };
 
     handleClickAddMenu = event => {
@@ -229,9 +229,9 @@ class Header extends React.Component {
                                     </MenuItem>
                                 </Menu>
                                 {/* Environment menu */}
-                                <EnvironmentSelector environments={this.state.environments}
-                                                     environmentLabel={Utils.getEnvironment().label}
-                                                     handleEnvironmentChange={this.handleEnvironmentChange}/>
+                                <EnvironmentMenu environments={this.state.environments}
+                                                 environmentLabel={Utils.getEnvironment().label}
+                                                 handleEnvironmentChange={this.handleEnvironmentChange}/>
                                 {/* User menu */}
                                 <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClickUserMenu}
                                         color="contrast">

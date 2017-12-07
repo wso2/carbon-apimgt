@@ -28,6 +28,11 @@ import Typography from 'material-ui/Typography';
 import Snackbar from 'material-ui/Snackbar';
 import User from '../../data/User'
 import ConfigManager from "../../data/ConfigManager";
+import Utils from "../../data/Utils";
+import Input, { InputLabel } from 'material-ui/Input';
+import Select from 'material-ui/Select';
+import {FormControl} from 'material-ui/Form';
+import {MenuItem} from 'material-ui/Menu';
 
 class Login extends Component {
 
@@ -46,13 +51,6 @@ class Login extends Component {
             environments: {},
             environmentId: 0
         };
-
-        //Get Environments
-        let promised_environments = ConfigManager.getConfigs().environments.then(response => {
-            this.setState({
-                environments: response.data.environments
-            });
-        });
     }
 
 
@@ -83,6 +81,14 @@ class Login extends Component {
     }
 
     componentDidMount() {
+        //Get Environments
+        let promised_environments = ConfigManager.getConfigs().environments.then(response => {
+            this.setState({
+                environments: response.data.environments,
+                environmentId: Utils.getEnvironmentID(response.data.environments)
+            });
+        });
+
         let queryString = this.props.location.search;
         queryString = queryString.replace(/^\?/, '');
         /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
@@ -94,7 +100,7 @@ class Login extends Component {
             this.setState({isLogin: true});
             const validityPeriod = params.validity_period; // In seconds
             const WSO2_AM_TOKEN_1 = params.partial_token;
-            const user = new User(params.user_name, params.id_token);
+            const user = new User(Utils.getEnvironment().label, params.user_name, params.id_token);
             user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/publisher");
             user.scopes = params.scopes.split(" ");
             AuthManager.setUser(user);
@@ -143,7 +149,6 @@ class Login extends Component {
                     />
                     <div className="login-main-content">
                         <Paper className="login-paper">
-
                             <form onSubmit={this.handleSubmit} className="login-form">
                                 <div>
                                     <img className="brand" src="/publisher/public/app/images/logo.svg" alt="wso2-logo"/>
@@ -179,12 +184,16 @@ class Login extends Component {
                                 {/*Environments*/}
                                 {this.state.environments && this.state.environments.length > 1 &&
                                 <div>
-                                    <label>Environment </label>
-                                    <select id="environment" onChange={this.handleEnvironmentChange}>
-                                        {this.state.environments.map((environment, index) =>
-                                            <option value={index} key={index}>{environment.label}</option>
-                                        )}
-                                    </select>
+                                    <br/>
+                                    <FormControl>
+                                        <InputLabel htmlFor="environment">Environment</InputLabel>
+                                        <Select onChange={this.handleEnvironmentChange} value={this.state.environmentId}
+                                                input={<Input id="environment"/>}>
+                                            {this.state.environments.map((environment, index) =>
+                                                <MenuItem value={index} key={index}>{environment.label}</MenuItem>
+                                            )}
+                                        </Select>
+                                    </FormControl>
                                 </div>
                                 }
 
@@ -201,7 +210,6 @@ class Login extends Component {
                             className="icon fw fw-wso2"/> Inc</a>.
                     </div>
                 </div>
-
             );
         } else {// If logged in, redirect to /apis page
             return (

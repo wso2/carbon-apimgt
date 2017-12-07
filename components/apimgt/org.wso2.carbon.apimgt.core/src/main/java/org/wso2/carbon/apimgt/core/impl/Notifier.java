@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-
 import org.wso2.carbon.apimgt.core.template.dto.NotificationDTO;
 
 /**

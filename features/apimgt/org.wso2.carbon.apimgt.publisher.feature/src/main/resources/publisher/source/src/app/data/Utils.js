@@ -16,6 +16,8 @@
  * under the License.
  */
 
+import AuthManager from "./AuthManager";
+
 /**
  * Utility class for Publisher application
  */
@@ -47,6 +49,7 @@ class Utils {
     /**
      * Delete a browser cookie given its name
      * @param {String} name : Name of the cookie which need to be deleted
+     * @param {String} path : Path of the cookie which need to be deleted
      */
     static delete_cookie(name, path) {
         //Environment name is appended to the cookie name
@@ -83,7 +86,15 @@ class Utils {
         return Object.keys(object).length === 0 && object.constructor === Object
     }
 
+    /**
+     * Get the current environment from local-storage
+     * @returns {Utils.CONST.DEFAULT_ENVIRONMENT|{label, host, loginTokenPath}}
+     */
     static getEnvironment() {
+        if (Utils._environment) {
+            return Utils._environment;
+        }
+
         let environmentData = localStorage.getItem(Utils.CONST.LOCALSTORAGE_ENVIRONMENT);
         if (!environmentData) {
             return Utils.CONST.DEFAULT_ENVIRONMENT;
@@ -92,26 +103,53 @@ class Utils {
         return JSON.parse(environmentData);
     }
 
+    /**
+     * Get current environment's index from the given environment array
+     * @param {array} environments
+     * @returns {number}
+     */
+    static getEnvironmentID(environments) {
+        let environment = Utils.getEnvironment();
+
+        for (let i = 0; i < environments.length; i++) {
+            if (environment.label === environments[i].label) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Store the given environment in local-storage
+     * @param {object} environment
+     */
     static setEnvironment(environment) {
-        if(!environment){
+        if (!environment) {
             environment = Utils.CONST.DEFAULT_ENVIRONMENT;
         }
 
-        if(!environment.host){
+        if (!environment.host) {
             environment.host = location.host;
         }
+        //Store environment.
+        Utils._environment = environment;
         localStorage.setItem(Utils.CONST.LOCALSTORAGE_ENVIRONMENT, JSON.stringify(environment));
+
+        //Read the user of stored environment.
+        let user = AuthManager.getUser(true);
+        //If user is null store only in memory.
+        AuthManager.setUser(user);
     }
 
-    static getAppLoginURL(){
+    static getAppLoginURL() {
         return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGIN + Utils.CONST.CONTEXT_PATH;
     }
 
-    static getAppLogoutURL(){
+    static getAppLogoutURL() {
         return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGOUT + Utils.CONST.CONTEXT_PATH;
     }
 
-    static getLoginTokenPath(){
+    static getLoginTokenPath() {
         return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGIN_TOKEN_PATH + Utils.CONST.CONTEXT_PATH;
     }
 
@@ -131,4 +169,10 @@ Utils.CONST = {
     CONTEXT_PATH: '/publisher'
 };
 
+/**
+ * Current environment
+ * @type {object} environment object
+ * @private
+ */
+Utils._environment = undefined;
 export default Utils;

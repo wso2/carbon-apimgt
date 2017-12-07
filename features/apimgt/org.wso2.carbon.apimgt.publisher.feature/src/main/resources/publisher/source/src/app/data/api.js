@@ -117,7 +117,7 @@ class API {
      * @param {function} callback - An optional callback method
      * @returns {Promise} Promise after creating and optionally calling the callback method.
      */
-    importWSDL (api_data, callback = null) {
+    importWSDL(api_data, callback = null) {
         let payload;
         let promise_create;
         payload = {
@@ -690,9 +690,10 @@ class API {
         let promised_validationResponse = this.client.then((client) => {
             return client.apis["API (Collection)"]
                 .post_apis_validate_definition({
-                    "type": "WSDL",
-                    "url": wsdlUrl,
-                    "Content-Type": "multipart/form-data"}, 
+                        "type": "WSDL",
+                        "url": wsdlUrl,
+                        "Content-Type": "multipart/form-data"
+                    },
                     this._requestMetaData({"Content-Type": "multipart/form-data"}));
         });
         return promised_validationResponse;
@@ -704,7 +705,8 @@ class API {
                 .post_apis_validate_definition({
                         "type": "WSDL",
                         "file": file,
-                        "Content-Type": "multipart/form-data"},
+                        "Content-Type": "multipart/form-data"
+                    },
                     this._requestMetaData({"Content-Type": "multipart/form-data"}));
         });
         return promised_validationResponse;

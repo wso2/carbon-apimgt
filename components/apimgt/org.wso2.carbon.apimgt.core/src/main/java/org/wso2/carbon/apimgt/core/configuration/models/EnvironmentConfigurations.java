@@ -12,7 +12,7 @@ import java.util.List;
  */
 @Configuration(description = "Environment Configurations")
 public class EnvironmentConfigurations {
-    @Element(description = "list of web clients (eg: 127.0.0.1:9292) to allow make requests to current environment\n" +
+    @Element(description = "list of web clients (eg: 127.0.0.1:9292) allowed to make requests to the current environment\n" +
             "(use '" + APIMgtConstants.CORSAllowOriginConstants.ALLOW_ALL_ORIGINS + "' to allow any web client)")
     private List<String> allowedHosts = Collections.singletonList(
             APIMgtConstants.CORSAllowOriginConstants.ALLOW_ALL_ORIGINS);

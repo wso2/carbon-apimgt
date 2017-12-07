@@ -105,20 +105,27 @@ class AuthManager {
      * An user object is return in present of user logged in user info in browser local storage, at the same time checks for partialToken in the cookie as well.
      * This may give a partial indication(passive check not actually check the token validity via an API) of whether the user has logged in or not, The actual API call may get denied
      * if the cookie stored access token is invalid/expired
-     *
      * @returns {User | null} Is any user has logged in or not
+     * @param {boolean} readFromLocalStorage: read from local-storage
      */
-    static getUser() {
-        const userData = localStorage.getItem(User.CONST.LOCALSTORAGE_USER);
+    static getUser(readFromLocalStorage) {
+        if (!readFromLocalStorage && AuthManager._user) {
+            return AuthManager._user;
+        }
+
+        const userData = localStorage.getItem(`${User.CONST.LOCALSTORAGE_USER}_${Utils.getEnvironment().label}`);
         const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1);
         if (!(userData && partialToken)) {
             return null;
         }
-        return User.fromJson(JSON.parse(userData));
+
+        //Update user in memory.
+        AuthManager._user = User.fromJson(JSON.parse(userData));
+        return AuthManager._user;
     }
 
     /**
-     * Persist an user in browser local storage, Since only one use can be logged into the application at a time,
+     * Persist an user in browser local storage and in-memory, Since only one use can be logged into the application at a time,
      * This method will override any previously persist user data.
      * @param {User} user : An instance of the {User} class
      */
@@ -126,7 +133,19 @@ class AuthManager {
         if (!user instanceof User) {
             throw new Error("Invalid user object");
         }
-        localStorage.setItem(User.CONST.LOCALSTORAGE_USER, JSON.stringify(user.toJson()));
+
+        if (user) {
+            localStorage.setItem(`${User.CONST.LOCALSTORAGE_USER}_${Utils.getEnvironment().label}`, JSON.stringify(user.toJson()));
+        }
+        AuthManager._user = user;
+    }
+
+    static hasScopes(resourcePath, resourceMethod) {
+        let userscopes = this.getUser().scopes;
+        let validScope = APIClient.getScopeForResource(resourcePath, resourceMethod);
+        return validScope.then(scope => {
+            return userscopes.includes(scope)
+        });
     }
 
     /**
@@ -168,7 +187,7 @@ class AuthManager {
             grant_type: 'password',
             validity_period: 3600,
             scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage '
-             + 'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover'
+            + 'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover'
         };
         let promised_response = axios(this.getTokenEndpoint(environment), {
             method: "POST",
@@ -183,7 +202,7 @@ class AuthManager {
         promised_response.then(response => {
             const validityPeriod = response.data.validityPeriod; // In seconds
             const WSO2_AM_TOKEN_1 = response.data.partialToken;
-            const user = new User(response.data.authUser, response.data.idToken);
+            const user = new User(Utils.getEnvironment().label, response.data.authUser, response.data.idToken);
             user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Utils.CONST.CONTEXT_PATH);
             user.scopes = response.data.scopes.split(" ");
             AuthManager.setUser(user);
@@ -233,14 +252,12 @@ class AuthManager {
         return axios.post(url, qs.stringify(params), {headers: headers});
     }
 
-    static hasScopes(resourcePath, resourceMethod) {
-        let userscopes = this.getUser().scopes;
-        let validScope = APIClient.getScopeForResource(resourcePath, resourceMethod);
-        return validScope.then(scope => {
-            return userscopes.includes(scope)
-        });
-    }
-
 }
 
+/**
+ * Current User
+ * @type {object} User Object
+ * @private
+ */
+AuthManager._user = undefined;
 export default AuthManager;

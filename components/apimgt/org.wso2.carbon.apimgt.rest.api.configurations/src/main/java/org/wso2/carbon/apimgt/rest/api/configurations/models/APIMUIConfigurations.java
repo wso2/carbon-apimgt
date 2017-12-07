@@ -30,9 +30,9 @@ import java.util.List;
 public class APIMUIConfigurations {
 
     @Element(description = "list of environments\n" +
-            "  ◆ host           - host of a environment (eg 127.0.0.1:9292, use '<empty-string>' for current host)\n" +
+            "  ◆ host           - host of an environment (eg 127.0.0.1:9292, use '<empty-string>' for the current host)\n" +
             "  ◆ loginTokenPath - token endpoint URL\n" +
-            "  ◆ label          - environment label to uniquely identify a environment")
+            "  ◆ label          - environment label to uniquely identify an environment")
     private List<EnvironmentConfigurations> environments = Collections.singletonList(new EnvironmentConfigurations());
 
     public List<EnvironmentConfigurations> getEnvironments() {
