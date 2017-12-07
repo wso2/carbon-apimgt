@@ -739,15 +739,18 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             throw new APIManagementException(e.getMessage(), e);
         }
     }
-
+//add an update method
     @Override
     public void addThreatProtectionPolicy(ThreatProtectionPolicy policy) throws APIManagementException {
         try {
-            if (policy.getUuid() == null || "".equals(policy.getUuid())) {
+            if (StringUtils.isBlank(policy.getUuid())) {
                 policy.setUuid(UUID.randomUUID().toString());
+                threatProtectionDAO.addPolicy(policy);
+                apiGateway.addThreatProtectionPolicy(policy);
+            } else {
+                threatProtectionDAO.updatePolicy(policy);
+                apiGateway.updateThreatProtectionPolicy(policy);
             }
-            threatProtectionDAO.addPolicy(policy);
-            apiGateway.addThreatProtectionPolicy(policy);
         } catch (APIMgtDAOException e) {
             log.error(e.getMessage(), e);
             throw new APIManagementException(e.getMessage(), e);

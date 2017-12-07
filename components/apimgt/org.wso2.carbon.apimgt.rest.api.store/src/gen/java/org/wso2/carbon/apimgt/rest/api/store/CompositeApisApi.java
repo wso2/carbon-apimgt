@@ -23,7 +23,6 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
-import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -47,7 +46,6 @@ import javax.ws.rs.core.Response;
 public class CompositeApisApi implements Microservice  {
    private final CompositeApisApiService delegate = CompositeApisApiServiceFactory.getCompositeApisApi();
 
-    @OPTIONS
     @DELETE
     @Path("/{apiId}")
     @Consumes({ "application/json" })
@@ -72,7 +70,6 @@ public class CompositeApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.compositeApisApiIdDelete(apiId,ifMatch,ifUnmodifiedSince,request);
     }
-    @OPTIONS
     @GET
     @Path("/{apiId}")
     @Consumes({ "application/json" })
@@ -97,7 +94,6 @@ public class CompositeApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.compositeApisApiIdGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
-    @OPTIONS
     @GET
     @Path("/{apiId}/implementation")
     @Consumes({ "application/json" })
@@ -122,7 +118,6 @@ public class CompositeApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.compositeApisApiIdImplementationGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
-    @OPTIONS
     @PUT
     @Path("/{apiId}/implementation")
     @Consumes({ "multipart/form-data" })
@@ -152,7 +147,6 @@ public class CompositeApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.compositeApisApiIdImplementationPut(apiId,apiImplementationInputStream, apiImplementationDetail,ifMatch,ifUnmodifiedSince,request);
     }
-    @OPTIONS
     @PUT
     @Path("/{apiId}")
     @Consumes({ "application/json" })
@@ -180,7 +174,6 @@ public class CompositeApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.compositeApisApiIdPut(apiId,body,ifMatch,ifUnmodifiedSince,request);
     }
-    @OPTIONS
     @GET
     @Path("/{apiId}/swagger")
     @Consumes({ "application/json" })
@@ -205,7 +198,6 @@ public class CompositeApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.compositeApisApiIdSwaggerGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
-    @OPTIONS
     @PUT
     @Path("/{apiId}/swagger")
     @Consumes({ "multipart/form-data" })
@@ -233,7 +225,6 @@ public class CompositeApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.compositeApisApiIdSwaggerPut(apiId,apiDefinition,ifMatch,ifUnmodifiedSince,request);
     }
-    @OPTIONS
     @GET
     
     @Consumes({ "application/json" })
@@ -257,7 +248,6 @@ public class CompositeApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.compositeApisGet(limit,offset,query,ifNoneMatch,request);
     }
-    @OPTIONS
     @POST
     
     @Consumes({ "application/json" })

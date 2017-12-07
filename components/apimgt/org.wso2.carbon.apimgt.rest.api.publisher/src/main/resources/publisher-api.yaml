@@ -2924,7 +2924,7 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-  /threat-protection/policies:
+  /threat-protection-policies:
     get:
       summary: Get All Threat Protection Policies
       description: This can be used to get all defined threat protection policies
@@ -2934,49 +2934,7 @@ paths:
           schema:
             $ref: '#/definitions/ThreatProtectionPolicyList'
 
-  /threat-protection/apis/{apiId}/policies/{policyId}:
-    security:
-      - OAuth2Security:
-        - apim:api_update
-    post:
-      summary: Associate a policy to an API
-      description: This can be used to asscociate a policy with an API
-      parameters:
-        - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/threatProtectionPolicyId'
-      responses:
-        200:
-          description: Ok. Successfully associated the policy with API
-        500:
-          description: Error accociating policy with API
-    delete:
-      summary: Remove a policy accociated with an API
-      description: This can be used to remove a policy associated with an API
-      parameters:
-        - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/threatProtectionPolicyId'
-      responses:
-        200:
-          description: Ok. Policy association removed.
-        500:
-          description: Error removing policy association.
-
-  /threat-protection/apis/{apiId}/policies:
-    security:
-      - OAuth2Security:
-        - apim:api_view
-    get:
-      summary: Get policy associated to an API
-      description: This can be used to get a policy associated with an API
-      parameters:
-        - $ref: '#/parameters/apiId'
-      responses:
-        200:
-          description: Ok. Associated policy is returned.
-          schema:
-            $ref: '#/definitions/ThreatProtectionPolicyIdList'
-
-  /threat-protection/policies/{policyId}:
+  /threat-protection-policies/{policyId}:
     get:
       summary: Get a threat protection policy
       parameters:
@@ -2988,7 +2946,6 @@ paths:
             $ref: '#/definitions/ThreatProtectionPolicy'
         404:
           description: No policy found for given policy ID
-
 
 ######################################################
 # The "Service Discovery" utility API
@@ -3579,6 +3536,10 @@ definitions:
               type:
                 type: string
                 example: "Production"
+      threatProtectionPolicies:
+        type: array
+        items:
+          type: string
 
 #-----------------------------------------------------
 # The Application resource
@@ -4217,30 +4178,6 @@ definitions:
               hasSoapBinding:
                 description: Indicates whether the WSDL contains SOAP Bindings
                 type: boolean
-
-
-#-----------------------------------------------------
-# The Threat Protection Policy ID resource
-#-----------------------------------------------------
-  ThreatProtectionPolicyId:
-    title: "Threat Protection Policy ID"
-    required:
-      - id
-    properties:
-      id:
-        type: string
-        description: Threat Protection Policy ID
-
-#-----------------------------------------------------
-# The Threat Protection Policy ID List resource
-#-----------------------------------------------------
-  ThreatProtectionPolicyIdList:
-    title: "Threat Protection Policy ID List"
-    properties:
-      list:
-        type: array
-        items:
-          $ref: '#/definitions/ThreatProtectionPolicyId'
 
 #-----------------------------------------------------
 # The Threat Protection Policy List resource

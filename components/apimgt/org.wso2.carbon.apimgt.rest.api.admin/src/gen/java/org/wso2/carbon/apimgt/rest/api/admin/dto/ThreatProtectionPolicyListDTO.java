@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.dto;
+package org.wso2.carbon.apimgt.rest.api.admin.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,22 +7,22 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThreatProtectionPolicyIdDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.dto.ThreatProtectionPolicyDTO;
 import java.util.Objects;
 
 /**
- * ThreatProtectionPolicyIdListDTO
+ * ThreatProtectionPolicyListDTO
  */
-public class ThreatProtectionPolicyIdListDTO   {
+public class ThreatProtectionPolicyListDTO   {
   @JsonProperty("list")
-  private List<ThreatProtectionPolicyIdDTO> list = new ArrayList<ThreatProtectionPolicyIdDTO>();
+  private List<ThreatProtectionPolicyDTO> list = new ArrayList<ThreatProtectionPolicyDTO>();
 
-  public ThreatProtectionPolicyIdListDTO list(List<ThreatProtectionPolicyIdDTO> list) {
+  public ThreatProtectionPolicyListDTO list(List<ThreatProtectionPolicyDTO> list) {
     this.list = list;
     return this;
   }
 
-  public ThreatProtectionPolicyIdListDTO addListItem(ThreatProtectionPolicyIdDTO listItem) {
+  public ThreatProtectionPolicyListDTO addListItem(ThreatProtectionPolicyDTO listItem) {
     this.list.add(listItem);
     return this;
   }
@@ -32,11 +32,11 @@ public class ThreatProtectionPolicyIdListDTO   {
    * @return list
   **/
   @ApiModelProperty(value = "")
-  public List<ThreatProtectionPolicyIdDTO> getList() {
+  public List<ThreatProtectionPolicyDTO> getList() {
     return list;
   }
 
-  public void setList(List<ThreatProtectionPolicyIdDTO> list) {
+  public void setList(List<ThreatProtectionPolicyDTO> list) {
     this.list = list;
   }
 
@@ -49,8 +49,8 @@ public class ThreatProtectionPolicyIdListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ThreatProtectionPolicyIdListDTO threatProtectionPolicyIdList = (ThreatProtectionPolicyIdListDTO) o;
-    return Objects.equals(this.list, threatProtectionPolicyIdList.list);
+    ThreatProtectionPolicyListDTO threatProtectionPolicyList = (ThreatProtectionPolicyListDTO) o;
+    return Objects.equals(this.list, threatProtectionPolicyList.list);
   }
 
   @Override
@@ -61,7 +61,7 @@ public class ThreatProtectionPolicyIdListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ThreatProtectionPolicyIdListDTO {\n");
+    sb.append("class ThreatProtectionPolicyListDTO {\n");
     
     sb.append("    list: ").append(toIndentedString(list)).append("\n");
     sb.append("}");

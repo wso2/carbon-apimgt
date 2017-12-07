@@ -8,7 +8,6 @@ import org.wso2.msf4j.formparam.FileInfo;
 import org.wso2.msf4j.Request;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThreatProtectionPolicyDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThreatProtectionPolicyIdListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThreatProtectionPolicyListDTO;
 
 import java.util.List;
@@ -19,15 +18,7 @@ import java.io.InputStream;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-public abstract class ThreatProtectionApiService {
-    public abstract Response threatProtectionApisApiIdPoliciesGet(String apiId
-  ,Request request) throws NotFoundException;
-    public abstract Response threatProtectionApisApiIdPoliciesPolicyIdDelete(String apiId
- ,String policyId
-  ,Request request) throws NotFoundException;
-    public abstract Response threatProtectionApisApiIdPoliciesPolicyIdPost(String apiId
- ,String policyId
-  ,Request request) throws NotFoundException;
+public abstract class ThreatProtectionPoliciesApiService {
     public abstract Response threatProtectionPoliciesGet( Request request) throws NotFoundException;
     public abstract Response threatProtectionPoliciesPolicyIdGet(String policyId
   ,Request request) throws NotFoundException;

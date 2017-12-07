@@ -369,20 +369,4 @@ public class MappingUtil {
         dto.setPolicy(policy.getPolicy());
         return dto;
     }
-
-
-    /**
-     * Converts rest api core ThreatProtectionJsonPolicy into apimgt core ThreatProtectionJsonPolicy
-     * @param dto rest api core ThreatProtectionJsonPolicyDTO
-     * @return apimgt core ThreatProtectionJsonPolicy
-     */
-    public static ThreatProtectionPolicy toThreatProtectionPolicy(ThreatProtectionPolicyDTO dto) {
-        if (dto == null) return null;
-        ThreatProtectionPolicy policy = new ThreatProtectionPolicy();
-        policy.setUuid(dto.getUuid());
-        policy.setType(dto.getType());
-        policy.setName(dto.getName());
-        policy.setPolicy(dto.getPolicy());
-        return policy;
-    }
 }

@@ -142,6 +142,11 @@ public class MappingUtil {
         }
         apidto.setCreatedTime(api.getCreatedTime().toString());
         apidto.setLastUpdatedTime(api.getLastUpdatedTime().toString());
+
+        if (api.getThreatProtectionPolicies() != null) {
+            List<String> policyIdList = new ArrayList<>(api.getThreatProtectionPolicies());
+            apidto.setThreatProtectionPolicies(policyIdList);
+        }
         return apidto;
     }
 
@@ -241,6 +246,10 @@ public class MappingUtil {
             apiBuilder.apiPolicy(policy);
         }
 
+        if (apidto.getThreatProtectionPolicies() != null) {
+            Set<String> policyIdSet = new HashSet<>(apidto.getThreatProtectionPolicies());
+            apiBuilder.threatProtectionPolicies(policyIdSet);
+        }
         return apiBuilder;
     }
 

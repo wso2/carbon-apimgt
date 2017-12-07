@@ -258,15 +258,4 @@ public class MappingUtilTestCase {
         Assert.assertEquals(policy.getName(), dto.getName());
         Assert.assertEquals(policy.getPolicy(), dto.getPolicy());
     }
-
-    @Test
-    public void toThreatProtectionPolicyTest() {
-        ThreatProtectionPolicyDTO dto = SampleTestObjectCreator.createUniqueThreatProtectionPolicyDTO();
-        ThreatProtectionPolicy policy = MappingUtil.toThreatProtectionPolicy(dto);
-
-        Assert.assertEquals(dto.getUuid(), policy.getUuid());
-        Assert.assertEquals(dto.getName(), policy.getName());
-        Assert.assertEquals(dto.getType(), policy.getType());
-        Assert.assertEquals(dto.getPolicy(), policy.getPolicy());
-    }
 }

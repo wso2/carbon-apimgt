@@ -576,59 +576,7 @@ paths:
 ######################################################
 # The "Threat Protection" resource API
 ######################################################
-  /threat-protection/policy:
-    post:
-      summary: "add a threat protection policy"
-      description: "add a threat protection policy"
-      parameters:
-        - $ref: '#/parameters/threatProtectionPolicy'
-      tags:
-        - Add Threat Protection Policy
-      responses:
-        200:
-          description: OK
-
-  /threat-protection/policy/{threatProtectionPolicyId}:
-    get:
-      summary: "Get one threat protection policy"
-      description: "Get one threat protection policy"
-      parameters:
-        - $ref: '#/parameters/threatProtectionPolicyId'
-      tags:
-        - Threat Protection Policy
-      responses:
-        200:
-          schema:
-            $ref: '#/definitions/ThreatProtectionPolicy'
-          description: OK
-
-    post:
-      summary: "post"
-      description: "desc"
-      parameters:
-        - $ref: '#/parameters/threatProtectionPolicyId'
-        - $ref: '#/parameters/threatProtectionPolicy'
-      tags:
-        - Update Threat Protection Policy
-      responses:
-        200:
-          description: Ok
-
-    delete:
-      summary: "Delete a threat protection policy"
-      description: "Delete a threat protection policy"
-      parameters:
-        - $ref: '#/parameters/threatProtectionPolicyId'
-      tags:
-        - Delete Threat Protection Policy
-      responses:
-        200:
-          description: "Ok. Policy is deleted"
-        500:
-          description: "Internal server error occurred during the operation"
-
-
-  /threat-protection/policies:
+  /threat-protection-policies:
     get:
       summary: "Get all threat protection policies"
       description: "all"
@@ -639,22 +587,6 @@ paths:
           schema:
             $ref: '#/definitions/ThreatProtectionPolicyList'
           description: OK
-
-  /threat-protection/apis/{apiId}/policy:
-    get:
-      summary: "Get threat protection policy IDs associated with an API"
-      description: "Can be used to get all policy IDs associated with an API"
-      parameters:
-        - $ref: '#/parameters/apiId'
-      tags:
-        - Threat Protection Policy for API
-      responses:
-        200:
-          schema:
-            $ref: '#/definitions/ThreatProtectionPolicyIdList'
-          description: Ok
-        404:
-          description: "No associated policies found for API"
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -743,26 +675,6 @@ parameters:
       Comma seperated gateway labels
     required: false
     type: string
-
-#Threat protection policy ID parameter
-  threatProtectionPolicyId:
-    name: ThreatProtectionPolicyId
-    in: path
-    description: |
-      The UUID of a Policy
-    required: true
-    type: string
-
-#Threat Protection policy parameter
-  threatProtectionPolicy:
-    name: threatProtectionPolicy
-    in: body
-    description: |
-      Threat protection json policy request parameter
-    required: true
-    schema: {
-      $ref: '#/definitions/ThreatProtectionPolicy'
-    }
 
 ######################################################
 # The resources used by some of the APIs above within the message body
@@ -1338,16 +1250,6 @@ definitions:
       policy:
         type: string
         description: policy as a json string
-
-  ThreatProtectionPolicyIdList:
-    title: "List of threat protection policy ids"
-    required:
-      - policyIds
-    properties:
-      policyIds:
-        type: array
-        items:
-          type: string
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

@@ -148,6 +148,9 @@ public class APIDTO   {
   @JsonProperty("operations")
   private List<API_operationsDTO> operations = new ArrayList<API_operationsDTO>();
 
+  @JsonProperty("threatProtectionPolicies")
+  private List<String> threatProtectionPolicies = new ArrayList<String>();
+
   public APIDTO id(String id) {
     this.id = id;
     return this;
@@ -779,6 +782,29 @@ public class APIDTO   {
     this.operations = operations;
   }
 
+  public APIDTO threatProtectionPolicies(List<String> threatProtectionPolicies) {
+    this.threatProtectionPolicies = threatProtectionPolicies;
+    return this;
+  }
+
+  public APIDTO addThreatProtectionPoliciesItem(String threatProtectionPoliciesItem) {
+    this.threatProtectionPolicies.add(threatProtectionPoliciesItem);
+    return this;
+  }
+
+   /**
+   * Get threatProtectionPolicies
+   * @return threatProtectionPolicies
+  **/
+  @ApiModelProperty(value = "")
+  public List<String> getThreatProtectionPolicies() {
+    return threatProtectionPolicies;
+  }
+
+  public void setThreatProtectionPolicies(List<String> threatProtectionPolicies) {
+    this.threatProtectionPolicies = threatProtectionPolicies;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -820,12 +846,13 @@ public class APIDTO   {
         Objects.equals(this.corsConfiguration, API.corsConfiguration) &&
         Objects.equals(this.endpoint, API.endpoint) &&
         Objects.equals(this.securityScheme, API.securityScheme) &&
-        Objects.equals(this.operations, API.operations);
+        Objects.equals(this.operations, API.operations) &&
+        Objects.equals(this.threatProtectionPolicies, API.threatProtectionPolicies);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, workflowStatus, createdTime, apiPolicy, lastUpdatedTime, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, labels, policies, visibility, visibleRoles, permission, userPermissionsForApi, visibleTenants, gatewayEnvironments, sequences, businessInformation, corsConfiguration, endpoint, securityScheme, operations);
+    return Objects.hash(id, name, description, context, version, provider, wsdlUri, lifeCycleStatus, workflowStatus, createdTime, apiPolicy, lastUpdatedTime, responseCaching, cacheTimeout, destinationStatsEnabled, isDefaultVersion, transport, tags, labels, policies, visibility, visibleRoles, permission, userPermissionsForApi, visibleTenants, gatewayEnvironments, sequences, businessInformation, corsConfiguration, endpoint, securityScheme, operations, threatProtectionPolicies);
   }
 
   @Override
@@ -865,6 +892,7 @@ public class APIDTO   {
     sb.append("    endpoint: ").append(toIndentedString(endpoint)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
+    sb.append("    threatProtectionPolicies: ").append(toIndentedString(threatProtectionPolicies)).append("\n");
     sb.append("}");
     return sb.toString();
   }

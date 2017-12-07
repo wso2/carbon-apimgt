@@ -66,9 +66,9 @@ public class WorkflowsApi implements Microservice  {
     public Response workflowsGet(@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
 ,@ApiParam(value = "Type of the worklfow ") @QueryParam("workflowType") String workflowType
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.workflowsGet(ifNoneMatch,ifModifiedSince,workflowType, request);
+        return delegate.workflowsGet(ifNoneMatch,ifModifiedSince,workflowType,request);
     }
     @GET
     @Path("/{workflowReferenceId}")
@@ -86,9 +86,9 @@ public class WorkflowsApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Workflow for the given reference in not found. ", response = WorkflowDTO.class) })
     public Response workflowsWorkflowReferenceIdGet(@ApiParam(value = "Workflow reference id ",required=true) @PathParam("workflowReferenceId") String workflowReferenceId
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.workflowsWorkflowReferenceIdGet(workflowReferenceId, request);
+        return delegate.workflowsWorkflowReferenceIdGet(workflowReferenceId,request);
     }
     @PUT
     @Path("/{workflowReferenceId}")
@@ -107,8 +107,8 @@ public class WorkflowsApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Workflow for the given reference in not found. ", response = WorkflowResponseDTO.class) })
     public Response workflowsWorkflowReferenceIdPut(@ApiParam(value = "Workflow reference id ",required=true) @PathParam("workflowReferenceId") String workflowReferenceId
 ,@ApiParam(value = "Workflow event that need to be updated " ,required=true) WorkflowRequestDTO body
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.workflowsWorkflowReferenceIdPut(workflowReferenceId,body, request);
+        return delegate.workflowsWorkflowReferenceIdPut(workflowReferenceId,body,request);
     }
 }
