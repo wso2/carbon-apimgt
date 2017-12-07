@@ -38,6 +38,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.WSAPIKeyDataStore;
@@ -69,8 +70,8 @@ import static org.junit.Assert.assertNull;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ PrivilegedCarbonContext.class, APISecurityUtils.class, ServiceReferenceHolder.class,
-		ServerConfiguration.class, APIUtil.class, Util.class, CarbonContext.class, Caching.class,
-		APIKeyValidator.class, RESTUtils.class })
+		ServerConfiguration.class, APIUtil.class, Util.class, CarbonContext.class, CarbonConstants.class,
+        Caching.class, APIKeyValidator.class, RESTUtils.class })
 public class APIKeyValidatorTestCase {
     private APIManagerConfiguration apiManagerConfiguration;
     private ServerConfiguration serverConfiguration;
@@ -82,6 +83,7 @@ public class APIKeyValidatorTestCase {
         System.setProperty("carbon.home", "jhkjn");
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(CarbonConstants.class);
         PowerMockito.mockStatic(ServerConfiguration.class);
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.mockStatic(CarbonContext.class);
