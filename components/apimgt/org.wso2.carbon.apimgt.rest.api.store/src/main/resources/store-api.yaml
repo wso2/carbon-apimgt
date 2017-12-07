@@ -2157,6 +2157,183 @@ paths:
 
 
 ######################################################
+# Export Application Resource API
+######################################################
+  /export/applications:
+
+    get:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
+      x-scope: apim:subscribe
+      produces:
+        - application/zip
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\"
+      https://localhost:9292/api/am/store/v1.0/export/applications?appId=xxx > exported-application.zip"
+      x-wso2-request: |
+        GET https://127.0.0.1:9292/api/am/store/v1.0/export/applications?appId=xxx
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\n Connection: keep-alive\n  Content-Disposition: attachment;
+       filename=\"exported-applications.zip\"\n  Content-Type: application/zip"
+      summary: Export details related to an Application.
+      description: |
+        This operation can be used to export details related to a perticular application.
+      parameters:
+        - name: appId
+          in: query
+          description: |
+            Application Search Query
+          required: true
+          type: string
+      tags:
+        - Application (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Export Configuration returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+          schema:
+            type: file
+        404:
+          description: |
+            Not Found.
+            Requested Application does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+######################################################
+# Import Application Resource API
+######################################################
+  /import/applications:
+
+    put:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
+      consumes:
+        - multipart/form-data
+      x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X PUT -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/store/v1.0/import/applications"
+      x-wso2-request: |
+        PUT https://127.0.0.1:9292/api/am/store/v1.0/import/applications
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type:application/json\n\n{\"applicationUUID\":\"645b8e32-3643-48e5-ab42-aed853a8cd77\",\"workflowResponse\":{\"workflowStatus\":\"APPROVED\"}}"
+      summary: Imports an Updates an Application.
+      description: |
+        This operation can be used to import an existing Application.
+      parameters:
+        - name: file
+          in: formData
+          description: |
+            Zip archive consisting on exported application configuration
+          required: true
+          type: file
+      tags:
+        - Application (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with the updated object as entity in the body.
+          schema:
+            $ref: '#/definitions/Application'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+    post:
+      security:
+        - OAuth2Security:
+          - apim:subscribe
+      consumes:
+        - multipart/form-data
+      x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9292/api/am/store/v1.0/import/applications"
+      x-wso2-request: |
+        POST https://127.0.0.1:9292/api/am/store/v1.0/import/applications
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\"name\":\"sampleApp2\",\"uuid\":\"5e3ac21a-cc14-4404-95f1-659900c165c4\",\"description\":\"sample app 2\",\"policy\":{\"uuid\":\"5b74ec82-264e-4104-91ef-fdd41b981798\",\"policyName\":\"50PerMin\",\"isDeployed\":false},\"status\":\"APPROVED\",\"createdUser\":\"admin\",\"createdTime\":{\"date\":{\"year\":2017,\"month\":11,\"day\":8},\"time\":{\"hour\":4,\"minute\":10,\"second\":4,\"nano\":434000000}}}"
+      summary: Imports an Application.
+      description: |
+        This operation can be used to import an existing Application.
+      parameters:
+        - name: file
+          in: formData
+          description: |
+            Zip archive consisting on exported application configuration
+          required: true
+          type: file
+      tags:
+        - Import Configuration
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with the updated object as entity in the body.
+          schema:
+            $ref: '#/definitions/Application'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+######################################################
 # The "Subscription Collection" resource APIs
 ######################################################
   /subscriptions:

@@ -509,7 +509,6 @@ public class APIFileUtils {
         getAllFiles(directoryToZip, fileList);
         try {
             writeArchiveFile(directoryToZip, fileList, archiveLocation, archiveName);
-
         } catch (IOException e) {
             String errorMsg = "Error while writing archive file " + directoryToZip.getPath() + " to archive " +
                     archiveLocation;
@@ -606,5 +605,4 @@ public class APIFileUtils {
             IOUtils.copy(inputStream, outputStream);
         }
     }
-
 }
