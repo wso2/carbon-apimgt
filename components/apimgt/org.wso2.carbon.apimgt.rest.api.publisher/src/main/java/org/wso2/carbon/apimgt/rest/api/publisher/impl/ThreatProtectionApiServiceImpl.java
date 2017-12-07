@@ -22,6 +22,13 @@ import java.util.Set;
 public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
     private static final Logger log = LoggerFactory.getLogger(ThreatProtectionApiServiceImpl.class);
 
+    /**
+     * Get a list of threat protection policy ids associated to an API
+     * @param apiId APIID
+     * @param request
+     * @return List of threat protection policy ids
+     * @throws NotFoundException
+     */
     @Override
     public Response threatProtectionApisApiIdPoliciesGet(String apiId, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
@@ -39,6 +46,14 @@ public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
         }
     }
 
+    /**
+     * Remove a threat protection policy from an API
+     * @param apiId APIID
+     * @param policyId Threat protection policy iD
+     * @param request
+     * @return HTTP status 200, 500 if failed to remove the policy
+     * @throws NotFoundException
+     */
     @Override
     public Response threatProtectionApisApiIdPoliciesPolicyIdDelete(String apiId, String policyId, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
@@ -54,6 +69,14 @@ public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
         }
     }
 
+    /**
+     * Add a threat protection policy to an API
+     * @param apiId APIID
+     * @param policyId Threat protection policy ID
+     * @param request
+     * @return HTTP status 200, 500 if failed to add the policy
+     * @throws NotFoundException
+     */
     @Override
     public Response threatProtectionApisApiIdPoliciesPolicyIdPost(String apiId, String policyId, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
@@ -69,6 +92,12 @@ public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
         }
     }
 
+    /**
+     * Get a list of all threat protection policies
+     * @param request
+     * @return List of threat protection policies
+     * @throws NotFoundException
+     */
     @Override
     public Response threatProtectionPoliciesGet( Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
@@ -82,6 +111,13 @@ public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
         return Response.status(500).build();
     }
 
+    /**
+     * Get a specific threat protection policy
+     * @param policyId Threat protection policy ID
+     * @param request
+     * @return A threat protection policy
+     * @throws NotFoundException
+     */
     @Override
     public Response threatProtectionPoliciesPolicyIdGet(String policyId, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);

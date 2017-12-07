@@ -25,7 +25,13 @@ public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
 
     private static final Logger log = LoggerFactory.getLogger(ThreatProtectionApiServiceImpl.class);
 
-    //to-do: use APIMgtAdminService
+    /**
+     * Get a list of threat protection policy ids associated with an API
+     * @param apiId APIID
+     * @param request
+     * @return List of threat protection policy ids
+     * @throws NotFoundException
+     */
     @Override
     public Response threatProtectionApisApiIdPolicyGet(String apiId, Request request) throws NotFoundException {
         ThreatProtectionDAO dao = DAOFactory.getThreatProtectionDAO();
@@ -39,6 +45,12 @@ public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
         return Response.status(500).entity("Error getting Threat Protection Policy IDs").build();
     }
 
+    /**
+     * Get a list of all threat protection policies
+     * @param request
+     * @return List of threat protection policies
+     * @throws NotFoundException
+     */
     @Override
     public Response threatProtectionPoliciesGet( Request request) throws NotFoundException {
         try {
@@ -55,6 +67,13 @@ public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
         return Response.status(500).entity("Internal Server Error.").build();
     }
 
+    /**
+     * Add a new threat protection policy
+     * @param threatProtectionPolicy Threat protection policy
+     * @param request
+     * @return HTTP Status 200, 500 if there was an error adding policy
+     * @throws NotFoundException
+     */
     @Override
     public Response threatProtectionPolicyPost(ThreatProtectionPolicyDTO threatProtectionPolicy
             ,Request request) throws NotFoundException {
@@ -69,6 +88,13 @@ public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
         return Response.status(500).entity("Internal Server Error.").build();
     }
 
+    /**
+     * Delete a threat protection policy
+     * @param threatProtectionPolicyId ID of the threat protection policy
+     * @param request
+     * @return HTTP status 200, 500 if failed to delete the policy
+     * @throws NotFoundException
+     */
     @Override
     public Response threatProtectionPolicyThreatProtectionPolicyIdDelete(String threatProtectionPolicyId, Request request) throws NotFoundException {
         try {
@@ -81,6 +107,13 @@ public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
         return Response.status(500).entity("Internal Server Error.").build();
     }
 
+    /**
+     * Get a specific threat protection policy
+     * @param threatProtectionPolicyId ID of the policy to be retrieved
+     * @param request
+     * @return Threat protection policy
+     * @throws NotFoundException
+     */
     @Override
     public Response threatProtectionPolicyThreatProtectionPolicyIdGet(String threatProtectionPolicyId, Request request) throws NotFoundException {
         try {
@@ -94,6 +127,14 @@ public class ThreatProtectionApiServiceImpl extends ThreatProtectionApiService {
         return Response.status(500).entity("Internal Server Error.").build();
     }
 
+    /**
+     * Update a threat protection policy
+     * @param threatProtectionPolicyId ID of the threat protection policy
+     * @param threatProtectionPolicy Threat protection policy
+     * @param request
+     * @return HTTP status 200, 500 if failed to update the policy
+     * @throws NotFoundException
+     */
     @Override
     public Response threatProtectionPolicyThreatProtectionPolicyIdPost(String threatProtectionPolicyId
             , ThreatProtectionPolicyDTO threatProtectionPolicy
