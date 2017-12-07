@@ -146,7 +146,7 @@ class Login extends Component {
 
                             <form onSubmit={this.handleSubmit} className="login-form">
                                 <div>
-                                    <img className="brand" src="/publisher/public/images/logo.svg" alt="wso2-logo"/>
+                                    <img className="brand" src="/publisher/public/app/images/logo.svg" alt="wso2-logo"/>
                                     <Typography type="subheading" gutterBottom>
                                         API Publisher
                                     </Typography>

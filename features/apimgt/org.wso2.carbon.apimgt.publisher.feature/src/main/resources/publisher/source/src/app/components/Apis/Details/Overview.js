@@ -178,10 +178,10 @@ class Overview extends Component {
 
                         <Card>
                             <CardMedia
-                                image="/publisher/public/images/api/api-default.png"
+                                image="/publisher/public/app/images/api/api-default.png"
                                 title="Contemplative Reptile"
                             >
-                                <img alt="API thumb" width="100%" src="/publisher/public/images/api/api-default.png"/>
+                                <img alt="API thumb" width="100%" src="/publisher/public/app/images/api/api-default.png"/>
                             </CardMedia>
                             <CardContent>
 

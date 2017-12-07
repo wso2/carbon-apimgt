@@ -121,7 +121,7 @@ div.horizontal{
     margin-bottom:20px;
 }
 .lifecycle-box{
-    background: transparent url(/publisher/public/images/lifecycle.svg) left top no-repeat;
+    background: transparent url(/publisher/public/app/images/lifecycle.svg) left top no-repeat;
     width: 438px;
     height: 281px;
     padding:100px 0 0 85px;

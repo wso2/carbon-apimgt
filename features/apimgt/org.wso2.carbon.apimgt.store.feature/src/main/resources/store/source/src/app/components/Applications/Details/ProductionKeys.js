@@ -1,56 +1,51 @@
 import  React from 'react'
 
-import Api from '../../../data/api'
 import Application from '../../../data/Application';
 
 import Paper from 'material-ui/Paper';
 import Button from 'material-ui/Button';
 import Grid from 'material-ui/Grid';
 import {withStyles} from 'material-ui/styles';
-import Typography from 'material-ui/Typography';
 import Loading from '../../Base/Loading/Loading'
+import TextField from 'material-ui/TextField';
 
 import IconButton from 'material-ui/IconButton';
-import Input, { InputLabel, InputAdornment } from 'material-ui/Input';
-import { FormControl, FormHelperText } from 'material-ui/Form';
+import Input, {InputLabel, InputAdornment} from 'material-ui/Input';
+import {FormControl, FormHelperText} from 'material-ui/Form';
 import Visibility from 'material-ui-icons/Visibility';
 import VisibilityOff from 'material-ui-icons/VisibilityOff';
-import classNames from 'classnames';
+
+// Styles for Grid and Paper elements
+const styles = theme => ({
+    root: {
+        flexGrow: 1,
+        marginTop: 30,
+        width: "95%"
+    },
+    paper: {
+        padding: 16,
+        textAlign: 'center',
+        color: theme.palette.text.secondary,
+    },
+});
 
 class ProductionKeys extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            accessToken: "",
-            consumerKey: "",
-            consumerSecret: "",
             application: null,
-            showCS: false,
+            showCS: false, // Show Consumer Secret flag
+            showAT: false,// Show Access Token flag
         };
         this.appId = this.props.match.params.applicationId;
+        this.handleShowToken = this.handleShowToken.bind(this);
     }
 
     handleClickToken() {
-        var api = new Api();
-        var data = "{\"keyType\": \"PRODUCTION\", \"grantTypesToBeSupported\": [\"password\",\"client_credentials\"], \"callbackUrl\": \"\"}";
-
-        api.generateKeys(this.appId, data).then(
-            response => {
-                this.state.consumerKey = response.obj.consumerKey;
-                this.state.consumerSecret = response.obj.consumerSecret;
-
-                var tokenData = {};
-                tokenData.consumerKey = response.obj.consumerKey;
-                tokenData.consumerSecret = response.obj.consumerSecret;
-                tokenData.validityPeriod = 3600;
-                tokenData.scopes = "";
-
-                api.generateToken(this.appId, tokenData).then(
-                    response => {
-                        this.setState({accessToken: response.obj.accessToken});
-                    }
-                );
-            }
+        let application = this.state.application;
+        const type = Application.KEY_TYPES.PRODUCTION;
+        application.generateKeys(type).then(
+            () => application.generateToken(type).then(() => this.setState({}))
         ).catch(
             error => {
                 if (process.env.NODE_ENV !== "production") {
@@ -64,18 +59,39 @@ class ProductionKeys extends React.Component {
         );
     }
 
-    handleClickShowPasssword = () => {
-        this.setState({ showCS: !this.state.showCS });
+    /**
+     * Because application access tokens are not coming with /keys or /application API calls,
+     * Fetch access token value upon user request
+     * @returns {boolean} If no application object found in state object
+     */
+    handleShowToken() {
+        if (!this.state.application) {
+            console.warn("No Application found!");
+            return false;
+        }
+        let promised_tokens = this.state.application.generateToken(Application.KEY_TYPES.PRODUCTION);
+        promised_tokens.then((token) => this.setState({showAT: true}))
+    }
+
+    handleShowCS = () => {
+        this.setState({showCS: !this.state.showCS});
     };
 
-    handleMouseDownPassword = event => {
+    /**
+     * Avoid conflict with `onClick`
+     * @param event
+     */
+    handleMouseDownGeneric = event => {
         event.preventDefault();
     };
 
+    /**
+     * Fetch Application object by ID coming from URL path params and fetch related keys to display
+     */
     componentDidMount() {
         let promised_app = Application.get(this.appId);
         promised_app.then(application => {
-            application.getKeys().then(_ => this.setState({application: application}))
+            application.getKeys().then(() => this.setState({application: application}))
         });
     }
 
@@ -83,59 +99,77 @@ class ProductionKeys extends React.Component {
         if (!this.state.application) {
             return <Loading/>
         }
-        let consumerKey = this.state.consumerKey || this.state.application.keys[0].consumerKey;
-        let consumerSecret = this.state.consumerSecret || this.state.application.keys[0].consumerSecret;
+        const {classes} = this.props;
+        const type = Application.KEY_TYPES.PRODUCTION; /* TODO: Re-use this component to work with sand-box key UI as well ~tmkb*/
+        let cs_ck_keys = this.state.application.keys.get(type);
+        let consumerKey = (cs_ck_keys && cs_ck_keys.consumerKey);
+        let consumerSecret = (cs_ck_keys && cs_ck_keys.consumerSecret);
+        let accessToken = this.state.application.tokens.has(type) && this.state.application.tokens.get(type).accessToken;
         return (
-            <Grid container className="tab-content">
-                <Grid item xs={12}>
-                    <Button color="accent" onClick={() => this.handleClickToken()}>Generate Token</Button>
-                    <Paper elevation={4} className="key-container">
-                        <Typography type="headline" component="h3">
-                            Consumer Key
-                        </Typography>
-                        {consumerKey ?
-                            <Typography type="body1" component="p">
-                                {consumerKey}
-                            </Typography>
-                            :
-                            <Typography type="body1" component="p">
-                                <i>Keys are not genrated yet. Click the Generate token button to generate the keys.</i>
-                            </Typography>
-                        }
-                        <FormControl>
-                            <InputLabel htmlFor="consumerSecret">Consumer Secret</InputLabel>
-                            <Input
-                                id="consumerSecret"
-                                type={this.state.showCS ? 'text' : 'password'}
-                                value={consumerSecret || "Keys are not genrated yet. Click the Generate token button to generate the keys."}
-                                endAdornment={
-                                    <InputAdornment position="end">
-                                        <IconButton classes="" onClick={this.handleClickShowPasssword}
-                                            onMouseDown={this.handleMouseDownPassword}>
-                                            {this.state.showCS ? <VisibilityOff/> : <Visibility/>}
-                                        </IconButton>
-                                    </InputAdornment>
-                                }
+            <div className={classes.root}>
+                <Grid container spacing={24}>
+                    <Grid alignContent="stretch" alignItems="baseline" container justify="center" item xs={12}>
+                        { !consumerKey &&
+                        <Button raised color="accent" onClick={() => this.handleClickToken()}>Generate Token</Button>}
+                    </Grid>
+                    <Grid item xs={6}>
+                        <Paper className={classes.paper}>
+                            <TextField
+                                disabled={true}
+                                label="Consumer Key"
+                                id="consumerKey"
+                                value={consumerKey || "Keys are not generated yet. Click the Generate token button to generate the keys."}
+                                className={"textField"}
+                                helperText="Consumer Key of the application"
+                                margin="none"
+                                fullWidth={true}
                             />
-                        </FormControl>
-
-                        <Typography type="headline" component="h3">
-                            Access Token
-                        </Typography>
-                        {this.state.accessToken ?
-                            <Typography type="body1" component="p">
-                                {this.state.accessToken}
-                            </Typography>
-                            :
-                            <Typography type="body1" component="p">
-                                <i>Token is not genrated yet. Click the Generate token button to get the token.</i>
-                            </Typography>
-                        }
-                    </Paper>
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={6}>
+                        <Paper className={classes.paper}>
+                            <FormControl fullWidth={true} margin="none">
+                                <InputLabel htmlFor="consumerSecret">Consumer Secret</InputLabel>
+                                <Input
+                                    disabled={true}
+                                    id="consumerSecret"
+                                    type={(this.state.showCS || !consumerSecret) ? 'text' : 'password'}
+                                    value={consumerSecret || "Keys are not generated yet. Click the Generate token button to generate the keys."}
+                                    endAdornment={
+                                        <InputAdornment position="end">
+                                            <IconButton classes="" onClick={this.handleShowCS}
+                                                        onMouseDown={this.handleMouseDownGeneric}>
+                                                {this.state.showCS ? <VisibilityOff/> : <Visibility/>}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    }
+                                />
+                                <FormHelperText>Consumer Secret of the application</FormHelperText>
+                            </FormControl>
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={8}>
+                        <Button disabled={this.state.showAT || accessToken} onMouseDown={this.handleMouseDownGeneric}
+                                onClick={this.handleShowToken} raised color="primary"
+                                className={classes.button}>Generate Token</Button>
+                        <Paper className={classes.paper}>
+                            <TextField
+                                disabled={true}
+                                label="Access Token"
+                                id="accessToken"
+                                value={accessToken || "Click on Generate Token button to generate Access Token."}
+                                // type={(this.state.showAT || !accessToken) ? 'text' : 'password'} TODO: add visibility icon ~tmkb
+                                className={"textField"}
+                                helperText="Access Token for the Application"
+                                margin="none"
+                                fullWidth={true}
+                            />
+                        </Paper>
+                    </Grid>
                 </Grid>
-            </Grid>
+            </div>
         );
     }
 }
 
-export default ProductionKeys
+export default withStyles(styles)(ProductionKeys);

@@ -120,7 +120,7 @@ class Login extends Component {
                 <div className="login-main-content">
                     <Paper elevation={0} square={true} className="branding">
                       <div>
-                          <img className="brand" src="/store/public/images/logo.svg" alt="wso2-logo"/>
+                          <img className="brand" src="/store/public/app/images/logo.svg" alt="wso2-logo"/>
                           <Typography type="headline" align="right" gutterBottom>
                               API STORE
                           </Typography>
