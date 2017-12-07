@@ -70,28 +70,49 @@ var api = outputs.api;%>
         }
     }
 
-  $(document).ready(function(){
-      window.swaggerUi = new SwaggerUi({
-        url: "<%=swaggerAPI%>",
-        dom_id: "swagger-ui-container",
-        supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch', 'head'],
-        onComplete: function(swaggerApi, swaggerUi){
-          console.log("Loaded SwaggerUI");
-          setIntervalId = setInterval(function() {
-            runEnjoyHintScript_swaggerUi();
-          }, 2000);
-        },
-        onFailure: function(data) {
-          console.log("Unable to Load SwaggerUI");
-        },
-        docExpansion: "list",
-        jsonEditor: false,
-        defaultModelRendering: 'schema',
-        showRequestHeaders: true,
-        validatorUrl: null
+  var load_swagger_ui = function(url) {
+      window.swaggerUI = SwaggerUIBundle({
+          url: url,
+          dom_id: '#swagger-ui-container',
+          deepLinking: true,
+          presets: [
+              SwaggerUIBundle.presets.apis
+          ],
+          requestInterceptor: function(request) {
+              //Intercept the request and inject Bearer token
+              var key = $("#access_token").val();
+              if (key && key.trim() != "") {
+                  request.headers.Authorization = "Bearer " + key;
+              } else {
+                  request.headers.Authorization = "Bearer ";
+              }
+              return request;
+          },
+          plugins: [
+              function() {
+                  return {
+                      components: {
+                          Models: function() {
+                              return null
+                          },
+                          schemes: function() {
+                              return null
+                          },
+                          authorizeBtn: function() {
+                              return null
+                          },
+                          info: function() {
+                              return null
+                          }
+                      }
+                  }
+              }
+          ]
       });
+  }
 
-      window.swaggerUi.load();
+  $(document).ready(function(){
+     load_swagger_ui("<%=swaggerAPI%>");
   });
   </script>
 <div class="row">
@@ -141,30 +162,25 @@ var show_environments = function(){
     select_environment();
   };
 
-var select_environment = function(){
+var select_environment = function() {
     var selectedEnvironment = $("#environment_name");
-    var name =selectedEnvironment.val();
-    if (window.swaggerUi.api.url.indexOf("?")!=-1) {
-      if (window.swaggerUi.api.url.indexOf("envName")!=-1) {
-            window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url.split("envName")[0] + "envName="+name});
-      }else{
-    window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "&envName="+name});
-      }
-    }else{
-    window.swaggerUi.updateSwaggerUi({ "url" : swaggerUi.api.url + "?envName="+name});
+    var name = selectedEnvironment.val();
+    var swaggerURL = window.swaggerUI.getConfigs().url;
+    var envSwaggerURL = "";
+    if (swaggerURL.indexOf("?") != -1) {
+        if (swaggerURL.indexOf("envName") != -1) {
+            envSwaggerURL = swaggerURL.split("envName")[0] + "envName=" + name;
+        } else {
+            envSwaggerURL = swaggerURL + "&envName=" + name;
+        }
+    } else {
+        envSwaggerURL = swaggerURL + "?envName=" + name;
     }
-    change_token();
-  };
 
-  $("#access_token").change(function(){
-    var key = $(this).val();
-    if(key && key.trim() != "") {
-      swaggerUi.api.clientAuthorizations.add("default", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer "+ key, "header"));
-    }
-    else{
-      swaggerUi.api.clientAuthorizations.add("default", new SwaggerClient.ApiKeyAuthorization("Authorization", "Bearer ", "header"));
-    }
-  });
+    //Load swagger spec for given environment
+    load_swagger_ui(envSwaggerURL);
+    change_token();
+};
 
   $(".subapp").change(change_token);
   $(".keytype").change(show_environments);
