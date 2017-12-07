@@ -110,6 +110,17 @@
                 context.failOver = false;
             }
             this.element.html(template(context));
+
+            $('a.help_popup').popover({
+                html : true,
+                container: 'body',
+                content: function() {
+                    var msg = $('#'+$(this).attr('help_data')).html();
+                    return msg;
+                },
+                template: '<div class="popover default-popover" role="tooltip"><div class="arrow"></div><div class="popover-content"></div></div>'
+            });
+
         },        
 
         render_advance: function(selectedEndpointType, selectedEndpointIndex){
