@@ -6833,4 +6833,60 @@ public final class APIUtil {
                         apiResource.getProperty(APIConstants.PUBLISHER_ROLES));
         return api;
     }
+     /* This method is used to get the actual endpoint password of an API from the hidden property
+     * in the case where the handler APIEndpointPasswordRegistryHandler is enabled in registry.xml
+     *
+     * @param tenantId  The Tenant ID
+     * @param config    The configuration to get from tenant registry or api-manager.xml
+     * @return          The configuration read from tenant registry or api-manager.xml or else null
+     * @throws APIManagementException Throws if the registry resource doesn't exist
+     * or the content cannot be parsed to JSON
+     */
+    public static String getOAuthConfiguration(int tenantId, String config)
+    throws APIManagementException{
+        try {
+            Registry registryConfig = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getConfigSystemRegistry(tenantId);
+
+            if (registryConfig.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                Resource resource = registryConfig.get(APIConstants.API_TENANT_CONF_LOCATION);
+                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                if (content != null) {
+                    JSONObject tenantConfig = (JSONObject) new JSONParser().parse(content);
+
+                    //Read the configuration from the tenant registry
+                    String oAuthConfiguration = "";
+                    if (null != tenantConfig.get(config)) {
+                        StringBuilder stringBuilder = new StringBuilder();
+                        stringBuilder.append(tenantConfig.get(config));
+                        oAuthConfiguration = stringBuilder.toString();
+
+                    }
+
+                    if (!StringUtils.isBlank(oAuthConfiguration)){
+
+                        return oAuthConfiguration;
+
+                    } else {
+                        //If tenant registry doesn't have the configuration, then read it from api-manager.xml
+                        APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
+                                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                        oAuthConfiguration = apimConfig.getFirstProperty(APIConstants.OAUTH_CONFIGS + config);
+
+                        if (!StringUtils.isBlank(oAuthConfiguration)) {
+                            return oAuthConfiguration;
+                        }
+                    }
+                }
+            }
+
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving " + config + " from tenant registry.";
+            throw new APIManagementException(msg, e);
+        } catch (ParseException pe) {
+            String msg = "Couldn't create json object from Swagger object for custom OAuth header.";
+            throw new APIManagementException(msg, pe);
+        }
+        return null;
+    }
 }
