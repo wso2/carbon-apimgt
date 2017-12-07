@@ -74,8 +74,8 @@ class ApiThumb extends React.Component {
         return (
             <Grid item xs={12} sm={6} md={3} lg={2} xl={2}>
                 <Card>
-                    <CardMedia image="/publisher/public/images/api/api-default.png">
-                        <img src="/publisher/public/images/api/api-default.png" style={{width:"100%"}}/>
+                    <CardMedia image="/publisher/public/app/images/api/api-default.png">
+                        <img src="/publisher/public/app/images/api/api-default.png" style={{width:"100%"}}/>
                     </CardMedia>
                     <CardContent>
                         <Typography type="headline" component="h2">

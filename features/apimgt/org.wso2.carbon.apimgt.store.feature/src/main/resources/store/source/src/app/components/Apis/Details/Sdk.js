@@ -150,9 +150,9 @@ class Sdk extends React.Component {
                                             <Divider/>
                                             <CardMedia
                                                 title={language.toString().toUpperCase()}
-                                                src={"/store/public/images/sdks/"+new String(language)+".svg"}
+                                                src={"/store/public/app/images/sdks/"+new String(language)+".svg"}
                                             >
-                                                <img alt={language} src={"/store/public/images/sdks/"+new String(language)+".svg"} style={{width:"100px",height:"100px",margin:"15px"}}/>
+                                                <img alt={language} src={"/store/public/app/images/sdks/"+new String(language)+".svg"} style={{width:"100px",height:"100px",margin:"15px"}}/>
                                             </CardMedia>
                                             <CardActions>
                                                 <Grid container justify="center">

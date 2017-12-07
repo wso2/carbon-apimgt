@@ -332,6 +332,7 @@ class API {
      * @param request_content payload of generate key request
      * @param callback {function} Function which needs to be called upon success
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     * @deprecated Use Application.generateKeys() instead
      */
     generateKeys(applicationId, request_content, callback = null) {
         var promise_get = this.client.then(
@@ -354,6 +355,7 @@ class API {
      * @param request_content payload of generate token request
      * @param callback {function} Function which needs to be called upon success
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     * @deprecated Use Application.generateToken() instead
      */
     generateToken(applicationId, request_content, callback = null) {
         var promise_get = this.client.then(
@@ -375,6 +377,7 @@ class API {
      * @param applicationId id of the application that needs to get the keys
      * @param callback {function} Function which needs to be called upon success
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     * @deprecated Use Application.getKeys() instead
      */
     getKeys(applicationId, callback = null) {
         var promise_get = this.client.then(
