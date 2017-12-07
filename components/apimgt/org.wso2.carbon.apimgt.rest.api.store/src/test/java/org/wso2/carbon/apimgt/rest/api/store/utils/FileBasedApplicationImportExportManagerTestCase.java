@@ -54,14 +54,6 @@ public class FileBasedApplicationImportExportManagerTestCase {
         importExportManager.exportApplication(testApp, "exported-apps");
     }
 
-    @Test(expected = APIMgtEntityImportExportException.class)
-    public void testCreateArchiveFromExportedAppArtifactsError() throws Exception {
-        printTestMethodName();
-        FileBasedApplicationImportExportManager importExportManager = new FileBasedApplicationImportExportManager
-                (apiStore, importExportRootDirectory);
-        importExportManager.createArchiveFromExportedAppArtifacts("testDir", "testLoc", "testName");
-    }
-
     private static void printTestMethodName() {
         log.info("------------------ Test method: " + Thread.currentThread().getStackTrace()[2].getMethodName() +
                 " ------------------");
