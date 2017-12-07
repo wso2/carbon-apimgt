@@ -268,7 +268,7 @@
 
 															    <label class="control-label col-xs-12 col-sm-3
 															    col-md-3 col-lg-3" for="algoCombo"> <%= i18n.localize("Algorithm")%>
-															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title="">
+															        <a class="help_popup" help_data="algorithm_help" data-trigger="hover" title="">
 															            <span class="icon fw-stack fw-lg" style="font-size:6px">
 															              <i class="fw fw-circle fw-stack-2x"></i>
 															              <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
@@ -285,7 +285,7 @@
 															{{#ifCond algoCombo "==" "other"}}
 															<div class="form-group">
 															    <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for=""> <%= i18n.localize("Class Name for Algorithm")%>
-															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title=""> <span class="icon fw-stack fw-lg" style="font-size:6px"><i class="fw fw-circle fw-stack-2x"></i><i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i></span>
+															        <a class="help_popup" help_data="algorithm_class_name_help" data-trigger="hover" title=""> <span class="icon fw-stack fw-lg" style="font-size:6px"><i class="fw fw-circle fw-stack-2x"></i><i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i></span>
 															        </a>
 															    </label>
 															    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-4">
@@ -295,7 +295,7 @@
 															{{/ifCond}}
 															<div class="form-group">
 															    <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="sessionManagement">Session Management
-															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title=""> <span class="icon fw-stack fw-lg" style="font-size:6px"><i class="fw fw-circle fw-stack-2x"></i><i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i></span>
+															        <a class="help_popup" help_data="session_management_help" data-trigger="hover" title=""> <span class="icon fw-stack fw-lg" style="font-size:6px"><i class="fw fw-circle fw-stack-2x"></i><i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i></span>
 															        </a>
 															    </label>
 															    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-4">
@@ -309,7 +309,7 @@
 															</div>
 															<div class="form-group">
 															    <label class="control-label col-xs-12 col-sm-3 col-md-3 col-lg-3" for="">Session Timeout (Mills)
-															        <a class="help_popup" help_data="test_help" data-trigger="hover" data-original-title="" title=""> <span class="icon fw-stack fw-lg" style="font-size:6px"><i class="fw fw-circle fw-stack-2x"></i><i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i></span>
+															        <a class="help_popup" help_data="session_timeout_help" data-trigger="hover" title=""> <span class="icon fw-stack fw-lg" style="font-size:6px"><i class="fw fw-circle fw-stack-2x"></i><i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i></span>
 															        </a>
 															    </label>
 															    <div class="col-xs-12 col-sm-9 col-md-9 col-lg-4">
@@ -351,6 +351,18 @@
 													</div>
 													<div id="sandbox_endpoints_help" class="hide">
 														 <p><%= i18n.localize("The Sandbox Endpoint is a mock endpoint that resembles the functionality of the actual backend API.")%></p>
+													</div>
+													<div id="algorithm_help" class="hide">
+														 <p><%= i18n.localize("The algorithm on which the load balancing is based on.")%></p>
+													</div>
+													<div id="algorithm_class_name_help" class="hide">
+														 <p><%= i18n.localize("The new algorithm on which the load balancing is based on.")%></p>
+													</div>
+													<div id="session_management_help" class="hide">
+														 <p><%= i18n.localize("A session management method.")%></p>
+													</div>
+													<div id="session_timeout_help" class="hide">
+														 <p><%= i18n.localize("The number of milliseconds before the session times out.")%></p>
 													</div>
 
                                                     <!--Manage Certificates - main-->
