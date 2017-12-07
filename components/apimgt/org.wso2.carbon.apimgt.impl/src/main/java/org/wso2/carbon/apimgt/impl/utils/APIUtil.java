@@ -2254,6 +2254,7 @@ public final class APIUtil {
         }
 
         if (isFromPublisher && APIConstants.Permissions.APIM_ADMIN.equals(permission)) {
+            userNameWithoutChange = getUserNameWithTenantSuffix(userNameWithoutChange);
             Integer value = getValueFromCache(APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE, userNameWithoutChange);
             if (value != null) {
                 return value == 1;
@@ -2427,6 +2428,7 @@ public final class APIUtil {
         String[] roles = null;
 
         if (isFromPublisher) {
+            username = getUserNameWithTenantSuffix(username);
             roles = getValueFromCache(APIConstants.API_PUBLISHER_USER_ROLE_CACHE, username);
         }
         if (roles != null) {
@@ -4111,7 +4113,7 @@ public final class APIUtil {
     public static String getUserNameWithTenantSuffix(String userName) {
         String userNameWithTenantPrefix = userName;
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
-        if (userName != null && !userName.contains("@")
+        if (userName != null && !userName.endsWith("@" + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)
                 && MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             userNameWithTenantPrefix = userName + "@" + tenantDomain;
         }
