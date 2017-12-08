@@ -28,6 +28,12 @@ import Typography from 'material-ui/Typography';
 import Snackbar from 'material-ui/Snackbar';
 import User from '../../data/User'
 import Footer from '../Base/Footer/Footer'
+import Input, { InputLabel } from 'material-ui/Input';
+import Select from 'material-ui/Select';
+import {FormControl} from 'material-ui/Form';
+import {MenuItem} from 'material-ui/Menu';
+import Utils from "../../data/Utils";
+import ConfigManager from "../../data/ConfigManager";
 
 class Login extends Component {
 
@@ -42,7 +48,9 @@ class Login extends Component {
             password: '',
             validate: false,
             messageOpen: false,
-            message:''
+            message:'',
+            environments: {},
+            environmentId: 0
         };
     }
 
@@ -53,12 +61,15 @@ class Login extends Component {
         this.setState({validate: true});
         let username = this.state.username;
         let password = this.state.password;
+        let environment = this.state.environments[this.state.environmentId];
+
         if(!username || !password){
             this.setState({ messageOpen: true });
             this.setState({message: 'Please fill both username and password fields'});
             return;
         }
-        let loginPromise = this.authManager.authenticateUser(username, password);
+
+        let loginPromise = this.authManager.authenticateUser(username, password, environment);
         loginPromise.then((response) => {
             this.setState({isLogin: AuthManager.getUser(), loading: false});
         }).catch((error) => {
@@ -71,6 +82,14 @@ class Login extends Component {
     }
 
     componentDidMount() {
+        //Get Environments
+        let promised_environments = ConfigManager.getConfigs().environments.then(response => {
+            this.setState({
+                environments: response.data.environments,
+                environmentId: Utils.getEnvironmentID(response.data.environments)
+            });
+        });
+
         let queryString = this.props.location.search;
         queryString = queryString.replace(/^\?/, '');
         /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
@@ -82,23 +101,35 @@ class Login extends Component {
             this.setState({isLogin: true});
             const validityPeriod = params.validity_period; // In seconds
             const WSO2_AM_TOKEN_1 = params.partial_token;
-            const user = new User(params.user_name, params.id_token);
+            const user = new User(Utils.getEnvironment().label, params.user_name, params.id_token);
             user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/store");
             user.scopes = params.scopes.split(" ");
             AuthManager.setUser(user);
         }
     }
 
+    handleInputChange = (event) => {
+        const target = event.target;
+        const value = target.type === 'checkbox' ? target.checked : target.value;
+        const name = target.id;
 
-    handleUsernameChange = (event) => {
         this.setState({
-           username : event.target.value
+            [name]: value
+        });
+    }
+
+    handleEnvironmentChange = (event) => {
+        this.setState({
+            environmentId : event.target.value
         });
     };
-    handlePasswordChange = (event) => {
-        this.setState({
-           password : event.target.value
-        });
+
+    handleClickEnvironmentMenu = (event) => {
+        this.setState({ openEnvironmentMenu: true, anchorElEnvironmentMenu: event.currentTarget });
+    };
+
+    handleRequestCloseEnvironmentMenu = (event) => {
+        this.setState({ openEnvironmentMenu: false});
     };
 
     handleRequestClose = () => {
@@ -139,7 +170,7 @@ class Login extends Component {
                                 autoComplete="username"
                                 margin="normal"
                                 style={{width:"100%"}}
-                                onChange={this.handleUsernameChange}
+                                onChange={this.handleInputChange}
                             />
                             <TextField
                                 error={!this.state.password && this.state.validate}
@@ -149,8 +180,24 @@ class Login extends Component {
                                 autoComplete="current-password"
                                 margin="normal"
                                 style={{width:"100%"}}
-                                onChange={this.handlePasswordChange}
+                                onChange={this.handleInputChange}
                             />
+
+                            {/*Environments*/}
+                            {this.state.environments && this.state.environments.length > 1 &&
+                            <div>
+                                <br/>
+                                <FormControl>
+                                    <InputLabel htmlFor="environment">Environment</InputLabel>
+                                    <Select onChange={this.handleEnvironmentChange} value={this.state.environmentId}
+                                            input={<Input id="environment"/>}>
+                                        {this.state.environments.map((environment, index) =>
+                                            <MenuItem value={index} key={index}>{environment.label}</MenuItem>
+                                        )}
+                                    </Select>
+                                </FormControl>
+                            </div>
+                            }
 
                             <Button type="submit" raised color="primary" className="login-form-submit">
                                 Login

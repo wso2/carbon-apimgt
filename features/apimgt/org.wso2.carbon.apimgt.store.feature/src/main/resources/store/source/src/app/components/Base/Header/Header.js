@@ -34,6 +34,9 @@ import InfoIcon from 'material-ui-icons/Info';
 import InfoLightBulb from 'material-ui-icons/LightbulbOutline';
 import Avatar from 'material-ui/Avatar';
 import List, {ListItem, ListItemIcon, ListItemText,} from 'material-ui/List';
+import ConfigManager from "../../../data/ConfigManager";
+import EnvironmentMenu from "./EnvironmentMenu";
+import Utils from "../../../data/Utils";
 
 const helpTips = [
     "By API Name [Default]",
@@ -58,8 +61,19 @@ class Header extends React.Component {
             openAddMenu: false,
             openMainMenu: false,
             searchVisible: false,
-            openTips: false
-        }
+            openTips: false,
+            environments: {},
+            environmentId: 0
+        };
+    }
+
+    componentDidMount(){
+        //Get Environments
+        let promised_environments = ConfigManager.getConfigs().environments.then(response => {
+            this.setState({
+                environments: response.data.environments
+            });
+        });
     }
 
     handleClickUserMenu = event => {
@@ -69,6 +83,15 @@ class Header extends React.Component {
     handleRequestCloseUserMenu = () => {
         this.setState({openUserMenu: false});
     };
+
+    handleEnvironmentChange = event => {
+        this.setState({ openEnvironmentMenu: false });
+        //TODO: [rnk] Optimize Rendering.
+        let environmentId = parseInt(event.target.id);
+        Utils.setEnvironment(this.state.environments[environmentId]);
+        this.setState({environmentId});
+    };
+
     handleClickAddMenu = event => {
         this.setState({openAddMenu: true, anchorElAddMenu: event.currentTarget});
     };
@@ -177,6 +200,10 @@ class Header extends React.Component {
                                         <MenuItem onClick={this.handleRequestCloseMainMenu}>Applications</MenuItem>
                                     </Link>
                                 </Menu>
+                                {/* Environment menu */}
+                                <EnvironmentMenu environments={this.state.environments}
+                                                 environmentLabel={Utils.getEnvironment().label}
+                                                 handleEnvironmentChange={this.handleEnvironmentChange}/>
                                 {/* User menu */}
                                 <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClickUserMenu}
                                         color="contrast">
