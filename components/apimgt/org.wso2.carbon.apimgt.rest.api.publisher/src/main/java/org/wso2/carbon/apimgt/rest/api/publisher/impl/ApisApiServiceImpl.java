@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListPaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.mappings.DocumentationMappingUtil;
@@ -105,6 +106,13 @@ public class ApisApiServiceImpl extends ApisApiService {
             allMatchedApis = apiProvider.searchAPIs(searchContent, searchType, null);
             apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, offset, limit);
             APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, allMatchedApis.size());
+
+            APIListPaginationDTO paginationDTO = new APIListPaginationDTO();
+            paginationDTO.setOffset(offset);
+            paginationDTO.setLimit(limit);
+            paginationDTO.setTotal(allMatchedApis.size());
+            apiListDTO.setPagination(paginationDTO);
+
             return Response.ok().entity(apiListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving APIs";
