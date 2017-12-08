@@ -29,72 +29,13 @@ import Typography from 'material-ui/Typography';
 import Divider from 'material-ui/Divider';
 import Grid from 'material-ui/Grid';
 import Paper from 'material-ui/Paper';
-import Checkbox from 'material-ui/Checkbox';
 
 import API from '../../../data/api'
 import Message from '../../Shared/Message'
-import XMLPolicyFields from '../Shared/XMLPolicyFields'
 
-class CreateXMLThreatProtectionPolicy extends Component {
-    state = {
-        policy: {
-            name: '',
-            policy: {
-                dtdEnabled: false,
-                externalEntitiesEnabled: false,
-                maxDepth: '',
-                maxElementCount: '',
-                maxAttributeCount: '',
-                maxAttributeLength: '',
-                entityExpansionLimit: '',
-                maxChildrenPerElement: ''
-            },
-            type: "XML"
-        }
-    };
-
+class AddPolicy extends Component {
     componentDidMount() {
 
-    }
-
-    handleChangeChild(name, value) {
-        var policy = this.state.policy;
-        if (name == "name") {
-            policy.name = value;
-        } else {
-            policy.policy[name] = value;
-        }
-        this.setState({policy: policy});
-    }
-
-    toggleGlobalPolicy(event) {
-        var isGlobalPolicy = !this.state.isGlobalPolicy;
-
-        var policy = this.state.policy;
-        if (isGlobalPolicy) {
-            policy.uuid = "GLOBAL-XML";
-        } else {
-            delete policy.uuid;
-        }
-        this.setState({policy: policy});
-        this.setState({isGlobalPolicy: !this.state.isGlobalPolicy});
-    }
-
-    handlePolicyCreate() {
-        var api = new API();
-        var policy = this.state.policy;
-        policy.policy = JSON.stringify(policy.policy);
-        const promised_policy = api.addThreatProtectionPolicy(policy);
-        promised_policy.then(
-            response => {
-                if (response.status == 200) {
-                    this.msg.info("Threat protection policy created successfully.");
-                } else {
-                    this.msg.error("Failed to create threat protection policy.");
-                    console.log(response.statusText);
-                }
-            }
-        );
     }
 
     render() {
@@ -105,21 +46,19 @@ class CreateXMLThreatProtectionPolicy extends Component {
                         <IconButton color="contrast" aria-label="Menu">
                             <MenuIcon />
                         </IconButton>
-                        <Link to={"/security/xml_threat_protection"}>
+                        <Link to={"/apis/:api_uuid/security"}>
                             <Button color="contrast">Go Back</Button>
                         </Link>
                     </Toolbar>
                 </AppBar>
-                <Message ref={a => this.msg = a}/>
+                {/*<Message ref={a => this.msg = a}/>*/}
                 <Paper>
                     <Grid container className="root" direction="column">
                         <Grid item xs={12} className="grid-item">
                             <Typography className="page-title" type="display1" gutterBottom>
-                                Create Threat Protection Policy
+                                Add Threat Protection Policy
                             </Typography>
                         </Grid>
-                        <XMLPolicyFields policy={this.state.policy} handleChangeChild={this.handleChangeChild.bind(this)} />
-                        <span><Checkbox label="Global Policy" checked={this.state.isGlobalPolicy} onChange={this.toggleGlobalPolicy.bind(this)}/> Global Policy</span>
                         <Paper elevation ={20}>
                             <Grid item xs={6} className="grid-item">
                                 <Divider />
@@ -128,7 +67,7 @@ class CreateXMLThreatProtectionPolicy extends Component {
                                         () => this.handlePolicyCreate()}>
                                         Create
                                     </Button>
-                                    <Link to={"/security/xml_threat_protection"}>
+                                    <Link to={"/security/json_threat_protection"}>
                                         <Button raised>Cancel</Button>
                                     </Link>
                                 </div>
@@ -141,4 +80,4 @@ class CreateXMLThreatProtectionPolicy extends Component {
     }
 }
 
-export default CreateXMLThreatProtectionPolicy
+export default AddPolicy

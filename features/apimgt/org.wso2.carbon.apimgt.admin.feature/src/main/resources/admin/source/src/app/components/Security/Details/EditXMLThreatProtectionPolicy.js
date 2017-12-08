@@ -88,7 +88,7 @@ class EditXMLThreatProtectionPolicy extends Component {
                         <IconButton color="contrast" aria-label="Menu">
                             <MenuIcon />
                         </IconButton>
-                        <Link to={"/security/json_threat_protection"}>
+                        <Link to={"/security/xml_threat_protection"}>
                             <Button color="contrast">Go Back</Button>
                         </Link>
                     </Toolbar>

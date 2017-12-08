@@ -717,6 +717,20 @@ class API {
         });
         return promised_wsdlResponse;
     }
+
+    getThreatProtectionPolicies() {
+        let promisedPolicies = this.client.then((client) => {
+            return client.apis["Threat Protection Policies"].get_threat_protection_policies();
+        });
+        return promisedPolicies;
+    }
+
+    getThreatProtectionPolicy(id) {
+        let promisedPolicies = this.client.then((client) => {
+            return client.apis["Threat Protection Policy"].get_threat_protection_policies__policyId_(id);
+        });
+        return promisedPolicies;
+    }
 }
 
 export default API

@@ -25,7 +25,7 @@ import Paper from 'material-ui/Paper';
 import Typography from 'material-ui/Typography';
 import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table';
 import AppBar from 'material-ui/AppBar';
-import Toolbar from 'material-ui/Toolbar';;
+import Toolbar from 'material-ui/Toolbar';
 import IconButton from 'material-ui/IconButton';
 import Divider from 'material-ui/Divider';
 import Button from 'material-ui/Button';
@@ -59,13 +59,11 @@ export default class JSONThreatProtectionPolicies extends Component {
 
     componentDidMount() {
         var api = new API();
-        console.log(api);
         var promised_policies = api.getThreatProtectionPolicies();
         promised_policies.then(
             response => {
                 var policies = response.obj.list.filter(item => item.type == "JSON");
                 //parsing policy string
-                console.log(response);
                 for(var i=0; i<policies.length; i++) {
                     policies[i].policy = JSON.parse(policies[i].policy);
                 }

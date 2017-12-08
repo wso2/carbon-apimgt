@@ -27,7 +27,7 @@ import Resources from './Resources/Resources'
 import PermissionFormWrapper from './Permission'
 import Endpoints from './Endpoints'
 import Subscriptions from './Subscriptions/Subscriptions'
-import Security from './Security/Security'
+import Security from './Security/SecurityOverview'
 import NavBar from  './NavBar'
 
 

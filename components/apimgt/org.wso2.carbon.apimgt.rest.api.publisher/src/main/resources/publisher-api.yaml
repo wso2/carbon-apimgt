@@ -2942,7 +2942,7 @@ paths:
       parameters:
         - $ref: '#/parameters/threatProtectionPolicyId'
       tags:
-        - Associate a Threat Protection Policy
+        - Threat Protection Policy
       responses:
         200:
           description: Ok. Policy is returned
