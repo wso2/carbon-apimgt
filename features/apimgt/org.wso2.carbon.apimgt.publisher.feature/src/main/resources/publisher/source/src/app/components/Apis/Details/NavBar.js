@@ -20,7 +20,7 @@ import React, {Component} from 'react'
 import {Link, withRouter} from 'react-router-dom'
 import { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
 import { Description, DonutLarge, Games,FilterNone,
-    LockOutline, InsertDriveFile, Tune, Code, Subscriptions, ChromeReaderMode  } from 'material-ui-icons';
+    LockOutline, InsertDriveFile, Tune, Code, Subscriptions, ChromeReaderMode, VerifiedUser  } from 'material-ui-icons';
 import Divider from 'material-ui/Divider';
 
 class NavBar extends Component {
@@ -35,7 +35,8 @@ class NavBar extends Component {
             DOCUMENTS: "documents",
             MEDIATION: "mediation",
             SCRIPTING: "scripting",
-            SUBSCRIPTIONS: "subscriptions"
+            SUBSCRIPTIONS: "subscriptions",
+            SECURITY: "security"
         }
     }
 
@@ -113,6 +114,12 @@ class NavBar extends Component {
                         <Subscriptions />
                     </ListItemIcon>
                     <Link name="subscriptions" to={"/apis/" + api_uuid + "/subscriptions"}><ListItemText primary="subscriptions" /></Link>
+                </ListItem>
+                <ListItem className={showActiveTab("security")}>
+                    <ListItemIcon>
+                        <VerifiedUser />
+                    </ListItemIcon>
+                    <Link name="security" to={"/apis/" + api_uuid + "/security"}><ListItemText primary="security" /></Link>
                 </ListItem>
             </div>
         )

@@ -82,8 +82,7 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
     @Override
     public void addPolicy(ThreatProtectionPolicy policy) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
-            //check for update
-            if (isPolicyExists(policy.getUuid(), connection)) {
+            if (isPolicyExists(policy.getUuid())) {
                 updatePolicy(policy, connection);
                 return;
             }
@@ -126,6 +125,14 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
     @Override
     public void updatePolicy(ThreatProtectionPolicy policy) throws APIMgtDAOException {
         try (Connection connection = DAOUtil.getConnection()) {
+            //handling global policy creation
+            //Global policies have ids 'GLOBAL-JSON' or 'GLOBAL-XML'
+            if ("GLOBAL-JSON".equalsIgnoreCase(policy.getUuid()) || "GLOBAL-XML".equalsIgnoreCase(policy.getUuid())) {
+                if (!isPolicyExists(policy.getUuid())) {
+                    addPolicy(policy, connection);
+                    return;
+                }
+            }
             updatePolicy(policy, connection);
         } catch (SQLException e) {
             String errorMsg = "Error updating policy for PolicyId: " + policy.getUuid();

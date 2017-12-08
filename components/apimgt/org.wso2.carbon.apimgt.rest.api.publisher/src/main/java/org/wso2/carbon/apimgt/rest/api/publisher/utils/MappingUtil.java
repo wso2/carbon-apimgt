@@ -587,7 +587,6 @@ public class MappingUtil {
         dto.setType(policy.getType());
         dto.setName(policy.getName());
         dto.setPolicy(policy.getPolicy());
-
         return dto;
     }
 

@@ -2928,6 +2928,8 @@ paths:
     get:
       summary: Get All Threat Protection Policies
       description: This can be used to get all defined threat protection policies
+      tags:
+        - Threat Protection Policies
       responses:
         200:
           description: Ok. List of policies is returned
@@ -2939,6 +2941,8 @@ paths:
       summary: Get a threat protection policy
       parameters:
         - $ref: '#/parameters/threatProtectionPolicyId'
+      tags:
+        - Associate a Threat Protection Policy
       responses:
         200:
           description: Ok. Policy is returned

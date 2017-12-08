@@ -739,7 +739,7 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             throw new APIManagementException(e.getMessage(), e);
         }
     }
-//add an update method
+
     @Override
     public void addThreatProtectionPolicy(ThreatProtectionPolicy policy) throws APIManagementException {
         try {
