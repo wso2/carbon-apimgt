@@ -3,6 +3,7 @@ var i18n = require("i18n");
 var localeResourcesBasePath = "/site/conf/locales/jaggery/";
 var tenantDomain = jagg.getTenantDomain();
 var site = require("/site/conf/site.json");
+var carbon = require('carbon');
 i18n.init(request, localeResourcesBasePath);
 jagg.block("api/api-info", {
     initialize: function (data) {
@@ -36,6 +37,15 @@ jagg.block("api/api-info", {
         var mod = jagg.module("manager");
         var isForumEnabled = mod.isForumEnabled();
         var supportedLangs = jagg.module("sdk").getSupportedLanguages();
+
+        var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        var apiUtil = new APIUtil();
+        var tenantVal = request.getParameter("tenant");
+        var tenantID = carbon.server.osgiService('org.wso2.carbon.user.core.service.RealmService').getTenantManager().getTenantId(tenantVal);
+        var customOAuth2Header = apiUtil.getOAuthConfiguration(tenantID, "CustomOAuth2Header");
+        if(null == customOAuth2Header) {
+            customOAuth2Header = "Authorization";
+        }
 
         if (api) {
             isAdvertiseOnly = (api.isAdvertiseOnly == null) ? false : api.isAdvertiseOnly;
@@ -110,7 +120,8 @@ jagg.block("api/api-info", {
                                                 "name": "api/swagger",
                                                 "inputs": {
                                                     "api": api,
-                                                    "subscriptions": subscriptions
+                                                    "subscriptions": subscriptions,
+                                                    "customOAuth2Header": customOAuth2Header
                                                 }
                                             }
                                         ]
@@ -295,7 +306,8 @@ jagg.block("api/api-info", {
                                                 "name": "api/swagger",
                                                 "inputs": {
                                                     "api": api,
-                                                    "subscriptions": subscriptions
+                                                    "subscriptions": subscriptions,
+                                                    "customOAuth2Header": customOAuth2Header
                                                 }
                                             }
                                         ]

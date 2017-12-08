@@ -1,5 +1,6 @@
 <%
 include("/jagg/jagg.jag");
+var carbon = require('carbon');
 (function () {
     var site = require("/site/conf/site.json");
     var ssoEnabled = site.ssoConfiguration.enabled;
@@ -150,7 +151,30 @@ include("/jagg/jagg.jag");
            }
            print(obj);
 
-     } else {
+     }  else if (action == "getCustomOAuthHeader" && request.getMethod() == 'POST') {
+            var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+            var apiUtil = new APIUtil();
+            var tenantVal = request.getParameter("tenant");
+            var tenantID = carbon.server.osgiService('org.wso2.carbon.user.core.service.RealmService').getTenantManager().getTenantId(tenantVal);
+            var customOAuth2Header = apiUtil.getOAuthConfiguration(tenantID, "CustomOAuth2Header");
+            if(null == customOAuth2Header) {
+                customOAuth2Header = "Authorization";
+            }
+            if (customOAuth2Header.error) {
+                obj = {
+                    error:result.error,
+                    message:msg.error.authError(action, username)
+                };
+            }else{
+                obj = {
+                    error:false,
+                    customHeader:customOAuth2Header
+                }
+            }
+
+            print(obj);
+    }
+    else {
         print({
             error:true,
             message:msg.error.invalidAction(action)

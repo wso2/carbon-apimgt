@@ -5,7 +5,7 @@ var site = require("/site/conf/site.json");
 var host = site.hostname;
 
 var subscriptions = outputs.subscriptions;
-
+var customOAuth2Header = outputs.customOAuth2Header;
 var protocol = "http";
 
 function getLocation(href) {
@@ -288,7 +288,7 @@ function checkOnKeyPress(e) {
             <label class="col-sm-3 control-label">Set Request Header</label>
             <div class=" col-sm-9">
             <div class="input-group">
-              <span class="input-group-addon" id="sizing-addon1">Authorization : Bearer</span>
+              <span class="input-group-addon" id="sizing-addon1"><%=customOAuth2Header%> : Bearer</span>
               <input type="text" id="access_token" name="access_token" title="access_token" placeholder="Access Token" class="form-control" onkeypress="return checkOnKeyPress(event)">
             </div>
             </div>
