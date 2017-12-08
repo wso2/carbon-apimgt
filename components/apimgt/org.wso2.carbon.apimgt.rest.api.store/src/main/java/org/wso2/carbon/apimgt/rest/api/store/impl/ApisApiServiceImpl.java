@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.store.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.dto.APIListPaginationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
@@ -72,6 +73,8 @@ public class ApisApiServiceImpl extends ApisApiService {
         //setting default limit and offset values if they are not set
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+
+        query = query == null ? "" : query;
 
         String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
         APIListDTO apiListDTO = new APIListDTO();
@@ -123,6 +126,12 @@ public class ApisApiServiceImpl extends ApisApiService {
                 Set<API> apiSet = (Set)apisResult;
                 apiListDTO = APIMappingUtil.fromAPISetToDTO(apiSet);
                 APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, size);
+
+                APIListPaginationDTO paginationDTO = new APIListPaginationDTO();
+                paginationDTO.setOffset(offset);
+                paginationDTO.setLimit(limit);
+                paginationDTO.setTotal(size);
+                apiListDTO.setPagination(paginationDTO);
             }
 
             return Response.ok().entity(apiListDTO).build();

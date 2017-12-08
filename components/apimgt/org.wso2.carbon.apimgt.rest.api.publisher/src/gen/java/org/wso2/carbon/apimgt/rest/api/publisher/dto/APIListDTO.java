@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.dto;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListPaginationDTO;
 import java.util.*;
 
 import io.swagger.annotations.*;
@@ -26,7 +27,10 @@ public class APIListDTO  {
   
   private List<APIInfoDTO> list = new ArrayList<APIInfoDTO>();
 
-  
+
+  private APIListPaginationDTO pagination = null;
+
+
   /**
    * Number of APIs returned.
    **/
@@ -77,7 +81,19 @@ public class APIListDTO  {
     this.list = list;
   }
 
-  
+
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("pagination")
+  public APIListPaginationDTO getPagination() {
+    return pagination;
+  }
+  public void setPagination(APIListPaginationDTO pagination) {
+    this.pagination = pagination;
+  }
+
+
 
   @Override
   public String toString()  {
@@ -88,6 +104,7 @@ public class APIListDTO  {
     sb.append("  next: ").append(next).append("\n");
     sb.append("  previous: ").append(previous).append("\n");
     sb.append("  list: ").append(list).append("\n");
+    sb.append("  pagination: ").append(pagination).append("\n");
     sb.append("}\n");
     return sb.toString();
   }
