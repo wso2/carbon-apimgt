@@ -32,7 +32,7 @@ describe('AuthManager',
                     function () {
                         let authenticator = new AuthManager();
                         let environment = {
-                            "host": "https://localhost:9292",
+                            "host": "localhost:9292",
                             "loginTokenPath": "/login/token",
                             "label": "Production"
                         };

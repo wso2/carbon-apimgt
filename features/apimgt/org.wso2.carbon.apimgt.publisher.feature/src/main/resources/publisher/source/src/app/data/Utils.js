@@ -88,7 +88,7 @@ class Utils {
 
     /**
      * Get the current environment from local-storage
-     * @returns {Utils.CONST.DEFAULT_ENVIRONMENT|{label, host, loginTokenPath}}
+     * @returns {Object} environment: {label, host, loginTokenPath}
      */
     static getEnvironment() {
         if (Utils._environment) {
@@ -97,7 +97,7 @@ class Utils {
 
         let environmentData = localStorage.getItem(Utils.CONST.LOCALSTORAGE_ENVIRONMENT);
         if (!environmentData) {
-            return Utils.CONST.DEFAULT_ENVIRONMENT;
+            return Utils._getDefaultEnvironment();
         }
 
         return JSON.parse(environmentData);
@@ -125,11 +125,11 @@ class Utils {
      */
     static setEnvironment(environment) {
         if (!environment) {
-            environment = Utils.CONST.DEFAULT_ENVIRONMENT;
+            environment = Utils._getDefaultEnvironment();
         }
 
         if (!environment.host) {
-            environment.host = location.host;
+            environment.host = window.location.host;
         }
         //Store environment.
         Utils._environment = environment;
@@ -156,11 +156,19 @@ class Utils {
     static getSwaggerURL() {
         return "https://" + Utils.getEnvironment().host + Utils.CONST.SWAGGER_YAML;
     }
+
+    /**
+     * Get an environment object with default values.
+     * @returns {Object} environment: {label: string, host: string, loginTokenPath: string}
+     * @private
+     */
+    static _getDefaultEnvironment(){
+        return {label: 'Default', host: window.location.host, loginTokenPath: '/login/token'};
+    }
 }
 
 Utils.CONST = {
     LOCALSTORAGE_ENVIRONMENT: 'environment',
-    DEFAULT_ENVIRONMENT: {label: 'Default', host: location.host, loginTokenPath: '/login/token'},
     LOGIN: '/login/login',
     LOGOUT: '/login/logout',
     LOGIN_TOKEN_PATH: '/login/token',
