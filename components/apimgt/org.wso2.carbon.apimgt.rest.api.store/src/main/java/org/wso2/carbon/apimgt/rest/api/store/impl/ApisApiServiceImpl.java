@@ -92,35 +92,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (!RestApiUtil.isTenantAvailable(requestedTenantDomain)) {
                 RestApiUtil.handleBadRequest("Provided tenant domain '" + xWSO2Tenant + "' is invalid", log);
             }
-
-            String newSearchQuery = "";
-            String inputSearchQuery = query.trim();
-            // sub context and doc content doesn't support AND search
-            if (inputSearchQuery.contains(" ")) {
-                if (inputSearchQuery.split(" ").length > 1) {
-                    String[] searchCriterias = inputSearchQuery.split(" ");
-                    for (int i = 0; i < searchCriterias.length; i++) {
-                        if (searchCriterias[i].contains(":") && searchCriterias[i].split(":").length > 1) {
-                            if (APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX
-                                    .equalsIgnoreCase(searchCriterias[i].split(":")[0])
-                                    || APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX
-                                            .equalsIgnoreCase(searchCriterias[i].split(":")[0])) {
-                                throw new APIManagementException("Invalid query. AND based search is not supported for "
-                                        + "doc and subcontext prefixes");
-                            }
-                        }
-                        if (i == 0) {
-                            newSearchQuery = APIUtil.getSingleSearchCriteria(searchCriterias[i]);
-                        } else {
-                            newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG
-                                    + APIUtil.getSingleSearchCriteria(searchCriterias[i]);
-                        }
-                    }
-                }
-            } else {
-                newSearchQuery = APIUtil.getSingleSearchCriteria(inputSearchQuery);
-            }
-
+            String newSearchQuery = APIUtil.constructNewSearchQuery(query);
             // Append LC state query criteria if the search is not doc or subcontext
             // based
             if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX2.startsWith(newSearchQuery) &&

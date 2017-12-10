@@ -109,29 +109,14 @@ public class ApisApiServiceImpl extends ApisApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query == null ? "" : query;
         try {
+            String newSearchQuery = APIUtil.constructNewSearchQuery(query);
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
-
-            //if query parameter is not specified, This will search by name
-            String searchType = APIConstants.API_NAME;
-            String searchContent = "";
-            if (!StringUtils.isBlank(query)) {
-                String[] querySplit = query.split(":");
-                if (querySplit.length == 2 && StringUtils.isNotBlank(querySplit[0]) && StringUtils
-                        .isNotBlank(querySplit[1])) {
-                    searchType = querySplit[0];
-                    searchContent = querySplit[1];
-                } else if (querySplit.length == 1) {
-                    searchContent = query;
-                } else {
-                    RestApiUtil.handleBadRequest("Provided query parameter '" + query + "' is invalid", log);
-                }
-            }
 
             //We should send null as the provider, Otherwise searchAPIs will return all APIs of the provider
             // instead of looking at type and query
             String username = RestApiUtil.getLoggedInUsername();
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
-            Map<String, Object> result = apiProvider.searchPaginatedAPIs(searchContent, tenantDomain,
+            Map<String, Object> result = apiProvider.searchPaginatedAPIs(newSearchQuery, tenantDomain,
                                         offset, limit, false);
             Set<API> apis = (Set<API>) result.get("apis");
             allMatchedApis.addAll(apis);
