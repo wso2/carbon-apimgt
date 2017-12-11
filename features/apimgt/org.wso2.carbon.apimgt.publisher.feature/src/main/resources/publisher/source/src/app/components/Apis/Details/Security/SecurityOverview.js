@@ -20,6 +20,7 @@ import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
 
 import Api from '../../../../data/api'
+import Message from '../../../Shared/Message'
 
 import Typography from 'material-ui/Typography';
 import Grid from 'material-ui/Grid';
@@ -27,13 +28,12 @@ import Paper from 'material-ui/Paper';
 import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table';
 import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
-import IconButton from 'material-ui/IconButton';
 import Button from 'material-ui/Button';
-import MenuIcon from 'material-ui-icons/Menu';
 
 class Security extends Component {
     constructor(props) {
         super(props);
+        this.api = new Api();
         this.state = {
             api: {
                 name: ''
@@ -48,26 +48,41 @@ class Security extends Component {
     }
 
     updateData() {
-        let api = new Api();
-        let promised_api = api.get(this.props.match.params.api_uuid);
+        let promised_api = this.api.get(this.props.match.params.api_uuid);
         promised_api.then(response => {
             this.setState({api: response.obj});
-
-            let policyIds = this.state.api.threatProtectionPolicies;
-            var policies = [];
-            for (var i=0; i<policyIds.length; i++) {
-                let id = policyIds[i];
-                let promisedPolicies = api.getThreatProtectionPolicy(id);
-                promisedPolicies.then(response => {
-                   policies.push(response.obj);
-                });
-            }
-            this.setState({policies: policies});
+            this.updatePolicyData();
         });
     }
 
-    deletePolicy(id) {
+    updatePolicyData() {
+        this.setState({policies: []})
+        let policyIds = this.state.api.threatProtectionPolicies;
+        for (var i=0; i<policyIds.length; i++) {
+            let id = policyIds[i];
+            let promisedPolicies = this.api.getThreatProtectionPolicy(id);
+            promisedPolicies.then(response => {
+                let policies = this.state.policies;
+                policies.push(response.obj);
+                this.setState({policies: policies});
+            });
+        }
+    }
 
+    deletePolicy(id) {
+        let associatedApi = this.state.api;
+        console.log(associatedApi);
+        let index = associatedApi.threatProtectionPolicies.indexOf(id);
+        associatedApi.threatProtectionPolicies.splice(index, 1);
+        let promisedApiUpdate = this.api.update(associatedApi);
+        promisedApiUpdate.then(response => {
+           if (response.status === 200) {
+               this.msg.info("Policy removed successfully.");
+               this.updatePolicyData();
+           } else {
+               this.msg.error("Failed to remove policy.");
+           }
+        });
     }
 
     render() {
@@ -81,12 +96,14 @@ class Security extends Component {
                 <Grid item xs={12}>
                     <AppBar position="static" >
                         <Toolbar style={{minHeight:'30px'}}>
-                            <Link to={"/security/json_threat_protection/create/"}>
+                            <Link to={"/apis/:api_uuid/security/add-policy".replace(":api_uuid",
+                                this.props.match.params.api_uuid)}>
                                 <Button color="contrast">Add Policy</Button>
                             </Link>
                         </Toolbar>
                     </AppBar>
                 </Grid>
+                <Message ref={a => this.msg = a}/>
                 <Grid item xs={12}>
                     <Paper>
                         <Typography className="page-title" type="display2">
@@ -104,6 +121,7 @@ class Security extends Component {
                             <TableHead>
                                 <TableRow>
                                     <TableCell>Policy Name</TableCell>
+                                    <TableCell>Policy Type</TableCell>
                                     <TableCell>Policy</TableCell>
                                     <TableCell></TableCell>
                                 </TableRow>
@@ -112,7 +130,8 @@ class Security extends Component {
                                 {data.map(n => {
                                     return (
                                         <TableRow key={n.uuid}>
-                                            <TableCell>{n.name + (n.uuid=="GLOBAL-JSON"? " (GLOBAL)": '')}</TableCell>
+                                            <TableCell>{n.name + (n.uuid=="GLOBAL-JSON"? " (GLOBAL)": "")}</TableCell>
+                                            <TableCell>{n.type}</TableCell>
                                             <TableCell>{n.policy}</TableCell>
                                             <TableCell>
                                               <span>

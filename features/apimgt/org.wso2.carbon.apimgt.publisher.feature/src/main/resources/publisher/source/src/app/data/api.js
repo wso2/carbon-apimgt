@@ -727,7 +727,7 @@ class API {
 
     getThreatProtectionPolicy(id) {
         let promisedPolicies = this.client.then((client) => {
-            return client.apis["Threat Protection Policy"].get_threat_protection_policies__policyId_(id);
+            return client.apis["Threat Protection Policy"].get_threat_protection_policies__policyId_({policyId: id});
         });
         return promisedPolicies;
     }

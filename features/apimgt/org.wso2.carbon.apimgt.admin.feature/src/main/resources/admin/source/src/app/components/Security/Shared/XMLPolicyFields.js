@@ -67,7 +67,7 @@ class XMLPolicyFields extends Component {
                         <Select
                             value={this.props.policy.policy.dtdEnabled.toString()}
                             onChange={this.handleChange("dtdEnabled")}
-                            input={<Input name="age" id="dtdEnabled" />}
+                            input={<Input name="dtdEnabled" id="dtdEnabled" />}
                         >
                             <MenuItem value={"true"}>true</MenuItem>
                             <MenuItem value={"false"}>false</MenuItem>
