@@ -1492,7 +1492,7 @@ public final class APIUtil {
      * @return true if wsdl2 definition
      * @throws APIManagementException
      */
-    static boolean isWSDL2Resource(byte[] wsdl) throws APIManagementException {
+    private static boolean isWSDL2Resource(byte[] wsdl) throws APIManagementException {
         String wsdl2NameSpace = "http://www.w3.org/ns/wsdl";
         String wsdlContent = new String(wsdl);
         return wsdlContent.indexOf(wsdl2NameSpace) > 0;
