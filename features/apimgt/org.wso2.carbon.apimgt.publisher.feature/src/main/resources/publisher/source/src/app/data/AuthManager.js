@@ -207,7 +207,7 @@ class AuthManager {
             user.scopes = response.data.scopes.split(" ");
             AuthManager.setUser(user);
         }).catch(error => {
-            console.log("Authentication Error:\n", error);
+            console.error("Authentication Error:\n", error);
             Utils.setEnvironment(previous_environment);
         });
         return promised_response;

@@ -19,7 +19,7 @@
 import AuthManager from "./AuthManager";
 
 /**
- * Utility class for Admin Portal application
+ * Utility class for Store application
  */
 class Utils {
 
@@ -172,9 +172,9 @@ Utils.CONST = {
     LOGIN: '/login/login',
     LOGOUT: '/login/logout',
     LOGIN_TOKEN_PATH: '/login/token',
-    SWAGGER_YAML: '/api/am/publisher/v1.0/apis/swagger.yaml',
+    SWAGGER_YAML: '/api/am/store/v1.0/apis/swagger.yaml',
     PROTOCOL: 'https://',
-    CONTEXT_PATH: '/publisher'
+    CONTEXT_PATH: '/store'
 };
 
 /**

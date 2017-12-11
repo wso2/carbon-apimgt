@@ -18,8 +18,8 @@
 
 import React, {Component} from 'react'
 
-import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom'
-import {Apis, Applications, ApplicationCreate, Base, Login, Logout } from './app/components'
+import {BrowserRouter as Router, Redirect, Route, Switch} from 'react-router-dom'
+import {Apis, ApplicationCreate, Applications, Base, Login, Logout} from './app/components'
 import {PageNotFound} from './app/components/Base/Errors'
 import AuthManager from './app/data/AuthManager'
 import qs from 'qs'
@@ -30,6 +30,8 @@ import 'antd/dist/antd.css'
 import {message} from 'antd'
 import './App.css'
 import 'typeface-roboto'
+import Utils from "./app/data/Utils";
+
 // import './materialize.css'
 
 /**
@@ -42,12 +44,20 @@ class Protected extends Component {
         message.config({top: '48px'}); // .custom-header height + some offset
         /* TODO: need to fix the header to avoid conflicting with messages ~tmkb*/
         this.handleResponse = this.handleResponse.bind(this);
-        /* TODO: Get apim base url from config*/
-        Axios.get(location.origin + "/login/login/store").then(this.handleResponse);
+        Axios.get(Utils.getAppLoginURL()).then(this.handleResponse).catch(this.handleReject);
     }
 
     handleResponse = (response) => {
-        this.setState({ authConfigs: response.data});
+        this.setState({authConfigs: response.data});
+    }
+
+    /**
+     * Handle invalid login url in localStorage - environment object
+     * @param reject
+     */
+    handleReject = reject => {
+        Utils.setEnvironment(); //Set Default environment
+        Axios.get(Utils.getAppLoginURL()).then(this.handleResponse); //Try login
     }
 
     /**
@@ -63,9 +73,9 @@ class Protected extends Component {
                 <Base>
                     <Switch>
                         <Redirect exact from="/" to="/apis"/>
-                        <Route path={"/apis"} component={Apis} />
-                        <Route path={"/applications"} component={Applications} />
-                        <Route path={"/application/create"} component={ApplicationCreate} />
+                        <Route path={"/apis"} component={Apis}/>
+                        <Route path={"/applications"} component={Applications}/>
+                        <Route path={"/application/create"} component={ApplicationCreate}/>
                         <Route component={PageNotFound}/>
                     </Switch>
                 </Base>
@@ -78,11 +88,11 @@ class Protected extends Component {
                 var client_id = this.state.authConfigs.client_id;
                 var callback_URL = this.state.authConfigs.callback_url;
                 var scopes = this.state.authConfigs.scopes;
-                window.location = authorizationEndpoint+"?response_type=code&client_id="+client_id+"&redirect_uri="+callback_URL+"&scope="+scopes;
+                window.location = authorizationEndpoint + "?response_type=code&client_id=" + client_id + "&redirect_uri=" + callback_URL + "&scope=" + scopes;
             } else {
                 return (
-                            <Redirect to={{pathname: '/login', search: params}}/>
-                        );
+                    <Redirect to={{pathname: '/login', search: params}}/>
+                );
             }
         } else {
             return <LoadingAnimation/>;

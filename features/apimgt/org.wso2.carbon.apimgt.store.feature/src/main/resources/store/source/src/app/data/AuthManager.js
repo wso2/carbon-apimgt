@@ -19,23 +19,15 @@
 
 import axios from 'axios'
 import qs from 'qs'
-import Configs from './ConfigManager'
-import Utils from './utils'
+import Utils from './Utils'
 import User from './User'
-
-const context = "store";
+import APIClient from './APIClient'
+import APIClientFactory from "./APIClientFactory";
 
 class AuthManager {
     constructor() {
-        /* TODO: Move this to configuration ~tmkb*/
-        this.host = window.location.protocol + "//" + window.location.host;
-        //TODO context: store ???
-        this.token = "/login/token/" + context;
         this.isLogged = false;
         this.username = null;
-        this.userscope = null;
-        this.bearer = "Bearer ";
-        this.contextPath = "/store";
     }
 
     static refreshTokenOnExpire() {
@@ -113,34 +105,58 @@ class AuthManager {
      * An user object is return in present of user logged in user info in browser local storage, at the same time checks for partialToken in the cookie as well.
      * This may give a partial indication(passive check not actually check the token validity via an API) of whether the user has logged in or not, The actual API call may get denied
      * if the cookie stored access token is invalid/expired
-     *
      * @returns {User | null} Is any user has logged in or not
+     * @param {boolean} readFromLocalStorage: read from local-storage
      */
-    static getUser() {
-        const userData = localStorage.getItem(User.CONST.LOCALSTORAGE_USER);
+    static getUser(readFromLocalStorage) {
+        if (!readFromLocalStorage && AuthManager._user) {
+            return AuthManager._user;
+        }
+
+        const userData = localStorage.getItem(`${User.CONST.LOCALSTORAGE_USER}_${Utils.getEnvironment().label}`);
         const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1);
         if (!(userData && partialToken)) {
             return null;
         }
-        return User.fromJson(JSON.parse(userData));
+
+        //Update user in memory.
+        AuthManager._user = User.fromJson(JSON.parse(userData));
+        return AuthManager._user;
     }
 
     /**
-     * Persist an user in browser local storage, Since only one use can be logged into the application at a time,
+     * Persist an user in browser local storage and in-memory, Since only one use can be logged into the application at a time,
      * This method will override any previously persist user data.
      * @param {User} user : An instance of the {User} class
      */
     static setUser(user) {
-        console.info("Setting user", user);
         if (!user instanceof User) {
             throw new Error("Invalid user object");
         }
-        localStorage.setItem(User.CONST.LOCALSTORAGE_USER, JSON.stringify(user.toJson()));
-        /* TODO: IMHO it's better to get this key (`wso2_user`) from configs */
+
+        if (user) {
+            localStorage.setItem(`${User.CONST.LOCALSTORAGE_USER}_${Utils.getEnvironment().label}`, JSON.stringify(user.toJson()));
+        }
+        AuthManager._user = user;
     }
 
-    getTokenEndpoint() {
-        return this.host + this.token;
+    /**
+     * Get login token path from given environment or get default login token path
+     * @param {Object} environment: environment object
+     * @returns {String} loginTokenPath: login token path of the given environment
+     */
+    getTokenEndpoint(environment) {
+        let loginTokenPath;
+        if (environment) {
+            let origin = Utils.CONST.PROTOCOL;
+            //The default value of `host` in back-end java code is an empty string.
+            origin += environment.host || Utils.getEnvironment().host;
+            loginTokenPath = origin + environment.loginTokenPath + Utils.CONST.CONTEXT_PATH;
+        } else {
+            //If no environment return default loginTokenPath
+            loginTokenPath = Utils.getLoginTokenPath();
+        }
+        return loginTokenPath;
     }
 
     /**
@@ -148,9 +164,10 @@ class AuthManager {
      * Can't use swaggerjs to generate client.Hence using Axios to make AJAX calls
      * @param {String} username : Username of the user
      * @param {String} password : Plain text password
+     * @param {Object} environment : environment object
      * @returns {AxiosPromise} : Promise object with the login request made
      */
-    authenticateUser(username, password) {
+    authenticateUser(username, password, environment) {
         const headers = {
             'Authorization': 'Basic deidwe',
             'Accept': 'application/json',
@@ -163,14 +180,26 @@ class AuthManager {
             validity_period: 3600,
             scopes: 'apim:subscribe apim:signup apim:workflow_approve'
         };
-        let promised_response = axios.post(this.getTokenEndpoint(), qs.stringify(data), {headers: headers});
+        let promised_response = axios(this.getTokenEndpoint(environment), {
+            method: "POST",
+            data: qs.stringify(data),
+            headers: headers,
+            withCredentials: true
+        });
+        //Set the environment that user tried to authenticate
+        let previous_environment = Utils.getEnvironment();
+        Utils.setEnvironment(environment);
+
         promised_response.then(response => {
             const validityPeriod = response.data.validityPeriod; // In seconds
             const WSO2_AM_TOKEN_1 = response.data.partialToken;
-            const user = new User(response.data.authUser, response.data.idToken);
-            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/store");
+            const user = new User(Utils.getEnvironment().label, response.data.authUser, response.data.idToken);
+            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Utils.CONST.CONTEXT_PATH);
             user.scopes = response.data.scopes.split(" ");
             AuthManager.setUser(user);
+        }).catch(error => {
+            console.error("Authentication Error:\n", error);
+            Utils.setEnvironment(previous_environment);
         });
         return promised_response;
     }
@@ -179,17 +208,19 @@ class AuthManager {
      * Revoke the issued OAuth access token for currently logged in user and clear both cookie and localstorage data.
      */
     logout() {
-        let authHeader = this.bearer + AuthManager.getUser().getPartialToken();
+        let authHeader = "Bearer " + AuthManager.getUser().getPartialToken();
         //TODO Will have to change the logout end point url to contain the app context(i.e. publisher/store, etc.)
-        let url = this.host + "/login/logout/store";
+        let url = Utils.getAppLogoutURL()
         let headers = {
             'Accept': 'application/json',
+            'Content-Type': 'application/json',
             'Authorization': authHeader
         };
         const promisedLogout = axios.post(url, null, {headers: headers});
         return promisedLogout.then(response => {
-            Utils.delete_cookie("WSO2_AM_TOKEN_1");
-            localStorage.removeItem("wso2_user");
+            Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, Utils.CONST.CONTEXT_PATH);
+            localStorage.removeItem(User.CONST.LOCALSTORAGE_USER);
+            new APIClientFactory().getAPIClient(Utils.getEnvironment().label)._instance = null; // Single client should be re initialize after log out
         });
     }
 
@@ -200,7 +231,7 @@ class AuthManager {
             scopes: 'apim:subscribe apim:signup apim:workflow_approve'
         };
         let referrer = (document.referrer.indexOf("https") !== -1) ? document.referrer : null;
-        let url = this.contextPath + '/auth/apis/login/token';
+        let url = Utils.CONST.CONTEXT_PATH + '/auth/apis/login/token';
         /* TODO: Fetch this from configs ~tmkb*/
         let headers = {
             'Authorization': authzHeader,
@@ -213,4 +244,10 @@ class AuthManager {
 
 }
 
+/**
+ * Current User
+ * @type {object} User Object
+ * @private
+ */
+AuthManager._user = undefined;
 export default AuthManager;

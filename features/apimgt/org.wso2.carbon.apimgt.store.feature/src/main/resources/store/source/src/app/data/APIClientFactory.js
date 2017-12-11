@@ -15,23 +15,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+"use strict";
+import APIClient from "./APIClient";
+import Utils from "./Utils";
 
-import {Axios} from 'axios'
-import DefaultConfig from './DefaultConfigs.json'
-
-class ConfigManager {
-
+class APIClientFactory {
     constructor() {
-        this.preBuildConfigs = DefaultConfig;
-        this.runTimeConfigs = {};
-        this.runTimeConfigLocation = ""; // URL to fetch runtime config JSON
+        if (APIClientFactory._instance) {
+            return APIClientFactory._instance;
+        }
+
+        this._APIClientMap = new Map();
     }
 
-    checkRunTimeConfigs() {
+    getAPIClient(environmentLabel) {
+        let api_Client = this._APIClientMap.get(environmentLabel);
 
-    }
+        if (api_Client) {
+            return api_Client;
+        }
 
-    getConfigs() {
-
+        api_Client = new APIClient(Utils.getEnvironment().host);
+        this._APIClientMap.set(environmentLabel, api_Client);
+        return api_Client;
     }
 }
+
+APIClientFactory._instance = null;
+
+export default APIClientFactory;
