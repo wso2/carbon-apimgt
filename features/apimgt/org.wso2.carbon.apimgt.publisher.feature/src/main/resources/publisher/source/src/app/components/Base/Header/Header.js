@@ -201,12 +201,13 @@ class Header extends React.Component {
                                     style={{alignItems: "center", justifyContent: "center"}}
                                 >
 
-                                    <MenuItem onClick={this.handleRequestCloseAddMenu}>
-                                        <Link to="/api/create/rest" style={{color: "#000", textDecoration: 'none'}}>Create new API</Link>
-                                    </MenuItem>
-                                    <MenuItem onClick={this.handleRequestCloseAddMenu}>
-                                        <Link to="/api/create/swagger" style={{color: "#000", textDecoration: 'none'}}>Create new API with Swagger</Link>
-                                    </MenuItem>
+                                    <Link to="/api/create/rest">
+                                        <MenuItem onClick={this.handleRequestCloseAddMenu}>Create new API</MenuItem>
+                                    </Link>
+                                    <Link to="/api/create/swagger">
+                                        <MenuItem onClick={this.handleRequestCloseAddMenu}>Create new API with
+                                            Swagger</MenuItem>
+                                    </Link>
                                 </Menu>
                                 {/* Main menu */}
                                 <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClickMainMenu}
@@ -221,12 +222,12 @@ class Header extends React.Component {
                                     style={{alignItems: "center", justifyContent: "center"}}
                                 >
 
-                                    <MenuItem onClick={this.handleRequestCloseMainMenu}>
-                                        <Link to="/" style={{color: "#000", textDecoration: 'none'}}>List API</Link>
-                                    </MenuItem>
-                                    <MenuItem onClick={this.handleRequestCloseMainMenu}>
-                                        <Link to="/endpoints" style={{color: "#000", textDecoration: 'none'}}>Endpoints</Link>
-                                    </MenuItem>
+                                    <Link to="/">
+                                        <MenuItem onClick={this.handleRequestCloseMainMenu}>List API</MenuItem>
+                                    </Link>
+                                    <Link to="/endpoints">
+                                        <MenuItem onClick={this.handleRequestCloseMainMenu}>Endpoints</MenuItem>
+                                    </Link>
                                 </Menu>
                                 {/* Environment menu */}
                                 <EnvironmentMenu environments={this.state.environments}

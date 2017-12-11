@@ -25,7 +25,7 @@ import API from '../../../data/api.js'
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import {Link} from 'react-router-dom'
-import {Table, Popconfirm, Menu, Dropdown, Row, Col, message} from 'antd';
+import {Col, Menu, message, Row, Table} from 'antd';
 
 import Paper from 'material-ui/Paper';
 import Grid from 'material-ui/Grid';
@@ -37,12 +37,12 @@ import ListIcon from 'material-ui-icons/List';
 
 const menu = (
     <Menu>
-        <Menu.Item>
-            <Link to="/api/create/swagger">Create new API with Swagger</Link>
-        </Menu.Item>
-        <Menu.Item>
-            <Link to="/api/create/rest">Create new API</Link>
-        </Menu.Item>
+        <Link to="/api/create/swagger">
+            <Menu.Item>Create new API with Swagger</Menu.Item>
+        </Link>
+        <Link to="/api/create/rest">
+            <Menu.Item>Create new API</Menu.Item>
+        </Link>
     </Menu>
 );
 const ButtonGroup = Button.Group;
