@@ -30,7 +30,10 @@ const styles = theme => ({
         height: theme.spacing.unit * 4,
     },
 });
-
+/**
+ * Common alerting/message displaying component for Store application, Pre-set vertical: 'top',
+ horizontal: 'center' and close action for consistent UX through out the app.
+ */
 class Alert extends React.Component {
     constructor(props) {
         super(props);
