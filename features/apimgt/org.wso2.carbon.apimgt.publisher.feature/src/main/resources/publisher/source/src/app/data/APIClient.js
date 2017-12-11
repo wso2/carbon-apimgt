@@ -26,9 +26,10 @@ import Utils from "./Utils";
  * Hence this singleton class help to preserve consecutive swagger client object creations saving redundant IO operations.
  */
 class APIClient {
-    /**--------
+    /**
      * Check for already created instance of the class, in the `APIClient._instance` variable,
      * and return single instance if already exist, else assign `APIClient._instance` to current instance and return
+     * @param {String} host : Host of apis. Host for the swagger-client's spec property.
      * @param {{}} args : Accept as an optional argument for APIClient constructor.Merge the given args with default args.
      * @returns {APIClient|*|null}
      */
