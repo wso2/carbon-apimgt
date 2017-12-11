@@ -731,6 +731,28 @@ class API {
         });
         return promisedPolicies;
     }
+
+    addThreatProtectionPolicyToApi(apiId, policyId) {
+        let promisedPolicies = this.client.then(
+            (client) => {
+                return client.apis["API (Individual)"].
+                    post_apis__apiId__threat_protection_policies({apiId: apiId, policyId: policyId});
+            }
+        );
+        return promisedPolicies;
+    }
+
+    deleteThreatProtectionPolicyFromApi(apiId, policyId) {
+        console.log(apiId);
+        let promisedDelete = this.client.then(
+            (client) => {
+                console.log(client.apis);
+                return client.apis["API (Individual)"].
+                delete_apis__apiId__threat_protection_policies({apiId: apiId, policyId: policyId});
+            }
+        );
+        return promisedDelete;
+    }
 }
 
 export default API

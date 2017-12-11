@@ -72,12 +72,15 @@ class Security extends Component {
     deletePolicy(id) {
         let associatedApi = this.state.api;
         console.log(associatedApi);
-        let index = associatedApi.threatProtectionPolicies.indexOf(id);
-        associatedApi.threatProtectionPolicies.splice(index, 1);
-        let promisedApiUpdate = this.api.update(associatedApi);
-        promisedApiUpdate.then(response => {
+        let promisedPolicyDelete = this.api.deleteThreatProtectionPolicyFromApi(associatedApi.id, id);
+        promisedPolicyDelete.then(response => {
            if (response.status === 200) {
                this.msg.info("Policy removed successfully.");
+
+               //remove policy from local api
+               let index = associatedApi.threatProtectionPolicies.indexOf(id);
+               associatedApi.threatProtectionPolicies.splice(index, 1);
+               this.setState({api: associatedApi});
                this.updatePolicyData();
            } else {
                this.msg.error("Failed to remove policy.");

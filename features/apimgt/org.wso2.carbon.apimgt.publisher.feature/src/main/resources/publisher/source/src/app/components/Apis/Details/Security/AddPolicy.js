@@ -69,15 +69,14 @@ class AddPolicy extends Component {
 
         if (this.state.currentApi) {
             let currentApi = this.state.currentApi;
-            currentApi.threatProtectionPolicies.push(this.state.selectedPolicy.uuid);
             let api = new API();
-            let promisedUpdate = api.update(currentApi);
-            promisedUpdate.then(response => {
-               if (response.status === 200) {
-                   this.msg.info("Threat protection policy added successfully.");
-               } else {
-                   this.msg.error("Failed to add threat protection policy.");
-               }
+            let promisedPolicyAdd = api.addThreatProtectionPolicyToApi(currentApi.id, this.state.selectedPolicy.uuid);
+            promisedPolicyAdd.then(response => {
+                if (response.status === 200) {
+                    this.msg.info("Threat protection policy added successfully.");
+                } else {
+                    this.msg.error("Failed to add threat protection policy.");
+                }
             });
         }
     }
