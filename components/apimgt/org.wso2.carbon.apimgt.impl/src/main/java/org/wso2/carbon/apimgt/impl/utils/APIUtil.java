@@ -1420,7 +1420,7 @@ public final class APIUtil {
 
             Resource wsdlResource = registry.newResource();
             // isWSDL2Document(api.getWsdlUrl()) method only understands http or file system urls.
-            // Hence if this is a registry url, should not go in to the foll if block
+            // Hence if this is a registry url, should not go in to the following if block
             if (!api.getWsdlUrl().matches(wsdRegistryPath) && (api.getWsdlUrl().startsWith("http:") || api.getWsdlUrl
                     ().startsWith("https:") || api.getWsdlUrl().startsWith("file:"))) {
                 if (isWSDL2Document(api.getWsdlUrl())) {
