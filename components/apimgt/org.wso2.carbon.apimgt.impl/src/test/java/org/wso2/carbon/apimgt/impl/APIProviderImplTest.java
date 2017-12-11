@@ -1555,6 +1555,7 @@ public class APIProviderImplTest {
         api.setContext("/test");
         api.setVisibility("Public");
         api.setStatus(APIStatus.CREATED);
+        api.setWsdlUrl("https://localhost:9443/services/echo?wsdl");
 
         String newVersion = "1.0.1";
         //Create new API object
@@ -1562,6 +1563,7 @@ public class APIProviderImplTest {
         final API newApi = new API(newApiId);
         newApi.setStatus(APIStatus.CREATED);
         newApi.setContext("/test");
+        newApi.setWsdlUrl("/registry/resource/_system/governance/apimgt/applicationdata/wsdls/admin--API11.0.0.wsdl");
 
         PowerMockito.when(APIUtil.getApiStatus("PUBLISHED")).thenReturn(APIStatus.PUBLISHED);
 
@@ -1672,6 +1674,11 @@ public class APIProviderImplTest {
         //Mock no tags case
         Mockito.when(apiProvider.registry.getTags(apiSourcePath)).thenReturn(null);
 
+        // Mock WSDL retrieval
+        String wsdlUrl = APIUtil.getWSDLDefinitionFilePath(api.getId().getApiName(), api.getId().getVersion(), api
+                .getId().getProviderName());
+        PowerMockito.when(apiProvider.registry.resourceExists(wsdlUrl)).thenReturn(true);
+
         //Mock new API retrieval
         String newApiPath = "API1/1.0.1/";
         PowerMockito.when(APIUtil.getAPIPath(newApi.getId())).thenReturn(newApiPath);
@@ -1695,6 +1702,11 @@ public class APIProviderImplTest {
         Mockito.when(apiDefinitionFromSwagger20.getAPIDefinition(apiId, apiProvider.registry)).thenReturn(
                 "{\"info\": {\"swagger\":\"data\"}}");
         Mockito.doNothing().when(artifactManager).updateGenericArtifact(artifact);
+
+        // WSDL
+        String newWsdlResourcePath = APIUtil.getWSDLDefinitionFilePath(newApi.getId().getApiName(), newApi
+                .getId().getVersion(), newApi.getId().getProviderName());
+        PowerMockito.when(apiProvider.registry.copy(resourcePath, newWsdlResourcePath)).thenReturn(newWsdlResourcePath);
 
         //Mock Config system registry
         ServiceReferenceHolder sh = TestUtils.getServiceReferenceHolder();
@@ -1722,6 +1734,7 @@ public class APIProviderImplTest {
 
         apiProvider.createNewAPIVersion(api, newVersion);
         Assert.assertEquals(newVersion, apiProvider.getAPI(newApi.getId()).getId().getVersion());
+        Assert.assertEquals(newApi.getWsdlUrl(), apiProvider.getAPI(newApi.getId()).getWsdlUrl());
     }
 
     @Test

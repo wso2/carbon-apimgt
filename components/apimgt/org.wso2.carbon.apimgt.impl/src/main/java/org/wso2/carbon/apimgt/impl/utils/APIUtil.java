@@ -1162,6 +1162,10 @@ public final class APIUtil {
                 apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
     }
 
+    public static String getWSDLDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
+        return APIConstants.API_WSDL_RESOURCE_LOCATION + apiProvider + "--" + apiName + apiVersion + ".wsdl";
+    }
+
     /**
      * Utility method to get api path from APIIdentifier
      *
@@ -1415,7 +1419,10 @@ public final class APIUtil {
             }
 
             Resource wsdlResource = registry.newResource();
-            if (!api.getWsdlUrl().matches(wsdRegistryPath)) {
+            // isWSDL2Document(api.getWsdlUrl()) method only understands http or file system urls.
+            // Hence if this is a registry url, should not go in to the foll if block
+            if (!api.getWsdlUrl().matches(wsdRegistryPath) && (api.getWsdlUrl().startsWith("http:") || api.getWsdlUrl
+                    ().startsWith("https:") || api.getWsdlUrl().startsWith("file:"))) {
                 if (isWSDL2Document(api.getWsdlUrl())) {
                     wsdlContentEle = wsdlReader.readAndCleanWsdl2(api);
                     wsdlResource.setContent(wsdlContentEle.toString());
@@ -1485,7 +1492,7 @@ public final class APIUtil {
      * @return true if wsdl2 definition
      * @throws APIManagementException
      */
-    private static boolean isWSDL2Resource(byte[] wsdl) throws APIManagementException {
+    static boolean isWSDL2Resource(byte[] wsdl) throws APIManagementException {
         String wsdl2NameSpace = "http://www.w3.org/ns/wsdl";
         String wsdlContent = new String(wsdl);
         return wsdlContent.indexOf(wsdl2NameSpace) > 0;
