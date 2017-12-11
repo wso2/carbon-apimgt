@@ -106,6 +106,14 @@ public abstract class ApisApiService {
  ,String ifMatch
  ,String ifUnmodifiedSince
   ,Request request) throws NotFoundException;
+    public abstract Response apisApiIdThreatProtectionPoliciesDelete(String apiId
+ ,String policyId
+  ,Request request) throws NotFoundException;
+    public abstract Response apisApiIdThreatProtectionPoliciesGet(String apiId
+  ,Request request) throws NotFoundException;
+    public abstract Response apisApiIdThreatProtectionPoliciesPost(String apiId
+ ,String policyId
+  ,Request request) throws NotFoundException;
     public abstract Response apisApiIdThumbnailGet(String apiId
  ,String ifNoneMatch
  ,String ifModifiedSince

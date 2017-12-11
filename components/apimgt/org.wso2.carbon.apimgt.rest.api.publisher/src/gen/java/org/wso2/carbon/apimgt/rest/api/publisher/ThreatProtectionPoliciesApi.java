@@ -51,7 +51,7 @@ public class ThreatProtectionPoliciesApi implements Microservice  {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
-    }, tags={  })
+    }, tags={ "Threat Protection Policies", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Ok. List of policies is returned", response = ThreatProtectionPolicyListDTO.class) })
     public Response threatProtectionPoliciesGet( @Context Request request)
@@ -66,7 +66,7 @@ public class ThreatProtectionPoliciesApi implements Microservice  {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
         })
-    }, tags={  })
+    }, tags={ "Threat Protection Policy", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "Ok. Policy is returned", response = ThreatProtectionPolicyDTO.class),
         

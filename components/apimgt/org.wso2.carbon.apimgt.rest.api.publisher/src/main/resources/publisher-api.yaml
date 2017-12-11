@@ -1034,6 +1034,82 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
+# The "Threat Protection" resource API
+######################################################
+  /apis/{apiId}/threat-protection-policies:
+    post:
+      security:
+        - OAuth2Security:
+          - apim:api_update
+      summary: Add a threat protection policy to an API
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - name: policyId
+          in: query
+          description: Threat protection policy id
+          type: string
+          required: true
+      tags:
+        - API (Individual)
+      responses:
+        200:
+          description: Ok. Policy added succesfuly.
+        500:
+          description: Internal server error while adding policy
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Specified API or Policy not found
+          schema:
+            $ref: '#/definitions/Error'
+
+    get:
+      summary: Get all threat protection policies associated with an API
+      parameters:
+        - $ref: '#/parameters/apiId'
+      tags:
+        - API (Individual)
+      responses:
+        200:
+          description: Ok. List of policy ids is returned
+          schema:
+            type: array
+            items:
+              type: string
+        404:
+          description: Specified API was not found.
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Error retrieving threat protection policies
+          schema:
+            $ref: '#/definitions/Error'
+
+    delete:
+      summary: Delete a threat protection policy from an API
+      parameters:
+        - $ref: '#/parameters/apiId'
+        - name: policyId
+          in: query
+          description: Threat protection policy id
+          type: string
+          required: true
+      tags:
+        - API (Individual)
+      responses:
+        200:
+          description: Ok. Policy deleted successfully.
+        404:
+          description: Specified API or Policy not found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Error while deleting the policy
+          schema:
+            $ref: '#/definitions/Error'
+
+
+######################################################
 # The "Copy API" Processing Function resource API
 ######################################################
   /apis/copy-api:
@@ -2924,6 +3000,9 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
+######################################################
+# The "Threat Protection Policies" resource API
+######################################################
   /threat-protection-policies:
     get:
       summary: Get All Threat Protection Policies
@@ -2936,6 +3015,9 @@ paths:
           schema:
             $ref: '#/definitions/ThreatProtectionPolicyList'
 
+######################################################
+# The "Threat Protection Policy" resource API
+######################################################
   /threat-protection-policies/{policyId}:
     get:
       summary: Get a threat protection policy

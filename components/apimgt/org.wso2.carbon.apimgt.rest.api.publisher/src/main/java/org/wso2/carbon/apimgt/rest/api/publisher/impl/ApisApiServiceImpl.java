@@ -20,6 +20,7 @@ import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
+import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
@@ -34,6 +35,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThreatProtectionPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
@@ -50,6 +52,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -929,6 +932,84 @@ public class ApisApiServiceImpl extends ApisApiService {
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
             log.error(errorMessage, e);
             return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    /**
+     * Delete a threat protection policy from an API
+     * @param apiId APIID
+     * @param policyId Threat protection policy id
+     * @param request MSF4J Request
+     * @return HTTP status 200 if success, 500 otherwise
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
+    @Override
+    public Response apisApiIdThreatProtectionPoliciesDelete(String apiId, String policyId, Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            if (!apiPublisher.isAPIExists(apiId)) {
+                ErrorDTO errorDTO = new ErrorDTO();
+                errorDTO.setCode(404l);
+                errorDTO.setDescription("Specified API was not found");
+                return Response.status(404).entity(errorDTO).build();
+            }
+            apiPublisher.deleteThreatProtectionPolicy(apiId, policyId);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            log.error(e.getMessage(), e);
+            return Response.status(500).entity("Internal Server Error.").build();
+        }
+    }
+
+    /**
+     * Get all threat protection policies associated with an API
+     * @param apiId APIID
+     * @param request MSF4J Request
+     * @return List of threat protection policy ids
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
+    @Override
+    public Response apisApiIdThreatProtectionPoliciesGet(String apiId, Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            List<ThreatProtectionPolicy> policyList = apiPublisher.getThreatProtectionPolicies();
+            List<ThreatProtectionPolicyDTO> dtoList = new ArrayList<>();
+            for(ThreatProtectionPolicy policy: policyList) {
+                dtoList.add(MappingUtil.toThreatProtectionPolicyDTO(policy));
+            }
+            return Response.ok().entity(dtoList).build();
+        } catch (APIManagementException e) {
+            log.error(e.getMessage(), e);
+            return Response.status(500).entity("Internal Server Error").build();
+        }
+    }
+
+    /**
+     * Add a threat protection policy to an API
+     * @param apiId APIID
+     * @param policyId Threat protection policy id
+     * @param request MSF4J Request
+     * @return HTTP status 200 if success, 500 otherwise
+     * @throws NotFoundException When the particular resource does not exist in the system
+     */
+    @Override
+    public Response apisApiIdThreatProtectionPoliciesPost(String apiId, String policyId, Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            if (!apiPublisher.isAPIExists(apiId)) {
+                ErrorDTO errorDTO = new ErrorDTO();
+                errorDTO.setCode(404l);
+                errorDTO.setDescription("Specified API was not found");
+                return Response.status(404).entity(errorDTO).build();
+            }
+            apiPublisher.addThreatProtectionPolicy(apiId, policyId);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            log.error(e.getMessage(), e);
+            return Response.status(500).entity("Internal Server Error.").build();
         }
     }
 

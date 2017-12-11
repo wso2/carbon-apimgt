@@ -474,6 +474,68 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdSwaggerPut(apiId,endpointId,ifMatch,ifUnmodifiedSince,request);
     }
+    @DELETE
+    @Path("/{apiId}/threat-protection-policies")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Delete a threat protection policy from an API", notes = "", response = void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "API (Individual)", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Ok. Policy deleted successfully.", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Specified API or Policy not found", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 500, message = "Error while deleting the policy", response = void.class) })
+    public Response apisApiIdThreatProtectionPoliciesDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
+,@ApiParam(value = "Threat protection policy id",required=true) @QueryParam("policyId") String policyId
+ ,@Context Request request)
+    throws NotFoundException {
+        return delegate.apisApiIdThreatProtectionPoliciesDelete(apiId,policyId,request);
+    }
+    @GET
+    @Path("/{apiId}/threat-protection-policies")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Get all threat protection policies associated with an API", notes = "", response = String.class, responseContainer = "List", authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
+        })
+    }, tags={ "API (Individual)", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Ok. List of policy ids is returned", response = String.class, responseContainer = "List"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Specified API was not found.", response = String.class, responseContainer = "List"),
+        
+        @io.swagger.annotations.ApiResponse(code = 500, message = "Error retrieving threat protection policies", response = String.class, responseContainer = "List") })
+    public Response apisApiIdThreatProtectionPoliciesGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
+ ,@Context Request request)
+    throws NotFoundException {
+        return delegate.apisApiIdThreatProtectionPoliciesGet(apiId,request);
+    }
+    @POST
+    @Path("/{apiId}/threat-protection-policies")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @io.swagger.annotations.ApiOperation(value = "Add a threat protection policy to an API", notes = "", response = void.class, authorizations = {
+        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
+            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_update", description = "Update API")
+        })
+    }, tags={ "API (Individual)", })
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "Ok. Policy added succesfuly.", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Specified API or Policy not found", response = void.class),
+        
+        @io.swagger.annotations.ApiResponse(code = 500, message = "Internal server error while adding policy", response = void.class) })
+    public Response apisApiIdThreatProtectionPoliciesPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
+,@ApiParam(value = "Threat protection policy id",required=true) @QueryParam("policyId") String policyId
+ ,@Context Request request)
+    throws NotFoundException {
+        return delegate.apisApiIdThreatProtectionPoliciesPost(apiId,policyId,request);
+    }
     @GET
     @Path("/{apiId}/thumbnail")
     @Consumes({ "application/json" })
