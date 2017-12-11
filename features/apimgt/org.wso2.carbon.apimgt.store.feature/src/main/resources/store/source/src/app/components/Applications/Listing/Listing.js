@@ -24,8 +24,7 @@ import Application from '../../../data/Application'
 
 import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
-import {Delete, Edit, CreateNewFolder, Description}from 'material-ui-icons';
-import { withStyles } from 'material-ui/styles';
+import {withStyles} from 'material-ui/styles';
 import PropTypes from 'prop-types';
 import Table, {
     TableBody,
@@ -37,6 +36,7 @@ import Table, {
 import Paper from 'material-ui/Paper';
 import IconButton from 'material-ui/IconButton';
 import DeleteIcon from 'material-ui-icons/Delete';
+import AddIcon from 'material-ui-icons/Add';
 
 const columnData = [
     {id: 'name', numeric: false, disablePadding: true, label: 'Name'},
@@ -50,9 +50,10 @@ const styles = theme => ({
     button: {
         margin: theme.spacing.unit,
     },
-    input: {
-        display: 'none',
-    },
+    fullWidth: {
+        width: "100%",
+        "margin-top": "1%"
+    }
 });
 
 class ApplicationTableHead extends Component {
@@ -76,7 +77,6 @@ class ApplicationTableHead extends Component {
                             <TableCell
                                 key={column.id}
                                 numeric={column.numeric}
-                                disablePadding={column.disablePadding}
                             >
                                 <TableSortLabel
                                     active={orderBy === column.id}
@@ -131,10 +131,11 @@ class Listing extends Component {
         data: []
     };
 
-    handleAppDelete(event){
+    handleAppDelete(event) {
         const id = "";
         Application.delete(id);
     }
+
     handleRequestSort = (event, property) => {
         const orderBy = property;
         let order = 'desc';
@@ -151,28 +152,23 @@ class Listing extends Component {
         const {data, order, orderBy, selected} = this.state;
         const {classes} = this.props;
         return (
-            <Grid container style={{paddingLeft: "40px"}}>
-                <Grid item xs={12}>
-                    <Paper style={{display: "flex"}}>
-                        <Typography type="display2" gutterBottom className="page-title">
-                            Applications
-                        </Typography>
-                        <Link to={"/application/create"}>
-                            <Button aria-owns="simple-menu" aria-haspopup="true">
-                                <CreateNewFolder /> Add Application
-                            </Button>
-                        </Link>
-                    </Paper>
-                </Grid>
-                <Grid item xs={12} sm={6} md={9} lg={9} xl={10}>
-                    <Paper style={{paddingLeft: "40px"}}>
-                        <p>
-                            An application is a logical collection of APIs. Applications allow you to use a single
-                            access
-                            token to invoke a collection of APIs and to subscribe to one API multiple times with
-                            different
-                            SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.
-                        </p>
+            <Grid className={classes.fullWidth} container justify="center" alignItems="center">
+                <Grid item xs={11}>
+                    <Paper>
+                        <Grid item xs={10}>
+                            <Typography type="display1" className="page-title">
+                                Applications
+                            </Typography>
+                            <Typography type="caption" className="page-title" paragraph={true}>
+                                An application is a logical collection of APIs. Applications allow you to use a single
+                                access
+                                token to invoke a collection of APIs and to subscribe to one API multiple times with
+                                different
+                                SLA levels. The DefaultApplication is pre-created and allows unlimited access by
+                                default.
+                            </Typography>
+                        </Grid>
+                        <hr/>
                         <Table>
                             <ApplicationTableHead order={order} orderBy={orderBy}
                                                   onRequestSort={this.handleRequestSort}/>
@@ -180,21 +176,21 @@ class Listing extends Component {
                                 {data.map(n => {
                                     return (
                                         <TableRow hover tabIndex="-1" key={n.applicationId}>
-                                            <TableCell disablePadding>
+                                            <TableCell>
                                                 <Link to={"/applications/" + n.applicationId}>
                                                     {n.name}
                                                 </Link>
                                             </TableCell>
-                                            <TableCell disablePadding>
+                                            <TableCell>
                                                 {n.throttlingTier}
                                             </TableCell>
-                                            <TableCell disablePadding>
+                                            <TableCell>
                                                 {n.lifeCycleStatus}
                                             </TableCell>
-                                            <TableCell disablePadding>
+                                            <TableCell>
                                                 0
                                             </TableCell>
-                                            <TableCell disablePadding>
+                                            <TableCell>
                                                 <IconButton color="accent" className={classes.button}
                                                             aria-label="Delete">
                                                     <DeleteIcon />
@@ -206,6 +202,15 @@ class Listing extends Component {
                             </TableBody>
                         </Table>
                     </Paper>
+                </Grid>
+                <Grid className={classes.fullWidth} container justify="flex-end" alignItems="center">
+                    <Grid>
+                        <Link to={"/application/create"}>
+                            <Button fab color="accent" aria-label="add" className={classes.button}>
+                                <AddIcon />
+                            </Button>
+                        </Link>
+                    </Grid>
                 </Grid>
             </Grid>
         );

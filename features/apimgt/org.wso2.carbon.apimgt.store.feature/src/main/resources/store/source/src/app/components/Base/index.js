@@ -23,21 +23,17 @@ import Footer from './Footer/Footer'
 import Grid from 'material-ui/Grid';
 
 
-
 class Layout extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props);
     }
 
-
-
-    render(props){
+    render() {
         return (
             <div>
                 <Header />
-
-                <Grid container spacing={0} >
-                    <Grid item xs={12} >
+                <Grid container spacing={0}>
+                    <Grid item xs={12}>
                         {this.props.children}
                     </Grid>
                 </Grid>
