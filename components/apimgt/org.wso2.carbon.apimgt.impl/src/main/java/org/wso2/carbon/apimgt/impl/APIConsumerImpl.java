@@ -2399,6 +2399,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     public int addApplication(Application application, String userId)
             throws APIManagementException {
 
+        if (application.getName() != null && (application.getName().length() != application.getName().trim().length())) {
+            handleApplicationNameContainSpacesException("Application name " +
+                                                            "cannot contain leading or trailing white spaces");
+        }
+
         if (APIUtil.isApplicationExist(userId, application.getName(), application.getGroupId())) {
             handleResourceAlreadyExistsException(
                     "A duplicate application already exists by the name - " + application.getName());
@@ -2481,6 +2486,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         //validate callback url
         if(!APIUtil.isValidURL(application.getCallbackUrl())){
             log.warn("Invalid Call Back URL "+ application.getCallbackUrl());
+        }
+
+        if (application.getName() != null && (application.getName().length() != application.getName().trim().length())) {
+            handleApplicationNameContainSpacesException("Application name " +
+                    "cannot contain leading or trailing white spaces");
         }
 
         apiMgtDAO.updateApplication(application);
