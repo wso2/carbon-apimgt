@@ -35,7 +35,7 @@ import CloseIcon from 'material-ui-icons/Close';
 import TextField from 'material-ui/TextField';
 import InfoIcon from 'material-ui-icons/Info';
 import InfoLightBulb from 'material-ui-icons/LightbulbOutline';
-import List, {ListItem, ListItemIcon, ListItemText,} from 'material-ui/List';
+import List, {ListItem, ListItemIcon, ListItemText} from 'material-ui/List';
 import ConfigManager from "../../../data/ConfigManager";
 import Utils from "../../../data/Utils";
 import EnvironmentMenu from "./EnvironmentMenu";
@@ -246,9 +246,9 @@ class Header extends React.Component {
                                 >
                                     <MenuItem onClick={this.handleRequestCloseUserMenu}>Change Password</MenuItem>
 
-                                    <MenuItem onClick={this.handleRequestCloseUserMenu}>
-                                        <Link to="/logout" style={{color: "#000", textDecoration: 'none'}}>Logout</Link>
-                                    </MenuItem>
+                                    <Link to="/logout">
+                                        <MenuItem onClick={this.handleRequestCloseUserMenu}>Logout</MenuItem>
+                                    </Link>
                                 </Menu>
                             </div>
                             :
