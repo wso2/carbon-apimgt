@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
+import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -594,4 +595,50 @@ public interface APIPublisher extends APIManager {
      * @throws APIManagementException If an error occurred while discovering services
      */
     List<Endpoint> discoverServiceEndpoints() throws APIManagementException;
+
+    /**
+     * Retrieves scopes releated to the API
+     *
+     * @param apiId apiId of api
+     * @return set of scopes assign to api
+     * @throws APIManagementException If an error occurred while retrieving scopes
+     */
+    Set<String> getScopesForApi(String apiId) throws APIManagementException;
+
+    /**
+     * Retrieves information according to the scope
+     *
+     * @param apiId     apiId of api
+     * @param scopeName name of scope to retrieve
+     * @return Scope object which contains relevant details.
+     * @throws APIManagementException If an error occured while retrieving scope information
+     */
+    Scope getScopeInformationOfApi(String apiId, String scopeName) throws APIManagementException;
+
+    /**
+     * Create Scope for API
+     *
+     * @param apiId apiId of api
+     * @param scope scope to be add
+     * @throws APIManagementException If an error occurred while creating scope;
+     */
+    void addScopeToTheApi(String apiId, Scope scope) throws APIManagementException;
+
+    /**
+     * Update Scope for API
+     *
+     * @param apiId apiId of api
+     * @param scope scope to be add
+     * @throws APIManagementException If an error occurred while updating scope;
+     */
+    void updateScopeOfTheApi(String apiId, Scope scope) throws APIManagementException;
+
+    /**
+     * Delete scope from API and Authorization Server
+     *
+     * @param apiId     apiId of api
+     * @param scopeName name of scope to delete
+     * @throws APIManagementException If an error occurred while deleting scope
+     */
+    void deleteScopeFromApi(String apiId, String scopeName) throws APIManagementException;
 }

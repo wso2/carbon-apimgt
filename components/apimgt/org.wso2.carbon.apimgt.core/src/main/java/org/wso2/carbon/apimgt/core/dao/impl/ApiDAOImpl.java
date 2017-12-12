@@ -2478,11 +2478,12 @@ public class ApiDAOImpl implements ApiDAO {
     private void addSubscriptionPolicies(Connection connection, Set<Policy> policies, String apiID)
             throws SQLException {
         final String query =
-                "INSERT INTO AM_API_SUBS_POLICY_MAPPING (API_ID, SUBSCRIPTION_POLICY_ID) " + "VALUES (?, ?)";
+                "INSERT INTO AM_API_SUBS_POLICY_MAPPING (API_ID, SUBSCRIPTION_POLICY_ID) " + "VALUES (?, SELECT UUID " +
+                        "FROM AM_SUBSCRIPTION_POLICY WHERE NAME=?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             for (Policy policy : policies) {
                 statement.setString(1, apiID);
-                statement.setString(2, policy.getUuid());
+                statement.setString(2, policy.getPolicyName());
                 statement.addBatch();
             }
             statement.executeBatch();

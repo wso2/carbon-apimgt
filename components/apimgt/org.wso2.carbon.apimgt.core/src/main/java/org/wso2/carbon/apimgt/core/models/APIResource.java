@@ -26,7 +26,7 @@ package org.wso2.carbon.apimgt.core.models;
 
 public class APIResource {
     private final UriTemplate uriTemplate;
-    private final Scope scope;
+    private final String scope;
     private final String produces;
     private final String consumes;
 
@@ -42,7 +42,7 @@ public class APIResource {
         return uriTemplate;
     }
 
-    public Scope getScope() {
+    public String getScope() {
         return scope;
     }
 
@@ -60,7 +60,7 @@ public class APIResource {
      */
     public static final class Builder {
         private UriTemplate uriTemplate;
-        private Scope scope;
+        private String scope;
         private String produces;
         private String consumes;
 
@@ -93,7 +93,7 @@ public class APIResource {
          * @param scope the {@code scope} to set
          * @return a reference to this Builder
          */
-        public Builder scope(Scope scope) {
+        public Builder scope(String scope) {
             this.scope = scope;
             return this;
         }

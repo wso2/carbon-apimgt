@@ -35,6 +35,8 @@ import org.wso2.carbon.apimgt.core.auth.OAuth2ServiceStubs;
 import org.wso2.carbon.apimgt.core.auth.OAuth2ServiceStubsFactory;
 import org.wso2.carbon.apimgt.core.auth.SCIMServiceStub;
 import org.wso2.carbon.apimgt.core.auth.SCIMServiceStubFactory;
+import org.wso2.carbon.apimgt.core.auth.ScopeRegistrationServiceStub;
+import org.wso2.carbon.apimgt.core.auth.ScopeRegistrationServiceStubFactory;
 import org.wso2.carbon.apimgt.core.auth.dto.SCIMGroup;
 import org.wso2.carbon.apimgt.core.auth.dto.SCIMUser;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -66,12 +68,15 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
 
     DefaultIdentityProviderImpl() throws APIManagementException {
         this(SCIMServiceStubFactory.getSCIMServiceStub(), DCRMServiceStubFactory.getDCRMServiceStub(),
-                OAuth2ServiceStubsFactory.getOAuth2ServiceStubs());
+                OAuth2ServiceStubsFactory.getOAuth2ServiceStubs(), ScopeRegistrationServiceStubFactory
+                        .getScopeRegistrationServiceStub());
     }
 
     DefaultIdentityProviderImpl(SCIMServiceStub scimServiceStub, DCRMServiceStub dcrmServiceStub,
-                                       OAuth2ServiceStubs oAuth2ServiceStubs) throws APIManagementException {
-        super(dcrmServiceStub, oAuth2ServiceStubs);
+                                OAuth2ServiceStubs oAuth2ServiceStubs, ScopeRegistrationServiceStub
+                                        scopeRegistrationServiceStub) throws
+            APIManagementException {
+        super(dcrmServiceStub, oAuth2ServiceStubs, scopeRegistrationServiceStub);
         this.scimServiceStub = scimServiceStub;
     }
 
@@ -109,7 +114,7 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
 
     @Override
     public String getEmailOfUser(String userId) throws IdentityProviderException {
-      Response userResponse = scimServiceStub.getUser(userId);
+        Response userResponse = scimServiceStub.getUser(userId);
         String userEmail;
         if (userResponse == null) {
             String errorMessage =
@@ -121,7 +126,7 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
             String responseBody = userResponse.body().toString();
             JsonParser parser = new JsonParser();
             JsonObject parsedResponseBody = (JsonObject) parser.parse(responseBody);
-            userEmail =  parsedResponseBody.get("emails").toString().replaceAll("[\\[\\]\"]", "");
+            userEmail = parsedResponseBody.get("emails").toString().replaceAll("[\\[\\]\"]", "");
 
             log.debug("Email {} of user {} is successfully retrieved from SCIM endpoint.",
                     userEmail, parsedResponseBody.get(USERNAME).getAsString());

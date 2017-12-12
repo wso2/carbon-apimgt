@@ -19,6 +19,7 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
+import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -26,6 +27,7 @@ import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -39,6 +41,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO;
@@ -46,7 +49,11 @@ import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.Assert.assertTrue;
@@ -406,4 +413,11 @@ public class TestMappingUtilTestCase {
         assertEquals(securityScheme, 3);
     }
 
+    @Test
+    public void testScopeMappingUtil() {
+        Set<String> scopeSet = new HashSet<>();
+        scopeSet.add("apim:api-read");
+        ScopeListDTO scopeListDTO = MappingUtil.toScopeListDto(scopeSet);
+        Assert.assertEquals(scopeListDTO.getCount().intValue(), 1);
+    }
 }

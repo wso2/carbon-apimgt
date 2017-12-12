@@ -31,7 +31,6 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
-import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
@@ -66,22 +65,6 @@ public class APIUtils {
         if (log.isDebugEnabled()) {
             log.debug(msg);
         }
-    }
-
-    /**
-     * Find scope object in a set based on the key
-     *
-     * @param scopes - Set of scopes
-     * @param key    - Key to search with
-     * @return Scope - scope object
-     */
-    public static Scope findScopeByKey(Set<Scope> scopes, String key) {
-        for (Scope scope : scopes) {
-            if (scope.getKey().equals(key)) {
-                return scope;
-            }
-        }
-        return null;
     }
 
     /**

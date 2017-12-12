@@ -18,17 +18,23 @@
 
 package org.wso2.carbon.apimgt.core.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.Scope;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.Map;
 
 public class APIDefinitionFromSwagger20TestCase {
 
-    @Test
+    @Test()
     public void testApiResourceParseFromSwagger() throws IOException, APIManagementException {
         APIDefinitionFromSwagger20 apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
         String sampleApi = SampleTestObjectCreator.getSampleApiSwagger();
@@ -36,6 +42,96 @@ public class APIDefinitionFromSwagger20TestCase {
                 .generateApiFromSwaggerResource("testProvider", sampleApi);
         API api = apiBuilder.build();
         Assert.assertNotNull(api);
+    }
+
+    @Test()
+    public void testApiScopePArseSwagger() throws IOException, APIManagementException {
+        APIDefinitionFromSwagger20 apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
+        String sampleApi = SampleTestObjectCreator.getSampleApiSwagger();
+        Map<String, String> scopeMap = apiDefinitionFromSwagger20.getScopesFromSecurityDefinition(sampleApi);
+        for (Map.Entry<String, String> scopeEntry : scopeMap.entrySet()) {
+            if ("apim:api_view".equals(scopeEntry.getKey())) {
+                Assert.assertEquals("View API", scopeEntry.getValue());
+            }
+            if ("apim:api_create".equals(scopeEntry.getKey())) {
+                Assert.assertEquals("Create API", scopeEntry.getValue());
+            }
+            if ("apim:api_delete".equals(scopeEntry.getKey())) {
+                Assert.assertEquals("Delete API", scopeEntry.getValue());
+            }
+        }
+
+        if (scopeMap.isEmpty()) {
+            Assert.fail("Scopes didn't ");
+        }
+    }
+
+    @Test()
+    public void testRemoveScopeFromSwagger() throws IOException, APIManagementException {
+        APIDefinitionFromSwagger20 apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
+        String sampleApi = SampleTestObjectCreator.getSampleApiSwagger();
+        String scopeRemovedSwagger = apiDefinitionFromSwagger20.removeScopeFromSwaggerDefinition(sampleApi,
+                "apim:api_view");
+        Map<String, String> scopeMap = apiDefinitionFromSwagger20.getScopesFromSecurityDefinition(scopeRemovedSwagger);
+        Assert.assertFalse(scopeMap.containsKey("apim:api_view"));
+    }
+
+    @Test()
+    public void testAddNewScopeToExistingOauthSecurity() throws IOException, APIManagementException {
+
+        APIDefinitionFromSwagger20 apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
+        String filePath = "src" + File.separator + "test" + File.separator + "resources" + File
+                .separator + "swagger" + File.separator + "swaggerWithAuthorization.yaml";
+        File file = Paths.get(filePath).toFile();
+        String sampleApi = IOUtils.toString(new FileInputStream(file));
+        Scope scope = new Scope();
+        scope.setName("apim:api_delete");
+        scope.setDescription("Delete API");
+        String scopeAddedSwagger = apiDefinitionFromSwagger20.addScopeToSwaggerDefinition(sampleApi, scope);
+        Map<String, String> scopes = apiDefinitionFromSwagger20.getScopesFromSecurityDefinition(scopeAddedSwagger);
+        Assert.assertTrue(scopes.containsKey("apim:api_delete"));
+    }
+
+    @Test()
+    public void testAddNewScopeToNonExistingSecurityDefinition() throws IOException, APIManagementException {
+        APIDefinitionFromSwagger20 apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
+        String sampleApi = IOUtils.toString(this.getClass().getResourceAsStream
+                ("/swagger/swaggerWithOutAuthorization.yaml"));
+        Scope scope = new Scope();
+        scope.setName("apim:api_delete");
+        scope.setDescription("Delete API");
+        String scopeAddedSwagger = apiDefinitionFromSwagger20.addScopeToSwaggerDefinition(sampleApi, scope);
+        Map<String, String> scopes = apiDefinitionFromSwagger20.getScopesFromSecurityDefinition(scopeAddedSwagger);
+        Assert.assertTrue(scopes.containsKey("apim:api_delete"));
+    }
+
+    @Test()
+    public void testAddNewScopeToSecurityDefinitionExistingSwaggerNonExisting() throws IOException,
+            APIManagementException {
+        APIDefinitionFromSwagger20 apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
+        String sampleApi = IOUtils.toString(this.getClass().getResourceAsStream
+                ("/swagger/swaggerWithAuthorizationApiKey.yaml"));
+        Scope scope = new Scope();
+        scope.setName("apim:api_delete");
+        scope.setDescription("Delete API");
+        String scopeAddedSwagger = apiDefinitionFromSwagger20.addScopeToSwaggerDefinition(sampleApi, scope);
+        Map<String, String> scopes = apiDefinitionFromSwagger20.getScopesFromSecurityDefinition(scopeAddedSwagger);
+        Assert.assertTrue(scopes.containsKey("apim:api_delete"));
+    }
+
+    @Test()
+    public void testUpdateScope() throws IOException, APIManagementException {
+        APIDefinitionFromSwagger20 apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
+        String sampleApi = IOUtils.toString(this.getClass().getResourceAsStream
+                ("/swagger/swaggerWithAuthorization.yaml"));
+        Scope scope = new Scope();
+        scope.setName("apim:api_create");
+        scope.setDescription("Delete API");
+        String scopeAddedSwagger = apiDefinitionFromSwagger20.updateScopesOnSwaggerDefinition(sampleApi, scope);
+        Map<String, String> scopes = apiDefinitionFromSwagger20.getScopesFromSecurityDefinition(scopeAddedSwagger);
+        Assert.assertTrue(scopes.containsKey("apim:api_create"));
+        //commented due to parallel test run
+        //Assert.assertEquals(scopes.get("apim:api_delete").getDescription(),"Delete API");
     }
 }
 

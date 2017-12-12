@@ -2088,8 +2088,6 @@ paths:
         This operation can be used to retrieve a list of scopes belonging to an API by providing the id of the API.
       parameters:
         - $ref: '#/parameters/apiId'
-        - $ref: '#/parameters/limit'
-        - $ref: '#/parameters/offset'
         - $ref: '#/parameters/If-None-Match'
       tags:
         - Scope (Collection)
@@ -4358,9 +4356,15 @@ definitions:
           description of Scope
         example: 'This Scope can used to view Apis'
       bindings:
-        type: array
-        items:
-          type: string
+        properties:
+          type:
+            type: string
+            description: |
+              Type of binding role / permission
+          values:
+            type: array
+            items:
+              type: string
 
 
 #-----------------------------------------------------

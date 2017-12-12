@@ -269,15 +269,8 @@ public class AuthenticatorService {
         try {
             if (applicationRestAPI != null) {
                 APIDefinition apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
-                Map<String, Scope> applicationScopesMap;
-                //Todo: when all swaggers modified with no vendor extension, following swagger parser should be modified.
-                //todo: for now only publisher swagger have been modified for no vendor extensions
-                if (AuthenticatorConstants.PUBLISHER_APPLICATION.equals(appName)) {
-                    applicationScopesMap = apiDefinitionFromSwagger20
-                            .getScopesFromSecurityDefinition(applicationRestAPI);
-                } else {
-                    applicationScopesMap = apiDefinitionFromSwagger20.getScopes(applicationRestAPI);
-                }
+                Map<String, Scope> applicationScopesMap = apiDefinitionFromSwagger20
+                        .getScopesFromSecurityDefinitionForWebApps(applicationRestAPI);
                 scopes = String.join(" ", applicationScopesMap.keySet());
                 // Set openid scope
                 if (StringUtils.isEmpty(scopes)) {

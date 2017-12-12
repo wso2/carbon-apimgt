@@ -20,6 +20,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -42,6 +43,7 @@ import org.wso2.carbon.apimgt.core.impl.APIPublisherImpl;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
@@ -64,9 +66,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
 
@@ -1003,7 +1008,8 @@ public class ApisApiServiceImplTestCase {
     @Test
     public void testApisApiIdSwaggerPut() throws Exception {
         printTestMethodName();
-        String swagger = "sample swagger";
+        String swagger = IOUtils.toString(new FileInputStream("src"+File.separator+"test"+File
+                .separator+"resources"+File.separator+"swaggerWithAuthorization.yaml"));
         ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
         APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
         PowerMockito.mockStatic(RestAPIPublisherUtil.class);
@@ -1820,6 +1826,197 @@ public class ApisApiServiceImplTestCase {
         assertTrue(response.getEntity().toString().contains("API Type specified is invalid"));
     }
 
+    @Test
+    public void testApisApiIdScopesGet() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Set<String> scopes = new HashSet<>();
+        scopes.add("apim:api_read");
+        Mockito.when(apiPublisher.getScopesForApi(apiId)).thenReturn(scopes);
+        Response response = apisApiService.apisApiIdScopesGet(apiId, null, getRequest());
+        assertEquals(response.getStatus(), 200);
+        assertTrue(response.getEntity().toString().contains("apim:api_read"));
+    }
+    @Test
+    public void testApisApiIdScopesGetException() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Set<String> scopes = new HashSet<>();
+        scopes.add("apim:api_read");
+        Mockito.when(apiPublisher.getScopesForApi(apiId)).thenThrow(new APIMgtDAOException("Swagger Definition " +
+                "of API: " + apiId + ", does not exist", ExceptionCodes.SWAGGER_NOT_FOUND));
+        Response response = apisApiService.apisApiIdScopesGet(apiId, null, getRequest());
+        assertEquals(response.getStatus(), 404);
+        assertTrue(response.getEntity().toString().contains("Swagger definition not found"));
+    }
+
+    @Test
+    public void testApisApiIdScopesNameDelete() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.doNothing().when(apiPublisher).deleteScopeFromApi(apiId,"apim:api_view");
+        Response response = apisApiService.apisApiIdScopesNameDelete(apiId, "apim:api_view", null, null, getRequest());
+        assertEquals(response.getStatus(), 200);
+    }
+    @Test
+    public void testApisApiIdScopesNameDeleteException() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.doThrow(new APIManagementException("Scope couldn't found by name: apim:api_view", ExceptionCodes
+                .SCOPE_NOT_FOUND)).when(apiPublisher).deleteScopeFromApi(apiId,"apim:api_view");
+        Response response = apisApiService.apisApiIdScopesNameDelete(apiId, "apim:api_view", null, null, getRequest());
+        assertEquals(response.getStatus(), 404);
+        assertTrue(response.getEntity().toString().contains("Scope not found"));
+    }
+
+    @Test
+    public void testApisApiIdScopesNameGet() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.when(apiPublisher.getScopeInformationOfApi(apiId,"apim:api_view")).thenReturn(new Scope
+                ("apim:api_view","api create"));
+        Response response = apisApiService.apisApiIdScopesNameGet(apiId, "apim:api_view", null, null, getRequest());
+        assertEquals(response.getStatus(), 200);
+        assertTrue(response.getEntity().toString().contains("apim:api_view"));
+        assertTrue(response.getEntity().toString().contains("api create"));
+    }
+
+    @Test
+    public void testApisApiIdScopesNameGetException() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Mockito.when(apiPublisher.getScopeInformationOfApi(apiId, "apim:api_view")).thenThrow(new
+                APIManagementException("Scope couldn't found by name: apim:api_view", ExceptionCodes
+                .SCOPE_NOT_FOUND));
+        Response response = apisApiService.apisApiIdScopesNameGet(apiId, "apim:api_view", null, null, getRequest());
+        assertEquals(response.getStatus(), 404);
+        assertTrue(response.getEntity().toString().contains("Scope not found"));
+    }
+
+    @Test
+    public void testApisApiIdScopesNamePut() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Scope scope = new Scope("apim:api_view","api view");
+        Mockito.doNothing().when(apiPublisher).updateScopeOfTheApi(apiId, scope);
+        Response response = apisApiService.apisApiIdScopesNamePut(apiId, scope.getName(), MappingUtil.scopeDto(scope,
+                "roles"), null, null, getRequest());
+        assertEquals(response.getStatus(), 200);
+    }
+    @Test
+    public void testApisApiIdScopesNamePutException() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Scope scope = new Scope("apim:api_view","api view");
+        Mockito.doThrow(new APIManagementException("Scope couldn't found by name: apim:api_view", ExceptionCodes
+                .SCOPE_NOT_FOUND)).when(apiPublisher).updateScopeOfTheApi(apiId,scope);
+        Response response = apisApiService.apisApiIdScopesNamePut(apiId, "apim:api_view", MappingUtil.scopeDto(scope,
+                "role"), null, null, getRequest());
+        assertEquals(response.getStatus(), 404);
+        assertTrue(response.getEntity().toString().contains("Scope not found"));
+    }
+    @Test
+    public void testApisApiIdScopesPost() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Scope scope = new Scope("api_view","api view");
+        Mockito.doNothing().when(apiPublisher).addScopeToTheApi(apiId, scope);
+        Response response = apisApiService.apisApiIdScopesPost(apiId, MappingUtil.scopeDto(scope, "role"), null,
+                null, getRequest());
+        assertEquals(response.getStatus(), 201);
+    }
+    @Test
+    public void testApisApiIdScopesPostWithRestrictedKeyWord() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Scope scope = new Scope("apim:api_view","api view");
+        Mockito.doNothing().when(apiPublisher).addScopeToTheApi(apiId, scope);
+        Response response = apisApiService.apisApiIdScopesPost(apiId, MappingUtil.scopeDto(scope, "role"), null,
+                null, getRequest());
+        assertEquals(response.getStatus(), 412);
+    }
+    @Test
+    public void testApisApiIdScopesPostWithInvalidscopebindingType() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Scope scope = new Scope("api_view","api view");
+        Mockito.doNothing().when(apiPublisher).addScopeToTheApi(apiId, scope);
+        Response response = apisApiService.apisApiIdScopesPost(apiId, MappingUtil.scopeDto(scope, "permission"), null,
+                null, getRequest());
+        assertEquals(response.getStatus(), 412);
+    }
+    @Test
+    public void testApisApiIdScopesNamePOSTException() throws Exception {
+        printTestMethodName();
+        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
+        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
+        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
+        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
+                thenReturn(apiPublisher);
+        String apiId = UUID.randomUUID().toString();
+        Scope scope = new Scope("api_view","api view");
+        Mockito.doThrow(new APIManagementException("Scope already registered", ExceptionCodes
+                .SCOPE_ALREADY_REGISTERED)).when(apiPublisher).addScopeToTheApi(apiId, scope);
+        Response response = apisApiService.apisApiIdScopesPost(apiId, MappingUtil.scopeDto(scope, "role"), null,
+                null, getRequest());
+        assertEquals(response.getStatus(), 409);
+        assertTrue(response.getEntity().toString().contains("Scope already exist"));
+    }
     private Matcher<API.APIBuilder> getAPIBuilderMatcher(API.APIBuilder apiBuilder) {
         return new BaseMatcher<API.APIBuilder>() {
             @Override

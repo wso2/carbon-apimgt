@@ -27,10 +27,13 @@ import org.wso2.carbon.apimgt.core.auth.DCRMServiceStub;
 import org.wso2.carbon.apimgt.core.auth.DCRMServiceStubFactory;
 import org.wso2.carbon.apimgt.core.auth.OAuth2ServiceStubs;
 import org.wso2.carbon.apimgt.core.auth.OAuth2ServiceStubsFactory;
+import org.wso2.carbon.apimgt.core.auth.ScopeRegistrationServiceStub;
+import org.wso2.carbon.apimgt.core.auth.ScopeRegistrationServiceStubFactory;
 import org.wso2.carbon.apimgt.core.auth.dto.DCRClientInfo;
 import org.wso2.carbon.apimgt.core.auth.dto.DCRError;
 import org.wso2.carbon.apimgt.core.auth.dto.OAuth2IntrospectionResponse;
 import org.wso2.carbon.apimgt.core.auth.dto.OAuth2TokenInfo;
+import org.wso2.carbon.apimgt.core.auth.dto.ScopeInfo;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
@@ -40,10 +43,12 @@ import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -55,6 +60,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
 
     private DCRMServiceStub dcrmServiceStub;
     private OAuth2ServiceStubs oAuth2ServiceStubs;
+    private ScopeRegistrationServiceStub scopeRegistrationServiceStub;
 
     /**
      * Default Constructor
@@ -62,20 +68,24 @@ public class DefaultKeyManagerImpl implements KeyManager {
      * @throws APIManagementException if error occurred while instantiating DefaultKeyManagerImpl
      */
     public DefaultKeyManagerImpl() throws APIManagementException {
-        this(DCRMServiceStubFactory.getDCRMServiceStub(), OAuth2ServiceStubsFactory.getOAuth2ServiceStubs());
+        this(DCRMServiceStubFactory.getDCRMServiceStub(), OAuth2ServiceStubsFactory.getOAuth2ServiceStubs(),
+                ScopeRegistrationServiceStubFactory.getScopeRegistrationServiceStub());
     }
 
     /**
      * Constructor
      *
-     * @param dcrmServiceStub    Service stub for DCR(M) service
-     * @param oAuth2ServiceStubs Service stub for OAuth2 services
+     * @param dcrmServiceStub              Service stub for DCR(M) service
+     * @param oAuth2ServiceStubs           Service stub for OAuth2 services
+     * @param scopeRegistrationServiceStub Service stub for Scope registration service
      * @throws APIManagementException if error occurred while instantiating DefaultKeyManagerImpl
      */
-    public DefaultKeyManagerImpl(DCRMServiceStub dcrmServiceStub, OAuth2ServiceStubs oAuth2ServiceStubs)
+    public DefaultKeyManagerImpl(DCRMServiceStub dcrmServiceStub, OAuth2ServiceStubs oAuth2ServiceStubs,
+                                 ScopeRegistrationServiceStub scopeRegistrationServiceStub)
             throws APIManagementException {
         this.dcrmServiceStub = dcrmServiceStub;
         this.oAuth2ServiceStubs = oAuth2ServiceStubs;
+        this.scopeRegistrationServiceStub = scopeRegistrationServiceStub;
     }
 
     @Override
@@ -436,6 +446,78 @@ public class DefaultKeyManagerImpl implements KeyManager {
 
     }
 
+    @Override
+    public boolean registerScope(Scope scope) throws KeyManagementException {
+        ScopeInfo scopeInfo = getScopeInfo(scope);
+        int existStatus = scopeRegistrationServiceStub.isScopeExist(scope.getName()).status();
+        if (existStatus == APIMgtConstants.HTTPStatusCodes
+                .SC_404_NOT_FOUND) {
+            Response response = scopeRegistrationServiceStub.registerScope(scopeInfo);
+            if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_201_CREATED) {
+                return true;
+            } else {
+                throw new KeyManagementException("Scope Registration Failed", ExceptionCodes.SCOPE_REGISTRATION_FAILED);
+            }
+        } else if (existStatus == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
+            return false;
+        } else {
+            throw new KeyManagementException("Scope Registration Failed", ExceptionCodes.SCOPE_REGISTRATION_FAILED);
+        }
+    }
+
+    @Override
+    public Scope retrieveScope(String name) throws KeyManagementException {
+        Response response = scopeRegistrationServiceStub.getScopeByName(name);
+        if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
+            try {
+                return getScope(response);
+            } catch (IOException e) {
+                throw new KeyManagementException("Couldn't retrieve Scope", e, ExceptionCodes.INTERNAL_ERROR);
+            }
+        } else if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_404_NOT_FOUND) {
+            throw new KeyManagementException("Couldn't retrieve Scope " + name, ExceptionCodes.SCOPE_NOT_FOUND);
+        } else {
+            throw new KeyManagementException("Couldn't find Scope", ExceptionCodes.INTERNAL_ERROR);
+        }
+    }
+
+    @Override
+    public boolean updateScope(Scope scope) throws KeyManagementException {
+        ScopeInfo scopeInfo = getScopeInfoForUpdate(scope);
+        Response response = scopeRegistrationServiceStub.updateScope(scopeInfo, scope.getName());
+        if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
+            return true;
+        } else {
+            throw new KeyManagementException("Scope Couldn't get updated", ExceptionCodes.INTERNAL_ERROR);
+        }
+    }
+
+    private ScopeInfo getScopeInfo(Scope scope) {
+        ScopeInfo scopeInfo = new ScopeInfo();
+        scopeInfo.setName(scope.getName());
+        scopeInfo.setDescription(scope.getDescription());
+        scopeInfo.setBindings(scope.getBindings());
+        return scopeInfo;
+    }
+
+    private ScopeInfo getScopeInfoForUpdate(Scope scope) {
+        ScopeInfo scopeInfo = new ScopeInfo();
+        scopeInfo.setDisplayName(scope.getName());
+        scopeInfo.setDescription(scope.getDescription());
+        scopeInfo.setBindings(scope.getBindings());
+        return scopeInfo;
+    }
+
+    @Override
+    public boolean deleteScope(String name) throws KeyManagementException {
+        Response response = scopeRegistrationServiceStub.deleteScope(name);
+        if (response.status() == APIMgtConstants.HTTPStatusCodes.SC_200_OK) {
+            return true;
+        } else {
+            throw new KeyManagementException("Scope Couldn't get deleted" + name, ExceptionCodes.SCOPE_DELETE_FAILED);
+        }
+    }
+
     private OAuthApplicationInfo getOAuthApplicationInfo(Response response) throws IOException {
         OAuthApplicationInfo oAuthApplicationInfoResponse = new OAuthApplicationInfo();
         DCRClientInfo dcrClientInfoResponse = (DCRClientInfo) new GsonDecoder().decode(response, DCRClientInfo.class);
@@ -446,4 +528,18 @@ public class DefaultKeyManagerImpl implements KeyManager {
         oAuthApplicationInfoResponse.setCallBackURL(dcrClientInfoResponse.getRedirectURIs().get(0));
         return oAuthApplicationInfoResponse;
     }
+
+    private Scope getScope(Response response) throws IOException {
+        Scope scope = new Scope();
+        ScopeInfo scopeInfoResponse = (ScopeInfo) new GsonDecoder().decode(response, ScopeInfo.class);
+        scope.setName(scopeInfoResponse.getName());
+        scope.setDescription(scopeInfoResponse.getDescription());
+        if (scopeInfoResponse.getBindings() != null) {
+            scope.setBindings(scopeInfoResponse.getBindings());
+        } else {
+            scope.setBindings(Collections.emptyList());
+        }
+        return scope;
+    }
+
 }

@@ -29,6 +29,7 @@ import io.swagger.models.ModelImpl;
 import io.swagger.models.Operation;
 import io.swagger.models.Path;
 import io.swagger.models.Response;
+import io.swagger.models.SecurityRequirement;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.ApiKeyAuthDefinition;
 import io.swagger.models.auth.In;
@@ -51,6 +52,7 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
+import org.wso2.carbon.apimgt.core.configuration.models.KeyMgtConfigurations;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
@@ -191,16 +193,36 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         }
         //update local cache with the resource to scope mapping read from swagger
         if (swagger != null) {
+            List<String> globalScopeList = new ArrayList<>();
+            List<SecurityRequirement> securityRequirementList = swagger.getSecurity();
+            if (securityRequirementList != null) {
+                for (SecurityRequirement securityRequirement : securityRequirementList) {
+                    Map<String, List<String>> security = securityRequirement.getRequirements();
+                    if (security.containsKey(APIMgtConstants.OAUTH2SECURITY)) {
+                        globalScopeList.addAll(security.get(APIMgtConstants.OAUTH2SECURITY));
+                    }
+                }
+            }
             for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
                 Path resource = entry.getValue();
                 Map<HttpMethod, Operation> operationsMap = resource.getOperationMap();
                 for (Map.Entry<HttpMethod, Operation> httpVerbEntry : operationsMap.entrySet()) {
                     List<Map<String, List<String>>> security = httpVerbEntry.getValue().getSecurity();
                     if (security != null) {
-                        String scope = security.get(0).get(APIMgtConstants.OAUTH2SECURITY).get(0);
+                        for (Map<String, List<String>> securityRequirement : security) {
+                            if (securityRequirement.containsKey(APIMgtConstants.OAUTH2SECURITY)) {
+                                List<String> scope = securityRequirement.get(APIMgtConstants.OAUTH2SECURITY);
+
+                                String path = httpVerbEntry.getKey() + "_" + entry.getKey();
+                                if (!localConfigMap.get(namespace).containsKey(path)) {
+                                    localConfigMap.get(namespace).put(path, convertListTostring(scope));
+                                }
+                            }
+                        }
+                    } else {
                         String path = httpVerbEntry.getKey() + "_" + entry.getKey();
                         if (!localConfigMap.get(namespace).containsKey(path)) {
-                            localConfigMap.get(namespace).put(path, scope);
+                            localConfigMap.get(namespace).put(path, convertListTostring(globalScopeList));
                         }
                     }
                 }
@@ -215,7 +237,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigsJSON.toString());
         Map<String, Path> resourceList = swagger.getPaths();
-        Map<String, Scope> scopeMap;
+        Map<String, String> scopeMap;
         //todo:remove vendor extensions scope retraction (remove else part)
         //retrieve scopes depending on OAuth2Security definitions availability
         if (swagger.getSecurityDefinitions() != null) {
@@ -243,24 +265,6 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                     apiResources.add(apiResourceBuilder.build());
                 }
             }
-        } else { //retrieve scopes in vendor extension
-            scopeMap = getScopes(resourceConfigsJSON.toString());
-            for (Map.Entry<String, Path> resourceEntry : resourceList.entrySet()) {
-                Path resource = resourceEntry.getValue();
-                UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
-                uriTemplateBuilder.uriTemplate(resourceEntry.getKey());
-                for (Map.Entry<HttpMethod, Operation> operationEntry : resource.getOperationMap().entrySet()) {
-                    Operation operation = operationEntry.getValue();
-                    Map<String, Object> vendorExtensions = operation.getVendorExtensions();
-                    APIResource.Builder apiResourceBuilder = setApiResourceBuilderProperties(operationEntry,
-                            uriTemplateBuilder, resourceEntry.getKey());
-                    String scope = (String) vendorExtensions.get(APIMgtConstants.SWAGGER_X_SCOPE);
-                    if (StringUtils.isNotEmpty(scope)) {
-                        apiResourceBuilder.scope(scopeMap.get(scope));
-                    }
-                    apiResources.add(apiResourceBuilder.build());
-                }
-            }
         }
         resourceConfigsJSON.setLength(0);
         resourceConfigsJSON.append(Json.pretty(swagger));
@@ -276,7 +280,8 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
      * @return APIResource.Builder object
      */
     private APIResource.Builder setApiResourceBuilderProperties(Map.Entry<HttpMethod, Operation> operationEntry,
-            UriTemplate.UriTemplateBuilder uriTemplateBuilder, String resourcePath) {
+                                                                UriTemplate.UriTemplateBuilder uriTemplateBuilder,
+                                                                String resourcePath) {
         Operation operation = operationEntry.getValue();
         APIResource.Builder apiResourceBuilder = new APIResource.Builder();
         List<String> producesList = operation.getProduces();
@@ -303,12 +308,35 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
     }
 
     @Override
-    public Map<String, Scope> getScopesFromSecurityDefinition(String resourceConfigJSON) throws APIManagementException {
+    public Map<String, String> getScopesFromSecurityDefinition(String resourceConfigJSON) throws
+            APIManagementException {
+        SwaggerParser swaggerParser = new SwaggerParser();
+        Swagger swagger = swaggerParser.parse(resourceConfigJSON);
+        Map<String, String> scopes = new HashMap<>();
+        Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
+        if (securityDefinitions != null) {
+            for (Map.Entry<String, SecuritySchemeDefinition> securitySchemeDefinitionEntry :
+                    securityDefinitions.entrySet()) {
+                if (securitySchemeDefinitionEntry.getValue() instanceof OAuth2Definition) {
+                    OAuth2Definition securityDefinition = (OAuth2Definition) securitySchemeDefinitionEntry.getValue();
+                    if (securityDefinition != null) {
+                        scopes.putAll(securityDefinition.getScopes());
+                    }
+                }
+
+            }
+        }
+        return scopes;
+    }
+
+    @Override
+    public Map<String, Scope> getScopesFromSecurityDefinitionForWebApps(String resourceConfigJSON) throws
+            APIManagementException {
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigJSON);
         String basePath = swagger.getBasePath();
         String nameSpace = getNamespaceFromBasePath(basePath);
-        Map<String, String> scopes = null;
+        Map<String, String> scopes;
         if (nameSpace == null) {
             return new HashMap<>();
         }
@@ -322,14 +350,16 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         //security header is not found in deployment.yaml.hence, reading from swagger
         Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
         if (securityDefinitions != null) {
-            Map.Entry<String, SecuritySchemeDefinition> entry = securityDefinitions.entrySet().iterator().next();
-            OAuth2Definition securityDefinition = (OAuth2Definition) entry.getValue();
-            scopes = securityDefinition.getScopes();
-            //populate Scope object map using oAuth2securityDefinitions
-            Map<String, Scope> scopeMap = populateScopeMap(scopes);
-            localConfigMap.get(nameSpace).put(APIMgtConstants.SCOPES, scopeMap);
-            log.debug("Scopes of extracted from Swagger: {}", scopeMap);
-            return scopeMap;
+            OAuth2Definition securityDefinition = (OAuth2Definition) securityDefinitions.get(APIMgtConstants
+                    .OAUTH2SECURITY);
+            if (securityDefinition != null) {
+                scopes = securityDefinition.getScopes();
+                //populate Scope object map using oAuth2securityDefinitions
+                Map<String, Scope> scopeMap = populateScopeMap(scopes);
+                localConfigMap.get(nameSpace).put(APIMgtConstants.SCOPES, scopeMap);
+                log.debug("Scopes of extracted from Swagger: {}", scopeMap);
+                return scopeMap;
+            }
         }
         return new HashMap<>();
     }
@@ -344,8 +374,8 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         Map<String, Scope> scopeMap = new HashMap<>();
         for (Map.Entry<String, String> scopeEntry : oAuth2SecurityDefinitionMap.entrySet()) {
             Scope scope = new Scope();
-            scope.setKey(scopeEntry.getKey());
-            scope.setName(scopeEntry.getValue());
+            scope.setName(scopeEntry.getKey());
+            scope.setDescription(scopeEntry.getValue());
             scopeMap.put(scopeEntry.getKey(), scope);
         }
         return scopeMap;
@@ -414,7 +444,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
             while (scopesIterator.hasNext()) {
                 Scope scope = new Gson().fromJson(((JSONObject) scopesIterator.next()).toJSONString(),
                         Scope.class);
-                scopeMap.put(scope.getKey(), scope);
+                scopeMap.put(scope.getName(), scope);
             }
         } else {
             if (log.isDebugEnabled()) {
@@ -615,7 +645,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
 
     @Override
     public CompositeAPI.Builder generateCompositeApiFromSwaggerResource(String provider, String apiDefinition)
-                                                                                         throws APIManagementException {
+            throws APIManagementException {
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(apiDefinition);
 
@@ -631,11 +661,11 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
             String apiVersion = apiInfo.getVersion();
             String apiDescription = apiInfo.getDescription();
             CompositeAPI.Builder apiBuilder = new CompositeAPI.Builder().
-                provider(provider).
-                name(apiName).
-                version(apiVersion).
-                description(apiDescription).
-                context(swagger.getBasePath());
+                    provider(provider).
+                    name(apiName).
+                    version(apiVersion).
+                    description(apiDescription).
+                    context(swagger.getBasePath());
 
             List<APIResource> apiResourceList = parseSwaggerAPIResources(new StringBuilder(apiDefinition));
             Map<String, UriTemplate> uriTemplateMap = new HashMap();
@@ -646,6 +676,131 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
             apiBuilder.id(UUID.randomUUID().toString());
             return apiBuilder;
         }
+    }
+
+    @Override
+    public String removeScopeFromSwaggerDefinition(String resourceConfigJSON, String name) {
+        SwaggerParser swaggerParser = new SwaggerParser();
+        Swagger swagger = swaggerParser.parse(resourceConfigJSON);
+        Map<String, SecuritySchemeDefinition> securitySchemeDefinitionMap = swagger.getSecurityDefinitions();
+        if (securitySchemeDefinitionMap != null && !securitySchemeDefinitionMap.isEmpty()) {
+            OAuth2Definition oAuth2Definition = (OAuth2Definition) securitySchemeDefinitionMap.get(APIMgtConstants
+                    .OAUTH2SECURITY);
+            if (oAuth2Definition != null) {
+                // Removing Scope from Swagger SecurityDefinition
+                oAuth2Definition.getScopes().remove(name);
+                // Finding Security requirements at root level
+                List<SecurityRequirement> securityRequirements = swagger.getSecurity();
+
+                if (securityRequirements != null && !securityRequirements.isEmpty()) {
+                    // Get List of Security Requirements
+                    Iterator<SecurityRequirement> securityRequirementIterator = securityRequirements.iterator();
+                    while (securityRequirementIterator.hasNext()) {
+                        SecurityRequirement securityRequirement = securityRequirementIterator.next();
+                        Map<String, List<String>> secListMap = securityRequirement.getRequirements();
+                        // get Oauth2Security scopes
+                        List<String> scopesList = secListMap.get(APIMgtConstants.OAUTH2SECURITY);
+                        if (scopesList != null) {
+                            // Remove Scope from root level
+                            scopesList.remove(name);
+                        }
+                        // Check root level security Requirements is empty
+                        if (securityRequirement.getRequirements().isEmpty()) {
+                            // Check root level security Requirements
+                            securityRequirementIterator.remove();
+                        }
+                    }
+                    if (securityRequirements.isEmpty()) {
+                        // Remove root level security
+                        swagger.setSecurity(null);
+                    }
+                }
+
+                Map<String, Path> pathMap = swagger.getPaths();
+                if (pathMap != null && !pathMap.isEmpty()) {
+                    for (Map.Entry<String, Path> pathEntry : pathMap.entrySet()) {
+                        Path path = pathEntry.getValue();
+                        List<Operation> operationList = path.getOperations();
+                        for (Operation operation : operationList) {
+                            List<Map<String, List<String>>> operationSecurityList = operation.getSecurity();
+                            if (operationSecurityList != null && !operationSecurityList.isEmpty()) {
+                                Iterator<Map<String, List<String>>> securityMapIterator = operationSecurityList
+                                        .iterator();
+                                while (securityMapIterator.hasNext()) {
+                                    Map<String, List<String>> securityMap = securityMapIterator.next();
+                                    List<String> scopesList = securityMap.get(APIMgtConstants.OAUTH2SECURITY);
+                                    scopesList.remove(name);
+                                    if (scopesList.isEmpty()) {
+                                        securityMapIterator.remove();
+                                    }
+                                }
+                                if (operationSecurityList.isEmpty()) {
+                                    operation.setSecurity(null);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return Json.pretty(swagger);
+    }
+
+    @Override
+    public String updateScopesOnSwaggerDefinition(String resourceConfigJSON, Scope scope) {
+        SwaggerParser swaggerParser = new SwaggerParser();
+        Swagger swagger = swaggerParser.parse(resourceConfigJSON);
+        Map<String, SecuritySchemeDefinition> securitySchemeDefinitionMap = swagger.getSecurityDefinitions();
+        if (securitySchemeDefinitionMap != null && !securitySchemeDefinitionMap.isEmpty()) {
+            OAuth2Definition oAuth2Definition = (OAuth2Definition) securitySchemeDefinitionMap.get(APIMgtConstants
+                    .OAUTH2SECURITY);
+            if (oAuth2Definition != null) {
+                // Removing Scope from Swagger SecurityDefinition
+                Map<String, String> scopeMap = oAuth2Definition.getScopes();
+                if (scopeMap != null && scopeMap.containsKey(scope.getName())) {
+                    scopeMap.replace(scope.getName(), scope.getDescription());
+                }
+            }
+        }
+        return Json.pretty(swagger);
+    }
+
+    @Override
+    public String addScopeToSwaggerDefinition(String resourceConfigJSON, Scope scope) {
+        KeyMgtConfigurations keyManagerConfigs = ServiceReferenceHolder.getInstance().getAPIMConfiguration()
+                .getKeyManagerConfigs();
+        SwaggerParser swaggerParser = new SwaggerParser();
+        Swagger swagger = swaggerParser.parse(resourceConfigJSON);
+        Map<String, SecuritySchemeDefinition> securitySchemeDefinitionMap = swagger.getSecurityDefinitions();
+
+
+        if (securitySchemeDefinitionMap != null && !securitySchemeDefinitionMap.isEmpty() &&
+                securitySchemeDefinitionMap.containsKey(APIMgtConstants.OAUTH2SECURITY)) {
+            OAuth2Definition oAuth2Definition = (OAuth2Definition) securitySchemeDefinitionMap.get(APIMgtConstants
+                    .OAUTH2SECURITY);
+            // Removing Scope from Swagger SecurityDefinition
+            Map<String, String> scopeMap = oAuth2Definition.getScopes();
+            if (scopeMap != null) {
+                scopeMap.put(scope.getName(), scope.getDescription());
+            }
+        } else {
+            OAuth2Definition oAuth2Definition = new OAuth2Definition();
+            oAuth2Definition.setType("oauth2");
+            oAuth2Definition.setFlow("password");
+            oAuth2Definition.setTokenUrl(keyManagerConfigs.getTokenEndpoint());
+            Map<String, String> scopes = new HashMap<>();
+            scopes.put(scope.getName(), scope.getDescription());
+            oAuth2Definition.setScopes(scopes);
+            if (securitySchemeDefinitionMap != null) {
+                securitySchemeDefinitionMap.put(APIMgtConstants.OAUTH2SECURITY, oAuth2Definition);
+            } else {
+                securitySchemeDefinitionMap = new HashMap<>();
+                securitySchemeDefinitionMap.put(APIMgtConstants.OAUTH2SECURITY, oAuth2Definition);
+                swagger.setSecurityDefinitions(securitySchemeDefinitionMap);
+            }
+        }
+        return Json.pretty(swagger);
+
     }
 
 
@@ -687,25 +842,37 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
 
     private Parameter getParameterFromURITemplateParam(URITemplateParam uriTemplateParam) {
         switch (uriTemplateParam.getParamType()) {
-        case BODY:
-            return getDefaultBodyParameter();
-        case PATH:
-            PathParameter pathParameter = new PathParameter();
-            pathParameter.setName(uriTemplateParam.getName());
-            pathParameter.setType(uriTemplateParam.getDataType());
-            return pathParameter;
-        case QUERY:
-            QueryParameter queryParameter = new QueryParameter();
-            queryParameter.setName(uriTemplateParam.getName());
-            queryParameter.setType(uriTemplateParam.getDataType());
-            return queryParameter;
-        case FORM_DATA:
-            FormParameter formParameter = new FormParameter();
-            formParameter.setName(uriTemplateParam.getName());
-            formParameter.setType(uriTemplateParam.getDataType());
-            return formParameter;
-        default:
-            return null;
+            case BODY:
+                return getDefaultBodyParameter();
+            case PATH:
+                PathParameter pathParameter = new PathParameter();
+                pathParameter.setName(uriTemplateParam.getName());
+                pathParameter.setType(uriTemplateParam.getDataType());
+                return pathParameter;
+            case QUERY:
+                QueryParameter queryParameter = new QueryParameter();
+                queryParameter.setName(uriTemplateParam.getName());
+                queryParameter.setType(uriTemplateParam.getDataType());
+                return queryParameter;
+            case FORM_DATA:
+                FormParameter formParameter = new FormParameter();
+                formParameter.setName(uriTemplateParam.getName());
+                formParameter.setType(uriTemplateParam.getDataType());
+                return formParameter;
+            default:
+                return null;
+        }
+    }
+
+    public static String convertListTostring(List<String> stringList) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String s : stringList) {
+            stringBuilder.append(s + " ");
+        }
+        if (stringBuilder.length() > 0) {
+            return stringBuilder.replace(stringBuilder.length() - 1, stringBuilder.length(), "").toString();
+        } else {
+            return stringBuilder.toString();
         }
     }
 }

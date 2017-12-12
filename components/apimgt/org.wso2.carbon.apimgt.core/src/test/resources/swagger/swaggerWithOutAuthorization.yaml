@@ -1,0 +1,61 @@
+swagger: '2.0'
+info:
+  version: "v1.0"
+  title: "WSO2 API Manager - Publisher API"
+  description: |
+    This specifies a **RESTful API** for WSO2 **API Manager** - Publisher.
+  contact:
+    name: "WSO2"
+    url: "http://wso2.com/products/api-manager/"
+    email: "architecture@wso2.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+schemes:
+  - https
+  - http
+
+host: apis.wso2.com
+
+basePath: /api/am/publisher/v1.0
+consumes:
+  - application/json
+
+produces:
+  - application/json
+
+paths:
+  /apis:
+
+    get:
+      summary: |
+        Retrieve/Search APIs
+      description: |
+        This operation provides you a list of available APIs qualifying under a given search condition.
+
+        Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details of an API, you need to use **Get details of an API** operation.
+      tags:
+        - API (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            List of qualifying APIs is returned.
+          schema:
+            $ref: '#/definitions/APIInfo'
+
+
+definitions:
+#-----------------------------------------------------
+# The API Info resource
+#-----------------------------------------------------
+  APIInfo:
+    title: API Info object with basic API details.
+    properties:
+      id:
+        type: string
+        example: 01234567-0123-0123-0123-012345678901
+      name:
+        type: string
+        example: CalculatorAPI

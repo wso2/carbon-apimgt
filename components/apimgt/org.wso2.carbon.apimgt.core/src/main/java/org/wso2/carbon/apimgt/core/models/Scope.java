@@ -25,6 +25,7 @@ package org.wso2.carbon.apimgt.core.models;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -33,18 +34,22 @@ import java.util.Objects;
 public class Scope implements Serializable {
 
     private static final long serialVersionUID = 5737132983639722942L;
-    String key;
     String name;
-    String roles;
+    List<String> bindings;
     String description;
-    int id;
 
-    public String getKey() {
-        return key;
+    public Scope(String name, List<String> bindings, String description) {
+        this.name = name;
+        this.bindings = bindings;
+        this.description = description;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public Scope(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
+
+    public Scope() {
     }
 
     public String getName() {
@@ -55,13 +60,6 @@ public class Scope implements Serializable {
         this.name = name;
     }
 
-    public String getRoles() {
-        return roles;
-    }
-
-    public void setRoles(String roles) {
-        this.roles = roles;
-    }
 
     public String getDescription() {
         return description;
@@ -71,14 +69,13 @@ public class Scope implements Serializable {
         this.description = description;
     }
 
-    public int getId() {
-        return id;
+    public List<String> getBindings() {
+        return bindings;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setBindings(List<String> bindings) {
+        this.bindings = bindings;
     }
-
 
     @Override
     public boolean equals(Object o) {
@@ -91,26 +88,20 @@ public class Scope implements Serializable {
         }
 
         Scope scope = (Scope) o;
-        return id == scope.id &&
-                Objects.equals(key, scope.key) &&
-                Objects.equals(name, scope.name) &&
-                Objects.equals(roles, scope.roles) &&
+        return Objects.equals(name, scope.name) &&
                 Objects.equals(description, scope.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(key, name, roles, description, id);
+        return Objects.hash(name, description);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .append("key", key)
                 .append("name", name)
-                .append("roles", roles)
                 .append("description", description)
-                .append("id", id)
                 .toString();
     }
 }

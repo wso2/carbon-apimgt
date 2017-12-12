@@ -26,6 +26,7 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.auth.DCRMServiceStub;
 import org.wso2.carbon.apimgt.core.auth.OAuth2ServiceStubs;
 import org.wso2.carbon.apimgt.core.auth.SCIMServiceStub;
+import org.wso2.carbon.apimgt.core.auth.ScopeRegistrationServiceStub;
 import org.wso2.carbon.apimgt.core.auth.dto.SCIMUser;
 import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.models.User;
@@ -44,8 +45,9 @@ public class DefaultIdentityProviderImplTestCase {
         SCIMServiceStub scimServiceStub = Mockito.mock(SCIMServiceStub.class);
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
         DefaultIdentityProviderImpl idpImpl = new DefaultIdentityProviderImpl(scimServiceStub, dcrmServiceStub,
-                oAuth2ServiceStub);
+                oAuth2ServiceStub, scopeRegistrationServiceStub);
 
         String validUserName = "John";
         final String validUserSearchQuery = "userName Eq " + validUserName;
@@ -107,8 +109,10 @@ public class DefaultIdentityProviderImplTestCase {
         SCIMServiceStub scimServiceStub = Mockito.mock(SCIMServiceStub.class);
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+
         DefaultIdentityProviderImpl idpImpl = new DefaultIdentityProviderImpl(scimServiceStub, dcrmServiceStub,
-                oAuth2ServiceStub);
+                oAuth2ServiceStub, scopeRegistrationServiceStub);
 
         String validUserId = "a42b4760-120d-432e-8042-4a7f12e3346c";
         String roleName1 = "subscriber";
@@ -164,7 +168,7 @@ public class DefaultIdentityProviderImplTestCase {
         try {
             idpImpl.getRoleNamesOfUser(invalidUserIdNot200OK);
         } catch (IdentityProviderException ex) {
-            Assert.assertEquals(ex.getMessage(),  "Error occurred while retrieving role names of user with Id "
+            Assert.assertEquals(ex.getMessage(), "Error occurred while retrieving role names of user with Id "
                     + invalidUserIdNot200OK + ". Error : User not found in the user store.");
         }
 
@@ -187,8 +191,9 @@ public class DefaultIdentityProviderImplTestCase {
         SCIMServiceStub scimServiceStub = Mockito.mock(SCIMServiceStub.class);
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
         DefaultIdentityProviderImpl idpImpl = new DefaultIdentityProviderImpl(scimServiceStub, dcrmServiceStub,
-                oAuth2ServiceStub);
+                oAuth2ServiceStub, scopeRegistrationServiceStub);
 
         final String validRole = "engineer";
         final String validRoleSearchQuery = "displayName Eq " + validRole;
@@ -212,8 +217,9 @@ public class DefaultIdentityProviderImplTestCase {
         SCIMServiceStub scimServiceStub = Mockito.mock(SCIMServiceStub.class);
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
         DefaultIdentityProviderImpl idpImpl = new DefaultIdentityProviderImpl(scimServiceStub, dcrmServiceStub,
-                oAuth2ServiceStub);
+                oAuth2ServiceStub, scopeRegistrationServiceStub);
 
         String validUserId = "a42b4760-120d-432e-8042-4a7f12e3346c";
         String roleName1 = "subscriber";
@@ -269,7 +275,7 @@ public class DefaultIdentityProviderImplTestCase {
         try {
             idpImpl.getRoleIdsOfUser(invalidUserIdNot200OK);
         } catch (IdentityProviderException ex) {
-            Assert.assertEquals(ex.getMessage(),  "Error occurred while retrieving role Ids of user with Id "
+            Assert.assertEquals(ex.getMessage(), "Error occurred while retrieving role Ids of user with Id "
                     + invalidUserIdNot200OK + ". Error : User not found in the user store.");
         }
 
@@ -292,8 +298,9 @@ public class DefaultIdentityProviderImplTestCase {
         SCIMServiceStub scimServiceStub = Mockito.mock(SCIMServiceStub.class);
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
         DefaultIdentityProviderImpl idpImpl = new DefaultIdentityProviderImpl(scimServiceStub, dcrmServiceStub,
-                oAuth2ServiceStub);
+                oAuth2ServiceStub, scopeRegistrationServiceStub);
 
         String validRoleName = "engineer";
         final String validRoleSearchQuery = "displayName Eq " + validRoleName;
@@ -355,8 +362,9 @@ public class DefaultIdentityProviderImplTestCase {
         SCIMServiceStub scimServiceStub = Mockito.mock(SCIMServiceStub.class);
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
         DefaultIdentityProviderImpl idpImpl = new DefaultIdentityProviderImpl(scimServiceStub, dcrmServiceStub,
-                oAuth2ServiceStub);
+                oAuth2ServiceStub, scopeRegistrationServiceStub);
 
         String validRoleId = "ac093278-9343-466c-8a71-af47921a575b";
         String expectedRoleName = "engineer";
@@ -426,8 +434,9 @@ public class DefaultIdentityProviderImplTestCase {
         SCIMServiceStub scimServiceStub = Mockito.mock(SCIMServiceStub.class);
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
         DefaultIdentityProviderImpl idpImpl = new DefaultIdentityProviderImpl(scimServiceStub, dcrmServiceStub,
-                oAuth2ServiceStub);
+                oAuth2ServiceStub, scopeRegistrationServiceStub);
 
         //happy path
         User user = new User();
@@ -435,7 +444,7 @@ public class DefaultIdentityProviderImplTestCase {
         user.setLastName("doe");
         user.setUsername("johnd");
         user.setEmail("john@wso2.com");
-        user.setPassword(new char[] {'p', 'a', 's', 's'});
+        user.setPassword(new char[]{'p', 'a', 's', 's'});
 
         SCIMUser scimUser = new SCIMUser();
         SCIMUser.SCIMName scimName = new SCIMUser.SCIMName();
