@@ -3632,56 +3632,11 @@ public class APIProviderHostObject extends ScriptableObject {
         int start = Integer.parseInt((String) args[2]);
         int end = Integer.parseInt((String) args[3]);
         boolean limitAttributes = false;
-        String newSearchQuery = "";
         if (args.length == 5) {
             limitAttributes = Boolean.parseBoolean((String) args[4]);
         }
-        
-        /*String searchTerm;
-        String searchType;
-
-        if (searchValue.contains(":")) {
-            if (searchValue.split(":").length > 1) {
-                searchType = searchValue.split(":")[0];
-                searchTerm = searchValue.split(":")[1];
-            } else {
-                throw new APIManagementException("Search term is missing. Try again with valid search query.");
-            }
-
-        } else {
-            searchTerm = searchValue;
-            searchType = "default";
-        }*/
-        inputSearchQuery = inputSearchQuery.trim();
-        // sub context and doc content doesn't support AND search
-        if (inputSearchQuery != null && inputSearchQuery.contains(" ")) {
-            if (inputSearchQuery.split(" ").length > 1) {
-                String[] searchCriterias = inputSearchQuery.split(" ");
-                for (int i = 0; i < searchCriterias.length; i++) {
-                    if (searchCriterias[i].contains(":") && searchCriterias[i].split(":").length > 1) {
-                        if (APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchCriterias[i].split(":")[0]) ||
-                                APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchCriterias[i].split(":")[0])) {
-                            throw new APIManagementException(
-                                    "Invalid query. AND based search is not supported for "
-                                            + "doc and subcontext prefixes");
-                        }
-                    }
-                    if (i == 0) {
-                        newSearchQuery = APIUtil.getSingleSearchCriteria(searchCriterias[i]);
-                    } else {
-                        newSearchQuery =
-                                newSearchQuery + APIConstants.SEARCH_AND_TAG +
-                                        APIUtil.getSingleSearchCriteria(searchCriterias[i]);
-                    }
-                }
-            }
-        } else {
-            newSearchQuery = APIUtil.getSingleSearchCriteria(inputSearchQuery);
-        }
+        String newSearchQuery  = APIUtil.constructNewSearchQuery(inputSearchQuery);
         try {
-            /*if ("*".equals(searchTerm) || searchTerm.startsWith("*")) {
-                searchTerm = searchTerm.replaceFirst("\\*", ".*");
-            }*/
             APIProvider apiProvider = getAPIProvider(thisObj);
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(
                     ((APIProviderHostObject) thisObj).getUsername()));
