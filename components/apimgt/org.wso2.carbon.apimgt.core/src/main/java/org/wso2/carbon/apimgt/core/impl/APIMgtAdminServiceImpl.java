@@ -725,8 +725,9 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         try {
             return threatProtectionDAO.getPolicy(policyId);
         } catch (APIMgtDAOException e) {
-            log.error(e.getMessage(), e);
-            throw new APIManagementException(e.getMessage(), e);
+            String message = "Error while retrieving threat protection policy";
+            log.error(message, e);
+            throw new APIManagementException(message, e);
         }
     }
 
@@ -735,8 +736,9 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         try {
             return threatProtectionDAO.getPolicies();
         } catch (APIMgtDAOException e) {
-            log.error(e.getMessage(), e);
-            throw new APIManagementException(e.getMessage(), e);
+            String message = "Error while retrieving threat protection policy list";
+            log.error(message, e);
+            throw new APIManagementException(message, e);
         }
     }
 
@@ -752,8 +754,9 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
                 apiGateway.updateThreatProtectionPolicy(policy);
             }
         } catch (APIMgtDAOException e) {
-            log.error(e.getMessage(), e);
-            throw new APIManagementException(e.getMessage(), e);
+            String message = "Error adding threat protection policy";
+            log.error(message, e);
+            throw new APIManagementException(message, e);
         }
     }
 
@@ -766,8 +769,9 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             policy.setUuid(policyId);
             apiGateway.deleteThreatProtectionPolicy(policy);
         } catch (APIMgtDAOException e) {
-            log.error(e.getMessage(), e);
-            throw new APIManagementException(e.getMessage(), e);
+            String message = "Error deleting threat protection policy";
+            log.error(message, e);
+            throw new APIManagementException(message, e);
         }
     }
 }
