@@ -85,6 +85,25 @@ if(jagg.isCSRFTokenValid())
                 else if(import_type == "swagger-file" && file){
                     file.open("r");
                     swagger = file.readAll();
+                    try {
+                        var swaggerJSON = parse(swagger);
+                        //Supported swagger version check
+                        if (swaggerJSON.swagger != supportedSwaggerVersion) {
+                            print({
+                                error: true,
+                                message: "Unsupported swagger version provided. Please re-imported with swagger " + supportedSwaggerVersion
+                            });
+                            return;
+                        }
+                        //Validate swagger definition with mandatory swagger elements
+                        if (swaggerJSON.swagger == null || swaggerJSON.paths == null || swaggerJSON.info == null) {
+                            print({error: true, message: file.getName() + " contains invalid swagger definition"});
+                            return;
+                        }
+                    } catch (e) {
+                        print({error: true, message: file.getName() + " is not a valid Swagger Definition file"});
+                        return;
+                    }
                     file.close();
                 }else{
                     var obj = require("/site/blocks/item-design/ajax/default_swagger.json");
@@ -159,7 +178,16 @@ if(jagg.isCSRFTokenValid())
             var wsdlUrl = request.getParameter("wsdl");
             if (wsdlUrl != null) {
                 if (!wsdlUrl.match(org.wso2.carbon.apimgt.impl.APIConstants.API_WSDL_RESOURCE_LOCATION)) {
-                    org.wso2.carbon.apimgt.impl.utils.APIUtil.isWSDL2Document(wsdlUrl);
+                    try {
+                        org.wso2.carbon.apimgt.impl.utils.APIUtil.isWSDL2Document(wsdlUrl);
+                    } catch (e) {
+                        obj = {
+                            error:true,
+                            message:"Please enter a valid WSDL URL"
+                        };
+                        print(obj);
+                        return;
+                    }
                 }
             }
 
