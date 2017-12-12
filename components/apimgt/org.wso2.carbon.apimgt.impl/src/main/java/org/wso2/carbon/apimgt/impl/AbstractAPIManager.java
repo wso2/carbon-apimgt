@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManager;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.ApplicationNameWhiteSpaceValidationException;
 import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
 import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -1581,6 +1582,12 @@ public abstract class AbstractAPIManager implements APIManager {
     protected final void handleBlockConditionNotFoundException(String msg) throws BlockConditionNotFoundException {
         log.error(msg);
         throw new BlockConditionNotFoundException(msg);
+    }
+
+    protected final void handleApplicationNameContainSpacesException(String msg)
+                                                                throws ApplicationNameWhiteSpaceValidationException {
+        log.error(msg);
+        throw new ApplicationNameWhiteSpaceValidationException(msg);
     }
 
     public boolean isApplicationTokenExists(String accessToken) throws APIManagementException {

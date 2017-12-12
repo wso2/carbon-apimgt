@@ -47,11 +47,11 @@ import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationMappingUt
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Map;
-import javax.ws.rs.core.Response;
 
 /**
  * This is the service implementation class for Store application related operations
@@ -157,6 +157,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 RestApiUtil.handleResourceAlreadyExistsError(
                         "An application already exists with name " + body.getName(), e,
                         log);
+            } else if (RestApiUtil.isDueToApplicationNameWhiteSpaceValidation(e)) {
+                RestApiUtil.handleBadRequest("Application name cannot contains leading or trailing white spaces", log);
             } else {
                 RestApiUtil.handleInternalServerError("Error while adding a new application for the user " + username,
                         e, log);
@@ -379,7 +381,11 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while updating application " + applicationId, e, log);
+            if (RestApiUtil.isDueToApplicationNameWhiteSpaceValidation(e)) {
+                RestApiUtil.handleBadRequest("Application name cannot contains leading or trailing white spaces", log);
+            } else {
+                RestApiUtil.handleInternalServerError("Error while updating application " + applicationId, e, log);
+            }
         }
         return null;
     }
