@@ -11,7 +11,7 @@ import org.wso2.carbon.apimgt.ballerina.threatprotection;
 function requestInterceptor(message m) (boolean, message) {
     system:println("invoking threat protection interceptor");
     string apiContext = messages:getProperty(m, constants:BASE_PATH);
-    //extract api version when support arrives
+    //extract api when support arrives
     //use apiContext + ":" + apiVersion to obtain apiId from holder
     string policyId = "GLOBAL";
     return analyzePayload(m, apiContext, policyId);
