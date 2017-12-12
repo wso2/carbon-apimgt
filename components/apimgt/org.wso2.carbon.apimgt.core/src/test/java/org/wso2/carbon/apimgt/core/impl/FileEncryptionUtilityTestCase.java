@@ -21,8 +21,8 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 import org.testng.Assert;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.configuration.models.FileEncryptionConfigurations;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -38,7 +38,6 @@ import java.util.List;
 
 public class FileEncryptionUtilityTestCase {
 
-    private static final String testDir = File.separator + "src" + File.separator + "test";
     private static final String securityDir = File.separator + "resources" + File.separator + "security";
     private static final String testFileToEncrypt = "testFileToEncrypt";
     private static final String someText = "someText";
@@ -47,10 +46,13 @@ public class FileEncryptionUtilityTestCase {
     private String encryptedFilePath;
     private String originalFilePath;
 
-    @BeforeTest(description = "Create a file to encrypt and set carbon.home system property")
+    @BeforeClass(description = "Create a file to encrypt and set carbon.home system property")
     public void createFileToEncrypt() throws Exception {
-        System.setProperty("carbon.home", System.getProperty("user.dir") + testDir);
-        securityDirAbsolutePath = System.getProperty("carbon.home") + securityDir + File.separator;
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource("swagger.json").getFile());
+        String resourceFileDirectory = file.getAbsoluteFile().getParent();
+        System.setProperty("carbon.home", resourceFileDirectory);
+        securityDirAbsolutePath = System.getProperty("carbon.home") + File.separator + securityDir + File.separator;
         encryptedFilePath = securityDirAbsolutePath + "encrypted" + testFileToEncrypt;
         originalFilePath =  securityDirAbsolutePath + testFileToEncrypt;
         APIFileUtils.createFile(originalFilePath);
@@ -105,7 +107,7 @@ public class FileEncryptionUtilityTestCase {
         fileEncryptionUtility.readFromEncryptedFile(securityDirAbsolutePath + "NonExistentFile");
     }
 
-    @AfterTest (description = "Clear files and the system property created by the test")
+    @AfterClass(description = "Clear files and the system property created by the test")
     public void removeCreatedFiles() throws Exception {
         String encryptedAesKeyPath = securityDirAbsolutePath + "encryptedAESKeyFile";
         Files.deleteIfExists(Paths.get(encryptedFilePath));
