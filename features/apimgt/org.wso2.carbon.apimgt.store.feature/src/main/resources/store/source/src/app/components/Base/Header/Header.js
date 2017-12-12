@@ -184,9 +184,8 @@ class Header extends React.Component {
                                 {/* User menu */}
                                 <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClickUserMenu}
                                         color="contrast">
-                                    <Avatar alt="{user.name}" src="/store/public/app/images/users/user.png"
-                                            style={{marginRight: "5px"}}></Avatar>
-                                    <span style={{textTransform: "none", marginLeft: "5px"}}>{user.name}</span>
+                                    <Avatar alt="{user.name}" src="/store/public/app/images/users/user.png"></Avatar>
+                                    <span>{user.name}</span>
                                 </Button>
                                 <Menu
                                     id="simple-menu"

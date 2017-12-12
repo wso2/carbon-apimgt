@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 "use strict";
-import SingleClient from "./SingleClient"
+import SingleClient from "./SingleClient";
+import Resource from "./Resource";
 
-export default class Application {
+/***
+ * Class to expose Application {Resource} related operations i:e: Get all Application , Delete, Generate Keys ect..
+ */
+export default class Application extends Resource {
     constructor(name, description, throttlingTier, kwargs) {
+        super();
         this.id = kwargs ? kwargs.applicationId : null;
         this.client = new SingleClient().client;
         this.keys = new Map();
@@ -105,17 +110,36 @@ export default class Application {
     }
 
     static get(id) {
-        let client = new SingleClient().client;
-        let promise_get = client.then(
+        let promised_get = Application.apiClient.then(
             (client) => {
-                return client.apis["Application (Individual)"].get_applications__applicationId_({applicationId: id});
+                return client.apis["Application (Individual)"].get_applications__applicationId_({applicationId: id},
+                    this._requestMetaData());
             });
-        return promise_get.then(response => {
+        return promised_get.then(response => {
             let app_json = response.obj;
             return new Application(app_json.name, app_json.description, app_json.throttlingTier, app_json);
         });
     }
+
+    static all() {
+        let promised_all = Application.apiClient.then(
+            (client) => {
+                return client.apis["Application (Collection)"].get_applications({}, this._requestMetaData());
+            });
+        return promised_all.then(response => response.obj);
+    }
+
+    static deleteApp(id) {
+        let promised_delete = Application.apiClient.then(
+            (client) => {
+                return client.apis["Application (Individual)"].delete_applications__applicationId_({applicationId: id},
+                    this._requestMetaData());
+            });
+        return promised_delete.then(response => response.ok);
+    }
 }
+
+Application.apiClient = new SingleClient().client;
 
 Application.KEY_TYPES = {
     PRODUCTION: "PRODUCTION",

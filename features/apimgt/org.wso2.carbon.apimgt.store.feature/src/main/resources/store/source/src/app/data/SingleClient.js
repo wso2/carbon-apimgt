@@ -23,6 +23,7 @@ import AuthManager from './AuthManager'
  * This class expose single swaggerClient instance created using the given swagger URL (Publisher, Store, ect ..)
  * it's highly unlikely to change the REST API Swagger definition (swagger.json) file on the fly,
  * Hence this singleton class help to preserve consecutive swagger client object creations saving redundant IO operations.
+ * @deprecated : This class will get disruptive changes when introducing multi environment support to store
  */
 class SingleClient {
     /**
@@ -37,7 +38,7 @@ class SingleClient {
         }
         const authorizations = {
             OAuth2Security: {
-                token: {access_token: AuthManager.getUser().getPartialToken()}
+                token: {access_token: AuthManager.getUser() ? AuthManager.getUser().getPartialToken() : ""}
             }
         };
         let promisedResolve = Swagger.resolve({url: this._getSwaggerURL()});

@@ -17,16 +17,34 @@
  */
 
 import React from 'react'
-import Grid from 'material-ui/Grid';
+import {withStyles} from 'material-ui/styles';
+import BottomNavigation, {BottomNavigationButton} from 'material-ui/BottomNavigation';
+import Typography from 'material-ui/Typography';
 
-export const Footer = () => (
-<Grid container spacing={24}>
-    <Grid item xs>
-        <p>WSO2 APIM Store v3.0.0 | © 2017 <a href="http://wso2.com/" target="_blank">
-            <i className="icon fw fw-wso2"/> Inc</a>.
-        </p>
-    </Grid>
-</Grid>
-);
+const styles = {
+    footer: {
+        clear: "both",
+        position: "relative",
+        "z-index": 10,
+        height: "3em",
+        "margin-top": "-3em",
+    },
+};
 
-export default Footer
+export const Footer = (props) => {
+    const {classes} = props;
+    return (
+        <div className={classes.root}>
+            <BottomNavigation className={classes.root}>
+                {/* This <p> tag introduce an warning
+                 Warning: Unknown prop `showLabel` on <p> tag. Remove this prop from the element.
+                 Ignore it till MUI fix.
+                 */}
+                <p>WSO2 APIM Store v3.0.0 | © 2017 <a href="http://wso2.com/" target="_blank">
+                    <i className="icon fw fw-wso2"/> Inc</a>
+                </p>
+            </BottomNavigation>
+        </div>
+    );
+};
+export default withStyles(styles)(Footer);

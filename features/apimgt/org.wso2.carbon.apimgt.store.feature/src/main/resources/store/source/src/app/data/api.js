@@ -14,33 +14,20 @@
  * limitations under the License.
  */
 "use strict";
-import AuthManager from './AuthManager'
 import SingleClient from './SingleClient'
+import Resource from "./Resource";
 
 /**
  * An abstract representation of an API
  */
-class API {
+class API extends Resource {
     /**
      * @constructor
      * @param {string} access_key - Access key for invoking the backend REST API call.
      */
     constructor() {
+        super();
         this.client = new SingleClient().client;
-    }
-
-    /**
-     *
-     * @param data
-     * @returns {object} Metadata for API request
-     * @private
-     */
-    _requestMetaData(data = {}) {
-        AuthManager.refreshTokenOnExpire();
-        /* TODO: This should be moved to an interceptor ~tmkb*/
-        return {
-            requestContentType: data['Content-Type'] || "application/json"
-        };
     }
 
     /**
@@ -50,9 +37,8 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getAllAPIs(callback = null) {
-        var promise_get_all = this.client.then(
+        let promise_get_all = this.client.then(
             (client) => {
-                console.info("this._requestMetaData()", this._requestMetaData());
                 return client.apis["API (Collection)"].get_apis({}, this._requestMetaData());
             }
         );
@@ -168,9 +154,9 @@ class API {
 
     /**
      * Get application by id
-     * @param id {String} UUID of the application
      * @param callback {function} Function which needs to be called upon success
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     * @deprecated Use Application.all method instead
      */
     getAllApplications(callback = null) {
         let promise_get = this.client.then(
@@ -249,10 +235,10 @@ class API {
     }
 
     /**
-    * Add new comment to an existing API
-    * @param api_id apiId of the api to which the comment is added
-    * @param commentInfo comment text
-    */
+     * Add new comment to an existing API
+     * @param api_id apiId of the api to which the comment is added
+     * @param commentInfo comment text
+     */
     addComment(api_id, commentInfo, callback = null) {
         var promise = this.client.then(
             (client) => {
@@ -260,10 +246,10 @@ class API {
                     {apiId: api_id, body: commentInfo}, this._requestMetaData());
             }
         ).catch(
-             error => {
-                 console.error(error);
-             }
-         );
+            error => {
+                console.error(error);
+            }
+        );
         if (callback) {
             return promise.then(callback);
         } else {
@@ -275,18 +261,18 @@ class API {
         var promise_get = this.client.then(
             (client) => {
                 return client.apis["API (Individual)"].get_apis__apiId__ratings(
-                      {apiId: api_id}, this._requestMetaData());
+                    {apiId: api_id}, this._requestMetaData());
             }
         ).catch(
-              error => {
-                  console.error(error);
-              }
-         );
-         if (callback) {
-             return promise_get.then(callback);
-         } else {
-             return promise_get;
-         }
+            error => {
+                console.error(error);
+            }
+        );
+        if (callback) {
+            return promise_get.then(callback);
+        } else {
+            return promise_get;
+        }
     }
 
     getAllComments(api_id, callback = null) {
@@ -296,9 +282,9 @@ class API {
                     {apiId: api_id}, this._requestMetaData());
             }
         ).catch(
-             error => {
-                 console.error(error);
-             }
+            error => {
+                console.error(error);
+            }
         );
         if (callback) {
             return promise_get.then(callback);
@@ -315,10 +301,10 @@ class API {
                     {apiId: api_id, body: ratingInfo}, this._requestMetaData());
             }
         ).catch(
-             error => {
-                 alert("error in adding " + error);
-             }
-         );
+            error => {
+                alert("error in adding " + error);
+            }
+        );
         if (callback) {
             return promise.then(callback);
         } else {
@@ -470,7 +456,7 @@ class API {
      * @returns {Promise} Zip file for the generated SDK.
      */
     getSdk(apiId, language) {
-        let payload = {apiId: apiId, language:language}
+        let payload = {apiId: apiId, language: language}
         var promise_sdk = this.client.then(
             (client) => {
                 return client.apis["API (Individual)"].get_apis__apiId__sdks__language_(
