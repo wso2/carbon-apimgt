@@ -17,7 +17,6 @@
  */
 
 import React, {Component} from 'react'
-import ActionBar from '../ActionBar'
 
 import {Link} from 'react-router-dom'
 import Grid from 'material-ui/Grid';
@@ -34,7 +33,6 @@ import TextField from 'material-ui/TextField';
 
 import API from '../../data/api'
 import Message from '../Shared/Message'
-import Confirm from '../Shared/Confirm'
 
 const messages = {
     success: 'Threat protection policy deleted successfully',

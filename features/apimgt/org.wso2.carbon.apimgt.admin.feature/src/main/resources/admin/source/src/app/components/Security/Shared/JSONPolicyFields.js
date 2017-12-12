@@ -19,7 +19,6 @@
 import TextField from 'material-ui/TextField';
 import Grid from 'material-ui/Grid';
 import Paper from 'material-ui/Paper';
-import Divider from 'material-ui/Divider';
 
 import React, {Component} from 'react';
 
