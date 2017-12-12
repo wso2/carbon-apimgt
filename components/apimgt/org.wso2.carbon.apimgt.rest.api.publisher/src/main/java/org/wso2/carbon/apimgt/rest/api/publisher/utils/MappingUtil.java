@@ -54,6 +54,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_businessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_corsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_endpointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_operationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_threatProtectionPoliciesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_threatProtectionPolicies_listDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
@@ -145,7 +147,19 @@ public class MappingUtil {
 
         if (api.getThreatProtectionPolicies() != null) {
             List<String> policyIdList = new ArrayList<>(api.getThreatProtectionPolicies());
-            apidto.setThreatProtectionPolicies(policyIdList);
+
+            List<API_threatProtectionPolicies_listDTO> listDTOS = new ArrayList<>();
+            for(String policyId: policyIdList) {
+                API_threatProtectionPolicies_listDTO threatProtectionPoliciesListDTO =
+                        new API_threatProtectionPolicies_listDTO();
+                threatProtectionPoliciesListDTO.setPolicyId(policyId);
+                //set priority when implementing
+                //threatProtectionPoliciesListDTO.setPriority(10);
+                listDTOS.add(threatProtectionPoliciesListDTO);
+            }
+            API_threatProtectionPoliciesDTO threatProtectionPoliciesDTO = new API_threatProtectionPoliciesDTO();
+            threatProtectionPoliciesDTO.setList(listDTOS);
+            apidto.setThreatProtectionPolicies(threatProtectionPoliciesDTO);
         }
         return apidto;
     }
@@ -247,7 +261,13 @@ public class MappingUtil {
         }
 
         if (apidto.getThreatProtectionPolicies() != null) {
-            Set<String> policyIdSet = new HashSet<>(apidto.getThreatProtectionPolicies());
+            API_threatProtectionPoliciesDTO threatProtectionPoliciesDTO = apidto.getThreatProtectionPolicies();
+            List<API_threatProtectionPolicies_listDTO> threatProtectionPolicies_listDTO = threatProtectionPoliciesDTO.getList();
+
+            Set<String> policyIdSet = new HashSet<>();
+            for (API_threatProtectionPolicies_listDTO listDTO: threatProtectionPolicies_listDTO) {
+                policyIdSet.add(listDTO.getPolicyId());
+            }
             apiBuilder.threatProtectionPolicies(policyIdSet);
         }
         return apiBuilder;

@@ -3623,9 +3623,15 @@ definitions:
                 type: string
                 example: "Production"
       threatProtectionPolicies:
-        type: array
-        items:
-          type: string
+        properties:
+          list:
+            type: array
+            items:
+              properties:
+                policyId:
+                  type: string
+                priority:
+                  type: integer
 
 #-----------------------------------------------------
 # The Application resource

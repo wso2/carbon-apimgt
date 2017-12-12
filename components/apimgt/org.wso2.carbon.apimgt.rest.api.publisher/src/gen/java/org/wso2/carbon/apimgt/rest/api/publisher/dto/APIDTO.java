@@ -12,6 +12,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_businessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_corsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_endpointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_operationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_threatProtectionPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SequenceDTO;
 import java.util.Objects;
 
@@ -149,7 +150,7 @@ public class APIDTO   {
   private List<API_operationsDTO> operations = new ArrayList<API_operationsDTO>();
 
   @JsonProperty("threatProtectionPolicies")
-  private List<String> threatProtectionPolicies = new ArrayList<String>();
+  private API_threatProtectionPoliciesDTO threatProtectionPolicies = null;
 
   public APIDTO id(String id) {
     this.id = id;
@@ -782,13 +783,8 @@ public class APIDTO   {
     this.operations = operations;
   }
 
-  public APIDTO threatProtectionPolicies(List<String> threatProtectionPolicies) {
+  public APIDTO threatProtectionPolicies(API_threatProtectionPoliciesDTO threatProtectionPolicies) {
     this.threatProtectionPolicies = threatProtectionPolicies;
-    return this;
-  }
-
-  public APIDTO addThreatProtectionPoliciesItem(String threatProtectionPoliciesItem) {
-    this.threatProtectionPolicies.add(threatProtectionPoliciesItem);
     return this;
   }
 
@@ -797,11 +793,11 @@ public class APIDTO   {
    * @return threatProtectionPolicies
   **/
   @ApiModelProperty(value = "")
-  public List<String> getThreatProtectionPolicies() {
+  public API_threatProtectionPoliciesDTO getThreatProtectionPolicies() {
     return threatProtectionPolicies;
   }
 
-  public void setThreatProtectionPolicies(List<String> threatProtectionPolicies) {
+  public void setThreatProtectionPolicies(API_threatProtectionPoliciesDTO threatProtectionPolicies) {
     this.threatProtectionPolicies = threatProtectionPolicies;
   }
 

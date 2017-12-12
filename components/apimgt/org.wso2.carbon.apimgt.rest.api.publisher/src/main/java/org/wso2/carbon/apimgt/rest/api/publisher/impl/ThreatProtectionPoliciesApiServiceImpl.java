@@ -42,11 +42,11 @@ public class ThreatProtectionPoliciesApiServiceImpl extends ThreatProtectionPoli
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             List<ThreatProtectionPolicy> list = apiPublisher.getThreatProtectionPolicies();
-            List<ThreatProtectionPolicyDTO> dtoList = new ArrayList<>();
+            ThreatProtectionPolicyListDTO listDTO = new ThreatProtectionPolicyListDTO();
             for (ThreatProtectionPolicy policy: list) {
-                dtoList.add(MappingUtil.toThreatProtectionPolicyDTO(policy));
+                listDTO.addListItem(MappingUtil.toThreatProtectionPolicyDTO(policy));
             }
-            return Response.ok().entity(dtoList).build();
+            return Response.ok().entity(listDTO).build();
         } catch (APIManagementException e) {
             log.error(e.getMessage(), e);
         }
