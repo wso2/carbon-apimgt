@@ -55,12 +55,11 @@ class AddPolicy extends Component {
         let api = new API();
         let promisedPolicies = api.getThreatProtectionPolicies();
         promisedPolicies.then(response => {
-            this.setState({policies: response.obj});
+            this.setState({policies: response.obj.list});
         });
     }
 
     handlePolicyAdd() {
-        console.log("Adding policy");
         let policy = this.state.selectedPolicy;
         if (policy.uuid === '' || policy.name === '') {
             this.msg.error("Please select a policy");

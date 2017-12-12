@@ -57,9 +57,9 @@ class Security extends Component {
 
     updatePolicyData() {
         this.setState({policies: []})
-        let policyIds = this.state.api.threatProtectionPolicies;
+        let policyIds = this.state.api.threatProtectionPolicies.list;
         for (var i=0; i<policyIds.length; i++) {
-            let id = policyIds[i];
+            let id = policyIds[i].policyId;
             let promisedPolicies = this.api.getThreatProtectionPolicy(id);
             promisedPolicies.then(response => {
                 let policies = this.state.policies;
@@ -71,15 +71,14 @@ class Security extends Component {
 
     deletePolicy(id) {
         let associatedApi = this.state.api;
-        console.log(associatedApi);
         let promisedPolicyDelete = this.api.deleteThreatProtectionPolicyFromApi(associatedApi.id, id);
         promisedPolicyDelete.then(response => {
            if (response.status === 200) {
                this.msg.info("Policy removed successfully.");
 
                //remove policy from local api
-               let index = associatedApi.threatProtectionPolicies.indexOf(id);
-               associatedApi.threatProtectionPolicies.splice(index, 1);
+               let index = associatedApi.threatProtectionPolicies.list.indexOf({policyId: id});
+               associatedApi.threatProtectionPolicies.list.splice(index, 1);
                this.setState({api: associatedApi});
                this.updatePolicyData();
            } else {

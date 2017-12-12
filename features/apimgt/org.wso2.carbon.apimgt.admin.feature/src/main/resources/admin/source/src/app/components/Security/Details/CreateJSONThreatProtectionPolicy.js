@@ -83,7 +83,6 @@ class CreateJSONThreatProtectionPolicy extends Component {
         var api = new API();
         var policy = this.state.policy;
         policy.policy = JSON.stringify(policy.policy);
-        console.log(policy);
         const promised_policy = api.addThreatProtectionPolicy(policy);
         promised_policy.then(
             response => {

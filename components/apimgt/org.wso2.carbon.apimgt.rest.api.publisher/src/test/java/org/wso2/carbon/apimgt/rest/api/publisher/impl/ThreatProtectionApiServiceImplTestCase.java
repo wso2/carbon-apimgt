@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThreatProtectionPolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.msf4j.Request;
@@ -62,8 +63,8 @@ public class ThreatProtectionApiServiceImplTestCase {
         ThreatProtectionPoliciesApiServiceImpl apiService = new ThreatProtectionPoliciesApiServiceImpl();
         Response response = apiService.threatProtectionPoliciesGet(getRequest());
         Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-        List<ThreatProtectionPolicy> resList = (List<ThreatProtectionPolicy>) response.getEntity();
-        Assert.assertEquals(2, resList.size());
+        ThreatProtectionPolicyListDTO resList = (ThreatProtectionPolicyListDTO) response.getEntity();
+        Assert.assertEquals(2, resList.getList().size());
     }
 
     @Test

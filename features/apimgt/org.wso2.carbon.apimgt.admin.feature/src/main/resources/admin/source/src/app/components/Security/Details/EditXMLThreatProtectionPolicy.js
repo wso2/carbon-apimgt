@@ -40,7 +40,6 @@ class EditXMLThreatProtectionPolicy extends Component {
     };
 
     componentDidMount() {
-        console.log("Mounted");
         var api = new API();
         const promised_policy = api.getThreatProtectionPolicy(this.props.match.params.policy_uuid);
         promised_policy.then(
@@ -60,7 +59,6 @@ class EditXMLThreatProtectionPolicy extends Component {
             policy.policy[name] = value;
         }
         this.setState({policy: policy});
-        console.log(this.state.policy);
     }
 
     handlePolicyUpdate(name, value) {
