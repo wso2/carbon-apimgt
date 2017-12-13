@@ -282,7 +282,3 @@ body.modal-open {
 .icon-implement{
     padding:13px 0 0 10px;
 }
-
-.swagger-ui .scheme-container {
-    display:none;
-}

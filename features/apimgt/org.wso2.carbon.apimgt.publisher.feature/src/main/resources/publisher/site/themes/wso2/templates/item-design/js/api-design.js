@@ -821,7 +821,6 @@ APIDesigner.prototype.edit_swagger = function(){
     tempNav.appendTo('body');
     $("#swaggerEditer").fadeIn("fast");
     tempNav.show('fast');
-    $(frames['se-iframe']).contents().find('.try-out').css("display", "none");
 };
 
 APIDesigner.prototype.close_swagger_editor = function(){
