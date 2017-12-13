@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.hostobjects;
 
+import com.google.gson.Gson;
 import io.swagger.models.Operation;
 import io.swagger.models.Path;
 import io.swagger.models.Swagger;
@@ -123,18 +124,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -841,7 +831,7 @@ public class APIProviderHostObject extends ScriptableObject {
      */
     public static boolean jsFunction_updateAPIDesign(Context cx, Scriptable thisObj,
                                                      Object[] args, Function funObj)
-            throws APIManagementException, ScriptException, FaultGatewaysException {
+            throws APIManagementException, ScriptException, FaultGatewaysException, ParseException {
 
         if (args == null || args.length == 0) {
             handleException("Invalid number of input parameters.");
@@ -862,6 +852,19 @@ public class APIProviderHostObject extends ScriptableObject {
         String techOwnerEmail = (String) apiData.get("techOwnerEmail", apiData);
         String bizOwner = (String) apiData.get("bizOwner", apiData);
         String bizOwnerEmail = (String) apiData.get("bizOwnerEmail", apiData);
+        String additionalProperties = (String) apiData.get("additionalProperties", apiData);
+        Properties properties = null;
+        if (additionalProperties != null && !additionalProperties.trim().isEmpty()) {
+            properties = new Properties();
+            JSONParser parser = new JSONParser();
+            JSONObject jsonObject = (JSONObject) parser.parse(additionalProperties);
+            for(Iterator iterator = jsonObject.keySet().iterator(); iterator.hasNext();) {
+                String key = (String) iterator.next();
+                String value = (String) jsonObject.get(key);
+                properties.put(key, value);
+            }
+        }
+
 
 //        String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
 //        String providerDomain = MultitenantUtils.getTenantDomain(provider);
@@ -960,6 +963,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setTechnicalOwner(techOwner);
         api.setTechnicalOwnerEmail(techOwnerEmail);
         api.setVisibility(visibility);
+        api.setAdditionalProperties(properties);
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
         api.setLastUpdated(new Date());
         api.setAccessControl(publisherAccessControl);

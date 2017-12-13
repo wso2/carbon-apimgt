@@ -20,10 +20,7 @@ package org.wso2.carbon.apimgt.api.model;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Provider's & system's view of API
@@ -113,6 +110,27 @@ public class API implements Serializable {
     private Set<String> environments;
 
     private String createdTime;
+    /**
+     * Customized properties that need to be saved.
+     */
+    private Properties additionalProperties;
+
+    public Properties getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+
+    public void setAdditionalProperties(Properties properties) {
+        this.additionalProperties = properties;
+    }
+
+    public void addProperty(String key, String value) {
+        additionalProperties.put(key, value);
+    }
+
+    public String getProperty(String key) {
+        return additionalProperties.getProperty(key);
+    }
 
     /**
      * Publisher access control related parameters.
@@ -207,6 +225,7 @@ public class API implements Serializable {
 
     public API(APIIdentifier id) {
         this.id = id;
+        additionalProperties = new Properties();
     }
 
     public APIIdentifier getId() {

@@ -142,20 +142,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1151,7 +1138,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (publisherAccessControlRoles != null) {
                 publisherAccessControlRoles = publisherAccessControlRoles.replaceAll("\\s+", "").toLowerCase();
             }
-            updateAPIRolesRestrictions(artifactPath, publisherAccessControlRoles, api.getAccessControl());
+            updateAPIResourcesAndRestrictions(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
+                    api.getAdditionalProperties());
 
             if (updatePermissions) {
                 clearResourcePermissions(artifactPath, api.getId());
@@ -2501,7 +2489,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             publisherAccessControlRoles = publisherAccessControlRoles == null ?
                     APIConstants.NULL_USER_ROLE_LIST :
                     publisherAccessControlRoles;
-            updateAPIRolesRestrictions(artifactPath, publisherAccessControlRoles, api.getAccessControl());
+            updateAPIResourcesAndRestrictions(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
+                    api.getAdditionalProperties());
             registry.commitTransaction();
             transactionCommitted = true;
 
@@ -5188,18 +5177,35 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     protected void updateAPIRolesRestrictions(String artifactPath, String publisherAccessControlRoles,
             String publisherAccessControl) throws RegistryException {
+       updateAPIResourcesAndRestrictions(artifactPath, publisherAccessControlRoles, publisherAccessControl, null);
+    }
+
+    protected void updateAPIResourcesAndRestrictions(String artifactPath, String publisherAccessControlRoles,
+            String publisherAccessControl, Properties additionalProperties) throws RegistryException {
         publisherAccessControlRoles = (publisherAccessControlRoles == null || publisherAccessControlRoles.trim()
                 .isEmpty()) ? APIConstants.NULL_USER_ROLE_LIST : publisherAccessControlRoles;
         if (publisherAccessControlRoles.equalsIgnoreCase(APIConstants.NULL_USER_ROLE_LIST)) {
             publisherAccessControl = APIConstants.NO_ACCESS_CONTROL;
+        }
+        if (!registry.resourceExists(artifactPath)) {
+            return;
         }
         Resource apiResource = registry.get(artifactPath);
         if (apiResource != null) {
             apiResource.setProperty(APIConstants.PUBLISHER_ROLES, publisherAccessControlRoles.replaceAll("\\s+", ""));
             apiResource.setProperty(APIConstants.ACCESS_CONTROL, publisherAccessControl);
             apiResource.removeProperty(APIConstants.CUSTOM_API_INDEXER_PROPERTY);
+
+            if (additionalProperties != null && additionalProperties.size() != 0) {
+                Enumeration e = additionalProperties.propertyNames();
+                while (e.hasMoreElements()) {
+                    String property = (String) e.nextElement();
+                    apiResource.setProperty(property, additionalProperties.getProperty(property));
+                }
+            }
             registry.put(artifactPath, apiResource);
         }
+
     }
 
     @Override

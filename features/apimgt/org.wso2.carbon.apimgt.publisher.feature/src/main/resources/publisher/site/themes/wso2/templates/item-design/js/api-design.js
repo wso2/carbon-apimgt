@@ -76,6 +76,8 @@ function APIDesigner(){
     this.container = $( "#api_designer" );
 
     //initialise the partials
+    var propertiesTemplate = $("#properties-add-template").html();
+    Handlebars.partials['properties-add-template'] = Handlebars.compile(propertiesTemplate);
     source   = $("#designer-resources-template").html();
     Handlebars.partials['designer-resources-template'] = Handlebars.compile(source);
     source   = $("#designer-resource-template").html();
@@ -622,6 +624,81 @@ APIDesigner.prototype.transform = function(api_doc){
 APIDesigner.prototype.setApiLevelPolicy = function(isAPILevel){
     this.apiLevelPolicy.isAPILevel = isAPILevel;
 }
+
+/**
+ * To render the additional properties part of the form.
+ */
+APIDesigner.prototype.render_additionalProperties = function(){
+    var apiPropertiesValue = JSON.parse($("#api_properties").val());
+    var apiProperties = null;
+
+    if (apiPropertiesValue) {
+        for(var prop in apiPropertiesValue) {
+            if (apiPropertiesValue.hasOwnProperty(prop)) {
+                apiProperties =  {"properties": apiPropertiesValue};
+                break;
+            }
+        }
+    }
+    var propertiesOutput = Handlebars.partials['properties-add-template'](apiProperties);
+    $('#additionalProperties').html(propertiesOutput);
+
+    $('#property_add').on("click", function () {
+        var propertyKeyVal = $("#property_key").val();
+        if (!propertyKeyVal || propertyKeyVal.trim() == "") {
+            jagg.message({content: i18n.t("Property name cannot be empty."), type: "error"});
+            return;
+        }
+        var propertyVal = $("#property_value").val();
+        if (!propertyVal || propertyVal.trim() == "") {
+            jagg.message({content: i18n.t("Property value cannot be empty."), type: "error"});
+            return;
+        }
+        propertyKeyVal = propertyKeyVal.trim();
+        propertyVal = propertyVal.trim();
+
+        var apiPropertiesValue = $("#api_properties").val();
+
+        var jsonObject = {};
+        if (apiPropertiesValue) {
+            jsonObject = JSON.parse(apiPropertiesValue);
+        }
+        if (!jsonObject) {
+            jsonObject = {};
+        }
+        jsonObject[propertyKeyVal] = propertyVal;
+        $("#api_properties").val(JSON.stringify(jsonObject));
+        var API_DESIGNER = APIDesigner();
+        API_DESIGNER.render_additionalProperties();
+
+    });
+
+    $(".delete-properties").on("click", function( event ) {
+        $("#messageModal div.modal-footer").html("");
+        var key = $(this).attr('data-key');
+        jagg.message({
+            // @todo: param_string
+            content:'Do you want to remove "'+ key +'" from properties list.',
+            type:'confirm',
+            title:"Remove Property",
+            okCallback:function(){
+                var API_DESIGNER = APIDesigner();
+                var apiPropertiesValue = $("#api_properties").val();
+                var jsonObject = {};
+                if (apiPropertiesValue) {
+                    jsonObject = JSON.parse(apiPropertiesValue);
+                }
+                if (!jsonObject) {
+                    jsonObject = {};
+                }
+                delete jsonObject[key];
+                $("#api_properties").val(JSON.stringify(jsonObject));
+
+                API_DESIGNER.render_additionalProperties();
+            }});
+        //delete resource if no operations
+    });
+};
 
 APIDesigner.prototype.render_resources = function(){
     context = {
