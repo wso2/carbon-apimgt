@@ -469,8 +469,8 @@ public class APIGatewayPublisherImpl implements APIGateway {
     private void publishToThreatProtectionTopic(GatewayEvent gatewayDTO) throws GatewayException {
         BrokerUtil.publishToTopic(threatProtectionTopic, gatewayDTO);
         if (log.isDebugEnabled()) {
-            log.debug("Gateway event : " + gatewayDTO.getEventType() + " has been published to store topic : " +
-                    storeTopic);
+            log.debug("Gateway event : " + gatewayDTO.getEventType() +
+                    " has been successfully published to broker topic: " + threatProtectionTopic);
         }
     }
 

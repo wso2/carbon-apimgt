@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 public class ThreatProtectionDAOImplTestCase extends DAOIntegrationTestBase {
+
     @Test
     public void testAddPolicy() throws Exception {
         ThreatProtectionPolicy policy = SampleTestObjectCreator.createUniqueThreatProtectionPolicy();

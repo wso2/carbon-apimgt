@@ -2057,6 +2057,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     @Override
     public void addThreatProtectionPolicy(String apiId, String policyId) throws APIManagementException {
         API api = getAPIbyUUID(apiId);
+        if (api == null) {
+            String message = "Add threat protection policy from API: No API found for APIID: " + apiId;
+            log.error(message);
+            throw new APIManagementException(message);
+        }
         API.APIBuilder builder = new API.APIBuilder(api);
 
         Set<String> policies = builder.getThreatProtectionPolicies();
@@ -2068,11 +2073,19 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             builder.threatProtectionPolicies(policies);
         }
         updateAPI(builder);
+        if (log.isDebugEnabled()) {
+            log.debug("Threat protection policy (ID: " + policyId + ") added to the API (ID: " + builder.getId() + ")");
+        }
     }
 
     @Override
     public void deleteThreatProtectionPolicy(String apiId, String policyId) throws APIManagementException {
         API api = getAPIbyUUID(apiId);
+        if (api == null) {
+            String message = "Delete threat protection policy from API: No API found for APIID: " + apiId;
+            log.error(message);
+            throw new APIManagementException(message);
+        }
         API.APIBuilder builder = new API.APIBuilder(api);
 
         Set<String> policies = builder.getThreatProtectionPolicies();
@@ -2080,6 +2093,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             policies.remove(policyId);
         }
         updateAPI(builder);
+        if (log.isDebugEnabled()) {
+            log.debug("Threat protection policy (ID: " + policyId + ") deleted from the API (ID: " + builder.getId() + ")");
+        }
     }
 
     @Override
