@@ -2094,7 +2094,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
         updateAPI(builder);
         if (log.isDebugEnabled()) {
-            log.debug("Threat protection policy (ID: " + policyId + ") deleted from the API (ID: " + builder.getId() + ")");
+            log.debug("Threat protection policy (ID: " + policyId + ") deleted from the API (ID: " +
+                    builder.getId() + ")");
         }
     }
 
