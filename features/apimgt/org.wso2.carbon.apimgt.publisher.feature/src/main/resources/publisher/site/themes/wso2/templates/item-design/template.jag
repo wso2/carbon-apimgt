@@ -345,13 +345,13 @@
 														</div>
 														<!-- UI components related with adding additional properties -->
 														<% if( api != null) { %>
-														    <input hidden id = "api_properties" value="<%= encode.forHtml(api.properties)%>" />
+                                                        <input hidden id = "api_properties"
+                                                            value="<%= encode.forHtml(api.additionalProperties)%>"
+                                                            name="api_properties" />
 														<% } else { %>
-														    <input hidden id = "api_properties" />
+														    <input hidden id = "api_properties" value="null" name="api_properties"/>
 														<% } %>
-														 <div id = "additionalProperties">
-
-                                                        </div>
+														 <div id = "additionalProperties"></div>
 										  </div><!-- left -->
 
 										  <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">

@@ -17,6 +17,8 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
+import jdk.nashorn.internal.parser.JSONParser;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.io.Serializable;
@@ -113,14 +115,14 @@ public class API implements Serializable {
     /**
      * Customized properties that need to be saved.
      */
-    private Properties additionalProperties;
+    private JSONObject additionalProperties;
 
-    public Properties getAdditionalProperties() {
+    public JSONObject getAdditionalProperties() {
         return additionalProperties;
     }
 
 
-    public void setAdditionalProperties(Properties properties) {
+    public void setAdditionalProperties(JSONObject properties) {
         this.additionalProperties = properties;
     }
 
@@ -129,7 +131,7 @@ public class API implements Serializable {
     }
 
     public String getProperty(String key) {
-        return additionalProperties.getProperty(key);
+        return additionalProperties.get(key).toString();
     }
 
     /**
@@ -225,7 +227,7 @@ public class API implements Serializable {
 
     public API(APIIdentifier id) {
         this.id = id;
-        additionalProperties = new Properties();
+        additionalProperties = new JSONObject();
     }
 
     public APIIdentifier getId() {

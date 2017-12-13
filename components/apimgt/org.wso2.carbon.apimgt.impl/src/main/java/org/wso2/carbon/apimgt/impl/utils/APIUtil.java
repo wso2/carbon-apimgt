@@ -185,21 +185,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
@@ -477,6 +464,20 @@ public final class APIUtil {
             // set rating
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             Resource apiResource = registry.get(artifactPath);
+            Properties properties = apiResource.getProperties();
+
+            if (properties != null) {
+                Enumeration propertyNames = properties.propertyNames();
+                while (propertyNames.hasMoreElements()) {
+                    String propertyName = (String) propertyNames.nextElement();
+                    if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
+                        api.addProperty(
+                                propertyName.substring(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX.length()),
+                                apiResource.getProperty(propertyName));
+                    }
+                }
+            }
+
             api.setAccessControl(apiResource.getProperty(APIConstants.ACCESS_CONTROL));
             api.setAccessControlRoles(
                     APIConstants.NULL_USER_ROLE_LIST.equals(apiResource.getProperty(APIConstants.PUBLISHER_ROLES)) ?

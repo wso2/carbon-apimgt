@@ -1330,6 +1330,11 @@ public final class APIConstants {
     public static final String ACCESS_CONTROL_PARAMETER = "accessControl";
     public static final String ACCESS_CONTROL_ROLES_PARAMETER = "accessControlRoles";
 
+    // Error message that will be shown when the user tries to access the API, that is not authorized for him.
     public static final String UN_AUTHORIZED_ERROR_MESSAGE = "User is not authorized to";
+
+    // Prefix used for saving the custom properties related with APIs
+    public static final String API_RELATED_CUSTOM_PROPERTIES_PREFIX = "apim.";
+
 
 }

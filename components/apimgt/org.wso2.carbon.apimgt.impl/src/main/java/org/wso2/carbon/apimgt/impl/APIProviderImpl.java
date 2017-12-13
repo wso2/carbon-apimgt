@@ -5181,7 +5181,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     protected void updateAPIResourcesAndRestrictions(String artifactPath, String publisherAccessControlRoles,
-            String publisherAccessControl, Properties additionalProperties) throws RegistryException {
+            String publisherAccessControl, Map<String, String> additionalProperties) throws RegistryException {
         publisherAccessControlRoles = (publisherAccessControlRoles == null || publisherAccessControlRoles.trim()
                 .isEmpty()) ? APIConstants.NULL_USER_ROLE_LIST : publisherAccessControlRoles;
         if (publisherAccessControlRoles.equalsIgnoreCase(APIConstants.NULL_USER_ROLE_LIST)) {
@@ -5192,15 +5192,25 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         Resource apiResource = registry.get(artifactPath);
         if (apiResource != null) {
+
+            // Removing all the properties, before updating new properties.
+            Properties properties = apiResource.getProperties();
+            if (properties != null) {
+                Enumeration propertyNames = properties.propertyNames();
+                while (propertyNames.hasMoreElements()) {
+                    String propertyName = (String) propertyNames.nextElement();
+                    if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
+                        apiResource.removeProperty(propertyName);
+                    }
+                }
+            }
             apiResource.setProperty(APIConstants.PUBLISHER_ROLES, publisherAccessControlRoles.replaceAll("\\s+", ""));
             apiResource.setProperty(APIConstants.ACCESS_CONTROL, publisherAccessControl);
             apiResource.removeProperty(APIConstants.CUSTOM_API_INDEXER_PROPERTY);
-
             if (additionalProperties != null && additionalProperties.size() != 0) {
-                Enumeration e = additionalProperties.propertyNames();
-                while (e.hasMoreElements()) {
-                    String property = (String) e.nextElement();
-                    apiResource.setProperty(property, additionalProperties.getProperty(property));
+                for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
+                    apiResource.setProperty(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + entry.getKey(),
+                            entry.getValue());
                 }
             }
             registry.put(artifactPath, apiResource);

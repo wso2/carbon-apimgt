@@ -2057,6 +2057,7 @@ public class APIStoreHostObject extends ScriptableObject {
                         row.put("isDefaultVersion", row,api.isDefaultVersion());
                         row.put("transports", row,api.getTransports());
                         row.put("type", row, api.getType());
+                        row.put("additionalProperties", row, api.getAdditionalProperties().toJSONString());
                         myn.put(0, myn, row);
 
                     } else {

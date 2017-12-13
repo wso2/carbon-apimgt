@@ -194,6 +194,9 @@
                         </tr>
             </tbody>
         </table>
+            <%if(api.additionalProperties!=''){%>
+                    <h4><%= i18n.localize("Description")%></h4>
+            <% } %>
     </div>
     <div class="col-sm-4">
         <div id="chart1"></div>

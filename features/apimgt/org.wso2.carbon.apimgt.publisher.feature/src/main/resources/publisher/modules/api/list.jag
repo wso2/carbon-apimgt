@@ -68,7 +68,8 @@ var getAPI = function (api) {
             apiLevelPolicy:result[51],
             type:result[52],
             accessControl:result[53],
-            accessControlRoles:result[54]
+            accessControlRoles:result[54],
+            additionalProperties:result[55]
         };
         return {
             error:false,

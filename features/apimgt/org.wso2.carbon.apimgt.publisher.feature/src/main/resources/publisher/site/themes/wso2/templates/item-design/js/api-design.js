@@ -911,6 +911,7 @@ $(document).ready(function(){
     $.fn.editable.defaults.mode = 'inline';
     var designer = new APIDesigner();
     designer.load_api_document(api_doc);
+    designer.render_additionalProperties();
 
     $("#swaggerEditer").on("keyup", function () {
         try {

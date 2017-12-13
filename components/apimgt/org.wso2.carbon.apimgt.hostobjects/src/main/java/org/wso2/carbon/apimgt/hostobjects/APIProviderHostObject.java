@@ -853,16 +853,10 @@ public class APIProviderHostObject extends ScriptableObject {
         String bizOwner = (String) apiData.get("bizOwner", apiData);
         String bizOwnerEmail = (String) apiData.get("bizOwnerEmail", apiData);
         String additionalProperties = (String) apiData.get("additionalProperties", apiData);
-        Properties properties = null;
+        JSONObject properties = null;
         if (additionalProperties != null && !additionalProperties.trim().isEmpty()) {
-            properties = new Properties();
             JSONParser parser = new JSONParser();
-            JSONObject jsonObject = (JSONObject) parser.parse(additionalProperties);
-            for(Iterator iterator = jsonObject.keySet().iterator(); iterator.hasNext();) {
-                String key = (String) iterator.next();
-                String value = (String) jsonObject.get(key);
-                properties.put(key, value);
-            }
+            properties = (JSONObject) parser.parse(additionalProperties);
         }
 
 
@@ -2783,6 +2777,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(52, myn, checkValue(api.getType()));
                 myn.put(53, myn, checkValue((api.getAccessControl())));
                 myn.put(54, myn, checkValue((api.getAccessControlRoles())));
+                myn.put(55, myn, checkValue(api.getAdditionalProperties().toJSONString()));
             } else {
                 handleException("Cannot find the requested API- " + apiName +
                         "-" + version);
