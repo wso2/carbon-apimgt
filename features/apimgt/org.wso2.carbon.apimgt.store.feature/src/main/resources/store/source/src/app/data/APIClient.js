@@ -24,13 +24,12 @@ import Utils from "./Utils";
  * This class expose single swaggerClient instance created using the given swagger URL (Publisher, Store, ect ..)
  * it's highly unlikely to change the REST API Swagger definition (swagger.json) file on the fly,
  * Hence this singleton class help to preserve consecutive swagger client object creations saving redundant IO operations.
- * @deprecated : This class will get disruptive changes when introducing multi environment support to store
  */
 class APIClient {
     /**
      * Check for already created instance of the class, in the `APIClient._instance` variable,
      * and return single instance if already exist, else assign `APIClient._instance` to current instance and return
-     * @param {} host
+     * @param {String} host : Host of apis. Host for the swagger-client's spec property.
      * @param {{}} args : Accept as an optional argument for APIClient constructor.Merge the given args with default args.
      * @returns {APIClient|*|null}
      */

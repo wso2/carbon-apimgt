@@ -141,16 +141,20 @@ class Utils {
         AuthManager.setUser(user);
     }
 
-    static getAppLoginURL() {
-        return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGIN + Utils.CONST.CONTEXT_PATH;
+    static getAppSSORequestURL() {
+        const uiService = window.location.origin.replace(/\//g, "%2F").replace(/:/g, "%3A");
+        return `${Utils.CONST.PROTOCOL}${Utils.getEnvironment().host}${Utils.CONST.SSO_LOGIN}${Utils.CONST.CONTEXT_PATH}`
+            + `?uiService=${uiService}/`;
     }
 
     static getAppLogoutURL() {
         return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGOUT + Utils.CONST.CONTEXT_PATH;
     }
 
-    static getLoginTokenPath() {
-        return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGIN_TOKEN_PATH + Utils.CONST.CONTEXT_PATH;
+    static getLoginTokenPath(environment = Utils.getEnvironment()) {
+        const uiService = window.location.origin.replace(/\//g, "%2F").replace(/:/g, "%3A");
+        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_TOKEN_PATH}${Utils.CONST.CONTEXT_PATH}`
+            + `?uiService=${uiService}/`;
     }
 
     static getSwaggerURL() {
@@ -163,13 +167,13 @@ class Utils {
      * @private
      */
     static _getDefaultEnvironment(){
-        return {label: 'Default', host: window.location.host, loginTokenPath: '/login/token'};
+        return {label: 'Default', host: window.location.host, loginTokenPath: '/login/token', _flag_default: true};
     }
 }
 
 Utils.CONST = {
     LOCALSTORAGE_ENVIRONMENT: 'environment',
-    LOGIN: '/login/login',
+    SSO_LOGIN: '/login/login',
     LOGOUT: '/login/logout',
     LOGIN_TOKEN_PATH: '/login/token',
     SWAGGER_YAML: '/api/am/publisher/v1.0/apis/swagger.yaml',

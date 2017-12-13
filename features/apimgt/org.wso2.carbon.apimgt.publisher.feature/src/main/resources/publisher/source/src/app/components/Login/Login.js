@@ -82,7 +82,7 @@ class Login extends Component {
 
     componentDidMount() {
         //Get Environments
-        let promised_environments = ConfigManager.getConfigs().environments.then(response => {
+        ConfigManager.getConfigs().environments.then(response => {
             this.setState({
                 environments: response.data.environments,
                 environmentId: Utils.getEnvironmentID(response.data.environments)

@@ -29,7 +29,7 @@ export default class API extends Resource {
      */
     constructor() {
         super();
-        this.client = new new APIClientFactory().getAPIClient(Utils.getEnvironment().label).client;
+        this.client = new APIClientFactory().getAPIClient(Utils.getEnvironment().label).client;
         this._requestMetaData = Resource._requestMetaData;
     }
 
@@ -68,7 +68,6 @@ export default class API extends Resource {
         if (callback) {
             return promise_get.then(callback);
         } else {
-            console.info("returninng promise");
             return promise_get;
         }
     }
@@ -91,7 +90,6 @@ export default class API extends Resource {
         if (callback) {
             return promise_get.then(callback);
         } else {
-            console.info("returninng promise");
             return promise_get;
         }
     }

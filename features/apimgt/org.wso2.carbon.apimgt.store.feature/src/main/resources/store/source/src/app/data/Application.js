@@ -112,7 +112,7 @@ export default class Application extends Resource {
     }
 
     static get(id) {
-        let apiClient = new SingleClient();
+        let apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
         let promised_get = apiClient.client.then(
             (client) => {
                 return client.apis["Application (Individual)"].get_applications__applicationId_({applicationId: id},
@@ -125,7 +125,7 @@ export default class Application extends Resource {
     }
 
     static all() {
-        let apiClient = new SingleClient();
+        let apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
         let promised_all = apiClient.client.then(
             (client) => {
                 return client.apis["Application (Collection)"].get_applications({}, this._requestMetaData());
@@ -134,7 +134,7 @@ export default class Application extends Resource {
     }
 
     static deleteApp(id) {
-        let apiClient = new SingleClient();
+        let apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
         let promised_delete = apiClient.client.then(
             (client) => {
                 return client.apis["Application (Individual)"].delete_applications__applicationId_({applicationId: id},

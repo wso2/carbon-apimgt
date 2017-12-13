@@ -31,10 +31,8 @@ import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
-import org.wso2.carbon.apimgt.rest.api.authenticator.configuration.models.APIMAppConfigurations;
 import org.wso2.carbon.apimgt.rest.api.authenticator.constants.AuthenticatorConstants;
 import org.wso2.carbon.apimgt.rest.api.authenticator.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.authenticator.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.authenticator.utils.AuthUtil;
 import org.wso2.carbon.apimgt.rest.api.authenticator.utils.bean.AuthResponseBean;
 import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
@@ -53,6 +51,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -80,7 +79,7 @@ public class AuthenticatorAPI implements Microservice {
     @Path("/token/{appName}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes({MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA})
-    public Response authenticate(@Context Request request, @PathParam("appName") String appName,
+    public Response authenticate(@Context Request request, @PathParam("appName") String appName, @QueryParam("uiService") String uiServiceUrl,
                                  @FormDataParam("username") String userName, @FormDataParam("password") String password,
                                  @FormDataParam("grant_type") String grantType, @FormDataParam("validity_period") String validityPeriod,
                                  @FormDataParam("remember_me") boolean isRememberMe, @FormDataParam("scopes") String scopesList) {
@@ -113,7 +112,7 @@ public class AuthenticatorAPI implements Microservice {
             }
             AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appContext.substring(1),
                     null, grantType, userName, password, refToken,
-                    Long.parseLong(validityPeriod));
+                    Long.parseLong(validityPeriod), uiServiceUrl);
             authenticatorService.setAccessTokenData(authResponseBean, accessTokenInfo);
             String accessToken = accessTokenInfo.getAccessToken();
             String refreshToken = accessTokenInfo.getRefreshToken();
@@ -239,12 +238,13 @@ public class AuthenticatorAPI implements Microservice {
     @GET
     @Path("/login/{appName}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response redirect(@Context Request request, @PathParam("appName") String appName) {
+    public Response redirect(@Context Request request, @PathParam("appName") String appName,
+                             @QueryParam("uiService") String uiServiceUrl) {
         try {
             KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
             SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
             AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
-            JsonObject oAuthData = authenticatorService.getAuthenticationConfigurations(appName);
+            JsonObject oAuthData = authenticatorService.getAuthenticationConfigurations(appName, uiServiceUrl);
             if (oAuthData.size() == 0) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                         .entity("Error while creating the OAuth application!").build();
@@ -268,7 +268,8 @@ public class AuthenticatorAPI implements Microservice {
     @GET
     @Path("/callback/{appName}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response callback(@Context Request request, @PathParam("appName") String appName) {
+    public Response callback(@Context Request request, @PathParam("appName") String appName,
+                             @QueryParam("uiService") String uiServiceUrl) {
         String appContext = "/" + appName;
         String logoutContext =
                 AuthenticatorConstants.LOGOUT_SERVICE_CONTEXT + AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
@@ -281,7 +282,6 @@ public class AuthenticatorAPI implements Microservice {
         }
         String requestURL = (String) request.getProperty(AuthenticatorConstants.REQUEST_URL);
 
-        APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance().getAPIMAppConfiguration();
         AuthResponseBean authResponseBean = new AuthResponseBean();
         String grantType = KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE;
         try {
@@ -289,7 +289,7 @@ public class AuthenticatorAPI implements Microservice {
             SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
             AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
             AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appName, requestURL, grantType,
-                    null, null, null, 0);
+                    null, null, null, 0, uiServiceUrl);
             if (StringUtils.isEmpty(accessTokenInfo.toString())) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                         .entity("Access token generation failed!").build();
@@ -317,13 +317,13 @@ public class AuthenticatorAPI implements Microservice {
                     log.debug("Set cookies for " + appName + " application.");
                 }
                 // Redirect to the store/apis page (redirect URL)
-                URI targetURIForRedirection = new URI(appConfigs.getApimBaseUrl() + appName);
+                URI targetURIForRedirection = new URI(uiServiceUrl + appName);
                 if (AuthenticatorConstants.PUBLISHER_APPLICATION.equals(appName) || AuthenticatorConstants.STORE_APPLICATION.equals(appName)) {
                     String authResponseBeanData = authResponseBean.getAuthUser() + "&id_token="
                             + authResponseBean.getIdToken() + "&partial_token=" + authResponseBean.getPartialToken()
                             + "&scopes=" + authResponseBean.getScopes() + "&validity_period="
                             + authResponseBean.getValidityPeriod();
-                    URI redirectURI = new URI(appConfigs.getApimBaseUrl() + appName + "/login?user_name="
+                    URI redirectURI = new URI(uiServiceUrl + appName + "/login?user_name="
                             + URLEncoder.encode(authResponseBeanData, "UTF-8")
                             .replaceAll("\\+", "%20").replaceAll("%26", "&").replaceAll("%3D", "="));
                     return Response.status(Response.Status.FOUND)
