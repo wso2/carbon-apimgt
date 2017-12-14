@@ -155,22 +155,6 @@
                             </arguments>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>threatprotection</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                        <configuration>
-                            <mainClass>org.wso2.carbon.apimgt.plugin.GenerateArchives</mainClass>
-                            <arguments>
-                                <argument>main</argument>
-                                <argument>${project.basedir}/configs</argument>
-                                <argument>org/wso2/carbon/apimgt/gateway/threatprotection/</argument>
-                                <argument>${project.build.directory}/threatprotection</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
                 </executions>
 
             </plugin>

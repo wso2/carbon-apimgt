@@ -22,20 +22,20 @@ import javax.ws.rs.core.SecurityContext;
 public abstract class LabelsApiService {
     public abstract Response labelsGet(String ifNoneMatch
  ,String ifModifiedSince
-  ,Request request) throws NotFoundException;
+ , Request request) throws NotFoundException;
     public abstract Response labelsLabelIdDelete(String labelId
  ,String ifMatch
  ,String ifUnmodifiedSince
-  ,Request request) throws NotFoundException;
+ , Request request) throws NotFoundException;
     public abstract Response labelsLabelIdGet(String labelId
  ,String ifNoneMatch
  ,String ifModifiedSince
-  ,Request request) throws NotFoundException;
+ , Request request) throws NotFoundException;
     public abstract Response labelsLabelIdPut(String labelId
  ,LabelDTO body
  ,String ifMatch
  ,String ifUnmodifiedSince
-  ,Request request) throws NotFoundException;
+ , Request request) throws NotFoundException;
     public abstract Response labelsPost(LabelDTO body
-  ,Request request) throws NotFoundException;
+ , Request request) throws NotFoundException;
 }

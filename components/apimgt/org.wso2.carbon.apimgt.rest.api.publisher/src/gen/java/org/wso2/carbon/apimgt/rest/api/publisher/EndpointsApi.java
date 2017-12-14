@@ -21,6 +21,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -68,6 +69,7 @@ public class EndpointsApi implements Microservice  {
     throws NotFoundException {
         return delegate.endpointsEndpointIdDelete(endpointId,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{endpointId}")
     @Consumes({ "application/json" })
@@ -90,6 +92,7 @@ public class EndpointsApi implements Microservice  {
     throws NotFoundException {
         return delegate.endpointsEndpointIdGet(endpointId,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @PUT
     @Path("/{endpointId}")
     @Consumes({ "application/json" })
@@ -115,6 +118,7 @@ public class EndpointsApi implements Microservice  {
     throws NotFoundException {
         return delegate.endpointsEndpointIdPut(endpointId,body,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     
     @Consumes({ "application/json" })
@@ -136,6 +140,7 @@ public class EndpointsApi implements Microservice  {
     throws NotFoundException {
         return delegate.endpointsGet(ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @HEAD
     
     @Consumes({ "application/json" })
@@ -159,6 +164,7 @@ public class EndpointsApi implements Microservice  {
     throws NotFoundException {
         return delegate.endpointsHead(name,ifNoneMatch,request);
     }
+    @OPTIONS
     @POST
     
     @Consumes({ "application/json" })

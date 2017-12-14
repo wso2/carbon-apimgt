@@ -70,7 +70,6 @@ public class FileApi {
     private String apiPolicy;
     private List<String> userSpecificApiPermissions;
     private int securityScheme;
-    private Set<String> threatProtectionPolicies;
 
     public String getId() {
         return id;
@@ -200,14 +199,6 @@ public class FileApi {
         this.tags = tags;
     }
 
-    public Set<String> getThreatProtectionPolicies() {
-        return threatProtectionPolicies;
-    }
-
-    public void setThreatProtectionPolicies(Set<String> threatProtectionPolicies) {
-        this.threatProtectionPolicies = threatProtectionPolicies;
-    }
-
     public FileApi(API api) {
         id = api.getId();
         provider = api.getProvider();
@@ -256,7 +247,6 @@ public class FileApi {
         if (api.getApiPolicy() != null) {
             this.apiPolicy = api.getApiPolicy().getPolicyName();
         }
-        this.threatProtectionPolicies = api.getThreatProtectionPolicies();
     }
 
     public Set<String> getLabels() {

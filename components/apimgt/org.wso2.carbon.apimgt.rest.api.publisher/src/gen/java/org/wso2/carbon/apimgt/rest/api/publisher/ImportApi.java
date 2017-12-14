@@ -21,6 +21,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -44,6 +45,7 @@ import javax.ws.rs.core.Response;
 public class ImportApi implements Microservice  {
    private final ImportApiService delegate = ImportApiServiceFactory.getImportApi();
 
+    @OPTIONS
     @POST
     @Path("/apis")
     @Consumes({ "multipart/form-data" })
@@ -69,6 +71,7 @@ public class ImportApi implements Microservice  {
     throws NotFoundException {
         return delegate.importApisPost(fileInputStream, fileDetail,provider,request);
     }
+    @OPTIONS
     @PUT
     @Path("/apis")
     @Consumes({ "multipart/form-data" })

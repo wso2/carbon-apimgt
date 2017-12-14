@@ -39,7 +39,6 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
-import org.wso2.carbon.apimgt.core.dao.ThreatProtectionDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -78,7 +77,6 @@ public abstract class AbstractAPIManager implements APIManager {
     private LabelDAO labelDAO;
     private WorkflowDAO workflowDAO;
     private TagDAO tagDAO;
-    private ThreatProtectionDAO threatProtectionDAO;
     private GatewaySourceGenerator gatewaySourceGenerator;
     private APIGateway apiGatewayPublisher;
     protected APIDefinition apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
@@ -87,8 +85,8 @@ public abstract class AbstractAPIManager implements APIManager {
     public AbstractAPIManager(String username, IdentityProvider idp, KeyManager keyManager, ApiDAO apiDAO,
                               ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
                               APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
-                              TagDAO tagDAO, ThreatProtectionDAO threatProtectionDAO,
-                              GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGatewayPublisher) {
+                              TagDAO tagDAO, GatewaySourceGenerator gatewaySourceGenerator,
+                              APIGateway apiGatewayPublisher) {
 
         this.username = username;
         this.identityProvider = idp;
@@ -101,7 +99,6 @@ public abstract class AbstractAPIManager implements APIManager {
         this.labelDAO = labelDAO;
         this.workflowDAO = workflowDAO;
         this.tagDAO = tagDAO;
-        this.threatProtectionDAO = threatProtectionDAO;
         this.gatewaySourceGenerator = gatewaySourceGenerator;
         this.apiGatewayPublisher = apiGatewayPublisher;
         this.config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
@@ -113,7 +110,7 @@ public abstract class AbstractAPIManager implements APIManager {
                               TagDAO tagDAO) {
 
         this(username, idp, keyManager, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager,
-                labelDAO, workflowDAO, tagDAO, null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
+                labelDAO, workflowDAO, tagDAO, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
     }
 
 
@@ -697,9 +694,5 @@ public abstract class AbstractAPIManager implements APIManager {
 
     public TagDAO getTagDAO() {
         return tagDAO;
-    }
-
-    public ThreatProtectionDAO getThreatProtectionDAO() {
-        return threatProtectionDAO;
     }
 }

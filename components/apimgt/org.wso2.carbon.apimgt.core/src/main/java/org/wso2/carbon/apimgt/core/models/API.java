@@ -88,7 +88,6 @@ public final class API {
         apiPolicy = builder.apiPolicy;
         userSpecificApiPermissions = builder.userSpecificApiPermissions;
         securityScheme = builder.securityScheme;
-        threatProtectionPolicies = builder.threatProtectionPolicies;
     }
 
     public Map getPermissionMap() {
@@ -235,10 +234,6 @@ public final class API {
         return securityScheme;
     }
 
-    public Set<String> getThreatProtectionPolicies() {
-        return threatProtectionPolicies;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -280,8 +275,7 @@ public final class API {
                 Objects.equals(uriTemplates, api.uriTemplates) &&
                 Objects.equals(copiedFromApiId, api.copiedFromApiId) &&
                 Objects.equals(endpoint, api.endpoint) &&
-                Objects.equals(securityScheme, api.securityScheme) &&
-                Objects.equals(threatProtectionPolicies, api.threatProtectionPolicies);
+                Objects.equals(securityScheme, api.securityScheme);
     }
 
     @Override
@@ -290,7 +284,7 @@ public final class API {
                 endpoint, gatewayConfig, wsdlUri, isResponseCachingEnabled, cacheTimeout, isDefaultVersion,
                 transport, tags, labels, visibility, visibleRoles, businessInformation, corsConfiguration,
                 applicationId, createdTime, createdBy, updatedBy, lastUpdatedTime, lifecycleState,
-                uriTemplates, copiedFromApiId, workflowStatus, securityScheme, threatProtectionPolicies);
+                uriTemplates, copiedFromApiId, workflowStatus, securityScheme);
     }
 
 
@@ -338,7 +332,6 @@ public final class API {
     private final Policy apiPolicy;
     private List<String> userSpecificApiPermissions;
     private int securityScheme;
-    private Set<String> threatProtectionPolicies;
 
     public String getWorkflowStatus() {
         return workflowStatus;
@@ -401,7 +394,6 @@ public final class API {
                 apiPolicy = new APIPolicy(api.getApiPolicy());
             }
             userSpecificApiPermissions = api.getUserSpecificApiPermissions();
-            threatProtectionPolicies = api.getThreatProtectionPolicies();
         }
 
         public String getId() {
@@ -500,10 +492,6 @@ public final class API {
             return securityScheme;
         }
 
-        public Set<String> getThreatProtectionPolicies() {
-            return threatProtectionPolicies;
-        }
-
         private String version;
         private String context;
         private String description;
@@ -538,7 +526,6 @@ public final class API {
         private String workflowStatus;
         private List<String> userSpecificApiPermissions;
         private int securityScheme;
-        private Set<String> threatProtectionPolicies;
 
         public APIBuilder(String provider, String name, String version) {
             this.provider = provider;
@@ -586,7 +573,6 @@ public final class API {
             this.workflowStatus = copy.workflowStatus;
             this.userSpecificApiPermissions = new ArrayList<String>();
             this.securityScheme = copy.securityScheme;
-            this.threatProtectionPolicies = copy.threatProtectionPolicies;
         }
 
         /**
@@ -993,11 +979,6 @@ public final class API {
 
         public APIBuilder securityScheme(int securityScheme) {
             this.securityScheme = securityScheme;
-            return this;
-        }
-
-        public APIBuilder threatProtectionPolicies(Set<String> threatProtectionPolicies) {
-            this.threatProtectionPolicies = threatProtectionPolicies;
             return this;
         }
 

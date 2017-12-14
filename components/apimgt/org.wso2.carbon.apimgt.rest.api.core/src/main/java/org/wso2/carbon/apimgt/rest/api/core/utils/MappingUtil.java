@@ -29,7 +29,6 @@ import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
 import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
-import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.core.dto.APIInfoDTO;
@@ -47,7 +46,6 @@ import org.wso2.carbon.apimgt.rest.api.core.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.PolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.RegistrationSummaryDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionDTO;
-import org.wso2.carbon.apimgt.rest.api.core.dto.ThreatProtectionPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.ThrottlingInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.UriTemplateDTO;
 
@@ -152,10 +150,6 @@ public class MappingUtil {
             apiInfo.setLifeCycleStatus(api.getLifeCycleStatus());
             apiInfo.setVersion(api.getVersion());
             apiInfo.setSecurityScheme(api.getSecurityScheme());
-
-            for (String threatProtectionPolicyId: api.getThreatProtectionPolicies()) {
-                apiInfo.addThreatProtectionPoliciesItem(threatProtectionPolicyId);
-            }
             apiInfoList.add(apiInfo);
         }
         return apiInfoList;
@@ -354,19 +348,4 @@ public class MappingUtil {
         return dto;
     }
 
-    /**
-     * Converts ThreatProtectionPolicy core model ThreatProtectionPolicyDTO rest api core model
-     * @param policy apimgt core model of ThreatProtectionPolicy
-     * @return ThreatProtectionPolicyDTO rest api core model
-     */
-    public static ThreatProtectionPolicyDTO toThreatProtectionPolicyDTO(ThreatProtectionPolicy policy) {
-        if (policy == null) return null;
-
-        ThreatProtectionPolicyDTO dto = new ThreatProtectionPolicyDTO();
-        dto.setUuid(policy.getUuid());
-        dto.setName(policy.getName());
-        dto.setType(policy.getType());
-        dto.setPolicy(policy.getPolicy());
-        return dto;
-    }
 }

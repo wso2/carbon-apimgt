@@ -13,7 +13,6 @@ import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
-import org.wso2.carbon.apimgt.core.dao.ThreatProtectionDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIConfigRetrievalException;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
@@ -34,7 +33,6 @@ import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.core.workflow.Workflow;
 
 import java.util.ArrayList;
@@ -57,11 +55,9 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
     private APIMConfigurations apimConfiguration;
     private APIGateway apiGateway;
     private WorkflowDAO workflowDAO;
-    private ThreatProtectionDAO threatProtectionDAO;
 
     public APIMgtAdminServiceImpl(APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO, ApiDAO apiDAO,
-                                  LabelDAO labelDAO, ApplicationDAO applicationDAO, APIGateway apiGateway,
-                                  WorkflowDAO workflowDAO, ThreatProtectionDAO threatProtectionDAO) {
+            LabelDAO labelDAO, ApplicationDAO applicationDAO, APIGateway apiGateway, WorkflowDAO workflowDAO) {
         this.apiSubscriptionDAO = apiSubscriptionDAO;
         this.policyDAO = policyDAO;
         this.apiDAO = apiDAO;
@@ -70,7 +66,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
         this.applicationDAO = applicationDAO;
         this.apiGateway = apiGateway;
         this.workflowDAO = workflowDAO;
-        this.threatProtectionDAO = threatProtectionDAO;
     }
 
     @Override
@@ -717,61 +712,6 @@ public class APIMgtAdminServiceImpl implements APIMgtAdminService {
             String message = "Error while retrieving workflow information";
             log.error(message, e);
             throw new APIManagementException(message, ExceptionCodes.APIMGT_DAO_EXCEPTION);
-        }
-    }
-
-    @Override
-    public ThreatProtectionPolicy getThreatProtectionPolicy(String policyId) throws APIManagementException {
-        try {
-            return threatProtectionDAO.getPolicy(policyId);
-        } catch (APIMgtDAOException e) {
-            String message = "Error while retrieving threat protection policy";
-            log.error(message, e);
-            throw new APIManagementException(message, e);
-        }
-    }
-
-    @Override
-    public List<ThreatProtectionPolicy> getThreatProtectionPolicyList() throws APIManagementException {
-        try {
-            return threatProtectionDAO.getPolicies();
-        } catch (APIMgtDAOException e) {
-            String message = "Error while retrieving threat protection policy list";
-            log.error(message, e);
-            throw new APIManagementException(message, e);
-        }
-    }
-
-    @Override
-    public void addThreatProtectionPolicy(ThreatProtectionPolicy policy) throws APIManagementException {
-        try {
-            if (StringUtils.isBlank(policy.getUuid())) {
-                policy.setUuid(UUID.randomUUID().toString());
-                threatProtectionDAO.addPolicy(policy);
-                apiGateway.addThreatProtectionPolicy(policy);
-            } else {
-                threatProtectionDAO.updatePolicy(policy);
-                apiGateway.updateThreatProtectionPolicy(policy);
-            }
-        } catch (APIMgtDAOException e) {
-            String message = "Error adding threat protection policy";
-            log.error(message, e);
-            throw new APIManagementException(message, e);
-        }
-    }
-
-    @Override
-    public void deleteThreatProtectionPolicy(String policyId) throws APIManagementException {
-        try {
-            threatProtectionDAO.deletePolicy(policyId);
-
-            ThreatProtectionPolicy policy = new ThreatProtectionPolicy();
-            policy.setUuid(policyId);
-            apiGateway.deleteThreatProtectionPolicy(policy);
-        } catch (APIMgtDAOException e) {
-            String message = "Error deleting threat protection policy";
-            log.error(message, e);
-            throw new APIManagementException(message, e);
-        }
+        }  
     }
 }

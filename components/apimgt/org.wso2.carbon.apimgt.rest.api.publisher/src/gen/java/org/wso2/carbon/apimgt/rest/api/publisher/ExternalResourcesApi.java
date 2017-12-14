@@ -60,8 +60,8 @@ public class ExternalResourcesApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found. Requested API does not exist. ", response = EndPointListDTO.class) })
     public Response externalResourcesServicesGet(@ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch
 ,@ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly retrieved variant of the resource. " )@HeaderParam("If-Modified-Since") String ifModifiedSince
- ,@Context Request request)
+, @Context Request request)
     throws NotFoundException {
-        return delegate.externalResourcesServicesGet(ifNoneMatch,ifModifiedSince,request);
+        return delegate.externalResourcesServicesGet(ifNoneMatch,ifModifiedSince, request);
     }
 }

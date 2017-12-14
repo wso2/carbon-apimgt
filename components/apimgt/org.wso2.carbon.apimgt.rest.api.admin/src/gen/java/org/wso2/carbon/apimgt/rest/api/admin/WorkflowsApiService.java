@@ -25,10 +25,10 @@ public abstract class WorkflowsApiService {
     public abstract Response workflowsGet(String ifNoneMatch
  ,String ifModifiedSince
  ,String workflowType
-  ,Request request) throws NotFoundException;
+ , Request request) throws NotFoundException;
     public abstract Response workflowsWorkflowReferenceIdGet(String workflowReferenceId
-  ,Request request) throws NotFoundException;
+ , Request request) throws NotFoundException;
     public abstract Response workflowsWorkflowReferenceIdPut(String workflowReferenceId
  ,WorkflowRequestDTO body
-  ,Request request) throws NotFoundException;
+ , Request request) throws NotFoundException;
 }

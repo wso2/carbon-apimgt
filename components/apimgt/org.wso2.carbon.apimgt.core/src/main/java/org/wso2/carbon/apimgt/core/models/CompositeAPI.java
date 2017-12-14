@@ -54,7 +54,6 @@ public class CompositeAPI {
     private final HashMap permissionMap;
     private final String apiPermission;
     private final String workflowStatus;
-    private final Set<String> threatProtectionPolicies;
 
     private CompositeAPI(Builder builder) {
         id = builder.id;
@@ -77,7 +76,6 @@ public class CompositeAPI {
         permissionMap = builder.permissionMap;
         apiPermission = builder.apiPermission;
         workflowStatus = builder.workflowStatus;
-        threatProtectionPolicies = builder.threatProtectionPolicies;
     }
 
 
@@ -161,10 +159,6 @@ public class CompositeAPI {
         return workflowStatus;
     }
 
-    public Set<String> getThreatProtectionPolicies() {
-        return threatProtectionPolicies;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -193,15 +187,14 @@ public class CompositeAPI {
                 Objects.equals(apiDefinition, that.apiDefinition) &&
                 Objects.equals(permissionMap, that.permissionMap) &&
                 Objects.equals(apiPermission, that.apiPermission) &&
-                Objects.equals(workflowStatus, that.workflowStatus) &&
-                Objects.equals(threatProtectionPolicies, that.threatProtectionPolicies);
+                Objects.equals(workflowStatus, that.workflowStatus);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, provider, name, version, context, description, gatewayConfig, transport, labels,
                 applicationId, createdTime, createdBy, updatedBy, lastUpdatedTime, uriTemplates, copiedFromApiId,
-                apiDefinition, permissionMap, apiPermission, workflowStatus, threatProtectionPolicies);
+                apiDefinition, permissionMap, apiPermission, workflowStatus);
     }
 
     /**
@@ -228,7 +221,6 @@ public class CompositeAPI {
         private HashMap permissionMap;
         private String apiPermission;
         private String workflowStatus;
-        private Set<String> threatProtectionPolicies;
 
         public Builder() {
         }
@@ -254,7 +246,6 @@ public class CompositeAPI {
             this.permissionMap = copy.permissionMap;
             this.apiPermission = copy.apiPermission;
             this.workflowStatus = copy.workflowStatus;
-            this.threatProtectionPolicies = copy.threatProtectionPolicies;
         }
 
         /**
@@ -492,11 +483,6 @@ public class CompositeAPI {
             return this;
         }
 
-        public Builder threatProtectionPolicies(Set<String> policies) {
-            this.threatProtectionPolicies = policies;
-            return this;
-        }
-
         /**
          * Returns a {@code CompositeAPI} built from the parameters previously set.
          *
@@ -584,10 +570,6 @@ public class CompositeAPI {
 
         public String getWorkflowStatus() {
             return workflowStatus;
-        }
-
-        public Set<String> getThreatProtectionPolicies() {
-            return threatProtectionPolicies;
         }
     }
 }
