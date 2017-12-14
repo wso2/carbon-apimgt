@@ -51,7 +51,7 @@ export default class Details extends Component {
         return (
             <div className="tab-content">
                 <BasicInfo uuid={this.props.match.params.api_uuid} />
-                <AppBar position="static" color="default" style={{margin:"10px 0px 10px 35px"}}>
+                <AppBar position="static" color="default">
                     <Tabs
                         value={this.state.value}
                         onChange={this.handleChange}

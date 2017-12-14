@@ -25,18 +25,26 @@ import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import Api from '../../../data/api'
 
+import {withStyles} from 'material-ui/styles';
 import Paper from 'material-ui/Paper';
 import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
-import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
-import { MenuItem } from 'material-ui/Menu';
-import { Delete, Edit, CreateNewFolder, Description  }from 'material-ui-icons';
-import Table, { TableBody, TableCell, TableRow } from 'material-ui/Table';
+import Card, {CardActions, CardContent, CardMedia} from 'material-ui/Card';
+import {MenuItem} from 'material-ui/Menu';
+import {Delete, Edit, CreateNewFolder, Description}from 'material-ui-icons';
+import Table, {TableBody, TableCell, TableRow} from 'material-ui/Table';
 import Select from 'material-ui/Select';
 import 'react-select/dist/react-select.css';
 import Subscriptions  from 'material-ui-icons/Subscriptions';
-import { FormControl } from 'material-ui/Form';
+import {FormControl} from 'material-ui/Form';
+
+const styles = theme => ({
+    fullWidth: {
+        width: "100%",
+        "margin-top": "1%"
+    }
+});
 
 class BasicInfo extends Component {
     constructor(props) {
@@ -143,7 +151,7 @@ class BasicInfo extends Component {
         let promised_subscriptions = api.getSubscriptions(this.api_uuid, null);
         promised_subscriptions.then(
             response => {
-                this.dropDownApplications = [<Option key="custom" onClick={this.handleClick} >New Application</Option>];
+                this.dropDownApplications = [<Option key="custom" onClick={this.handleClick}>New Application</Option>];
 
                 for (var i = 0; i < this.api.policies.length; i++) {
                     this.dropDownPolicies.push(<Option key={this.api.policies[i]}>{this.api.policies[i]}</Option>);
@@ -165,7 +173,7 @@ class BasicInfo extends Component {
                             continue;
                         }
                     }
-                    if(!subscribedApp) {
+                    if (!subscribedApp) {
                         this.dropDownApplications.push(<Option key={application.id}>{application.name}</Option>);
                     }
                 }
@@ -186,7 +194,7 @@ class BasicInfo extends Component {
     }
 
     handleChange = name => event => {
-        this.setState({ [name]: event.target.value });
+        this.setState({[name]: event.target.value});
     };
 
     createSubscription = (e) => {
@@ -205,35 +213,39 @@ class BasicInfo extends Component {
         )
     };
 
-    populateApplicationDropdown(){
+    populateApplicationDropdown() {
         return this.dropDownApplications;
     }
 
-    populatePolicyDropdown(){
+    populatePolicyDropdown() {
         return this.dropDownPolicies;
     }
 
-    handleClick(){
+    handleClick() {
         this.setState({redirect: true});
     }
 
-    selectChange(){
-        this.setState({matDropVisible:!this.state.matDropVisible})
+    selectChange() {
+        this.setState({matDropVisible: !this.state.matDropVisible})
     }
-    onBlur(e){
+
+    onBlur(e) {
         console.info(document.activeElement);
-        if ( !e.currentTarget.contains( document.activeElement ) ){
+        if (!e.currentTarget.contains(document.activeElement)) {
             this.setState({matDropVisible: false});
         }
     }
-    selectOption(option){
+
+    selectOption(option) {
         console.info(option);
         this.setState({selectOption: option});
     }
+
     logChange(val) {
         this.setState({matDropValue: val.value});
         console.log("Selected: " + JSON.stringify(val));
     }
+
     render() {
         const formItemLayout = {
             labelCol: {span: 6},
@@ -242,139 +254,145 @@ class BasicInfo extends Component {
         if (this.state.notFound) {
             return <ResourceNotFound />
         }
-
         if (this.state.redirect) {
-            return <Redirect push to="/application-create" />;
+            return <Redirect push to="/application-create"/>;
         }
-
+        const {classes} = this.props;
         const api = this.state.api;
-
-
 
         return (
             this.state.api ?
-                <Grid container>
-                    <Grid item xs={12}>
-                        <Paper style={{display:"flex"}}>
-                            <Typography type="display2" gutterBottom className="page-title">
-                                {api.name} - <span style={{fontSize:"50%"}}>Overview</span>
+                <div>
+                    <Grid className={classes.fullWidth} container justify="center" alignItems="center">
+                        <Grid item xs={12}>
+                            <Paper style={{display: "flex"}}>
+                                <Typography type="display2" gutterBottom className="page-title">
+                                    {api.name} - <span style={{fontSize: "50%"}}>Overview</span>
+                                </Typography>
+                                {/*<Button aria-owns="simple-menu" aria-haspopup="true" >
+                                 <Edit /> Edit
+                                 </Button>
+                                 <Button aria-owns="simple-menu" aria-haspopup="true" >
+                                 <CreateNewFolder /> Create New Version
+                                 </Button>
+                                 <Button aria-owns="simple-menu" aria-haspopup="true" >
+                                 <Description /> View Swagger
+                                 </Button>*/}
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={12} sm={12} md={3} lg={3} xl={2} style={{paddingLeft: "40px"}}>
+
+                            <Card>
+                                <CardMedia image="/store/public/app/images/api/api-default.png">
+                                </CardMedia>
+                                <CardContent>
+                                    <div className="custom-card">
+                                        <Badge status="processing" text={api.lifeCycleStatus}/>
+                                        <p>11 Apps</p>
+                                        <a href={"/store/apis/" + this.api_uuid} target="_blank" title="Store">View in
+                                            store</a>
+                                    </div>
+                                </CardContent>
+                                <CardActions>
+                                    {api.lifeCycleStatus}
+
+                                    <Button dense color="primary">
+                                        <a href={"/store/apis/" + this.api_uuid} target="_blank" title="Store">View in
+                                            store</a>
+                                    </Button>
+                                </CardActions>
+                            </Card>
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={3} lg={3} xl={2} style={{paddingLeft: "40px"}}>
+                            <Table>
+                                <TableBody>
+
+
+                                    <TableRow>
+                                        <TableCell>Version</TableCell><TableCell>{api.version}</TableCell>
+                                    </TableRow>
+
+                                    <TableRow>
+                                        <TableCell>Context</TableCell><TableCell>{api.context}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell>Context</TableCell><TableCell>{api.provider}</TableCell>
+                                    </TableRow>
+
+                                    <TableRow>
+                                        <TableCell>Date Created</TableCell><TableCell>{api.createdTime}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell>Date Last
+                                            Updated</TableCell><TableCell>{api.lastUpdatedTime}</TableCell>
+                                    </TableRow>
+
+                                    <TableRow>
+                                        <TableCell>Default API
+                                            Version</TableCell><TableCell>{api.isDefaultVersion}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell>Default API
+                                            Version</TableCell><TableCell>{api.lifeCycleStatus}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                        <TableCell>Rating</TableCell>
+                                        <TableCell>
+                                            <StarRatingBar apiIdProp={this.api_uuid}></StarRatingBar>
+                                        </TableCell>
+                                    </TableRow>
+
+
+                                </TableBody>
+                            </Table>
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={6} lg={6} xl={8} style={{paddingLeft: "40px"}}>
+                            <Typography type="subheading" gutterBottom>
+                                Applications
                             </Typography>
-                            {/*<Button aria-owns="simple-menu" aria-haspopup="true" >
-                                <Edit /> Edit
+                            {this.state.options &&
+                            <FormControl style={{width: "100%", marginBottom: "20px"}}>
+                                <Select
+                                    style={{width: "100%"}}
+                                    value={this.state.applicationId}
+                                    onChange={this.handleChange('applicationId')}
+                                >
+                                    {this.state.options.map((option) => <MenuItem key={option.value}
+                                                                                  value={option.value}>{option.label}</MenuItem>)}
+                                </Select>
+                            </FormControl>
+                            }
+                            <Typography type="subheading" gutterBottom>
+                                Tiers
+                            </Typography>
+                            {this.state.tiers &&
+                            <FormControl style={{width: "100%"}}>`
+                                <Select
+                                    style={{width: "100%"}}
+                                    value={this.state.policyName}
+                                    onChange={this.handleChange('policyName')}
+                                >
+                                    {this.state.tiers.map((tier) => <MenuItem key={tier.value}
+                                                                              value={tier.value}>{tier.label}</MenuItem>)}
+                                </Select>
+                            </FormControl>
+                            }
+                            <br />
+                            <Button onClick={this.createSubscription} raised color="primary"
+                                    style={{paddingTop: '20px'}}>
+                                <Subscriptions style={{paddingRight: '10px'}}/> Subscribe
                             </Button>
-                            <Button aria-owns="simple-menu" aria-haspopup="true" >
-                                <CreateNewFolder /> Create New Version
-                            </Button>
-                            <Button aria-owns="simple-menu" aria-haspopup="true" >
-                                <Description /> View Swagger
-                            </Button>*/}
-                        </Paper>
-                    </Grid>
-                    <Grid item xs={12} sm={12} md={3} lg={3} xl={2} style={{paddingLeft:"40px"}}>
-
-                        <Card>
-                            <CardMedia image="/store/public/app/images/api/api-default.png" >
-                            </CardMedia>
-                            <CardContent>
-                                <div className="custom-card">
-                                    <Badge status="processing" text={api.lifeCycleStatus}/>
-                                    <p>11 Apps</p>
-                                    <a href={"/store/apis/" + this.api_uuid} target="_blank" title="Store">View in store</a>
-                                </div>
-                            </CardContent>
-                            <CardActions>
-                                {api.lifeCycleStatus}
-
-                                <Button dense color="primary">
-                                    <a href={"/store/apis/" + this.api_uuid} target="_blank" title="Store">View in store</a>
-                                </Button>
-                            </CardActions>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3} lg={3} xl={2} style={{paddingLeft:"40px"}}>
-                        <Table>
-                            <TableBody>
-
-
-
-                                <TableRow>
-                                    <TableCell>Version</TableCell><TableCell>{api.version}</TableCell>
-                                </TableRow>
-
-                                <TableRow>
-                                    <TableCell>Context</TableCell><TableCell>{api.context}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell>Context</TableCell><TableCell>{api.provider}</TableCell>
-                                </TableRow>
-
-                                <TableRow>
-                                    <TableCell>Date Created</TableCell><TableCell>{api.createdTime}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell>Date Last Updated</TableCell><TableCell>{api.lastUpdatedTime}</TableCell>
-                                </TableRow>
-
-                                <TableRow>
-                                    <TableCell>Default API Version</TableCell><TableCell>{api.isDefaultVersion}</TableCell>
-                                </TableRow>
-                                 <TableRow>
-                                    <TableCell>Default API Version</TableCell><TableCell>{api.lifeCycleStatus}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell>Rating</TableCell>
-                                    <TableCell>
-                                        <StarRatingBar apiIdProp = {this.api_uuid}></StarRatingBar>
-                                    </TableCell>
-                                </TableRow>
-
-
-                            </TableBody>
-                        </Table>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={6} lg={6} xl={8} style={{paddingLeft:"40px"}}>
-                        <Typography type="subheading" gutterBottom>
-                            Applications
-                        </Typography>
-                        {this.state.options &&
-                        <FormControl style={{width:"100%",marginBottom:"20px"}}>
-                            <Select
-                                style={{width:"100%"}}
-                                value={this.state.applicationId}
-                                onChange={this.handleChange('applicationId')}
-                            >
-                                {this.state.options.map((option) => <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>)}
-                            </Select>
-                        </FormControl>
-                        }
-                        <Typography type="subheading" gutterBottom>
-                            Tiers
-                        </Typography>
-                        {this.state.tiers &&
-                        <FormControl style={{width:"100%"}}>`
-                            <Select
-                                style={{width:"100%"}}
-                                value={this.state.policyName}
-                                onChange={this.handleChange('policyName')}
-                            >
-                                {this.state.tiers.map((tier) => <MenuItem key={tier.value} value={tier.value}>{tier.label}</MenuItem>)}
-                            </Select>
-                        </FormControl>
-                        }
-                        <br />
-                        <Button onClick={this.createSubscription} raised color="primary" style={{paddingTop: '20px'}}>
-                            <Subscriptions style={{paddingRight: '10px'}} /> Subscribe
-                        </Button>
 
                             {/*<Select>
-                                {this.populateApplicationDropdown()}
-                            </Select>
-                            <Select>
-                                {this.populatePolicyDropdown()}
-                            </Select>*/}
+                             {this.populateApplicationDropdown()}
+                             </Select>
+                             <Select>
+                             {this.populatePolicyDropdown()}
+                             </Select>*/}
 
+                        </Grid>
                     </Grid>
-                </Grid>
+                </div>
                 : <Loading/>
         );
     }
@@ -393,10 +411,10 @@ class Star extends React.Component {
 
     render() {
         return this.props.isRated ?
-            <span onMouseOver = {this.handleHoveringOver} style={{color: 'gold'}}>
+            <span onMouseOver={this.handleHoveringOver} style={{color: 'gold'}}>
                 ★
             </span> :
-            <span onMouseOver = {this.handleHoveringOver} style={{color: 'gold'}}>
+            <span onMouseOver={this.handleHoveringOver} style={{color: 'gold'}}>
                 ☆
             </span>;
     }
@@ -406,9 +424,9 @@ class StarRatingBar extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-                        previousRating : 0,
-                        rating : 0
-                     };
+            previousRating: 0,
+            rating: 0
+        };
 
         this.handleMouseOver = this.handleMouseOver.bind(this);
         this.handleRatingUpdate = this.handleRatingUpdate.bind(this);
@@ -427,47 +445,46 @@ class StarRatingBar extends React.Component {
         let promised_rating = api.getRatingFromUser(this.props.apiIdProp, null);
         promised_rating.then(
             response => {
-                this.setState({rating :response.obj.userRating});
-                this.setState({previousRating :response.obj.userRating});
+                this.setState({rating: response.obj.userRating});
+                this.setState({previousRating: response.obj.userRating});
             }
         );
     }
 
     handleMouseOver(index) {
-        this.setState({rating : index});
+        this.setState({rating: index});
     }
 
     handleMouseOut() {
-        this.setState({rating : this.state.previousRating});
+        this.setState({rating: this.state.previousRating});
     }
 
     handleRatingUpdate() {
-        this.setState({previousRating : this.state.rating});
-        this.setState({rating : this.state.rating});
+        this.setState({previousRating: this.state.rating});
+        this.setState({rating: this.state.rating});
 
         var api = new Api();
-        let ratingInfo = {"rating" : this.state.rating};
+        let ratingInfo = {"rating": this.state.rating};
         let promise = api.addRating(this.props.apiIdProp, ratingInfo);
         promise.then(
             response => {
                 message.success("Rating updated successfully");
-            }).catch (
-                 error => {
-                     message.error("Error occurred while adding ratings!");
-                 }
-             );
+            }).catch(
+            error => {
+                message.error("Error occurred while adding ratings!");
+            }
+        );
     }
 
     render() {
-        return (<div onClick = {this.handleRatingUpdate} onMouseOut = {this.handleMouseOut}>
-                <Star name = {1} isRated = {this.state.rating >= 1} hoverOver = {this.handleMouseOver} > </Star>
-                <Star name = {2} isRated = {this.state.rating >= 2} hoverOver = {this.handleMouseOver} > </Star>
-                <Star name = {3} isRated = {this.state.rating >= 3} hoverOver = {this.handleMouseOver} > </Star>
-                <Star name = {4} isRated = {this.state.rating >= 4} hoverOver = {this.handleMouseOver} > </Star>
-                <Star name = {5} isRated = {this.state.rating >= 5} hoverOver = {this.handleMouseOver} > </Star>
-               </div>);
+        return (<div onClick={this.handleRatingUpdate} onMouseOut={this.handleMouseOut}>
+            <Star name={1} isRated={this.state.rating >= 1} hoverOver={this.handleMouseOver}> </Star>
+            <Star name={2} isRated={this.state.rating >= 2} hoverOver={this.handleMouseOver}> </Star>
+            <Star name={3} isRated={this.state.rating >= 3} hoverOver={this.handleMouseOver}> </Star>
+            <Star name={4} isRated={this.state.rating >= 4} hoverOver={this.handleMouseOver}> </Star>
+            <Star name={5} isRated={this.state.rating >= 5} hoverOver={this.handleMouseOver}> </Star>
+        </div>);
     }
 }
 
-
-export default BasicInfo
+export default withStyles(styles)(BasicInfo);
