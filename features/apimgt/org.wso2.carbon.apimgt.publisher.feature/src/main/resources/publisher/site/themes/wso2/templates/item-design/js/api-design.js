@@ -634,8 +634,9 @@ APIDesigner.prototype.render_additionalProperties = function () {
     var apiPropertiesElement = $("#api_properties");
     var apiPropertiesValue = JSON.parse(apiPropertiesElement.val());
     var apiProperties = null;
-    var reservedKeyWords = ["provider", "version", "context", "status", "description", "subcontext", "doc", "lcState"];
-
+    var reservedKeyWords = ["provider", "version", "context", "status", "description", "subcontext", "doc", "lcState",
+        "name", "documentation", "tags"];
+    
     if (apiPropertiesValue) {
         for (var prop in apiPropertiesValue) {
             if (apiPropertiesValue.hasOwnProperty(prop)) {
@@ -669,7 +670,6 @@ APIDesigner.prototype.render_additionalProperties = function () {
         }
 
         for (var keyWord in reservedKeyWords) {
-            console.log(keyWord);
             if (propertyKeyVal.toLowerCase() === reservedKeyWords[keyWord]) {
                 jagg.message({
                     content: i18n.t("Property name matches with one of the reserved keywords. Reserved" +
@@ -680,15 +680,15 @@ APIDesigner.prototype.render_additionalProperties = function () {
             }
         }
         var apiPropertiesValue = apiPropertiesElement.val();
-        var jsonObject = {};
+        var apiPropertiesObject = {};
         if (apiPropertiesValue) {
-            jsonObject = JSON.parse(apiPropertiesValue);
+            apiPropertiesObject = JSON.parse(apiPropertiesValue);
         }
-        if (!jsonObject) {
-            jsonObject = {};
+        if (!apiPropertiesObject) {
+            apiPropertiesObject = {};
         }
 
-        if (jsonObject.hasOwnProperty(propertyKeyVal)) {
+        if (apiPropertiesObject.hasOwnProperty(propertyKeyVal)) {
             jagg.message({
                 content: i18n.t("Property " + propertyKeyVal + " already exist for this API. Property names are" +
                     " unique. Please select a different property name."),
@@ -696,8 +696,8 @@ APIDesigner.prototype.render_additionalProperties = function () {
             });
             return;
         }
-        jsonObject[propertyKeyVal] = propertyVal;
-        $(apiPropertiesElement).val(JSON.stringify(jsonObject));
+        apiPropertiesObject[propertyKeyVal] = propertyVal;
+        $(apiPropertiesElement).val(JSON.stringify(apiPropertiesObject));
         var apiDesigner = new APIDesigner();
         apiDesigner.render_additionalProperties();
     });

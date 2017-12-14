@@ -590,5 +590,7 @@
     "Restricted by roles, only viewable and modifiable by " : "Restricted by roles, only viewable and modifiable by ",
     "Additional Properties" : "Additional Properties",
     "Property Name" : "Property Name",
-    "Property Value" : "Property Value"
+    "Property Value" : "Property Value",
+    "Meta Information" : "Meta Information",
+    "By Custom Meta Information [Syntax - {property name}:xxxx]" : "By Custom Meta Information [Syntax - {property name}:xxxx]"
 }

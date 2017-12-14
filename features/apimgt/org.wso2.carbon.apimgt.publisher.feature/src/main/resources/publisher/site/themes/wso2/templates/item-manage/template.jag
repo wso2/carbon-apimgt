@@ -776,7 +776,35 @@
                   </div>
                 </div>
           </div><!-- Business Information -->
-        </div>
+          <!-- Start of Additional Properties -->
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingThree" data-toggle="collapse" data-parent=".accordion"
+                href="#accordion1-collapse3" aria-controls="accordion1-collapse3">
+                    <h4 class="panel-title">
+                        <div>
+                            <div class="heading no-description"><%=i18n.localize("Meta Information")%></div>
+                            <div class="status">
+                                <i class="fw fw-down"></i>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                    </h4>
+                </div>
+                <div id="accordion1-collapse3" class="panel-collapse collapse" role="tabpanel"
+                aria-labelledby="headingThree">
+                  <div class="panel-body">
+                        <!-- UI components related with adding additional properties -->
+                        <% if( api != null) { %>
+                                <input hidden id = "api_properties" value="<%= encode.forHtml(api.additionalProperties)%>"
+                                    name="additionalProperties" />
+                        <% } else { %>
+                                <input hidden id = "api_properties" value="null" name="additionalProperties"/>
+                        <% } %>
+                        <div id = "additionalProperties"></div>
+                  </div>
+                </div>
+            </div>
+           </div>   <!-- End of Additional Properties -->
 
 
         <div class="panel-group accordion">
@@ -899,6 +927,62 @@
 
 <script id="designer-apidoc-template" type="text/x-handlebars-template">
 </script>
+
+<!-- Script to add additional properties -->
+<script id="properties-add-template" type="text/x-handlebars-template">
+    <div class="form-group">
+        <label class="col-sm-3 control-label"><%=i18n.localize("Additional Properties")%>:</label>
+        <div class="col-sm-3">
+            <input id="property_key" type="text" placeholder="property name" class="form-control"/>
+        </div>
+        <div class="col-sm-4">
+            <input id="property_value" type="text" placeholder="property value" class="form-control"/>
+        </div>
+        <div class="col-sm-2">
+            <a class="btn" id="property_add">
+            <span class="icon fw-stack" style="font-size:10px">
+                <i class="fw fw-add fw-stack-1x"></i>
+                <i class="fw fw-circle-outline fw-stack-2x"></i>
+            </span>
+            </a>
+
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-lg-offset-3">
+        {{#if properties}}
+            <table class="table table-striped table-responsive">
+                <thead>
+                    <tr>
+                        <td><strong><%=i18n.localize("Property Name")%></strong></td>
+                        <td><strong><%=i18n.localize("Property Value")%></strong></td>
+                        <td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each properties}}
+                    <tr>
+                        <td style="word-wrap: break-word;min-width: 100px;max-width: 160px;white-space:normal;
+                        ">{{@key}}</td>
+                        <td style="word-wrap: break-word;min-width: 100px;max-width: 300px;white-space:normal;
+                        ">{{this}}</td>
+                        <td align="right">
+                            <a class="delete-properties" data-key="{{@key}}" data-value="{{this}}">
+                                <span class="fw-stack" style="font-size:10px">
+                                    <i class="fw fw-delete fw-stack-1x"></i>
+                                    <i class="fw fw-circle-outline fw-stack-2x"></i>
+                                </span>
+                            </a>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+
+            {{/if}}
+    </div>
+</script>
+<!-- End of script for properties addition-->
 
 <script id="designer-resource-template" type="text/x-handlebars-template">
 <div class="resource_body_padding">

@@ -1834,14 +1834,20 @@ public abstract class AbstractAPIManager implements APIManager {
         StringBuilder filteredQuery = new StringBuilder();
 
         for (String query : searchQueries) {
-            String[] searchKeys = query.split("=");
-            if (!Arrays.asList(APIConstants.API_SEARCH_PREFIXES).contains(searchKeys[0].toLowerCase())) {
-                searchKeys[0] = APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + searchKeys[0];
-            }
-            if (filteredQuery.length() == 0) {
-                filteredQuery.append(searchKeys[0]).append("=").append(searchKeys[1]);
+            // If the query does not contains "=" then it is an errorneous scenario.
+            if (query.contains("=")) {
+                String[] searchKeys = query.split("=");
+                if (!Arrays.asList(APIConstants.API_SEARCH_PREFIXES).contains(searchKeys[0].toLowerCase())) {
+                    searchKeys[0] = APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + searchKeys[0];
+                }
+                if (filteredQuery.length() == 0) {
+                    filteredQuery.append(searchKeys[0]).append("=").append(searchKeys[1]);
+                } else {
+                    filteredQuery.append("&").append(searchKeys[0]).append("=").append(searchKeys[1]);
+                }
             } else {
-                filteredQuery.append("&").append(searchKeys[0]).append("=").append(searchKeys[1]);
+                filteredQuery = new StringBuilder(searchQuery);
+                break;
             }
         }
         searchQuery = filteredQuery.toString();

@@ -341,5 +341,6 @@
     "Return to public store": "Return to public store",
     "Meta Information": "Meta Information",
     "Property Name": "Property Name",
-    "Property Value": "Proper Value"
+    "Property Value": "Proper Value",
+    "By Custom Meta Information [Syntax - {property name}:xxxx]" : "By Custom Meta Information [Syntax - {property name}:xxxx]"
 }
