@@ -26,53 +26,43 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>org.wso2.carbon.apimgt.store.feature</artifactId>
-    <packaging>pom</packaging>
+    <packaging>carbon-feature</packaging>
     <name>WSO2 Carbon - API Store Feature</name>
     <url>http://wso2.org</url>
     <description>This feature contains the core bundles required for API management back end
     </description>
 
-    <dependencies>
-        <!--<dependency>-->
-            <!--<groupId>org.wso2.carbon.apimgt</groupId>-->
-            <!--<artifactId>org.wso2.carbon.apimgt.publisher.feature</artifactId>-->
-            <!--<type>zip</type>-->
-        <!--</dependency>-->
-    </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.wso2.maven</groupId>
-                <artifactId>carbon-p2-plugin</artifactId>
-                <version>${carbon.p2.plugin.version}</version>
+                <groupId>org.wso2.carbon.maven</groupId>
+                <artifactId>carbon-feature-plugin</artifactId>
+                <version>${carbon.feature.plugin.version}</version>
+                <extensions>true</extensions>
                 <executions>
                     <execution>
-                        <id>4-p2-feature-generation</id>
+                        <id>1-p2-feature-generation</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>p2-feature-gen</goal>
+                            <goal>generate</goal>
                         </goals>
                         <configuration>
                             <id>org.wso2.carbon.apimgt.store</id>
-                            <propertiesFile>../../etc/feature.properties</propertiesFile>
-                            <adviceFile>
-                                <properties>
-                                    <propertyDef>org.wso2.carbon.p2.category.type:server
-                                    </propertyDef>
-                                    <propertyDef>org.eclipse.equinox.p2.type.group:false
-                                    </propertyDef>
-                                </properties>
-                            </adviceFile>
+                            <propertyFile>../../etc/feature.properties</propertyFile>
+                            <adviceFileContents>
+                                <advice>
+                                    <name>org.wso2.carbon.p2.category.type</name>
+                                    <value>server</value>
+                                </advice>
+                                <advice>
+                                    <name>org.eclipse.equinox.p2.type.group</name>
+                                    <value>server</value>
+                                </advice>
+                            </adviceFileContents>
                             <bundles>
 
                             </bundles>
-                            <importFeatures>
-
-                            </importFeatures>
-                            <importBundles>
-
-                            </importBundles>
                         </configuration>
                     </execution>
                 </executions>
@@ -163,6 +153,15 @@
             </plugin>
 
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>publisher/public/**</include>
+                    <include>publisher/pages/**</include>
+                </includes>
+            </resource>
+        </resources>
     </build>
     <profiles>
         <profile>
