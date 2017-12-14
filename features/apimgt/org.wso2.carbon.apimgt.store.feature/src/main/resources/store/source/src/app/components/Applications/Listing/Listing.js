@@ -32,6 +32,7 @@ import Loading from "../../Base/Loading/Loading";
 import AppsTableContent from "./AppsTableContent";
 import Tooltip from 'material-ui/Tooltip';
 import Alert from "../../Base/Alert";
+import qs from 'qs';
 
 const styles = theme => ({
     fullWidth: {

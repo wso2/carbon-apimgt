@@ -61,10 +61,7 @@ class Overview extends Component {
         const api = new Api();
         let promised_api = api.getAPIById(this.api_uuid);
         promised_api.then(
-            response => {
-                console.info(response.obj)
-                this.setState({api: response.obj});
-            }
+            response => this.setState({api: response.obj})
         ).catch(
             error => {
                 if (process.env.NODE_ENV !== "production") {
