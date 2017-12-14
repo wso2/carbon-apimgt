@@ -1733,6 +1733,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String, String> corsProperties = new HashMap<String, String>();
         corsProperties.put(APIConstants.CORSHeaders.IMPLEMENTATION_TYPE_HANDLER_VALUE, api.getImplementation());
 
+        //Get CustomOAuth2Header from tenant registry or api-manager.xml
+        String customOAuth2Header = APIUtil.getOAuthConfiguration(tenantId, APIConstants.CUSTOM_OAUTH2_HEADER);
+        if (!StringUtils.isBlank(customOAuth2Header)) {
+            corsProperties.put(APIConstants.CUSTOM_OAUTH2_HEADER, customOAuth2Header);
+        }
+
         if (api.getCorsConfiguration() != null && api.getCorsConfiguration().isCorsConfigurationEnabled()) {
             CORSConfiguration corsConfiguration = api.getCorsConfiguration();
             if (corsConfiguration.getAccessControlAllowHeaders() != null) {
@@ -1777,7 +1783,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 Map<String, String> authProperties = new HashMap<String, String>();
                 //Get CustomOAuth2Header from tenant registry or api-manager.xml
-                String customOAuth2Header = APIUtil.getOAuthConfiguration(tenantId, APIConstants.CUSTOM_OAUTH2_HEADER);
+                //String customOAuth2Header = APIUtil.getOAuthConfiguration(tenantId, APIConstants.CUSTOM_OAUTH2_HEADER);
                 if (!StringUtils.isBlank(customOAuth2Header)){
                     authProperties.put(APIConstants.CUSTOM_OAUTH2_HEADER, customOAuth2Header);
                 }
@@ -1790,8 +1796,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         authProperties);
                 Map<String, String> properties = new HashMap<String, String>();
 
-                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                        .getAPIManagerConfiguration();
                 boolean isGlobalThrottlingEnabled =  APIUtil.isAdvanceThrottlingEnabled();
                 if (api.getProductionMaxTps() != null) {
                     properties.put("productionMaxCount", api.getProductionMaxTps());

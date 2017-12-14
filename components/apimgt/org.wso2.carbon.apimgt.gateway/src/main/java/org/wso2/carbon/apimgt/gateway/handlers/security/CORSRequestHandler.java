@@ -58,6 +58,7 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
     private boolean initializeHeaderValues;
     private String allowedMethods;
     private boolean allowCredentialsEnabled;
+    private String customOAuth2Header;
 
     public void init(SynapseEnvironment synapseEnvironment) {
         if (log.isDebugEnabled()) {
@@ -81,6 +82,10 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
         if (allowHeaders == null) {
             allowHeaders = APIUtil.getAllowedHeaders();
         }
+        if (customOAuth2Header != null) {
+            allowHeaders += APIConstants.MULTI_ATTRIBUTE_SEPARATOR + customOAuth2Header;
+        }
+
         if (allowedOrigins == null) {
             String allowedOriginsList = APIUtil.getAllowedOrigins();
             if (!allowedOriginsList.isEmpty()) {
@@ -364,5 +369,13 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 
     public void setAllowedMethods(String allowedMethods) {
         this.allowedMethods = allowedMethods;
+    }
+
+    public String getCustomOAuth2Header() {
+        return customOAuth2Header;
+    }
+
+    public void setCustomOAuth2Header(String customOAuth2Header) {
+        this.customOAuth2Header = customOAuth2Header;
     }
 }
