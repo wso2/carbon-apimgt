@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -28,6 +30,9 @@ public class APIInfoDTO   {
 
   @JsonProperty("securityScheme")
   private Integer securityScheme = null;
+
+  @JsonProperty("threatProtectionPolicies")
+  private List<String> threatProtectionPolicies = new ArrayList<String>();
 
   public APIInfoDTO id(String id) {
     this.id = id;
@@ -137,6 +142,29 @@ public class APIInfoDTO   {
     this.securityScheme = securityScheme;
   }
 
+  public APIInfoDTO threatProtectionPolicies(List<String> threatProtectionPolicies) {
+    this.threatProtectionPolicies = threatProtectionPolicies;
+    return this;
+  }
+
+  public APIInfoDTO addThreatProtectionPoliciesItem(String threatProtectionPoliciesItem) {
+    this.threatProtectionPolicies.add(threatProtectionPoliciesItem);
+    return this;
+  }
+
+   /**
+   * Get threatProtectionPolicies
+   * @return threatProtectionPolicies
+  **/
+  @ApiModelProperty(value = "")
+  public List<String> getThreatProtectionPolicies() {
+    return threatProtectionPolicies;
+  }
+
+  public void setThreatProtectionPolicies(List<String> threatProtectionPolicies) {
+    this.threatProtectionPolicies = threatProtectionPolicies;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -152,12 +180,13 @@ public class APIInfoDTO   {
         Objects.equals(this.context, apIInfo.context) &&
         Objects.equals(this.version, apIInfo.version) &&
         Objects.equals(this.lifeCycleStatus, apIInfo.lifeCycleStatus) &&
-        Objects.equals(this.securityScheme, apIInfo.securityScheme);
+        Objects.equals(this.securityScheme, apIInfo.securityScheme) &&
+        Objects.equals(this.threatProtectionPolicies, apIInfo.threatProtectionPolicies);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, context, version, lifeCycleStatus, securityScheme);
+    return Objects.hash(id, name, context, version, lifeCycleStatus, securityScheme, threatProtectionPolicies);
   }
 
   @Override
@@ -171,6 +200,7 @@ public class APIInfoDTO   {
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
+    sb.append("    threatProtectionPolicies: ").append(toIndentedString(threatProtectionPolicies)).append("\n");
     sb.append("}");
     return sb.toString();
   }

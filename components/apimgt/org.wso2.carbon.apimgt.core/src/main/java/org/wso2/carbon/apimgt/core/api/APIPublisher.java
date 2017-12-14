@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.core.models.Provider;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
+import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
 import org.wso2.carbon.lcm.sql.beans.LifecycleHistoryBean;
@@ -554,6 +555,37 @@ public interface APIPublisher extends APIManager {
             throws APIMgtDAOException, APIMgtWSDLException;
 
     Set<String> getSubscribersByAPIId(String apiId) throws APIManagementException;
+
+    /**
+     * Associate a threat protection policy with an API
+     * @param apiId ApiId
+     * @param policyId  Threat protection PolicyId
+     * @throws APIManagementException if failed associate policy with API
+     */
+    void addThreatProtectionPolicy(String apiId, String policyId) throws APIManagementException;
+
+    /**
+     * Removes a threat protection policy associated with an API
+     * @param apiId ApiId
+     * @param policyId Threat protection PolicyId
+     * @throws APIManagementException if failed to remove association
+     */
+    void deleteThreatProtectionPolicy(String apiId, String policyId) throws APIManagementException;
+
+    /**
+     * Get all threat protection policies available
+     * @return List of threat protection policies
+     * @throws APIManagementException if failed to retrieve policy list
+     */
+    List<ThreatProtectionPolicy> getThreatProtectionPolicies() throws APIManagementException;
+
+    /**
+     * Get a single threat protection policy
+     * @param policyId Threat protection PolicyId
+     * @return  {@link ThreatProtectionPolicy} if found. Null otherwise.
+     * @throws APIManagementException if failed to retrieve the policy
+     */
+    ThreatProtectionPolicy getThreatProtectionPolicy(String policyId) throws APIManagementException;
 
     /**
      * Discover and Return a list of service endpoints

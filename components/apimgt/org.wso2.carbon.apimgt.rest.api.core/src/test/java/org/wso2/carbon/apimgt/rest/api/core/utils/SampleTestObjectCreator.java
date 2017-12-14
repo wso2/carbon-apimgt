@@ -46,8 +46,10 @@ import org.wso2.carbon.apimgt.core.models.policy.QueryParameterCondition;
 import org.wso2.carbon.apimgt.core.models.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.rest.api.core.dto.LabelDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.ThreatProtectionPolicyDTO;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -442,9 +444,44 @@ public class SampleTestObjectCreator {
                 createdBy(API_CREATOR).
                 uriTemplates(Collections.emptyMap()).
                 apiDefinition(apiDefinition).
-                lastUpdatedTime(LocalDateTime.now());
+                lastUpdatedTime(LocalDateTime.now()).
+                threatProtectionPolicies(new HashSet<>(Arrays.asList("a", "b")));
 
         return apiBuilder;
+    }
+
+    /**
+     * Creates a new {@link ThreatProtectionPolicyDTO} object for testing purposes
+     * @return {@link ThreatProtectionPolicyDTO}
+     */
+    public static ThreatProtectionPolicyDTO createUniqueThreatProtectionPolicyDTO() {
+        ThreatProtectionPolicyDTO dto = new ThreatProtectionPolicyDTO();
+        dto.setUuid(UUID.randomUUID().toString());
+        dto.setType("JSON");
+        dto.setName("JSON POLICY 1");
+
+        String policyString = "{\"maxFieldLength\": 20, \"maxDepth\": 20, \"maxFieldCount\": 20, " +
+                "\"maxStringLength\": 100, \"maxArrayElementCount\": 100}";
+
+        dto.setPolicy(policyString);
+
+        return dto;
+    }
+
+    /**
+     * Creates a new {@link ThreatProtectionPolicy} for testing purposes
+     * @return {@link ThreatProtectionPolicy}
+     */
+    public static ThreatProtectionPolicy createUniqueThreatProtectionPolicy() {
+        ThreatProtectionPolicy policy = new ThreatProtectionPolicy();
+        policy.setUuid(UUID.randomUUID().toString());
+        policy.setType("JSON");
+        policy.setName("JSON POLICY 1");
+        String policyString = "{\"maxFieldLength\": 20, \"maxDepth\": 20, \"maxFieldCount\": 20, " +
+                "\"maxStringLength\": 100, \"maxArrayElementCount\": 100}";
+        policy.setPolicy(policyString);
+
+        return policy;
     }
 
 

@@ -721,6 +721,59 @@ class API {
         });
         return promised_wsdlResponse;
     }
+
+    /**
+     * Get all threat protection policies
+     */
+    getThreatProtectionPolicies() {
+        let promisedPolicies = this.client.then((client) => {
+            return client.apis["Threat Protection Policies"].get_threat_protection_policies();
+        });
+        return promisedPolicies;
+    }
+
+    /**
+     * Retrieve a single threat protection policy
+     * @param id Threat protection policy id
+     */
+    getThreatProtectionPolicy(id) {
+        let promisedPolicies = this.client.then((client) => {
+            return client.apis["Threat Protection Policy"].get_threat_protection_policies__policyId_({policyId: id});
+        });
+        return promisedPolicies;
+    }
+
+    /**
+     * Add threat protection policy to an API
+     * @param apiId APIID
+     * @param policyId Threat protection policy id
+     */
+    addThreatProtectionPolicyToApi(apiId, policyId) {
+        let promisedPolicies = this.client.then(
+            (client) => {
+                return client.apis["API (Individual)"].
+                    post_apis__apiId__threat_protection_policies({apiId: apiId, policyId: policyId});
+            }
+        );
+        return promisedPolicies;
+    }
+
+    /**
+     * Delete threat protection policy from an API
+     * @param apiId APIID
+     * @param policyId Threat protection policy id
+     */
+    deleteThreatProtectionPolicyFromApi(apiId, policyId) {
+        console.log(apiId);
+        let promisedDelete = this.client.then(
+            (client) => {
+                console.log(client.apis);
+                return client.apis["API (Individual)"].
+                delete_apis__apiId__threat_protection_policies({apiId: apiId, policyId: policyId});
+            }
+        );
+        return promisedDelete;
+    }
 }
 
 export default API

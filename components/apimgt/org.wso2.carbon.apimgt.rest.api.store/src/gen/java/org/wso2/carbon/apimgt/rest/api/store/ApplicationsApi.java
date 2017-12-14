@@ -28,7 +28,6 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
-import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -52,7 +51,6 @@ import javax.ws.rs.core.Response;
 public class ApplicationsApi implements Microservice  {
    private final ApplicationsApiService delegate = ApplicationsApiServiceFactory.getApplicationsApi();
 
-    @OPTIONS
     @DELETE
     @Path("/{applicationId}")
     @Consumes({ "application/json" })
@@ -77,7 +75,6 @@ public class ApplicationsApi implements Microservice  {
     throws NotFoundException {
         return delegate.applicationsApplicationIdDelete(applicationId,ifMatch,ifUnmodifiedSince,request);
     }
-    @OPTIONS
     @POST
     @Path("/{applicationId}/generate-keys")
     @Consumes({ "application/json" })
@@ -101,7 +98,6 @@ public class ApplicationsApi implements Microservice  {
     throws NotFoundException {
         return delegate.applicationsApplicationIdGenerateKeysPost(applicationId,body,request);
     }
-    @OPTIONS
     @POST
     @Path("/{applicationId}/generate-token")
     @Consumes({ "application/json" })
@@ -127,7 +123,6 @@ public class ApplicationsApi implements Microservice  {
     throws NotFoundException {
         return delegate.applicationsApplicationIdGenerateTokenPost(applicationId,body,ifMatch,ifUnmodifiedSince,request);
     }
-    @OPTIONS
     @GET
     @Path("/{applicationId}")
     @Consumes({ "application/json" })
@@ -152,7 +147,6 @@ public class ApplicationsApi implements Microservice  {
     throws NotFoundException {
         return delegate.applicationsApplicationIdGet(applicationId,ifNoneMatch,ifModifiedSince,request);
     }
-    @OPTIONS
     @GET
     @Path("/{applicationId}/keys")
     @Consumes({ "application/json" })
@@ -175,7 +169,6 @@ public class ApplicationsApi implements Microservice  {
     throws NotFoundException {
         return delegate.applicationsApplicationIdKeysGet(applicationId,request);
     }
-    @OPTIONS
     @GET
     @Path("/{applicationId}/keys/{keyType}")
     @Consumes({ "application/json" })
@@ -199,7 +192,6 @@ public class ApplicationsApi implements Microservice  {
     throws NotFoundException {
         return delegate.applicationsApplicationIdKeysKeyTypeGet(applicationId,keyType,request);
     }
-    @OPTIONS
     @PUT
     @Path("/{applicationId}/keys/{keyType}")
     @Consumes({ "application/json" })
@@ -224,7 +216,6 @@ public class ApplicationsApi implements Microservice  {
     throws NotFoundException {
         return delegate.applicationsApplicationIdKeysKeyTypePut(applicationId,keyType,body,request);
     }
-    @OPTIONS
     @POST
     @Path("/{applicationId}/map-keys")
     @Consumes({ "application/json" })
@@ -248,7 +239,6 @@ public class ApplicationsApi implements Microservice  {
     throws NotFoundException {
         return delegate.applicationsApplicationIdMapKeysPost(applicationId,body,request);
     }
-    @OPTIONS
     @PUT
     @Path("/{applicationId}")
     @Consumes({ "application/json" })
@@ -274,7 +264,6 @@ public class ApplicationsApi implements Microservice  {
     throws NotFoundException {
         return delegate.applicationsApplicationIdPut(applicationId,body,ifMatch,ifUnmodifiedSince,request);
     }
-    @OPTIONS
     @GET
     
     @Consumes({ "application/json" })
@@ -300,7 +289,6 @@ public class ApplicationsApi implements Microservice  {
     throws NotFoundException {
         return delegate.applicationsGet(query,limit,offset,ifNoneMatch,request);
     }
-    @OPTIONS
     @POST
     
     @Consumes({ "application/json" })

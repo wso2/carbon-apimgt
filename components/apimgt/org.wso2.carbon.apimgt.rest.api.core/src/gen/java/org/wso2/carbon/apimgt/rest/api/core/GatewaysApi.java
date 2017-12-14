@@ -57,8 +57,8 @@ public class GatewaysApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was in a not supported format. ", response = RegistrationSummaryDTO.class) })
     public Response gatewaysRegisterPost(@ApiParam(value = "Register object that needs to be added " ,required=true) RegistrationDTO body
 ,@ApiParam(value = "Media type of the entity in the body. Default is JSON. " ,required=true, defaultValue="JSON")@HeaderParam("Content-Type") String contentType
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.gatewaysRegisterPost(body,contentType, request);
+        return delegate.gatewaysRegisterPost(body,contentType,request);
     }
 }

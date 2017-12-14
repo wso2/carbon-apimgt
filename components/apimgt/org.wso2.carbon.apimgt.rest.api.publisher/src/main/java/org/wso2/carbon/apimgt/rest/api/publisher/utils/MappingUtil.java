@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.core.models.WSDLInfo;
+import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
@@ -53,6 +54,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_businessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_corsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_endpointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_operationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_threatProtectionPoliciesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_threatProtectionPolicies_listDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
@@ -62,6 +65,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThreatProtectionPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO.WorkflowStatusEnum;
 
@@ -140,6 +144,23 @@ public class MappingUtil {
         }
         apidto.setCreatedTime(api.getCreatedTime().toString());
         apidto.setLastUpdatedTime(api.getLastUpdatedTime().toString());
+
+        if (api.getThreatProtectionPolicies() != null) {
+            List<String> policyIdList = new ArrayList<>(api.getThreatProtectionPolicies());
+
+            List<API_threatProtectionPolicies_listDTO> listDTOS = new ArrayList<>();
+            for(String policyId: policyIdList) {
+                API_threatProtectionPolicies_listDTO threatProtectionPoliciesListDTO =
+                        new API_threatProtectionPolicies_listDTO();
+                threatProtectionPoliciesListDTO.setPolicyId(policyId);
+                //set priority when implementing
+                //threatProtectionPoliciesListDTO.setPriority(10);
+                listDTOS.add(threatProtectionPoliciesListDTO);
+            }
+            API_threatProtectionPoliciesDTO threatProtectionPoliciesDTO = new API_threatProtectionPoliciesDTO();
+            threatProtectionPoliciesDTO.setList(listDTOS);
+            apidto.setThreatProtectionPolicies(threatProtectionPoliciesDTO);
+        }
         return apidto;
     }
 
@@ -239,6 +260,16 @@ public class MappingUtil {
             apiBuilder.apiPolicy(policy);
         }
 
+        if (apidto.getThreatProtectionPolicies() != null) {
+            API_threatProtectionPoliciesDTO threatProtectionPoliciesDTO = apidto.getThreatProtectionPolicies();
+            List<API_threatProtectionPolicies_listDTO> threatProtectionPolicies_listDTO = threatProtectionPoliciesDTO.getList();
+
+            Set<String> policyIdSet = new HashSet<>();
+            for (API_threatProtectionPolicies_listDTO listDTO: threatProtectionPolicies_listDTO) {
+                policyIdSet.add(listDTO.getPolicyId());
+            }
+            apiBuilder.threatProtectionPolicies(policyIdSet);
+        }
         return apiBuilder;
     }
 
@@ -568,6 +599,15 @@ public class MappingUtil {
             securitySchemesList.add("apikey");
         }
         return securitySchemesList;
+    }
+
+    public static ThreatProtectionPolicyDTO toThreatProtectionPolicyDTO(ThreatProtectionPolicy policy) {
+        ThreatProtectionPolicyDTO dto = new ThreatProtectionPolicyDTO();
+        dto.setUuid(policy.getUuid());
+        dto.setType(policy.getType());
+        dto.setName(policy.getName());
+        dto.setPolicy(policy.getPolicy());
+        return dto;
     }
 
 }

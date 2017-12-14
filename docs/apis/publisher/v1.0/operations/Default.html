@@ -1,0 +1,115 @@
+<div class="main-content">
+    <h1><a name="default"></a>default</h1>
+
+            <hr/>
+            <h3 class="operation-heading"><a name="threatProtectionPoliciesPolicyIdGet"></a>Get a threat protection policy <br><small>GET https://apis.wso2.com/api/am/publisher/v1.0/threat-protection/policies/{policyId}</small></h3>
+            <p class="marked"></p>
+
+            
+
+            <h4 class="section-heading">OAuth 2.0 Scope</h4>
+                <code>apim:api_view</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:api_view' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+
+            <div class="pointer" data-toggle="collapse" data-target="#request-threatProtectionPoliciesPolicyIdGet">
+                <h4 class="section-heading">
+                    Request
+                </h4>
+            </div>
+
+                <code class="bash">GET https://apis.wso2.com/api/am/publisher/v1.0/threat-protection/policies/{policyId}</code>
+
+            <div class="pointer" data-toggle="collapse" data-target="#response-threatProtectionPoliciesPolicyIdGet">
+                <h4 class="section-heading">
+                    Response
+                </h4>
+            </div>
+                <p>Not Available</p>
+
+            <h4 class="section-heading">Sample CURL</h4>
+                <p>Not Available</p>
+
+            <h4 class="section-heading" id="scroll-to">Parameters</h4>
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                    <col style="width: 40%;"/>
+                    <col style="width: 10%;"/>
+                    <col style="width: 20%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>Type</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                    <th>Default</th>
+                </tr>
+                </thead>
+                    <tr>
+                        <td class="parameter">
+                            
+                            
+                            <span class="param-in">Path </span>
+                            
+                            
+                        </td>
+                        <td class="param-name">
+                            <p>policyId</p>
+                            <p class="param-required">
+                                required
+                                
+                            </p>
+                        </td>
+                        <td>
+                            <p class="param-description marked">The UUID of a Policy
+</p>
+                        </td>
+                        <td>
+                            <span class="param-type">
+                                String
+                            </span>
+                        </td>
+                        <td>
+                            <p class="marked"></p>
+                        </td>
+                    </tr>
+            </table>
+
+            <h4 class="section-heading">Responses</h4>
+
+            <table class="table table-hover">
+                <colgroup>
+                    <col style="width: 15%;"/>
+                    <col style="width: 70%;"/>
+                    <col style="width: 15%;"/>
+                </colgroup>
+                <thead>
+                <tr class="active">
+                    <th>HTTP Code</th>
+                    <th>Description</th>
+                    <th>Schema</th>
+                </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="parameter"><p class="marked">200</p></td>
+                        <td class="parameter"><p class="marked">Ok. Policy is returned</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    <a href="#!/models#ThreatProtectionPolicy">ThreatProtectionPolicy</a>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="parameter"><p class="marked">404</p></td>
+                        <td class="parameter"><p class="marked">No policy found for given policy ID</p></td>
+                        <td class="parameter">
+                            <span class="parameter">
+                                    
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+</div>

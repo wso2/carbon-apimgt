@@ -20,5 +20,5 @@ import javax.ws.rs.core.SecurityContext;
 
 public abstract class ApplicationsApiService {
     public abstract Response applicationsGet(String accept
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
 }

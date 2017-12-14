@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
 import org.wso2.carbon.apimgt.core.models.RegistrationSummary;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.rest.api.core.dto.APIListDTO;
@@ -41,6 +42,7 @@ import org.wso2.carbon.apimgt.rest.api.core.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.PolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.RegistrationSummaryDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.SubscriptionDTO;
+import org.wso2.carbon.apimgt.rest.api.core.dto.ThreatProtectionPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.UriTemplateDTO;
 
 import java.util.ArrayList;
@@ -244,5 +246,16 @@ public class MappingUtilTestCase {
         //Test for null handling
         blockConditionIPRANGE.setUuid(null);
         Assert.assertNull(MappingUtil.fromBlockingConditionToDTO(blockConditionIPRANGE));
+    }
+
+    @Test
+    public void toThreatProtectionPolicyDTOTest() {
+        ThreatProtectionPolicy policy = SampleTestObjectCreator.createUniqueThreatProtectionPolicy();
+        ThreatProtectionPolicyDTO dto = MappingUtil.toThreatProtectionPolicyDTO(policy);
+
+        Assert.assertEquals(policy.getUuid(), dto.getUuid());
+        Assert.assertEquals(policy.getType(), dto.getType());
+        Assert.assertEquals(policy.getName(), dto.getName());
+        Assert.assertEquals(policy.getPolicy(), dto.getPolicy());
     }
 }

@@ -22,5 +22,5 @@ import javax.ws.rs.core.SecurityContext;
 public abstract class GatewaysApiService {
     public abstract Response gatewaysRegisterPost(RegistrationDTO body
  ,String contentType
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
 }

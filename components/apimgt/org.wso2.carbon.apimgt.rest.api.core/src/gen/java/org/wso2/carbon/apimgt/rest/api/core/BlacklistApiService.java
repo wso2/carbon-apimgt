@@ -19,5 +19,5 @@ import javax.ws.rs.core.SecurityContext;
 
 public abstract class BlacklistApiService {
     public abstract Response blacklistGet(String accept
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
 }

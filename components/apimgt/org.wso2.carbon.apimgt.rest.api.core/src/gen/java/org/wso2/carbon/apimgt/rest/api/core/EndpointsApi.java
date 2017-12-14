@@ -58,9 +58,9 @@ public class EndpointsApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = void.class) })
     public Response endpointsEndpointIdGatewayConfigGet(@ApiParam(value = "The UUID of an Endpoint ",required=true) @PathParam("endpointId") String endpointId
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.endpointsEndpointIdGatewayConfigGet(endpointId,accept, request);
+        return delegate.endpointsEndpointIdGatewayConfigGet(endpointId,accept,request);
     }
     @GET
     
@@ -73,8 +73,8 @@ public class EndpointsApi implements Microservice  {
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error ", response = EndpointListDTO.class) })
     public Response endpointsGet(@ApiParam(value = "Number of entities that should be retrieved. ") @QueryParam("limit") Integer limit
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.endpointsGet(limit,accept, request);
+        return delegate.endpointsGet(limit,accept,request);
     }
 }

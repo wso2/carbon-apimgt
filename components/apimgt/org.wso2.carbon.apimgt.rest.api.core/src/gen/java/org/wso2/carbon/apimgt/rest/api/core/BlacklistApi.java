@@ -50,8 +50,8 @@ public class BlacklistApi implements Microservice  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Blocking conditions returned ", response = BlockingConditionListDTO.class) })
     public Response blacklistGet(@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.blacklistGet(accept, request);
+        return delegate.blacklistGet(accept,request);
     }
 }

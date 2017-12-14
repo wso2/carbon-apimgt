@@ -447,6 +447,10 @@ public class APIMgtConstants {
         public static final String BLOCK_CONDITION_UPDATE = "BLOCK_CONDITION_UPDATE";
         public static final String BLOCK_CONDITION_DELETE = "BLOCK_CONDITION_DELETE";
 
+        public static final String THREAT_PROTECTION_POLICY_ADD = "THREAT_PROTECTION_POLICY_ADD";
+        public static final String THREAT_PROTECTION_POLICY_DELETE = "THREAT_PROTECTION_POLICY_DELETE";
+        public static final String THREAT_PROTECTION_POLICY_UPDATE = "THREAT_PROTECTION_POLICY_UPDATE";
+
     }
 
     /**

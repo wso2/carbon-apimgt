@@ -20,5 +20,5 @@ import javax.ws.rs.core.SecurityContext;
 
 public abstract class PoliciesApiService {
     public abstract Response policiesGet(String accept
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
 }

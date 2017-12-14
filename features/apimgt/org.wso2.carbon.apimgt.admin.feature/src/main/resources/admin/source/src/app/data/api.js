@@ -283,6 +283,76 @@ class API {
             }
         );
     }
+
+    /**
+     * Get all threat protection policies
+     * @returns {Promise} promised threat protection policies response
+     */
+    getThreatProtectionPolicies() {
+        return this.client.then(
+            (client) => {
+                return client.apis["All Threat Protection Policies"].get_threat_protection_policies();
+            }
+        );
+    }
+
+    /**
+     * Get a threat protection policy
+     * @param id ID of the threat protection policy
+     * @returns {Promise} promised threat protection policy
+     */
+    getThreatProtectionPolicy(id) {
+        return this.client.then(
+            (client) => {
+                return client.apis["Threat Protection Policy"].
+                get_threat_protection_policies__threatProtectionPolicyId_({threatProtectionPolicyId: id});
+            }
+        );
+    }
+
+    /**
+     * Add a threat protection policy
+     * @param policy Threat protection policy
+     */
+    addThreatProtectionPolicy(policy) {
+        //update policy
+        if (policy.uuid) {
+            console.log("update policy: ");
+            console.log(policy);
+            return this.client.then(
+                (client) => {
+                    return client.apis["Update Threat Protection Policy"].
+                    post_threat_protection_policies__threatProtectionPolicyId_(
+                            {threatProtectionPolicyId: policy.uuid, threatProtectionPolicy: policy}
+                        )
+                }
+            );
+        } else {
+            console.log("New Policy");
+            //add policy
+            return this.client.then(
+                (client) => {
+                    return client.apis["Add Threat Protection Policy"].
+                    post_threat_protection_policies(
+                        {threatProtectionPolicy: policy}
+                    )
+                }
+            );
+        }
+    }
+
+    /**
+     * Delete a threat protection policy
+     * @param id ID of the threat protection policy
+     */
+    deleteThreatProtectionPolicy(id) {
+        return this.client.then(
+            (client) => {
+                return client.apis["Delete Threat Protection Policy"].
+                    delete_threat_protection_policies__threatProtectionPolicyId_({threatProtectionPolicyId: id});
+            }
+        );
+    }
 }
 
 export default API

@@ -46,3 +46,28 @@ struct CredentialsDTO {
     string username;
     string password;
 }
+
+struct XMLThreatProtectionInfoDTO {
+    string policyId;
+    string name;
+    string _type;
+    boolean dtdEnabled;
+    boolean externalEntitiesEnabled;
+    int maxDepth;
+    int elementCount;
+    int attributeCount;
+    int attributeLength;
+    int entityExpansionLimit;
+    int childrenPerElement;
+}
+
+struct JSONThreatProtectionInfoDTO {
+    string policyId;
+    string name;
+    string _type;
+    int propertyCount;
+    int stringLength;
+    int arrayElementCount;
+    int keyLength;
+    int maxDepth;
+}

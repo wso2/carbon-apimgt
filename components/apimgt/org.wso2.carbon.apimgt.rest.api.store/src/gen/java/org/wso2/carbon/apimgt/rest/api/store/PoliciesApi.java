@@ -21,7 +21,6 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
-import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -45,7 +44,6 @@ import javax.ws.rs.core.Response;
 public class PoliciesApi implements Microservice  {
    private final PoliciesApiService delegate = PoliciesApiServiceFactory.getPoliciesApi();
 
-    @OPTIONS
     @GET
     @Path("/{tierLevel}")
     @Consumes({ "application/json" })
@@ -69,7 +67,6 @@ public class PoliciesApi implements Microservice  {
     throws NotFoundException {
         return delegate.policiesTierLevelGet(tierLevel,limit,offset,ifNoneMatch,request);
     }
-    @OPTIONS
     @GET
     @Path("/{tierLevel}/{tierName}")
     @Consumes({ "application/json" })

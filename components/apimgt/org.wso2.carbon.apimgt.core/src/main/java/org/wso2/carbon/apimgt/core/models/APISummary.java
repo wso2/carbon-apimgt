@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.core.models;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 /**
  * The summary of the API
@@ -42,6 +43,8 @@ public class APISummary {
     private LocalDateTime lastUpdatedTime;
 
     private int securityScheme;
+
+    private Set<String> threatProtectionPolicies;
 
     public static long getSerialVersionUID() {
         return serialVersionUID;
@@ -109,5 +112,13 @@ public class APISummary {
 
     public void setSecurityScheme(int securityScheme) {
         this.securityScheme = securityScheme;
+    }
+
+    public Set<String> getThreatProtectionPolicies() {
+        return threatProtectionPolicies;
+    }
+
+    public void setThreatProtectionPolicies(Set<String> threatProtectionPolicies) {
+        this.threatProtectionPolicies = threatProtectionPolicies;
     }
 }

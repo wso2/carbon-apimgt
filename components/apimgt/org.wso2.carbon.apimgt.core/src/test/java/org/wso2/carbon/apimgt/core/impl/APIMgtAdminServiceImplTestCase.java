@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
+import org.wso2.carbon.apimgt.core.dao.ThreatProtectionDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -46,6 +47,7 @@ import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -941,27 +943,110 @@ public class APIMgtAdminServiceImplTestCase {
         }
     }
 
+    @Test(description = "Test getting a threat protection policy")
+    public void testGetThreatProtectionPolicy() throws APIManagementException {
+        ThreatProtectionDAO threatProtectionDAO = Mockito.mock(ThreatProtectionDAO.class);
+        APIMgtAdminServiceImpl adminService = getAPIMgtAdminServiceImpl(threatProtectionDAO);
+        ThreatProtectionPolicy policy = SampleTestObjectCreator.createUniqueThreatProtectionPolicy();
+        Mockito.when(threatProtectionDAO.getPolicy(policy.getUuid())).thenReturn(policy);
+        ThreatProtectionPolicy policyReturned = adminService.getThreatProtectionPolicy(policy.getUuid());
+        Assert.assertEquals(policyReturned, policy);
+
+        //Error path
+        Mockito.when(threatProtectionDAO.getPolicy(policy.getUuid())).thenThrow(APIMgtDAOException.class);
+        try {
+            adminService.getThreatProtectionPolicy(policy.getUuid());
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Error while retrieving threat protection policy");
+        }
+    }
+
+    @Test(description = "Test getting list of all threat protection policies")
+    public void testGetThreatProtectionPolicyList() throws APIManagementException {
+        ThreatProtectionDAO threatProtectionDAO = Mockito.mock(ThreatProtectionDAO.class);
+        APIMgtAdminServiceImpl adminService = getAPIMgtAdminServiceImpl(threatProtectionDAO);
+
+        List<ThreatProtectionPolicy> policyList = new ArrayList<>();
+        policyList.add(SampleTestObjectCreator.createUniqueThreatProtectionPolicy());
+        policyList.add(SampleTestObjectCreator.createUniqueThreatProtectionPolicy());
+
+        Mockito.when(threatProtectionDAO.getPolicies()).thenReturn(policyList);
+        List<ThreatProtectionPolicy> policyListReturned = adminService.getThreatProtectionPolicyList();
+        Assert.assertEquals(policyListReturned.size(), policyList.size());
+
+        //Error path
+        Mockito.when(threatProtectionDAO.getPolicies()).thenThrow(APIMgtDAOException.class);
+        try {
+            adminService.getThreatProtectionPolicyList();
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Error while retrieving threat protection policy list");
+        }
+    }
+
+    @Test(description = "Test adding threat protection policy")
+    public void testAddThreatProtectionPolicy() throws APIManagementException {
+        ThreatProtectionDAO threatProtectionDAO = Mockito.mock(ThreatProtectionDAO.class);
+        APIMgtAdminServiceImpl adminService = getAPIMgtAdminServiceImpl(threatProtectionDAO);
+        ThreatProtectionPolicy policy = SampleTestObjectCreator.createUniqueThreatProtectionPolicy();
+
+        Mockito.doThrow(APIMgtDAOException.class).when(threatProtectionDAO).updatePolicy(policy);
+        Mockito.doThrow(APIMgtDAOException.class).when(threatProtectionDAO).addPolicy(policy);
+        //Error path
+        try {
+            adminService.addThreatProtectionPolicy(policy);
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Error adding threat protection policy");
+        }
+
+        try {
+            policy.setUuid("");
+            adminService.addThreatProtectionPolicy(policy);
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Error adding threat protection policy");
+        }
+    }
+
+    @Test(description = "Test delete threat protection policy")
+    public void testDeleteThreatProtectionPolicy() throws APIManagementException {
+        ThreatProtectionDAO threatProtectionDAO = Mockito.mock(ThreatProtectionDAO.class);
+        APIMgtAdminServiceImpl adminService = getAPIMgtAdminServiceImpl(threatProtectionDAO);
+        ThreatProtectionPolicy policy = SampleTestObjectCreator.createUniqueThreatProtectionPolicy();
+
+        //Error path
+        Mockito.doThrow(APIMgtDAOException.class).when(threatProtectionDAO).deletePolicy(policy.getUuid());
+        try {
+            adminService.deleteThreatProtectionPolicy(policy.getUuid());
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Error deleting threat protection policy");
+        }
+    }
+
     private APIMgtAdminServiceImpl getAPIMgtAdminServiceImpl(ApiDAO apiDAO) {
-        return new APIMgtAdminServiceImpl(null, null, apiDAO, null, null, null, null);
+        return new APIMgtAdminServiceImpl(null, null, apiDAO, null, null, null, null, null);
     }
 
     private APIMgtAdminServiceImpl getAPIMgtAdminServiceImpl(ApplicationDAO applicationDAO) {
-        return new APIMgtAdminServiceImpl(null, null, null, null, applicationDAO, null, null);
+        return new APIMgtAdminServiceImpl(null, null, null, null, applicationDAO, null, null, null);
     }
 
     private APIMgtAdminServiceImpl getAPIMgtAdminServiceImpl(PolicyDAO policyDAO) {
-        return new APIMgtAdminServiceImpl(null, policyDAO, null, null, null, null, null);
+        return new APIMgtAdminServiceImpl(null, policyDAO, null, null, null, null, null, null);
     }
 
     private APIMgtAdminServiceImpl getAPIMgtAdminServiceImpl(APISubscriptionDAO apiSubscriptionDAO) {
-        return new APIMgtAdminServiceImpl(apiSubscriptionDAO, null, null, null, null, null, null);
+        return new APIMgtAdminServiceImpl(apiSubscriptionDAO, null, null, null, null, null, null, null);
     }
 
     private APIMgtAdminServiceImpl getAPIMgtAdminServiceImpl(LabelDAO labelDAO) {
-        return new APIMgtAdminServiceImpl(null, null, null, labelDAO, null, null, null);
+        return new APIMgtAdminServiceImpl(null, null, null, labelDAO, null, null, null, null);
     }
 
     private APIMgtAdminServiceImpl getAPIMgtAdminServiceImpl(PolicyDAO policyDAO, APIGateway apiGateway) {
-        return new APIMgtAdminServiceImpl(null, policyDAO, null, null, null, apiGateway, null);
+        return new APIMgtAdminServiceImpl(null, policyDAO, null, null, null, apiGateway, null, null);
+    }
+
+    private APIMgtAdminServiceImpl getAPIMgtAdminServiceImpl(ThreatProtectionDAO threatProtectionDAO) {
+        return new APIMgtAdminServiceImpl(null, null, null, null,
+                null, null, null, threatProtectionDAO);
     }
 }

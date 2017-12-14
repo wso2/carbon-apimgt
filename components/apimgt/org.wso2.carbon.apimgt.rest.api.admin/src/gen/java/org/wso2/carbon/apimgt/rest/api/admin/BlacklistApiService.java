@@ -23,19 +23,19 @@ public abstract class BlacklistApiService {
     public abstract Response blacklistConditionIdDelete(String conditionId
  ,String ifMatch
  ,String ifUnmodifiedSince
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
     public abstract Response blacklistConditionIdGet(String conditionId
  ,String ifNoneMatch
  ,String ifModifiedSince
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
     public abstract Response blacklistConditionIdPut(String conditionId
  ,BlockingConditionDTO body
  ,String ifMatch
  ,String ifUnmodifiedSince
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
     public abstract Response blacklistGet(String ifNoneMatch
  ,String ifModifiedSince
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
     public abstract Response blacklistPost(BlockingConditionDTO body
- , Request request) throws NotFoundException;
+  ,Request request) throws NotFoundException;
 }

@@ -59,8 +59,8 @@ public class ResourcesApi implements Microservice  {
     public Response resourcesGet(@ApiParam(value = "Context of the API. ") @QueryParam("apiContext") String apiContext
 ,@ApiParam(value = "Version of the API. ") @QueryParam("apiVersion") String apiVersion
 ,@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.resourcesGet(apiContext,apiVersion,accept, request);
+        return delegate.resourcesGet(apiContext,apiVersion,accept,request);
     }
 }

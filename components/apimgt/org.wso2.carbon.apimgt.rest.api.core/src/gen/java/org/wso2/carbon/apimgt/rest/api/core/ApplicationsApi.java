@@ -57,8 +57,8 @@ public class ApplicationsApi implements Microservice  {
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ", response = ApplicationListDTO.class) })
     public Response applicationsGet(@ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.applicationsGet(accept, request);
+        return delegate.applicationsGet(accept,request);
     }
 }
