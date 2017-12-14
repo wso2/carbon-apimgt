@@ -1162,6 +1162,10 @@ public final class APIUtil {
                 apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
     }
 
+    public static String getWSDLDefinitionFilePath(String apiName, String apiVersion, String apiProvider) {
+        return APIConstants.API_WSDL_RESOURCE_LOCATION + apiProvider + "--" + apiName + apiVersion + ".wsdl";
+    }
+
     /**
      * Utility method to get api path from APIIdentifier
      *
@@ -1415,7 +1419,10 @@ public final class APIUtil {
             }
 
             Resource wsdlResource = registry.newResource();
-            if (!api.getWsdlUrl().matches(wsdRegistryPath)) {
+            // isWSDL2Document(api.getWsdlUrl()) method only understands http or file system urls.
+            // Hence if this is a registry url, should not go in to the following if block
+            if (!api.getWsdlUrl().matches(wsdRegistryPath) && (api.getWsdlUrl().startsWith("http:") || api.getWsdlUrl
+                    ().startsWith("https:") || api.getWsdlUrl().startsWith("file:"))) {
                 if (isWSDL2Document(api.getWsdlUrl())) {
                     wsdlContentEle = wsdlReader.readAndCleanWsdl2(api);
                     wsdlResource.setContent(wsdlContentEle.toString());
@@ -6752,5 +6759,43 @@ public final class APIUtil {
             Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants
                     .API_PUBLISHER_USER_ROLE_CACHE).remove(userName);
         }
+    }
+
+    /**
+     * Used to reconstruct the input search query as sub context and doc content doesn't support AND search
+     *
+     * @param query Input search query
+     * @return Reconstructed new search query
+     * @throws APIManagementException If there is an error in the search query
+     */
+    public static String constructNewSearchQuery(String query) throws APIManagementException {
+        String newSearchQuery = "";
+        String inputSearchQuery = query.trim();
+        // sub context and doc content doesn't support AND search
+        if (inputSearchQuery != null && inputSearchQuery.contains(" ")) {
+            if (inputSearchQuery.split(" ").length > 1) {
+                String[] searchCriterias = inputSearchQuery.split(" ");
+                for (int i = 0; i < searchCriterias.length; i++) {
+                    if (searchCriterias[i].contains(":") && searchCriterias[i].split(":").length > 1) {
+                        if (APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX
+                                .equalsIgnoreCase(searchCriterias[i].split(":")[0])
+                                || APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX
+                                .equalsIgnoreCase(searchCriterias[i].split(":")[0])) {
+                            throw new APIManagementException("Invalid query. AND based search is not supported for "
+                                    + "doc and subcontext prefixes");
+                        }
+                    }
+                    if (i == 0) {
+                        newSearchQuery = APIUtil.getSingleSearchCriteria(searchCriterias[i]);
+                    } else {
+                        newSearchQuery = newSearchQuery + APIConstants.SEARCH_AND_TAG + APIUtil
+                                .getSingleSearchCriteria(searchCriterias[i]);
+                    }
+                }
+            }
+        } else {
+            newSearchQuery = APIUtil.getSingleSearchCriteria(inputSearchQuery);
+        }
+        return newSearchQuery;
     }
 }

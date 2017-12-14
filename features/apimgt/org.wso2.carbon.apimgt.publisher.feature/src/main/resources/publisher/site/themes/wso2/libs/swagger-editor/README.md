@@ -1,61 +1,65 @@
-# Swagger Editor
+# Swagger-Editor
 
 [![Build Status](https://travis-ci.org/swagger-api/swagger-editor.svg?branch=master)](https://travis-ci.org/swagger-api/swagger-editor)
 [![Code Climate](https://codeclimate.com/github/swagger-api/swagger-editor/badges/gpa.svg)](https://codeclimate.com/github/swagger-api/swagger-editor)
-[![NPM version](https://badge.fury.io/js/swagger-editor-src.png)](http://badge.fury.io/js/swagger-editor-src)
 [![Dependency Status](https://david-dm.org/swagger-api/swagger-editor/status.svg)](https://david-dm.org/swagger-api/swagger-editor)
 [![devDependency Status](https://david-dm.org/swagger-api/swagger-editor/dev-status.svg)](https://david-dm.org/swagger-api/swagger-editor-#info=devDependencies)
 
 Swagger Editor lets you edit [Swagger API specifications](https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md) in YAML inside your browser and to preview documentations in real time.
 Valid Swagger JSON descriptions can then be generated and used with the full Swagger tooling (code generation, documentation, etc).
 
-**[LIVE DEMO](http://editor.swagger.io)**
+## New!
 
-[![Screenshot of the Swagger Editor](docs/screenshot.png "Designing an API with the Swagger Editor")](http://editor.swagger.io)
+**This is the new version of swagger-editor, 3.x. Want to learn more? Check out our [FAQ](http://swagger.io/new-ui-faq/).**
 
-#### Running with Docker
+As a brand new version, written from the ground up, there are some known issues and unimplemented features. Check out the [Known Issues](#known-issues) section for more details.
 
-The swagger-editor is published in a [public repository on Dockerhub](https://hub.docker.com/r/swaggerapi/swagger-editor/)
+This repository publishes to two different NPM modules:
 
-You can run editor easily with docker:
+* [swagger-editor](https://www.npmjs.com/package/swagger-editor) is a traditional npm module intended for use in JavaScript web application projects that are capable of resolving dependencies (via Webpack, Browserify, etc).
+* [swagger-editor-dist](https://www.npmjs.com/package/swagger-editor-dist) is a dependency-free module that includes everything you need to serve Swagger-Editor in a server-side project, or a web project that can't resolve npm module dependencies.
 
-```bash
-docker pull swaggerapi/swagger-editor
-docker run -p 80:8080 swaggerapi/swagger-editor
-```
 
-#### Running Locally
+For the older version of swagger-editor, refer to the [*2.x branch*](https://github.com/swagger-api/swagger-editor/tree/2.x).
 
-[**Download the latest release (v2.10.1)**](https://github.com/swagger-api/swagger-editor/releases/download/v2.10.1/swagger-editor.zip) and serve the static files via your HTTP server. If you don't have an HTTP server, you can use [`http-server`](https://www.npmjs.com/package/http-server) Node.js module.
+## Running locally
 
-###### Using `http-server` module:
-```shell
-npm install -g http-server
-wget https://github.com/swagger-api/swagger-editor/releases/download/v2.10.1/swagger-editor.zip
-unzip swagger-editor.zip
-http-server swagger-editor
-```
+##### Prerequisites
+- Node 6.x
+- NPM 3.x
 
-#### Building From Source
+If you have Node.js and npm installed, you can run `npm start` to spin up a static server.
 
-Make sure you have [Node.js](http://nodejs.org/) installed. 
+Otherwise, you can open `index.html` directly from your filesystem in your browser.
 
-```shell
-git clone https://github.com/swagger-api/swagger-editor.git
-cd swagger-editor
-npm install
-npm start
-```
+If you'd like to make code changes to Swagger-Editor, you can start up a Webpack hot-reloading dev server via `npm run dev`. 
 
-#### Documentations
-* [Importing your Swagger document](./docs/import.md)
-* [Development Guide](./docs/development.md)
-* [Configuration Guide](./docs/config.md)
-* [Cross Origin Request(CORS) issues](docs/cors.md)
+##### Browser support
 
-[Contributing](./CONTRIBUTING.md)
+Swagger UI works in the latest versions of Chrome, Safari, Firefox, Edge and IE11.
 
-[LICENSE](./LICENSE)
+### Known Issues
 
----
-<img src="http://swagger.io/wp-content/uploads/2016/02/logo.jpg"/>
+To help with the migration, here are the currently known issues with 3.X. This list will update regularly, and will not include features that were not implemented in previous versions.
+
+- Everything listed in [Swagger-UI's Known Issues](https://github.com/swagger-api/swagger-ui/blob/master/README.md#known-issues).
+- The integration with the codegen is still missing.
+- Importing specs from a URL is not implemented.
+
+## Security contact
+
+Please disclose any security-related issues or vulnerabilities by emailing [security@swagger.io](mailto:security@swagger.io), instead of using the public issue tracker.
+
+## License
+
+Copyright 2017 SmartBear Software
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at [apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

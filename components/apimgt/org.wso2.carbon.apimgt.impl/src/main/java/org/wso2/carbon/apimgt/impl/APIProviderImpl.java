@@ -2124,6 +2124,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 definitionFromSwagger20.saveAPIDefinition(newAPI, swaggerObject.toJSONString(), registry);
             }
 
+            // copy wsdl in case of a SOAP API
+            String existingWsdlResourcePath = APIUtil.getWSDLDefinitionFilePath(api.getId().getApiName(),
+                    api.getId().getVersion(), api.getId().getProviderName());
+            if (registry.resourceExists(existingWsdlResourcePath)) {
+                String newWsdlResourcePath = APIUtil.getWSDLDefinitionFilePath(newAPI.getId().getApiName(), newAPI
+                        .getId().getVersion(), newAPI.getId().getProviderName());
+                registry.copy(existingWsdlResourcePath, newWsdlResourcePath);
+            }
+
             // Make sure to unset the isLatest flag on the old version
             GenericArtifact oldArtifact = artifactManager.getGenericArtifact(
                     apiSourceArtifact.getUUID());
