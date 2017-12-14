@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.core.models.CompositeAPI;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
-import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 
 import java.util.List;
 
@@ -201,25 +200,4 @@ public interface APIGateway {
      * @throws GatewayException If there is a failure in notifying update block condition to gateway
      */
     void deleteBlockCondition(BlockConditions blockConditions) throws GatewayException;
-
-    /**
-     * Publish Threat Protection Policy add event to gateway
-     * @param policy ThreatProtectionPolicy, see {@link ThreatProtectionPolicy}
-     * @throws GatewayException if there is a failure in notifying event to gateway
-     */
-    void addThreatProtectionPolicy(ThreatProtectionPolicy policy) throws GatewayException;
-
-    /**
-     * Publish Threat Protection Policy delete event to gateway
-     * @param policy ThreatProtectionPolicy, see {@link ThreatProtectionPolicy}
-     * @throws GatewayException if there is a failure in notifying event to gateway
-     */
-    void deleteThreatProtectionPolicy(ThreatProtectionPolicy policy) throws GatewayException;
-
-    /**
-     * Publish Threat Protection Policy update event to gateway
-     * @param policy ThreatProtectionPolicy, see {@link ThreatProtectionPolicy}
-     * @throws GatewayException if there is a failure in notifying event to gateway
-     */
-    void updateThreatProtectionPolicy(ThreatProtectionPolicy policy) throws GatewayException;
 }

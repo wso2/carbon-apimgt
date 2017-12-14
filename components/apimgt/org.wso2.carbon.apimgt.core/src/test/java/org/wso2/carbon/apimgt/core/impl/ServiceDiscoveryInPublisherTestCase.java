@@ -89,6 +89,6 @@ public class ServiceDiscoveryInPublisherTestCase {
 
     private APIPublisherImpl getApiPublisherImpl() {
         return new APIPublisherImpl("admin", null, null, null, null, null, null, null, null, null, null,
-                null, null, null);
+                null, null);
     }
 }

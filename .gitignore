@@ -30,7 +30,6 @@ components/apimgt/org.wso2.carbon.apimgt.rest.api.commons/src/main/resources/pub
 components/apimgt/org.wso2.carbon.apimgt.rest.api.commons/src/main/resources/store-api.yaml
 components/apimgt/org.wso2.carbon.apimgt.rest.api.commons/src/main/resources/analytics-api.yaml
 components/apimgt/org.wso2.carbon.apimgt.rest.api.commons/src/main/resources/admin-api.yaml
-components/apimgt/org.wso2.carbon.apimgt.core/src/test/resources/amdb/
 #################
 ## NPM
 #################

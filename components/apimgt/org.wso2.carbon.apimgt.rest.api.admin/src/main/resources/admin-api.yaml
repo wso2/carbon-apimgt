@@ -1832,73 +1832,6 @@ paths:
           schema:
             $ref: '#/definitions/Error'
 
-
-######################################################
-# The "Threat Protection" resource API
-######################################################
-  /threat-protection-policies:
-    post:
-      summary: "add a threat protection policy"
-      description: "add a threat protection policy"
-      parameters:
-        - $ref: '#/parameters/threatProtectionPolicy'
-      tags:
-        - Add Threat Protection Policy
-      responses:
-        200:
-          description: OK
-
-    get:
-      summary: "Get all threat protection policies"
-      description: "all"
-      tags:
-        - All Threat Protection Policies
-      responses:
-        200:
-          schema:
-            $ref: '#/definitions/ThreatProtectionPolicyList'
-          description: OK
-
-  /threat-protection-policies/{threatProtectionPolicyId}:
-    get:
-      summary: "Get one threat protection policy"
-      description: "Get one threat protection policy"
-      parameters:
-        - $ref: '#/parameters/threatProtectionPolicyId'
-      tags:
-        - Threat Protection Policy
-      responses:
-        200:
-          schema:
-            $ref: '#/definitions/ThreatProtectionPolicy'
-          description: OK
-
-    post:
-      summary: "post"
-      description: "desc"
-      parameters:
-        - $ref: '#/parameters/threatProtectionPolicyId'
-        - $ref: '#/parameters/threatProtectionPolicy'
-      tags:
-        - Update Threat Protection Policy
-      responses:
-        200:
-          description: Ok
-
-    delete:
-      summary: "Delete a threat protection policy"
-      description: "Delete a threat protection policy"
-      parameters:
-        - $ref: '#/parameters/threatProtectionPolicyId'
-      tags:
-        - Delete Threat Protection Policy
-      responses:
-        200:
-          description: "Ok. Policy is deleted"
-        500:
-          description: "Internal server error occurred during the operation"
-
-
 ######################################################
 # Parameters - required by some of the APIs above
 ######################################################
@@ -2022,27 +1955,6 @@ parameters:
       Type of the worklfow
     required: false
     type: string
-
-#Threat Protection policy parameter
-  threatProtectionPolicy:
-    name: threatProtectionPolicy
-    in: body
-    description: |
-      Threat protection json policy request parameter
-    required: true
-    schema: {
-      $ref: '#/definitions/ThreatProtectionPolicy'
-    }
-
-#Threat protection policy ID parameter
-  threatProtectionPolicyId:
-    name: threatProtectionPolicyId
-    in: path
-    description: |
-      The UUID of a Policy
-    required: true
-    type: string
-
 ######################################################
 # The resources used by some of the APIs above within the message body
 ######################################################
@@ -2620,39 +2532,6 @@ definitions:
         type: string
         example: APPROVED
 
-#-----------------------------------------------------
-# The Threat Protection Policy resource
-#-----------------------------------------------------
-  ThreatProtectionPolicy:
-    title: "Threat Protection Policy Schema"
-    required:
-      - name
-      - type
-      - policy
-    properties:
-      uuid:
-        type: string
-        description: Policy ID
-      name:
-        type: string
-        description: Name of the policy
-      type:
-        type: string
-        description: Type of the policy
-      policy:
-        type: string
-        description: policy as a json string
-
-#-----------------------------------------------------
-# The Threat Protection JSON Policy List resource
-#-----------------------------------------------------
-  ThreatProtectionPolicyList:
-    title: "Threat Protection Policy List"
-    properties:
-      list:
-        type: array
-        items:
-          $ref: '#/definitions/ThreatProtectionPolicy'
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

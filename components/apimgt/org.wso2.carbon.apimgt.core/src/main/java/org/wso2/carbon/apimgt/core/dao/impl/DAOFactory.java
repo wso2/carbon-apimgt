@@ -31,7 +31,6 @@ import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.SystemApplicationDao;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
-import org.wso2.carbon.apimgt.core.dao.ThreatProtectionDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
@@ -343,10 +342,6 @@ public class DAOFactory {
             }
         }
         return analyticsDAO;
-    }
-
-    public static ThreatProtectionDAO getThreatProtectionDAO() {
-        return new ThreatProtectionDAOImpl();
     }
 
     private static AnalyticsDAO getAnalyticsDaoImplForVendor(Connection connection)

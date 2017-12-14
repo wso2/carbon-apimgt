@@ -1034,82 +1034,6 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
-# The "Threat Protection" resource API
-######################################################
-  /apis/{apiId}/threat-protection-policies:
-    post:
-      security:
-        - OAuth2Security:
-          - apim:api_update
-      summary: Add a threat protection policy to an API
-      parameters:
-        - $ref: '#/parameters/apiId'
-        - name: policyId
-          in: query
-          description: Threat protection policy id
-          type: string
-          required: true
-      tags:
-        - API (Individual)
-      responses:
-        200:
-          description: Ok. Policy added succesfuly.
-        500:
-          description: Internal server error while adding policy
-          schema:
-            $ref: '#/definitions/Error'
-        404:
-          description: Specified API or Policy not found
-          schema:
-            $ref: '#/definitions/Error'
-
-    get:
-      summary: Get all threat protection policies associated with an API
-      parameters:
-        - $ref: '#/parameters/apiId'
-      tags:
-        - API (Individual)
-      responses:
-        200:
-          description: Ok. List of policy ids is returned
-          schema:
-            type: array
-            items:
-              type: string
-        404:
-          description: Specified API was not found.
-          schema:
-            $ref: '#/definitions/Error'
-        500:
-          description: Error retrieving threat protection policies
-          schema:
-            $ref: '#/definitions/Error'
-
-    delete:
-      summary: Delete a threat protection policy from an API
-      parameters:
-        - $ref: '#/parameters/apiId'
-        - name: policyId
-          in: query
-          description: Threat protection policy id
-          type: string
-          required: true
-      tags:
-        - API (Individual)
-      responses:
-        200:
-          description: Ok. Policy deleted successfully.
-        404:
-          description: Specified API or Policy not found
-          schema:
-            $ref: '#/definitions/Error'
-        500:
-          description: Error while deleting the policy
-          schema:
-            $ref: '#/definitions/Error'
-
-
-######################################################
 # The "Copy API" Processing Function resource API
 ######################################################
   /apis/copy-api:
@@ -3001,39 +2925,6 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
-# The "Threat Protection Policies" resource API
-######################################################
-  /threat-protection-policies:
-    get:
-      summary: Get All Threat Protection Policies
-      description: This can be used to get all defined threat protection policies
-      tags:
-        - Threat Protection Policies
-      responses:
-        200:
-          description: Ok. List of policies is returned
-          schema:
-            $ref: '#/definitions/ThreatProtectionPolicyList'
-
-######################################################
-# The "Threat Protection Policy" resource API
-######################################################
-  /threat-protection-policies/{policyId}:
-    get:
-      summary: Get a threat protection policy
-      parameters:
-        - $ref: '#/parameters/threatProtectionPolicyId'
-      tags:
-        - Threat Protection Policy
-      responses:
-        200:
-          description: Ok. Policy is returned
-          schema:
-            $ref: '#/definitions/ThreatProtectionPolicy'
-        404:
-          description: No policy found for given policy ID
-
-######################################################
 # The "Service Discovery" utility API
 ######################################################
   /external-resources/services:
@@ -3305,7 +3196,7 @@ parameters:
 
 # API definition specified as a file
 # Specified as a multipart form-data parameter
-  definitionFile:
+  definitionFile:  
     in: formData
     name: file
     description: Definition to upload as a file
@@ -3314,32 +3205,12 @@ parameters:
 
 # API definition URL
 # Specified as a multipart form-data parameter
-  definitionUrl:
+  definitionUrl:  
     in: formData
     name: url
     description: Definition url
     type: string
     required: false
-
-#Threat protection policy ID parameter
-  threatProtectionPolicyId:
-    name: policyId
-    in: path
-    description: |
-      The UUID of a Policy
-    required: true
-    type: string
-
-#Threat Protection policy
-  threatProtectionPolicy:
-    name: threatProtectionPolicy
-    in: body
-    description: |
-      Threat protection policy request parameter
-    required: true
-    schema: {
-      $ref: '#/definitions/ThreatProtectionPolicy'
-    }
 
 ######################################################
 # The resources used by some of the APIs above within the message body
@@ -3622,16 +3493,6 @@ definitions:
               type:
                 type: string
                 example: "Production"
-      threatProtectionPolicies:
-        properties:
-          list:
-            type: array
-            items:
-              properties:
-                policyId:
-                  type: string
-                priority:
-                  type: integer
 
 #-----------------------------------------------------
 # The Application resource
@@ -4218,7 +4079,7 @@ definitions:
 
 #-----------------------------------------------------
 # The api definition validation response
-#-----------------------------------------------------
+#-----------------------------------------------------        
   APIDefinitionValidationResponse:
     title: API definition validation Response
     required:
@@ -4270,37 +4131,3 @@ definitions:
               hasSoapBinding:
                 description: Indicates whether the WSDL contains SOAP Bindings
                 type: boolean
-
-#-----------------------------------------------------
-# The Threat Protection Policy List resource
-#-----------------------------------------------------
-  ThreatProtectionPolicyList:
-    title: "Threat Protection Policy List"
-    properties:
-      list:
-        type: array
-        items:
-          $ref: '#/definitions/ThreatProtectionPolicy'
-
-#-----------------------------------------------------
-# The Threat Protection Policy resource
-#-----------------------------------------------------
-  ThreatProtectionPolicy:
-    title: "Threat Protection Policy Schema"
-    required:
-      - name
-      - type
-      - policy
-    properties:
-      uuid:
-        type: string
-        description: Policy ID
-      name:
-        type: string
-        description: Name of the policy
-      type:
-        type: string
-        description: Type of the policy
-      policy:
-        type: string
-        description: policy as a json string

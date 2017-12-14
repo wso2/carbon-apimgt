@@ -48,7 +48,6 @@ import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
 import org.wso2.carbon.apimgt.core.dao.LabelDAO;
 import org.wso2.carbon.apimgt.core.dao.PolicyDAO;
 import org.wso2.carbon.apimgt.core.dao.TagDAO;
-import org.wso2.carbon.apimgt.core.dao.ThreatProtectionDAO;
 import org.wso2.carbon.apimgt.core.dao.WorkflowDAO;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
@@ -79,7 +78,6 @@ import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
-import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.core.template.APIConfigContext;
 import org.wso2.carbon.apimgt.core.template.APITemplateException;
 import org.wso2.carbon.apimgt.core.template.dto.NotificationDTO;
@@ -131,10 +129,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public APIPublisherImpl(String username, IdentityProvider idp, KeyManager keyManager, ApiDAO apiDAO,
                             ApplicationDAO applicationDAO, APISubscriptionDAO apiSubscriptionDAO, PolicyDAO policyDAO,
                             APILifecycleManager apiLifecycleManager, LabelDAO labelDAO, WorkflowDAO workflowDAO,
-                            TagDAO tagDAO, ThreatProtectionDAO threatProtectionDAO,
-                            GatewaySourceGenerator gatewaySourceGenerator, APIGateway apiGatewayPublisher) {
+                            TagDAO tagDAO, GatewaySourceGenerator gatewaySourceGenerator,
+                            APIGateway apiGatewayPublisher) {
         super(username, idp, keyManager, apiDAO, applicationDAO, apiSubscriptionDAO, policyDAO, apiLifecycleManager,
-                labelDAO, workflowDAO, tagDAO, threatProtectionDAO, gatewaySourceGenerator, apiGatewayPublisher);
+                labelDAO, workflowDAO, tagDAO, gatewaySourceGenerator, apiGatewayPublisher);
     }
 
     /**
@@ -2052,63 +2050,6 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             subscriberList.add(listItem.getApplication().getCreatedUser());
         }
         return subscriberList;
-    }
-
-    @Override
-    public void addThreatProtectionPolicy(String apiId, String policyId) throws APIManagementException {
-        API api = getAPIbyUUID(apiId);
-        if (api == null) {
-            String message = "Add threat protection policy from API: No API found for APIID: " + apiId;
-            log.error(message);
-            throw new APIManagementException(message);
-        }
-        API.APIBuilder builder = new API.APIBuilder(api);
-
-        Set<String> policies = builder.getThreatProtectionPolicies();
-        if (policies != null) {
-            policies.add(policyId);
-        } else {
-            policies = new HashSet<>();
-            policies.add(policyId);
-            builder.threatProtectionPolicies(policies);
-        }
-        updateAPI(builder);
-        if (log.isDebugEnabled()) {
-            log.debug("Threat protection policy (ID: " + policyId + ") added to the API (ID: " + builder.getId() + ")");
-        }
-    }
-
-    @Override
-    public void deleteThreatProtectionPolicy(String apiId, String policyId) throws APIManagementException {
-        API api = getAPIbyUUID(apiId);
-        if (api == null) {
-            String message = "Delete threat protection policy from API: No API found for APIID: " + apiId;
-            log.error(message);
-            throw new APIManagementException(message);
-        }
-        API.APIBuilder builder = new API.APIBuilder(api);
-
-        Set<String> policies = builder.getThreatProtectionPolicies();
-        if (policies != null) {
-            policies.remove(policyId);
-        }
-        updateAPI(builder);
-        if (log.isDebugEnabled()) {
-            log.debug("Threat protection policy (ID: " + policyId + ") deleted from the API (ID: " +
-                    builder.getId() + ")");
-        }
-    }
-
-    @Override
-    public List<ThreatProtectionPolicy> getThreatProtectionPolicies() throws APIManagementException {
-        ThreatProtectionDAO dao = getThreatProtectionDAO();
-        return dao.getPolicies();
-    }
-
-    @Override
-    public ThreatProtectionPolicy getThreatProtectionPolicy(String policyId) throws APIManagementException {
-        ThreatProtectionDAO dao = getThreatProtectionDAO();
-        return dao.getPolicy(policyId);
     }
 
     private void cleanupPendingTaskForAPIStateChange(String apiId) throws APIManagementException {

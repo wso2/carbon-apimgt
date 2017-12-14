@@ -574,21 +574,6 @@ paths:
               type: string
 
 ######################################################
-# The "Threat Protection" resource API
-######################################################
-  /threat-protection-policies:
-    get:
-      summary: "Get all threat protection policies"
-      description: "all"
-      tags:
-        - All Threat Protection Policies
-      responses:
-        200:
-          schema:
-            $ref: '#/definitions/ThreatProtectionPolicyList'
-          description: OK
-
-######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
@@ -675,6 +660,7 @@ parameters:
       Comma seperated gateway labels
     required: false
     type: string
+
 
 ######################################################
 # The resources used by some of the APIs above within the message body
@@ -1028,10 +1014,6 @@ definitions:
       securityScheme:
         type: integer
         example: 1
-      threatProtectionPolicies:
-        type: array
-        items:
-          type: string
 
 #-----------------------------------------------------
 # The Policy resource
@@ -1134,7 +1116,6 @@ definitions:
         example: tcp://localhost:7612
       credentials:
         $ref: '#/definitions/Credentials'
-
 #-----------------------------------------------------
 # Throttling information
 #-----------------------------------------------------
@@ -1217,39 +1198,6 @@ definitions:
         items:
           $ref: '#/definitions/BlockingCondition'
 
-#-----------------------------------------------------
-# The Threat Protection JSON Policy List resource
-#-----------------------------------------------------
-  ThreatProtectionPolicyList:
-    title: "Threat Protection Policy List"
-    properties:
-      list:
-        type: array
-        items:
-          $ref: '#/definitions/ThreatProtectionPolicy'
-
-#-----------------------------------------------------
-# The Threat Protection Policy resource
-#-----------------------------------------------------
-  ThreatProtectionPolicy:
-    title: "Threat Protection Policy Schema"
-    required:
-      - name
-      - type
-      - policy
-    properties:
-      uuid:
-        type: string
-        description: Policy ID
-      name:
-        type: string
-        description: Name of the policy
-      type:
-        type: string
-        description: Type of the policy
-      policy:
-        type: string
-        description: policy as a json string
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

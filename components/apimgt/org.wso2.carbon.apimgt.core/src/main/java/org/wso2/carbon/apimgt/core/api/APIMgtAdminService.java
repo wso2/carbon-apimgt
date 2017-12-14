@@ -35,7 +35,6 @@ import org.wso2.carbon.apimgt.core.models.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.CustomPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.models.policy.SubscriptionPolicy;
-import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.core.workflow.Workflow;
 
 import java.util.List;
@@ -459,33 +458,4 @@ public interface APIMgtAdminService {
      */
     List<Workflow> retrieveUncompletedWorkflows() throws APIManagementException;
 
-    /**
-     * Retrieve a single threat protection policy using PolicyID
-     * @param policyId ID of the threat protection policy
-     * @return {@link ThreatProtectionPolicy}
-     * @throws APIManagementException if failed to retrieve the policy
-     */
-    ThreatProtectionPolicy getThreatProtectionPolicy(String policyId) throws APIManagementException;
-
-    /**
-     * Retrieve all threat protection policies
-     * @return List of threat protection policies
-     * @throws APIManagementException if failed to retrieve list of policies
-     */
-    List<ThreatProtectionPolicy> getThreatProtectionPolicyList() throws APIManagementException;
-
-    /**
-     * Add a threat protection policy.
-     * If a policy with same UUID is present, it will be updated.
-     * @param policy {@link ThreatProtectionPolicy}
-     * @throws APIManagementException if failed to add the policy
-     */
-    void addThreatProtectionPolicy(ThreatProtectionPolicy policy) throws APIManagementException;
-
-    /**
-     * Deletes a threat protection policy
-     * @param policyId ID of the policy to be deleted
-     * @throws APIManagementException if failed to delete the policy
-     */
-    void deleteThreatProtectionPolicy(String policyId) throws APIManagementException;
 }

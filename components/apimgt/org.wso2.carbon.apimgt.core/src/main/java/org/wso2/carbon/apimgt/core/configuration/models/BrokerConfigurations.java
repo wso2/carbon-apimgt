@@ -35,9 +35,6 @@ public class BrokerConfigurations {
     private String publisherTopic = "PublisherTopic";
     @Element(description = "Throttle topic name")
     private String throttleTopic = "ThrottleTopic";
-    @Element(description = "Threat Protection Topic")
-    private String threatProtectionTopic = "ThreatProtectionTopic";
-
     public JMSConnectionConfiguration getJmsConnectionConfiguration() {
         return jmsConnectionConfiguration;
     }
@@ -68,13 +65,5 @@ public class BrokerConfigurations {
 
     public void setThrottleTopic(String throttleTopic) {
         this.throttleTopic = throttleTopic;
-    }
-
-    public String getThreatProtectionTopic() {
-        return threatProtectionTopic;
-    }
-
-    public void setThreatProtectionTopic(String threatProtectionTopic) {
-        this.threatProtectionTopic = threatProtectionTopic;
     }
 }

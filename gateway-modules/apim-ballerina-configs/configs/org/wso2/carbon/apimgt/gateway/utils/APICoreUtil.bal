@@ -33,20 +33,6 @@ function registerGateway () (json) {
     return gatewayConfig;
 }
 
-function getThreatProtectionPolicies() (json) {
-    json threatProtectionJsonPolicyList = {};
-    try {
-        http:ClientConnector client = create http:ClientConnector(getAPICoreURL());
-        message request = {};
-        message response = http:ClientConnector.get(client, "/api/am/core/v1.0/threat-protection-policies", request);
-        threatProtectionJsonPolicyList = messages:getJsonPayload(response);
-    } catch (errors:Error error) {
-        system:println("Error occurred while retrieving ThreatProtection Policy List from API Core. " + error.msg);
-        throw error;
-    }
-    return threatProtectionJsonPolicyList;
-}
-
 function loadAPIs () {
 
     json apis = getAPIs();
@@ -197,24 +183,6 @@ function getEndpointConfig (string endpointId) (int, string) {
     }
     return status, apiConfig;
 }
-
-function getThreatProtectionPolicyIdsForApi(string apiId) (int, json) {
-    message request = {};
-    message response = {};
-    json policyIdList;
-    int status;
-    try {
-        http:ClientConnector client = create http:ClientConnector(getAPICoreURL());
-        response = http:ClientConnector.get(client, "/api/am/core/v1.0/threat-protection/apis/" + apiId + "/policy", request);
-        policyIdList = messages:getJsonPayload(response);
-        status = http:getStatusCode(response);
-    } catch (errors:Error e) {
-        system:println("Error occurred while retrieving threat protection policies for API : " + apiId);
-        throw e;
-    }
-    return status, policyIdList;
-}
-
 function fromJsonToEndpointDto (json endpointConfig) (dto:EndpointDto) {
     dto:EndpointDto endpointDto = {};
     errors:TypeCastError err;

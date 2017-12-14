@@ -28,6 +28,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -51,6 +52,7 @@ import javax.ws.rs.core.Response;
 public class ApisApi implements Microservice  {
    private final ApisApiService delegate = ApisApiServiceFactory.getApisApi();
 
+    @OPTIONS
     @DELETE
     @Path("/{apiId}")
     @Consumes({ "application/json" })
@@ -75,6 +77,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdDelete(apiId,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}/documents/{documentId}/content")
     @Consumes({ "application/json" })
@@ -102,6 +105,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdDocumentsDocumentIdContentGet(apiId,documentId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @POST
     @Path("/{apiId}/documents/{documentId}/content")
     @Consumes({ "multipart/form-data" })
@@ -131,6 +135,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdDocumentsDocumentIdContentPost(apiId,documentId,fileInputStream, fileDetail,inlineContent,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @DELETE
     @Path("/{apiId}/documents/{documentId}")
     @Consumes({ "application/json" })
@@ -154,6 +159,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdDocumentsDocumentIdDelete(apiId,documentId,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}/documents/{documentId}")
     @Consumes({ "application/json" })
@@ -179,6 +185,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdDocumentsDocumentIdGet(apiId,documentId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @PUT
     @Path("/{apiId}/documents/{documentId}")
     @Consumes({ "application/json" })
@@ -205,6 +212,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdDocumentsDocumentIdPut(apiId,documentId,body,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}/documents")
     @Consumes({ "application/json" })
@@ -230,6 +238,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdDocumentsGet(apiId,limit,offset,ifNoneMatch,request);
     }
+    @OPTIONS
     @POST
     @Path("/{apiId}/documents")
     @Consumes({ "application/json" })
@@ -253,6 +262,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdDocumentsPost(apiId,body,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}/gateway-config")
     @Consumes({ "application/json" })
@@ -277,6 +287,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdGatewayConfigGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @PUT
     @Path("/{apiId}/gateway-config")
     @Consumes({ "multipart/form-data" })
@@ -304,6 +315,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdGatewayConfigPut(apiId,gatewayConfig,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}")
     @Consumes({ "application/json" })
@@ -328,6 +340,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}/lifecycle")
     @Consumes({ "application/json" })
@@ -352,6 +365,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdLifecycleGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}/lifecycle-history")
     @Consumes({ "application/json" })
@@ -376,6 +390,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdLifecycleHistoryGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @DELETE
     @Path("/{apiId}/lifecycle/lifecycle-pending-task")
     @Consumes({ "application/json" })
@@ -396,6 +411,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdLifecycleLifecyclePendingTaskDelete(apiId,request);
     }
+    @OPTIONS
     @PUT
     @Path("/{apiId}")
     @Consumes({ "application/json" })
@@ -423,6 +439,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdPut(apiId,body,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}/swagger")
     @Consumes({ "application/json" })
@@ -447,6 +464,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdSwaggerGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @PUT
     @Path("/{apiId}/swagger")
     @Consumes({ "multipart/form-data" })
@@ -474,68 +492,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdSwaggerPut(apiId,endpointId,ifMatch,ifUnmodifiedSince,request);
     }
-    @DELETE
-    @Path("/{apiId}/threat-protection-policies")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Delete a threat protection policy from an API", notes = "", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
-            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
-        })
-    }, tags={ "API (Individual)", })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Ok. Policy deleted successfully.", response = void.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Specified API or Policy not found", response = void.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 500, message = "Error while deleting the policy", response = void.class) })
-    public Response apisApiIdThreatProtectionPoliciesDelete(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
-,@ApiParam(value = "Threat protection policy id",required=true) @QueryParam("policyId") String policyId
- ,@Context Request request)
-    throws NotFoundException {
-        return delegate.apisApiIdThreatProtectionPoliciesDelete(apiId,policyId,request);
-    }
-    @GET
-    @Path("/{apiId}/threat-protection-policies")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Get all threat protection policies associated with an API", notes = "", response = String.class, responseContainer = "List", authorizations = {
-        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
-            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_view", description = "View API")
-        })
-    }, tags={ "API (Individual)", })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Ok. List of policy ids is returned", response = String.class, responseContainer = "List"),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Specified API was not found.", response = String.class, responseContainer = "List"),
-        
-        @io.swagger.annotations.ApiResponse(code = 500, message = "Error retrieving threat protection policies", response = String.class, responseContainer = "List") })
-    public Response apisApiIdThreatProtectionPoliciesGet(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
- ,@Context Request request)
-    throws NotFoundException {
-        return delegate.apisApiIdThreatProtectionPoliciesGet(apiId,request);
-    }
-    @POST
-    @Path("/{apiId}/threat-protection-policies")
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Add a threat protection policy to an API", notes = "", response = void.class, authorizations = {
-        @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
-            @io.swagger.annotations.AuthorizationScope(scope = "apim:api_update", description = "Update API")
-        })
-    }, tags={ "API (Individual)", })
-    @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "Ok. Policy added succesfuly.", response = void.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 404, message = "Specified API or Policy not found", response = void.class),
-        
-        @io.swagger.annotations.ApiResponse(code = 500, message = "Internal server error while adding policy", response = void.class) })
-    public Response apisApiIdThreatProtectionPoliciesPost(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. The combination of the provider of the API, name of the API and the version is also accepted as a valid API ID. Should be formatted as **provider-name-version**. ",required=true) @PathParam("apiId") String apiId
-,@ApiParam(value = "Threat protection policy id",required=true) @QueryParam("policyId") String policyId
- ,@Context Request request)
-    throws NotFoundException {
-        return delegate.apisApiIdThreatProtectionPoliciesPost(apiId,policyId,request);
-    }
+    @OPTIONS
     @GET
     @Path("/{apiId}/thumbnail")
     @Consumes({ "application/json" })
@@ -560,6 +517,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdThumbnailGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @POST
     @Path("/{apiId}/thumbnail")
     @Consumes({ "multipart/form-data" })
@@ -587,6 +545,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdThumbnailPost(apiId,fileInputStream, fileDetail,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}/wsdl")
     @Consumes({ "application/json" })
@@ -611,6 +570,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdWsdlGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @PUT
     @Path("/{apiId}/wsdl")
     @Consumes({ "multipart/form-data" })
@@ -640,6 +600,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdWsdlPut(apiId,fileInputStream, fileDetail,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @POST
     @Path("/change-lifecycle")
     @Consumes({ "application/json" })
@@ -670,6 +631,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisChangeLifecyclePost(action,apiId,lifecycleChecklist,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @POST
     @Path("/copy-api")
     @Consumes({ "application/json" })
@@ -691,6 +653,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisCopyApiPost(newVersion,apiId,request);
     }
+    @OPTIONS
     @GET
     
     @Consumes({ "application/json" })
@@ -714,6 +677,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisGet(limit,offset,query,ifNoneMatch,request);
     }
+    @OPTIONS
     @HEAD
     
     @Consumes({ "application/json" })
@@ -737,6 +701,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisHead(query,ifNoneMatch,request);
     }
+    @OPTIONS
     @POST
     @Path("/import-definition")
     @Consumes({ "multipart/form-data" })
@@ -765,6 +730,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisImportDefinitionPost(type,fileInputStream, fileDetail,url,additionalProperties,implementationType,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @POST
     
     @Consumes({ "application/json" })
@@ -785,6 +751,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisPost(body,request);
     }
+    @OPTIONS
     @POST
     @Path("/validate-definition")
     @Consumes({ "multipart/form-data" })

@@ -39,8 +39,6 @@ import org.wso2.carbon.apimgt.core.models.events.EndpointEvent;
 import org.wso2.carbon.apimgt.core.models.events.GatewayEvent;
 import org.wso2.carbon.apimgt.core.models.events.PolicyEvent;
 import org.wso2.carbon.apimgt.core.models.events.SubscriptionEvent;
-import org.wso2.carbon.apimgt.core.models.events.ThreatProtectionEvent;
-import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.BrokerUtil;
@@ -56,14 +54,12 @@ public class APIGatewayPublisherImpl implements APIGateway {
     private String publisherTopic;
     private String storeTopic;
     private String throttleTopic;
-    private String threatProtectionTopic;
 
     public APIGatewayPublisherImpl() {
         config = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
         publisherTopic = config.getBrokerConfigurations().getPublisherTopic();
         storeTopic = config.getBrokerConfigurations().getStoreTopic();
         throttleTopic = config.getBrokerConfigurations().getThrottleTopic();
-        threatProtectionTopic = config.getBrokerConfigurations().getThreatProtectionTopic();
     }
 
     @Override
@@ -90,7 +86,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
         apiSummary.setName(api.getName());
         apiSummary.setVersion(api.getVersion());
         apiSummary.setContext(api.getContext());
-        apiSummary.setThreatProtectionPolicies(api.getThreatProtectionPolicies());
         gatewayDTO.setApiSummary(apiSummary);
         publishToPublisherTopic(gatewayDTO);
 
@@ -130,7 +125,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
         apiSummary.setName(api.getName());
         apiSummary.setVersion(api.getVersion());
         apiSummary.setContext(api.getContext());
-        apiSummary.setThreatProtectionPolicies(api.getThreatProtectionPolicies());
         gatewayDTO.setApiSummary(apiSummary);
         publishToPublisherTopic(gatewayDTO);
 
@@ -429,52 +423,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void addThreatProtectionPolicy(ThreatProtectionPolicy policy) throws GatewayException {
-        ThreatProtectionEvent event = new ThreatProtectionEvent(
-                APIMgtConstants.GatewayEventTypes.THREAT_PROTECTION_POLICY_ADD);
-        event.setPolicy(policy);
-        publishToThreatProtectionTopic(event);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void deleteThreatProtectionPolicy(ThreatProtectionPolicy policy) throws GatewayException {
-        ThreatProtectionEvent event = new ThreatProtectionEvent(
-                APIMgtConstants.GatewayEventTypes.THREAT_PROTECTION_POLICY_DELETE);
-        event.setPolicy(policy);
-        publishToThreatProtectionTopic(event);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void updateThreatProtectionPolicy(ThreatProtectionPolicy policy) throws GatewayException {
-        ThreatProtectionEvent event = new ThreatProtectionEvent(
-                APIMgtConstants.GatewayEventTypes.THREAT_PROTECTION_POLICY_UPDATE);
-        event.setPolicy(policy);
-        publishToThreatProtectionTopic(event);
-    }
-
-    /**
-     * Publish an event to threatprotection topic
-     * @param gatewayDTO {@link GatewayEvent}
-     * @throws GatewayException if failed to publish to the topic
-     */
-    private void publishToThreatProtectionTopic(GatewayEvent gatewayDTO) throws GatewayException {
-        BrokerUtil.publishToTopic(threatProtectionTopic, gatewayDTO);
-        if (log.isDebugEnabled()) {
-            log.debug("Gateway event : " + gatewayDTO.getEventType() +
-                    " has been successfully published to broker topic: " + threatProtectionTopic);
-        }
-    }
-
-    /**
      * Convert API definition into APISummary
      *
      * @param api API definition
@@ -491,7 +439,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
         apiSummary.setCreatedTime(api.getCreatedTime());
         apiSummary.setLastUpdatedTime(api.getLastUpdatedTime());
         apiSummary.setSecurityScheme(api.getSecurityScheme());
-        apiSummary.setThreatProtectionPolicies(api.getThreatProtectionPolicies());
         return apiSummary;
     }
 
