@@ -91,7 +91,7 @@ for(var i=0;i < outputs.tiers.length; i++){
             ConsumerKey: oauthapp.sandboxConsumerKey,
             ConsumerSecret: oauthapp.sandboxConsumerSecret,
             Key: oauthapp.sandboxKey,
-            KeyScope: oauthapp.sandKeyScope,
+            KeyScope: oauthapp.sandKeyScopeValue,
             Scopes: outputs.scopes,
             ValidityTime: oauthapp.sandValidityTime,
             keyState: oauthapp.sandboxKeyState,
