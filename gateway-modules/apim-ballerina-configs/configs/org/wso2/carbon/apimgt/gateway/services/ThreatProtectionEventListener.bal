@@ -27,7 +27,7 @@ service<jms> ThreatProtectionJmsService {
         string policyType;
         policyType, _ = (string)event.policy["type"];
         eventType, _ = (string)event.eventType;
-        system:println(event);
+        system:println("Threat Protection Policy Event: " + eventType);
         if (strings:contains(policyType, "JSON")) {
             json jsonPolicy = event.policy;
             dto:JSONThreatProtectionInfoDTO jsonInfo = utils:fromJSONToJSONThreatProtectionInfoDTO(jsonPolicy);
