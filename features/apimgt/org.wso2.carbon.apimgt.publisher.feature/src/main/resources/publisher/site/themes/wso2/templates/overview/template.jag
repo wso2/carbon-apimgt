@@ -6,6 +6,7 @@
   }
     var mod = jagg.module("api");
     var isPublisherAccessControlEnabled = mod.isPublisherAccessControlEnabled();
+    var apiAdditionalProperties = parse(api.additionalProperties);
 
     %>
 <div class="row">
@@ -194,9 +195,47 @@
                         </tr>
             </tbody>
         </table>
-            <%if(api.additionalProperties!=''){%>
-                    <h4><%= i18n.localize("Description")%></h4>
-            <% } %>
+
+        <!-- Start of additional properties UI -->
+        <%if(api.additionalProperties && api.additionalProperties != stringify({})){%>
+           <div class="panel-group accordion add-margin-bottom-2x" role="tablist" aria-multiselectable="true">
+                <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingOne" data-toggle="collapse" data-parent=".accordion"
+                    href="#accordion1-collapse1" aria-controls="accordion1-collapse1">
+                    <h4 class="panel-title">
+                        <div>
+                            <div class="no-description" style="margin-left: 10px"><%=i18n.localize("Meta Information")%></div>
+                            <div class="status">
+                                <i class="fw fw-down"></i>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                    </h4>
+                </div>
+                <div id="accordion1-collapse1" class="panel-collapse collapse" role="tabpanel"aria-labelledby="headingOne">
+                    <div class="panel-body">
+                        <table class="table-bordered table-responsive table">
+                            <thead>
+                                <tr>
+                                    <th><strong><%=i18n.localize("Property Name")%></strong></th>
+                                    <th><strong><%=i18n.localize("Property Value")%></strong></th>
+                                </tr>
+                            </thead>
+                             <% for(var prop in apiAdditionalProperties) { %>
+                                <% if (apiAdditionalProperties.hasOwnProperty(prop)) { %>
+                                    <tr>
+                                        <td class="col-sm-3"><%= encode.forHtml(prop) %></td>
+                                        <td><%= encode.forHtml(apiAdditionalProperties[prop]) %></td>
+                                    </tr>
+                                <% } %>
+                            <% } %>
+                        </table>
+                    </div>
+                </div>
+                </div>
+            </div>
+        <% } %>
+        <!-- End of additional properties UI -->
     </div>
     <div class="col-sm-4">
         <div id="chart1"></div>

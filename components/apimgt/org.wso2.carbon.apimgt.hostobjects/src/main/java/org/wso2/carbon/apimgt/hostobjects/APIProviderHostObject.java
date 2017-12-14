@@ -370,7 +370,7 @@ public class APIProviderHostObject extends ScriptableObject {
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
     public static boolean jsFunction_manageAPI(Context cx, Scriptable thisObj, Object[] args, Function funObj)
-            throws APIManagementException, ScriptException, FaultGatewaysException {
+            throws APIManagementException, ScriptException, FaultGatewaysException, ParseException {
         boolean success = false;
 
         if (args == null || args.length == 0) {
@@ -404,6 +404,12 @@ public class APIProviderHostObject extends ScriptableObject {
         String environments = (String) apiData.get("environments", apiData);
         String responseCache = (String) apiData.get("responseCache", apiData);
         String corsConfiguraion = (String) apiData.get("corsConfiguration", apiData);
+        String additionalProperties = (String) apiData.get("additionalProperties", apiData);
+        JSONObject properties = null;
+        if (additionalProperties != null && !additionalProperties.trim().isEmpty()) {
+            JSONParser parser = new JSONParser();
+            properties = (JSONObject) parser.parse(additionalProperties);
+        }
 
         int cacheTimeOut = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
         if (APIConstants.ENABLED.equalsIgnoreCase(responseCache)) {
@@ -483,6 +489,7 @@ public class APIProviderHostObject extends ScriptableObject {
         if (corsConfiguration != null) {
             api.setCorsConfiguration(corsConfiguration);
         }
+        api.setAdditionalProperties(properties);
         Set<Tier> availableTier = new HashSet<Tier>();
         String[] tierNames;
         if (tier != null) {
@@ -852,12 +859,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String techOwnerEmail = (String) apiData.get("techOwnerEmail", apiData);
         String bizOwner = (String) apiData.get("bizOwner", apiData);
         String bizOwnerEmail = (String) apiData.get("bizOwnerEmail", apiData);
-        String additionalProperties = (String) apiData.get("additionalProperties", apiData);
-        JSONObject properties = null;
-        if (additionalProperties != null && !additionalProperties.trim().isEmpty()) {
-            JSONParser parser = new JSONParser();
-            properties = (JSONObject) parser.parse(additionalProperties);
-        }
+
 
 
 //        String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
@@ -957,7 +959,6 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setTechnicalOwner(techOwner);
         api.setTechnicalOwnerEmail(techOwnerEmail);
         api.setVisibility(visibility);
-        api.setAdditionalProperties(properties);
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
         api.setLastUpdated(new Date());
         api.setAccessControl(publisherAccessControl);

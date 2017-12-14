@@ -87,16 +87,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
@@ -1839,10 +1830,25 @@ public abstract class AbstractAPIManager implements APIManager {
                                                    int start, int end, boolean isLazyLoad) throws APIManagementException {
         Map<String, Object> result = new HashMap<String, Object>();
         boolean isTenantFlowStarted = false;
+        String[] searchQueries = searchQuery.split("&");
+        StringBuilder filteredQuery = new StringBuilder();
 
+        for (String query : searchQueries) {
+            String[] searchKeys = query.split("=");
+            if (!Arrays.asList(APIConstants.API_SEARCH_PREFIXES).contains(searchKeys[0].toLowerCase())) {
+                searchKeys[0] = APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + searchKeys[0];
+            }
+            if (filteredQuery.length() == 0) {
+                filteredQuery.append(searchKeys[0]).append("=").append(searchKeys[1]);
+            } else {
+                filteredQuery.append("&").append(searchKeys[0]).append("=").append(searchKeys[1]);
+            }
+        }
+        searchQuery = filteredQuery.toString();
         try {
             boolean isTenantMode = (requestedTenantDomain != null);
-            if (isTenantMode && !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenantDomain)) {
+            if (isTenantMode && !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
+                    .equals(requestedTenantDomain)) {
                 isTenantFlowStarted = true;
                 startTenantFlow(requestedTenantDomain);
             } else {
@@ -1855,10 +1861,11 @@ public abstract class AbstractAPIManager implements APIManager {
             Registry userRegistry;
             int tenantIDLocal = 0;
             String userNameLocal = this.username;
-            if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(requestedTenantDomain))) {//Tenant store anonymous mode
-                tenantIDLocal = getTenantManager()
-                        .getTenantId(requestedTenantDomain);
-                userRegistry = getRegistryService().getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantIDLocal);
+            if ((isTenantMode && this.tenantDomain == null) || (isTenantMode && isTenantDomainNotMatching(
+                    requestedTenantDomain))) {//Tenant store anonymous mode
+                tenantIDLocal = getTenantManager().getTenantId(requestedTenantDomain);
+                userRegistry = getRegistryService()
+                        .getGovernanceUserRegistry(CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME, tenantIDLocal);
                 userNameLocal = CarbonConstants.REGISTRY_ANONNYMOUS_USERNAME;
             } else {
                 userRegistry = this.registry;
@@ -1867,8 +1874,8 @@ public abstract class AbstractAPIManager implements APIManager {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(userNameLocal);
 
             if (searchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
-                Map<Documentation, API> apiDocMap =
-                        searchAPIDoc(userRegistry, tenantIDLocal, userNameLocal, searchQuery.split("=")[1]);
+                Map<Documentation, API> apiDocMap = searchAPIDoc(userRegistry, tenantIDLocal, userNameLocal,
+                        searchQuery.split("=")[1]);
                 result.put("apis", apiDocMap);
                 /*Pagination for Document search results is not supported yet, hence length is sent as end-start*/
                 if (apiDocMap.isEmpty()) {
@@ -2285,6 +2292,9 @@ public abstract class AbstractAPIManager implements APIManager {
         Map<String, Object> result = new HashMap<String, Object>();
         int totalLength = 0;
         boolean isMore = false;
+
+        String[] apimPropertiesNeedToBeSearched = searchQuery.split("&");
+
 
         try {
             String paginationLimit = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()

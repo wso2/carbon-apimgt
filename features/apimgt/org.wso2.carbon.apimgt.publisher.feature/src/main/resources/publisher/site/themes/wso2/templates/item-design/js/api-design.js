@@ -76,8 +76,10 @@ function APIDesigner(){
     this.container = $( "#api_designer" );
 
     //initialise the partials
-    var propertiesTemplate = $("#properties-add-template").html();
-    Handlebars.partials['properties-add-template'] = Handlebars.compile(propertiesTemplate);
+    propertiesTemplate = $("#properties-add-template").html();
+    if (propertiesTemplate) {
+        Handlebars.partials['properties-add-template'] = Handlebars.compile(propertiesTemplate);
+    }
     source   = $("#designer-resources-template").html();
     Handlebars.partials['designer-resources-template'] = Handlebars.compile(source);
     source   = $("#designer-resource-template").html();
@@ -628,21 +630,22 @@ APIDesigner.prototype.setApiLevelPolicy = function(isAPILevel){
 /**
  * To render the additional properties part of the form.
  */
-APIDesigner.prototype.render_additionalProperties = function(){
-    var apiPropertiesValue = JSON.parse($("#api_properties").val());
+APIDesigner.prototype.render_additionalProperties = function () {
+    var apiPropertiesElement = $("#api_properties");
+    var apiPropertiesValue = JSON.parse(apiPropertiesElement.val());
     var apiProperties = null;
+    var reservedKeyWords = ["provider", "version", "context", "status", "description", "subcontext", "doc", "lcState"];
 
     if (apiPropertiesValue) {
-        for(var prop in apiPropertiesValue) {
+        for (var prop in apiPropertiesValue) {
             if (apiPropertiesValue.hasOwnProperty(prop)) {
-                apiProperties =  {"properties": apiPropertiesValue};
+                apiProperties = {"properties": apiPropertiesValue};
                 break;
             }
         }
     }
     var propertiesOutput = Handlebars.partials['properties-add-template'](apiProperties);
     $('#additionalProperties').html(propertiesOutput);
-
     $('#property_add').on("click", function () {
         var propertyKeyVal = $("#property_key").val();
         if (!propertyKeyVal || propertyKeyVal.trim() == "") {
@@ -657,8 +660,26 @@ APIDesigner.prototype.render_additionalProperties = function(){
         propertyKeyVal = propertyKeyVal.trim();
         propertyVal = propertyVal.trim();
 
-        var apiPropertiesValue = $("#api_properties").val();
+        if (propertyKeyVal.indexOf(' ') >= 0) {
+            jagg.message({
+                content: i18n.t("Property name should not have space. Please select a different property" +
+                    " name"), type: "error"
+            });
+            return;
+        }
 
+        for (var keyWord in reservedKeyWords) {
+            console.log(keyWord);
+            if (propertyKeyVal.toLowerCase() === reservedKeyWords[keyWord]) {
+                jagg.message({
+                    content: i18n.t("Property name matches with one of the reserved keywords. Reserved" +
+                        " keywords are [" + reservedKeyWords + "]. Please select a different property name"),
+                    type: "error"
+                });
+                return;
+            }
+        }
+        var apiPropertiesValue = apiPropertiesElement.val();
         var jsonObject = {};
         if (apiPropertiesValue) {
             jsonObject = JSON.parse(apiPropertiesValue);
@@ -666,24 +687,31 @@ APIDesigner.prototype.render_additionalProperties = function(){
         if (!jsonObject) {
             jsonObject = {};
         }
-        jsonObject[propertyKeyVal] = propertyVal;
-        $("#api_properties").val(JSON.stringify(jsonObject));
-        var API_DESIGNER = APIDesigner();
-        API_DESIGNER.render_additionalProperties();
 
+        if (jsonObject.hasOwnProperty(propertyKeyVal)) {
+            jagg.message({
+                content: i18n.t("Property " + propertyKeyVal + " already exist for this API. Property names are" +
+                    " unique. Please select a different property name."),
+                type: "error"
+            });
+            return;
+        }
+        jsonObject[propertyKeyVal] = propertyVal;
+        $(apiPropertiesElement).val(JSON.stringify(jsonObject));
+        var apiDesigner = new APIDesigner();
+        apiDesigner.render_additionalProperties();
     });
 
-    $(".delete-properties").on("click", function( event ) {
+    $(".delete-properties").on("click", function (event) {
         $("#messageModal div.modal-footer").html("");
         var key = $(this).attr('data-key');
         jagg.message({
-            // @todo: param_string
-            content:'Do you want to remove "'+ key +'" from properties list.',
-            type:'confirm',
-            title:"Remove Property",
-            okCallback:function(){
-                var API_DESIGNER = APIDesigner();
-                var apiPropertiesValue = $("#api_properties").val();
+            content: 'Do you want to remove "' + key + '" from properties list.',
+            type: 'confirm',
+            title: "Remove Property",
+            okCallback: function () {
+                var apiDesigner = new APIDesigner();
+                var apiPropertiesValue = apiPropertiesElement.val();
                 var jsonObject = {};
                 if (apiPropertiesValue) {
                     jsonObject = JSON.parse(apiPropertiesValue);
@@ -692,11 +720,10 @@ APIDesigner.prototype.render_additionalProperties = function(){
                     jsonObject = {};
                 }
                 delete jsonObject[key];
-                $("#api_properties").val(JSON.stringify(jsonObject));
-
-                API_DESIGNER.render_additionalProperties();
-            }});
-        //delete resource if no operations
+                apiPropertiesElement.val(JSON.stringify(jsonObject));
+                apiDesigner.render_additionalProperties();
+            }
+        });
     });
 };
 
@@ -911,7 +938,9 @@ $(document).ready(function(){
     $.fn.editable.defaults.mode = 'inline';
     var designer = new APIDesigner();
     designer.load_api_document(api_doc);
-    designer.render_additionalProperties();
+    if (propertiesTemplate) {
+        designer.render_additionalProperties();
+    }
 
     $("#swaggerEditer").on("keyup", function () {
         try {

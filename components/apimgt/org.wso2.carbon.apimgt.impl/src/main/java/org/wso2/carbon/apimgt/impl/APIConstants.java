@@ -1206,6 +1206,10 @@ public final class APIConstants {
     public static final String TAG_SEARCH_TYPE_PREFIX2 = "tags=";
     public static final String TAG_SEARCH_TYPE_PREFIX3 = "tag";
     public static final String NAME_TYPE_PREFIX = "name";
+    public static final String PROVIDER_SEARCH_TYPE_PREFIX = "provider";
+    public static final String VERSION_SEARCH_TYPE_PREFIX = "version";
+    public static final String CONTEXT_SEARCH_TYPE_PREFIX = "context";
+
 
     public static class AdvancedThrottleConstants {
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";
@@ -1335,6 +1339,9 @@ public final class APIConstants {
 
     // Prefix used for saving the custom properties related with APIs
     public static final String API_RELATED_CUSTOM_PROPERTIES_PREFIX = "apim.";
+    public static final String[] API_SEARCH_PREFIXES = {DOCUMENTATION_SEARCH_TYPE_PREFIX,
+            TAG_SEARCH_TYPE_PREFIX, NAME_TYPE_PREFIX, SUBCONTEXT_SEARCH_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX,
+            CONTEXT_SEARCH_TYPE_PREFIX, VERSION_SEARCH_TYPE_PREFIX, LCSTATE_SEARCH_KEY.toLowerCase()};
 
 
 }

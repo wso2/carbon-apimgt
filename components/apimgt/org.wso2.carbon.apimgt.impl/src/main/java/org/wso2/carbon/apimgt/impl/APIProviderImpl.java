@@ -5192,15 +5192,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         Resource apiResource = registry.get(artifactPath);
         if (apiResource != null) {
-
-            // Removing all the properties, before updating new properties.
-            Properties properties = apiResource.getProperties();
-            if (properties != null) {
-                Enumeration propertyNames = properties.propertyNames();
-                while (propertyNames.hasMoreElements()) {
-                    String propertyName = (String) propertyNames.nextElement();
-                    if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
-                        apiResource.removeProperty(propertyName);
+            if (additionalProperties != null) {
+                // Removing all the properties, before updating new properties.
+                Properties properties = apiResource.getProperties();
+                if (properties != null) {
+                    Enumeration propertyNames = properties.propertyNames();
+                    while (propertyNames.hasMoreElements()) {
+                        String propertyName = (String) propertyNames.nextElement();
+                        if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
+                            apiResource.removeProperty(propertyName);
+                        }
                     }
                 }
             }

@@ -607,7 +607,7 @@
 <!-- Script to add additional properties -->
 <script id="properties-add-template" type="text/x-handlebars-template">
     <div class="form-group">
-        <label class="col-sm-3 control-label">Additional Properties:</label>
+        <label class="col-sm-3 control-label"><%=i18n.localize("Additional Properties")%>:</label>
         <div class="col-sm-3">
             <input id="property_key" type="text" placeholder="property name" class="form-control"/>
         </div>
@@ -630,8 +630,8 @@
             <table class="table table-striped table-responsive">
                 <thead>
                     <tr>
-                        <td><strong>Property Name</strong></td>
-                        <td><strong>Property Value</strong></td>
+                        <td><strong><%=i18n.localize("Property Name")%></strong></td>
+                        <td><strong><%=i18n.localize("Property Value")%></strong></td>
                         <td></td>
                     </tr>
                 </thead>
