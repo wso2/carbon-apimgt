@@ -766,7 +766,6 @@ public class ApiDAOImpl implements ApiDAO {
         addUrlMappings(connection, api.getUriTemplates().values(), apiPrimaryKey);
         addAPIDefinition(connection, apiPrimaryKey, api.getApiDefinition(), api.getCreatedBy());
         addAPIPermission(connection, api.getPermissionMap(), apiPrimaryKey);
-        addThreatProtectionPolicies(connection, apiPrimaryKey, api.getThreatProtectionPolicies());
 
         if (api.getThreatProtectionPolicies() != null) {
             addThreatProtectionPolicies(connection, apiPrimaryKey, api.getThreatProtectionPolicies());

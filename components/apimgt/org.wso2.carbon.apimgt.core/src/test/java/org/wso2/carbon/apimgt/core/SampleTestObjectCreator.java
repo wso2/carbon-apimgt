@@ -179,6 +179,7 @@ public class SampleTestObjectCreator {
     public static InputStream inputStream;
     private static final Logger log = LoggerFactory.getLogger(SampleTestObjectCreator.class);
     public static String endpointId = UUID.randomUUID().toString();
+    private static Set<String> threatProtectionPolicies = new HashSet<>();
 
     static {
         try {
@@ -234,7 +235,8 @@ public class SampleTestObjectCreator {
                 apiPermission(permissionJson).
                 uriTemplates(getMockUriTemplates()).
                 apiDefinition(apiDefinition).
-                securityScheme(3);
+                securityScheme(3).
+                threatProtectionPolicies(threatProtectionPolicies);
         Map map = new HashMap();
         map.put(DEVELOPER_ROLE_ID, 6);
         map.put(ADMIN_ROLE_ID, 15);
@@ -249,7 +251,8 @@ public class SampleTestObjectCreator {
                 description(api.getDescription()).
                 lifeCycleStatus(api.getLifeCycleStatus()).
                 lifecycleInstanceId(api.getLifecycleInstanceId()).
-                securityScheme(api.getSecurityScheme()).build();
+                securityScheme(api.getSecurityScheme()).
+                threatProtectionPolicies(threatProtectionPolicies).build();
     }
 
     public static API copyAPIIgnoringNonEditableFields(API fromAPI, API toAPI) {
@@ -264,7 +267,8 @@ public class SampleTestObjectCreator {
                 createdBy(fromAPI.getCreatedBy()).
                 lifecycleInstanceId(fromAPI.getLifecycleInstanceId()).
                 lifeCycleStatus(fromAPI.getLifeCycleStatus()).
-                copiedFromApiId(fromAPI.getCopiedFromApiId()).build();
+                copiedFromApiId(fromAPI.getCopiedFromApiId()).
+                threatProtectionPolicies(threatProtectionPolicies).build();
 
     }
 
@@ -338,7 +342,8 @@ public class SampleTestObjectCreator {
                 createdBy(API_CREATOR).
                 apiDefinition(apiDefinition).
                 lastUpdatedTime(LocalDateTime.now()).
-                securityScheme(3);
+                securityScheme(3).
+                threatProtectionPolicies(threatProtectionPolicies);
 
         return apiBuilder;
     }
@@ -403,7 +408,8 @@ public class SampleTestObjectCreator {
                 uriTemplates(Collections.emptyMap()).
                 apiDefinition(apiDefinition).
                 lastUpdatedTime(LocalDateTime.now()).
-                securityScheme(3);
+                securityScheme(3).
+                threatProtectionPolicies(threatProtectionPolicies);
 
         return apiBuilder;
     }
@@ -439,7 +445,8 @@ public class SampleTestObjectCreator {
                 createdBy(API_CREATOR).
                 uriTemplates(Collections.emptyMap()).
                 apiDefinition(apiDefinition).
-                lastUpdatedTime(LocalDateTime.now());
+                lastUpdatedTime(LocalDateTime.now()).
+                threatProtectionPolicies(threatProtectionPolicies);
 
         return apiBuilder;
     }
@@ -462,7 +469,8 @@ public class SampleTestObjectCreator {
                 description(api.getDescription()).
                 lifeCycleStatus(api.getLifeCycleStatus()).
                 lifecycleInstanceId(api.getLifecycleInstanceId()).
-                securityScheme(api.getSecurityScheme()).build();
+                securityScheme(api.getSecurityScheme()).
+                threatProtectionPolicies(api.getThreatProtectionPolicies()).build();
     }
 
     public static String createAlternativeSwaggerDefinition() throws IOException {
