@@ -38,7 +38,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   APPLICATION_STATUS, " +
             "   USER_ID, " +
             "   GROUP_ID, " +
-            "   UUID " +
+            "   UUID, " +
+            "   APP.CREATED_BY AS CREATED_BY " +
             " FROM" +
             "   AM_APPLICATION APP, " +
             "   AM_SUBSCRIBER SUB  " +
@@ -65,7 +66,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   APPLICATION_STATUS, " +
             "   USER_ID, " +
             "   GROUP_ID, " +
-            "   UUID " +
+            "   UUID, " +
+            "   APP.CREATED_BY AS CREATED_BY " +
             " FROM" +
             "   AM_APPLICATION APP, " +
             "   AM_SUBSCRIBER SUB  " +
@@ -79,6 +81,69 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             " limit ? , ? "+
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) ";
 
+    public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE_WITH_MULTIGROUPID =
+            "select distinct x.*,bl.ENABLED from (" +
+                    " SELECT " +
+                    "   APPLICATION_ID, " +
+                    "   NAME," +
+                    "   APPLICATION_TIER," +
+                    "   APP.SUBSCRIBER_ID,  " +
+                    "   CALLBACK_URL,  " +
+                    "   DESCRIPTION, " +
+                    "   APPLICATION_STATUS, " +
+                    "   USER_ID, " +
+                    "   GROUP_ID, " +
+                    "   UUID, " +
+                    "   APP.CREATED_BY AS CREATED_BY " +
+                    " FROM" +
+                    "   AM_APPLICATION APP, " +
+                    "   AM_SUBSCRIBER SUB  " +
+                    " WHERE " +
+                    "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                    " AND (" +
+                    "    (APPLICATION_ID IN ( SELECT APPLICATION_ID FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) ))" +
+                    "           OR " +
+                    "    (SUB.USER_ID = ? )" +
+                    " )" +
+                    " And " +
+                    "    NAME like ?" +
+                    " ORDER BY $1 $2 " +
+                    " limit ? , ? "+
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) ";
+
+
+    public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITH_MULTIGROUPID =
+            "select distinct x.*,bl.ENABLED from (" +
+                    "SELECT " +
+                    "   APPLICATION_ID, " +
+                    "   NAME," +
+                    "   APPLICATION_TIER," +
+                    "   APP.SUBSCRIBER_ID,  " +
+                    "   CALLBACK_URL,  " +
+                    "   DESCRIPTION, " +
+                    "   APPLICATION_STATUS, " +
+                    "   USER_ID, " +
+                    "   GROUP_ID, " +
+                    "   UUID, " +
+                    "   APP.CREATED_BY AS CREATED_BY " +
+                    " FROM" +
+                    "   AM_APPLICATION APP, " +
+                    "   AM_SUBSCRIBER SUB  " +
+                    " WHERE " +
+                    "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                    " AND (" +
+                    "    (APPLICATION_ID IN ( SELECT APPLICATION_ID FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params)))" +
+                    "           OR " +
+                    "    (LOWER (SUB.USER_ID) = LOWER(?))" +
+                    " )" +
+                    " And "+
+                    "    NAME like ?"+
+                    " ORDER BY $1 $2 " +
+                    " limit ? , ? "+
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = concat(concat(x.USER_ID,':'),x.name)) ";
+
+
+
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE =
             "select distinct x.*,bl.ENABLED from (" +
             "SELECT " +
@@ -91,7 +156,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   APPLICATION_STATUS, " +
             "   USER_ID, " +
             "   GROUP_ID, " +
-            "   UUID " +
+            "   UUID, " +
+            "   APP.CREATED_BY AS CREATED_BY " +
             " FROM" +
             "   AM_APPLICATION APP, " +
             "   AM_SUBSCRIBER SUB  " +
@@ -117,7 +183,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
             "   APPLICATION_STATUS, " +
             "   USER_ID, " +
             "   GROUP_ID, " +
-            "   UUID " +
+            "   UUID, " +
+            "   APP.CREATED_BY AS CREATED_BY " +
             " FROM" +
             "   AM_APPLICATION APP, " +
             "   AM_SUBSCRIBER SUB  " +

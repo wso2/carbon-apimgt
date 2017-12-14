@@ -2564,6 +2564,11 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("applicationId", row, api.getApplication().getId());
                     row.put("prodKey", row, getKey(api, APIConstants.API_KEY_TYPE_PRODUCTION));
                     row.put("sandboxKey", row, getKey(api, APIConstants.API_KEY_TYPE_SANDBOX));
+
+                    if(APIUtil.isMultiGroupSharingEnabled()){
+                        row.put("owner", row, api.getApplication().getOwner());
+                    }
+
                     ArrayList<APIKey> keys = (ArrayList<APIKey>) api.getApplication().getKeys();
                     for(APIKey key : keys){
                         row.put(key.getType()+"_KEY", row, key.getAccessToken());
@@ -3151,6 +3156,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("groupId", row, application.getGroupId());
                     row.put("isBlacklisted", row, application.getIsBlackListed());
                     row.put("totalCount", row, applicationCount);
+                    row.put("owner", row, application.getOwner());
                     myn.put(i++, myn, row);
                 }
 
@@ -3189,6 +3195,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("apiCount", row, subscriptionCount);
                     row.put("groupId", row, application.getGroupId());
                     row.put("isBlacklisted", row, application.getIsBlackListed());
+                    row.put("owner", row, application.getOwner());
                     myn.put(i++, myn, row);
                 }
             }
@@ -3227,7 +3234,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 row.put("callbackUrl", row, application.getCallbackUrl());
                 row.put("status", row, application.getStatus());
                 row.put("description", row, application.getDescription());
-
+                row.put("groupId", row, application.getGroupId());
                 return row;
             }
         }
@@ -3401,6 +3408,15 @@ public class APIStoreHostObject extends ScriptableObject {
             updatedApplication.setTier(tier);
             updatedApplication.setCallbackUrl(callbackUrl);
             updatedApplication.setDescription(description);
+
+            if (APIUtil.isMultiGroupSharingEnabled()) {
+                String newGroupId = null;
+                if (args.length > 7 && args[7] != null) {
+                    newGroupId = (String) args[7];
+                }
+                updatedApplication.setGroupId(newGroupId);
+            }
+
             apiConsumer.updateApplication(updatedApplication);
             return true;
         }
@@ -4567,22 +4583,37 @@ public class APIStoreHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args Passing arguments
      * @param funObj Function object
-     * @return String group id. 
-     * 
+     * @return String group id.
+     *
      */
-    public static String jsFunction_getGroupIds(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
+    public static NativeArray jsFunction_getGroupIds(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
         String response = (String) args[0];
         APIConsumer consumer = getAPIConsumer(thisObj);
-        String groupId = null;
+        NativeArray grpIdList = null;
+        String[] groupIdArray = null;
         try {
-            groupId = consumer.getGroupIds(response);
+            groupIdArray = consumer.getGroupIds(response);
+            if (groupIdArray != null) {
+                grpIdList = new NativeArray(0);
+                int i = 0;
+                for (String groupId : groupIdArray) {
+                    grpIdList.put(i, grpIdList, groupId);
+                    i++;
+                }
+                return grpIdList;
+            }else{
+                return null;
+            }
         } catch (APIManagementException e) {
-        	//This is actually not an exception, that should abort the user flow. If the groupId is not available then 
-        	//the flow for which the group id is not required will be run.
+            //This is actually not an exception, that should abort the user flow. If the groupId is not available then
+            //the flow for which the group id is not required will be run.
             log.error("Error occurred while getting group id", e);
         }
-        return groupId;
+        if (log.isDebugEnabled()) {
+            log.debug("Group Id List :- " + grpIdList.toString());
+        }
 
+        return grpIdList;
     }
 
     /**
@@ -4682,7 +4713,7 @@ public class APIStoreHostObject extends ScriptableObject {
         envCount++;
         return envCount;
     }
-    
+
     /**
      * This method returns all the supported grant types
      * @param cx Rhino Context
@@ -4697,7 +4728,7 @@ public class APIStoreHostObject extends ScriptableObject {
             throws ScriptException, APIManagementException {
         OAuthAdminService oAuthAdminService = new OAuthAdminService();
         String[] allowedGrantTypes = oAuthAdminService.getAllowedGrantTypes();
-        
+
         NativeArray myn = new NativeArray(0);
         int i = 0;
         for (String grantType : allowedGrantTypes) {
@@ -4705,6 +4736,6 @@ public class APIStoreHostObject extends ScriptableObject {
             i++;
         }
         return myn;
-        
+
     }
 }

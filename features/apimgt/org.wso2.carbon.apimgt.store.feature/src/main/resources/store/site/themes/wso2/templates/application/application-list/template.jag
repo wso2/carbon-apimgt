@@ -30,7 +30,7 @@
   //@todo groupId inform if check 
 %>
 <script id="application-actions" type="text/x-handlebars-template">
-  <a title="View" href="<%=jagg.urlTenanted("/site/pages/application.jag?name={{ name }}")%>" class="btn  btn-sm padding-reduce-on-grid-view">
+  <a title="View" href="<%=jagg.urlTenanted("/site/pages/application.jag?name={{ name }}&groupId={{groupId}}")%>" class="btn  btn-sm padding-reduce-on-grid-view">
       <span class="fw-stack">
           <i class="fw fw-ring fw-stack-2x"></i>
           <i class="fw fw-view fw-stack-1x"></i>
@@ -56,7 +56,7 @@
 </script>
 
 <script id="application-name" type="text/x-handlebars-template">
-  <a title="applications" href="<%=jagg.urlTenanted("/site/pages/application.jag?name={{ name }}")%>">{{ name }}{{#if shared}}(Shared){{/if}}</a>
+  <a title="applications" href="<%=jagg.urlTenanted("/site/pages/application.jag?name={{ name }}")%>">{{#if grpIdList}} {{ owner}}/{{/if}}{{name }}{{#if shared }}(Shared){{/if}}</a>
 </script>
 
  

@@ -343,5 +343,7 @@
     "Meta Information": "Meta Information",
     "Property Name": "Property Name",
     "Property Value": "Proper Value",
-    "By Custom Meta Information [Syntax - {property name}:{property value}]" : "By Custom Meta Information [Syntax - {property name}:{property value}]"
+    "By Custom Meta Information [Syntax - {property name}:{property value}]" : "By Custom Meta Information [Syntax - {property name}:{property value}]",
+    "Groups" : "Groups",
+    "Type a Group and Enter" : "Type a Group and Enter"
 }

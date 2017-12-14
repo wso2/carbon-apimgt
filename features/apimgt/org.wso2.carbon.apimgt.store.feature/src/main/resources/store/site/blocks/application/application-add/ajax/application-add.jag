@@ -42,6 +42,11 @@ include("/jagg/jagg.jag");
         application = request.getParameter("application", "UTF-8");
         username = user.username;
         tier = request.getParameter("tier");
+        var groupId = "";
+        if(jagg.isMultiGroupEnabled()){
+            groupId = request.getParameter("groupId");;
+        }
+
         if(null == request.getParameter("callbackUrl")){
             callbackUrl = "";
         }else{
@@ -56,7 +61,7 @@ include("/jagg/jagg.jag");
         var applicationTierList = APIUtil.getTiers(applicationTierType, tenantDomain);
 
         if (!applicationTierList.isEmpty() && applicationTierList.containsKey(tier)) {
-            result = mod.addApplication(username, application, tier, callbackUrl, description);
+            result = mod.addApplication(username, application, tier, callbackUrl, description, groupId);
             if (result.error) {
                 obj = {
                     error: true,

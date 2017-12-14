@@ -6764,6 +6764,17 @@ public final class APIUtil {
     }
 
     /**
+     * Used in application sharing
+     * @return returns true if ENABLE_MULTIPLE_GROUPID is set to True
+     */
+    public static boolean isMultiGroupSharingEnabled(){
+
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        return JavaUtils.isTrueExplicitly(config.getFirstProperty(APIConstants.ENABLE_MULTIPLE_GROUPID));
+    }
+
+    /**
      * Used to reconstruct the input search query as sub context and doc content doesn't support AND search
      *
      * @param query Input search query

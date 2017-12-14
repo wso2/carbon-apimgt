@@ -614,7 +614,8 @@ public class SQLConstants {
             "   APP.NAME AS APP_NAME, " +
             "   APP.CALLBACK_URL AS CALLBACK_URL, " +
             "   SUBS.UUID AS SUB_UUID, " +
-            "   APP.UUID AS APP_UUID " +
+            "   APP.UUID AS APP_UUID, " +
+            "   APP.CREATED_BY AS OWNER" +
             " FROM " +
             "   AM_SUBSCRIBER SUB," +
             "   AM_APPLICATION APP, " +
@@ -1304,7 +1305,8 @@ public class SQLConstants {
             "   APPLICATION_STATUS, " +
             "   USER_ID, " +
             "   GROUP_ID, " +
-            "   UUID " +
+            "   UUID, " +
+            "   APP.CREATED_BY " +
             " FROM" +
             "   AM_APPLICATION APP, " +
             "   AM_SUBSCRIBER SUB  " +
@@ -2568,6 +2570,16 @@ public class SQLConstants {
             "AND TOKEN.CONSUMER_KEY_ID = CON_APP.ID " +
             "AND CON_APP.CONSUMER_KEY=AKM.CONSUMER_KEY " +
             "AND AKM.APPLICATION_ID = APP.APPLICATION_ID";
+
+
+    public static final String REMOVE_GROUP_ID_MAPPING_SQL =
+            "DELETE FROM AM_APPLICATION_GROUP_MAPPING WHERE APPLICATION_ID = ?";
+
+    public static final String ADD_GROUP_ID_MAPPING_SQL =
+            "INSERT INTO AM_APPLICATION_GROUP_MAPPING (APPLICATION_ID, GROUP_ID) VALUES (?,?)";
+
+    public static final String GET_GROUP_ID_SQL =
+            "SELECT GROUP_ID  FROM AM_APPLICATION_GROUP_MAPPING WHERE APPLICATION_ID = ?";
 
     /** Throttle related constants**/
 

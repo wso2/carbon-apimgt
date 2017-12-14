@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
+import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -3161,22 +3162,37 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 	}
 
 	@Override
-    public String getGroupIds(String response) throws APIManagementException {
+    public String[] getGroupIds(String response) throws APIManagementException {
         String groupingExtractorClass = APIUtil.getGroupingExtractorImplementation();
         if (groupingExtractorClass != null) {
             try {
                 LoginPostExecutor groupingExtractor = (LoginPostExecutor) APIUtil.getClassForName
                         (groupingExtractorClass).newInstance();
-                return groupingExtractor.getGroupingIdentifiers(response);
+                //switching 2.1.0 and 2.2.0
+                if(APIUtil.isMultiGroupSharingEnabled()){
+                    NewPostLoginExecutor newGroupIdListExtractor = (NewPostLoginExecutor)groupingExtractor;
+                    return newGroupIdListExtractor.getGroupingIdentifierList(response);
+                }else {
+                    String groupId = groupingExtractor.getGroupingIdentifiers(response);
+                    return new String[]{groupId};
+                }
+
             } catch (ClassNotFoundException e) {
-                handleException(groupingExtractorClass + " is not found in run time", e);
-                return null;
-            } catch (IllegalAccessException e) {
-                handleException("Error occurred while invocation of getGroupingIdentifier method", e);
-                return null;
+                String msg = groupingExtractorClass + " is not found in run time";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }  catch (ClassCastException e) {
+                String msg = "Cannot cast " + groupingExtractorClass + " NewPostLoginExecutor";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
+            }catch (IllegalAccessException e) {
+                String msg = "Error occurred while invocation of getGroupingIdentifier method";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
             } catch (InstantiationException e) {
-                handleException("Error occurred while instantiating " + groupingExtractorClass + " class", e);
-                return null;
+                String msg = "Error occurred while instantiating " + groupingExtractorClass + " class";
+                log.error(msg, e);
+                throw new APIManagementException(msg, e);
             }
         }
         return null;

@@ -35,12 +35,16 @@ $(document).ready(function () {
         var description = $("#description").val();
         var status='';
         var applicationOld = $("#application-name-old").val();
+        var groupIdNew = $("#groupId").val();
+        var groupIdOld = $("#groupId-old").val();
         jagg.post("/site/blocks/application/application-update/ajax/application-update.jag", {
             action:"updateApplication",
             applicationNew:application,
             applicationOld:applicationOld,
             tier:tier,
-            descriptionNew:description
+            descriptionNew:description,
+            groupIdOld:groupIdOld,
+            groupIdNew:groupIdNew
         }, function (result) {
             if (result.error == false) {                
                 window.location = jagg.url("/site/pages/application.jag?name="+application);

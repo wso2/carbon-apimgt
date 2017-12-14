@@ -32,11 +32,28 @@ var login = function (username, password,tenantMode) {
             message:message
         };
     }
-    var groupId = store.getGroupIds(stringify(result));
+    var groupIdArray = store.getGroupIds(stringify(result));
+
+    var groupId = "";
+    if(groupIdArray != null && groupIdArray.length != 0){
+        var length = groupIdArray.length;
+        for (i = 0; i < length; i++) {
+            if (groupIdArray[i] != null) {
+                if (i == (length - 1)) {
+                    groupId = groupId + groupIdArray[i].toString();
+                } else {
+                    groupId = groupId + groupIdArray[i].toString() + ",";
+                }
+            }
+        }
+    }
+    if(log.isDebugEnabled()){
+        log.debug("Setting Group ID :-" + groupId);
+    }
     if(groupId == null || groupId == "null"){
-  //   Set group Id to empty string to avoid null value being passed to backend.
-    	groupId="";
-   }
+        //   Set group Id to empty string to avoid null value being passed to backend.
+        groupId="";
+    }
     session.put("groupId", groupId);
     var subscriber = store.getSubscriber(username);
     if (!subscriber) {

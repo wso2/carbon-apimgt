@@ -229,7 +229,20 @@ public class RestApiUtil {
                 loginInfoJsonObj.put("isSuperTenant", false);
             }
             String loginInfoString = loginInfoJsonObj.toJSONString();
-            return apiConsumer.getGroupIds(loginInfoString);
+            String[] groupIdArr = apiConsumer.getGroupIds(loginInfoString);
+            String groupId = "";
+            if (groupIdArr != null) {
+                for (int i = 0; i < groupIdArr.length; i++) {
+                    if (groupIdArr[i] != null) {
+                        if (i == groupIdArr.length - 1) {
+                            groupId = groupId + groupIdArr[i];
+                        } else {
+                            groupId = groupId + groupIdArr[i] + ",";
+                        }
+                    }
+                }
+            }
+            return groupId;
         } catch (APIManagementException e) {
             String errorMsg = "Unable to get groupIds of user " + username;
             handleInternalServerError(errorMsg, e, log);

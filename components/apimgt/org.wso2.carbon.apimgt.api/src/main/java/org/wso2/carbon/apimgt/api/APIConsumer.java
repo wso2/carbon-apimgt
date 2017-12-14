@@ -602,7 +602,7 @@ public interface APIConsumer extends APIManager {
 	 */
 	Set<Scope> getScopesByScopeKeys(String scopeKeys, int tenantId) throws APIManagementException;
 
-    String getGroupIds(String response) throws APIManagementException;
+    String[] getGroupIds(String response) throws APIManagementException;
 
 	JSONObject resumeWorkflow(Object[] args);
 

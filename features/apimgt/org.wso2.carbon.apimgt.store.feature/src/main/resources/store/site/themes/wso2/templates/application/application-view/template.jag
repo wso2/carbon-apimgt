@@ -41,6 +41,20 @@ for(var i=0;i < outputs.tiers.length; i++){
       <p><%=i18n.localize("This feature allows you to assign an API request quota per access token. Allocated quota will be shared among all the subscribed APIs of the application.")%></p>
     </div>
   </div>
+
+<%
+  if(jagg.isMultiGroupEnabled()){
+%>
+    <div class="form-group">
+       <label class="col-sm-3 control-label">Groups%></label>
+       <div class="col-sm-9 " style="width: 200px">
+         <%
+            var groupId = encode.forHtml(application.groupId).replace(/,/g," ");
+         %>
+         <p class="form-control-static" style="width: 100%"><span style="font-weight: bold;"><%= encode.forHtml(groupId)%></span></p>
+       </div>
+  </div>
+<%}%>
   <div class="form-group">
     <label class="col-sm-3 control-label"><%=i18n.localize("Description")%></label>
     <div class="col-sm-9">

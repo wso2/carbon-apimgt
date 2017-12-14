@@ -63,4 +63,47 @@ public class DefaultGroupIDExtractorImplTest {
         Assert.assertEquals("carbon.super/organization", defaultGroupIDExtractor.
                 getGroupingIdentifiers("{\"user\":\"user\", \"isSuperTenant\":false}"));
     }
+
+    @Test
+    public void getGroupingIdentifierListTestCase() throws UserStoreException {
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        RealmService realmService = Mockito.mock(RealmService.class);
+        UserRealm userRealm = Mockito.mock(UserRealm.class);
+        TenantManager tenantManager = Mockito.mock(TenantManager.class);
+        UserStoreManager userStoreManager = Mockito.mock(UserStoreManager.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRealmService()).thenReturn(realmService);
+        Mockito.when(realmService.getTenantManager()).thenReturn(tenantManager);
+
+        Mockito.when(tenantManager.getTenantId("carbon.super")).thenReturn(-1234);
+        Mockito.when(realmService.getTenantUserRealm(-1234)).thenReturn(userRealm);
+        Mockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
+        Mockito.when(userStoreManager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername("user"),
+                "http://wso2.org/claims/organization", null)).thenReturn("org1,org2,org3");
+
+        DefaultGroupIDExtractorImpl defaultGroupIDExtractor = new DefaultGroupIDExtractorImpl();
+
+        String[] expectedArr = new String[] {"org1", "org2", "org3"};
+
+        Assert.assertEquals(expectedArr[0], defaultGroupIDExtractor.
+                getGroupingIdentifierList("{\"user\":\"user\", \"isSuperTenant\":true}")[0]);
+        Assert.assertEquals(expectedArr[1], defaultGroupIDExtractor.
+                getGroupingIdentifierList("{\"user\":\"user\", \"isSuperTenant\":true}")[1]);
+        Assert.assertEquals(expectedArr[2], defaultGroupIDExtractor.
+                getGroupingIdentifierList("{\"user\":\"user\", \"isSuperTenant\":true}")[2]);
+
+        Assert.assertEquals(expectedArr[0], defaultGroupIDExtractor.
+                getGroupingIdentifierList("{\"user\":\"user\", \"isSuperTenant\":false}")[0]);
+
+        Mockito.when(userStoreManager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername("user"),
+                "http://wso2.org/claims/organization", null)).thenReturn("org1|org2|org3");
+        Assert.assertEquals("org1|org2|org3", defaultGroupIDExtractor.
+                getGroupingIdentifierList("{\"user\":\"user\", \"isSuperTenant\":false}")[0]);
+
+        Mockito.when(userStoreManager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername("user"),
+                "http://wso2.org/claims/organization", null)).thenReturn(null);
+        Assert.assertEquals( 0, defaultGroupIDExtractor.getGroupingIdentifierList("{\"user\":\"user\", " +
+                "\"isSuperTenant\":false}").length);
+    }
 }

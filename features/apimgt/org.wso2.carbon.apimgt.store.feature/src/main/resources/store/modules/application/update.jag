@@ -1,11 +1,22 @@
 <%
-var updateApplication = function (applicationNew,applicationOld,username,tier,callbackUrlNew,descriptionNew) {
+include("/jagg/jagg.jag");
+
+var updateApplication = function (applicationNew,applicationOld,username,tier,callbackUrlNew,descriptionNew,groupIdOld,groupIdNew) {
     var log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
         var groupId = session.get("groupId");
-        var status = store.updateApplication(applicationNew,applicationOld,username,tier,callbackUrlNew,descriptionNew,groupId);
+        if(jagg.isMultiGroupEnabled()){
+            groupId = groupIdOld;
+        }
+
+        if (groupIdNew == null || groupIdNew == "null") {
+            //   Set group Id to empty string to avoid null value being passed to backend.
+            groupIdNew = " ";
+        }
+
+        var status = store.updateApplication(applicationNew,applicationOld,username,tier,callbackUrlNew,descriptionNew,groupId,groupIdNew);
         if (log.isDebugEnabled()) {
             log.debug("updateApplication");
         }

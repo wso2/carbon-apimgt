@@ -213,9 +213,12 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                                                    %>
                                                    <%if (app.name=="DefaultApplication"){%>
                                                    <option selected value="<%=app.id%>"><%= encode.forHtml(app.name)%></option>
-                                                   <%}else{%>
-                                                   <option value="<%=app.id%>"><%= encode.forHtml(app.name)%></option>
-                                                   <% }}} %>
+                                                   <%}else{
+                                                       if(jagg.isMultiGroupEnabled()){
+                                                   %>   <option value="<%=app.id%>" data-content="<span><strong><%= app.name%><br />owner-</strong> <span style='color:blue;'><%= encode.forHtml(app.owner) %></span> </span>" ><%= encode.forHtml(app.name)%></option>
+                                                    <%   }else{%>
+                                                        <option value="<%=app.id%>"><%= encode.forHtml(app.name)%></option>
+                                                   <%} }}} %>
                                                </optgroup>
                                             </select>
                                         </div>
