@@ -2306,7 +2306,7 @@ public class ApiDAOImpl implements ApiDAO {
      */
     private void addThreatProtectionPolicies(Connection connection, String apiId, Set<String> policies)
             throws SQLException {
-        final String query = "INSERT INTO AM_THREAT_PROTECTION_ASSOCIATIONS (API_ID, POLICY_ID) VALUES(?,?)";
+        final String query = "INSERT INTO AM_THREAT_PROTECTION_MAPPING (API_ID, POLICY_ID) VALUES(?,?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             for (String policy: policies) {
                 statement.setString(1, apiId);
@@ -2411,7 +2411,7 @@ public class ApiDAOImpl implements ApiDAO {
      * @throws SQLException If failed to delete policies
      */
     private void deleteThreatProtectionPolicies(Connection connection, String apiId) throws SQLException {
-        final String query = "DELETE FROM AM_THREAT_PROTECTION_ASSOCIATIONS WHERE API_ID = ?";
+        final String query = "DELETE FROM AM_THREAT_PROTECTION_MAPPING WHERE API_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiId);
             statement.execute();
@@ -3197,7 +3197,7 @@ public class ApiDAOImpl implements ApiDAO {
      */
     private Set<String> getThreatProtectionPolicies(Connection connection, String apiId) throws SQLException {
         Set<String> policies = new HashSet<>();
-        final String query = "SELECT POLICY_ID FROM AM_THREAT_PROTECTION_ASSOCIATIONS WHERE API_ID = ?";
+        final String query = "SELECT POLICY_ID FROM AM_THREAT_PROTECTION_MAPPING WHERE API_ID = ?";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiId);
             statement.execute();
