@@ -31,7 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ThreatProtectionDAOImplTestCase extends DAOIntegrationTestBase {
+public class ThreatProtectionDAOImplIT extends DAOIntegrationTestBase {
 
     @Test
     public void testAddPolicy() throws Exception {
@@ -44,9 +44,6 @@ public class ThreatProtectionDAOImplTestCase extends DAOIntegrationTestBase {
         Assert.assertEquals(fromDb.getName(), policy.getName());
         Assert.assertEquals(fromDb.getType(), policy.getType());
         Assert.assertEquals(fromDb.getPolicy(), policy.getPolicy());
-
-        //cleanup
-        dao.deletePolicy(policy.getUuid());
     }
 
     @Test
@@ -72,11 +69,6 @@ public class ThreatProtectionDAOImplTestCase extends DAOIntegrationTestBase {
         }
 
         Assert.assertEquals(matchedCount, policyList.size());
-
-        //cleanup
-        for (ThreatProtectionPolicy policy: policyList) {
-            dao.deletePolicy(policy.getUuid());
-        }
     }
 
     @Test
@@ -88,9 +80,6 @@ public class ThreatProtectionDAOImplTestCase extends DAOIntegrationTestBase {
 
         ThreatProtectionPolicy policy2 = SampleTestObjectCreator.createUniqueThreatProtectionPolicy();
         Assert.assertEquals(dao.isPolicyExists(policy2.getUuid()), false);
-
-        //cleanup
-        dao.deletePolicy(policy.getUuid());
     }
 
     @Test
@@ -111,9 +100,6 @@ public class ThreatProtectionDAOImplTestCase extends DAOIntegrationTestBase {
         Assert.assertEquals(fromDb.getName(), policy.getName());
         Assert.assertEquals(fromDb.getType(), policy.getType());
         Assert.assertEquals(fromDb.getPolicy(), policy.getPolicy());
-
-        //cleanup
-        dao.deletePolicy(policy.getUuid());
     }
 
     @Test
@@ -133,9 +119,5 @@ public class ThreatProtectionDAOImplTestCase extends DAOIntegrationTestBase {
         Set<String> fromDb = threatProtectionDAO.getThreatProtectionPolicyIdsForApi(builder.getId());
 
         Assert.assertEquals(fromDb.toArray()[0].toString(), policy.getUuid());
-
-        //cleanup
-        threatProtectionDAO.deletePolicy(policy.getUuid());
-        dao.deleteAPI(builder.getId());
     }
 }
