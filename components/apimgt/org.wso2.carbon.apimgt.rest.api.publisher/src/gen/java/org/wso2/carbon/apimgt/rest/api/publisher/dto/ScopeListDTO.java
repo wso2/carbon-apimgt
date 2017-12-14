@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeList_listDTO;
 import java.util.Objects;
 
 /**
@@ -17,7 +18,7 @@ public class ScopeListDTO   {
   private Integer count = null;
 
   @JsonProperty("list")
-  private List<String> list = new ArrayList<String>();
+  private List<ScopeList_listDTO> list = new ArrayList<ScopeList_listDTO>();
 
   public ScopeListDTO count(Integer count) {
     this.count = count;
@@ -37,12 +38,12 @@ public class ScopeListDTO   {
     this.count = count;
   }
 
-  public ScopeListDTO list(List<String> list) {
+  public ScopeListDTO list(List<ScopeList_listDTO> list) {
     this.list = list;
     return this;
   }
 
-  public ScopeListDTO addListItem(String listItem) {
+  public ScopeListDTO addListItem(ScopeList_listDTO listItem) {
     this.list.add(listItem);
     return this;
   }
@@ -52,11 +53,11 @@ public class ScopeListDTO   {
    * @return list
   **/
   @ApiModelProperty(value = "")
-  public List<String> getList() {
+  public List<ScopeList_listDTO> getList() {
     return list;
   }
 
-  public void setList(List<String> list) {
+  public void setList(List<ScopeList_listDTO> list) {
     this.list = list;
   }
 

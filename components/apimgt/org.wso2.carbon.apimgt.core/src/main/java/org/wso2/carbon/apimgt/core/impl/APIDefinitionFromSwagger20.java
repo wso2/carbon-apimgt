@@ -70,10 +70,13 @@ import org.wso2.msf4j.ServiceMethodInfo;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -237,11 +240,8 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         SwaggerParser swaggerParser = new SwaggerParser();
         Swagger swagger = swaggerParser.parse(resourceConfigsJSON.toString());
         Map<String, Path> resourceList = swagger.getPaths();
-        Map<String, String> scopeMap;
-        //todo:remove vendor extensions scope retraction (remove else part)
-        //retrieve scopes depending on OAuth2Security definitions availability
+        String securityName = getOauthSecurityName(swagger);
         if (swagger.getSecurityDefinitions() != null) {
-            scopeMap = getScopesFromSecurityDefinition(resourceConfigsJSON.toString());
             for (Map.Entry<String, Path> resourceEntry : resourceList.entrySet()) {
                 Path resource = resourceEntry.getValue();
                 UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder();
@@ -249,15 +249,13 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 for (Map.Entry<HttpMethod, Operation> operationEntry : resource.getOperationMap().entrySet()) {
                     APIResource.Builder apiResourceBuilder = setApiResourceBuilderProperties(operationEntry,
                             uriTemplateBuilder, resourceEntry.getKey());
+
                     List<Map<String, List<String>>> security = operationEntry.getValue().getSecurity();
                     if (security != null) {
-                        List<String> securityScopes = security.get(0).get(security.get(0).keySet().toArray()[0]);
-                        if (securityScopes.size() == 0) {
-                            continue;
-                        }
-                        String scope = securityScopes.get(0);
-                        if (StringUtils.isNotEmpty(scope)) {
-                            apiResourceBuilder.scope(scopeMap.get(scope));
+                        for (Map<String, List<String>> securityMap : security) {
+                            if (securityMap.containsKey(securityName)) {
+                                apiResourceBuilder.scopes(securityMap.get(securityName));
+                            }
                         }
                     }
                     uriTemplateBuilder.httpVerb(operationEntry.getKey().name());
@@ -329,6 +327,21 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         return scopes;
     }
 
+    private String getOauthSecurityName(Swagger swagger) {
+        String oauthSecurityName = null;
+        Map<String, SecuritySchemeDefinition> securityDefinitions = swagger.getSecurityDefinitions();
+        if (securityDefinitions != null) {
+            for (Map.Entry<String, SecuritySchemeDefinition> securitySchemeDefinitionEntry :
+                    securityDefinitions.entrySet()) {
+                if (securitySchemeDefinitionEntry.getValue() instanceof OAuth2Definition) {
+                    oauthSecurityName = securitySchemeDefinitionEntry.getKey();
+                    break;
+                }
+            }
+        }
+        return oauthSecurityName;
+    }
+
     @Override
     public Map<String, Scope> getScopesFromSecurityDefinitionForWebApps(String resourceConfigJSON) throws
             APIManagementException {
@@ -362,6 +375,177 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
             }
         }
         return new HashMap<>();
+    }
+
+    @Override
+    public List<String> getGlobalAssignedScopes(String resourceConfigJson) throws APIManagementException {
+        SwaggerParser swaggerParser = new SwaggerParser();
+        Swagger swagger = swaggerParser.parse(resourceConfigJson);
+        String securityName = getOauthSecurityName(swagger);
+        Set<String> scopes = new HashSet<>();
+        List<SecurityRequirement> securityRequirements = swagger.getSecurity();
+        if (securityRequirements != null) {
+            for (SecurityRequirement securityRequirement : securityRequirements) {
+                Map<String, List<String>> requirementMap = securityRequirement.getRequirements();
+                if (requirementMap.containsKey(securityName)) {
+                    scopes.addAll(requirementMap.get(securityName));
+                }
+            }
+        }
+        return new ArrayList<>(scopes);
+    }
+
+
+    private void assignScopesToOperation(Operation operation, String securityName, List<String> scopes) {
+        List<Map<String, List<String>>> securityList = operation.getSecurity();
+        if (securityList != null) {
+            for (Map<String, List<String>> securityRequirement : securityList) {
+                if (securityRequirement.containsKey(securityName)) {
+                    securityRequirement.replace(securityName, scopes);
+                    break;
+                } else {
+                    securityRequirement.put(securityName, scopes);
+                    break;
+                }
+            }
+        } else {
+            securityList = new ArrayList<>();
+            Map<String, List<String>> securityRequirement = new HashMap<>();
+            securityRequirement.put(securityName, scopes);
+            securityList.add(securityRequirement);
+            operation.setSecurity(securityList);
+        }
+    }
+
+    @Override
+    public String generateMergedResourceDefinition(String resourceConfigJson, API api) {
+        SwaggerParser swaggerParser = new SwaggerParser();
+        Swagger swagger = swaggerParser.parse(resourceConfigJson);
+        addSecuritySchemeToSwaggerDefinition(swagger, api);
+        String securityName = getOauthSecurityName(swagger);
+        if (!StringUtils.isEmpty(securityName)) {
+            List<SecurityRequirement> securityRequirements = swagger.getSecurity();
+            if (securityRequirements != null) {
+                for (SecurityRequirement securityRequirement : securityRequirements) {
+                    Map<String, List<String>> requirementMap = securityRequirement.getRequirements();
+                    if (requirementMap.containsKey(securityName)) {
+                        requirementMap.replace(securityName, api.getScopes());
+                    } else {
+                        if (!api.getScopes().isEmpty()) {
+                            requirementMap.put(securityName, api.getScopes());
+                        }
+                    }
+                }
+            } else {
+                if (!api.getScopes().isEmpty()) {
+                    SecurityRequirement securityRequirement = new SecurityRequirement();
+                    securityRequirement.setRequirements(securityName, api.getScopes());
+                    swagger.addSecurity(securityRequirement);
+                }
+            }
+            Map<String, UriTemplate> uriTemplateMap = new HashMap<>(api.getUriTemplates());
+            swagger.getPaths().entrySet().removeIf(entry -> isPathNotExist(uriTemplateMap, securityName, entry));
+            uriTemplateMap.forEach((k, v) -> {
+                Path path = swagger.getPath(v.getUriTemplate());
+                if (path == null) {
+                    path = new Path();
+                    swagger.path(v.getUriTemplate(), path);
+                }
+                Map<HttpMethod, Operation> operationMap = path.getOperationMap();
+                Operation operation = operationMap.get(getHttpMethodForVerb(v.getHttpVerb().toUpperCase
+                        ()));
+                if (operation != null) {
+                    assignScopesToOperation(operation, securityName, v.getScopes());
+                } else {
+                    Operation operationTocCreate = new Operation();
+                    operationTocCreate.addSecurity(securityName, v.getScopes());
+                    operationTocCreate.addResponse("200", getDefaultResponse());
+                    List<Parameter> parameterList = getParameters(v.getUriTemplate());
+                    if (!HttpMethod.GET.toString().equalsIgnoreCase(v.getHttpVerb()) && !HttpMethod.DELETE.toString
+                            ().equalsIgnoreCase(v.getHttpVerb()) && !HttpMethod.OPTIONS.toString().equalsIgnoreCase
+                            (v.getHttpVerb()) && !HttpMethod.HEAD.toString().equalsIgnoreCase(v.getHttpVerb())) {
+                        parameterList.add(getDefaultBodyParameter());
+                    }
+                    operationTocCreate.setParameters(parameterList);
+                    path.set(v.getHttpVerb().toLowerCase(), operationTocCreate);
+                }
+            });
+        }
+
+        return Json.pretty(swagger);
+    }
+
+    private void addSecuritySchemeToSwaggerDefinition(Swagger swagger, API api) {
+        KeyMgtConfigurations keyMgtConfigurations = ServiceReferenceHolder.getInstance().
+                getAPIMConfiguration().getKeyManagerConfigs();
+        if ((api.getSecurityScheme() & 2) == 2) { //apikey
+            log.debug("API security scheme : API Key Scheme");
+            swagger.securityDefinition(APIMgtConstants.SWAGGER_APIKEY, new ApiKeyAuthDefinition(
+                    APIMgtConstants.SWAGGER_APIKEY, In.HEADER));
+        }
+        if ((api.getSecurityScheme() & 1) == 1) {
+            log.debug("API security Scheme : Oauth");
+            OAuth2Definition oAuth2Definition = new OAuth2Definition();
+            oAuth2Definition = oAuth2Definition.application(keyMgtConfigurations.getTokenEndpoint());
+            oAuth2Definition.setScopes(Collections.emptyMap());
+            swagger.securityDefinition(APIMgtConstants.SWAGGER_OAUTH2, oAuth2Definition);
+        }
+    }
+
+    private boolean isPathNotExist(Map<String, UriTemplate> uriTemplateMap, String securityName, Map.Entry<String,
+            Path> entry) {
+        Path path = entry.getValue();
+        String uri = entry.getKey();
+        path.getOperationMap().entrySet().forEach(httpMethodOperationEntry -> {
+            if (isOperationNotExist(httpMethodOperationEntry, uri, uriTemplateMap, securityName)) {
+                path.set(httpMethodOperationEntry.getKey().name().toLowerCase(), null);
+            }
+        });
+        return path.isEmpty();
+    }
+
+    private boolean isOperationNotExist(Map.Entry<HttpMethod, Operation> entry, String uri, Map<String, UriTemplate>
+            uriTemplateMap, String securityName) {
+        HttpMethod httpMethod = entry.getKey();
+        Operation operation = entry.getValue();
+        String operationId = APIUtils.generateOperationIdFromPath(uri, httpMethod.name());
+        if (uriTemplateMap.containsKey(operationId)) {
+            assignScopesToOperation(operation, securityName, uriTemplateMap.get(operationId).getScopes());
+            uriTemplateMap.remove(operationId);
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private HttpMethod getHttpMethodForVerb(String verb) {
+        HttpMethod httpMethod = null;
+        switch (verb) {
+            case "GET":
+                httpMethod = HttpMethod.GET;
+                break;
+            case "POST":
+                httpMethod = HttpMethod.POST;
+                break;
+            case "PUT":
+                httpMethod = HttpMethod.PUT;
+                break;
+            case "PATCH":
+                httpMethod = HttpMethod.PATCH;
+                break;
+            case "DELETE":
+                httpMethod = HttpMethod.DELETE;
+                break;
+            case "HEAD":
+                httpMethod = HttpMethod.HEAD;
+                break;
+            case "OPTIONS":
+                httpMethod = HttpMethod.OPTIONS;
+                break;
+            default:
+                break;
+        }
+        return httpMethod;
     }
 
     /**
@@ -495,16 +679,7 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
         info.setVersion(api.getVersion());
         swagger.setInfo(info);
 
-        if ((api.getSecurityScheme() & 2) == 2) { //apikey
-            log.debug("API security scheme : API Key Scheme");
-            swagger.securityDefinition(APIMgtConstants.SWAGGER_APIKEY, new ApiKeyAuthDefinition(
-                    APIMgtConstants.SWAGGER_APIKEY, In.HEADER));
-        }
-        if ((api.getSecurityScheme() & 1) == 1) {
-            log.debug("API security Scheme : Oauth");
-            swagger.securityDefinition(APIMgtConstants.SWAGGER_OAUTH2, new OAuth2Definition());
-        }
-
+        addSecuritySchemeToSwaggerDefinition(swagger, api.build());
         Map<String, Path> stringPathMap = new HashMap();
         for (UriTemplate uriTemplate : api.getUriTemplates().values()) {
             String uriTemplateString = uriTemplate.getUriTemplate();

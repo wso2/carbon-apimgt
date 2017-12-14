@@ -25,12 +25,18 @@ import org.wso2.carbon.apimgt.core.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Scope;
+import org.wso2.carbon.apimgt.core.models.UriTemplate;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class APIDefinitionFromSwagger20TestCase {
 
@@ -96,7 +102,7 @@ public class APIDefinitionFromSwagger20TestCase {
     public void testAddNewScopeToNonExistingSecurityDefinition() throws IOException, APIManagementException {
         APIDefinitionFromSwagger20 apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
         String sampleApi = IOUtils.toString(this.getClass().getResourceAsStream
-                ("/swagger/swaggerWithOutAuthorization.yaml"));
+                (File.separator + "swagger" + File.separator + "swaggerWithOutAuthorization.yaml"));
         Scope scope = new Scope();
         scope.setName("apim:api_delete");
         scope.setDescription("Delete API");
@@ -110,7 +116,7 @@ public class APIDefinitionFromSwagger20TestCase {
             APIManagementException {
         APIDefinitionFromSwagger20 apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
         String sampleApi = IOUtils.toString(this.getClass().getResourceAsStream
-                ("/swagger/swaggerWithAuthorizationApiKey.yaml"));
+                (File.separator + "swagger" + File.separator + "swaggerWithAuthorizationApiKey.yaml"));
         Scope scope = new Scope();
         scope.setName("apim:api_delete");
         scope.setDescription("Delete API");
@@ -123,7 +129,7 @@ public class APIDefinitionFromSwagger20TestCase {
     public void testUpdateScope() throws IOException, APIManagementException {
         APIDefinitionFromSwagger20 apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
         String sampleApi = IOUtils.toString(this.getClass().getResourceAsStream
-                ("/swagger/swaggerWithAuthorization.yaml"));
+                (File.separator + "swagger" + File.separator + "swaggerWithAuthorization.yaml"));
         Scope scope = new Scope();
         scope.setName("apim:api_create");
         scope.setDescription("Delete API");
@@ -132,6 +138,109 @@ public class APIDefinitionFromSwagger20TestCase {
         Assert.assertTrue(scopes.containsKey("apim:api_create"));
         //commented due to parallel test run
         //Assert.assertEquals(scopes.get("apim:api_delete").getDescription(),"Delete API");
+    }
+
+    @Test
+    public void testGetGlobalAssignedScopes() throws IOException, APIManagementException {
+        APIDefinitionFromSwagger20 apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
+        String sampleApi = IOUtils.toString(this.getClass().getResourceAsStream
+                (File.separator + "swagger" + File.separator + "swaggerWithAuthorization.yaml"));
+        List<String> scopes = apiDefinitionFromSwagger20.getGlobalAssignedScopes(sampleApi);
+        Assert.assertEquals(scopes.size(), 1);
+    }
+
+    @Test
+    public void testGetGlobalAssignedScopesFromApiKeyAuthorization() throws IOException, APIManagementException {
+        APIDefinitionFromSwagger20 apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
+        String sampleApi = IOUtils.toString(this.getClass().getResourceAsStream
+                (File.separator + "swagger" + File.separator + "swaggerWithAuthorizationApiKey.yaml"));
+        List<String> scopes = apiDefinitionFromSwagger20.getGlobalAssignedScopes(sampleApi);
+        Assert.assertEquals(scopes.size(), 0);
+    }
+
+    @Test
+    public void testGetGlobalAssignedScopesFromNonExisting() throws IOException, APIManagementException {
+        APIDefinitionFromSwagger20 apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
+        String sampleApi = IOUtils.toString(this.getClass().getResourceAsStream
+                (File.separator + "swagger" + File.separator + "swaggerWithOutAuthorization.yaml"));
+        List<String> scopes = apiDefinitionFromSwagger20.getGlobalAssignedScopes(sampleApi);
+        Assert.assertEquals(scopes.size(), 0);
+    }
+
+    @Test
+    public void testGenerateMergedResourceDefinition() throws IOException {
+        APIDefinitionFromSwagger20 apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
+        String sampleApi = IOUtils.toString(this.getClass().getResourceAsStream
+                (File.separator + "swagger" + File.separator + "swaggerWithAuthorization.yaml"));
+        UriTemplate uriTemplate1 = new UriTemplate.UriTemplateBuilder().uriTemplate("/apis").httpVerb("post").scopes
+                (Arrays.asList("apim:api_create")).build();
+        UriTemplate uriTemplate2 = new UriTemplate.UriTemplateBuilder().uriTemplate("/endpoints").httpVerb("post")
+                .scopes(Arrays.asList("apim:api_create")).build();
+        Map<String, UriTemplate> hasTemplateMap = new HashMap<>();
+        hasTemplateMap.put(APIUtils.generateOperationIdFromPath(uriTemplate1.getUriTemplate(),
+                uriTemplate1.getHttpVerb()), uriTemplate1);
+        hasTemplateMap.put(APIUtils.generateOperationIdFromPath(uriTemplate2.getUriTemplate(),
+                uriTemplate2.getHttpVerb()), uriTemplate2);
+        API api = new API.APIBuilder("admin", "admin", "1.0.0").uriTemplates(hasTemplateMap).id(UUID.randomUUID()
+                .toString()).build();
+        apiDefinitionFromSwagger20.generateMergedResourceDefinition(sampleApi, api);
+    }
+
+    @Test
+    public void testGenerateMergedResourceDefinitionWhileAddingRootLevelSecurity() throws IOException {
+        APIDefinitionFromSwagger20 apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
+        String sampleApi = IOUtils.toString(this.getClass().getResourceAsStream
+                (File.separator + "swagger" + File.separator + "swaggerWithoutRootLevelSecurity.yaml"));
+        UriTemplate uriTemplate1 = new UriTemplate.UriTemplateBuilder().uriTemplate("/apis").httpVerb("post").scopes
+                (Arrays.asList("apim:api_create")).build();
+        UriTemplate uriTemplate2 = new UriTemplate.UriTemplateBuilder().uriTemplate("/endpoints").httpVerb("post")
+                .scopes(Arrays.asList("apim:api_create")).build();
+        Map<String, UriTemplate> hasTemplateMap = new HashMap<>();
+        hasTemplateMap.put(APIUtils.generateOperationIdFromPath(uriTemplate1.getUriTemplate(),
+                uriTemplate1.getHttpVerb()), uriTemplate1);
+        hasTemplateMap.put(APIUtils.generateOperationIdFromPath(uriTemplate2.getUriTemplate(),
+                uriTemplate2.getHttpVerb()), uriTemplate2);
+        API api = new API.APIBuilder("admin", "admin", "1.0.0").uriTemplates(hasTemplateMap).id(UUID.randomUUID()
+                .toString()).scopes(Arrays.asList("apim:api_create")).build();
+        apiDefinitionFromSwagger20.generateMergedResourceDefinition(sampleApi, api);
+    }
+
+    @Test
+    public void testGenerateMergedResourceDefinitionWhileAddingRootLevelHavingDifferentLevelSecurity() throws
+            IOException {
+        APIDefinitionFromSwagger20 apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
+        String sampleApi = IOUtils.toString(this.getClass().getResourceAsStream
+                (File.separator + "swagger" + File.separator + "swaggerWithAuthorizationApiKeyInRoot.yaml"));
+        UriTemplate uriTemplate1 = new UriTemplate.UriTemplateBuilder().uriTemplate("/apis").httpVerb("post").scopes
+                (Arrays.asList("apim:api_create")).build();
+        UriTemplate uriTemplate2 = new UriTemplate.UriTemplateBuilder().uriTemplate("/endpoints").httpVerb("post")
+                .scopes(Arrays.asList("apim:api_create")).build();
+        Map<String, UriTemplate> hasTemplateMap = new HashMap<>();
+        hasTemplateMap.put(APIUtils.generateOperationIdFromPath(uriTemplate1.getUriTemplate(),
+                uriTemplate1.getHttpVerb()), uriTemplate1);
+        hasTemplateMap.put(APIUtils.generateOperationIdFromPath(uriTemplate2.getUriTemplate(),
+                uriTemplate2.getHttpVerb()), uriTemplate2);
+        API api = new API.APIBuilder("admin", "admin", "1.0.0").uriTemplates(hasTemplateMap).id(UUID.randomUUID()
+                .toString()).scopes(Arrays.asList("apim:api_create")).build();
+        apiDefinitionFromSwagger20.generateMergedResourceDefinition(sampleApi, api);
+    }
+    @Test
+    public void testGenerateMergedResourceDefinitionUpdatingExistingresource() throws IOException {
+        APIDefinitionFromSwagger20 apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
+        String sampleApi = IOUtils.toString(this.getClass().getResourceAsStream
+                (File.separator + "swagger" + File.separator + "swaggerWithAuthorization.yaml"));
+        UriTemplate uriTemplate1 = new UriTemplate.UriTemplateBuilder().uriTemplate("/apis").httpVerb("get").scopes
+                (Arrays.asList("apim:api_create")).build();
+        UriTemplate uriTemplate2 = new UriTemplate.UriTemplateBuilder().uriTemplate("/endpoints").httpVerb("post")
+                .scopes(Arrays.asList("apim:api_create")).build();
+        Map<String, UriTemplate> hasTemplateMap = new HashMap<>();
+        hasTemplateMap.put(APIUtils.generateOperationIdFromPath(uriTemplate1.getUriTemplate(),
+                uriTemplate1.getHttpVerb()), uriTemplate1);
+        hasTemplateMap.put(APIUtils.generateOperationIdFromPath(uriTemplate2.getUriTemplate(),
+                uriTemplate2.getHttpVerb()), uriTemplate2);
+        API api = new API.APIBuilder("admin", "admin", "1.0.0").uriTemplates(hasTemplateMap).id(UUID.randomUUID()
+                .toString()).build();
+        apiDefinitionFromSwagger20.generateMergedResourceDefinition(sampleApi, api);
     }
 }
 

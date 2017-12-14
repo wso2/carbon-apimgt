@@ -58,19 +58,19 @@ securityDefinitions:
     flow: password
     tokenUrl: https://localhost:9443/token
     scopes:
-      apim:api_view: View API
-      apim:api_create: Create API
-      apim:api_update: Update API
-      apim:api_delete: Delete API
-      apim:apidef_update: Update API Definition
-      apim:api_publish: Publish API
-      apim:subscription_view: View Subscription
-      apim:subscription_block: Block Subscription
-      apim:external_services_discover: Discover External Services
+      api_view: View API
+      api_create: Create API
+      api_update: Update API
+      api_delete: Delete API
+      apidef_update: Update API Definition
+      api_publish: Publish API
+      subscription_view: View Subscription
+      subscription_block: Block Subscription
+      external_services_discover: Discover External Services
 
 security:
   - OAuth2Security:
-    - apim:api_view
+    - api_view
 
 ######################################################
 # The "API Collection" resource APIs
@@ -223,7 +223,7 @@ paths:
       x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/7a2298c4-c905-403f-8fac-38c73301631f\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"CREATED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\":    [\r\n      \"http\",\r\n      \"https\"\r\n   ],\r\n   \"tags\": [\"pizza\"],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 5000,\r\n      \"production\": 1000\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}"
       security:
         - OAuth2Security:
-          - apim:api_create
+          - api_create
       summary: Create a new API
       description: |
         This operation can be used to create a new API specifying the details of the API in the payload. The new API will be in `CREATED` state.
@@ -343,7 +343,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\r\n   \"id\": \"7a2298c4-c905-403f-8fac-38c73301631f\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"1.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"endpointId\": \"{\\\"paths\\\":{\\\"/order\\\":{\\\"post\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Create a new Order\\\",\\\"parameters\\\":[{\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Order object that needs to be added\\\",\\\"name\\\":\\\"body\\\",\\\"required\\\":true,\\\"in\\\":\\\"body\\\"}],\\\"responses\\\":{\\\"201\\\":{\\\"headers\\\":{\\\"Location\\\":{\\\"description\\\":\\\"The URL of the newly created resource.\\\",\\\"type\\\":\\\"string\\\"}},\\\"schema\\\":{\\\"$ref\\\":\\\"#/definitions/Order\\\"},\\\"description\\\":\\\"Created.\\\"}}}},\\\"/menu\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Return a list of available menu items\\\",\\\"parameters\\\":[],\\\"responses\\\":{\\\"200\\\":{\\\"headers\\\":{},\\\"schema\\\":{\\\"title\\\":\\\"Menu\\\",\\\"properties\\\":{\\\"list\\\":{\\\"items\\\":{\\\"$ref\\\":\\\"#/definitions/MenuItem\\\"},\\\"type\\\":\\\"array\\\"}},\\\"type\\\":\\\"object\\\"},\\\"description\\\":\\\"OK.\\\"}}}}},\\\"schemes\\\":[\\\"https\\\"],\\\"produces\\\":[\\\"application/json\\\"],\\\"swagger\\\":\\\"2.0\\\",\\\"definitions\\\":{\\\"MenuItem\\\":{\\\"title\\\":\\\"Pizza menu Item\\\",\\\"properties\\\":{\\\"price\\\":{\\\"type\\\":\\\"string\\\"},\\\"description\\\":{\\\"type\\\":\\\"string\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"},\\\"image\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"name\\\"]},\\\"Order\\\":{\\\"title\\\":\\\"Pizza Order\\\",\\\"properties\\\":{\\\"customerName\\\":{\\\"type\\\":\\\"string\\\"},\\\"delivered\\\":{\\\"type\\\":\\\"boolean\\\"},\\\"address\\\":{\\\"type\\\":\\\"string\\\"},\\\"pizzaType\\\":{\\\"type\\\":\\\"string\\\"},\\\"creditCardNumber\\\":{\\\"type\\\":\\\"string\\\"},\\\"quantity\\\":{\\\"type\\\":\\\"number\\\"},\\\"orderId\\\":{\\\"type\\\":\\\"integer\\\"}},\\\"required\\\":[\\\"orderId\\\"]}},\\\"consumes\\\":[\\\"application/json\\\"],\\\"info\\\":{\\\"title\\\":\\\"PizzaShackAPI\\\",\\\"description\\\":\\\"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\\\n\\\",\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\",\\\"url\\\":\\\"http://www.apache.org/licenses/LICENSE-2.0.html\\\"},\\\"contact\\\":{\\\"email\\\":\\\"architecture@pizzashack.com\\\",\\\"name\\\":\\\"John Doe\\\",\\\"url\\\":\\\"http://www.pizzashack.com\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"CREATED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\": [\"https\"],\r\n   \"tags\":    [\r\n      \"chicken\",\r\n      \"pizza\"\r\n   ],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 500,\r\n      \"production\": 100\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}"
       security:
         - OAuth2Security:
-          - apim:api_update
+          - api_update
       summary: Update an API
       description: |
         This operation can be used to update an existing API.
@@ -422,7 +422,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK"
       security:
         - OAuth2Security:
-          - apim:api_delete
+          - api_delete
       summary: Delete an API
       description: |
         This operation can be used to delete an existing API proving the Id of the API.
@@ -536,7 +536,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
       security:
         - OAuth2Security:
-          - apim:apidef_update
+          - apidef_update
       summary: Update swagger definition
       description: |
         This operation can be used to update the swagger definition of an existing API. Swagger definition to be updated is passed as a form data parameter `apiDefinition`.
@@ -610,7 +610,7 @@ paths:
     get:
       security:
         - OAuth2Security:
-          - apim:api_view
+          - api_view
       produces:
         - application/octet-stream
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://127.0.0.1:9292/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/wsdl"
@@ -671,7 +671,7 @@ paths:
         - multipart/form-data
       security:
         - OAuth2Security:
-          - apim:api_create
+          - api_create
       x-wso2-curl: "curl -k -H \"Authorization:Bearer 5311eca3-8ac8-354e-ab36-7e2fdd6a4013\" -F inlineContent=\"{\\\"paths\\\":{\\\"\\/*\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"responses\\\":{\\\"200\\\":{\\\"description\\\":\\\"OK\\\"}}}}},\\\"x-wso2-security\\\":{\\\"apim\\\":{\\\"x-wso2-scopes\\\":[]}},\\\"swagger\\\":\\\"2.0\\\",\\\"info\\\":{\\\"title\\\":\\\"PhoneVerification\\\",\\\"description\\\":\\\"Verify a phone number\\\",\\\"contact\\\":{\\\"email\\\":\\\"xx@ee.com\\\",\\\"name\\\":\\\"xx\\\"},\\\"version\\\":\\\"1.0.0\\\"}}\" -X PUT \"https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/wsdl\""
       x-wso2-request: |
        PUT https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/wsdl
@@ -827,7 +827,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"paths\": {\"/*\": {\"get\":    {\n      \"x-auth-type\": \"Application\",\n      \"x-throttling-policy\": \"Unlimited\",\n      \"responses\": {\"200\": {\"description\": \"OK\"}}\n   }}},\n   \"swagger\": \"2.0\",\n   \"info\":    {\n      \"title\": \"PhoneVerification\",\n      \"description\": \"Verify a phone number\",\n      \"contact\":       {\n         \"email\": \"xx@ee.com\",\n         \"name\": \"xx\"\n      },\n      \"version\": \"1.0.0\"\n   }\n}"
       security:
         - OAuth2Security:
-          - apim:apidef_update
+          - apidef_update
       summary: Update gateway configuration
       description: |
         This operation can be used to update the gateway configuration of an existing API. gateway configuration to be updated is passed as a form data parameter `gatewayConfig`.
@@ -973,7 +973,7 @@ paths:
       x-wso2-response: "HTTP/1.1 201 Created\r\nLocation: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/thumbnail\r\nContent-Type: application/json\r\n\r\n{\r\n   \"relativePath\": \"/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/thumbnail\",\r\n   \"mediaType\": \"image/jpeg\"\r\n}"
       security:
         - OAuth2Security:
-          - apim:api_update
+          - api_update
       summary: Upload a thumbnail image
       description: |
         This operation can be used to upload a thumbnail image of an API. The thumbnail to be uploaded should be given as a form data parameter `file`.
@@ -1049,7 +1049,7 @@ paths:
       x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/25a84fc9-38c0-4578-95e8-29fb6b1c4771\nContent-Type: application/json\n\n{\r\n   \"id\": \"25a84fc9-38c0-4578-95e8-29fb6b1c4771\",\r\n   \"name\": \"PizzaShackAPI\",\r\n   \"description\": \"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\r\\n\",\r\n   \"context\": \"/pizzashack\",\r\n   \"version\": \"2.0.0\",\r\n   \"provider\": \"admin\",\r\n   \"endpointId\": \"{\\\"paths\\\":{\\\"\\\\/order\\\":{\\\"post\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Create a new Order\\\",\\\"parameters\\\":[{\\\"schema\\\":{\\\"$ref\\\":\\\"#\\\\/definitions\\\\/Order\\\"},\\\"description\\\":\\\"Order object that needs to be added\\\",\\\"name\\\":\\\"body\\\",\\\"required\\\":true,\\\"in\\\":\\\"body\\\"}],\\\"responses\\\":{\\\"201\\\":{\\\"schema\\\":{\\\"$ref\\\":\\\"#\\\\/definitions\\\\/Order\\\"},\\\"headers\\\":{\\\"Location\\\":{\\\"description\\\":\\\"The URL of the newly created resource.\\\",\\\"type\\\":\\\"string\\\"}},\\\"description\\\":\\\"Created.\\\"}}}},\\\"\\\\/menu\\\":{\\\"get\\\":{\\\"x-auth-type\\\":\\\"Application & Application User\\\",\\\"x-throttling-policy\\\":\\\"Unlimited\\\",\\\"description\\\":\\\"Return a list of available menu items\\\",\\\"parameters\\\":[],\\\"responses\\\":{\\\"200\\\":{\\\"schema\\\":{\\\"title\\\":\\\"Menu\\\",\\\"properties\\\":{\\\"list\\\":{\\\"items\\\":{\\\"$ref\\\":\\\"#\\\\/definitions\\\\/MenuItem\\\"},\\\"type\\\":\\\"array\\\"}},\\\"type\\\":\\\"object\\\"},\\\"headers\\\":{},\\\"description\\\":\\\"OK.\\\"}}}}},\\\"schemes\\\":[\\\"https\\\"],\\\"produces\\\":[\\\"application\\\\/json\\\"],\\\"swagger\\\":\\\"2.0\\\",\\\"definitions\\\":{\\\"MenuItem\\\":{\\\"title\\\":\\\"Pizza menu Item\\\",\\\"properties\\\":{\\\"price\\\":{\\\"type\\\":\\\"string\\\"},\\\"description\\\":{\\\"type\\\":\\\"string\\\"},\\\"name\\\":{\\\"type\\\":\\\"string\\\"},\\\"image\\\":{\\\"type\\\":\\\"string\\\"}},\\\"required\\\":[\\\"name\\\"]},\\\"Order\\\":{\\\"title\\\":\\\"Pizza Order\\\",\\\"properties\\\":{\\\"customerName\\\":{\\\"type\\\":\\\"string\\\"},\\\"delivered\\\":{\\\"type\\\":\\\"boolean\\\"},\\\"pizzaType\\\":{\\\"type\\\":\\\"string\\\"},\\\"address\\\":{\\\"type\\\":\\\"string\\\"},\\\"creditCardNumber\\\":{\\\"type\\\":\\\"string\\\"},\\\"quantity\\\":{\\\"type\\\":\\\"number\\\"},\\\"orderId\\\":{\\\"type\\\":\\\"integer\\\"}},\\\"required\\\":[\\\"orderId\\\"]}},\\\"consumes\\\":[\\\"application\\\\/json\\\"],\\\"info\\\":{\\\"title\\\":\\\"PizzaShackAPI\\\",\\\"description\\\":\\\"This document describe a RESTFul API for Pizza Shack online pizza delivery store.\\\\n\\\",\\\"license\\\":{\\\"name\\\":\\\"Apache 2.0\\\",\\\"url\\\":\\\"http:\\\\/\\\\/www.apache.org\\\\/licenses\\\\/LICENSE-2.0.html\\\"},\\\"contact\\\":{\\\"email\\\":\\\"architecture@pizzashack.com\\\",\\\"name\\\":\\\"John Doe\\\",\\\"url\\\":\\\"http:\\\\/\\\\/www.pizzashack.com\\\"},\\\"version\\\":\\\"2.0.0\\\"}}\",\r\n   \"wsdlUri\": null,\r\n   \"lifeCycleStatus\": \"CREATED\",\r\n   \"responseCaching\": \"Disabled\",\r\n   \"cacheTimeout\": 300,\r\n   \"destinationStatsEnabled\": null,\r\n   \"isDefaultVersion\": false,\r\n   \"transport\": [\"https\"],\r\n   \"tags\":    [\r\n      \"chicken\",\r\n      \"pizza\"\r\n   ],\r\n   \"policies\": [\"Unlimited\"],\r\n   \"maxTps\":    {\r\n      \"sandbox\": 500,\r\n      \"production\": 100\r\n   },\r\n   \"visibility\": \"PUBLIC\",\r\n   \"visibleRoles\": [],\r\n   \"visibleTenants\": [],\r\n   \"endpointConfig\": \"{\\\"production_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"sandbox_endpoints\\\":{\\\"url\\\":\\\"https://localhost:9443/am/sample/pizzashack/v1.0/api/\\\",\\\"config\\\":null},\\\"endpoint_type\\\":\\\"http\\\"}\",\r\n   \"endpointSecurity\":    {\r\n      \"username\": \"user\",\r\n      \"type\": \"basic\",\r\n      \"password\": \"pass\"\r\n   },\r\n   \"gatewayEnvironments\": \"Production and Sandbox\",\r\n   \"sequences\": [],\r\n   \"subscriptionAvailability\": null,\r\n   \"subscriptionAvailableTenants\": [],\r\n   \"businessInformation\":    {\r\n      \"businessOwnerEmail\": \"marketing@pizzashack.com\",\r\n      \"technicalOwnerEmail\": \"architecture@pizzashack.com\",\r\n      \"technicalOwner\": \"John Doe\",\r\n      \"businessOwner\": \"Jane Roe\"\r\n   },\r\n   \"corsConfiguration\":    {\r\n      \"accessControlAllowOrigins\": [\"*\"],\r\n      \"accessControlAllowHeaders\":       [\r\n         \"authorization\",\r\n         \"Access-Control-Allow-Origin\",\r\n         \"Content-Type\",\r\n         \"SOAPAction\"\r\n      ],\r\n      \"accessControlAllowMethods\":       [\r\n         \"GET\",\r\n         \"PUT\",\r\n         \"POST\",\r\n         \"DELETE\",\r\n         \"PATCH\",\r\n         \"OPTIONS\"\r\n      ],\r\n      \"accessControlAllowCredentials\": false,\r\n      \"corsConfigurationEnabled\": false\r\n   }\r\n}"
       security:
         - OAuth2Security:
-          - apim:api_create
+          - api_create
       summary: Create a new API version
       description: |
         This operation can be used to create a new version of an existing API. The new version is specified as `newVersion` query parameter. New API will be in `CREATED` state.
@@ -1101,7 +1101,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK"
       security:
         - OAuth2Security:
-          - apim:api_publish
+          - api_publish
       summary: Change API Status
       description: |
         This operation is used to change the lifecycle of an API. Eg: Publish an API which is in `CREATED` state. In order to change the lifecycle, we need to provide the lifecycle `action` as a query parameter.
@@ -1220,7 +1220,7 @@ paths:
       \"Feb 23, 2017 5:17:17 PM\",\n    \"user\" : \"admin\"\n }\n]"
       security:
         - OAuth2Security:
-          - apim:api_publish
+          - api_publish
       summary: Get Lifecycle state change history of the API.
       description: |
             This operation can be used to retrieve Lifecycle state change history of the API.
@@ -1283,7 +1283,7 @@ paths:
       chunked \n\n {  \n   \"lcName\":\"API_LIFECYCLE\",\n   \"state\":\"Published\",\n   \"lifecycleId\":\"2febf145f07e457c9643100b6ec60679\",\n   \"checkItemBeanList\":[  \n\n   ],\n   \"inputBeanList\":[  \n\n   ],\n   \"customCodeBeanList\":[  \n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Maintenance\"\n      },\n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Deprecated\"\n      },\n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Created\"\n      },\n      {  \n         \"classObject\":{  \n\n         },\n         \"targetName\":\"Prototyped\"\n      }\n   ],\n   \"availableTransitionBeanList\":[  \n      {  \n         \"event\":\"Move to Maintenance\",\n         \"targetState\":\"Maintenance\"\n      },\n      {  \n         \"event\":\"Deploy as a Prototype\",\n         \"targetState\":\"Prototyped\"\n      },\n      {  \n         \"event\":\"Demote to Created\",\n         \"targetState\":\"Created\"\n      },\n      {  \n         \"event\":\"Deprecate\",\n         \"targetState\":\"Deprecated\"\n      },\n      {  \n         \"event\":\"Publish\",\n         \"targetState\":\"Published\"\n      }\n   ],\n   \"permissionBeanList\":[  \n\n   ]\n}"
       security:
         - OAuth2Security:
-          - apim:api_publish
+          - api_publish
       summary: Get Lifecycle state data of the API.
       description: |
             This operation can be used to retrieve Lifecycle state data of the API.
@@ -1348,7 +1348,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK"
       security:
         - OAuth2Security:
-          - apim:api_publish
+          - api_publish
       summary: Delete pending lifecycle state change tasks.
       description: |
             This operation can be used to remove pending lifecycle state change requests that are in pending state
@@ -1389,7 +1389,7 @@ paths:
          - multipart/form-data
       security:
         - OAuth2Security:
-          - apim:api_create
+          - api_create
       summary: Import API Definition
       description: |
          This operation can be used to create api from api definition.
@@ -1488,7 +1488,7 @@ paths:
     post:
       security:
         - OAuth2Security:
-          - apim:api_create
+          - api_create
       summary: Validate API definition and retrieve a summary
       consumes:
         - multipart/form-data
@@ -1591,7 +1591,7 @@ paths:
       x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058\",\n   \"summary\": \"This is a sample documentation\",\n   \"name\": \"Introduction to PhoneVerification API\",\n   \"type\": \"HOWTO\"\n}"
       security:
         - OAuth2Security:
-          - apim:api_create
+          - api_create
       summary: Add a new document to an API
       description: |
         This operation can be used to add a new documentation to an API. This operation only adds the metadata of a document. To add the actual content we need to use **Upload the content of an API document ** API once we obtain a document Id by this operation.
@@ -1713,7 +1713,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"visibility\": \"API_LEVEL\",\n   \"sourceType\": \"INLINE\",\n   \"sourceUrl\": null,\n   \"otherTypeName\": null,\n   \"documentId\": \"0bcb7f05-599d-4e1a-adce-5cb89bfe58d5\",\n   \"summary\": \"This is a sample documentation for v1.0.0\",\n   \"name\": \"PhoneVerification API Documentation\",\n   \"type\": \"HOWTO\"\n}"
       security:
         - OAuth2Security:
-          - apim:api_update
+          - api_update
       summary: Update a document of an API
       description: |
         This operation can be used to update metadata of an API's document.
@@ -1787,7 +1787,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK"
       security:
         - OAuth2Security:
-          - apim:api_delete
+          - api_delete
       summary: Delete a document of an API
       description: |
         This operation can be used to delete a document associated with an API.
@@ -1921,7 +1921,7 @@ paths:
         x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/8848faaa-7fd1-478a-baa2-48a4ebb92c98/documents/b3a79270-02bb-4e39-9ac1-90ce8f6c84af/content\nContent-Type: application/json\n\n{\n    \"visibility\":\"API_LEVEL\",\n    \"sourceType\":\"FILE\",\n    \"sourceUrl\":null,\n    \"otherTypeName\":null,\n    \"documentId\":\"daf732d3-bda2-46da-b381-2c39d901ea61\",\n    \"summary\":\"This is a sample documentation pdf\",\n    \"name\":\"Introduction to PhoneVerification API PDF\",\n    \"type\":\"HOWTO\"\n}"
         security:
           - OAuth2Security:
-            - apim:api_create
+            - api_create
         summary: Upload the content of an API document
         description: |
           Thid operation can be used to upload a file or add inline content to an API document.
@@ -2057,7 +2057,7 @@ paths:
       x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://127.0.0.1:9443/api/am/publisher/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/scopes/ffd5790d-b7a9-4cb6-b76a-f8b83ecdd058\nContent-Type: application/json"
       security:
         - OAuth2Security:
-          - apim:api_create
+          - api_create
       summary: Add a new scope to an API
       description: |
         This operation can be used to add a new scope to an API.
@@ -2179,7 +2179,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n"
       security:
         - OAuth2Security:
-          - apim:api_update
+          - api_update
       summary: Update a Scope of an API
       description: |
         This operation can be used to update scope of an API
@@ -2253,7 +2253,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK"
       security:
         - OAuth2Security:
-          - apim:api_delete
+          - api_delete
       summary: Delete a scope of an API
       description: |
         This operation can be used to delete a scope associated with an API.
@@ -2355,7 +2355,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\"count\":2,\"list\":[{\"id\":\"4df90edc-f76b-4b19-bf57-7d161fa04467\",\"name\":\"testApi2\",\"context\":\"/test2\",\"version\":\"2.0.3\",\"provider\":\"admin\",\"lifeCycleStatus\":\"Created\",\"workflowStatus\":\"APPROVED\"},{\"id\":\"4066bc9e-1d87-4296-bcca-f6e38d3da6d0\",\"name\":\"testApi\",\"context\":\"/testApi\",\"version\":\"1.0.0\",\"provider\":\"admin\",\"lifeCycleStatus\":\"Created\",\"workflowStatus\":\"APPROVED\"}]}"
       security:
         - OAuth2Security:
-          - apim:api_update
+          - api_update
       summary: Imports API(s).
       description: |
         This operation can be used to import one or more existing APIs.
@@ -2417,7 +2417,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\"count\":2,\"list\":[{\"id\":\"4df90edc-f76b-4b19-bf57-7d161fa04467\",\"name\":\"testApi2\",\"context\":\"/test2\",\"version\":\"2.0.3\",\"provider\":\"admin\",\"lifeCycleStatus\":\"Created\",\"workflowStatus\":\"APPROVED\"},{\"id\":\"4066bc9e-1d87-4296-bcca-f6e38d3da6d0\",\"name\":\"testApi\",\"context\":\"/testApi\",\"version\":\"1.0.0\",\"provider\":\"admin\",\"lifeCycleStatus\":\"Created\",\"workflowStatus\":\"APPROVED\"}]}"
       security:
         - OAuth2Security:
-          - apim:api_create
+          - api_create
       summary: Imports API(s).
       description: |
         This operation can be used to import one or more existing APIs.
@@ -2485,7 +2485,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n \n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"subscriptionId\": \"64eca60b-2e55-4c38-8603-e9e6bad7d809\",\n         \"policy\": \"Gold\",\n         \"apiIdentifier\": \"admin-PhoneVerification-1.0.0\",\n         \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n         \"lifeCycleStatus\": \"UNBLOCKED\"\n      },\n            {\n         \"subscriptionId\": \"7ac22c34-8745-4cfe-91e0-262c50b2f2e3\",\n         \"policy\": \"Gold\",\n         \"apiIdentifier\": \"admin-PhoneVerification-1.0.0\",\n         \"applicationId\": \"367a2361-8db5-4140-8133-c6c8dc7fa0c4\",\n         \"lifeCycleStatus\": \"UNBLOCKED\"\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 2\n}"
       security:
         - OAuth2Security:
-          - apim:subscription_view
+          - subscription_view
       summary: Get all Subscriptions
       description: |
         This operation can be used to retrieve a list of subscriptions of the user associated with the provided access token. This operation is capable of
@@ -2545,7 +2545,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"subscriptionId\": \"64eca60b-2e55-4c38-8603-e9e6bad7d809\",\n   \"policy\": \"Gold\",\n   \"apiIdentifier\": \"admin-PhoneVerification-1.0.0\",\n   \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n   \"lifeCycleStatus\": \"UNBLOCKED\"\n}"
       security:
         - OAuth2Security:
-          - apim:subscription_view
+          - subscription_view
       summary: Get details of a subscription
       description: |
         This operation can be used to get details of a single subscription.
@@ -2599,7 +2599,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n \n{\n   \"subscriptionId\": \"64eca60b-2e55-4c38-8603-e9e6bad7d809\",\n   \"policy\": \"Gold\",\n   \"apiIdentifier\": \"admin-PhoneVerification-1.0.0\",\n   \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n   \"lifeCycleStatus\": \"PROD_ONLY_BLOCKED\"\n}"
       security:
         - OAuth2Security:
-          - apim:subscription_block
+          - subscription_block
       summary: Block a subscription
       description: |
         This operation can be used to block a subscription. Along with the request, `blockState` must be specified as a query parameter.
@@ -2672,7 +2672,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"subscriptionId\": \"64eca60b-2e55-4c38-8603-e9e6bad7d809\",\n   \"policy\": \"Gold\",\n   \"apiIdentifier\": \"admin-PhoneVerification-1.0.0\",\n   \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n   \"lifeCycleStatus\": \"UNBLOCKED\"\n} "
       security:
         - OAuth2Security:
-          - apim:subscription_block
+          - subscription_block
       summary: Unblock a Subscription
       parameters:
         - $ref: '#/parameters/subscriptionId-Q'
@@ -2733,7 +2733,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"unitTime\": 60000,\n         \"tierPlan\": \"FREE\",\n         \"tierLevel\": \"api\",\n         \"stopOnQuotaReach\": true,\n         \"requestCount\": 1,\n         \"description\": \"Allows 1 request(s) per minute.\",\n         \"name\": \"Bronze\",\n         \"attributes\": {}\n      },\n            {\n         \"unitTime\": 60000,\n         \"tierPlan\": \"FREE\",\n         \"tierLevel\": \"api\",\n         \"stopOnQuotaReach\": true,\n         \"requestCount\": 20,\n         \"description\": \"Allows 20 request(s) per minute.\",\n         \"name\": \"Gold\",\n         \"attributes\": {}\n      },\n            {\n         \"unitTime\": 60000,\n         \"tierPlan\": \"FREE\",\n         \"tierLevel\": \"api\",\n         \"stopOnQuotaReach\": true,\n         \"requestCount\": 5,\n         \"description\": \"Allows 5 request(s) per minute.\",\n         \"name\": \"Silver\",\n         \"attributes\": {}\n      },\n            {\n         \"unitTime\": 0,\n         \"tierPlan\": null,\n         \"tierLevel\": \"api\",\n         \"stopOnQuotaReach\": true,\n         \"requestCount\": 0,\n         \"description\": \"Allows unlimited requests\",\n         \"name\": \"Unlimited\",\n         \"attributes\": {}\n      }\n   ],\n   \"next\": \"\",\n   \"count\": 4\n}"
       security:
         - OAuth2Security:
-          - apim:api_update
+          - api_update
       summary: Get all policies
       description: |
         This operation can be used to list the available policies for a given policy level. Tier level should be specified as a path parameter and should be one of `api`, `application` and `resource`.
@@ -2788,7 +2788,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"unitTime\": 60000,\n   \"tierPlan\": \"FREE\",\n   \"tierLevel\": \"api\",\n   \"stopOnQuotaReach\": true,\n   \"requestCount\": 1,\n   \"description\": \"Allows 1 request(s) per minute.\",\n   \"name\": \"Bronze\",\n   \"attributes\": {}\n}"
       security:
         - OAuth2Security:
-          - apim:api_update
+          - api_update
       summary: Get details of a policy
       description: |
         This operation can be used to retrieve details of a single policy by specifying the policy level and policy name.
@@ -2854,7 +2854,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n  \"list\": [\n    {\n      \"id\": \"01234567-0123-0123-0123-012345678901\",\n      \"name\": \"Endpoint 1\",\n      \"endpointConfig\": {\n        \"serviceUrl\": \"http://192.168.56.1:8281\",\n        \"timeout\": 1000\n      },\n      \"endpointSecurity\": {\n        \"enabled\": false\n      },\n      \"maxTps\": 1000,\n      \"type\": \"http\"\n    }\n  ],\n  \"count\": 1\n}"
       security:
         - OAuth2Security:
-          - apim:api_view
+          - api_view
       summary: Get all endpoints
       description: |
         This operation can be used to retrieve the list of endpoints available.
@@ -2900,7 +2900,7 @@ paths:
       x-wso2-response: ""
       security:
         - OAuth2Security:
-          - apim:api_create
+          - api_create
       summary: Add a new endpoint
       description: |
         This operation can be used to add a new endpoint.
@@ -2955,7 +2955,7 @@ paths:
     head:
       security:
         - OAuth2Security:
-          - apim:api_create
+          - api_create
       summary: |
         Check given Endpoint is already exist
       description: |
@@ -3007,7 +3007,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"list\": [   {\n      \"showInApiConsole\": true,\n      \"serverUrl\": \"https://192.168.56.1:9444//services/\",\n      \"endpoints\":       {\n         \"http\": \"http://192.168.56.1:8281\",\n         \"https\": \"https://192.168.56.1:8244\"\n      },\n      \"name\": \"Production and Sandbox\",\n      \"type\": \"hybrid\"\n   }],\n   \"count\": 1\n}"
       security:
         - OAuth2Security:
-          - apim:api_create
+          - api_create
       summary: Get specific endpoints
       description: |
         This operation can be used to retrieve endpoint specific details.
@@ -3054,7 +3054,7 @@ paths:
       x-wso2-response: ""
       security:
         - OAuth2Security:
-          - apim:api_create
+          - api_create
       summary: Update a Tier
       description: |
         This operation can be used to update an existing endpoint.
@@ -3128,7 +3128,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK"
       security:
         - OAuth2Security:
-          - apim:api_create
+          - api_create
       summary: Delete an endpoint
       description: |
         This operation can be used to delete an existing Endpoint proving the Id of the Endpoint.
@@ -3177,7 +3177,7 @@ paths:
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       security:
         - OAuth2Security:
-          - apim:api_publish
+          - api_publish
       summary: Get all labels
       description: |
         This operation can be used to retrieve the list of labels available.
@@ -3230,7 +3230,7 @@ paths:
       x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n  \"list\": [\n    {\n      \"id\": \"ds-0\",\n      \"name\": \"service-1\",\n      \"endpointConfig\": {\n        \"serviceUrl\": \"http://192.168.56.1:8281\",\n        \"serviceType\": \"NodePort\",\n        \"namespace\": \"default\"\n      },\n      \"endpointSecurity\": {\n        \"enabled\": false\n      },\n      \"maxTps\": 1000,\n      \"type\": \"http\"\n    }\n  ],\n  \"count\": 1\n}"
       security:
         - OAuth2Security:
-          - apim:external_services_discover
+          - external_services_discover
       summary: Get all service endpoints after service discovery
       description: |
         This operation can be used to retrieve the list of service endpoints available in the cluster after a process of service discovery.
@@ -4210,7 +4210,7 @@ definitions:
         type: string
         description: |
           name of Scope
-        example: apim:api_view
+        example: api_view
       description:
         type: string
         description: |

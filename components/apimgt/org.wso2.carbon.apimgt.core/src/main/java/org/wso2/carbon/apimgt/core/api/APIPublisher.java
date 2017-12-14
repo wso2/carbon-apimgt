@@ -600,10 +600,10 @@ public interface APIPublisher extends APIManager {
      * Retrieves scopes releated to the API
      *
      * @param apiId apiId of api
-     * @return set of scopes assign to api
+     * @return map of scopes assign to api
      * @throws APIManagementException If an error occurred while retrieving scopes
      */
-    Set<String> getScopesForApi(String apiId) throws APIManagementException;
+    Map<String, String> getScopesForApi(String apiId) throws APIManagementException;
 
     /**
      * Retrieves information according to the scope

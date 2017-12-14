@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,7 @@ public final class UriTemplate {
     private final Policy policy;
     private final Map<String, Endpoint> endpoint;
     private final List<URITemplateParam> parameters;
+    private final List<String> scopes;
 
     private UriTemplate(UriTemplateBuilder uriTemplateBuilder) {
         uriTemplate = uriTemplateBuilder.uriTemplate;
@@ -57,6 +59,11 @@ public final class UriTemplate {
         templateId = uriTemplateBuilder.templateId;
         contentType = uriTemplateBuilder.contentType;
         parameters = uriTemplateBuilder.parameters;
+        scopes = uriTemplateBuilder.scopes;
+    }
+
+    public List<String> getScopes() {
+        return scopes;
     }
 
     public String getUriTemplate() {
@@ -137,6 +144,7 @@ public final class UriTemplate {
         public String templateId;
         private String contentType;
         private List<URITemplateParam> parameters;
+        private List<String> scopes = new ArrayList<>();
 
         public UriTemplateBuilder() {
         }
@@ -150,6 +158,8 @@ public final class UriTemplate {
             this.templateId = copy.templateId;
             this.contentType = copy.contentType;
             this.parameters = copy.parameters;
+            this.scopes = copy.scopes;
+
         }
 
         public static UriTemplateBuilder getInstance() {
@@ -196,6 +206,11 @@ public final class UriTemplate {
             return this;
         }
 
+        public UriTemplateBuilder scopes(List<String> scopes) {
+            this.scopes = scopes;
+            return this;
+        }
+
         public String getUriTemplate() {
             return uriTemplate;
         }
@@ -218,6 +233,14 @@ public final class UriTemplate {
 
         public String getTemplateId() {
             return templateId;
+        }
+
+        public List<String> getScopes() {
+            return scopes;
+        }
+
+        public void setScopes(List<String> scopes) {
+            this.scopes = scopes;
         }
 
         public UriTemplate build() {

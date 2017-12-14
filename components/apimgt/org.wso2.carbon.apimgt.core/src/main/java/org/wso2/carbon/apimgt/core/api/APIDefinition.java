@@ -147,4 +147,23 @@ public interface APIDefinition {
     Map<String, Scope> getScopesFromSecurityDefinitionForWebApps(String resourceConfigJSON) throws
             APIManagementException;
 
+    /**
+     * get scopes assigned Globally
+     *
+     * @param resourceConfigJson swagger
+     * @return set of scopes
+     * @throws APIManagementException if Error occurred while passing swagger
+     */
+
+    List<String> getGlobalAssignedScopes(String resourceConfigJson) throws APIManagementException;
+
+
+    /**
+     * Used to generate merged swagger definition
+     *
+     * @param resourceConfigJson swagger definition
+     * @param api                api model
+     * @return merged swagger
+     */
+    String generateMergedResourceDefinition(String resourceConfigJson, API api);
 }

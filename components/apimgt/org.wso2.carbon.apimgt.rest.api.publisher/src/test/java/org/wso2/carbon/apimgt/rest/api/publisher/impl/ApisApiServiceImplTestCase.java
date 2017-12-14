@@ -934,6 +934,7 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
+        Mockito.when(apiPublisher.getApiSwaggerDefinition(apiId)).thenReturn(SampleTestObjectCreator.apiDefinition);
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
         API api = apiBuilder.id(apiId).build();
         APIDTO apidto = MappingUtil.toAPIDto(api);
@@ -960,6 +961,7 @@ public class ApisApiServiceImplTestCase {
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
         API api = apiBuilder.id(apiId).build();
         APIDTO apidto = MappingUtil.toAPIDto(api);
+        Mockito.when(apiPublisher.getApiSwaggerDefinition(apiId)).thenReturn(SampleTestObjectCreator.apiDefinition);
         Mockito.doNothing().doThrow(new IllegalArgumentException())
                 .when(apiPublisher).updateAPI(apiBuilder);
         Mockito.doThrow(new APIManagementException("Error occurred", ExceptionCodes.API_TYPE_INVALID))
@@ -1835,8 +1837,8 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
                 thenReturn(apiPublisher);
         String apiId = UUID.randomUUID().toString();
-        Set<String> scopes = new HashSet<>();
-        scopes.add("apim:api_read");
+        Map<String,String> scopes = new HashMap<>();
+        scopes.put("apim:api_read","read apis");
         Mockito.when(apiPublisher.getScopesForApi(apiId)).thenReturn(scopes);
         Response response = apisApiService.apisApiIdScopesGet(apiId, null, getRequest());
         assertEquals(response.getStatus(), 200);
@@ -1969,21 +1971,6 @@ public class ApisApiServiceImplTestCase {
         Response response = apisApiService.apisApiIdScopesPost(apiId, MappingUtil.scopeDto(scope, "role"), null,
                 null, getRequest());
         assertEquals(response.getStatus(), 201);
-    }
-    @Test
-    public void testApisApiIdScopesPostWithRestrictedKeyWord() throws Exception {
-        printTestMethodName();
-        ApisApiServiceImpl apisApiService = new ApisApiServiceImpl();
-        APIPublisher apiPublisher = Mockito.mock(APIPublisherImpl.class);
-        PowerMockito.mockStatic(RestAPIPublisherUtil.class);
-        PowerMockito.when(RestAPIPublisherUtil.getApiPublisher(USER)).
-                thenReturn(apiPublisher);
-        String apiId = UUID.randomUUID().toString();
-        Scope scope = new Scope("apim:api_view","api view");
-        Mockito.doNothing().when(apiPublisher).addScopeToTheApi(apiId, scope);
-        Response response = apisApiService.apisApiIdScopesPost(apiId, MappingUtil.scopeDto(scope, "role"), null,
-                null, getRequest());
-        assertEquals(response.getStatus(), 412);
     }
     @Test
     public void testApisApiIdScopesPostWithInvalidscopebindingType() throws Exception {

@@ -6,6 +6,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
@@ -19,6 +20,7 @@ import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.impl.WSDLProcessFactory;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Scope;
@@ -38,6 +40,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.StringUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_operationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
@@ -1746,7 +1749,7 @@ public class ApisApiServiceImpl extends ApisApiService {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-            Set<String> scopeSet = apiPublisher.getScopesForApi(apiId);
+            Map<String,String> scopeSet = apiPublisher.getScopesForApi(apiId);
             ScopeListDTO scopeListDTO = MappingUtil.toScopeListDto(scopeSet);
             return Response.ok().entity(scopeListDTO).build();
         } catch (APIManagementException e) {
@@ -1828,12 +1831,6 @@ public class ApisApiServiceImpl extends ApisApiService {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
             KeyMgtConfigurations keyManagerConfiguration = APIMConfigurationService.getInstance()
                     .getApimConfigurations().getKeyManagerConfigs();
-            if (body.getName().contains(keyManagerConfiguration.getProductRestApiScopesKeyWord())) {
-                String message = "scope name couldn't have the restricted keyword " + keyManagerConfiguration
-                        .getProductRestApiScopesKeyWord();
-                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(message, 900313L, message);
-                return Response.status(Response.Status.PRECONDITION_FAILED).entity(errorDTO).build();
-            }
 
             if (body.getBindings() != null && StringUtils.isNotEmpty(body.getBindings().getType())) {
                 if (!keyManagerConfiguration.getScopeBindingType().equalsIgnoreCase(body.getBindings().getType())) {

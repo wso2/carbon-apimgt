@@ -591,6 +591,11 @@ public class ApiFileDAOImpl implements ApiDAO {
     }
 
     @Override
+    public boolean isAPIVersionsExist(String apiName) throws APIMgtDAOException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public double getAverageRating(String apiId) throws APIMgtDAOException {
         throw new UnsupportedOperationException();
     }

@@ -88,6 +88,7 @@ public final class API {
         apiPolicy = builder.apiPolicy;
         userSpecificApiPermissions = builder.userSpecificApiPermissions;
         securityScheme = builder.securityScheme;
+        scopes = builder.scopes;
         threatProtectionPolicies = builder.threatProtectionPolicies;
     }
 
@@ -239,6 +240,14 @@ public final class API {
         return threatProtectionPolicies;
     }
 
+    public List<String> getScopes() {
+        return scopes;
+    }
+
+    public void setScopes(List<String> scopes) {
+        this.scopes = scopes;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -338,6 +347,7 @@ public final class API {
     private final Policy apiPolicy;
     private List<String> userSpecificApiPermissions;
     private int securityScheme;
+    private List<String> scopes = new ArrayList<>();
     private Set<String> threatProtectionPolicies;
 
     public String getWorkflowStatus() {
@@ -496,6 +506,10 @@ public final class API {
             return userSpecificApiPermissions;
         }
 
+        public List<String> getScopes() {
+            return scopes;
+        }
+
         public int getSecurityScheme() {
             return securityScheme;
         }
@@ -538,6 +552,7 @@ public final class API {
         private String workflowStatus;
         private List<String> userSpecificApiPermissions;
         private int securityScheme;
+        private List<String> scopes = new ArrayList<>();
         private Set<String> threatProtectionPolicies;
 
         public APIBuilder(String provider, String name, String version) {
@@ -586,6 +601,7 @@ public final class API {
             this.workflowStatus = copy.workflowStatus;
             this.userSpecificApiPermissions = new ArrayList<String>();
             this.securityScheme = copy.securityScheme;
+            this.scopes = copy.scopes;
             this.threatProtectionPolicies = copy.threatProtectionPolicies;
         }
 
@@ -993,6 +1009,11 @@ public final class API {
 
         public APIBuilder securityScheme(int securityScheme) {
             this.securityScheme = securityScheme;
+            return this;
+        }
+
+        public APIBuilder scopes(List<String> scopes) {
+            this.scopes = scopes;
             return this;
         }
 

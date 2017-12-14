@@ -93,7 +93,9 @@ function fromJsonToResourceDto (json resourceResponse) (dto:ResourceDto) {
     resourceDto.httpVerb, err = (string)resourceResponse.httpVerb;
     resourceDto.authType, err = (string)resourceResponse.authType;
     resourceDto.scope, err = (string)resourceResponse.scope;
-    resourceDto.policy, err = (string)resourceResponse.policy;
+    if(resourceResponse.policy != null){
+        resourceDto.policy, err = (string)resourceResponse.policy;
+    }
     return resourceDto;
 }
 function retrieveSubscriptions () (boolean) {

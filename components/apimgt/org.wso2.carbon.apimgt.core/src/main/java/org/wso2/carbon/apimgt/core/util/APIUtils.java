@@ -201,16 +201,15 @@ public class APIUtils {
  * used to generate operationId according to the uri template and http verb
  */
     public static String generateOperationIdFromPath(String path, String httpVerb) {
-        //TODO need to write proper way of creating operationId
         StringTokenizer stringTokenizer = new StringTokenizer(path, "/");
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(httpVerb.toLowerCase());
         while (stringTokenizer.hasMoreElements()) {
             String part1 = stringTokenizer.nextToken();
             if (part1.contains("{")) {
-/*
-                stringBuilder.append("By" + pathParam);
-*/
+                part1 = part1.replace("{", "").replace("}", "");
+                part1 = StringUtils.capitalize(part1);
+                stringBuilder.append("By" + part1);
             } else if (part1.contains("*")) {
                 stringBuilder.append(part1.replaceAll("\\*", "_star_"));
             } else {

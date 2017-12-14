@@ -850,4 +850,12 @@ public interface ApiDAO {
      * @throws APIMgtDAOException if error occurs while accessing data layer
      */
     String getEndpointConfig(String endpointId) throws APIMgtDAOException;
+
+    /**
+     * Retrieve Existence of api versions
+     * @param apiName Name of API
+     * @return true if api versions Exist.
+     * @throws APIMgtDAOException if error occurs while accessing data layer
+     */
+    boolean isAPIVersionsExist(String apiName) throws APIMgtDAOException;
 }

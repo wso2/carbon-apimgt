@@ -415,9 +415,9 @@ public class TestMappingUtilTestCase {
 
     @Test
     public void testScopeMappingUtil() {
-        Set<String> scopeSet = new HashSet<>();
-        scopeSet.add("apim:api-read");
-        ScopeListDTO scopeListDTO = MappingUtil.toScopeListDto(scopeSet);
+        Map<String,String> scopeMap= new HashMap<>();
+        scopeMap.put("apim:api-read","read apis");
+        ScopeListDTO scopeListDTO = MappingUtil.toScopeListDto(scopeMap);
         Assert.assertEquals(scopeListDTO.getCount().intValue(), 1);
     }
 }

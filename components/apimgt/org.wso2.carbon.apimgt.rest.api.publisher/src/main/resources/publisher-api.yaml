@@ -481,6 +481,9 @@ paths:
         - API (Individual)
       responses:
         200:
+          schema:
+             type: string
+             example: ""
           description: |
             OK.
             Requested swagger document of the API is returned
@@ -3880,11 +3883,14 @@ definitions:
            example: "01234567-0123-0123-0123-012345678901"
           inline:
            $ref: '#/definitions/EndPoint'
-
           type:
             type: string
             example: "Production"
       securityScheme:
+        type: array
+        items:
+          type: string
+      scopes:
         type: array
         items:
           type: string
@@ -3919,6 +3925,10 @@ definitions:
               type:
                 type: string
                 example: "Production"
+          scopes:
+            type: array
+            items:
+              type: string
       threatProtectionPolicies:
         properties:
           list:
@@ -4381,7 +4391,13 @@ definitions:
       list:
         type: array
         items:
-          type: string
+          properties:
+            name:
+              type: string
+              example: "apim:api_view"
+            description:
+              type: string
+              example: "Scope for Api view"
 
 #-----------------------------------------------------
 # The Label resource

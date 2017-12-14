@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.core.configuration.models.KeyMgtConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.NotificationConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryImplConfig;
@@ -58,6 +59,7 @@ import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
+import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.exception.NotificationException;
 import org.wso2.carbon.apimgt.core.exception.ServiceDiscoveryException;
@@ -229,6 +231,26 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 String permissionString = api.getApiPermission();
                 if (!StringUtils.isEmpty(permissionString)) {
                     api.setApiPermission(replaceGroupIdWithName(permissionString));
+                }
+                if (!getScopesForApi(uuid).isEmpty()) {
+                    String swagger = getApiSwaggerDefinition(uuid);
+                    List<String> globalScopes = new APIDefinitionFromSwagger20().getGlobalAssignedScopes(swagger);
+                    List<APIResource> apiResourceList = new APIDefinitionFromSwagger20().parseSwaggerAPIResources
+                            (new StringBuilder(swagger));
+                    api.setScopes(globalScopes);
+                    for (APIResource apiResource : apiResourceList) {
+                        if (apiResource.getUriTemplate().getScopes().isEmpty()) {
+                            UriTemplate retrievedUriTemplateFromApi = api.getUriTemplates().get(apiResource
+                                    .getUriTemplate().getTemplateId());
+                            if (retrievedUriTemplateFromApi != null) {
+                                UriTemplate.UriTemplateBuilder uriTemplate = new UriTemplate.UriTemplateBuilder
+                                        (retrievedUriTemplateFromApi);
+                                uriTemplate.scopes(apiResource.getScope());
+                                api.getUriTemplates().replace(apiResource.getUriTemplate().getTemplateId(), uriTemplate
+                                        .build());
+                            }
+                        }
+                    }
                 }
             }
         } catch (ParseException e) {
@@ -432,8 +454,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     private void validateApiPolicy(Policy policy) throws APIManagementException {
         if (policy != null) {
-            Policy apiPolicy = getPolicyByName(APIMgtAdminService.PolicyLevel.api, policy.getPolicyName());
-            policy.setUuid(apiPolicy.getUuid());
+            if (!APIMgtConstants.DEFAULT_API_POLICY.equalsIgnoreCase(policy.getPolicyName())) {
+                Policy apiPolicy = getPolicyByName(APIMgtAdminService.PolicyLevel.api, policy.getPolicyName());
+                policy.setUuid(apiPolicy.getUuid());
+            }
         }
     }
 
@@ -505,7 +529,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     createUriTemplateList(apiBuilder, true);
                     validateApiPolicy(apiBuilder.getApiPolicy());
                     validateSubscriptionPolicies(apiBuilder);
-                    String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
+                    String updatedSwagger = apiDefinitionFromSwagger20.generateMergedResourceDefinition(getApiDAO()
+                            .getApiSwaggerDefinition(apiBuilder.getId()), apiBuilder.build());
                     String gatewayConfig = getApiGatewayConfig(apiBuilder.getId());
                     GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
                     APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.build(), config
@@ -1232,7 +1257,19 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 if (log.isDebugEnabled()) {
                     log.debug("API : " + api.getName() + " has been successfully removed from the gateway");
                 }
-
+                if (!getApiDAO().isAPIVersionsExist(api.getName())) {
+                    Map<String, String> scopeMap = apiDefinitionFromSwagger20.getScopesFromSecurityDefinition
+                            (getApiSwaggerDefinition(identifier));
+                    for (String scope : scopeMap.keySet()) {
+                        try {
+                            getKeyManager().deleteScope(scope);
+                        } catch (KeyManagementException e) {
+                            // We ignore the error due to if scope get deleted from other end that will affect to delete
+                            // api.
+                            log.warn("Scope couldn't delete from Key Manager", e);
+                        }
+                    }
+                }
                 getApiDAO().deleteAPI(identifier);
                 getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
                 APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
@@ -1572,6 +1609,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public String addApiFromDefinition(InputStream apiDefinition) throws APIManagementException {
         try {
             String apiDefinitionString = IOUtils.toString(apiDefinition);
+            validateScope(apiDefinitionString);
             API.APIBuilder apiBuilder = apiDefinitionFromSwagger20.generateApiFromSwaggerResource(getUsername(),
                     apiDefinitionString);
             Map<String, String> scopes = apiDefinitionFromSwagger20.getScopesFromSecurityDefinition
@@ -1634,8 +1672,9 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 getKeyManager().deleteScope(scopeEntry.getKey());
             }
             for (Map.Entry<String, String> scopeEntry : updatedScopes.entrySet()) {
-                getKeyManager().deleteScope(scopeEntry.getKey());
-                getKeyManager().registerScope(new Scope(scopeEntry.getKey(), scopeEntry.getValue()));
+                Scope scope = getKeyManager().retrieveScope(scopeEntry.getKey());
+                scope.setDescription(scopeEntry.getValue());
+                getKeyManager().updateScope(scope);
             }
 
             API api = getAPIbyUUID(apiId);
@@ -1650,6 +1689,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     updatedUriTemplateMap);
             API.APIBuilder apiBuilder = new API.APIBuilder(api);
             apiBuilder.uriTemplates(uriTemplateMapNeedTobeUpdate);
+            createUriTemplateList(apiBuilder, true);
             apiBuilder.updatedBy(getUsername());
             apiBuilder.lastUpdatedTime(localDateTime);
 
@@ -2249,11 +2289,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     }
 
     @Override
-    public Set<String> getScopesForApi(String apiId) throws APIManagementException {
+    public Map<String, String> getScopesForApi(String apiId) throws APIManagementException {
 
         String swagger = getApiSwaggerDefinition(apiId);
-        Map<String, String> scopeMap = apiDefinitionFromSwagger20.getScopesFromSecurityDefinition(swagger);
-        return scopeMap.keySet();
+        return apiDefinitionFromSwagger20.getScopesFromSecurityDefinition(swagger);
     }
 
     @Override
@@ -2270,12 +2309,13 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     @Override
     public void addScopeToTheApi(String apiId, Scope scope) throws APIManagementException {
+        validateScopeName(scope.getName());
         String swagger = getApiSwaggerDefinition(apiId);
         Map<String, String> scopeMap = apiDefinitionFromSwagger20.getScopesFromSecurityDefinition(swagger);
         if (!scopeMap.containsKey(scope.getName())) {
             if (getKeyManager().registerScope(scope)) {
                 String updatedSwagger = apiDefinitionFromSwagger20.addScopeToSwaggerDefinition(swagger, scope);
-                saveSwagger20Definition(apiId, updatedSwagger);
+                getApiDAO().updateApiDefinition(apiId, updatedSwagger, getUsername());
             } else {
                 throw new APIManagementException("Scope already registered", ExceptionCodes.SCOPE_ALREADY_REGISTERED);
             }
@@ -2292,7 +2332,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             if (getKeyManager().updateScope(scope)) {
                 String updatedSwaggerDefinition = new APIDefinitionFromSwagger20().updateScopesOnSwaggerDefinition
                         (swagger, scope);
-                saveSwagger20Definition(apiId, updatedSwaggerDefinition);
+                getApiDAO().updateApiDefinition(apiId, updatedSwaggerDefinition, getUsername());
             }
         } else {
             throw new APIManagementException("Scope couldn't found by name: " + scope.getName(), ExceptionCodes
@@ -2308,11 +2348,30 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             String scopeDeletedApiDefinition = apiDefinitionFromSwagger20.removeScopeFromSwaggerDefinition(swagger,
                     scopeName);
             if (getKeyManager().deleteScope(scopeName)) {
-                saveSwagger20Definition(apiId, scopeDeletedApiDefinition);
+                getApiDAO().updateApiDefinition(apiId, scopeDeletedApiDefinition, getUsername());
             }
+
         } else {
             throw new APIManagementException("Scope couldn't found by name: " + scopeName, ExceptionCodes
                     .SCOPE_NOT_FOUND);
         }
+    }
+
+    private boolean validateScope(String swagger) throws APIManagementException {
+        List<String> scopes = apiDefinitionFromSwagger20.getGlobalAssignedScopes(swagger);
+        for (String scope : scopes) {
+            validateScopeName(scope);
+        }
+        return true;
+    }
+
+    private boolean validateScopeName(String scopeName) throws APIManagementException {
+        KeyMgtConfigurations keyManagerConfiguration = getConfig().getKeyManagerConfigs();
+        if (scopeName.contains(keyManagerConfiguration.getProductRestApiScopesKeyWord())) {
+            String message = "scope name couldn't have the restricted keyword " + keyManagerConfiguration
+                    .getProductRestApiScopesKeyWord();
+            throw new APIManagementException(message, ExceptionCodes.SCOPE_VALIDATION_FAILED);
+        }
+        return true;
     }
 }

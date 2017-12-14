@@ -32,15 +32,17 @@ securityDefinitions:
     authorizationUrl: https://localhost:9443/oauth2/authorize
     scopes:
       apim:api_create: Create API
-
-security:
-  - OAuth2Security:
-    - apim:api_create
+  ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY
 
 paths:
   /apis:
 
     get:
+      security:
+        - ApiKeyAuth: []
       summary: |
         Retrieve/Search APIs
       description: |

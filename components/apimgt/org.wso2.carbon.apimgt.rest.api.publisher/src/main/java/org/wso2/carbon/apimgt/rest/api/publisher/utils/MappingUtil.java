@@ -66,6 +66,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeList_listDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.Scope_bindingsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
@@ -118,6 +119,7 @@ public class MappingUtil {
         for (Policy policy : api.getPolicies()) {
             apidto.addPoliciesItem(policy.getPolicyName());
         }
+        apidto.setScopes(api.getScopes());
         BusinessInformation businessInformation = api.getBusinessInformation();
         API_businessInformationDTO apiBusinessInformationDTO = new API_businessInformationDTO();
         apiBusinessInformationDTO.setBusinessOwner(businessInformation.getBusinessOwner());
@@ -142,6 +144,7 @@ public class MappingUtil {
             apiOperationsDTO.setEndpoint(fromEndpointToList(uriTemplate.getEndpoint()));
             apiOperationsDTO.setHttpVerb(uriTemplate.getHttpVerb());
             apiOperationsDTO.setPolicy(uriTemplate.getPolicy().getPolicyName());
+            apiOperationsDTO.setScopes(uriTemplate.getScopes());
             apidto.addOperationsItem(apiOperationsDTO);
         }
         if (api.getApiPolicy() != null) {
@@ -219,6 +222,7 @@ public class MappingUtil {
             uriTemplateBuilder.authType(operationsDTO.getAuthType());
             uriTemplateBuilder.httpVerb(operationsDTO.getHttpVerb());
             uriTemplateBuilder.policy(new APIPolicy(operationsDTO.getPolicy()));
+            uriTemplateBuilder.scopes(operationsDTO.getScopes());
             if (operationsDTO.getEndpoint() != null && !operationsDTO.getEndpoint().isEmpty()) {
                 uriTemplateBuilder.endpoint(fromEndpointListToMap(operationsDTO.getEndpoint()));
             }
@@ -249,6 +253,7 @@ public class MappingUtil {
                 uriTemplates(uriTemplateList).
                 corsConfiguration(corsConfiguration).
                 wsdlUri(apidto.getWsdlUri()).
+                scopes(apidto.getScopes()).
                 securityScheme(mapSecuritySchemeListToInt(apidto.getSecurityScheme()));
 
         if (apidto.getIsDefaultVersion() != null) {
@@ -609,15 +614,15 @@ public class MappingUtil {
     /**
      * This method used to convert scope map
      *
-     * @param scopeSet set of scopes
+     * @param scopeMap map of scopes
      * @return ScopeListDTO object
      */
-    public static ScopeListDTO toScopeListDto(Set<String> scopeSet) {
+    public static ScopeListDTO toScopeListDto(Map<String, String> scopeMap) {
         ScopeListDTO scopeListDTO = new ScopeListDTO();
-        for (String scope : scopeSet) {
-            scopeListDTO.addListItem(scope);
-        }
-        scopeListDTO.setCount(scopeSet.size());
+        scopeMap.forEach((name, description) ->{
+            scopeListDTO.addListItem(new ScopeList_listDTO().name(name).description(description));
+        } );
+        scopeListDTO.setCount(scopeMap.size());
         return scopeListDTO;
     }
 
