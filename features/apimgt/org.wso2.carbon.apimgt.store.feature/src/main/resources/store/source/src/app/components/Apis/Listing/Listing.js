@@ -56,32 +56,6 @@ class Listing extends React.Component {
 
     componentDidMount() {
         let api = new API();
-
-
-        let promised_tires = api.getAllTiers("application");
-        promised_tires.then(
-            response => {
-                let tires = [];
-                for (let i = 0; i < response.obj.count; i++) {
-                    let tier = {};
-                    tier.name = response.obj.list[i].name;
-                    tier.description = response.obj.list[i].description;
-                    tires.push(tier);
-                }
-                this.setState({tiers: tires});
-            }
-        ).catch(error => {
-            let status = error.status;
-            if (status === 404) {
-                this.setState({notFound: true});
-            } else if (status === 401) {
-                this.setState({isAuthorize: false});
-                let params = qs.stringify({reference: this.props.location.pathname});
-                this.props.history.push({pathname: "/login", search: params});
-            }
-        });
-
-
         let promised_apis = api.getAllAPIs();
         promised_apis.then((response) => {
             this.setState({apis: response.obj});
@@ -96,7 +70,6 @@ class Listing extends React.Component {
             }
         });
     }
-
 
     render() {
         let forum_link = "/forum";

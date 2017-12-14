@@ -19,7 +19,7 @@
 import React, {Component} from 'react'
 import AuthManager from '../data/AuthManager'
 import {Redirect} from 'react-router-dom';
-import qs from 'qs'
+import qs from 'qs';
 
 class Logout extends Component {
     constructor(props) {

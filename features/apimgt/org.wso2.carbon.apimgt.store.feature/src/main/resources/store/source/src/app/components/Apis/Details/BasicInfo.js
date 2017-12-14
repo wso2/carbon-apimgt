@@ -198,11 +198,11 @@ class BasicInfo extends Component {
         let promised_subscribe = api.subscribe(apiId, applicationId, policy);
         promised_subscribe.then(response => {
             console.log("Subscription created successfully with ID : " + response.body.subscriptionId);
-        }).catch(
-            function (error_response) {
+        }).catch(error => {
                 console.log("Error while creating the subscription.");
+                console.error(error);
             }
-        );
+        )
     };
 
     populateApplicationDropdown(){

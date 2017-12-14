@@ -20,7 +20,7 @@ import Resource from "./Resource";
 /**
  * An abstract representation of an API
  */
-class API extends Resource {
+export default class API extends Resource {
     /**
      * @constructor
      * @param {string} access_key - Access key for invoking the backend REST API call.
@@ -28,6 +28,7 @@ class API extends Resource {
     constructor() {
         super();
         this.client = new SingleClient().client;
+        this._requestMetaData = Resource._requestMetaData;
     }
 
     /**
@@ -467,5 +468,3 @@ class API extends Resource {
     }
 
 }
-
-export default API
