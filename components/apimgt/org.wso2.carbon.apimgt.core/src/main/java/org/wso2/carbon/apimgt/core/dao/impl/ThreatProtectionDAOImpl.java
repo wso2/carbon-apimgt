@@ -160,7 +160,7 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
      * @throws APIMgtDAOException if failed to retrieve the list of policies
      */
     private List<ThreatProtectionPolicy> getPolicies(Connection connection) throws APIMgtDAOException {
-        final String sqlQuery = "SELECT `UUID`, `NAME`, `TYPE`, `POLICY` " +
+        final String sqlQuery = "SELECT UUID, NAME, TYPE, POLICY " +
                 " FROM " + THREAT_PROTECTION_TABLE;
         try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
             try (ResultSet rs = preparedStatement.executeQuery()) {
@@ -192,7 +192,7 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
      * @throws APIMgtDAOException If failed to retrieve the policy
      */
     private ThreatProtectionPolicy getPolicy(String policyId, Connection connection) throws APIMgtDAOException {
-        final String sqlQuery = "SELECT `UUID`, `NAME`, `TYPE`, `POLICY` " +
+        final String sqlQuery = "SELECT UUID, NAME, TYPE, POLICY " +
                 " FROM " + THREAT_PROTECTION_TABLE + " WHERE UUID = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
             preparedStatement.setString(1, policyId);
@@ -226,7 +226,7 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
      */
     private void addPolicy(ThreatProtectionPolicy policy, Connection connection) throws APIMgtDAOException {
         final String sqlQuery = "INSERT INTO " + THREAT_PROTECTION_TABLE +
-                " (`UUID`, `NAME`, `TYPE`, `POLICY`) " +
+                " (UUID, NAME, TYPE, POLICY) " +
                 " VALUES (?, ?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
             preparedStatement.setString(1, policy.getUuid());
@@ -251,10 +251,10 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
      */
     private void updatePolicy(ThreatProtectionPolicy policy, Connection connection) throws APIMgtDAOException {
         final String sqlQuery = "UPDATE " + THREAT_PROTECTION_TABLE +
-                " SET `NAME` = ?, " +
-                "`TYPE` = ?, " +
-                "`POLICY` = ? " +
-                "WHERE `UUID` = ?";
+                " SET NAME = ?, " +
+                "TYPE = ?, " +
+                "POLICY = ? " +
+                "WHERE UUID = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
             preparedStatement.setString(1, policy.getName());
             preparedStatement.setString(2, policy.getType());
@@ -299,7 +299,7 @@ public class ThreatProtectionDAOImpl implements ThreatProtectionDAO {
      * @throws SQLException If failed to retrieve the list of ids
      */
     private Set<String> getThreatProtectionPolicyIdsForApi(String apiId, Connection connection) throws SQLException {
-        final String query = "SELECT POLICY_ID FROM AM_THREAT_PROTECTION_ASSOCIATIONS WHERE API_ID = ?";
+        final String query = "SELECT POLICY_ID FROM AM_THREAT_PROTECTION_MAPPING WHERE API_ID = ?";
         Set<String> policyIds = new HashSet<>();
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiId);
