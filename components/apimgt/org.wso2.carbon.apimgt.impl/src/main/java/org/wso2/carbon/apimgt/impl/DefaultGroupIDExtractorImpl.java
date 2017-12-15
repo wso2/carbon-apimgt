@@ -85,11 +85,8 @@ public class DefaultGroupIDExtractorImpl implements NewPostLoginExecutor {
             organization =
                     manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), claim, null);
             if (organization != null) {
-
                 if (organization.contains(",")) {
-
                     groupIdArray = organization.split(",");
-
                     for (int i = 0; i < groupIdArray.length; i++) {
                         groupIdArray[i] = groupIdArray[i].toString();
                     }
