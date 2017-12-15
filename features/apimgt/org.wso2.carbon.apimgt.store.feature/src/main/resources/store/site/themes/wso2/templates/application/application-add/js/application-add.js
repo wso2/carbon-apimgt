@@ -15,6 +15,10 @@ $(document).ready(function () {
         return !/(["\'])/g.test(value);
      }, i18n.t('The Name contains one or more illegal characters') + '( &nbsp;&nbsp; " &nbsp;&nbsp; \' &nbsp;&nbsp; )');
 
+    $.validator.addMethod('checkForSpaces', function(value, element) {
+        return (value.length == value.trim().length);
+    }, i18n.t('Application name cannot contain leading or trailing white spaces'));
+
     $("#appAddForm").validate({
         submitHandler: function(form) {
             applicationAdd();
