@@ -3178,7 +3178,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
 
             } catch (ClassNotFoundException e) {
-                String msg = groupingExtractorClass + " is not found in run time";
+                String msg = groupingExtractorClass + " is not found in runtime";
                 log.error(msg, e);
                 throw new APIManagementException(msg, e);
             } catch (ClassCastException e) {
