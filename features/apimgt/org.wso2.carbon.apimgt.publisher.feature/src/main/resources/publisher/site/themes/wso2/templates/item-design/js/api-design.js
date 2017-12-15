@@ -347,7 +347,7 @@ APIDesigner.prototype.update_elements = function(resource, newValue){
             obj['type'] = "string";
         }
     }
-        
+    API_DESIGNER.load_swagger_editor_content();
 };
 
 APIDesigner.prototype.update_elements_boolean = function(resource, newValue){
