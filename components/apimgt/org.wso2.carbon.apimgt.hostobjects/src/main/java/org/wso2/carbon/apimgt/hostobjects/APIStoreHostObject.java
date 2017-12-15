@@ -2565,7 +2565,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("prodKey", row, getKey(api, APIConstants.API_KEY_TYPE_PRODUCTION));
                     row.put("sandboxKey", row, getKey(api, APIConstants.API_KEY_TYPE_SANDBOX));
 
-                    if(APIUtil.isMultiGroupSharingEnabled()){
+                    if (APIUtil.isMultiGroupSharingEnabled()) {
                         row.put("owner", row, api.getApplication().getOwner());
                     }
 
@@ -4601,7 +4601,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     i++;
                 }
                 return grpIdList;
-            }else{
+            } else {
                 return null;
             }
         } catch (APIManagementException e) {
