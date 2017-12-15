@@ -43,8 +43,8 @@ include("/jagg/jagg.jag");
         username = user.username;
         tier = request.getParameter("tier");
         var groupId = "";
-        if(jagg.isMultiGroupEnabled()){
-            groupId = request.getParameter("groupId");;
+        if (jagg.isMultiGroupEnabled()) {
+            groupId = request.getParameter("groupId");
         }
 
         if(null == request.getParameter("callbackUrl")){

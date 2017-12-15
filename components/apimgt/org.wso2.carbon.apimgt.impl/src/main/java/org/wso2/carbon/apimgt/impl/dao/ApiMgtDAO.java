@@ -3770,7 +3770,7 @@ public class ApiMgtDAO {
             }
 
             String groupId = application.getGroupId();
-            if(multiGropIdEnabled){
+            if (multiGropIdEnabled) {
                 // setting an empty groupId since groupid's should be saved in groupId mapping table
                 groupId = "";
             }

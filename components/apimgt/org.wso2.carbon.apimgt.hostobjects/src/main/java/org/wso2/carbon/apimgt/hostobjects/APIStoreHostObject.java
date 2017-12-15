@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.hostobjects;
 
+import com.sun.source.tree.NewArrayTree;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
@@ -4605,7 +4606,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 return null;
             }
         } catch (APIManagementException e) {
-            //This is actually not an exception, that should abort the user flow. If the groupId is not available then
+            //This exception should not abort the user flow. If the groupId is not available then
             //the flow for which the group id is not required will be run.
             log.error("Error occurred while getting group id", e);
         }
