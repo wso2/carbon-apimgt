@@ -185,8 +185,22 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import javax.cache.Cache;
 import javax.cache.CacheConfiguration;
@@ -465,7 +479,6 @@ public final class APIUtil {
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
             Resource apiResource = registry.get(artifactPath);
             Properties properties = apiResource.getProperties();
-
             if (properties != null) {
                 Enumeration propertyNames = properties.propertyNames();
                 while (propertyNames.hasMoreElements()) {

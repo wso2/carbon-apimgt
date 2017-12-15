@@ -52,8 +52,13 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class APIMappingUtil {
 
@@ -485,7 +490,6 @@ public class APIMappingUtil {
                 model.addProperty(entry.getKey().toLowerCase(), entry.getValue());
             }
         }
-
         APIBusinessInformationDTO apiBusinessInformationDTO = dto.getBusinessInformation();
         if (apiBusinessInformationDTO != null) {
             model.setBusinessOwner(apiBusinessInformationDTO.getBusinessOwner());

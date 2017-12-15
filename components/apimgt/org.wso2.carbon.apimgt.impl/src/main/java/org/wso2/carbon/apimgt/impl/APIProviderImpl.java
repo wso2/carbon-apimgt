@@ -142,7 +142,21 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.StringTokenizer;
+import java.util.TreeSet;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -5180,21 +5194,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return new ThrottlePolicyTemplateBuilder();
     }
 
-
     /**
-     * To add API roles restrictions whenever the publisher access control is modified.
+     * To add API roles restrictions and add additional properties.
      *
      * @param artifactPath                Path of the API artifact.
      * @param publisherAccessControlRoles Role specified for the publisher access control.
      * @param publisherAccessControl      Publisher Access Control restriction.
+     * @param additionalProperties        Additional properties that is related with an API.
      * @throws RegistryException Registry Exception.
      */
-    protected void updateAPIRolesRestrictions(String artifactPath, String publisherAccessControlRoles,
-            String publisherAccessControl) throws RegistryException {
-       updateAPIResourcesAndRestrictions(artifactPath, publisherAccessControlRoles, publisherAccessControl, null);
-    }
-
-    protected void updateAPIResourcesAndRestrictions(String artifactPath, String publisherAccessControlRoles,
+    private void updateAPIResourcesAndRestrictions(String artifactPath, String publisherAccessControlRoles,
             String publisherAccessControl, Map<String, String> additionalProperties) throws RegistryException {
         publisherAccessControlRoles = (publisherAccessControlRoles == null || publisherAccessControlRoles.trim()
                 .isEmpty()) ? APIConstants.NULL_USER_ROLE_LIST : publisherAccessControlRoles;
@@ -5224,13 +5233,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiResource.removeProperty(APIConstants.CUSTOM_API_INDEXER_PROPERTY);
             if (additionalProperties != null && additionalProperties.size() != 0) {
                 for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
-                    apiResource.setProperty(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + entry.getKey(),
+                    apiResource.setProperty(
+                            (APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + entry.getKey()).toLowerCase(),
                             entry.getValue());
                 }
             }
             registry.put(artifactPath, apiResource);
         }
-
     }
 
     @Override

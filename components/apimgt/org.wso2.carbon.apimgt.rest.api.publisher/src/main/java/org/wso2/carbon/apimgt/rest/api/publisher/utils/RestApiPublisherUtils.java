@@ -214,7 +214,7 @@ public class RestApiPublisherUtils {
     /**
      * To validate the additional properties.
      * Validation will be done for the keys of additional properties. Property keys should not contain spaces in it
-     * and it and
+     * and property keys should not conflict with reserved key words.
      *
      * @return error message if there is an validation error with additional properties.
      */

@@ -73,7 +73,7 @@ public class APIDTO  {
 
   private String createdTime = null;
 
-  private Map<String, String> additionalProperties = new HashMap<String, String>();
+  private Map<String, String> additionalProperties = new HashMap<>();
 
   /**
   * gets and sets the lastUpdatedTime for APIDTO
@@ -302,8 +302,8 @@ public class APIDTO  {
   }
 
   /**
-   * Custom properties for the API
-   **/
+   * Custom properties of API
+   */
   @ApiModelProperty(value = "Custom properties for the API")
   @JsonProperty("additionalProperties")
   public Map<String, String> getAdditionalProperties() {

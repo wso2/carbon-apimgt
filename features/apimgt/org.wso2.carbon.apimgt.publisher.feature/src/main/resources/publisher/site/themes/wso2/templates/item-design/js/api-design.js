@@ -636,7 +636,7 @@ APIDesigner.prototype.render_additionalProperties = function () {
     var apiProperties = null;
     var reservedKeyWords = ["provider", "version", "context", "status", "description", "subcontext", "doc", "lcState",
         "name", "documentation", "tags"];
-    
+
     if (apiPropertiesValue) {
         for (var prop in apiPropertiesValue) {
             if (apiPropertiesValue.hasOwnProperty(prop)) {

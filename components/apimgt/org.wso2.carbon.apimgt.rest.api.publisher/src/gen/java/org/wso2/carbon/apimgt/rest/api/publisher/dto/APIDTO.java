@@ -130,8 +130,7 @@ public class APIDTO  {
   
   private APICorsConfigurationDTO corsConfiguration = null;
 
-  private Map<String, String> additionalProperties = new HashMap<String, String>();
-
+  private Map<String, String> additionalProperties = new HashMap<>();
   
   /**
    * UUID of the api registry artifact\n
