@@ -658,7 +658,7 @@ APIDesigner.prototype.render_additionalProperties = function () {
             jagg.message({content: i18n.t("Property value cannot be empty."), type: "error"});
             return;
         }
-        propertyKeyVal = propertyKeyVal.trim();
+        propertyKeyVal = propertyKeyVal.trim().toLowerCase();
         propertyVal = propertyVal.trim();
 
         if (propertyKeyVal.indexOf(' ') >= 0) {
@@ -670,7 +670,7 @@ APIDesigner.prototype.render_additionalProperties = function () {
         }
 
         for (var keyWord in reservedKeyWords) {
-            if (propertyKeyVal.toLowerCase() === reservedKeyWords[keyWord]) {
+            if (propertyKeyVal === reservedKeyWords[keyWord]) {
                 jagg.message({
                     content: i18n.t("Property name matches with one of the reserved keywords. Reserved" +
                         " keywords are [" + reservedKeyWords + "]. Please select a different property name"),
@@ -687,7 +687,6 @@ APIDesigner.prototype.render_additionalProperties = function () {
         if (!apiPropertiesObject) {
             apiPropertiesObject = {};
         }
-
         if (apiPropertiesObject.hasOwnProperty(propertyKeyVal)) {
             jagg.message({
                 content: i18n.t("Property " + propertyKeyVal + " already exist for this API. Property names are" +

@@ -2052,6 +2052,9 @@ definitions:
       thumbnailUrl:
         type: string
         example: ""
+      additionalProperties:
+        type: object
+        description : Custom(user defined) properties of API
       endpointURLs:
         type: array
         items:

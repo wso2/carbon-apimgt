@@ -49,6 +49,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  *  This class contains REST API Publisher related utility operations
@@ -205,6 +206,30 @@ public class RestApiPublisherUtils {
                                 + "accessControl list entered";
             } else {
                 return "Invalid user roles found";
+            }
+        }
+        return "";
+    }
+
+    /**
+     * To validate the additional properties.
+     * Validation will be done for the keys of additional properties. Property keys should not contain spaces in it
+     * and it and
+     *
+     * @return error message if there is an validation error with additional properties.
+     */
+    public static String validateAdditionalProperties(Map<String, String> additionalProperties) {
+        if (additionalProperties != null) {
+            for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
+                String propertyKey = entry.getKey();
+                if (propertyKey.trim().contains(" ")) {
+                    return "Property names should not contain space chracter. Property '" + propertyKey + "' "
+                            + "contains space in it.";
+                }
+                if (Arrays.asList(APIConstants.API_SEARCH_PREFIXES).contains(propertyKey.toLowerCase())) {
+                    return "Property '" + propertyKey + "' conflicts with the reserved keywords. Reserved keywords "
+                            + "are [" + Arrays.toString(APIConstants.API_SEARCH_PREFIXES) + "]";
+                }
             }
         }
         return "";

@@ -1,7 +1,10 @@
 package org.wso2.carbon.apimgt.rest.api.store.dto;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIEndpointURLsDTO;
 
@@ -69,6 +72,8 @@ public class APIDTO  {
   private String lastUpdatedTime = null;
 
   private String createdTime = null;
+
+  private Map<String, String> additionalProperties = new HashMap<String, String>();
 
   /**
   * gets and sets the lastUpdatedTime for APIDTO
@@ -296,7 +301,17 @@ public class APIDTO  {
     this.businessInformation = businessInformation;
   }
 
-  
+  /**
+   * Custom properties for the API
+   **/
+  @ApiModelProperty(value = "Custom properties for the API")
+  @JsonProperty("additionalProperties")
+  public Map<String, String> getAdditionalProperties() {
+    return additionalProperties;
+  }
+  public void setAdditionalProperties(Map<String, String> additionalProperties) {
+    this.additionalProperties = additionalProperties;
+  }
 
   @Override
   public String toString()  {

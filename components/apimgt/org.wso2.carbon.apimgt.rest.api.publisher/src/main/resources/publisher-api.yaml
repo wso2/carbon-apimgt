@@ -1,3 +1,4 @@
+
 swagger: '2.0'
 ######################################################
 # Prolog
@@ -3057,6 +3058,9 @@ definitions:
         items:
           type: string
         example: []
+      additionalProperties:
+        type: object
+        description : Map of custom properties of API
       accessControl:
         type: string
         description: Is the API is restricted to certain set of publishers or creators or is it visible to all the

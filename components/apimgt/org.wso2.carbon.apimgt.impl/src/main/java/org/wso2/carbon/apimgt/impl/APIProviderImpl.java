@@ -2021,8 +2021,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 rolesSet = roles.split(",");
             }
             // Adding publisher access control permissions to new version.
-            Resource apiTargetArtifact = registry.get(targetPath);
+            Resource apiTargetArtifact = null;
+            if (registry.resourceExists(targetPath)) {
+                apiTargetArtifact = registry.get(targetPath);
+            }
             if (apiTargetArtifact != null) {
+                // Copying all the properties.
+                Properties properties = apiSourceArtifact.getProperties();
+                if (properties != null) {
+                    Enumeration propertyNames = properties.propertyNames();
+                    while (propertyNames.hasMoreElements()) {
+                        String propertyName = (String) propertyNames.nextElement();
+                        if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
+                            apiTargetArtifact.setProperty(propertyName, apiSourceArtifact.getProperty(propertyName));
+                        }
+                    }
+                }
                 apiTargetArtifact.setProperty(APIConstants.PUBLISHER_ROLES,
                         apiSourceArtifact.getProperty(APIConstants.PUBLISHER_ROLES));
                 apiTargetArtifact.setProperty(APIConstants.ACCESS_CONTROL,
