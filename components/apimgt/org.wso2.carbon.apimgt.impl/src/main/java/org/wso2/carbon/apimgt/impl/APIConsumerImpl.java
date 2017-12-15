@@ -3159,9 +3159,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 	public Set<Scope> getScopesByScopeKeys(String scopeKeys, int tenantId)
 			throws APIManagementException {
 		return apiMgtDAO.getScopesByScopeKeys(scopeKeys, tenantId);
-	}
+    }
 
-	@Override
+    @Override
     public String[] getGroupIds(String response) throws APIManagementException {
         String groupingExtractorClass = APIUtil.getGroupingExtractorImplementation();
         if (groupingExtractorClass != null) {
@@ -3169,23 +3169,23 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 LoginPostExecutor groupingExtractor = (LoginPostExecutor) APIUtil.getClassForName
                         (groupingExtractorClass).newInstance();
                 //switching 2.1.0 and 2.2.0
-                if(APIUtil.isMultiGroupSharingEnabled()){
-                    NewPostLoginExecutor newGroupIdListExtractor = (NewPostLoginExecutor)groupingExtractor;
+                if (APIUtil.isMultiGroupSharingEnabled()) {
+                    NewPostLoginExecutor newGroupIdListExtractor = (NewPostLoginExecutor) groupingExtractor;
                     return newGroupIdListExtractor.getGroupingIdentifierList(response);
-                }else {
+                } else {
                     String groupId = groupingExtractor.getGroupingIdentifiers(response);
-                    return new String[]{groupId};
+                    return new String[] {groupId};
                 }
 
             } catch (ClassNotFoundException e) {
                 String msg = groupingExtractorClass + " is not found in run time";
                 log.error(msg, e);
                 throw new APIManagementException(msg, e);
-            }  catch (ClassCastException e) {
+            } catch (ClassCastException e) {
                 String msg = "Cannot cast " + groupingExtractorClass + " NewPostLoginExecutor";
                 log.error(msg, e);
                 throw new APIManagementException(msg, e);
-            }catch (IllegalAccessException e) {
+            } catch (IllegalAccessException e) {
                 String msg = "Error occurred while invocation of getGroupingIdentifier method";
                 log.error(msg, e);
                 throw new APIManagementException(msg, e);
