@@ -1560,7 +1560,8 @@ public class ApiMgtDAO {
 
         String whereClauseWithMultiGroupId = " AND  ( (APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
                 "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params)))  OR  ( SUB.USER_ID = ? ))";
-        String whereClauseWithGroupIdMultiCaseInsensitiveComp =" AND  ( (APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
+        String whereClauseWithGroupIdMultiCaseInsensitiveComp = "  AND  ( (APP.APPLICATION_ID IN (SELECT " +
+                "APPLICATION_ID  FROM " +
                 "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params)))  OR  ( LOWER(SUB.USER_ID) = LOWER(?) ))";
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -1639,7 +1640,7 @@ public class ApiMgtDAO {
                         application.addOAuthApp(entry.getKey(), entry.getValue());
                     }
 
-                    if(multiGropIdEnabled){
+                    if (multiGropIdEnabled) {
                         application.setGroupId(getGroupId(application.getId()));
                         application.setOwner(result.getString("OWNER"));
                     }
