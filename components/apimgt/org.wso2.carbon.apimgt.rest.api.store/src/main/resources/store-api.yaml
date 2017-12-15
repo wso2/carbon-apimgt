@@ -2300,7 +2300,7 @@ paths:
           required: true
           type: file
       tags:
-        - Import Configuration
+        - Application (Individual)
       responses:
         200:
           description: |

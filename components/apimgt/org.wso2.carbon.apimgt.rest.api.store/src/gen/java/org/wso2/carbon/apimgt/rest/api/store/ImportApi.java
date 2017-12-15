@@ -54,7 +54,7 @@ public class ImportApi implements Microservice  {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "Import Configuration", })
+    }, tags={ "Application (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Successful response with the updated object as entity in the body. ", response = ApplicationDTO.class),
         
