@@ -47,7 +47,6 @@ import javax.cache.Cache;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import java.lang.reflect.Field;
-import java.rmi.RemoteException;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;

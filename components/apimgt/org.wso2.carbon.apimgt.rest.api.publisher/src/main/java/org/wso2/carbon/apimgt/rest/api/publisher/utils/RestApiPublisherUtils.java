@@ -25,8 +25,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
-import org.hibernate.validator.internal.constraintvalidators.URLValidator;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -223,7 +221,7 @@ public class RestApiPublisherUtils {
             for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
                 String propertyKey = entry.getKey();
                 if (propertyKey.trim().contains(" ")) {
-                    return "Property names should not contain space chracter. Property '" + propertyKey + "' "
+                    return "Property names should not contain space character. Property '" + propertyKey + "' "
                             + "contains space in it.";
                 }
                 if (Arrays.asList(APIConstants.API_SEARCH_PREFIXES).contains(propertyKey.toLowerCase())) {
