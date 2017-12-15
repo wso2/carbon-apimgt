@@ -20,6 +20,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -43,11 +44,12 @@ import javax.ws.rs.core.Response;
 public class ExportApi implements Microservice  {
    private final ExportApiService delegate = ExportApiServiceFactory.getExportApi();
 
+    @OPTIONS
     @GET
     @Path("/applications")
     @Consumes({ "application/json" })
     @Produces({ "application/zip" })
-    @io.swagger.annotations.ApiOperation(value = "Export information related to an Application.", notes = "This operation can be used to export information related to a perticular application. ", response = File.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Export details related to an Application.", notes = "This operation can be used to export details related to a perticular application. ", response = File.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })

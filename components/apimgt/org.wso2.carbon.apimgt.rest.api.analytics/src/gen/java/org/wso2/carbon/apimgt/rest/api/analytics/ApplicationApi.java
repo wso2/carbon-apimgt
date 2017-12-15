@@ -19,6 +19,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -42,6 +43,7 @@ import javax.ws.rs.core.Response;
 public class ApplicationApi implements Microservice  {
    private final ApplicationApiService delegate = ApplicationApiServiceFactory.getApplicationApi();
 
+    @OPTIONS
     @GET
     @Path("/count-over-time")
     @Consumes({ "application/json" })
@@ -60,8 +62,8 @@ public class ApplicationApi implements Microservice  {
     public Response applicationCountOverTimeGet(@ApiParam(value = "Defines the starting timestamp of the interval ",required=true) @QueryParam("startTime") String startTime
 ,@ApiParam(value = "Defines the ending timestamp of the interval ",required=true) @QueryParam("endTime") String endTime
 ,@ApiParam(value = "application/api creator name. In case of any creator is not provided all the details will be provided ") @QueryParam("createdBy") String createdBy
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.applicationCountOverTimeGet(startTime,endTime,createdBy, request);
+        return delegate.applicationCountOverTimeGet(startTime,endTime,createdBy,request);
     }
 }

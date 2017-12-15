@@ -21,6 +21,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -44,6 +45,7 @@ import javax.ws.rs.core.Response;
 public class BlacklistApi implements Microservice  {
    private final BlacklistApiService delegate = BlacklistApiServiceFactory.getBlacklistApi();
 
+    @OPTIONS
     @DELETE
     @Path("/{conditionId}")
     @Consumes({ "application/json" })
@@ -66,6 +68,7 @@ public class BlacklistApi implements Microservice  {
     throws NotFoundException {
         return delegate.blacklistConditionIdDelete(conditionId,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{conditionId}")
     @Consumes({ "application/json" })
@@ -90,6 +93,7 @@ public class BlacklistApi implements Microservice  {
     throws NotFoundException {
         return delegate.blacklistConditionIdGet(conditionId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @PUT
     @Path("/{conditionId}")
     @Consumes({ "application/json" })
@@ -115,6 +119,7 @@ public class BlacklistApi implements Microservice  {
     throws NotFoundException {
         return delegate.blacklistConditionIdPut(conditionId,body,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     
     @Consumes({ "application/json" })
@@ -136,6 +141,7 @@ public class BlacklistApi implements Microservice  {
     throws NotFoundException {
         return delegate.blacklistGet(ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @POST
     
     @Consumes({ "application/json" })
