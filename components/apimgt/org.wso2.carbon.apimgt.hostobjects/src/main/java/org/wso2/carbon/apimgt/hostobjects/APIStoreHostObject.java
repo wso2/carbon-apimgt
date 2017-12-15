@@ -4583,7 +4583,7 @@ public class APIStoreHostObject extends ScriptableObject {
      * @param thisObj Scriptable object
      * @param args Passing arguments
      * @param funObj Function object
-     * @return String group id.
+     * @return NativeArray groupid array.
      *
      */
     public static NativeArray jsFunction_getGroupIds(Context cx, Scriptable thisObj, Object[] args, Function funObj) {
