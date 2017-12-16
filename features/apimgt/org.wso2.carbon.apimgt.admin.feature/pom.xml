@@ -137,8 +137,9 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <includes>
-                    <include>publisher/public/**</include>
-                    <include>publisher/pages/**</include>
+                    <include>admin/public/**</include>
+                    <include>admin/pages/**</include>
+                    <include>p2.inf</include>
                 </includes>
             </resource>
         </resources>

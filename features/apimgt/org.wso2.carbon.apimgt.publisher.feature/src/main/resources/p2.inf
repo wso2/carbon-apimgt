@@ -1,11 +1,6 @@
 metaRequirements.0.namespace = org.eclipse.equinox.p2.iu
 metaRequirements.0.name = org.wso2.carbon.extensions.touchpoint
 instructions.configure = \
-org.eclipse.equinox.p2.touchpoint.natives.remove(path:${installFolder}/../lib/features/org.wso2.carbon.apimgt.publisher_${feature.version}/publisher/node_modules,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.remove(path:${installFolder}/../lib/features/org.wso2.carbon.apimgt.publisher_${feature.version}/publisher/source,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.remove(path:${installFolder}/../lib/features/org.wso2.carbon.apimgt.publisher_${feature.version}/publisher/package.json,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.remove(path:${installFolder}/../lib/features/org.wso2.carbon.apimgt.publisher_${feature.version}/publisher/webpack.config.js,overwrite:true);\
-org.eclipse.equinox.p2.touchpoint.natives.remove(path:${installFolder}/../lib/features/org.wso2.carbon.apimgt.publisher_${feature.version}/publisher/package-lock.json,overwrite:true);\
 org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/);\
 org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/web-ui-apps/);\
 org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/web-ui-apps/publisher/);\

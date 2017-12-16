@@ -157,8 +157,9 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <includes>
-                    <include>publisher/public/**</include>
-                    <include>publisher/pages/**</include>
+                    <include>store/public/**</include>
+                    <include>store/pages/**</include>
+                    <include>p2.inf</include>
                 </includes>
             </resource>
         </resources>
