@@ -13,6 +13,9 @@ var apiLevelPolicy = {
     isAPILevel : false
 };
 
+const SWAGGER_CONTENT = "swagger-editor-content"
+const SWAGGER_CONTENT_CACHE = "swagger-editor-content-cache"
+
 Handlebars.registerHelper('countKeys', function(value){
     return Object.keys(value).length * 2 + 1;
 });
@@ -348,7 +351,7 @@ APIDesigner.prototype.update_elements = function(resource, newValue){
             obj['type'] = "string";
         }
     }
-        
+    API_DESIGNER.load_swagger_editor_content();
 };
 
 APIDesigner.prototype.update_elements_boolean = function(resource, newValue){
@@ -444,6 +447,7 @@ APIDesigner.prototype.init_controllers = function(){
         }
         resource.parameters.push({ name : parameter , in : "query", required : false , type: "string"});
         //@todo need to checge parent.parent to stop code brak when template change.
+        API_DESIGNER.load_swagger_editor_content();
         API_DESIGNER.render_resource(resource_body);
     });
 
@@ -587,6 +591,7 @@ APIDesigner.prototype.init_controllers = function(){
  
 APIDesigner.prototype.load_api_document = function(api_document){
     this.api_doc = api_document;
+    this.load_swagger_editor_content();
     this.render_resources();
     this.render_scopes();
     if (this.api_document != null) {
@@ -598,6 +603,13 @@ APIDesigner.prototype.load_api_document = function(api_document){
     }
 };
 
+APIDesigner.prototype.load_swagger_editor_content = function (){
+    if(this.api_doc != ""){
+       var swagYaml = jsyaml.safeDump(this.api_doc);
+       window.localStorage.setItem(SWAGGER_CONTENT, swagYaml);
+       window.localStorage.setItem(SWAGGER_CONTENT_CACHE, swagYaml);
+    }
+};
 
 APIDesigner.prototype.render_scopes = function(){
     if($('#scopes-template').length){    
@@ -779,6 +791,8 @@ APIDesigner.prototype.render_resources = function(){
           '<button type="button" class="btn btn-secondary btn-sm editable-cancel">'+
             '<i class="fw fw-cancel"></i>'+
           '</button>';
+              this.load_swagger_editor_content();
+
 };
 
 APIDesigner.prototype.render_resource = function(container){
@@ -862,7 +876,8 @@ APIDesigner.prototype.render_resource = function(container){
         source: [ { value:true, text:"True" },{ value:false, text:"False"} ],
         success : this.update_elements_boolean,
         mode: 'popup'
-    });   
+    });
+    this.load_swagger_editor_content();
 };
 
 APIDesigner.prototype.query = function(path){
@@ -878,14 +893,15 @@ APIDesigner.prototype.add_resource = function(resource, path){
     }
     else{
         this.api_doc.paths[path] = $.extend({}, this.api_doc.paths[path], resource);
-    } 
+    }
+    this.load_swagger_editor_content();
     this.render_resources();
 };
 
 APIDesigner.prototype.edit_swagger = function(){
     $("body").addClass("modal-open");
     $(".wizard").hide();
-    $("#swaggerEditer").append('<iframe id="se-iframe"  style="border:0px;"background: #4a4a4a; width="100%" height="100%"></iframe>');    
+    $("#swaggerEditer").append('<iframe id="se-iframe"  style="border:0px;"background: #4a4a4a; width="100%" height="100%"></iframe>');
     document.getElementById('se-iframe').src = $("#swaggerEditer").attr("editor-url");
 
     //Added temparory navebar on top of the swagger editor
@@ -917,6 +933,9 @@ APIDesigner.prototype.close_swagger_editor = function(){
     $('#swaggerEditer').append($('.swagger_editer_header'));
     $('.tempNav').remove();
     $("#swaggerEditer").fadeOut("fast");
+    var swagYaml = window.localStorage.getItem(SWAGGER_CONTENT_CACHE);
+    window.localStorage.setItem(SWAGGER_CONTENT, swagYaml);
+
 };
 
 APIDesigner.prototype.update_swagger = function(){
@@ -927,7 +946,7 @@ APIDesigner.prototype.update_swagger = function(){
     $('.tempNav').remove();
     $("#swaggerEditer").fadeOut("fast");    
     var designer =  APIDesigner();
-    var json = jsyaml.safeLoad(designer.yaml);
+    var json = jsyaml.safeLoad(window.localStorage.getItem(SWAGGER_CONTENT));
     designer.load_api_document(json);          
 };
 

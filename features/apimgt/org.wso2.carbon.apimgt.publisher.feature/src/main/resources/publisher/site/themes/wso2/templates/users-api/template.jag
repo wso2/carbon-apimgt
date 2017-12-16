@@ -39,27 +39,34 @@
 			<tbody id="userList">
 				<%
         var i, subscriber;
-        if(subscribers!=null){
-        var length = subscribers.length;
-        numberOfPages = parseInt(length / itemsPerPage);
-        if (length % itemsPerPage != 0) {
-        numberOfPages++;
-        }
-        if (request.getParameter('page') != null) {
-        currentPage = parseInt(request.getParameter('page'));
-        if((currentPage-1)*itemsPerPage == length){
-        if(String(currentPage)=='1'){%>
+        if (subscribers!=null) {
+            subscribers.sort(function(a,b) {
+                return (a.username > b.username) ? 1 : ((b.username > a.username) ? -1 : 0);
+            });
+            var length = subscribers.length;
+            numberOfPages = parseInt(length / itemsPerPage);
+            if (length % itemsPerPage != 0) {
+                numberOfPages++;
+            }
+            if (request.getParameter('page') != null) {
+                currentPage = parseInt(request.getParameter('page'));
+                if ((currentPage-1)*itemsPerPage == length) {
+                    if (String(currentPage)=='1') {%>
 				<script>
-        window.location.href = "<%=jagg.getAbsoluteUrl("/site/pages/item-info.jag")%>";
-        </script>
+                    window.location.href = "<%=jagg.getAbsoluteUrl("/site/pages/item-info.jag")%>";
+                </script>
 				<%}else{
-        currentPage = currentPage - 1;
-        %>
+                    currentPage = currentPage - 1;
+                %>
 				<script>
-        window.location.href = "<%=jagg.getAbsoluteUrl("/site/pages/item-info.jag")%>" +"?name="+"<%=api.name%>"+"&version="+"<%=api.version%>"+"&provider="+"<%=api.provider%>"+"&page="+"<%=String(currentPage)%>";
-        </script>
+                    window.location.href = "<%=jagg.getAbsoluteUrl("/site/pages/item-info.jag")%>" +"?name="+"<%=api
+                    .name%>"+"&version="+"<%=api.version%>"+"&provider="+"<%=api.provider%>"+"&page="
+                    +"<%=String(currentPage)%>";
+                </script>
 				<%
-        } }  }
+                }
+            }
+        }
         var from = (currentPage - 1)*itemsPerPage;
         var to = currentPage*itemsPerPage;
         if(currentPage == numberOfPages){

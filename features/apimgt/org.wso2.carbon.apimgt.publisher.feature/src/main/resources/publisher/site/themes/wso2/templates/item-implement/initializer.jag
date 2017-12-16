@@ -24,6 +24,7 @@ jagg.initializer("item-implement", {
         jagg.addFooterJS("multiselect", "jagg", "libs/bootstrap-multiselect.js");
         jagg.addFooterJS("jsonpath-0.15.0", "jagg", "libs/jsonpath-0.15.0.js");
         jagg.addFooterJS("design-api", "jagg", "templates/item-design/js/api-design.js");
+        jagg.addFooterJS("yaml2json", "jagg", "libs/js-yaml.min.js");
         jagg.addFooterJS("endpint-ui-jq", "jagg", "templates/item-implement/js/jquery.endpointUi.js");
         jagg.addFooterJS("cert-ui-jq", "jagg", "templates/item-implement/js/jquery.certUi.js");
         jagg.addFooterJS("implementation-api", "jagg", "templates/item-implement/js/api-implementation.js");
