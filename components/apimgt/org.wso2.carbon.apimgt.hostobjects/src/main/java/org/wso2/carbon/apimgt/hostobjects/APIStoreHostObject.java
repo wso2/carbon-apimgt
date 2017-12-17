@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.hostobjects;
 
-import com.sun.source.tree.NewArrayTree;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
