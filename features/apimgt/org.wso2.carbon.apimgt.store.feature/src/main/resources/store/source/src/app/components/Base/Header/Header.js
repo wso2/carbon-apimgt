@@ -19,27 +19,21 @@
 import React from 'react'
 import {Link, withRouter} from "react-router-dom";
 import AuthManager from '../../../data/AuthManager.js';
-import qs from 'qs'
 
 import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
 import IconButton from 'material-ui/IconButton';
 import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
-import Menu, { MenuItem } from 'material-ui/Menu';
+import Menu, {MenuItem} from 'material-ui/Menu';
 import SearchIcon from 'material-ui-icons/Search';
 import MenuIcon from 'material-ui-icons/Menu';
-import PlaylistAddIcon from 'material-ui-icons/PlaylistAdd';
 import CloseIcon from 'material-ui-icons/Close';
 import TextField from 'material-ui/TextField';
 import InfoIcon from 'material-ui-icons/Info';
 import InfoLightBulb from 'material-ui-icons/LightbulbOutline';
 import Avatar from 'material-ui/Avatar';
-import List, {
-    ListItem,
-    ListItemIcon,
-    ListItemText,
-} from 'material-ui/List';
+import List, {ListItem, ListItemIcon, ListItemText,} from 'material-ui/List';
 
 const helpTips = [
     "By API Name [Default]",
@@ -53,7 +47,7 @@ const helpTips = [
 ];
 
 class Header extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props);
         this.state = {
             anchorElUserMenu: undefined,
@@ -67,39 +61,41 @@ class Header extends React.Component {
             openTips: false
         }
     }
+
     handleClickUserMenu = event => {
-        this.setState({ openUserMenu: true, anchorElUserMenu: event.currentTarget });
+        this.setState({openUserMenu: true, anchorElUserMenu: event.currentTarget});
     };
 
     handleRequestCloseUserMenu = () => {
-        this.setState({ openUserMenu: false });
+        this.setState({openUserMenu: false});
     };
     handleClickAddMenu = event => {
-        this.setState({ openAddMenu: true, anchorElAddMenu: event.currentTarget });
+        this.setState({openAddMenu: true, anchorElAddMenu: event.currentTarget});
     };
 
     handleRequestCloseAddMenu = () => {
-        this.setState({ openAddMenu: false });
+        this.setState({openAddMenu: false});
     };
     handleClickMainMenu = event => {
-        this.setState({ openMainMenu: true, anchorElMainMenu: event.currentTarget });
+        this.setState({openMainMenu: true, anchorElMainMenu: event.currentTarget});
     };
 
     handleRequestCloseMainMenu = () => {
-        this.setState({ openMainMenu: false });
+        this.setState({openMainMenu: false});
     };
     toggleSearch = () => {
-        this.setState({searchVisible:!this.state.searchVisible});
+        this.setState({searchVisible: !this.state.searchVisible});
     }
     handleClickTips = event => {
-        this.setState({ openTips: true, anchorElTips: event.currentTarget });
+        this.setState({openTips: true, anchorElTips: event.currentTarget});
     };
     handleRequestCloseTips = () => {
-        this.setState({ openTips: false });
+        this.setState({openTips: false});
     };
-    componentWillReceiveProps(nextProps){
-        if(nextProps.showLeftMenu){
-            this.setState({showLeftMenu:nextProps.showLeftMenu});
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.showLeftMenu) {
+            this.setState({showLeftMenu: nextProps.showLeftMenu});
         }
     }
 
@@ -118,11 +114,11 @@ class Header extends React.Component {
                         </IconButton>
                         <TextField
                             id="placeholder"
-                            InputProps={{ placeholder: 'Placeholder' }}
+                            InputProps={{placeholder: 'Placeholder'}}
                             helperText="Search By Name"
                             fullWidth
                             margin="normal"
-                            color = "contrast"
+                            color="contrast"
                             inputRef={focusUsernameInputField}
                         />
                         <IconButton aria-label="Search Info" color="contrast">
@@ -137,8 +133,8 @@ class Header extends React.Component {
                             <List dense={true}>
                                 {helpTips.map((tip) => {
                                     return <ListItem button key={tip}>
-                                        <ListItemIcon><InfoIcon /></ListItemIcon>
-                                        <ListItemText  primary={tip} />
+                                        <ListItemIcon><InfoIcon/></ListItemIcon>
+                                        <ListItemText primary={tip}/>
                                     </ListItem>
                                 })}
                             </List>
@@ -147,24 +143,24 @@ class Header extends React.Component {
                     :
                     <Toolbar>
                         {this.state.showLeftMenu ?
-                        <IconButton color="contrast" aria-label="Menu">
-                            <MenuIcon color="contrast" onClick={this.props.toggleDrawer}/>
-                        </IconButton> : <span></span> }
+                            <IconButton color="contrast" aria-label="Menu">
+                                <MenuIcon color="contrast" onClick={this.props.toggleDrawer}/>
+                            </IconButton> : <span></span>}
                         <Typography type="title" color="inherit" style={{flex: 1}}>
                             <Link to="/" className="home">
-                                    <img className="brand" src="/store/public/app/images/logo-inverse.svg" alt="wso2-logo"/>
-                                    <span color="contrast" style={{fontSize: "15px", color:"#fff"}}>APIM Store</span>
+                                <img className="brand" src="/store/public/app/images/logo-inverse.svg" alt="wso2-logo"/>
+                                <span color="contrast" style={{fontSize: "15px", color: "#fff"}}>APIM Store</span>
                             </Link>
                         </Typography>
-                        { user ?
-                            <div style={{display:"flex"}}>
+                        {user ?
+                            <div style={{display: "flex"}}>
                                 <Button aria-label="Search" onClick={this.toggleSearch} color="contrast">
-                                    <SearchIcon />
+                                    <SearchIcon/>
                                 </Button>
 
                                 <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClickMainMenu}
                                         color="contrast">
-                                    <MenuIcon />
+                                    <MenuIcon/>
                                 </Button>
                                 <Menu
                                     id="simple-menu"
@@ -174,12 +170,12 @@ class Header extends React.Component {
                                     style={{alignItems: "center", justifyContent: "center"}}
                                 >
 
-                                    <MenuItem onClick={this.handleRequestCloseMainMenu}>
-                                        <Link to="/" style={{color: "#000", textDecoration: 'none'}}>List API</Link>
-                                    </MenuItem>
-                                    <MenuItem onClick={this.handleRequestCloseMainMenu}>
-                                        <Link to="/applications" style={{color: "#000", textDecoration: 'none'}}>Applications</Link>
-                                    </MenuItem>
+                                    <Link to="/">
+                                        <MenuItem onClick={this.handleRequestCloseMainMenu}>List API</MenuItem>
+                                    </Link>
+                                    <Link to="/applications">
+                                        <MenuItem onClick={this.handleRequestCloseMainMenu}>Applications</MenuItem>
+                                    </Link>
                                 </Menu>
                                 {/* User menu */}
                                 <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClickUserMenu}
@@ -202,7 +198,7 @@ class Header extends React.Component {
                                 </Menu>
                             </div>
                             :
-                            <div></div> }
+                            <div></div>}
 
                     </Toolbar>
                 }
