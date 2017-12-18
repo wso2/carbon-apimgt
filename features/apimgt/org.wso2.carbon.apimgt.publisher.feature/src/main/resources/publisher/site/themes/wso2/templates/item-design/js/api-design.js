@@ -996,7 +996,7 @@ $(document).ready(function(){
         if(designer.has_resources() == false && !ws ){
         	$("#messageModal div.modal-footer").html("");
             jagg.message({
-                content: i18n.t("At least one resource should be specified. Do you want to add a wildcard resource ()?"),
+                content: i18n.t("At least one resource should be specified. Do you want to add a wildcard resource (/*)?"),
                 type:"confirm",
                 title: i18n.t("Resource not specified"),
                 anotherDialog:true,
