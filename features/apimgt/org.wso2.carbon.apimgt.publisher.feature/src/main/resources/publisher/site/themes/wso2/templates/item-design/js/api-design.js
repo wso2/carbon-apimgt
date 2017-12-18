@@ -453,7 +453,7 @@ APIDesigner.prototype.init_controllers = function(){
         var i = $(this).attr("data-index");
 
         var deleteDataArray = deleteData.split(".");
-        var operations = deleteDataArray[2];
+        var operations = deleteDataArray[2].replace(/]|[[]|'/g, '');
         var operation = deleteDataArray[3];
         var paramName = API_DESIGNER.api_doc.paths[operations][operation]['parameters'][i]['name'];
 
