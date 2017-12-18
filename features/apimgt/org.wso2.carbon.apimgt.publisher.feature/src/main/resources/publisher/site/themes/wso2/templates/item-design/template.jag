@@ -445,7 +445,7 @@
                                         <div class="form-actions" id="saveButtons">
 											<button type="submit" class="btn btn-secondary has-spinner" id="saveBtn"><%=i18n.localize("Save")%></button>
 											<input type="hidden" value="Save" action="design"/>
-											<a class="btn btn-primary has-spinner" id="go_to_implement" title="go_to_implement"><%=i18n.localize("Next: Implement")%><i class="fw fw-right add-margin-left-2x"></i></a>
+											<button id="go_to_implement" class="btn btn-primary has-spinner" disabled=""><%=i18n.localize("Next: Implement")%><i class="fw fw-right add-margin-left-2x"></i></button>
 										</div>
 									</div>
 								</div>
