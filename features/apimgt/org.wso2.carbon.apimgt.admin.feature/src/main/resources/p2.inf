@@ -1,4 +1,7 @@
 metaRequirements.0.namespace = org.eclipse.equinox.p2.iu
 metaRequirements.0.name = org.wso2.carbon.extensions.touchpoint
 instructions.configure = \
-org.wso2.carbon.extensions.touchpoint.copy(source:${installFolder}/../lib/features/org.wso2.carbon.apimgt.admin_${feature.version}/admin/,target:${installFolder}/../{runtime}/deployment/webapps/admin,overwrite:true);\
+org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/);\
+org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/web-ui-apps/);\
+org.eclipse.equinox.p2.touchpoint.natives.mkdir(path:${installFolder}/../../deployment/web-ui-apps/admin/);\
+org.wso2.carbon.extensions.touchpoint.copy(source:${installFolder}/../lib/features/org.wso2.carbon.apimgt.admin_${feature.version}/admin/,target:${installFolder}/../../deployment/web-ui-apps/admin/,overwrite:true);\
