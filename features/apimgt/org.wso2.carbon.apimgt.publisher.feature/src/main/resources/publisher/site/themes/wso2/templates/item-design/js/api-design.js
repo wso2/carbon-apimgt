@@ -1224,10 +1224,6 @@ var isAPIUpdateValid = function(){
 var disableForm = function() {
     //var form = $('#design_form');
     $("form").each(function() {
-        $(this).find('a').each(function() {
-            $(this).attr('disabled', 'true');
-
-        });
         var inputLength = $(this).find(':input').length; //<-- Should return all input elements in that specific form.
         var elements = $(this).find(':input');
         for (var i = 0, len = elements.length; i < len; ++i) {
