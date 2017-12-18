@@ -993,7 +993,7 @@ $(document).ready(function(){
         if(designer.has_resources() == false && !ws ){
         	$("#messageModal div.modal-footer").html("");
             jagg.message({
-                content: i18n.t("At least one resource should be specified. Do you want to add a wildcard resource (/*)?"),
+                content: i18n.t("At least one resource should be specified. Do you want to add a wildcard resource ()?"),
                 type:"confirm",
                 title: i18n.t("Resource not specified"),
                 anotherDialog:true,
@@ -1218,21 +1218,26 @@ var isAPIUpdateValid = function(){
     return;
 }
 
-var disableForm = function(){
+var disableForm = function() {
     //var form = $('#design_form');
-    $("form").each(function(){
-     var inputLength = $(this).find(':input').length; //<-- Should return all input elements in that specific form.
-     var elements = $(this).find(':input');
-     for (var i = 0, len = elements.length; i < len; ++i) {
-        elements[i].disabled = true;
-     }
+    $("form").each(function() {
+        $(this).find('a').each(function() {
+            $(this).attr('disabled', 'true');
+
+        });
+        var inputLength = $(this).find(':input').length; //<-- Should return all input elements in that specific form.
+        var elements = $(this).find(':input');
+        for (var i = 0, len = elements.length; i < len; ++i) {
+            elements[i].disabled = true;
+        }
+
     });
 
-    $("#api_designer").each(function(){
-      $(this).find('a').each(function() {
-       $(this).attr('disabled','true');
-  
-       });     
+    $("#api_designer").each(function() {
+        $(this).find('a').each(function() {
+            $(this).attr('disabled', 'true');
+
+        });
     });
 
     $('.btn-secondary').prop('disabled', true);
