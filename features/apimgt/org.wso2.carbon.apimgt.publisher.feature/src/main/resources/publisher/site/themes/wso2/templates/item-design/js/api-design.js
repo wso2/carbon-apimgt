@@ -1229,18 +1229,15 @@ var disableForm = function() {
         for (var i = 0, len = elements.length; i < len; ++i) {
             elements[i].disabled = true;
         }
-
     });
 
     $("#api_designer").each(function() {
         $(this).find('a').each(function() {
             $(this).attr('disabled', 'true');
-
         });
     });
 
     $('.btn-secondary').prop('disabled', true);
     $('#swaggerEditor').unbind('click');
-
 }
 
