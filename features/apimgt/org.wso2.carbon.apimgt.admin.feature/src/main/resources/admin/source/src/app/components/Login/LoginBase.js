@@ -26,7 +26,7 @@ const LoginBase = (props) => {
                     <div className="pull-left brand float-remove-xs text-center-xs">
                         <a href="/admin/">
                             <img
-                                src="/admin/public/images/logo.svg"
+                                src="/admin/public/app/images/logo.svg"
 
                                 className="logo"/>
                             <h1>API Admin Portal</h1>

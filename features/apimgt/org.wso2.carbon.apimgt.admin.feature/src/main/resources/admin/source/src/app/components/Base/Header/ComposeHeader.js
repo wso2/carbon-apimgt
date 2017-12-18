@@ -31,7 +31,7 @@ const ComposeHeader = (props) => {
         <Header className='custom-header'>
             <div className="logo">
                 <Link to="/">
-                    <img className="brand" src="/admin/public/images/logo.svg" alt="wso2-logo"/>
+                    <img className="brand" src="/admin/public/app/images/logo.svg" alt="wso2-logo"/>
                     <span>API Admin Portal</span>
                 </Link>
             </div>
