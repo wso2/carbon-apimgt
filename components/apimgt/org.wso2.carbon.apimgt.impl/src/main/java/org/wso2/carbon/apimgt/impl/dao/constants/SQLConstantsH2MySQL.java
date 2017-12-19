@@ -101,7 +101,8 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     " WHERE " +
                     "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                     " AND (" +
-                    "    (APPLICATION_ID IN ( SELECT APPLICATION_ID FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) ))" +
+                    "    (APPLICATION_ID IN ( SELECT APPLICATION_ID FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID " +
+                    " IN ($params) AND TENANT = ? ))" +
                     "           OR " +
                     "    (SUB.USER_ID = ? )" +
                     " )" +
@@ -132,7 +133,7 @@ public class SQLConstantsH2MySQL extends SQLConstants{
                     " WHERE " +
                     "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
                     " AND (" +
-                    "    (APPLICATION_ID IN ( SELECT APPLICATION_ID FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params)))" +
+                    "    (APPLICATION_ID IN ( SELECT APPLICATION_ID FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?)) " +
                     "           OR " +
                     "    (LOWER (SUB.USER_ID) = LOWER(?))" +
                     " )" +

@@ -1339,6 +1339,35 @@ public class SQLConstants {
                 " And "+
                 "    NAME like ?";
 
+    public static final String GET_APPLICATIONS_COUNNT_CASESENSITVE_WITH_MULTIGROUPID = "SELECT " +
+            "   count(*) count " +
+            " FROM" +
+            "   AM_APPLICATION APP, " +
+            "   AM_SUBSCRIBER SUB  " +
+            " WHERE " +
+            "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+            " AND (" +
+            "   (APPLICATION_ID IN ( SELECT APPLICATION_ID FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?)) " +
+            "           OR   " +
+            "   LOWER (SUB.USER_ID) = LOWER(?) )"+
+            " And "+
+            "    NAME like ?";
+
+
+    public static final String GET_APPLICATIONS_COUNNT_NONE_CASESENSITVE_WITH_MULTIGROUPID = "SELECT " +
+            "   count(*) count " +
+            " FROM" +
+            "   AM_APPLICATION APP, " +
+            "   AM_SUBSCRIBER SUB  " +
+            " WHERE " +
+            "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+            " AND (" +
+            "    (APPLICATION_ID IN ( SELECT APPLICATION_ID FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?)) " +
+            "        OR " +
+            "    SUB.USER_ID = ? )" +
+            " And "+
+            "    NAME like ?";
+
         public static final String GET_APPLICATIONS_COUNNT_CASESENSITVE = "SELECT " +
                 "   count(*) count " +
                 " FROM" +
@@ -2573,10 +2602,10 @@ public class SQLConstants {
 
 
     public static final String REMOVE_GROUP_ID_MAPPING_SQL =
-            "DELETE FROM AM_APPLICATION_GROUP_MAPPING WHERE APPLICATION_ID = ?";
+            "DELETE FROM AM_APPLICATION_GROUP_MAPPING WHERE APPLICATION_ID = ? ";
 
     public static final String ADD_GROUP_ID_MAPPING_SQL =
-            "INSERT INTO AM_APPLICATION_GROUP_MAPPING (APPLICATION_ID, GROUP_ID) VALUES (?,?)";
+            "INSERT INTO AM_APPLICATION_GROUP_MAPPING (APPLICATION_ID, GROUP_ID, TENANT) VALUES (?,?,?)";
 
     public static final String GET_GROUP_ID_SQL =
             "SELECT GROUP_ID  FROM AM_APPLICATION_GROUP_MAPPING WHERE APPLICATION_ID = ?";
