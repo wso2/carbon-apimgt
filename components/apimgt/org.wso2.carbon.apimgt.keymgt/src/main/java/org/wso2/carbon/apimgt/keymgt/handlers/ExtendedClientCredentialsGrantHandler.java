@@ -56,7 +56,6 @@ public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGran
         return true;
     }
 
-
     @Override
     public boolean validateGrant(OAuthTokenReqMessageContext tokReqMsgCtx)
             throws IdentityOAuth2Exception {
@@ -82,7 +81,8 @@ public class ExtendedClientCredentialsGrantHandler extends ClientCredentialsGran
             String applicationScope = APIKeyMgtDataHolder.getApplicationTokenScope();
             if (scopes != null) {
 
-                // Arrays.asList won't work here, because list.add cannot be called on the returned list.
+                // Arrays.asList won't work here, because list.add cannot be called
+                // on the returned list as it's immutable.
                 ArrayList<String> scopeList = new ArrayList<String>(scopes.length);
                 scopeList.addAll(Arrays.asList(scopes));
                 // Forcefully add application scope if it's not included in the list.

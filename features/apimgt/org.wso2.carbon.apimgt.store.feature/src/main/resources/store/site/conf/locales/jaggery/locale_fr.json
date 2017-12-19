@@ -126,7 +126,7 @@
 	"INACTIVE": "INACTIVE",
 	"If you already have an OAuth application registered with the IdP, you can use those keys without generating one.": "Si vous avez déjà une application OAuth enregistrée avec l'IdP, vous pouvez utiliser ces clés sans en générer une.",
 	"If you already have an access token, please provide it below.": "Si vous avez déjà un jeton d'accès, veuillez le fournir ci-dessous.",
-	"In a similar manner, you can generate an access token using the Client Credential grant type with the following cURL command.": "De la même manière, vous pouvez générer un jeton d'accès en utilisant le type d'authentification de client avec la commande cURL suivante.",
+	"In a similar manner, you can generate an access token using the Client Credentials grant type with the following cURL command.": "De la même manière, vous pouvez générer un jeton d'accès en utilisant le type d'authentification de client avec la commande cURL suivante.",
 	"Info": "Info",
 	"Inline Documentation": "Documentation en ligne",
 	"Invocations": "Invocations",

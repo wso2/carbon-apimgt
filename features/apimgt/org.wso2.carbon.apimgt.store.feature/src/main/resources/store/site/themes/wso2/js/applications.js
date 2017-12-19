@@ -1,3 +1,5 @@
+var selectedGrants = "";
+
 var GrantTypes = function (available) {
     //order will be preserved in the response map
     this.config = {
@@ -6,7 +8,7 @@ var GrantTypes = function (available) {
         "refresh_token":"Refresh Token", 
         "password":"Password", 
         "iwa:ntlm":"IWA-NTLM", 
-        "client_credentials":"Client Credential", 
+        "client_credentials":"Client Credentials",
         "urn:ietf:params:oauth:grant-type:saml2-bearer":"SAML2",
         "kerberos":"Kerberos"
     }
@@ -109,6 +111,14 @@ GrantTypes.prototype.getMap = function(selected){
         this.grants = new GrantTypes(options.grant_types);
         this.app.grants = this.grants.getMap(this.app.grants);
 
+        var i;
+        for (i = 0; i < this.app.grants.length; ++i) {
+            if(this.app.grants[i].key == "client_credentials" && this.app.grants[i].selected == true){
+                this.app.ClientCredentials = true;
+                break;
+            }
+        }
+
         this.options = $.extend( {}, defaults, options) ;
 
         this._defaults = defaults;
@@ -142,9 +152,18 @@ GrantTypes.prototype.getMap = function(selected){
             this.render();
         },
 
+        toggle_regenerate_button: function(e){
+            if(selectedGrants.indexOf("client_credentials") == -1){
+                $(this.element.find('.regenerate')).attr("disabled", true);
+            } else {
+                $(this.element.find('.regenerate')).attr("disabled", false);
+            }
+            return false;
+        },
+
         selectDefaultGrants: function(){
             /* If keys are not generated select grants by default */
-            if(this.app.ConsumerKey == undefined || this.app.ConsumerKey == ""){                
+            if(this.app.ConsumerKey == undefined || this.app.ConsumerKey == ""){
                 for(var i =0 ;i < this.app.grants.length;i++){
                     if((this.app.callbackUrl == undefined || this.app.callbackUrl =="" ) &&
                         (this.app.grants[i].key == "authorization_code" || this.app.grants[i].key == "implicit") ){
@@ -153,9 +172,9 @@ GrantTypes.prototype.getMap = function(selected){
                     }else{
                         this.app.grants[i].selected = true;
                         delete this.app.grants[i].disabled
-                    }                    
+                    }
                 }
-            }else{
+            } else {
                 for(var i =0 ;i < this.app.grants.length;i++){
                     if((this.app.callbackUrl == undefined || this.app.callbackUrl =="" ) &&
                         (this.app.grants[i].key == "authorization_code" || this.app.grants[i].key == "implicit") ){
@@ -163,16 +182,16 @@ GrantTypes.prototype.getMap = function(selected){
                         this.app.grants[i].disabled = true;
                     }else{
                         delete this.app.grants[i].disabled
-                    }                 
-                }                
-            } 
+                    }
+                }
+            }
         },
 
         toggleKeyVisibility: function(el, options) {
             this.app.show_keys = !this.app.show_keys;
             $.cookie('OAuth_key_visibility', this.app.show_keys );
             this.render();
-            return false;            
+            return false;
         },
 
         provideKeys: function(){
@@ -236,13 +255,14 @@ GrantTypes.prototype.getMap = function(selected){
             }, "json");
         },
 
-        generateKeys: function(){            
+        generateKeys: function(){
             var validity_time = this.element.find(".validity_time").val();
             var selected = this.element.find(".grants:checked")
                            .map(function(){ return $( this ).val();}).get().join(",");
+	        selectedGrants = selected;
             var scopes = $('#scopes option:selected')
                             .map(function(){ return $( this ).val();}).get().join(" ");
-            
+
             this.element.find('.generatekeys').buttonLoader('start');
             jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
                 action: "generateApplicationKey",
@@ -259,13 +279,16 @@ GrantTypes.prototype.getMap = function(selected){
                         var appDetails = JSON.parse(result.data.key.appDetails);
                         this.app.grants = this.grants.getMap(appDetails.grant_types);
                     }
-                    this.app.ConsumerKey = result.data.key.consumerKey,
-                    this.app.ConsumerSecret = result.data.key.consumerSecret,
-                    this.app.Key = result.data.key.accessToken,
-                    this.app.KeyScope = result.data.key.tokenScope,
-                    this.app.ValidityTime = result.data.key.validityTime,
-                    this.app.keyState = result.data.key.keyState,
+                    this.app.ConsumerKey = result.data.key.consumerKey;
+                    this.app.ConsumerSecret = result.data.key.consumerSecret;
+                    this.app.Key = result.data.key.accessToken;
+                    this.app.KeyScope = result.data.key.tokenScope;
+                    if(result.data.key.validityTime !== 0){
+                        this.app.ValidityTime = result.data.key.validityTime;
+                    }
+                    this.app.keyState = result.data.key.keyState;
                     this.render();
+                    this.toggle_regenerate_button();
                 } else {
                     jagg.message({content: result.message, type: "error"});
                 }
@@ -273,13 +296,16 @@ GrantTypes.prototype.getMap = function(selected){
             return false;
         },
 
-        regenerateToken: function(){            
+        regenerateToken: function(){
             var validity_time = this.element.find(".validity_time").val();
             var scopes = "";
             if(this.element.find("select.scope_select").val() != null) {
                 scopes = this.element.find("select.scope_select").val().join(" ");
             }
-            
+            var selected = this.element.find(".grants:checked")
+                           .map(function(){ return $( this ).val();}).get().join(",");
+            selectedGrants = selected;
+
             this.element.find('.regenerate').buttonLoader('start');
             jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
                 action:"refreshToken",
@@ -295,9 +321,17 @@ GrantTypes.prototype.getMap = function(selected){
                 if (!result.error) {
                     this.app.Key = result.data.key.accessToken;
                     this.app.ValidityTime = result.data.key.validityTime;
-                    this.app.KeyScope = result.data.key.tokenScope.join();                    
+                    this.app.KeyScope = result.data.key.tokenScope.join();
+                    this.app.grants = this.grants.getMap(selectedGrants.split(",").join(" "));
+                    var i;
+                    for (i = 0; i < this.app.grants.length; ++i) {
+                        if(this.app.grants[i].key == "client_credentials" && this.app.grants[i].selected == true){
+                            this.app.ClientCredentials = true;
+                            break;
+                        }
+                    }
                     this.render();
-                    this.element.find('input.access_token').animate({ opacity: 0.1 }, 500).animate({ opacity: 1 }, 500);                    
+                    this.element.find('input.access_token').animate({ opacity: 0.1 }, 500).animate({ opacity: 1 }, 500);
                 } else {
                     jagg.message({content:result.message,type:"error"});
                 }
@@ -310,7 +344,7 @@ GrantTypes.prototype.getMap = function(selected){
             this.element.find('.update_grants').buttonLoader('start');
             var selected = this.element.find(".grants:checked")
                            .map(function(){ return $( this ).val();}).get().join(",");
-
+            selectedGrants = selected;
             jagg.post("/site/blocks/subscription/subscription-add/ajax/subscription-add.jag", {
                 action:"updateClientApplication",
                 application:this.app.name,
@@ -320,15 +354,16 @@ GrantTypes.prototype.getMap = function(selected){
             }, $.proxy(function (result) {
                 this.element.find('.update_grants').buttonLoader('stop');
                 if (!result.error) {
+                    this.toggle_regenerate_button();
                 } else {
                     //@todo: param_string
                     jagg.message({content:result.message,type:"error"});
                 }
-            }, this), "json");                       
+            }, this), "json");
             return false;
         },
 
-        render: function(){                   
+        render: function(){
             this.app.basickey = Base64.encode(this.app.ConsumerKey+":"+this.app.ConsumerSecret);
             this.app.username = this.options.username;
             this.app.password = this.options.password;
@@ -352,9 +387,6 @@ GrantTypes.prototype.getMap = function(selected){
     };
 
 })( jQuery, window, document );
-
-
-
 
 $(document).ready(function() {
     $('.copy-button').click(function(event) {
@@ -382,10 +414,11 @@ $(document).ready(function() {
             window.prompt("Press : Ctrl+C and hit Enter to copy the value", text);
         }
     });
+
 $("#subscription-actions").each(function(){
     var source   = $("#subscription-actions").html();
     var subscription_actions = Handlebars.compile(source);
-    var source   = $("#subscription-api-name").html();
+    source   = $("#subscription-api-name").html();
     var subscription_api_name = Handlebars.compile(source);    
 
     var sub_list = $('#subscription-table').datatables_extended({
@@ -452,7 +485,7 @@ $("#application-actions").each(function(){
     var source   = $("#application-actions").html();
     var application_actions = Handlebars.compile(source);
 
-    var source   = $("#application-name").html();
+    source   = $("#application-name").html();
     var application_name = Handlebars.compile(source);    
 
     var app_list = $('#application-table').datatables_extended({

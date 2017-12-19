@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.api.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class Scope implements Serializable{
 
@@ -76,7 +77,6 @@ public class Scope implements Serializable{
 
     @Override
     public int hashCode() {
-        return key.hashCode();
+        return Objects.hash(key, name, roles, description, id);
     }
-
 }

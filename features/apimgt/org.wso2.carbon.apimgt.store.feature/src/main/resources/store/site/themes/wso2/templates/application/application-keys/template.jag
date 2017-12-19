@@ -76,7 +76,6 @@
 		  {{> callback_url this}}
 		  <button class=" btn btn-primary update_grants"><%=i18n.localize("Update")%></button>
 
-
 		<div class="row add-margin-top-5x">
 		  <div class="col-md-12">
 		  	<h4><%=i18n.localize("Generating Access Tokens")%></h4>
@@ -86,7 +85,7 @@
 	    -H "Authorization: Basic {{# if show_keys }}{{basickey}}{{else}}Base64(consumer-key:consumer-secret){{/if}}" \
 	     <%= gatewayurlendpoint %>/token</textarea></pre>
 	        </div>
-	        <p><%=i18n.localize("In a similar manner, you can generate an access token using the Client Credential grant type with the following cURL command.")%></p>
+	        <p><%=i18n.localize("In a similar manner, you can generate an access token using the Client Credentials grant type with the following cURL command.")%></p>
 			<div class="highlight"><pre>
 			<a data-clipboard-text='curl -k -d "grant_type=client_credentials" -H "Authorization: Basic {{basickey}}" <%= gatewayurlendpoint %>/token ' class="pull-right copy-button"  title="<%=i18n.localize("Copy")%>"><i class="fw fw-copy"></i></a><textarea class="curl_command">curl -k -d "grant_type=client_credentials" \
 	    -H "Authorization: Basic {{# if show_keys }}{{basickey}}{{else}}Base64(consumer-key:consumer-secret){{/if}}" \
@@ -107,9 +106,17 @@
 		    </div>
 		  </div>
 		  <p>
-		  <%=i18n.localize("Above token has a validity period of")%> <strong>{{ ValidityTime }}</strong> <%=i18n.localize("seconds.")%>
-		  {{#if KeyScope}}
-			<%=i18n.localize("And the token has")%> ( <strong>{{KeyScope}}</strong> ) <%=i18n.localize("scopes.")%>
+		  {{#if Key}}
+			{{#ifCond Key ''}}
+				<%=i18n.localize("Enable Client-Credentials grant type to generate test access tokens.")%>
+			{{else}}
+				<%=i18n.localize("Above token has a validity period of")%> <strong>{{ ValidityTime }}</strong> <%=i18n.localize("seconds.")%>
+				{{#if KeyScope}}
+					<%=i18n.localize("And the token has")%> ( <strong>{{KeyScope}}</strong> ) <%=i18n.localize("scopes.")%>
+				{{/if}}
+			{{/ifCond}}
+		  {{else}}
+			<%=i18n.localize("Enable Client-Credentials grant type to generate test access tokens.")%>
 		  {{/if}}
 		  </p>
 	  	<form class="add-margin-top-5x well">
@@ -128,7 +135,11 @@
                       <div class="input-group-addon"><%=i18n.localize("Seconds")%></div>
                     </div>
             </div>
-            <button class=" btn btn-primary regenerate" data-load-text="<%= i18n.localize("Generating") %>"><%=i18n.localize("Re-generate")%></button>
+            {{#if ClientCredentials}}
+                <button class=" btn btn-primary regenerate" data-load-text="<%= i18n.localize("Generating") %>"><%=i18n.localize("Re-generate")%></button>
+            {{else}}
+                <button disabled="disabled" class=" btn btn-primary regenerate" data-load-text="<%= i18n.localize("Generating") %>"><%=i18n.localize("Re-generate")%></button>
+            {{/if}}
 		</form>		  	
 	  </div>
 	</div>

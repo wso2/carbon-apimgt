@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.apache.axiom.om.OMElement;
-import org.apache.oltu.oauth2.common.OAuth;
 import org.apache.axis2.util.URL;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,28 +31,38 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.apache.oltu.oauth2.common.OAuth;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
+import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
+import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClient;
 import org.wso2.carbon.apimgt.keymgt.client.SubscriberKeyMgtClientPool;
+import org.wso2.carbon.identity.core.util.IdentityConfigParser;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
 import org.wso2.carbon.identity.oauth.common.OAuthConstants;
 import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientApplicationDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
-import org.wso2.carbon.identity.core.util.IdentityConfigParser;
-
-import javax.xml.namespace.QName;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.xml.namespace.QName;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
@@ -83,19 +92,17 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         String applicationName = oAuthApplicationInfo.getClientName();
         String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
         if (keyType != null) {
-            applicationName = applicationName + "_" + keyType;
+            applicationName = applicationName + '_' + keyType;
         }
 
         if (log.isDebugEnabled()) {
             log.debug("Trying to create OAuth application :" + applicationName);
         }
-        
-        
+
         String tokenScope = (String) oAuthApplicationInfo.getParameter("tokenScope");
-        String tokenScopes[] = new String[1];
+        String[] tokenScopes = new String[1];
         tokenScopes[0] = tokenScope;
 
-               
         org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = null;
 
         try {
@@ -277,7 +284,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         // Call the /revoke only if there's a token to be revoked.
         try {
-            if (tokenRequest.getTokenToRevoke() != null && !"".equals(tokenRequest.getTokenToRevoke())) {
+            if (tokenRequest.getTokenToRevoke() != null && !tokenRequest.getTokenToRevoke().isEmpty()) {
                 URL revokeEndpointURL = new URL(revokeEndpoint);
                 String revokeEndpointProtocol = revokeEndpointURL.getProtocol();
                 int revokeEndpointPort = revokeEndpointURL.getPort();
@@ -303,39 +310,31 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 }
 
                 if (statusCode != 200) {
-                    throw new RuntimeException("Token revoke failed : HTTP error code : " + statusCode);
+                    throw new APIManagementException("Token revoke failed : HTTP error code : " + statusCode);
                 } else {
                     if (log.isDebugEnabled()) {
                         log.debug("Successfully submitted revoke request for old application token. HTTP status : 200");
                     }
                 }
             }
-            //get default application access token name from config.
-
-            String applicationTokenScope = getConfigurationElementValue(APIConstants.APPLICATION_TOKEN_SCOPE);
 
             // When validity time set to a negative value, a token is considered never to expire.
             if (tokenRequest.getValidityPeriod() == OAuthConstants.UNASSIGNED_VALIDITY_PERIOD) {
                 // Setting a different -ve value if the set value is -1 (-1 will be ignored by TokenValidator)
-                tokenRequest.setValidityPeriod(-2);
+                tokenRequest.setValidityPeriod(-2L);
             }
 
             //Generate New Access Token
             HttpPost httpTokpost = new HttpPost(tokenEndpoint);
-            List<NameValuePair> tokParams = new ArrayList<NameValuePair>(3);
+            List<NameValuePair> tokParams = new ArrayList<>(3);
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, GRANT_TYPE_VALUE));
             tokParams.add(new BasicNameValuePair(GRANT_TYPE_PARAM_VALIDITY,
                     Long.toString(tokenRequest.getValidityPeriod())));
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, tokenRequest.getClientId()));
             tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, tokenRequest.getClientSecret()));
-            StringBuilder builder = new StringBuilder();
-            builder.append(applicationTokenScope);
 
-            for (String scope : tokenRequest.getScope()) {
-                builder.append(' ').append(scope);
-            }
-
-            tokParams.add(new BasicNameValuePair("scope", builder.toString()));
+            String scopes = String.join(" ", tokenRequest.getScope());
+            tokParams.add(new BasicNameValuePair("scope", scopes));
 
             httpTokpost.setEntity(new UrlEncodedFormEntity(tokParams, "UTF-8"));
             try {
@@ -343,7 +342,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 HttpEntity tokEntity = tokResponse.getEntity();
 
                 if (tokResponse.getStatusLine().getStatusCode() != 200) {
-                    throw new RuntimeException("Error occurred while calling token endpoint: HTTP error code : " +
+                    throw new APIManagementException("Error occurred while calling token endpoint: HTTP error code : " +
                             tokResponse.getStatusLine().getStatusCode());
                 } else {
                     tokenInfo = new AccessTokenInfo();
@@ -413,7 +412,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         if (responseDTO.getExpiryTime() == Long.MAX_VALUE) {
             tokenInfo.setValidityPeriod(Long.MAX_VALUE);
         } else {
-            tokenInfo.setValidityPeriod(responseDTO.getExpiryTime() * 1000);
+            tokenInfo.setValidityPeriod(responseDTO.getExpiryTime() * 1000L);
         }
 
         tokenInfo.setIssuedTime(System.currentTimeMillis());
@@ -463,7 +462,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         String consumerKey = oAuthApplicationInfo.getClientId();
         String tokenScope = (String) oAuthApplicationInfo.getParameter("tokenScope");
-        String tokenScopes[] = new String[1];
+        String[] tokenScopes = new String[1];
         tokenScopes[0] = tokenScope;
         String clientSecret = (String) oAuthApplicationInfo.getParameter("client_secret");
         oAuthApplicationInfo.setClientSecret(clientSecret);
@@ -505,7 +504,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             // If the provided configuration is null, read the Server-URL and other properties from
             // APIKeyValidator section.            
 
-            /**
+            /*
              * we need to read identity.xml here because we need to get default validity time for access_token in order
              * to set in semi-manual.
              */
@@ -521,7 +520,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 OMElement loginConfigElem =  oauthElem.getFirstChildWithName(getQNameWithIdentityNS("AccessTokenDefaultValidityPeriod"));
                 validityPeriod = loginConfigElem.getText();
             }
-            
             
             if (this.configuration == null) {
                 this.configuration = new KeyManagerConfiguration();
@@ -594,18 +592,6 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     public AccessTokenInfo getAccessTokenByConsumerKey(String consumerKey) throws APIManagementException {
         return null;
     }
-
-    /**
-     * common method to throw exceptions.
-     *
-     * @param msg this parameter contain error message that we need to throw.
-     * @param e   Exception object.
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
-     */
-    private void handleException(String msg, Exception e) throws APIManagementException {
-        log.error(msg, e);
-        throw new APIManagementException(msg, e);
-    }
     
     protected org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo createOAuthApplicationbyApplicationInfo(
                       org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationToCreate) throws Exception {
@@ -652,8 +638,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
      * @throws ClientProtocolException
      * @throws IOException
      */
-    protected HttpResponse executeHTTPrequest(int port, String protocol, HttpPost httpPost) throws 
-                                                                                 ClientProtocolException, IOException {
+    protected HttpResponse executeHTTPrequest(int port, String protocol, HttpPost httpPost) throws IOException {
         HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
         return httpClient.execute(httpPost);
     }
@@ -705,8 +690,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     }
     
     /**
-     * Returns OAuth COnfiguration from identity.xml
-     * @return OAuth COnfiguration
+     * Returns OAuth Configuration from identity.xml
+     * @return OAuth Configuration
      */
     protected OMElement getOAuthConfigElement() {
         return IdentityConfigParser.getInstance().getConfigElement(CONFIG_ELEM_OAUTH);

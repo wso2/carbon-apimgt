@@ -78,11 +78,6 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
 
             state = dao.validateSubscriptionDetails(validationContext.getContext(), validationContext.getVersion(),
                     dto.getConsumerKey(), dto);
-//            if (state) {
-//                dto.setAuthorizedDomains(APIUtil
-//                        .getListOfAuthorizedDomainsByConsumerKey(validationContext.getTokenInfo().getConsumerKey()));
-//            }
-
 
             if (log.isDebugEnabled()) {
                 log.debug("After validating subscriptions : " + dto);
