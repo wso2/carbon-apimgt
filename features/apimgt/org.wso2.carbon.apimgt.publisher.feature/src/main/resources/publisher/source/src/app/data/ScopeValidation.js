@@ -73,8 +73,9 @@ class ScopeValidation extends React.Component {
     }
 
     render() {
+        const {children} = this.props;
         if (this.state.haveScope) {
-            return (this.props.children);
+            return children ? children : null;
         }
         return null;
     }
