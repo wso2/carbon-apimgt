@@ -706,9 +706,9 @@
 							                    <input type="hidden" id="swagger" name="swagger" class="swagger" value="" />
 							                    <input type="hidden" value="endpoint" name="implementation_methods" >
 							                    <div class="form-actions" id="saveButtons">
-							                        <button type="submit" class="btn btn-secondary manageSaveButton has-spinner" id="saveBtn" >Save</button>
+							                        <button type="submit" class="btn btn-secondary manageSaveButton has-spinner" id="saveBtn" ><%=i18n.localize("Save")%></button>
 							                        <input type="hidden" id="hiddenGoToManage" value=""/>
-							                        <button id="go_to_manage" class="btn btn-primary manageSaveButton has-spinner">Next : Manage &gt;</button>
+							                        <button id="go_to_manage" class="btn btn-primary manageSaveButton has-spinner"><%=i18n.localize("Next: Manage")%></button>
 							                    </div>
 							                    </form>
 							                </div>

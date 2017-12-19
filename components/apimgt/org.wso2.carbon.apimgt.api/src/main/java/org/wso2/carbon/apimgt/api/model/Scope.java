@@ -66,4 +66,17 @@ public class Scope implements Serializable{
     public void setId(int id) {
         this.id = id;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        return obj instanceof Scope && key.equals(((Scope) obj).getKey()) && name.equals(((Scope) obj).getName()) &&
+                roles.equals(((Scope) obj).getRoles()) && description.equals(((Scope) obj).getDescription());
+    }
+
+    @Override
+    public int hashCode() {
+        return key.hashCode();
+    }
+
 }

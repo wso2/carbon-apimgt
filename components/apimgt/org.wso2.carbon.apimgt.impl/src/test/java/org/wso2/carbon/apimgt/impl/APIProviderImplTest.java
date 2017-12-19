@@ -1096,6 +1096,48 @@ public class APIProviderImplTest {
     }
 
     @Test
+    public void testAddAPINameWithIllegalCharacters() throws APIManagementException, GovernanceException {
+        APIIdentifier apiId = new APIIdentifier("admin", "API2&", "1.0.2");
+        API api = new API(apiId);
+        api.setContext("/test");
+        api.setStatus(APIStatus.CREATED);
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
+
+        Mockito.when(artifactManager.newGovernanceArtifact(Matchers.any(QName.class))).thenReturn(artifact);
+        Mockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenReturn(artifact);
+
+        try {
+            apiProvider.addAPI(api);
+            Assert.fail("Exception was expected, but wasn't thrown");
+        } catch (APIManagementException e) {
+            Assert.assertEquals("Error in adding API :" + api.getId().getApiName(), e.getMessage());
+            Assert.assertTrue(e.getCause().getMessage().contains("API Name contains one or more illegal characters"));
+        }
+    }
+
+    @Test
+    public void testAddAPIVersionWithIllegalCharacters() throws APIManagementException, GovernanceException {
+        APIIdentifier apiId = new APIIdentifier("admin", "API3", "1.0.2&");
+        API api = new API(apiId);
+        api.setContext("/test");
+        api.setStatus(APIStatus.CREATED);
+
+        APIProviderImplWrapper apiProvider = new APIProviderImplWrapper(apimgtDAO, null, null);
+
+        Mockito.when(artifactManager.newGovernanceArtifact(Matchers.any(QName.class))).thenReturn(artifact);
+        Mockito.when(APIUtil.createAPIArtifactContent(artifact, api)).thenReturn(artifact);
+
+        try {
+            apiProvider.addAPI(api);
+            Assert.fail("Exception was expected, but wasn't thrown");
+        } catch (APIManagementException e) {
+            Assert.assertEquals("Error in adding API :" + api.getId().getApiName(), e.getMessage());
+            Assert.assertTrue(e.getCause().getMessage().contains("API Version contains one or more illegal characters"));
+        }
+    }
+
+    @Test
     public void testUpdateAPIStatus() throws APIManagementException, FaultGatewaysException, UserStoreException,
             RegistryException, WorkflowException {
         APIIdentifier apiId = new APIIdentifier("admin", "API1", "1.0.1");
