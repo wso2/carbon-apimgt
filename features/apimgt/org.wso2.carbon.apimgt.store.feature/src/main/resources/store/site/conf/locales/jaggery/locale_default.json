@@ -342,5 +342,5 @@
     "Meta Information": "Meta Information",
     "Property Name": "Property Name",
     "Property Value": "Proper Value",
-    "By Custom Meta Information [Syntax - {property name}:xxxx]" : "By Custom Meta Information [Syntax - {property name}:xxxx]"
+    "By Custom Meta Information [Syntax - {property name}:{property value}]" : "By Custom Meta Information [Syntax - {property name}:{property value}]"
 }

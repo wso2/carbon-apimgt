@@ -1039,7 +1039,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
         result = apiConsumer.searchPaginatedAPIs(newSearchQuery, tenantDomain, start, end, limitAttributes);
         if (result != null) {
-            if (newSearchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
+            if (newSearchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX2)) {
                 Map<Documentation, API> apiDocMap = (Map<Documentation, API>) result.get("apis");
                 if (apiDocMap != null) {
                     int i = 0;

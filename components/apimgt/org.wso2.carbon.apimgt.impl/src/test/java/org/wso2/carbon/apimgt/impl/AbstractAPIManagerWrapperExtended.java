@@ -56,14 +56,14 @@ public class AbstractAPIManagerWrapperExtended extends AbstractAPIManagerWrapper
 
     public Map<String, Object> searchPaginatedAPIs(Registry registry, String searchQuery, int start, int end,
             boolean limitAttributes) throws APIManagementException {
-        if (searchQuery.equalsIgnoreCase("apim.secured=*true*")) {
+        if (searchQuery.equalsIgnoreCase("api_meta.secured=*true*")) {
             return new HashMap<String, Object>() {{
                 put("apis", new ArrayList() {{
                     add(new API(new APIIdentifier("admin", "sxy", "1.0.0")));
                 }});
                 put("length", 1);
             }};
-        } else if (searchQuery.equalsIgnoreCase("name=*test*&apim.secured=*true*")) {
+        } else if (searchQuery.equalsIgnoreCase("name=*test*&api_meta.secured=*true*")) {
             return new HashMap<String, Object>() {{
                 put("apis", new ArrayList() {{
                     add(new API(new APIIdentifier("admin", "sxy12", "1.0.0")));

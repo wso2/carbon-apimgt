@@ -1152,7 +1152,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (publisherAccessControlRoles != null) {
                 publisherAccessControlRoles = publisherAccessControlRoles.replaceAll("\\s+", "").toLowerCase();
             }
-            updateAPIResourcesAndRestrictions(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
+            updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
                     api.getAdditionalProperties());
 
             if (updatePermissions) {
@@ -2517,7 +2517,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             publisherAccessControlRoles = publisherAccessControlRoles == null ?
                     APIConstants.NULL_USER_ROLE_LIST :
                     publisherAccessControlRoles;
-            updateAPIResourcesAndRestrictions(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
+            updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
                     api.getAdditionalProperties());
             registry.commitTransaction();
             transactionCommitted = true;
@@ -5203,7 +5203,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param additionalProperties        Additional properties that is related with an API.
      * @throws RegistryException Registry Exception.
      */
-    private void updateAPIResourcesAndRestrictions(String artifactPath, String publisherAccessControlRoles,
+    private void updateRegistryResources(String artifactPath, String publisherAccessControlRoles,
             String publisherAccessControl, Map<String, String> additionalProperties) throws RegistryException {
         publisherAccessControlRoles = (publisherAccessControlRoles == null || publisherAccessControlRoles.trim()
                 .isEmpty()) ? APIConstants.NULL_USER_ROLE_LIST : publisherAccessControlRoles;

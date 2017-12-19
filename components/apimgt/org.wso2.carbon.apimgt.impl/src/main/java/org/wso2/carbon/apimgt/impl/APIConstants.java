@@ -1337,7 +1337,7 @@ public final class APIConstants {
     public static final String UN_AUTHORIZED_ERROR_MESSAGE = "User is not authorized to";
 
     // Prefix used for saving the custom properties related with APIs
-    public static final String API_RELATED_CUSTOM_PROPERTIES_PREFIX = "apim.";
+    public static final String API_RELATED_CUSTOM_PROPERTIES_PREFIX = "api_meta.";
     // Reserved keywords for search.
     public static final String[] API_SEARCH_PREFIXES = { DOCUMENTATION_SEARCH_TYPE_PREFIX, TAG_SEARCH_TYPE_PREFIX,
             NAME_TYPE_PREFIX, SUBCONTEXT_SEARCH_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,

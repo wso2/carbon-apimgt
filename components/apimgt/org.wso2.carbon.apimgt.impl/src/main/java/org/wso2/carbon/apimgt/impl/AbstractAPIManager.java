@@ -1857,8 +1857,7 @@ public abstract class AbstractAPIManager implements APIManager {
                     filteredQuery.append("&").append(searchKeys[0]).append("=").append(searchKeys[1]);
                 }
             } else {
-                filteredQuery = new StringBuilder(searchQuery);
-                break;
+                filteredQuery.append(query);
             }
         }
         searchQuery = filteredQuery.toString();

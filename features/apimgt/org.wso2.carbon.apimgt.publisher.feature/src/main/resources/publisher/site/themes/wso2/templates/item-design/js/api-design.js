@@ -646,8 +646,8 @@ APIDesigner.prototype.render_additionalProperties = function () {
     var apiPropertiesElement = $("#api_properties");
     var apiPropertiesValue = JSON.parse(apiPropertiesElement.val());
     var apiProperties = null;
-    var reservedKeyWords = ["provider", "version", "context", "status", "description", "subcontext", "doc", "lcState",
-        "name", "documentation", "tags"];
+    var reservedKeyWords = ["provider", "version", "context", "status", "description", "subcontext", "doc", "lcstate",
+        "name", "tags"];
 
     if (apiPropertiesValue) {
         for (var prop in apiPropertiesValue) {
@@ -659,35 +659,51 @@ APIDesigner.prototype.render_additionalProperties = function () {
     }
     var propertiesOutput = Handlebars.partials['properties-add-template'](apiProperties);
     $('#additionalProperties').html(propertiesOutput);
+    $('#property_key_help').popover({
+        html: true,
+        container: 'body',
+        content: function () {
+            var msg = $('#' + $(this).attr('help_data')).html();
+            return msg;
+        },
+        template: '<div class="popover default-popover" role="tooltip"><div class="arrow"></div><div class="popover-content"></div></div>'
+    });
+
+
+    $("#property_key").on("change", function () {
+        $("#property_key_error").addClass("hidden");
+        $("#property_value_error").addClass("hidden");
+    });
+
+    $("#property_value").on("change", function () {
+        $("#property_key_error").addClass("hidden");
+        $("#property_value_error").addClass("hidden");
+    });
+
     $('#property_add').on("click", function () {
         var propertyKeyVal = $("#property_key").val();
         if (!propertyKeyVal || propertyKeyVal.trim() == "") {
-            jagg.message({content: i18n.t("Property name cannot be empty."), type: "error"});
+            $("#property_key_error").text(i18n.t("Property name cannot be empty.")).removeClass("hidden");
             return;
         }
         var propertyVal = $("#property_value").val();
         if (!propertyVal || propertyVal.trim() == "") {
-            jagg.message({content: i18n.t("Property value cannot be empty."), type: "error"});
+            $("#property_value_error").text(i18n.t("Property value cannot be empty.")).removeClass("hidden");
             return;
         }
         propertyKeyVal = propertyKeyVal.trim().toLowerCase();
         propertyVal = propertyVal.trim();
 
         if (propertyKeyVal.indexOf(' ') >= 0) {
-            jagg.message({
-                content: i18n.t("Property name should not have space. Please select a different property" +
-                    " name"), type: "error"
-            });
+            $("#property_key_error").text(i18n.t("Property name should not have space. Please select a different " +
+                "property name.")).removeClass("hidden").show();
             return;
         }
 
         for (var keyWord in reservedKeyWords) {
             if (propertyKeyVal === reservedKeyWords[keyWord]) {
-                jagg.message({
-                    content: i18n.t("Property name matches with one of the reserved keywords. Reserved" +
-                        " keywords are [" + reservedKeyWords + "]. Please select a different property name"),
-                    type: "error"
-                });
+                $("#property_key_error").text(i18n.t("Property name matches with one of the reserved keywords." +
+                    " Please select a different property name.")).removeClass("hidden").show();
                 return;
             }
         }
@@ -700,11 +716,8 @@ APIDesigner.prototype.render_additionalProperties = function () {
             apiPropertiesObject = {};
         }
         if (apiPropertiesObject.hasOwnProperty(propertyKeyVal)) {
-            jagg.message({
-                content: i18n.t("Property " + propertyKeyVal + " already exist for this API. Property names are" +
-                    " unique. Please select a different property name."),
-                type: "error"
-            });
+            $("#property_key_error").text(i18n.t("Property " + propertyKeyVal + " already exist for this API. Property names are" +
+                " unique. Please select a different property name.")).removeClass("hidden").show();
             return;
         }
         apiPropertiesObject[propertyKeyVal] = propertyVal;
@@ -717,9 +730,9 @@ APIDesigner.prototype.render_additionalProperties = function () {
         $("#messageModal div.modal-footer").html("");
         var key = $(this).attr('data-key');
         jagg.message({
-            content: 'Do you want to remove "' + key + '" from properties list.',
+            content: i18n.t("Do you want to remove") + "'" + key + "' " +  i18n.t("from properties list."),
             type: 'confirm',
-            title: "Remove Property",
+            title: i18n.t("Remove Property"),
             okCallback: function () {
                 var apiDesigner = new APIDesigner();
                 var apiPropertiesValue = apiPropertiesElement.val();
