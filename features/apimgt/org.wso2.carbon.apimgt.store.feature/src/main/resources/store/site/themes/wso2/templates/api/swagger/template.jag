@@ -88,6 +88,9 @@ var api = outputs.api;%>
               }
               return request;
           },
+          onComplete: function(){
+              runEnjoyHintScript_swaggerUi();
+          },
           plugins: [
               function() {
                   return {

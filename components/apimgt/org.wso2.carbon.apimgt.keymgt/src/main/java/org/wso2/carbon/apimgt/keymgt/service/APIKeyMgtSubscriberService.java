@@ -89,12 +89,6 @@ import java.util.Set;
 public class APIKeyMgtSubscriberService extends AbstractAdmin {
 
     private static final Log log = LogFactory.getLog(APIKeyMgtSubscriberService.class);
-    private static final String GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials";
-    private static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
-    private static final String OAUTH_RESPONSE_TOKEN_SCOPE = "scope";
-    private static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
-    private static final String APP_DISPLAY_NAME = "DisplayName";
-
 
 
     /**
@@ -151,7 +145,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             serviceProvider.setDescription("Service Provider for application " + applicationName);
             ServiceProviderProperty[] serviceProviderProperties = new ServiceProviderProperty[1];
             ServiceProviderProperty serviceProviderProperty = new ServiceProviderProperty();
-            serviceProviderProperty.setName(APP_DISPLAY_NAME);
+            serviceProviderProperty.setName(APIConstants.APP_DISPLAY_NAME);
             serviceProviderProperty.setValue(displayName);
             serviceProviderProperties[0] = serviceProviderProperty;
             serviceProvider.setSpProperties(serviceProviderProperties);
@@ -588,7 +582,7 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
         List<NameValuePair> tokParams = new ArrayList<NameValuePair>(3);
         List<NameValuePair> revokeParams = new ArrayList<NameValuePair>(3);
 
-        tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, GRANT_TYPE_CLIENT_CREDENTIALS));
+        tokParams.add(new BasicNameValuePair(OAuth.OAUTH_GRANT_TYPE, APIConstants.GRANT_TYPE_CLIENT_CREDENTIALS));
         tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_ID, clientId));
         tokParams.add(new BasicNameValuePair(OAuth.OAUTH_CLIENT_SECRET, clientSecret));
         tokParams.add(new BasicNameValuePair(OAuth.OAUTH_SCOPE, tokenType));
@@ -622,9 +616,9 @@ public class APIKeyMgtSubscriberService extends AbstractAdmin {
             } else {
                 String responseStr = EntityUtils.toString(tokEntity);
                 JSONObject obj = new JSONObject(responseStr);
-                newAccessToken = obj.get(OAUTH_RESPONSE_ACCESSTOKEN).toString();
-                validityPeriod = Long.parseLong(obj.get(OAUTH_RESPONSE_EXPIRY_TIME).toString());
-                tokenScope = obj.get(OAUTH_RESPONSE_TOKEN_SCOPE).toString();
+                newAccessToken = obj.get(APIConstants.OAUTH_RESPONSE_ACCESSTOKEN).toString();
+                validityPeriod = Long.parseLong(obj.get(APIConstants.OAUTH_RESPONSE_EXPIRY_TIME).toString());
+                tokenScope = obj.get(APIConstants.OAUTH_RESPONSE_TOKEN_SCOPE).toString();
 
                 if (validityTime != null && !"".equals(validityTime)) {
                     validityPeriod = Long.parseLong(validityTime);

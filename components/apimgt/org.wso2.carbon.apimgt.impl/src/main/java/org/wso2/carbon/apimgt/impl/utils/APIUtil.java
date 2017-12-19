@@ -43,7 +43,6 @@ import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
@@ -79,9 +78,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
-import org.wso2.carbon.apimgt.api.model.policy.GlobalPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Limit;
-import org.wso2.carbon.apimgt.api.model.policy.Pipeline;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
@@ -5567,7 +5564,6 @@ public final class APIUtil {
     public static HttpClient getHttpClient(int port, String protocol) {
         SchemeRegistry registry = new SchemeRegistry();
         SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
-        String ignoreHostnameVerification = System.getProperty("org.wso2.ignoreHostnameVerification");
         String sslValue = null;
 
         AxisConfiguration axis2Config = ServiceReferenceHolder.getContextService().getServerConfigContext()
@@ -5578,18 +5574,10 @@ public final class APIUtil {
             sslValue = (String) sslVerifyClient.getValue();
         }
 
-        if (ignoreHostnameVerification != null && "true".equalsIgnoreCase(ignoreHostnameVerification)) {
-            X509HostnameVerifier hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-            socketFactory.setHostnameVerifier(hostnameVerifier);
-        }
         if (APIConstants.HTTPS_PROTOCOL.equals(protocol)) {
             try {
                 if (APIConstants.SSL_VERIFY_CLIENT_STATUS_REQUIRE.equals(sslValue)) {
                     socketFactory = createSocketFactory();
-                    if (ignoreHostnameVerification != null && "true".equalsIgnoreCase(ignoreHostnameVerification)) {
-                        X509HostnameVerifier hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
-                        socketFactory.setHostnameVerifier(hostnameVerifier);
-                    }
                 }
                 if (port >= 0) {
                     registry.register(new Scheme(APIConstants.HTTPS_PROTOCOL, port, socketFactory));

@@ -59,7 +59,6 @@ import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-
 import org.wso2.carbon.apimgt.hostobjects.internal.HostObjectComponent;
 import org.wso2.carbon.apimgt.hostobjects.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -335,68 +334,15 @@ public class APIStoreHostObject extends ScriptableObject {
                 String callbackUrl = (String) args[3];
                 String groupingId = (String)args[8];
                 String jsonParams = null;
-                if(args.length == 10){
+                if (args.length == 10) {
                     jsonParams = (String) args[9];
-                }else{
-                    jsonParams = null;
                 }
 
-
-	            /*String tenantDomain = MultitenantUtils.getTenantDomain(username);
-	            int tenantId =
-			            ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-			                                  .getTenantId(tenantDomain);
-
-                if (null == validityPeriod || validityPeriod.isEmpty()) { // In case a validity period is unspecified
-                    long defaultValidityPeriod = getApplicationAccessTokenValidityPeriodInSeconds();
-
-                    if (defaultValidityPeriod < 0) {
-                        validityPeriod = String.valueOf(Long.MAX_VALUE);
-                    }
-                    else {
-                        validityPeriod = String.valueOf(defaultValidityPeriod);
-                    }
-                }
-	            //checking for authorized scopes
-	            Set<Scope> scopeSet = new LinkedHashSet<Scope>();
-	            List<Scope> authorizedScopes = new ArrayList<Scope>();
-	            String authScopeString;
-	            APIConsumer apiConsumer = getAPIConsumer(thisObj);
-	            if (scopes != null && scopes.length() != 0 &&
-	                !scopes.equals(APIConstants.OAUTH2_DEFAULT_SCOPE)) {
-		            scopeSet.addAll(apiConsumer.getScopesByScopeKeys(scopes, tenantId));
-		            authorizedScopes = getAllowedScopesForUserApplication(username, scopeSet);
-	            }
-
-	            if (!authorizedScopes.isEmpty()) {
-		            StringBuilder scopeBuilder = new StringBuilder();
-		            for (Scope scope : authorizedScopes) {
-			            scopeBuilder.append(scope.getKey()).append(" ");
-		            }
-		            authScopeString = scopeBuilder.toString();
-	            } else {
-		            authScopeString = APIConstants.OAUTH2_DEFAULT_SCOPE;
-	            }
-                Map<String, Object> keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistration(
-                        username, applicationName, tokenType, callbackUrl,
-		                accessAllowDomainsArray, validityPeriod, authScopeString, groupingId,
-                        jsonParams);
-                */
                 Map<String, Object> keyDetails = getAPIConsumer(thisObj).requestApprovalForApplicationRegistration(
                         username, applicationName, tokenType, callbackUrl,
                         accessAllowDomainsArray, validityPeriod, scopes, groupingId,
                         jsonParams);
                 NativeObject row = new NativeObject();
-                String authorizedDomains = "";
-                boolean first = true;
-                for (String anAccessAllowDomainsArray : accessAllowDomainsArray) {
-                    if (first) {
-                        authorizedDomains = anAccessAllowDomainsArray;
-                        first = false;
-                    } else {
-                        authorizedDomains = authorizedDomains + ", " + anAccessAllowDomainsArray;
-                    }
-                }
 
                 Set<Map.Entry<String, Object>> entries = keyDetails.entrySet();
 
@@ -404,12 +350,11 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put(entry.getKey(), row, entry.getValue());
                 }
 
-                boolean isRegenarateOptionEnabled = true;
-                if (getApplicationAccessTokenValidityPeriodInSeconds() < 0) {
-                    isRegenarateOptionEnabled = false;
+                boolean isRegenerateOptionEnabled = true;
+                if (getApplicationAccessTokenValidityPeriodInSeconds() < 0L) {
+                    isRegenerateOptionEnabled = false;
                 }
-                row.put("enableRegenarate", row, isRegenarateOptionEnabled);
-                row.put("accessallowdomains", row, authorizedDomains);
+                row.put("enableRegenarate", row, isRegenerateOptionEnabled);
                 return row;
             } catch (Exception e) {
                 String msg = "Error while obtaining the application access token for the application:" + args[1];
@@ -2660,6 +2605,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 String tokenType = (String) args[2];
                 String tokenScope = (String) args[6];
                 String groupingId = (String) args[7];
+
                 Map<String, String> keyDetails = getAPIConsumer(thisObj).completeApplicationRegistration(userId, 
                                                                    applicationName, tokenType, tokenScope, groupingId);
                 NativeObject object = new NativeObject();

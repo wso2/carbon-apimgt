@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.api.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 public class Scope implements Serializable{
 
@@ -65,5 +66,17 @@ public class Scope implements Serializable{
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        return obj instanceof Scope && key.equals(((Scope) obj).getKey()) && name.equals(((Scope) obj).getName()) &&
+                roles.equals(((Scope) obj).getRoles()) && description.equals(((Scope) obj).getDescription());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(key, name, roles, description, id);
     }
 }

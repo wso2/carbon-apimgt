@@ -457,7 +457,7 @@ APIDesigner.prototype.init_controllers = function(){
         var i = $(this).attr("data-index");
 
         var deleteDataArray = deleteData.split(".");
-        var operations = deleteDataArray[2];
+        var operations = deleteDataArray[2].replace(/]|[[]|'/g, '');
         var operation = deleteDataArray[3];
         var paramName = API_DESIGNER.api_doc.paths[operations][operation]['parameters'][i]['name'];
 
@@ -594,11 +594,14 @@ APIDesigner.prototype.load_api_document = function(api_document){
     this.load_swagger_editor_content();
     this.render_resources();
     this.render_scopes();
-    if (this.api_document != null) {
+    if (api_document != null) {
         $("#version").val(api_document.info.version);
         $("#name").val(api_document.info.title);
         if (api_document.info.description) {
             $("#description").val(api_document.info.description);
+        }
+        if (api_document.basePath) {
+            $("#context").val(api_document.basePath);
         }
     }
 };
@@ -1337,25 +1340,23 @@ var isAPIUpdateValid = function(){
     return;
 }
 
-var disableForm = function(){
+var disableForm = function() {
     //var form = $('#design_form');
-    $("form").each(function(){
-     var inputLength = $(this).find(':input').length; //<-- Should return all input elements in that specific form.
-     var elements = $(this).find(':input');
-     for (var i = 0, len = elements.length; i < len; ++i) {
-        elements[i].disabled = true;
-     }
+    $("form").each(function() {
+        var inputLength = $(this).find(':input').length; //<-- Should return all input elements in that specific form.
+        var elements = $(this).find(':input');
+        for (var i = 0, len = elements.length; i < len; ++i) {
+            elements[i].disabled = true;
+        }
     });
 
-    $("#api_designer").each(function(){
-      $(this).find('a').each(function() {
-       $(this).attr('disabled','true');
-  
-       });     
+    $("#api_designer").each(function() {
+        $(this).find('a').each(function() {
+            $(this).attr('disabled', 'true');
+        });
     });
 
     $('.btn-secondary').prop('disabled', true);
     $('#swaggerEditor').unbind('click');
-
 }
 
