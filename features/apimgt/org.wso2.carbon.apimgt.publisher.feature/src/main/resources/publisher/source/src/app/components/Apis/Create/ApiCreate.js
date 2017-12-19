@@ -28,93 +28,95 @@ const ApiCreateSwagger = () => import(/* webpackChunkName: "ApiCreateSwagger" */
 class ApiCreate extends Component {
     render() {
         return (
-                <div>
-                    <Switch>
-                        <Route path={"/api/create/home"} render={() =>
-                            <div className="ch-grid-container">
-                                <ul className="ch-grid">
-                                    <li>
-                                        <Link to="/api/create/swagger">
-                                            <div className="test_button ch-item depth-1">
-                                                <div className="ch-info-wrap">
-                                                    <div className="ch-info">
-                                                        <div className="ch-info-front ch-img-1">
-                                                            <i className="fw fw-document fw-4x"/>
-                                                            <span>I Have an Existing API</span>
-                                                        </div>
-                                                        <div className="ch-info-back">
-                                                            <p className="unselectable">Use an existing API's endpoint or the API
-                                                                Swagger
-                                                                definition to create an API</p>
-                                                        </div>
+            <div>
+                <Switch>
+                    <Route path={"/api/create/home"} render={() =>
+                        <div className="ch-grid-container">
+                            <ul className="ch-grid">
+                                <li>
+                                    <Link to="/api/create/swagger">
+                                        <div className="test_button ch-item depth-1">
+                                            <div className="ch-info-wrap">
+                                                <div className="ch-info">
+                                                    <div className="ch-info-front ch-img-1">
+                                                        <i className="fw fw-document fw-4x"/>
+                                                        <span>I Have an Existing API</span>
+                                                    </div>
+                                                    <div className="ch-info-back">
+                                                        <p className="unselectable">Use an existing API's endpoint or
+                                                            the API
+                                                            Swagger
+                                                            definition to create an API</p>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link to="/api/create/wsdl">
-                                            <div className="test_button ch-item depth-1 ripple-effect">
-                                                <div className="ch-info-wrap">
-                                                    <div className="ch-info">
-                                                        <div className="ch-info-front ch-img-2">
-                                                            <i className="fw fw-endpoint fw-4x"/>
-                                                            <span>I Have a SOAP Endpoint</span>
-                                                        </div>
-                                                        <div className="ch-info-back">
-                                                            <p className="unselectable">Use an existing SOAP endpoint to create a
-                                                                managed API.
-                                                                Import the WSDL of the SOAP service</p>
-                                                        </div>
+                                        </div>
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link to="/api/create/wsdl">
+                                        <div className="test_button ch-item depth-1 ripple-effect">
+                                            <div className="ch-info-wrap">
+                                                <div className="ch-info">
+                                                    <div className="ch-info-front ch-img-2">
+                                                        <i className="fw fw-endpoint fw-4x"/>
+                                                        <span>I Have a SOAP Endpoint</span>
+                                                    </div>
+                                                    <div className="ch-info-back">
+                                                        <p className="unselectable">Use an existing SOAP endpoint to
+                                                            create a
+                                                            managed API.
+                                                            Import the WSDL of the SOAP service</p>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link to="/api/create/rest">
-                                            <div className="test_button ch-item depth-1 ripple-effect">
-                                                <div className="ch-info-wrap">
-                                                    <div className="ch-info">
-                                                        <div className="ch-info-front ch-img-3">
-                                                            <i className="fw fw-rest-api fw-4x"/>
-                                                            <span>Design New REST API</span>
-                                                        </div>
-                                                        <div className="ch-info-back">
-                                                            <p className="unselectable">Design and prototype a new REST API</p>
-                                                        </div>
+                                        </div>
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link to="/api/create/rest">
+                                        <div className="test_button ch-item depth-1 ripple-effect">
+                                            <div className="ch-info-wrap">
+                                                <div className="ch-info">
+                                                    <div className="ch-info-front ch-img-3">
+                                                        <i className="fw fw-rest-api fw-4x"/>
+                                                        <span>Design New REST API</span>
+                                                    </div>
+                                                    <div className="ch-info-back">
+                                                        <p className="unselectable">Design and prototype a new REST
+                                                            API</p>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link to="/api/create/rest">
-                                            <div className="test_button ch-item depth-1 ripple-effect">
-                                                <div className="ch-info-wrap">
-                                                    <div className="ch-info">
-                                                        <div className="ch-info-front ch-img-4">
-                                                            <i className="fw fw-web-clip fw-4x"/>
-                                                            <span>Design New Websocket API</span>
-                                                        </div>
-                                                        <div className="ch-info-back">
-                                                            <p className="unselectable">Design and prototype a new Websocket API</p>
-                                                        </div>
+                                        </div>
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link to="/api/create/rest">
+                                        <div className="test_button ch-item depth-1 ripple-effect">
+                                            <div className="ch-info-wrap">
+                                                <div className="ch-info">
+                                                    <div className="ch-info-front ch-img-4">
+                                                        <i className="fw fw-web-clip fw-4x"/>
+                                                        <span>Design New Websocket API</span>
+                                                    </div>
+                                                    <div className="ch-info-back">
+                                                        <p className="unselectable">Design and prototype a new Websocket
+                                                            API</p>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </Link>
-                                    </li>
-                                </ul>
-                            </div>
-                        } />
-                        <Route path={"/api/create/rest"} component={getAsyncComponent(ApiCreateEndpoint)}/>
-                        <Route path={"/api/create/swagger"} component={getAsyncComponent(ApiCreateSwagger)}/>
-                        <Route path={"/api/create/wsdl"} component={getAsyncComponent(ApiCreateWSDL)}/>
-                    </Switch>
-                    {/*<ApiCreateEndpoint/>*/}
-
-                </div>
+                                        </div>
+                                    </Link>
+                                </li>
+                            </ul>
+                        </div>
+                    }/>
+                    <Route path={"/api/create/rest"} component={getAsyncComponent(ApiCreateEndpoint)}/>
+                    <Route path={"/api/create/swagger"} component={getAsyncComponent(ApiCreateSwagger)}/>
+                    <Route path={"/api/create/wsdl"} component={getAsyncComponent(ApiCreateWSDL)}/>
+                </Switch>
+            </div>
         );
     }
 }

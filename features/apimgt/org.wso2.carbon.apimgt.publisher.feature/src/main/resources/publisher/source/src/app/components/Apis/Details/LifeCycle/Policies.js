@@ -20,9 +20,9 @@
 import React, {Component} from 'react'
 import API from '../../../../data/api'
 
-import Input, { InputLabel } from 'material-ui/Input';
-import { MenuItem } from 'material-ui/Menu';
-import { FormControl } from 'material-ui/Form';
+import Input, {InputLabel} from 'material-ui/Input';
+import {MenuItem} from 'material-ui/Menu';
+import {FormControl, FormHelperText} from 'material-ui/Form';
 import Select from 'material-ui/Select';
 import Button from 'material-ui/Button';
 
@@ -39,10 +39,11 @@ export default class Policies extends Component {
 
     handleChange(e) {
         this.setState({selectedPolicies: e.target.value});
-        if(this.props.handlePolicies){
+        if (this.props.handlePolicies) {
             this.props.handlePolicies(e.target.value);
         }
     }
+
     changeTiers(event) {
         this.setState({loading: true});
         const api_uuid = this.props.api.id;
@@ -59,25 +60,18 @@ export default class Policies extends Component {
     }
 
     render() {
-        let currentPolicies = this.props.api ? this.props.api.policies : this.props.selectedPolicies;
         const policies = this.props.policies;
-        const props = {
-            mode: "multiple",
-            style: {width: '100%'},
-            placeholder: "Please select",
-            onChange: this.handleChange,
-            defaultValue: currentPolicies
-        };
+        const {classes} = this.props;
         return (
-
             <div>
                 <FormControl className="policies-select">
-                    <InputLabel htmlFor="name-multiple">Policies</InputLabel>
+                    <InputLabel classes={classes} htmlFor="name-multiple">Business Plans</InputLabel>
                     <Select
+                        margin="none"
                         multiple
                         value={this.state.selectedPolicies}
                         onChange={this.handleChange}
-                        input={<Input id="name-multiple" />}
+                        input={<Input id="name-multiple"/>}
                         MenuProps={{
                             PaperProps: {
                                 style: {
@@ -98,12 +92,9 @@ export default class Policies extends Component {
                             </MenuItem>
                         ))}
                     </Select>
+                    <FormHelperText>Select a plan for the API and enable API level throttling.</FormHelperText>
                 </FormControl>
-
-
-
             </div>
-
         );
     }
 }
