@@ -77,7 +77,7 @@ class ApiCreateEndpoint extends React.Component {
         this.handlePolicies = this.handlePolicies.bind(this)
     }
 
-    componentWillMount() {
+    componentDidMount() {
         this.updateData();
     }
 
