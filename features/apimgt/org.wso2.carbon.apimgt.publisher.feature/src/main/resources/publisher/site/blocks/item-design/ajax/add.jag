@@ -83,9 +83,37 @@ if(jagg.isCSRFTokenValid())
                     }
                 }
                 else if(import_type == "swagger-file" && file){
-                    file.open("r");
-                    swagger = file.readAll();
-                    file.close();
+                    try {
+                        file.open("r");
+                        swagger = file.readAll();
+                        file.close();
+                        var keywords = [/swagger/i, /info/i, /paths/i, /version/i];
+                        var valid = true;
+                        for (var i = 0; i < keywords.length; i++) {
+                            if ((m = keywords[i].exec(swagger)) == null) {
+                                swagger = "undefined";
+                                print({error: true, message: file.getName() + " contains invalid swagger definition"});
+                                return;
+                            }
+                        }
+                        var swaggerJSON = parse(swagger);
+                        //Supported swagger version check
+                        if(swaggerJSON.swagger != supportedSwaggerVersion){
+                            print({
+                                error: true,
+                                message: "Unsupported swagger version provided. Please re-imported with swagger " + supportedSwaggerVersion
+                            });
+                            return;
+                        }
+                        //Validate swagger definition with mandatory swagger elements
+                        if(swaggerJSON.swagger == null || swaggerJSON.paths == null || swaggerJSON.info == null){
+                            print({error: true, message: file.getName() + " contains invalid Swagger definition"});
+                            return;
+                        }
+                    } catch (e) {
+                        print({error: true, message: file.getName() + " contains invalid swagger definitio"});
+                        return;
+                    }
                 }else{
                     var obj = require("/site/blocks/item-design/ajax/default_swagger.json");
                     swagger = stringify(obj);
