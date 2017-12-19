@@ -2733,8 +2733,9 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
 
         if (!authorizedScopes.isEmpty()) {
+            Set<Scope> authorizedScopeSet = new HashSet<Scope>(authorizedScopes);
             StringBuilder scopeBuilder = new StringBuilder();
-            for (Scope scope : authorizedScopes) {
+            for (Scope scope : authorizedScopeSet) {
                 scopeBuilder.append(scope.getKey()).append(' ');
             }
             authScopeString = scopeBuilder.toString();
