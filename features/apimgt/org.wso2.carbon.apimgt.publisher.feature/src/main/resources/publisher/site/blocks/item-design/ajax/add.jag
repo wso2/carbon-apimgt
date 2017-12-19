@@ -97,8 +97,9 @@ if(jagg.isCSRFTokenValid())
                             }
                         }
                         var swaggerJSON = parse(swagger);
+
                         //Supported swagger version check
-                        if(swaggerJSON.swagger != supportedSwaggerVersion){
+                        if (swaggerJSON.swagger != supportedSwaggerVersion) {
                             print({
                                 error: true,
                                 message: "Unsupported swagger version provided. Please re-imported with swagger " + supportedSwaggerVersion
@@ -106,7 +107,7 @@ if(jagg.isCSRFTokenValid())
                             return;
                         }
                         //Validate swagger definition with mandatory swagger elements
-                        if(swaggerJSON.swagger == null || swaggerJSON.paths == null || swaggerJSON.info == null){
+                        if (swaggerJSON.swagger == null || swaggerJSON.paths == null || swaggerJSON.info == null) {
                             print({error: true, message: file.getName() + " contains invalid Swagger definition"});
                             return;
                         }
