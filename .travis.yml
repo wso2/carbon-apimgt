@@ -15,6 +15,6 @@ script: travis_wait 100 mvn clean install -q -B -V
 cache:
   directories:
   - $HOME/.m2
-  - /home/tmkasun/Documents/wso2/dev/products/team/apim/carbon-apimgt-forked/features/apimgt/org.wso2.carbon.apimgt.admin.feature/src/main/resources/admin/node_modules
-  - /home/tmkasun/Documents/wso2/dev/products/team/apim/carbon-apimgt-forked/features/apimgt/org.wso2.carbon.apimgt.publisher.feature/src/main/resources/publisher/node_modules
-  - /home/tmkasun/Documents/wso2/dev/products/team/apim/carbon-apimgt-forked/features/apimgt/org.wso2.carbon.apimgt.store.feature/src/main/resources/store/node_modules
+  - features/apimgt/org.wso2.carbon.apimgt.admin.feature/src/main/resources/admin/node_modules
+  - features/apimgt/org.wso2.carbon.apimgt.publisher.feature/src/main/resources/publisher/node_modules
+  - features/apimgt/org.wso2.carbon.apimgt.store.feature/src/main/resources/store/node_modules
