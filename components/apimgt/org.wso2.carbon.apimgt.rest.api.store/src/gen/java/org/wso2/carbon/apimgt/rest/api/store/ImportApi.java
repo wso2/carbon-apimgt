@@ -21,6 +21,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -44,6 +45,7 @@ import javax.ws.rs.core.Response;
 public class ImportApi implements Microservice  {
    private final ImportApiService delegate = ImportApiServiceFactory.getImportApi();
 
+    @OPTIONS
     @POST
     @Path("/applications")
     @Consumes({ "multipart/form-data" })
@@ -68,15 +70,16 @@ public class ImportApi implements Microservice  {
     throws NotFoundException {
         return delegate.importApplicationsPost(fileInputStream, fileDetail,request);
     }
+    @OPTIONS
     @PUT
     @Path("/applications")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Imports an Application.", notes = "This operation can be used to import an existing Application. ", response = ApplicationDTO.class, authorizations = {
+    @io.swagger.annotations.ApiOperation(value = "Imports an Updates an Application.", notes = "This operation can be used to import an existing Application. ", response = ApplicationDTO.class, authorizations = {
         @io.swagger.annotations.Authorization(value = "OAuth2Security", scopes = {
             @io.swagger.annotations.AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API")
         })
-    }, tags={ "Import Configuration", })
+    }, tags={ "Application (Individual)", })
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK. Successful response with the updated object as entity in the body. ", response = ApplicationDTO.class),
         

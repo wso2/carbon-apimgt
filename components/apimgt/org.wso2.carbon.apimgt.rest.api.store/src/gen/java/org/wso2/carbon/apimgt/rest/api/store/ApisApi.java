@@ -27,6 +27,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -50,6 +51,7 @@ import javax.ws.rs.core.Response;
 public class ApisApi implements Microservice  {
    private final ApisApiService delegate = ApisApiServiceFactory.getApisApi();
 
+    @OPTIONS
     @DELETE
     @Path("/{apiId}/comments/{commentId}")
     @Consumes({ "application/json" })
@@ -71,6 +73,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdCommentsCommentIdDelete(commentId,apiId,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}/comments/{commentId}")
     @Consumes({ "application/json" })
@@ -96,6 +99,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdCommentsCommentIdGet(commentId,apiId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @PUT
     @Path("/{apiId}/comments/{commentId}")
     @Consumes({ "application/json" })
@@ -122,6 +126,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdCommentsCommentIdPut(commentId,apiId,body,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}/comments")
     @Consumes({ "application/json" })
@@ -142,6 +147,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdCommentsGet(apiId,limit,offset,request);
     }
+    @OPTIONS
     @POST
     @Path("/{apiId}/comments")
     @Consumes({ "application/json" })
@@ -163,6 +169,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdCommentsPost(apiId,body,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}/documents/{documentId}/content")
     @Consumes({ "application/json" })
@@ -190,6 +197,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdDocumentsDocumentIdContentGet(apiId,documentId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}/documents/{documentId}")
     @Consumes({ "application/json" })
@@ -215,6 +223,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdDocumentsDocumentIdGet(apiId,documentId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}/documents")
     @Consumes({ "application/json" })
@@ -240,6 +249,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdDocumentsGet(apiId,limit,offset,ifNoneMatch,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}")
     @Consumes({ "application/json" })
@@ -264,6 +274,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}/ratings")
     @Consumes({ "application/json" })
@@ -286,6 +297,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdRatingsGet(apiId,limit,offset,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}/ratings/{ratingId}")
     @Consumes({ "application/json" })
@@ -311,6 +323,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdRatingsRatingIdGet(apiId,ratingId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}/sdks/{language}")
     @Consumes({ "application/json" })
@@ -334,6 +347,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdSdksLanguageGet(apiId,language,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}/swagger")
     @Consumes({ "application/json" })
@@ -358,6 +372,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdSwaggerGet(apiId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @PUT
     @Path("/{apiId}/user-rating")
     @Consumes({ "application/json" })
@@ -379,6 +394,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdUserRatingPut(apiId,body,request);
     }
+    @OPTIONS
     @GET
     @Path("/{apiId}/wsdl")
     @Consumes({ "application/json" })
@@ -404,6 +420,7 @@ public class ApisApi implements Microservice  {
     throws NotFoundException {
         return delegate.apisApiIdWsdlGet(apiId,labelName,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @GET
     
     @Consumes({ "application/json" })

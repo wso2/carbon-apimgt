@@ -20,6 +20,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -43,6 +44,7 @@ import javax.ws.rs.core.Response;
 public class SubscriptionApi implements Microservice  {
    private final SubscriptionApiService delegate = SubscriptionApiServiceFactory.getSubscriptionApi();
 
+    @OPTIONS
     @GET
     @Path("/count-over-time")
     @Consumes({ "application/json" })
@@ -61,10 +63,11 @@ public class SubscriptionApi implements Microservice  {
     public Response subscriptionCountOverTimeGet(@ApiParam(value = "Defines the starting timestamp of the interval ",required=true) @QueryParam("startTime") String startTime
 ,@ApiParam(value = "Defines the ending timestamp of the interval ",required=true) @QueryParam("endTime") String endTime
 ,@ApiParam(value = "application/api creator name. In case of any creator is not provided all the details will be provided ") @QueryParam("createdBy") String createdBy
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.subscriptionCountOverTimeGet(startTime,endTime,createdBy, request);
+        return delegate.subscriptionCountOverTimeGet(startTime,endTime,createdBy,request);
     }
+    @OPTIONS
     @GET
     @Path("/list")
     @Consumes({ "application/json" })
@@ -83,8 +86,8 @@ public class SubscriptionApi implements Microservice  {
     public Response subscriptionListGet(@ApiParam(value = "Defines the starting timestamp of the interval ",required=true) @QueryParam("startTime") String startTime
 ,@ApiParam(value = "Defines the ending timestamp of the interval ",required=true) @QueryParam("endTime") String endTime
 ,@ApiParam(value = "application/api creator name. In case of any creator is not provided all the details will be provided ") @QueryParam("createdBy") String createdBy
-, @Context Request request)
+ ,@Context Request request)
     throws NotFoundException {
-        return delegate.subscriptionListGet(startTime,endTime,createdBy, request);
+        return delegate.subscriptionListGet(startTime,endTime,createdBy,request);
     }
 }

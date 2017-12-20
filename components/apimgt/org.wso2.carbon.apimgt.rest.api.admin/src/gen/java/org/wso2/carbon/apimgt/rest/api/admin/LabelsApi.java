@@ -21,6 +21,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -44,6 +45,7 @@ import javax.ws.rs.core.Response;
 public class LabelsApi implements Microservice  {
    private final LabelsApiService delegate = LabelsApiServiceFactory.getLabelsApi();
 
+    @OPTIONS
     @GET
     @Path("/")
     @Consumes({ "application/json" })
@@ -65,6 +67,7 @@ public class LabelsApi implements Microservice  {
     throws NotFoundException {
         return delegate.labelsGet(ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @DELETE
     @Path("/{labelId}")
     @Consumes({ "application/json" })
@@ -87,6 +90,7 @@ public class LabelsApi implements Microservice  {
     throws NotFoundException {
         return delegate.labelsLabelIdDelete(labelId,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @GET
     @Path("/{labelId}")
     @Consumes({ "application/json" })
@@ -111,6 +115,7 @@ public class LabelsApi implements Microservice  {
     throws NotFoundException {
         return delegate.labelsLabelIdGet(labelId,ifNoneMatch,ifModifiedSince,request);
     }
+    @OPTIONS
     @PUT
     @Path("/{labelId}")
     @Consumes({ "application/json" })
@@ -136,6 +141,7 @@ public class LabelsApi implements Microservice  {
     throws NotFoundException {
         return delegate.labelsLabelIdPut(labelId,body,ifMatch,ifUnmodifiedSince,request);
     }
+    @OPTIONS
     @POST
     @Path("/")
     @Consumes({ "application/json" })

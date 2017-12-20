@@ -20,6 +20,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -43,6 +44,7 @@ import javax.ws.rs.core.Response;
 public class ThreatProtectionPoliciesApi implements Microservice  {
    private final ThreatProtectionPoliciesApiService delegate = ThreatProtectionPoliciesApiServiceFactory.getThreatProtectionPoliciesApi();
 
+    @OPTIONS
     @GET
     
     @Consumes({ "application/json" })
@@ -58,6 +60,7 @@ public class ThreatProtectionPoliciesApi implements Microservice  {
     throws NotFoundException {
         return delegate.threatProtectionPoliciesGet(request);
     }
+    @OPTIONS
     @GET
     @Path("/{policyId}")
     @Consumes({ "application/json" })
