@@ -2052,7 +2052,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             oAuthApplication.addParameter("tokenScope", Arrays.toString(noScopes));
         }
 
-        //#TODO get actuall values from response and pass.
         Map<String, Object> keyDetails = new HashMap<String, Object>();
 
         if (tokenInfo != null) {

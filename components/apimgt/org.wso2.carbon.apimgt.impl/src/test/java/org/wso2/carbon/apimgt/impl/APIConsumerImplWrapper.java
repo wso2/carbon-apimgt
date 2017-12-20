@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.test.TestTenantManager;
-import org.wso2.carbon.apimgt.impl.workflow.APIStateChangeSimpleWorkflowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.SampleWorkFlowExecutor;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutor;
@@ -43,9 +42,7 @@ public class APIConsumerImplWrapper extends APIConsumerImpl {
     private final Log log = LogFactory.getLog(APIConsumerImplWrapper.class);
 
     public APIConsumerImplWrapper() throws APIManagementException {
-        super();
     }
-
 
     public APIConsumerImplWrapper(ApiMgtDAO apiMgtDAO) throws APIManagementException {
         this.apiMgtDAO = apiMgtDAO;
