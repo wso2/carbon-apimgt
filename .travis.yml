@@ -8,7 +8,8 @@ install:
   - . $HOME/.nvm/nvm.sh
   - nvm install 8.9.0
   - nvm use 8.9.0
-  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+  # Using -q Quiet output which only show errors, to overcome TravisCI log limit issue
+  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -q -B -V
 
 cache:
   directories:
