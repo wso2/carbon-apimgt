@@ -1,5 +1,5 @@
 ---
-# Use Ubuntu Trusty with sudo instead of new default Trusty because of higher resources
+# Use Ubuntu Trusty with sudo instead of new default Trusty because of higher resources availability
 sudo: required
 dist: trusty
 language: java
