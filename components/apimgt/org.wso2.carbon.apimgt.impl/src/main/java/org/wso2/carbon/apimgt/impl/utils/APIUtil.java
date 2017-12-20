@@ -43,6 +43,7 @@ import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.X509HostnameVerifier;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
@@ -235,6 +236,11 @@ public final class APIUtil {
 
     private static volatile Set<String> whiteListedScopes;
     private static boolean isPublisherRoleCacheEnabled = true;
+
+    public static final String STRICT = "Strict";
+    public static final String ALLOW_ALL = "AllowAll";
+    public static final String DEFAULT_AND_LOCALHOST = "DefaultAndLocalhost";
+    public static final String HOST_NAME_VERIFIER = "httpclient.hostnameVerifier";
 
 
     //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
@@ -5550,6 +5556,7 @@ public final class APIUtil {
     public static HttpClient getHttpClient(int port, String protocol) {
         SchemeRegistry registry = new SchemeRegistry();
         SSLSocketFactory socketFactory = SSLSocketFactory.getSocketFactory();
+        String hostnameVerifierOption = System.getProperty(HOST_NAME_VERIFIER);
         String sslValue = null;
 
         AxisConfiguration axis2Config = ServiceReferenceHolder.getContextService().getServerConfigContext()
@@ -5560,10 +5567,21 @@ public final class APIUtil {
             sslValue = (String) sslVerifyClient.getValue();
         }
 
+        X509HostnameVerifier hostnameVerifier;
+        if (ALLOW_ALL.equalsIgnoreCase(hostnameVerifierOption)) {
+            hostnameVerifier = SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER;
+        } else if (STRICT.equalsIgnoreCase(hostnameVerifierOption)) {
+            hostnameVerifier = SSLSocketFactory.STRICT_HOSTNAME_VERIFIER;
+        } else {
+            hostnameVerifier = SSLSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER;
+        }
+        socketFactory.setHostnameVerifier(hostnameVerifier);
+
         if (APIConstants.HTTPS_PROTOCOL.equals(protocol)) {
             try {
                 if (APIConstants.SSL_VERIFY_CLIENT_STATUS_REQUIRE.equals(sslValue)) {
                     socketFactory = createSocketFactory();
+                    socketFactory.setHostnameVerifier(hostnameVerifier);
                 }
                 if (port >= 0) {
                     registry.register(new Scheme(APIConstants.HTTPS_PROTOCOL, port, socketFactory));
