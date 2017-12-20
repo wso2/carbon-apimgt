@@ -26,16 +26,18 @@ import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.ApplicationUtils;
+
+import java.util.Arrays;
 
 public abstract class AbstractApplicationRegistrationWorkflowExecutor extends WorkflowExecutor{
 
@@ -113,7 +115,6 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
      */
     protected void generateKeysForApplication(ApplicationRegistrationWorkflowDTO workflowDTO) throws
                                                                                               APIManagementException {
-        ApiMgtDAO dao = ApiMgtDAO.getInstance();
         if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
             dogenerateKeysForApplication(workflowDTO);
         }
@@ -147,9 +148,18 @@ public abstract class AbstractApplicationRegistrationWorkflowExecutor extends Wo
 
             workflowDTO.setApplicationInfo(oAuthApplication);
 
-            AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication,null);
-            AccessTokenInfo tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
-
+            AccessTokenInfo tokenInfo;
+            if (oAuthApplication.getJsonString().contains(APIConstants.GRANT_TYPE_CLIENT_CREDENTIALS)) {
+                AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication, null);
+                tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
+            } else {
+                tokenInfo = new AccessTokenInfo();
+                tokenInfo.setAccessToken("");
+                tokenInfo.setValidityPeriod(0L);
+                String[] noScopes = new String[] {"N/A"};
+                tokenInfo.setScope(noScopes);
+                oAuthApplication.addParameter("tokenScope", Arrays.toString(noScopes));
+            }
             workflowDTO.setAccessTokenInfo(tokenInfo);
         } catch (Exception e) {
             APIUtil.handleException("Error occurred while executing SubscriberKeyMgtClient.", e);

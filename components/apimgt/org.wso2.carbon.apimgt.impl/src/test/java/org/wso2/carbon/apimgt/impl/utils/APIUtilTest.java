@@ -79,10 +79,8 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.Tag;
-import org.wso2.carbon.registry.core.config.RegistryContext;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -94,7 +92,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.net.URL;
 import java.sql.Connection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -191,61 +188,11 @@ public class APIUtilTest {
         ServiceReferenceHolderMockCreator holderMockCreator = new ServiceReferenceHolderMockCreator(1);
         ServiceReferenceHolderMockCreator.initContextService();
 
-        System.setProperty("org.wso2.ignoreHostnameVerification", "true");
+        System.setProperty("httpclient.hostnameVerifier", "DefaultAndLocalhost");
         HttpClient client = APIUtil.getHttpClient(3244, "https");
 
         Assert.assertNotNull(client);
     }
-
-    /*
-    @Test
-    public void testGetHttpClientSSLVerifyClient() throws Exception {
-        System.setProperty("carbon.home", "");
-
-        Log log = Mockito.mock(Log.class);
-        PowerMockito.mockStatic(LogFactory.class);
-        Mockito.when(LogFactory.getLog(Mockito.any(Class.class))).thenReturn(log);
-
-        SSLSocketFactory socketFactory = Mockito.mock(SSLSocketFactory.class);
-        PowerMockito.mockStatic(SSLSocketFactory.class);
-        Mockito.when(SSLSocketFactory.getSocketFactory()).thenReturn(socketFactory);
-
-        ServiceReferenceHolderMockCreator holderMockCreator = new ServiceReferenceHolderMockCreator(1);
-        ServiceReferenceHolderMockCreator.initContextService();
-
-        TransportInDescription transportInDescription = holderMockCreator.getConfigurationContextServiceMockCreator().
-                getContextMockCreator().getConfigurationMockCreator().getTransportInDescription();
-
-        Parameter sslVerifyClient = Mockito.mock(Parameter.class);
-        Mockito.when(transportInDescription.getParameter(APIConstants.SSL_VERIFY_CLIENT)).thenReturn(sslVerifyClient);
-        Mockito.when(sslVerifyClient.getValue()).thenReturn(APIConstants.SSL_VERIFY_CLIENT_STATUS_REQUIRE);
-
-        System.setProperty("org.wso2.ignoreHostnameVerification", "true");
-
-        File keyStore = new File(Thread.currentThread().getContextClassLoader().
-                getResource("wso2carbon.jks").getFile());
-
-        ServerConfiguration serverConfiguration = Mockito.mock(ServerConfiguration.class);
-        PowerMockito.mockStatic(CarbonUtils.class);
-        Mockito.when(CarbonUtils.getServerConfiguration()).thenReturn(serverConfiguration);
-
-        Mockito.when(serverConfiguration.getFirstProperty("Security.KeyStore.Location")).
-                thenReturn(keyStore.getAbsolutePath());
-        Mockito.when(serverConfiguration.getFirstProperty("Security.KeyStore.Password")).
-                thenReturn("wso2carbon");
-
-        InputStream inputStream = new FileInputStream(keyStore.getAbsolutePath());
-        KeyStore keystore = KeyStore.getInstance("JKS");
-        char[] pwd = "wso2carbon".toCharArray();
-        keystore.load(inputStream, pwd);
-        SSLContext sslcontext = SSLContexts.custom().loadTrustMaterial(keystore).useSSL().build();
-        SSLContext.setDefault(sslcontext);
-
-        HttpClient client = APIUtil.getHttpClient(3244, "https");
-
-        Assert.assertNotNull(client);
-    }
-    */
 
     @Test
     public void testIsValidURL() throws Exception {

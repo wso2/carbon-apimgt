@@ -156,7 +156,7 @@ public abstract class AbstractKeyManager implements KeyManager {
      * @param e   Exception object.
      * @throws APIManagementException
      */
-    private void handleException(String msg, Exception e) throws APIManagementException {
+    protected void handleException(String msg, Exception e) throws APIManagementException {
         log.error(msg, e);
         throw new APIManagementException(msg, e);
     }
