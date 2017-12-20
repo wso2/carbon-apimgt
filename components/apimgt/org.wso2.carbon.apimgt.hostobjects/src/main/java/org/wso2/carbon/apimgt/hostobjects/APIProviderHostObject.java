@@ -43,7 +43,6 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.jaggeryjs.hostobjects.file.FileHostObject;
 import org.jaggeryjs.scriptengine.exceptions.ScriptException;
 import org.json.simple.JSONArray;
@@ -96,7 +95,6 @@ import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
-import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
@@ -3664,7 +3662,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     ((APIProviderHostObject) thisObj).getUsername()));
             result = apiProvider.searchPaginatedAPIs(newSearchQuery, tenantDomain, start, end, limitAttributes);
 
-            if (newSearchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX2)) {
+            if (newSearchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS)) {
                 Map<Documentation, API> apiDocMap = (Map<Documentation, API>) result.get("apis");
                 if (apiDocMap != null) {
                     int i = 0;

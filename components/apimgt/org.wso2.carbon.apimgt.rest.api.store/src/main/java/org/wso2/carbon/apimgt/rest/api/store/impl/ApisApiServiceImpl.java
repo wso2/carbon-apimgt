@@ -95,7 +95,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             String newSearchQuery = APIUtil.constructNewSearchQuery(query);
             // Append LC state query criteria if the search is not doc or subcontext
             // based
-            if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX2.startsWith(newSearchQuery) &&
+            if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS.startsWith(newSearchQuery) &&
                     !APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.startsWith(newSearchQuery)) {
                 boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
 
