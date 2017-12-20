@@ -2,7 +2,7 @@
 
 |  Branch | Build Status(Jenkins) | Build Status(TravisCI) |
 | :------------ |:------------- |:-------------
-| master      | [![Build Status](https://wso2.org/jenkins/job/platform-builds/job/carbon-apimgt/badge/icon)](https://wso2.org/jenkins/job/platform-builds/job/carbon-apimgt/) | [![Build Status](https://api.travis-ci.org/wso2/carbon-apimgt.svg?branch=master)](https://api.travis-ci.org/tmkasun/react-samples) |
+| master      | [![Build Status](https://wso2.org/jenkins/job/platform-builds/job/carbon-apimgt/badge/icon)](https://wso2.org/jenkins/job/platform-builds/job/carbon-apimgt/) | [![Build Status](https://api.travis-ci.org/wso2/carbon-apimgt.svg?branch=master)](https://api.travis-ci.org/wso2/carbon-apimgt) |
 
  This repository contains major components which are used to build the API Manager product.
 
