@@ -1,0 +1,18 @@
+---
+# Use Ubuntu Trusty with sudo instead of new default Trusty because of higher resources
+sudo: required
+dist: trusty
+language: java
+
+install:
+  - . $HOME/.nvm/nvm.sh
+  - nvm install 8.9.0
+  - nvm use 8.9.0
+  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+
+cache:
+  directories:
+  - $HOME/.m2
+  - /home/tmkasun/Documents/wso2/dev/products/team/apim/carbon-apimgt-forked/features/apimgt/org.wso2.carbon.apimgt.admin.feature/src/main/resources/admin/node_modules
+  - /home/tmkasun/Documents/wso2/dev/products/team/apim/carbon-apimgt-forked/features/apimgt/org.wso2.carbon.apimgt.publisher.feature/src/main/resources/publisher/node_modules
+  - /home/tmkasun/Documents/wso2/dev/products/team/apim/carbon-apimgt-forked/features/apimgt/org.wso2.carbon.apimgt.store.feature/src/main/resources/store/node_modules
