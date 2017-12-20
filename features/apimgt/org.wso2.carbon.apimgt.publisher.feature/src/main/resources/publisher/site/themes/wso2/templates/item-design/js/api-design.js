@@ -696,7 +696,6 @@ APIDesigner.prototype.render_additionalProperties = function () {
         }
         propertyKeyVal = propertyKeyVal.trim().toLowerCase();
         propertyVal = propertyVal.trim();
-
         if (propertyKeyVal.indexOf(' ') >= 0) {
             $("#property_key_error").text(i18n.t("Property name should not have space. Please select a different " +
                 "property name.")).removeClass("hidden").show();
@@ -709,6 +708,15 @@ APIDesigner.prototype.render_additionalProperties = function () {
                     " Please select a different property name.")).removeClass("hidden").show();
                 return;
             }
+        }
+        if (propertyKeyVal.length > 80) {
+            $("#property_key_error").text(i18n.t("Property name can have maximum of 80 characters." +
+                " Please select a different property name.")).removeClass("hidden").show();
+            return;
+        }
+        if (propertyKeyVal.length > 900) {
+            $("#property_key_error").text(i18n.t("Property value can have maximum of 900 characters.")).removeClass("hidden").show();
+            return;
         }
         var apiPropertiesValue = apiPropertiesElement.val();
         var apiPropertiesObject = {};

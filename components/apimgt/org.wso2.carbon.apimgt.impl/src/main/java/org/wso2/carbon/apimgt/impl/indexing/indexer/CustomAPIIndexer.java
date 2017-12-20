@@ -80,10 +80,16 @@ public class CustomAPIIndexer extends RXTIndexer {
         if (resource != null) {
             Properties properties = resource.getProperties();
             Enumeration propertyNames = properties.propertyNames();
+            if (log.isDebugEnabled()) {
+                log.debug("API has " + propertyNames + " properties.");
+            }
             while (propertyNames.hasMoreElements()) {
                 String property = (String) propertyNames.nextElement();
                 if (property.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
                     fields.put((OVERVIEW_PREFIX + property).toLowerCase(), resource.getPropertyValues(property));
+                    if (log.isDebugEnabled()) {
+                        log.debug(property + " is added as " + (OVERVIEW_PREFIX + property) + " field for indexing");
+                    }
                 }
             }
             indexDocument.setFields(fields);

@@ -1843,12 +1843,20 @@ public abstract class AbstractAPIManager implements APIManager {
         String[] searchQueries = searchQuery.split("&");
         StringBuilder filteredQuery = new StringBuilder();
 
+        if (log.isDebugEnabled()) {
+            log.debug("Original search query received : " + searchQuery);
+        }
+
         // Filtering the queries related with custom properties
         for (String query : searchQueries) {
             // If the query does not contains "=" then it is an errornous scenario.
             if (query.contains("=")) {
                 String[] searchKeys = query.split("=");
                 if (!Arrays.asList(APIConstants.API_SEARCH_PREFIXES).contains(searchKeys[0].toLowerCase())) {
+                    if (log.isDebugEnabled()) {
+                        log.debug(searchKeys[0] + " does not match with any of the reserved key words. Hence"
+                                + " appending " + APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + " as prefix");
+                    }
                     searchKeys[0] = (APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + searchKeys[0]).toLowerCase();
                 }
                 if (filteredQuery.length() == 0) {
@@ -1861,6 +1869,9 @@ public abstract class AbstractAPIManager implements APIManager {
             }
         }
         searchQuery = filteredQuery.toString();
+        if (log.isDebugEnabled()) {
+            log.debug("Final search query after the post processing for the custom properties : " + searchQuery);
+        }
         try {
             boolean isTenantMode = (requestedTenantDomain != null);
             if (isTenantMode && !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(requestedTenantDomain)) {

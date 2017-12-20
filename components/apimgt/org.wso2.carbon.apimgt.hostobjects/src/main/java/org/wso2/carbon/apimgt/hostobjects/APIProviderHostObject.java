@@ -416,7 +416,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String corsConfiguraion = (String) apiData.get("corsConfiguration", apiData);
         String additionalProperties = (String) apiData.get("additionalProperties", apiData);
         JSONObject properties = null;
-        if (additionalProperties != null && !additionalProperties.trim().isEmpty()) {
+        if (!StringUtils.isEmpty(additionalProperties)) {
             JSONParser parser = new JSONParser();
             properties = (JSONObject) parser.parse(additionalProperties);
         }
@@ -1192,9 +1192,10 @@ public class APIProviderHostObject extends ScriptableObject {
         String environments = (String) apiData.get("environments", apiData);
         String visibleRoles = "";
         String publisherAccessControl = (String) apiData.get(APIConstants.ACCESS_CONTROL_PARAMETER, apiData);
-        String publisherAccessControlRoles = "";  String additionalProperties = (String) apiData.get("additionalProperties", apiData);
+        String publisherAccessControlRoles = "";
+        String additionalProperties = (String) apiData.get("additionalProperties", apiData);
         JSONObject properties = null;
-        if (additionalProperties != null && !additionalProperties.trim().isEmpty()) {
+        if (!StringUtils.isEmpty(additionalProperties)) {
             JSONParser parser = new JSONParser();
             properties = (JSONObject) parser.parse(additionalProperties);
         }
@@ -1773,7 +1774,7 @@ public class APIProviderHostObject extends ScriptableObject {
         String visibleRoles = "";
         String additionalProperties = (String) apiData.get("additionalProperties", apiData);
         JSONObject properties = null;
-        if (additionalProperties != null && !additionalProperties.trim().isEmpty()) {
+        if (!StringUtils.isEmpty(additionalProperties)) {
             JSONParser parser = new JSONParser();
             properties = (JSONObject) parser.parse(additionalProperties);
         }
