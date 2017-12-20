@@ -155,8 +155,14 @@ var carbon = require('carbon');
             var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
             var apiUtil = new APIUtil();
             var tenantVal = request.getParameter("tenant");
+            if (tenantVal == null) {
+                tenantVal = "carbon.super";
+            }
+            var name = request.getParameter("name");
+            var version = request.getParameter("version");
+            var provider = request.getParameter("provider");
             var tenantID = carbon.server.osgiService('org.wso2.carbon.user.core.service.RealmService').getTenantManager().getTenantId(tenantVal);
-            var customOAuth2Header = apiUtil.getOAuthConfiguration(tenantID, "CustomOAuth2Header");
+            var customOAuth2Header = apiUtil.getOAuthConfiguration(tenantID, "CustomOAuth2Header", provider, name, version);
             if(null == customOAuth2Header) {
                 customOAuth2Header = "Authorization";
             }
