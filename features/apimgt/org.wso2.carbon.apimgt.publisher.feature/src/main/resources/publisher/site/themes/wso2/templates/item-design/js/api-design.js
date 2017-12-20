@@ -694,7 +694,7 @@ APIDesigner.prototype.render_additionalProperties = function () {
             $("#property_value_error").text(i18n.t("Property value cannot be empty.")).removeClass("hidden");
             return;
         }
-        propertyKeyVal = propertyKeyVal.trim().toLowerCase();
+        propertyKeyVal = propertyKeyVal.trim();
         propertyVal = propertyVal.trim();
         if (propertyKeyVal.indexOf(' ') >= 0) {
             $("#property_key_error").text(i18n.t("Property name should not have space. Please select a different " +
@@ -703,7 +703,7 @@ APIDesigner.prototype.render_additionalProperties = function () {
         }
 
         for (var keyWord in reservedKeyWords) {
-            if (propertyKeyVal === reservedKeyWords[keyWord]) {
+            if (propertyKeyVal.toLowerCase() === reservedKeyWords[keyWord]) {
                 $("#property_key_error").text(i18n.t("Property name matches with one of the reserved keywords." +
                     " Please select a different property name.")).removeClass("hidden").show();
                 return;
@@ -714,8 +714,8 @@ APIDesigner.prototype.render_additionalProperties = function () {
                 " Please select a different property name.")).removeClass("hidden").show();
             return;
         }
-        if (propertyKeyVal.length > 900) {
-            $("#property_key_error").text(i18n.t("Property value can have maximum of 900 characters.")).removeClass("hidden").show();
+        if (propertyVal.length > 900) {
+            $("#property_value_error").text(i18n.t("Property value can have maximum of 900 characters.")).removeClass("hidden").show();
             return;
         }
         var apiPropertiesValue = apiPropertiesElement.val();

@@ -487,7 +487,7 @@ public class APIMappingUtil {
         Map<String, String> additionalProperties = dto.getAdditionalProperties();
         if (additionalProperties != null) {
             for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
-                model.addProperty(entry.getKey().toLowerCase(), entry.getValue());
+                model.addProperty(entry.getKey(), entry.getValue());
             }
         }
         APIBusinessInformationDTO apiBusinessInformationDTO = dto.getBusinessInformation();

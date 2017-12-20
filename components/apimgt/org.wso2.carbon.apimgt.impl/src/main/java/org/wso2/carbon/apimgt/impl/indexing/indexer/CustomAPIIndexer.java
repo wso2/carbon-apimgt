@@ -32,10 +32,7 @@ import org.wso2.carbon.registry.indexing.AsyncIndexer;
 import org.wso2.carbon.registry.indexing.IndexingManager;
 import org.wso2.carbon.registry.indexing.solr.IndexDocument;
 
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.CUSTOM_API_INDEXER_PROPERTY;
 import static org.wso2.carbon.apimgt.impl.APIConstants.OVERVIEW_PREFIX;
@@ -80,13 +77,13 @@ public class CustomAPIIndexer extends RXTIndexer {
         if (resource != null) {
             Properties properties = resource.getProperties();
             Enumeration propertyNames = properties.propertyNames();
-            if (log.isDebugEnabled()) {
-                log.debug("API has " + propertyNames + " properties.");
-            }
             while (propertyNames.hasMoreElements()) {
                 String property = (String) propertyNames.nextElement();
+                if (log.isDebugEnabled()) {
+                    log.debug("API at " + resourcePath + " has " + property + " property");
+                }
                 if (property.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
-                    fields.put((OVERVIEW_PREFIX + property).toLowerCase(), resource.getPropertyValues(property));
+                    fields.put((OVERVIEW_PREFIX + property), getLowerCaseList(resource.getPropertyValues(property)));
                     if (log.isDebugEnabled()) {
                         log.debug(property + " is added as " + (OVERVIEW_PREFIX + property) + " field for indexing");
                     }
@@ -95,5 +92,23 @@ public class CustomAPIIndexer extends RXTIndexer {
             indexDocument.setFields(fields);
         }
         return indexDocument;
+    }
+
+    /**
+     * To get the list with lower case letters. This is needed as whenever we do a attribute search it will be
+     * converted back to lower case.
+     *
+     * @param propertyValues List of properties that need to be converted to lowercase.
+     * @return lower case list of properties.
+     */
+    private List<String> getLowerCaseList(List<String> propertyValues) {
+        List<String> lowerCasedProperties = new ArrayList<>();
+        if (propertyValues == null) {
+            return null;
+        }
+        for (String property : propertyValues) {
+            lowerCasedProperties.add(property.toLowerCase());
+        }
+        return lowerCasedProperties;
     }
 }

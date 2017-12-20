@@ -5234,7 +5234,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (additionalProperties != null && additionalProperties.size() != 0) {
                 for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
                     apiResource.setProperty(
-                            (APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + entry.getKey()).toLowerCase(),
+                            (APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + entry.getKey()),
                             entry.getValue());
                 }
             }

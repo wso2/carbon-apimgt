@@ -6792,17 +6792,16 @@ public final class APIUtil {
      * @return Updated API.
      * @throws RegistryException Registry Exception.
      */
-    public static API setResourceProperties(API api, Registry registry, String artifactPath) throws RegistryException {
+    private static API setResourceProperties(API api, Registry registry, String artifactPath) throws RegistryException {
         Resource apiResource = registry.get(artifactPath);
         Properties properties = apiResource.getProperties();
         if (properties != null) {
             Enumeration propertyNames = properties.propertyNames();
-            if (log.isDebugEnabled()) {
-                log.debug("API '" + api.getId().toString() + "' " + "has following registry properties " + propertyNames
-                        .toString());
-            }
             while (propertyNames.hasMoreElements()) {
                 String propertyName = (String) propertyNames.nextElement();
+                if (log.isDebugEnabled()) {
+                    log.debug("API '" + api.getId().toString() + "' " + "has the property " + propertyName);
+                }
                 if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
                     api.addProperty(propertyName.substring(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX.length()),
                             apiResource.getProperty(propertyName));

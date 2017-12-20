@@ -1857,7 +1857,7 @@ public abstract class AbstractAPIManager implements APIManager {
                         log.debug(searchKeys[0] + " does not match with any of the reserved key words. Hence"
                                 + " appending " + APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + " as prefix");
                     }
-                    searchKeys[0] = (APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + searchKeys[0]).toLowerCase();
+                    searchKeys[0] = (APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + searchKeys[0]);
                 }
                 if (filteredQuery.length() == 0) {
                     filteredQuery.append(searchKeys[0]).append("=").append(searchKeys[1]);
