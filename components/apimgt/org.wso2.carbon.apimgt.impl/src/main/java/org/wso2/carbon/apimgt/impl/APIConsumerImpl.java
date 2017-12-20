@@ -30,7 +30,26 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
-import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIKey;
+import org.wso2.carbon.apimgt.api.model.APIRating;
+import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
+import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
+import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
+import org.wso2.carbon.apimgt.api.model.ApplicationKeysDTO;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.KeyManager;
+import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
+import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
+import org.wso2.carbon.apimgt.api.model.Tag;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidator;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
@@ -74,7 +93,6 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import javax.cache.Caching;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -90,6 +108,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import javax.cache.Caching;
 
 /**
  * This class provides the core API store functionality. It is implemented in a very
@@ -2020,8 +2039,18 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         //Do application mapping with consumerKey.
         apiMgtDAO.createApplicationKeyTypeMappingForManualClients(keyType, applicationName, userName, clientId);
 
-        AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication, null);
-        AccessTokenInfo tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
+        AccessTokenInfo tokenInfo;
+        if (oAuthApplication.getJsonString().contains(APIConstants.GRANT_TYPE_CLIENT_CREDENTIALS)) {
+            AccessTokenRequest tokenRequest = ApplicationUtils.createAccessTokenRequest(oAuthApplication, null);
+            tokenInfo = keyManager.getNewApplicationAccessToken(tokenRequest);
+        } else {
+            tokenInfo = new AccessTokenInfo();
+            tokenInfo.setAccessToken("");
+            tokenInfo.setValidityPeriod(0L);
+            String[] noScopes = new String[] {"N/A"};
+            tokenInfo.setScope(noScopes);
+            oAuthApplication.addParameter("tokenScope", Arrays.toString(noScopes));
+        }
 
         //#TODO get actuall values from response and pass.
         Map<String, Object> keyDetails = new HashMap<String, Object>();
@@ -2029,16 +2058,14 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (tokenInfo != null) {
             keyDetails.put("validityTime", Long.toString(tokenInfo.getValidityPeriod()));
             keyDetails.put("accessToken", tokenInfo.getAccessToken());
+            keyDetails.put("tokenDetails", tokenInfo.getJSONString());
         }
 
-        if (oAuthApplication != null) {
-            keyDetails.put("consumerKey", oAuthApplication.getClientId());
-            keyDetails.put("consumerSecret", oAuthApplication.getParameter("client_secret"));
-            keyDetails.put("appDetails", oAuthApplication.getJsonString());
-        }
+        keyDetails.put("consumerKey", oAuthApplication.getClientId());
+        keyDetails.put("consumerSecret", oAuthApplication.getParameter("client_secret"));
+        keyDetails.put("appDetails", oAuthApplication.getJsonString());
 
         return keyDetails;
-
     }
 
     /** returns the SubscribedAPI object which is related to the subscriptionId
@@ -2947,7 +2974,6 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
                         keyDetails.put("consumerKey", oauthApp.getClientId());
                         keyDetails.put("consumerSecret", oauthApp.getClientSecret());
-                        keyDetails.put("accessallowdomains", registrationWorkflowDTO.getDomainList());
                         keyDetails.put("appDetails", oauthApp.getJsonString());
                     } catch (APIManagementException e) {
                         APIUtil.handleException("Error occurred while Creating Keys.", e);

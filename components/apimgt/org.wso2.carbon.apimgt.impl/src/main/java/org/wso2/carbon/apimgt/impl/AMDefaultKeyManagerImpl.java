@@ -106,7 +106,8 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo info = null;
 
         try {
-            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationToCreate = new org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo();
+            org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationToCreate =
+                    new org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo();
             applicationToCreate.setIsSaasApplication(oAuthApplicationInfo.getIsSaasApplication());
             applicationToCreate.setCallBackURL(oAuthApplicationInfo.getCallBackURL());
             applicationToCreate.setClientName(applicationName);
@@ -165,7 +166,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             String[] grantTypes = null;
             if (oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_GRANT) != null) {
                 grantTypes = ((String)oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_GRANT))
-                                                                                                           .split(",");
+                        .split(",");
             }
             String applicationName = oAuthApplicationInfo.getClientName();
             String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
@@ -488,6 +489,34 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         }
 
         oAuthApplicationInfo.addParameter("tokenScope", tokenScopes);
+        oAuthApplicationInfo.setClientName(info.getClientName());
+        oAuthApplicationInfo.setClientId(info.getClientId());
+        oAuthApplicationInfo.setCallBackURL(info.getCallBackURL());
+        oAuthApplicationInfo.setClientSecret(info.getClientSecret());
+        oAuthApplicationInfo.setIsSaasApplication(info.getIsSaasApplication());
+
+        try {
+            JSONObject jsonObject = new JSONObject(info.getJsonString());
+
+            if (jsonObject.has(ApplicationConstants.
+                    OAUTH_REDIRECT_URIS)) {
+                oAuthApplicationInfo.addParameter(ApplicationConstants.
+                        OAUTH_REDIRECT_URIS, jsonObject.get(ApplicationConstants.OAUTH_REDIRECT_URIS));
+            }
+
+            if (jsonObject.has(ApplicationConstants.OAUTH_CLIENT_NAME)) {
+                oAuthApplicationInfo.addParameter(ApplicationConstants.
+                        OAUTH_CLIENT_NAME, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_NAME));
+            }
+
+            if (jsonObject.has(ApplicationConstants.OAUTH_CLIENT_GRANT)) {
+                oAuthApplicationInfo.addParameter(ApplicationConstants.
+                        OAUTH_CLIENT_GRANT, jsonObject.get(ApplicationConstants.OAUTH_CLIENT_GRANT));
+            }
+        } catch (JSONException e) {
+            handleException("Can not read information from the retrieved OAuth application", e);
+        }
+
         if (log.isDebugEnabled()) {
             log.debug("Creating semi-manual application for consumer id  :  " + oAuthApplicationInfo.getClientId());
         }
