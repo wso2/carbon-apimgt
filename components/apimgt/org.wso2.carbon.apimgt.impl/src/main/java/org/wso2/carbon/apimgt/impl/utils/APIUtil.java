@@ -639,7 +639,7 @@ public final class APIUtil {
             String environments = artifact.getAttribute(APIConstants.API_OVERVIEW_ENVIRONMENTS);
             api.setEnvironments(extractEnvironmentsForAPI(environments));
             api.setCorsConfiguration(getCorsConfigurationFromArtifact(artifact));
-
+            api.setCustomOAuth2Header(artifact.getAttribute(APIConstants.API_OVERVIEW_CUSTOMOAUTH2HEADER));
         } catch (GovernanceException e) {
             String msg = "Failed to get API for artifact ";
             throw new APIManagementException(msg, e);
@@ -873,7 +873,9 @@ public final class APIUtil {
 
             artifact.setAttribute(APIConstants.API_PRODUCTION_THROTTLE_MAXTPS, api.getProductionMaxTps());
             artifact.setAttribute(APIConstants.API_SANDBOX_THROTTLE_MAXTPS, api.getSandboxMaxTps());
-
+            if (!StringUtils.isBlank(api.getCustomOAuth2Header())) {
+                artifact.setAttribute(APIConstants.API_OVERVIEW_CUSTOMOAUTH2HEADER, api.getCustomOAuth2Header());
+            }
             //Validate if the API has an unsupported context before setting it in the artifact
             String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
             if (APIConstants.SUPER_TENANT_DOMAIN.equals(tenantDomain)) {
@@ -6837,14 +6839,26 @@ public final class APIUtil {
      * in the case where the handler APIEndpointPasswordRegistryHandler is enabled in registry.xml
      *
      * @param tenantId  The Tenant ID
-     * @param config    The configuration to get from tenant registry or api-manager.xml
+     * @param property    The configuration to get from tenant registry or api-manager.xml
      * @return          The configuration read from tenant registry or api-manager.xml or else null
      * @throws APIManagementException Throws if the registry resource doesn't exist
      * or the content cannot be parsed to JSON
      */
-    public static String getOAuthConfiguration(int tenantId, String config)
+    public static String getOAuthConfiguration(int tenantId, String property, String providerName, String apiName, String apiVersion)
     throws APIManagementException{
         try {
+            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+            String apiPath = APIUtil.getAPIPath(apiIdentifier);
+            Registry govRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry();
+            Resource apiResource = govRegistry.get(apiPath);
+            String artifactId = apiResource.getUUID();
+            GenericArtifactManager artifactManager = APIUtil.getArtifactManager(govRegistry, APIConstants.API_KEY);
+            GenericArtifact artifact = artifactManager.getGenericArtifact(artifactId);
+
+            String oAuthConfiguration = artifact.getAttribute(APIConstants.API_OVERVIEW_CUSTOMOAUTH2HEADER);
+            if (!StringUtils.isBlank(oAuthConfiguration)) {
+                return oAuthConfiguration;
+            }
             Registry registryConfig = ServiceReferenceHolder.getInstance().getRegistryService()
                     .getConfigSystemRegistry(tenantId);
 
@@ -6855,10 +6869,10 @@ public final class APIUtil {
                     JSONObject tenantConfig = (JSONObject) new JSONParser().parse(content);
 
                     //Read the configuration from the tenant registry
-                    String oAuthConfiguration = "";
-                    if (null != tenantConfig.get(config)) {
+                    oAuthConfiguration = "";
+                    if (null != tenantConfig.get(property)) {
                         StringBuilder stringBuilder = new StringBuilder();
-                        stringBuilder.append(tenantConfig.get(config));
+                        stringBuilder.append(tenantConfig.get(property));
                         oAuthConfiguration = stringBuilder.toString();
 
                     }
@@ -6871,7 +6885,7 @@ public final class APIUtil {
                         //If tenant registry doesn't have the configuration, then read it from api-manager.xml
                         APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
                                 .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                        oAuthConfiguration = apimConfig.getFirstProperty(APIConstants.OAUTH_CONFIGS + config);
+                        oAuthConfiguration = apimConfig.getFirstProperty(APIConstants.OAUTH_CONFIGS + property);
 
                         if (!StringUtils.isBlank(oAuthConfiguration)) {
                             return oAuthConfiguration;
@@ -6881,7 +6895,65 @@ public final class APIUtil {
             }
 
         } catch (RegistryException e) {
-            String msg = "Error while retrieving " + config + " from tenant registry.";
+            String msg = "Error while retrieving " + property + " from tenant registry.";
+            throw new APIManagementException(msg, e);
+        } catch (ParseException pe) {
+            String msg = "Couldn't create json object from Swagger object for custom OAuth header.";
+            throw new APIManagementException(msg, pe);
+        }
+        return null;
+    }
+
+    /**
+     * This method is used to get the actual endpoint password of an API from the hidden property
+     * in the case where the handler APIEndpointPasswordRegistryHandler is enabled in registry.xml
+     *
+     * @param tenantId  The Tenant ID
+     * @param property    The configuration to get from tenant registry or api-manager.xml
+     * @return          The configuration read from tenant registry or api-manager.xml or else null
+     * @throws APIManagementException Throws if the registry resource doesn't exist
+     * or the content cannot be parsed to JSON
+     */
+    public static String getOAuthConfiguration(int tenantId, String property)
+            throws APIManagementException{
+        try {
+            Registry registryConfig = ServiceReferenceHolder.getInstance().getRegistryService()
+                    .getConfigSystemRegistry(tenantId);
+
+            if (registryConfig.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
+                Resource resource = registryConfig.get(APIConstants.API_TENANT_CONF_LOCATION);
+                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
+                if (content != null) {
+                    JSONObject tenantConfig = (JSONObject) new JSONParser().parse(content);
+
+                    //Read the configuration from the tenant registry
+                    String oAuthConfiguration = "";
+                    if (null != tenantConfig.get(property)) {
+                        StringBuilder stringBuilder = new StringBuilder();
+                        stringBuilder.append(tenantConfig.get(property));
+                        oAuthConfiguration = stringBuilder.toString();
+
+                    }
+
+                    if (!StringUtils.isBlank(oAuthConfiguration)){
+
+                        return oAuthConfiguration;
+
+                    } else {
+                        //If tenant registry doesn't have the configuration, then read it from api-manager.xml
+                        APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
+                                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                        oAuthConfiguration = apimConfig.getFirstProperty(APIConstants.OAUTH_CONFIGS + property);
+
+                        if (!StringUtils.isBlank(oAuthConfiguration)) {
+                            return oAuthConfiguration;
+                        }
+                    }
+                }
+            }
+
+        } catch (RegistryException e) {
+            String msg = "Error while retrieving " + property + " from tenant registry.";
             throw new APIManagementException(msg, e);
         } catch (ParseException pe) {
             String msg = "Couldn't create json object from Swagger object for custom OAuth header.";
