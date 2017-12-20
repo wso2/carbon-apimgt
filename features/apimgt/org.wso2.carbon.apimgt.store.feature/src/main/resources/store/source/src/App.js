@@ -23,15 +23,11 @@ import {Apis, ApplicationCreate, Applications, Base, Login, Logout} from './app/
 import {PageNotFound} from './app/components/Base/Errors'
 import AuthManager from './app/data/AuthManager'
 import qs from 'qs'
-import Axios from 'axios';
-import LoadingAnimation from './app/components/Base/Loading/Loading.js';
 
 import 'antd/dist/antd.css'
 import {message} from 'antd'
 import './App.css'
 import 'typeface-roboto'
-import Utils from "./app/data/Utils";
-import ConfigManager from "./app/data/ConfigManager";
 
 // import './materialize.css'
 
@@ -78,19 +74,17 @@ class Protected extends Component {
 /**
  * Define base routes for the application
  */
-class Store extends Component {
 
-    render() {
-        return (
-            <Router basename="/store">
-                <Switch>
-                    <Route path={"/login"} component={Login}/>
-                    <Route path={"/logout"} component={Logout}/>
-                    <Route component={Protected}/>
-                </Switch>
-            </Router>
-        );
-    }
+const Store = (props) => {
+    return (
+        <Router basename="/store">
+            <Switch>
+                <Route path={"/login"} render={() => <Login appName={"store"} appLabel={"STORE"} />}/>
+                <Route path={"/logout"} component={Logout}/>
+                <Route component={Protected}/>
+            </Switch>
+        </Router>
+    );
 }
 
 export default Store;
