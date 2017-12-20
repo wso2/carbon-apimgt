@@ -6,7 +6,9 @@ import Info from 'material-ui-icons/Info';
 import Error from 'material-ui-icons/Error';
 import Warning from 'material-ui-icons/Warning';
 
-
+/**
+ * @Deprecated use {Alert} class instead
+ */
 class Message extends React.Component{
     constructor(props){
         super(props);

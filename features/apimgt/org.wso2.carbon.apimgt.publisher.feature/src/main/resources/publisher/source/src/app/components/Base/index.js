@@ -16,16 +16,13 @@
  * under the License.
  */
 import React from 'react';
-
-import Header from './Header/Header'
-
+import Header from './Header/Header';
+import Footer from './Footer/Footer';
 import Grid from 'material-ui/Grid';
-
 const defaultOffset = "250px";
 
-
 class Layout extends React.Component {
-    constructor(props){
+    constructor(props) {
         super(props);
         this.state = {
             drawerOpen: true,
@@ -34,14 +31,21 @@ class Layout extends React.Component {
         };
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
     }
+
     toggleDrawer = () => {
-        if( !this.state.showLeftMenu ) return;
-        this.setState({ drawerOpen: !this.state.drawerOpen });
-        this.setState({ layoutLeftOffset : (() => {return (this.state.drawerOpen ? "0px" : defaultOffset)})() });
+        if (!this.state.showLeftMenu) return;
+        this.setState({drawerOpen: !this.state.drawerOpen});
+        this.setState({
+            layoutLeftOffset: (() => {
+                return (this.state.drawerOpen ? "0px" : defaultOffset)
+            })()
+        });
     };
 
     componentDidMount() {
-        if(!this.props.showLeftMenu) { this.setState({layoutLeftOffset:"0px"})}
+        if (!this.props.showLeftMenu) {
+            this.setState({layoutLeftOffset: "0px"})
+        }
         this.updateWindowDimensions();
         window.addEventListener('resize', this.updateWindowDimensions);
     }
@@ -49,36 +53,43 @@ class Layout extends React.Component {
     componentWillUnmount() {
         window.removeEventListener('resize', this.updateWindowDimensions);
     }
-    componentWillReceiveProps(nextProps){
-        if(nextProps.showLeftMenu){
-            this.setState({showLeftMenu:nextProps.showLeftMenu});
-            if(nextProps.showLeftMenu) { this.setState({layoutLeftOffset:defaultOffset})}
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.showLeftMenu) {
+            this.setState({showLeftMenu: nextProps.showLeftMenu});
+            if (nextProps.showLeftMenu) {
+                this.setState({layoutLeftOffset: defaultOffset})
+            }
         }
 
     }
+
     updateWindowDimensions() {
-        if(!this.state.showLeftMenu) {
+        if (!this.state.showLeftMenu) {
             return;
         }
-        window.innerWidth < 650  ?
-            this.setState({drawerOpen:false,layoutLeftOffset:"0px"}) :
-            this.setState({drawerOpen:true,layoutLeftOffset:defaultOffset});
+        window.innerWidth < 650 ?
+            this.setState({drawerOpen: false, layoutLeftOffset: "0px"}) :
+            this.setState({drawerOpen: true, layoutLeftOffset: defaultOffset});
     }
 
 
-    render(props){
-        //let params = qs.stringify({referrer: props.location.pathname});
+    render() {
         return (
-            <div  style={{marginLeft:this.state.layoutLeftOffset}}  >
-                <Header toggleDrawer={this.toggleDrawer} showLeftMenu={this.state.showLeftMenu} />
-
-                <Grid container spacing={0} >
-                    <Grid item xs={12} >
+            <div style={{marginLeft: this.state.layoutLeftOffset}}>
+                <Grid container spacing={0}>
+                    <Grid item xs={12}>
+                        <Header toggleDrawer={this.toggleDrawer} showLeftMenu={this.state.showLeftMenu}/>
+                    </Grid>
+                    <Grid item xs={12}>
                         {this.props.children}
                     </Grid>
+                    <Grid container spacing={0} justify="center">
+                        <Grid item xs={6}>
+                            <Footer/>
+                        </Grid>
+                    </Grid>
                 </Grid>
-
-
             </div>
         );
     }
