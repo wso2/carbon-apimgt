@@ -225,10 +225,23 @@ GrantTypes.prototype.getMap = function(selected){
                 validityTime: 3600 //set a default value.
             }, $.proxy(function (result) {
                 if (!result.error) {
+                    if ((typeof(result.data.key.appDetails) != 'undefined') ||  (result.data.key.appDetails != null)){
+                        var appDetails = JSON.parse(result.data.key.appDetails);
+                        this.app.grants = this.grants.getMap(appDetails.grant_types);
+                    }
+                    selectedGrants = appDetails.grant_types;
                     this.app.ConsumerKey = client_id;
                     this.app.ConsumerSecret = client_secret;
                     this.app.Key = result.data.key.accessToken;
+                    this.app.callbackUrl = appDetails.redirect_uris;
+                    this.app.KeyScope = result.data.key.tokenScope;
+                    if (result.data.key.validityTime !== 0){
+                        this.app.ValidityTime = result.data.key.validityTime;
+                    }
+                    this.app.keyState = result.data.key.keyState;
+                    this.selectDefaultGrants();
                     this.render();
+                    this.toggle_regenerate_button();
                 } else {
                     jagg.message({content: i18n.t("Error occurred while saving OAuth application. Please check if you have provided valid Consumer Key & Secret."), type: "error"});
                 }
@@ -354,6 +367,7 @@ GrantTypes.prototype.getMap = function(selected){
             }, $.proxy(function (result) {
                 this.element.find('.update_grants').buttonLoader('stop');
                 if (!result.error) {
+                    this.app.grants = this.grants.getMap(selectedGrants.split(",").join(" "));
                     this.toggle_regenerate_button();
                 } else {
                     //@todo: param_string
