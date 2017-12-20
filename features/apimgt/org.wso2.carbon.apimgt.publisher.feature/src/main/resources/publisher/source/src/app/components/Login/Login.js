@@ -29,10 +29,11 @@ import Snackbar from 'material-ui/Snackbar';
 import User from '../../data/User'
 import ConfigManager from "../../data/ConfigManager";
 import Utils from "../../data/Utils";
-import Input, { InputLabel } from 'material-ui/Input';
+import Input, {InputLabel} from 'material-ui/Input';
 import Select from 'material-ui/Select';
 import {FormControl} from 'material-ui/Form';
 import {MenuItem} from 'material-ui/Menu';
+import {CircularProgress} from "material-ui/Progress";
 
 class Login extends Component {
 
@@ -49,12 +50,81 @@ class Login extends Component {
             messageOpen: false,
             message:'',
             environments: {},
-            environmentId: 0
+            environmentId: 0,
+            authConfigs: {_updated: false},
         };
+        this.fetch_ssoData = this.fetch_ssoData.bind(this);
     }
 
+    componentDidMount() {
+        //Get Environments and SSO data
+        ConfigManager.getConfigs().environments.then(response => {
+            const environments = response.data.environments;
+            const environmentId = Utils.getEnvironmentID(environments);
+
+            // Do not need to render before fetch sso data
+            this.state.environments = environments;
+            this.state.environmentId = environmentId;
+
+            // Update environment to discard default environment configuration
+            const environment = environments[environmentId];
+            Utils.setEnvironment(environment);
+
+            //Fetch SSO data and render
+            this.fetch_ssoData(environment);
+        });
+
+        let queryString = this.props.location.search;
+        queryString = queryString.replace(/^\?/, '');
+        /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
+        let params = qs.parse(queryString);
+        if (params.referrer) {
+            this.setState({referrer: params.referrer});
+        }
+        if (params.user_name) {
+            this.setState({isLogin: true});
+            const validityPeriod = params.validity_period; // In seconds
+            const WSO2_AM_TOKEN_1 = params.partial_token;
+            const user = new User(Utils.getEnvironment().label, params.user_name, params.id_token);
+            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/publisher");
+            user.scopes = params.scopes.split(" ");
+            AuthManager.setUser(user);
+        }
+    }
+
+    fetch_ssoData(environment){
+        this.state.authConfigs._updated = false;
+        let promised_ssoData = Utils.getPromised_ssoData(environment);
+        promised_ssoData.then(response => {
+            response.data.members._updated = true;
+
+            this.setState({
+                authConfigs: response.data.members
+            });
+        });
+    }
 
     handleSubmit = (e) => {
+        const isSsoEnabled = this.state.authConfigs.is_sso_enabled.value;
+        if(isSsoEnabled){
+            this.handleSsoLogin(e);
+        }else{
+            this.handleDefaultLogin(e);
+        }
+    };
+
+    handleSsoLogin = (e) => {
+        e.preventDefault();
+        const authorizationEndpoint = this.state.authConfigs.authorizationEndpoint.value;
+        const client_id = this.state.authConfigs.client_id.value;
+        const callback_URL = `${this.state.authConfigs.callback_url.value}`;
+        const scopes = this.state.authConfigs.scopes.value;
+
+        window.location = `${authorizationEndpoint}?response_type=code&client_id=${client_id}` +
+            `&redirect_uri=${callback_URL}&scope=${scopes}`;
+    };
+
+    handleDefaultLogin = (e) => {
         e.preventDefault();
         this.setState({loading: true});
         this.setState({validate: true});
@@ -78,34 +148,7 @@ class Login extends Component {
                 this.setState({loading: false});
             }
         );
-    }
-
-    componentDidMount() {
-        //Get Environments
-        ConfigManager.getConfigs().environments.then(response => {
-            this.setState({
-                environments: response.data.environments,
-                environmentId: Utils.getEnvironmentID(response.data.environments)
-            });
-        });
-
-        let queryString = this.props.location.search;
-        queryString = queryString.replace(/^\?/, '');
-        /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
-        let params = qs.parse(queryString);
-        if (params.referrer) {
-            this.setState({referrer: params.referrer});
-        }
-        if (params.user_name) {
-            this.setState({isLogin: true});
-            const validityPeriod = params.validity_period; // In seconds
-            const WSO2_AM_TOKEN_1 = params.partial_token;
-            const user = new User(Utils.getEnvironment().label, params.user_name, params.id_token);
-            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/publisher");
-            user.scopes = params.scopes.split(" ");
-            AuthManager.setUser(user);
-        }
-    }
+    };
 
     handleInputChange = (event) => {
         const target = event.target;
@@ -115,26 +158,34 @@ class Login extends Component {
         this.setState({
             [name]: value
         });
-    }
+    };
 
     handleEnvironmentChange = (event) => {
+        const environmentId = event.target.value;
+        let environment = this.state.environments[environmentId];
+
+        //Get sso data of selected environment
+        this.fetch_ssoData(environment);
+
         this.setState({
-            environmentId : event.target.value
+            environmentId
         });
-    };
-
-    handleClickEnvironmentMenu = (event) => {
-        this.setState({ openEnvironmentMenu: true, anchorElEnvironmentMenu: event.currentTarget });
-    };
-
-    handleRequestCloseEnvironmentMenu = (event) => {
-        this.setState({ openEnvironmentMenu: false});
     };
 
     handleRequestClose = () => {
         this.setState({ messageOpen: false });
     };
+
     render() {
+        const isMoreThanTwoEnvironments = this.state.environments && this.state.environments.length > 1;
+        const isSsoUpdated = this.state.authConfigs._updated;
+        const isSsoEnabled = isSsoUpdated ? this.state.authConfigs.is_sso_enabled.value : undefined;
+
+        if(isSsoEnabled && !isMoreThanTwoEnvironments){ // If sso enabled and no more than two environments
+            this.handleSsoLogin();
+        }
+
+        // Show login page if sso disabled or more than two environments
         if (!this.state.isLogin) { // If not logged in, go to login page
             return (
                 <div className="login-flex-container">
@@ -160,31 +211,10 @@ class Login extends Component {
                                     </Typography>
                                 </div>
 
-                                <TextField
-                                    error={!this.state.username && this.state.validate}
-                                    id="username"
-                                    label="Username"
-                                    type="text"
-                                    autoComplete="username"
-                                    margin="normal"
-                                    style={{width:"100%"}}
-                                    onChange={this.handleInputChange}
-                                />
-                                <TextField
-                                    error={!this.state.password && this.state.validate}
-                                    id="password"
-                                    label="Password"
-                                    type="password"
-                                    autoComplete="current-password"
-                                    margin="normal"
-                                    style={{width:"100%"}}
-                                    onChange={this.handleInputChange}
-                                />
-
                                 {/*Environments*/}
-                                {this.state.environments && this.state.environments.length > 1 &&
+                                {isMoreThanTwoEnvironments &&
                                 <div>
-                                    <br/>
+                                    <br/><br/>
                                     <FormControl>
                                         <InputLabel htmlFor="environment">Environment</InputLabel>
                                         <Select onChange={this.handleEnvironmentChange} value={this.state.environmentId}
@@ -197,8 +227,50 @@ class Login extends Component {
                                 </div>
                                 }
 
-                                <Button type="submit" raised color="primary"  className="login-form-submit">
-                                    Login
+                                {isSsoUpdated ?
+                                    <div>
+                                        {isSsoEnabled ?
+                                            <div style={{width: '100%', marginTop: '29%', fontSize: 'medium'}}>
+                                                Single Sign On is enabled.
+                                            </div>
+                                            :
+                                            <div>
+                                                <TextField
+                                                    error={!this.state.username && this.state.validate}
+                                                    id="username"
+                                                    label="Username"
+                                                    type="text"
+                                                    autoComplete="username"
+                                                    margin="normal"
+                                                    style={{width: "100%"}}
+                                                    onChange={this.handleInputChange}
+                                                />
+                                                <TextField
+                                                    error={!this.state.password && this.state.validate}
+                                                    id="password"
+                                                    label="Password"
+                                                    type="password"
+                                                    autoComplete="current-password"
+                                                    margin="normal"
+                                                    style={{width: "100%"}}
+                                                    onChange={this.handleInputChange}
+                                                />
+                                            </div>
+                                        }
+                                    </div>
+                                    :
+                                    <div style={{width: '100%', marginTop: '15%', marginBottom: '10%'}}>
+                                        <CircularProgress style={{margin: 'auto', display: 'block'}}/>
+                                    </div>
+                                }
+
+                                <Button
+                                    type="submit"
+                                    raised color="primary"
+                                    className="login-form-submit"
+                                    disabled={!isSsoUpdated}
+                                >
+                                    {isSsoEnabled ? "Visit Login Page" : "Login"}
                                 </Button>
 
                             </form>

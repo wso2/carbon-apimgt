@@ -41,63 +41,10 @@ import ConfigManager from "./app/data/ConfigManager";
 class Protected extends Component {
     constructor(props) {
         super(props);
-        this.state = {showLeftMenu: false, authConfigs: null};
+        this.state = {showLeftMenu: false};
         message.config({top: '48px'}); // .custom-header height + some offset
         /* TODO: need to fix the header to avoid conflicting with messages ~tmkb*/
-        this.handleResponse = this.handleResponse.bind(this);
-        this.handleReject = this.handleReject.bind(this);
-        this.fetch_SSO_Data = this.fetch_SSO_Data.bind(this);
     }
-
-    componentDidMount(){
-        this.fetch_SSO_Data();
-    }
-
-    componentWillReceiveProps(nextProps){
-        if (!AuthManager.getUser()) {
-            this.fetch_SSO_Data();
-        }
-    }
-
-    /**
-     * Fetch SSO data
-     */
-    fetch_SSO_Data(){
-        const environment = Utils.getEnvironment();
-        if(environment._flag_default){ //If default environment
-            //Get Environments
-            ConfigManager.getConfigs().environments.then(response => {
-                const environments = response.data.environments;
-                if (environments){
-                    //Change SSO request url with changing the environment
-                    Utils.setEnvironment(environments[0]);
-                }
-
-                //Send SSO request to first environment in the list
-                Axios.get(Utils.getAppSSORequestURL()).then(this.handleResponse, this.handleReject);
-            });
-        }else{
-            //Send SSO request to last logged in environment
-            Axios.get(Utils.getAppSSORequestURL()).then(this.handleResponse, this.handleReject);
-        }
-    }
-
-    handleResponse = (response) => {
-        this.setState({
-            authConfigs: response.data.members,
-            updateSSO: true
-        });
-    };
-
-    /**
-     * Handle invalid login url in localStorage - environment object
-     * @param reject
-     */
-    handleReject = reject => {
-        console.log("Error: Single Sign On:\n", reject);
-        Utils.setEnvironment(); //Set Default environment
-        Axios.get(Utils.getAppSSORequestURL()).then(this.handleResponse); //Try login
-    };
 
     /**
      * Change the visibility state of left side navigation menu bar
@@ -108,7 +55,6 @@ class Protected extends Component {
         // Note: AuthManager.getUser() method is a passive check, which simply check the user availability in browser storage,
         // Not actively check validity of access token from backend
         if (AuthManager.getUser()) {
-            this.state.updateSSO = false;
             return (
                 <Base>
                     <Switch>
@@ -122,29 +68,10 @@ class Protected extends Component {
             );
         }
 
-        if(this.state.updateSSO) {
-            this.state.updateSSO = false;
-            let params = qs.stringify({referrer: this.props.location.pathname});
-            if (this.state.authConfigs) {
-                if (this.state.authConfigs.is_sso_enabled.value) {
-                    const authorizationEndpoint = this.state.authConfigs.authorizationEndpoint.value;
-                    const client_id = this.state.authConfigs.client_id.value;
-                    const callback_URL = `${this.state.authConfigs.callback_url.value}`;
-                    const scopes = this.state.authConfigs.scopes.value;
-                    window.location = `${authorizationEndpoint}?response_type=code&client_id=${client_id}` +
-                        `&redirect_uri=${callback_URL}&scope=${scopes}`;
-                } else {
-                    return (
-                        <Redirect to={{pathname: '/login', search: params}}/>
-                    );
-                }
-            } else {
-                return <LoadingAnimation/>;
-            }
-        }
-
-        this.state.updateSSO = false;
-        return null;
+        let params = qs.stringify({referrer: this.props.location.pathname});
+        return (
+            <Redirect to={{pathname: '/login', search: params}}/>
+        );
     }
 }
 

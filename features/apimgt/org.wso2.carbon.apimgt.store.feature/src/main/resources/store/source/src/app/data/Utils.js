@@ -17,6 +17,7 @@
  */
 
 import AuthManager from "./AuthManager";
+import Axios from "axios";
 
 /**
  * Utility class for Store application
@@ -141,9 +142,13 @@ class Utils {
         AuthManager.setUser(user);
     }
 
-    static getAppSSORequestURL() {
+    static getPromised_ssoData(environment){
+        return Axios.get(Utils.getAppSSORequestURL(environment));
+    }
+
+    static getAppSSORequestURL(environment = Utils.getEnvironment()) {
         const uiService = window.location.origin.replace(/\//g, "%2F").replace(/:/g, "%3A");
-        return `${Utils.CONST.PROTOCOL}${Utils.getEnvironment().host}${Utils.CONST.SSO_LOGIN}${Utils.CONST.CONTEXT_PATH}`
+        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.SSO_LOGIN}${Utils.CONST.CONTEXT_PATH}`
             + `?uiService=${uiService}/`;
     }
 
@@ -167,7 +172,7 @@ class Utils {
      * @private
      */
     static _getDefaultEnvironment(){
-        return {label: 'Default', host: window.location.host, loginTokenPath: '/login/token', _flag_default: true};
+        return {label: 'Default', host: window.location.host, loginTokenPath: '/login/token'};
     }
 }
 
