@@ -56,21 +56,20 @@ class LifeCycle extends Component {
     render() {
         if (this.state.api) {
             return (
-                    <Grid container>
+                    <Grid item>
                         <Grid item xs={12}>
-
                             <Paper>
-                                <Typography className="page-title" type="display2">
+                                <Typography type="display2">
                                     {this.state.api.name} - <span>Change Lifecycle</span>
                                 </Typography>
-                                <Typography type="caption" gutterBottom align="left" className="page-title-help">
+                                <Typography type="caption" gutterBottom align="left">
                                     Manage API lifecycle from cradle to grave: create, publish,
                                     block, deprecate, and retire
                                 </Typography>
 
                             </Paper>
                         </Grid>
-                        <Grid item xs={12}  className="page-content">
+                        <Grid item xs={12}>
                             <Typography type="headline" className="title-gap">
                                 Change Lifecycle
                             </Typography>
@@ -94,7 +93,6 @@ class LifeCycle extends Component {
                                 </div> }
                         </Grid>
                     </Grid>
-
             );
         } else {
             return <Loading/>

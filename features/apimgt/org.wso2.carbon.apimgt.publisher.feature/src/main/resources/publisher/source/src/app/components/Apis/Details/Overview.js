@@ -24,7 +24,6 @@ const FormItem = Form.Item;
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import Api from '../../../data/api'
-import {Redirect} from 'react-router-dom'
 import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation'
 import ApiPermissionValidation from '../../../data/ApiPermissionValidation'
 
@@ -32,11 +31,10 @@ import Paper from 'material-ui/Paper';
 import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
-import Card, { CardActions, CardContent, CardMedia } from 'material-ui/Card';
-import Table, { TableBody, TableCell, TableRow } from 'material-ui/Table';
-import IconButton from 'material-ui/IconButton';
-import { Delete, Edit, CreateNewFolder, Description  }from 'material-ui-icons';
-import Confirm from '../../Shared/Confirm'
+import Card, {CardActions, CardContent, CardMedia} from 'material-ui/Card';
+import Table, {TableBody, TableCell, TableRow} from 'material-ui/Table';
+import blueGrey from 'material-ui/colors/blueGrey';
+import {Delete, Edit, CreateNewFolder, Description}from 'material-ui-icons';
 
 class Overview extends Component {
     constructor(props) {
@@ -134,124 +132,127 @@ class Overview extends Component {
         if (!this.state.api) {
             return <Loading/>
         }
-
-
-
         return (
-                <Grid container>
-                    <Grid item xs={12}>
-                        <Paper style={{display:"flex"}}>
-                            <Typography type="display2" gutterBottom className="page-title">
-                                {api.name} - <span>Overview</span>
-                            </Typography>
-                            {/* allowing edit based on scopes */}
-                            <ScopeValidation resourceMethod={resourceMethod.PUT} resourcePath={resourcePath.SINGLE_API}>
-                                <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
-                                    <Button aria-owns="simple-menu" aria-haspopup="true" >
-                                        <Edit /> Edit
-                                    </Button>
-                                </ApiPermissionValidation>
-                            </ScopeValidation>
-                            {/* allowing delet based on scopes */}
-                            <ScopeValidation resourceMethod={resourceMethod.DELETE} resourcePath={resourcePath.SINGLE_API}>
-                                <ApiPermissionValidation checkingPermissionType={ApiPermissionValidation.permissionType.DELETE}
-                                                         userPermissions={this.state.api.userPermissionsForApi}>
-                                    <Popconfirm title="Do you want to delete this api?" onConfirm={this.handleApiDelete}>
-                                        <Button aria-owns="simple-menu" aria-haspopup="true" >
-                                            <Delete /> Delete
-                                        </Button>
-                                    </Popconfirm>
-                                </ApiPermissionValidation>
-                            </ScopeValidation>
-                            {/* allowing to create new version based on scopes */}
-                            <ScopeValidation resourcePath={resourcePath.API_COPY} resourceMethod={resourceMethod.POST}>
-                              <Button aria-owns="simple-menu" aria-haspopup="true" >
-                                  <CreateNewFolder /> Create New Version
-                              </Button>
-                          </ScopeValidation>
-                            <Button aria-owns="simple-menu" aria-haspopup="true" >
-                                <Description /> View Swagger
-                            </Button>
-                        </Paper>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3} lg={3} xl={2} style={{paddingLeft:"40px"}}>
-
-                        <Card>
-                            <CardMedia
-                                image="/publisher/public/app/images/api/api-default.png"
-                                title="Contemplative Reptile"
-                            >
-                                <img alt="API thumb" width="100%" src="/publisher/public/app/images/api/api-default.png"/>
-                            </CardMedia>
-                            <CardContent>
-
-                            </CardContent>
-                            <CardActions>
-                                {api.lifeCycleStatus}
-
-                                <Button dense color="primary">
-                                    <a href={"/store/apis/" + this.api_uuid} target="_blank" title="Store">View in store</a>
+            <Grid item>
+                <Grid item xs={12}>
+                    <Paper>
+                        <Typography type="display2" gutterBottom>
+                            {api.name} - <span>Overview</span>
+                        </Typography>
+                        {/* allowing edit based on scopes */}
+                        <ScopeValidation resourceMethod={resourceMethod.PUT} resourcePath={resourcePath.SINGLE_API}>
+                            <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
+                                <Button aria-owns="simple-menu" aria-haspopup="true">
+                                    <Edit /> Edit
                                 </Button>
-                            </CardActions>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={9} lg={9} xl={10} >
-                        <Paper>
-                            <Table>
-                                <TableBody>
-
-                                    <TableRow>
-                                        <TableCell style={{width:"100px"}}>Visibility</TableCell><TableCell>{api.visibility}</TableCell>
-                                    </TableRow>
-
-                                    <TableRow>
-                                        <TableCell>Version</TableCell><TableCell>{api.version}</TableCell>
-                                    </TableRow>
-
-                                    <TableRow>
-                                        <TableCell>Context</TableCell><TableCell>{api.context}</TableCell>
-                                    </TableRow>
-                                    {
-                                        api.endpoint.map( ep => <TableRow>
-                                            <TableCell>{ep.type}</TableCell>
-                                            <TableCell>{ep.inline ? ep.inline.endpointConfig.serviceUrl : ''}</TableCell>
-                                        </TableRow>)
-                                    }
-                                    <TableRow>
-                                        <TableCell>Date Created</TableCell><TableCell>{api.createdTime}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>Date Last Updated</TableCell><TableCell>{api.lastUpdatedTime}</TableCell>
-                                    </TableRow>
-
-                                    <TableRow>
-                                        <TableCell>Default API Version</TableCell><TableCell>{api.isDefaultVersion}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>Published Environments</TableCell><TableCell>not-supported-yet</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>Policies</TableCell>
-                                        <TableCell>
-                                            {api.policies.map(policy => policy + ", ")}
-                                        </TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>WSDL URLs</TableCell>
-                                        <TableCell>
-                                            {
-                                                api.wsdlUri && (
-                                                    <a onClick={this.downloadWSDL}>Download</a>
-                                                )
-                                            }
-                                        </TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            </Table>
-                        </Paper>
-
-                    </Grid>
+                            </ApiPermissionValidation>
+                        </ScopeValidation>
+                        {/* allowing delet based on scopes */}
+                        <ScopeValidation resourceMethod={resourceMethod.DELETE}
+                                         resourcePath={resourcePath.SINGLE_API}>
+                            <ApiPermissionValidation
+                                checkingPermissionType={ApiPermissionValidation.permissionType.DELETE}
+                                userPermissions={this.state.api.userPermissionsForApi}>
+                                <Popconfirm title="Do you want to delete this api?"
+                                            onConfirm={this.handleApiDelete}>
+                                    <Button aria-owns="simple-menu" aria-haspopup="true">
+                                        <Delete /> Delete
+                                    </Button>
+                                </Popconfirm>
+                            </ApiPermissionValidation>
+                        </ScopeValidation>
+                        {/* allowing to create new version based on scopes */}
+                        <ScopeValidation resourcePath={resourcePath.API_COPY} resourceMethod={resourceMethod.POST}>
+                            <Button aria-owns="simple-menu" aria-haspopup="true">
+                                <CreateNewFolder /> Create New Version
+                            </Button>
+                        </ScopeValidation>
+                        <Button aria-owns="simple-menu" aria-haspopup="true">
+                            <Description /> View Swagger
+                        </Button>
+                    </Paper>
                 </Grid>
+                <Grid item xs={12}>
+                    <Card>
+                        <CardMedia
+                            style={{backgroundColor: blueGrey[50]}}
+                            title="Contemplative Reptile">
+                            <img alt="API thumb" width="10%"
+                                 src="/publisher/public/app/images/api/api-default.png"/>
+                        </CardMedia>
+                        <CardContent>
+
+                        </CardContent>
+                        <CardActions>
+                            {api.lifeCycleStatus}
+
+                            <Button dense color="primary">
+                                <a href={"/store/apis/" + this.api_uuid} target="_blank" title="Store">View in
+                                    store</a>
+                            </Button>
+                        </CardActions>
+                    </Card>
+                </Grid>
+                <Grid item xs={12}>
+                    <Paper>
+                        <Table>
+                            <TableBody>
+
+                                <TableRow>
+                                    <TableCell
+                                        style={{width: "100px"}}>Visibility</TableCell><TableCell>{api.visibility}</TableCell>
+                                </TableRow>
+
+                                <TableRow>
+                                    <TableCell>Version</TableCell><TableCell>{api.version}</TableCell>
+                                </TableRow>
+
+                                <TableRow>
+                                    <TableCell>Context</TableCell><TableCell>{api.context}</TableCell>
+                                </TableRow>
+                                {
+                                    api.endpoint.map(ep => <TableRow key={ep.inline.id}>
+                                        <TableCell>{ep.type}</TableCell>
+                                        <TableCell>{ep.inline ? ep.inline.endpointConfig.serviceUrl : ''}</TableCell>
+                                    </TableRow>)
+                                }
+                                <TableRow>
+                                    <TableCell>Date Created</TableCell><TableCell>{api.createdTime}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Date Last
+                                        Updated</TableCell><TableCell>{api.lastUpdatedTime}</TableCell>
+                                </TableRow>
+
+                                <TableRow>
+                                    <TableCell>Default API
+                                        Version</TableCell><TableCell>{api.isDefaultVersion}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Published
+                                        Environments</TableCell><TableCell>not-supported-yet</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Policies</TableCell>
+                                    <TableCell>
+                                        {api.policies.map(policy => policy + ", ")}
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>WSDL URLs</TableCell>
+                                    <TableCell>
+                                        {
+                                            api.wsdlUri && (
+                                                <a onClick={this.downloadWSDL}>Download</a>
+                                            )
+                                        }
+                                    </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </Paper>
+                </Grid>
+            </Grid>
         );
     }
 }

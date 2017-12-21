@@ -25,23 +25,18 @@ import {
 } from 'material-ui-icons';
 import Divider from 'material-ui/Divider';
 import Drawer from 'material-ui/Drawer';
-
-
 import {withStyles} from 'material-ui/styles';
 import List from 'material-ui/List';
-import {MenuItem} from 'material-ui/Menu';
-import Typography from 'material-ui/Typography';
-import IconButton from 'material-ui/IconButton';
-import MenuIcon from 'material-ui-icons/Menu';
-import ChevronLeftIcon from 'material-ui-icons/ChevronLeft';
-import ChevronRightIcon from 'material-ui-icons/ChevronRight';
+import blue from 'material-ui/colors/blue';
 
 
 const styles = {
+    active: {
+        backgroundColor: blue[500]
+    },
     drawerPaper: {
         position: 'relative',
-        height: '100%',
-        width: 240,
+        height: '100%'
     }
 };
 
@@ -76,13 +71,12 @@ class NavBar extends Component {
         const pathSegments = this.props.location.pathname.split('/');
         // This assume that last segment and segment before it contains detail page action and API UUID
         const [active_tab, api_uuid] = pathSegments.reverse();
+        const {classes} = this.props;
+        const {anchor, open} = this.state;
 
         function showActiveTab(tab) {
-            return (tab === active_tab) ? "detail-menu selected-item" : "detail-menu";
+            return (tab === active_tab) ? {root: classes.active} : {};
         }
-
-        const {classes, theme} = this.props;
-        const {anchor, open} = this.state;
 
         return (
             <Drawer type="persistent" classes={{paper: classes.drawerPaper,}} anchor={anchor} open={open}>
@@ -95,11 +89,11 @@ class NavBar extends Component {
                     </ListItem>
                     <Divider />
                     {NavBar.TABS.map(tab =>
-                        (<ListItem key={tab.name} className={showActiveTab({tab: name})}>
+                        (<ListItem key={tab.name} classes={showActiveTab(tab.name)}>
                             <ListItemIcon>
                                 {tab.icon}
                             </ListItemIcon>
-                            <Link name={tab.name} to={"/apis/" + api_uuid + "/" + {tab: name}}>
+                            <Link name={tab.name} to={"/apis/" + api_uuid + "/" + tab.name}>
                                 <ListItemText primary={tab.name}/></Link>
                         </ListItem>)
                     )}
