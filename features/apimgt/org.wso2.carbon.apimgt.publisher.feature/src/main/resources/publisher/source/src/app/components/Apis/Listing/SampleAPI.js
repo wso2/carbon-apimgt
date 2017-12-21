@@ -126,7 +126,7 @@ class SampleAPI extends Component {
                             Can't find any APIs!
                         </Typography>
                         <Button disabled={deploying} raised onClick={this.handleDeploySample} color="primary">
-                            Deploy Sample
+                            Deploy Sample API
                         </Button>
                         {deploying && <CircularProgress size={24} className={classes.buttonProgress}/>}
                     </Paper>
