@@ -30,7 +30,7 @@ class Apis extends React.Component {
             <Switch>
                 <Route exact path={"/apis"} component={Listing}/>
                 <Route path={"/apis/:api_uuid/"} render={ props => (
-                    <Details {...props} setLeftMenu={this.props.setLeftMenu}/>)}/>
+                    <Details {...props}/>)}/>
                 <Route component={PageNotFound}/>
             </Switch>
         );
