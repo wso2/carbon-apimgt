@@ -4,7 +4,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>6.2.25</version>
+    <version>6.2.26-SNAPSHOT</version>
     <name>WSO2 Carbon - API Management Aggregator POM</name>
     <url>http://wso2.org</url>
 
@@ -19,7 +19,7 @@
         <url>https://github.com/wso2/carbon-apimgt.git</url>
         <developerConnection>scm:git:https://github.com/wso2/carbon-apimgt.git</developerConnection>
         <connection>scm:git:https://github.com/wso2/carbon-apimgt.git</connection>
-        <tag>v6.2.25</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <modules>
@@ -1301,7 +1301,7 @@
 
         <!-- APIM Component Version -->
         <hamcrest.version>1.3</hamcrest.version>
-        <carbon.apimgt.version>6.2.25</carbon.apimgt.version>
+        <carbon.apimgt.version>6.2.26-SNAPSHOT</carbon.apimgt.version>
         <carbon.apimgt.imp.pkg.version>[6.0.0, 7.0.0)</carbon.apimgt.imp.pkg.version>
 
         <analytics.shared.version>1.0.1</analytics.shared.version>
