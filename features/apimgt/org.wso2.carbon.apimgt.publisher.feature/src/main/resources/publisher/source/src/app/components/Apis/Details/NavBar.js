@@ -18,26 +18,54 @@
 
 import React, {Component} from 'react'
 import {Link, withRouter} from 'react-router-dom'
-import { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
-import { Description, DonutLarge, Games,FilterNone,
-    LockOutline, InsertDriveFile, Tune, Code, Subscriptions, ChromeReaderMode, VerifiedUser  } from 'material-ui-icons';
+import {ListItem, ListItemIcon, ListItemText} from 'material-ui/List';
+import {
+    Description, DonutLarge, Games, FilterNone,
+    LockOutline, InsertDriveFile, Tune, Code, Subscriptions, ChromeReaderMode, VerifiedUser
+} from 'material-ui-icons';
 import Divider from 'material-ui/Divider';
+import Drawer from 'material-ui/Drawer';
+
+
+import {withStyles} from 'material-ui/styles';
+import List from 'material-ui/List';
+import {MenuItem} from 'material-ui/Menu';
+import Typography from 'material-ui/Typography';
+import IconButton from 'material-ui/IconButton';
+import MenuIcon from 'material-ui-icons/Menu';
+import ChevronLeftIcon from 'material-ui-icons/ChevronLeft';
+import ChevronRightIcon from 'material-ui-icons/ChevronRight';
+
+
+const styles = {
+    drawerPaper: {
+        position: 'relative',
+        height: '100%',
+        width: 240,
+    }
+};
+
 
 class NavBar extends Component {
 
-    static get CONST() {
-        return {
-            OVERVIEW: "overview",
-            LIFECYCLE: "lifecycle",
-            ENDPOINTS: "endpoints",
-            RESOURCES: "resources",
-            PERMISSION: "permission",
-            DOCUMENTS: "documents",
-            MEDIATION: "mediation",
-            SCRIPTING: "scripting",
-            SUBSCRIPTIONS: "subscriptions",
-            SECURITY: "security"
-        }
+    constructor(props) {
+        super(props);
+        this.state = {anchor: 'left', open: true};
+    }
+
+    static get TABS() {
+        return [
+            {name: "overview", icon: <Description />},
+            {name: "lifecycle", icon: <DonutLarge />},
+            {name: "endpoints", icon: <Games />},
+            {name: "resources", icon: <FilterNone />},
+            {name: "documents", icon: <InsertDriveFile />},
+            {name: "permission", icon: <LockOutline />},
+            {name: "mediation", icon: <Tune />},
+            {name: "scripting", icon: <Code />},
+            {name: "subscriptions", icon: <Subscriptions />},
+            {name: "security", icon: <VerifiedUser />},
+        ]
     }
 
     render() {
@@ -48,80 +76,35 @@ class NavBar extends Component {
         const pathSegments = this.props.location.pathname.split('/');
         // This assume that last segment and segment before it contains detail page action and API UUID
         const [active_tab, api_uuid] = pathSegments.reverse();
-        function showActiveTab(tab){
-            return (tab === active_tab) ?  "detail-menu selected-item" : "detail-menu" ;
+
+        function showActiveTab(tab) {
+            return (tab === active_tab) ? "detail-menu selected-item" : "detail-menu";
         }
+
+        const {classes, theme} = this.props;
+        const {anchor, open} = this.state;
+
         return (
-            <div>
-                <ListItem style={{width:"250px"}}>
-                    <ListItemIcon>
-                        <ChromeReaderMode />
-                    </ListItemIcon>
-                    <Link name="listing" className="api-details-title" to={"/"} >API Details</Link>
-                </ListItem>
-                <Divider />
-                <ListItem className={showActiveTab("overview")}>
-                    <ListItemIcon>
-                        <Description />
-                    </ListItemIcon>
-                    <Link name="overview" to={"/apis/" + api_uuid + "/overview"} >
-                        <ListItemText primary="overview"  /></Link>
-                </ListItem>
-                <ListItem className={showActiveTab("lifecycle")}>
-                    <ListItemIcon>
-                        <DonutLarge />
-                    </ListItemIcon>
-                    <Link name="lifecycle" to={"/apis/" + api_uuid + "/lifecycle"}><ListItemText primary="lifecycle" /></Link>
-                </ListItem>
-                <ListItem className={showActiveTab("endpoints")}>
-                    <ListItemIcon>
-                        <Games />
-                    </ListItemIcon>
-                    <Link name="endpoints" to={"/apis/" + api_uuid + "/endpoints"}><ListItemText primary="endpoints" /></Link>
-                </ListItem>
-                <ListItem className={showActiveTab("resources")}>
-                    <ListItemIcon>
-                        <FilterNone />
-                    </ListItemIcon>
-                    <Link name="resources" to={"/apis/" + api_uuid + "/resources"}><ListItemText primary="resources" /></Link>
-                </ListItem>
-                <ListItem className={showActiveTab("permission")}>
-                    <ListItemIcon>
-                        <LockOutline />
-                    </ListItemIcon>
-                    <Link name="permission" to={"/apis/" + api_uuid + "/permission"}><ListItemText primary="permission" /></Link>
-                </ListItem>
-                <ListItem className={showActiveTab("documents")}>
-                    <ListItemIcon>
-                        <InsertDriveFile />
-                    </ListItemIcon>
-                    <Link name="documents" to={"/apis/" + api_uuid + "/documents"}><ListItemText primary="documents" /></Link>
-                </ListItem>
-                <ListItem className={showActiveTab("mediation")}>
-                    <ListItemIcon>
-                        <Tune />
-                    </ListItemIcon>
-                    <Link name="mediation" to={"/apis/" + api_uuid + "/mediation"}><ListItemText primary="mediation" /></Link>
-                </ListItem>
-                <ListItem className={showActiveTab("scripting")}>
-                    <ListItemIcon>
-                        <Code />
-                    </ListItemIcon>
-                    <Link name="scripting" to={"/apis/" + api_uuid + "/scripting"}><ListItemText primary="scripting" /></Link>
-                </ListItem>
-                <ListItem className={showActiveTab("subscriptions")}>
-                    <ListItemIcon>
-                        <Subscriptions />
-                    </ListItemIcon>
-                    <Link name="subscriptions" to={"/apis/" + api_uuid + "/subscriptions"}><ListItemText primary="subscriptions" /></Link>
-                </ListItem>
-                <ListItem className={showActiveTab("security")}>
-                    <ListItemIcon>
-                        <VerifiedUser />
-                    </ListItemIcon>
-                    <Link name="security" to={"/apis/" + api_uuid + "/security"}><ListItemText primary="security" /></Link>
-                </ListItem>
-            </div>
+            <Drawer type="persistent" classes={{paper: classes.drawerPaper,}} anchor={anchor} open={open}>
+                <List className={classes.list}>
+                    <ListItem>
+                        <ListItemIcon>
+                            <ChromeReaderMode />
+                        </ListItemIcon>
+                        <Link name="listing" className="api-details-title" to={"/"}>API Details</Link>
+                    </ListItem>
+                    <Divider />
+                    {NavBar.TABS.map(tab =>
+                        (<ListItem key={tab.name} className={showActiveTab({tab: name})}>
+                            <ListItemIcon>
+                                {tab.icon}
+                            </ListItemIcon>
+                            <Link name={tab.name} to={"/apis/" + api_uuid + "/" + {tab: name}}>
+                                <ListItemText primary={tab.name}/></Link>
+                        </ListItem>)
+                    )}
+                </List>
+            </Drawer>
         )
     }
 }
@@ -129,4 +112,4 @@ class NavBar extends Component {
 // Using `withRouter` helper from React-Router-Dom to get the current user location to be used with logout action,
 // To identify which tab user is currently viewing we need to know their location information
 // DOC: https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/withRouter.md
-export default withRouter(NavBar)
+export default withStyles(styles)(withRouter(NavBar));
