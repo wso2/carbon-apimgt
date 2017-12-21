@@ -1350,4 +1350,8 @@ public final class APIConstants {
             API_STATUS.toLowerCase() };
     // Prefix for registry attributes.
     public static final String OVERVIEW_PREFIX = "overview_";
+    /**
+     * Parameter for enabling tenant load notifications to members in the same HZ cluster
+     */
+    public static final String ENABLE_TENANT_LOAD_NOTIFICATION = "enableTenantLoadNotification";
 }
