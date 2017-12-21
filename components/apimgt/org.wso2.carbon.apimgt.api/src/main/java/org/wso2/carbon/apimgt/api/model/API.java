@@ -17,6 +17,7 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.io.Serializable;
@@ -113,6 +114,48 @@ public class API implements Serializable {
     private Set<String> environments;
 
     private String createdTime;
+    /**
+     * Customized properties relevant to the particular API.
+     */
+    private JSONObject additionalProperties;
+
+    /**
+     * To get the additional properties
+     *
+     * @return additional properties of the API
+     */
+    public JSONObject getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    /**
+     * To assign a set of customized properties to the API.
+     *
+     * @param properties Properties that need to be assigned to.
+     */
+    public void setAdditionalProperties(JSONObject properties) {
+        this.additionalProperties = properties;
+    }
+
+    /**
+     * To add a new property to additional properties list.
+     *
+     * @param key   Name of the property.
+     * @param value Value of the property.
+     */
+    public void addProperty(String key, String value) {
+        additionalProperties.put(key, value);
+    }
+
+    /**
+     * To get the value of the property.
+     *
+     * @param key Name of the property
+     * @return value of the property.
+     */
+    public String getProperty(String key) {
+        return additionalProperties.get(key).toString();
+    }
 
     /**
      * Publisher access control related parameters.
@@ -207,6 +250,7 @@ public class API implements Serializable {
 
     public API(APIIdentifier id) {
         this.id = id;
+        additionalProperties = new JSONObject();
     }
 
     public APIIdentifier getId() {

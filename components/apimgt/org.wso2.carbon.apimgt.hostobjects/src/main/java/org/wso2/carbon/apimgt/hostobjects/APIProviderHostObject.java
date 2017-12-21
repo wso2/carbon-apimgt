@@ -43,7 +43,6 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.jaggeryjs.hostobjects.file.FileHostObject;
 import org.jaggeryjs.scriptengine.exceptions.ScriptException;
 import org.json.simple.JSONArray;
@@ -96,7 +95,6 @@ import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIAuthenticationAdminClient;
-import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
@@ -380,7 +378,7 @@ public class APIProviderHostObject extends ScriptableObject {
      * @throws APIManagementException Wrapped exception by org.wso2.carbon.apimgt.api.APIManagementException
      */
     public static boolean jsFunction_manageAPI(Context cx, Scriptable thisObj, Object[] args, Function funObj)
-            throws APIManagementException, ScriptException, FaultGatewaysException {
+            throws APIManagementException, ScriptException, FaultGatewaysException, ParseException {
         boolean success = false;
 
         if (args == null || args.length == 0) {
@@ -414,6 +412,12 @@ public class APIProviderHostObject extends ScriptableObject {
         String environments = (String) apiData.get("environments", apiData);
         String responseCache = (String) apiData.get("responseCache", apiData);
         String corsConfiguraion = (String) apiData.get("corsConfiguration", apiData);
+        String additionalProperties = (String) apiData.get("additionalProperties", apiData);
+        JSONObject properties = null;
+        if (!StringUtils.isEmpty(additionalProperties)) {
+            JSONParser parser = new JSONParser();
+            properties = (JSONObject) parser.parse(additionalProperties);
+        }
 
         int cacheTimeOut = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
         if (APIConstants.ENABLED.equalsIgnoreCase(responseCache)) {
@@ -493,6 +497,7 @@ public class APIProviderHostObject extends ScriptableObject {
         if (corsConfiguration != null) {
             api.setCorsConfiguration(corsConfiguration);
         }
+        api.setAdditionalProperties(properties);
         Set<Tier> availableTier = new HashSet<Tier>();
         String[] tierNames;
         if (tier != null) {
@@ -862,7 +867,6 @@ public class APIProviderHostObject extends ScriptableObject {
         String techOwnerEmail = (String) apiData.get("techOwnerEmail", apiData);
         String bizOwner = (String) apiData.get("bizOwner", apiData);
         String bizOwnerEmail = (String) apiData.get("bizOwnerEmail", apiData);
-
 //        String context = contextVal.startsWith("/") ? contextVal : ("/" + contextVal);
 //        String providerDomain = MultitenantUtils.getTenantDomain(provider);
 
@@ -1163,7 +1167,7 @@ public class APIProviderHostObject extends ScriptableObject {
      * @throws FaultGatewaysException
      */
     public static boolean jsFunction_addAPI(Context cx, Scriptable thisObj, Object[] args, Function funObj)
-            throws APIManagementException, ScriptException, FaultGatewaysException {
+            throws APIManagementException, ScriptException, FaultGatewaysException, ParseException {
         if (args == null || args.length == 0) {
             handleException("Invalid number of input parameters.");
         }
@@ -1187,6 +1191,12 @@ public class APIProviderHostObject extends ScriptableObject {
         String visibleRoles = "";
         String publisherAccessControl = (String) apiData.get(APIConstants.ACCESS_CONTROL_PARAMETER, apiData);
         String publisherAccessControlRoles = "";
+        String additionalProperties = (String) apiData.get("additionalProperties", apiData);
+        JSONObject properties = null;
+        if (!StringUtils.isEmpty(additionalProperties)) {
+            JSONParser parser = new JSONParser();
+            properties = (JSONObject) parser.parse(additionalProperties);
+        }
 
         if (name != null) {
             name = name.trim();
@@ -1552,6 +1562,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setVisibleRoles(visibleRoles != null ? visibleRoles.trim() : null);
         api.setAccessControl(publisherAccessControl);
         api.setAccessControlRoles(publisherAccessControlRoles);
+        api.setAdditionalProperties(properties);
         api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments));
         CORSConfiguration corsConfiguration = APIUtil.getCorsConfigurationDtoFromJson(corsConfiguraion);
         if (corsConfiguration != null) {
@@ -1729,7 +1740,8 @@ public class APIProviderHostObject extends ScriptableObject {
 
     public static boolean jsFunction_updateAPI(Context cx, Scriptable thisObj,
                                                Object[] args,
-                                               Function funObj) throws APIManagementException, FaultGatewaysException {
+                                               Function funObj)
+            throws APIManagementException, FaultGatewaysException, ParseException {
 
         if (args == null || args.length == 0) {
             handleException("Invalid number of input parameters.");
@@ -1758,6 +1770,12 @@ public class APIProviderHostObject extends ScriptableObject {
         String environments = (String) apiData.get("environments", apiData);
         String corsConfiguraion = (String) apiData.get("corsConfiguration", apiData);
         String visibleRoles = "";
+        String additionalProperties = (String) apiData.get("additionalProperties", apiData);
+        JSONObject properties = null;
+        if (!StringUtils.isEmpty(additionalProperties)) {
+            JSONParser parser = new JSONParser();
+            properties = (JSONObject) parser.parse(additionalProperties);
+        }
         String publisherAccessControlRoles = "";
         if (visibility != null && visibility.equals(APIConstants.API_RESTRICTED_VISIBILITY)) {
             visibleRoles = (String) apiData.get("visibleRoles", apiData);
@@ -2014,6 +2032,7 @@ public class APIProviderHostObject extends ScriptableObject {
         api.setVisibleTenants(visibleTenants != null ? visibleTenants.trim() : null);
         api.setAccessControl(publisherAccessControl);
         api.setAccessControlRoles(publisherAccessControlRoles);
+        api.setAdditionalProperties(properties);
         Set<Tier> availableTier = new HashSet<Tier>();
         if (tier != null) {
             String[] tierNames = tier.split(",");
@@ -2779,6 +2798,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(52, myn, checkValue(api.getType()));
                 myn.put(53, myn, checkValue((api.getAccessControl())));
                 myn.put(54, myn, checkValue((api.getAccessControlRoles())));
+                myn.put(55, myn, checkValue(api.getAdditionalProperties().toJSONString()));
             } else {
                 handleException("Cannot find the requested API- " + apiName +
                         "-" + version);
@@ -3642,7 +3662,7 @@ public class APIProviderHostObject extends ScriptableObject {
                     ((APIProviderHostObject) thisObj).getUsername()));
             result = apiProvider.searchPaginatedAPIs(newSearchQuery, tenantDomain, start, end, limitAttributes);
 
-            if (newSearchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX2)) {
+            if (newSearchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS)) {
                 Map<Documentation, API> apiDocMap = (Map<Documentation, API>) result.get("apis");
                 if (apiDocMap != null) {
                     int i = 0;

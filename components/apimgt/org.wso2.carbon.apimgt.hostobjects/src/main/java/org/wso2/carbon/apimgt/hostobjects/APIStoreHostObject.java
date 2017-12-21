@@ -956,7 +956,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
         // Append LC state query criteria if the search is not doc or subcontext
         // based
-        if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX2.startsWith(newSearchQuery) &&
+        if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS.startsWith(newSearchQuery) &&
             !APIConstants.SUBCONTEXT_SEARCH_TYPE_PREFIX.startsWith(newSearchQuery)) {
             boolean displayAPIsWithMultipleStatus = APIUtil.isAllowDisplayAPIsWithMultipleStatus();
 
@@ -984,7 +984,7 @@ public class APIStoreHostObject extends ScriptableObject {
 
         result = apiConsumer.searchPaginatedAPIs(newSearchQuery, tenantDomain, start, end, limitAttributes);
         if (result != null) {
-            if (newSearchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX)) {
+            if (newSearchQuery.startsWith(APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS)) {
                 Map<Documentation, API> apiDocMap = (Map<Documentation, API>) result.get("apis");
                 if (apiDocMap != null) {
                     int i = 0;
@@ -2002,6 +2002,7 @@ public class APIStoreHostObject extends ScriptableObject {
                         row.put("isDefaultVersion", row,api.isDefaultVersion());
                         row.put("transports", row,api.getTransports());
                         row.put("type", row, api.getType());
+                        row.put("additionalProperties", row, api.getAdditionalProperties().toJSONString());
                         myn.put(0, myn, row);
 
                     } else {

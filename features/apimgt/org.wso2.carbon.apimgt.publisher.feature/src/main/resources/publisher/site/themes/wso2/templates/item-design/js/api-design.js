@@ -79,6 +79,10 @@ function APIDesigner(){
     this.container = $( "#api_designer" );
 
     //initialise the partials
+    propertiesTemplate = $("#properties-add-template").html();
+    if (propertiesTemplate) {
+        Handlebars.partials['properties-add-template'] = Handlebars.compile(propertiesTemplate);
+    }
     source   = $("#designer-resources-template").html();
     Handlebars.partials['designer-resources-template'] = Handlebars.compile(source);
     source   = $("#designer-resource-template").html();
@@ -638,6 +642,126 @@ APIDesigner.prototype.setApiLevelPolicy = function(isAPILevel){
     this.apiLevelPolicy.isAPILevel = isAPILevel;
 }
 
+/**
+ * To render the additional properties part of the form.
+ */
+APIDesigner.prototype.render_additionalProperties = function () {
+    var apiPropertiesElement = $("#api_properties");
+    var apiPropertiesValue = JSON.parse(apiPropertiesElement.val());
+    var apiProperties = null;
+    var reservedKeyWords = ["provider", "version", "context", "status", "description", "subcontext", "doc", "lcstate",
+        "name", "tags"];
+
+    if (apiPropertiesValue) {
+        for (var prop in apiPropertiesValue) {
+            if (apiPropertiesValue.hasOwnProperty(prop)) {
+                apiProperties = {"properties": apiPropertiesValue};
+                break;
+            }
+        }
+    }
+    var propertiesOutput = Handlebars.partials['properties-add-template'](apiProperties);
+    $('#additionalProperties').html(propertiesOutput);
+    $('#property_key_help').popover({
+        html: true,
+        container: 'body',
+        content: function () {
+            var msg = $('#' + $(this).attr('help_data')).html();
+            return msg;
+        },
+        template: '<div class="popover default-popover" role="tooltip"><div class="arrow"></div><div class="popover-content"></div></div>'
+    });
+
+
+    $("#property_key").on("change", function () {
+        $("#property_key_error").addClass("hidden");
+        $("#property_value_error").addClass("hidden");
+    });
+
+    $("#property_value").on("change", function () {
+        $("#property_key_error").addClass("hidden");
+        $("#property_value_error").addClass("hidden");
+    });
+
+    $('#property_add').on("click", function () {
+        var propertyKeyVal = $("#property_key").val();
+        if (!propertyKeyVal || propertyKeyVal.trim() == "") {
+            $("#property_key_error").text(i18n.t("Property name cannot be empty.")).removeClass("hidden");
+            return;
+        }
+        var propertyVal = $("#property_value").val();
+        if (!propertyVal || propertyVal.trim() == "") {
+            $("#property_value_error").text(i18n.t("Property value cannot be empty.")).removeClass("hidden");
+            return;
+        }
+        propertyKeyVal = propertyKeyVal.trim();
+        propertyVal = propertyVal.trim();
+        if (propertyKeyVal.indexOf(' ') >= 0) {
+            $("#property_key_error").text(i18n.t("Property name should not have space. Please select a different " +
+                "property name.")).removeClass("hidden").show();
+            return;
+        }
+
+        for (var keyWord in reservedKeyWords) {
+            if (propertyKeyVal.toLowerCase() === reservedKeyWords[keyWord]) {
+                $("#property_key_error").text(i18n.t("Property name matches with one of the reserved keywords." +
+                    " Please select a different property name.")).removeClass("hidden").show();
+                return;
+            }
+        }
+        if (propertyKeyVal.length > 80) {
+            $("#property_key_error").text(i18n.t("Property name can have maximum of 80 characters." +
+                " Please select a different property name.")).removeClass("hidden").show();
+            return;
+        }
+        if (propertyVal.length > 900) {
+            $("#property_value_error").text(i18n.t("Property value can have maximum of 900 characters.")).removeClass("hidden").show();
+            return;
+        }
+        var apiPropertiesValue = apiPropertiesElement.val();
+        var apiPropertiesObject = {};
+        if (apiPropertiesValue) {
+            apiPropertiesObject = JSON.parse(apiPropertiesValue);
+        }
+        if (!apiPropertiesObject) {
+            apiPropertiesObject = {};
+        }
+        if (apiPropertiesObject.hasOwnProperty(propertyKeyVal)) {
+            $("#property_key_error").text(i18n.t("Property " + propertyKeyVal + " already exist for this API. Property names are" +
+                " unique. Please select a different property name.")).removeClass("hidden").show();
+            return;
+        }
+        apiPropertiesObject[propertyKeyVal] = propertyVal;
+        $(apiPropertiesElement).val(JSON.stringify(apiPropertiesObject));
+        var apiDesigner = new APIDesigner();
+        apiDesigner.render_additionalProperties();
+    });
+
+    $(".delete-properties").on("click", function (event) {
+        $("#messageModal div.modal-footer").html("");
+        var key = $(this).attr('data-key');
+        jagg.message({
+            content: i18n.t("Do you want to remove") + "'" + key + "' " +  i18n.t("from properties list."),
+            type: 'confirm',
+            title: i18n.t("Remove Property"),
+            okCallback: function () {
+                var apiDesigner = new APIDesigner();
+                var apiPropertiesValue = apiPropertiesElement.val();
+                var jsonObject = {};
+                if (apiPropertiesValue) {
+                    jsonObject = JSON.parse(apiPropertiesValue);
+                }
+                if (!jsonObject) {
+                    jsonObject = {};
+                }
+                delete jsonObject[key];
+                apiPropertiesElement.val(JSON.stringify(jsonObject));
+                apiDesigner.render_additionalProperties();
+            }
+        });
+    });
+};
+
 APIDesigner.prototype.render_resources = function(){
     context = {
         "doc" : this.transform(this.api_doc),
@@ -856,6 +980,9 @@ $(document).ready(function(){
     $.fn.editable.defaults.mode = 'inline';
     var designer = new APIDesigner();
     designer.load_api_document(api_doc);
+    if (propertiesTemplate) {
+        designer.render_additionalProperties();
+    }
 
     $("#swaggerEditer").on("keyup", function () {
         try {

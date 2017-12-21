@@ -1125,9 +1125,9 @@ paths:
     get:
       x-scope: 'apim:subscribe'
       x-wso2-request: |-
-        GET https://127.0.0.1:9443/api/am/store/v0.9/applications/scopes/896658a0-b4ee-4535-bbfa-806c894a4015
+        GET https://127.0.0.1:9443/api/am/store/v0.11/applications/scopes/896658a0-b4ee-4535-bbfa-806c894a4015
         Authorization: Beareraa0ddec1ac656744234477f20fafcb0d
-      x-wso2-curl: 'curl -k -H "Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d" "https://127.0.0.1:9443/api/am/store/v0.9/applications/scopes/896658a0-b4ee-4535-bbfa-806c894a4015"'
+      x-wso2-curl: 'curl -k -H "Authorization: Bearer aa0ddec1ac656744234477f20fafcb0d" "https://127.0.0.1:9443/api/am/store/v0.11/applications/scopes/896658a0-b4ee-4535-bbfa-806c894a4015"'
       x-wso2-response: |-
         HTTP/1.1 200 OK
         Content-Type: application/json
@@ -2052,6 +2052,9 @@ definitions:
       thumbnailUrl:
         type: string
         example: ""
+      additionalProperties:
+        type: object
+        description : Custom(user defined) properties of API
       endpointURLs:
         type: array
         items:

@@ -2257,7 +2257,10 @@ public class APIProviderImplTest {
         oldApi.setContext("/test");
         oldApi.setEnvironments(environments);
         api.setUriTemplates(uriTemplates);
-
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("test", "new_test");
+        api.setAdditionalProperties(jsonObject);
+        api.addProperty("secured", "false");
 
         PowerMockito.when(APIUtil.getApiStatus("PUBLISHED")).thenReturn(APIStatus.PUBLISHED);
 
@@ -2344,6 +2347,10 @@ public class APIProviderImplTest {
         apiProvider.updateAPI(api);
         Assert.assertEquals(1, api.getEnvironments().size());
         Assert.assertEquals(true, api.getEnvironments().contains("SANDBOX"));
+        Assert.assertEquals("Additional properties that are set are not retrieved new_test", "new_test",
+                api.getAdditionalProperties().get("test"));
+        Assert.assertEquals("Additional properties that are set are not retrieved new_test", "false",
+                api.getAdditionalProperties().get("secured"));
 
     }
 

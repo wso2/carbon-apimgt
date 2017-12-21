@@ -25,8 +25,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
-import org.hibernate.validator.internal.constraintvalidators.URLValidator;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -49,6 +47,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  *  This class contains REST API Publisher related utility operations
@@ -205,6 +204,41 @@ public class RestApiPublisherUtils {
                                 + "accessControl list entered";
             } else {
                 return "Invalid user roles found";
+            }
+        }
+        return "";
+    }
+
+    /**
+     * To validate the additional properties.
+     * Validation will be done for the keys of additional properties. Property keys should not contain spaces in it
+     * and property keys should not conflict with reserved key words.
+     *
+     * @return error message if there is an validation error with additional properties.
+     */
+    public static String validateAdditionalProperties(Map<String, String> additionalProperties) {
+        if (additionalProperties != null) {
+            for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
+                String propertyKey = entry.getKey().trim();
+                String propertyValue = entry.getValue();
+                if (propertyKey.contains(" ")) {
+                    return "Property names should not contain space character. Property '" + propertyKey + "' "
+                            + "contains space in it.";
+                }
+                if (Arrays.asList(APIConstants.API_SEARCH_PREFIXES).contains(propertyKey.toLowerCase())) {
+                    return "Property '" + propertyKey + "' conflicts with the reserved keywords. Reserved keywords "
+                            + "are [" + Arrays.toString(APIConstants.API_SEARCH_PREFIXES) + "]";
+                }
+                // Maximum allowable characters of registry property name and value is 100 and 1000. Hence we are
+                // restricting them to be within 80 and 900.
+                if (propertyKey.length() > 80) {
+                    return "Property name can have maximum of 80 characters. Property '" + propertyKey + "' + contains "
+                            + propertyKey.length() + "characters";
+                }
+                if (propertyValue.length() > 900) {
+                    return "Property value can have maximum of 900 characters. Property '" + propertyKey + "' + "
+                            + "contains a value with " + propertyValue.length() + "characters";
+                }
             }
         }
         return "";

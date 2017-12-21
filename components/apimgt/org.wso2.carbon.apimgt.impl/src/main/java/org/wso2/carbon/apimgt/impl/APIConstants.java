@@ -1206,11 +1206,14 @@ public final class APIConstants {
     public static final String LCSTATE_SEARCH_KEY = "lcState";
     public static final String SUBCONTEXT_SEARCH_TYPE_PREFIX = "subcontext";
     public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX = "doc";
-    public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX2 = "doc=";
+    public static final String DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS = "doc=";
     public static final String TAG_SEARCH_TYPE_PREFIX = "tags";
     public static final String TAG_SEARCH_TYPE_PREFIX2 = "tags=";
     public static final String TAG_SEARCH_TYPE_PREFIX3 = "tag";
     public static final String NAME_TYPE_PREFIX = "name";
+    private static final String PROVIDER_SEARCH_TYPE_PREFIX = "provider";
+    private static final String VERSION_SEARCH_TYPE_PREFIX = "version";
+    private static final String CONTEXT_SEARCH_TYPE_PREFIX = "context";
 
     public static class AdvancedThrottleConstants {
         public static final String THROTTLING_CONFIGURATIONS = "ThrottlingConfigurations";
@@ -1335,6 +1338,16 @@ public final class APIConstants {
     public static final String ACCESS_CONTROL_PARAMETER = "accessControl";
     public static final String ACCESS_CONTROL_ROLES_PARAMETER = "accessControlRoles";
 
+    // Error message that will be shown when the user tries to access the API, that is not authorized for him.
     public static final String UN_AUTHORIZED_ERROR_MESSAGE = "User is not authorized to";
 
+    // Prefix used for saving the custom properties related with APIs
+    public static final String API_RELATED_CUSTOM_PROPERTIES_PREFIX = "api_meta.";
+    // Reserved keywords for search.
+    public static final String[] API_SEARCH_PREFIXES = { DOCUMENTATION_SEARCH_TYPE_PREFIX, TAG_SEARCH_TYPE_PREFIX,
+            NAME_TYPE_PREFIX, SUBCONTEXT_SEARCH_TYPE_PREFIX, PROVIDER_SEARCH_TYPE_PREFIX, CONTEXT_SEARCH_TYPE_PREFIX,
+            VERSION_SEARCH_TYPE_PREFIX, LCSTATE_SEARCH_KEY.toLowerCase(), API_DESCRIPTION.toLowerCase(),
+            API_STATUS.toLowerCase() };
+    // Prefix for registry attributes.
+    public static final String OVERVIEW_PREFIX = "overview_";
 }

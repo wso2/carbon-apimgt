@@ -28,6 +28,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -1623,6 +1625,24 @@ public class AbstractAPIManagerTestCase {
                 Mockito.anyInt())).thenReturn(contextApis);
         Assert.assertTrue(
                 abstractAPIManager.searchPaginatedAPIs("subcontext=search", null, 0, 5, false).containsKey("api2"));
+
+        // Test related with searches with custom properties
+        Map<String, Object> actualAPIs = abstractAPIManager
+                .searchPaginatedAPIs("secured=*true*", SAMPLE_TENANT_DOMAIN_1, 0, 5, false);
+        List<API> retrievedAPIs = (List<API>) actualAPIs.get("apis");
+        Assert.assertEquals("Searching with additional property failed", 1, actualAPIs.get("length"));
+        Assert.assertNotNull("Search with additional property failed", retrievedAPIs);
+        Assert.assertEquals("Search with additional property failed", 1, retrievedAPIs.size());
+        Assert.assertEquals("Search with additional property failed", "sxy", retrievedAPIs.get(0).getId().getApiName());
+
+        actualAPIs = abstractAPIManager
+                .searchPaginatedAPIs("name=*test*&secured=*true*", SAMPLE_TENANT_DOMAIN_1, 0, 5, false);
+        retrievedAPIs = (List<API>) actualAPIs.get("apis");
+        Assert.assertEquals("Searching with additional property failed", 1, actualAPIs.get("length"));
+        Assert.assertNotNull("Search with additional property failed", retrievedAPIs);
+        Assert.assertEquals("Search with additional property failed", 1, retrievedAPIs.size());
+        Assert.assertEquals("Search with additional property failed", "sxy12",
+                retrievedAPIs.get(0).getId().getApiName());
 
         TestUtils.mockAPIMConfiguration(APIConstants.API_STORE_APIS_PER_PAGE, null, -1234);
         Assert.assertEquals(abstractAPIManager.searchPaginatedAPIs("search", null, 0, 5, false).get("length"), 0);

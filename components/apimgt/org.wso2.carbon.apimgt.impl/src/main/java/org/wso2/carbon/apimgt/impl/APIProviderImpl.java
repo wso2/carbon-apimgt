@@ -145,6 +145,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1151,7 +1152,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (publisherAccessControlRoles != null) {
                 publisherAccessControlRoles = publisherAccessControlRoles.replaceAll("\\s+", "").toLowerCase();
             }
-            updateAPIRolesRestrictions(artifactPath, publisherAccessControlRoles, api.getAccessControl());
+            updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
+                    api.getAdditionalProperties());
 
             if (updatePermissions) {
                 clearResourcePermissions(artifactPath, api.getId());
@@ -2033,8 +2035,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 rolesSet = roles.split(",");
             }
             // Adding publisher access control permissions to new version.
-            Resource apiTargetArtifact = registry.get(targetPath);
+            Resource apiTargetArtifact = null;
+            if (registry.resourceExists(targetPath)) {
+                apiTargetArtifact = registry.get(targetPath);
+            }
             if (apiTargetArtifact != null) {
+                // Copying all the properties.
+                Properties properties = apiSourceArtifact.getProperties();
+                if (properties != null) {
+                    Enumeration propertyNames = properties.propertyNames();
+                    while (propertyNames.hasMoreElements()) {
+                        String propertyName = (String) propertyNames.nextElement();
+                        if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
+                            apiTargetArtifact.setProperty(propertyName, apiSourceArtifact.getProperty(propertyName));
+                        }
+                    }
+                }
                 apiTargetArtifact.setProperty(APIConstants.PUBLISHER_ROLES,
                         apiSourceArtifact.getProperty(APIConstants.PUBLISHER_ROLES));
                 apiTargetArtifact.setProperty(APIConstants.ACCESS_CONTROL,
@@ -2501,7 +2517,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             publisherAccessControlRoles = publisherAccessControlRoles == null ?
                     APIConstants.NULL_USER_ROLE_LIST :
                     publisherAccessControlRoles;
-            updateAPIRolesRestrictions(artifactPath, publisherAccessControlRoles, api.getAccessControl());
+            updateRegistryResources(artifactPath, publisherAccessControlRoles, api.getAccessControl(),
+                    api.getAdditionalProperties());
             registry.commitTransaction();
             transactionCommitted = true;
 
@@ -5177,27 +5194,50 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return new ThrottlePolicyTemplateBuilder();
     }
 
-
     /**
-     * To add API roles restrictions whenever the publisher access control is modified.
+     * To add API roles restrictions and add additional properties.
      *
      * @param artifactPath                Path of the API artifact.
      * @param publisherAccessControlRoles Role specified for the publisher access control.
      * @param publisherAccessControl      Publisher Access Control restriction.
+     * @param additionalProperties        Additional properties that is related with an API.
      * @throws RegistryException Registry Exception.
      */
-    protected void updateAPIRolesRestrictions(String artifactPath, String publisherAccessControlRoles,
-            String publisherAccessControl) throws RegistryException {
+    private void updateRegistryResources(String artifactPath, String publisherAccessControlRoles,
+            String publisherAccessControl, Map<String, String> additionalProperties) throws RegistryException {
         publisherAccessControlRoles = (publisherAccessControlRoles == null || publisherAccessControlRoles.trim()
                 .isEmpty()) ? APIConstants.NULL_USER_ROLE_LIST : publisherAccessControlRoles;
         if (publisherAccessControlRoles.equalsIgnoreCase(APIConstants.NULL_USER_ROLE_LIST)) {
             publisherAccessControl = APIConstants.NO_ACCESS_CONTROL;
         }
+        if (!registry.resourceExists(artifactPath)) {
+            return;
+        }
         Resource apiResource = registry.get(artifactPath);
         if (apiResource != null) {
+            if (additionalProperties != null) {
+                // Removing all the properties, before updating new properties.
+                Properties properties = apiResource.getProperties();
+                if (properties != null) {
+                    Enumeration propertyNames = properties.propertyNames();
+                    while (propertyNames.hasMoreElements()) {
+                        String propertyName = (String) propertyNames.nextElement();
+                        if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
+                            apiResource.removeProperty(propertyName);
+                        }
+                    }
+                }
+            }
             apiResource.setProperty(APIConstants.PUBLISHER_ROLES, publisherAccessControlRoles.replaceAll("\\s+", ""));
             apiResource.setProperty(APIConstants.ACCESS_CONTROL, publisherAccessControl);
             apiResource.removeProperty(APIConstants.CUSTOM_API_INDEXER_PROPERTY);
+            if (additionalProperties != null && additionalProperties.size() != 0) {
+                for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
+                    apiResource.setProperty(
+                            (APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX + entry.getKey()),
+                            entry.getValue());
+                }
+            }
             registry.put(artifactPath, apiResource);
         }
     }

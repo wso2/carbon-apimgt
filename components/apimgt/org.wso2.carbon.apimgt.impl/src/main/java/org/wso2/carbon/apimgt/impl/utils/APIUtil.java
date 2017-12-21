@@ -194,6 +194,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -291,8 +292,7 @@ public final class APIUtil {
             api = new API(apiIdentifier);
             // set rating
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-
-
+            api = setResourceProperties(api, registry, artifactPath);
             api.setRating(getAverageRating(apiId));
             //set description
             api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
@@ -479,11 +479,7 @@ public final class APIUtil {
             api.setUUID(artifact.getId());
             // set rating
             String artifactPath = GovernanceUtils.getArtifactPath(registry, artifact.getId());
-            Resource apiResource = registry.get(artifactPath);
-            api.setAccessControl(apiResource.getProperty(APIConstants.ACCESS_CONTROL));
-            api.setAccessControlRoles(
-                    APIConstants.NULL_USER_ROLE_LIST.equals(apiResource.getProperty(APIConstants.PUBLISHER_ROLES)) ?
-                            null : apiResource.getProperty(APIConstants.PUBLISHER_ROLES));
+            api = setResourceProperties(api, registry, artifactPath);
             api.setRating(getAverageRating(apiId));
             //set description
             api.setDescription(artifact.getAttribute(APIConstants.API_OVERVIEW_DESCRIPTION));
@@ -6803,5 +6799,38 @@ public final class APIUtil {
             newSearchQuery = APIUtil.getSingleSearchCriteria(inputSearchQuery);
         }
         return newSearchQuery;
+    }
+
+    /**
+     * To set the resource properties to the API.
+     *
+     * @param api          API that need to set the resource properties.
+     * @param registry     Registry to get the resource from.
+     * @param artifactPath Path of the API artifact.
+     * @return Updated API.
+     * @throws RegistryException Registry Exception.
+     */
+    private static API setResourceProperties(API api, Registry registry, String artifactPath) throws RegistryException {
+        Resource apiResource = registry.get(artifactPath);
+        Properties properties = apiResource.getProperties();
+        if (properties != null) {
+            Enumeration propertyNames = properties.propertyNames();
+            while (propertyNames.hasMoreElements()) {
+                String propertyName = (String) propertyNames.nextElement();
+                if (log.isDebugEnabled()) {
+                    log.debug("API '" + api.getId().toString() + "' " + "has the property " + propertyName);
+                }
+                if (propertyName.startsWith(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX)) {
+                    api.addProperty(propertyName.substring(APIConstants.API_RELATED_CUSTOM_PROPERTIES_PREFIX.length()),
+                            apiResource.getProperty(propertyName));
+                }
+            }
+        }
+        api.setAccessControl(apiResource.getProperty(APIConstants.ACCESS_CONTROL));
+        api.setAccessControlRoles(
+                APIConstants.NULL_USER_ROLE_LIST.equals(apiResource.getProperty(APIConstants.PUBLISHER_ROLES)) ?
+                        null :
+                        apiResource.getProperty(APIConstants.PUBLISHER_ROLES));
+        return api;
     }
 }
