@@ -13,7 +13,7 @@
     "url": "git://github.com/wso2/carbon-apimgt"
   },
   "author": "WSO2 Org",
-  "license": "Apache License 2.0",
+  "license": "Apache-2.0",
   "dependencies": {
     "antd": "^2.11.2",
     "async-react-component": "^0.7.0",
