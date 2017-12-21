@@ -65,6 +65,7 @@ public class OAuthAuthenticator implements Authenticator {
 
     public OAuthAuthenticator(){
     }
+
     public OAuthAuthenticator(String customSecurityHeader, boolean removeOAuthHeader){
         this.securityHeader = customSecurityHeader;
         this.removeOAuthHeadersFromOutMessage = removeOAuthHeader;

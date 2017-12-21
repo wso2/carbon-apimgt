@@ -6840,6 +6840,9 @@ public final class APIUtil {
      *
      * @param tenantId  The Tenant ID
      * @param property    The configuration to get from tenant registry or api-manager.xml
+     * @param providerName The API provider
+     * @param apiName The name of the API
+     * @param apiVersion The version of the API
      * @return          The configuration read from tenant registry or api-manager.xml or else null
      * @throws APIManagementException Throws if the registry resource doesn't exist
      * or the content cannot be parsed to JSON
@@ -6847,9 +6850,10 @@ public final class APIUtil {
     public static String getOAuthConfiguration(int tenantId, String property, String providerName, String apiName, String apiVersion)
     throws APIManagementException{
         try {
-            APIIdentifier apiIdentifier = new APIIdentifier(providerName, apiName, apiVersion);
+            //Check for an API specific custom authorization header in the registry.
+            APIIdentifier apiIdentifier = new APIIdentifier(replaceEmailDomain(providerName), apiName, apiVersion);
             String apiPath = APIUtil.getAPIPath(apiIdentifier);
-            Registry govRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry();
+            Registry govRegistry = ServiceReferenceHolder.getInstance().getRegistryService().getGovernanceUserRegistry(replaceEmailDomain(providerName), tenantId);
             Resource apiResource = govRegistry.get(apiPath);
             String artifactId = apiResource.getUUID();
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(govRegistry, APIConstants.API_KEY);
@@ -6858,50 +6862,16 @@ public final class APIUtil {
             String oAuthConfiguration = artifact.getAttribute(APIConstants.API_OVERVIEW_CUSTOMOAUTH2HEADER);
             if (!StringUtils.isBlank(oAuthConfiguration)) {
                 return oAuthConfiguration;
+            } else {
+                //Check for a custom authorization header in the tenant configuration and the api manager configuration
+                return getOAuthConfiguration(tenantId, property);
             }
-            Registry registryConfig = ServiceReferenceHolder.getInstance().getRegistryService()
-                    .getConfigSystemRegistry(tenantId);
 
-            if (registryConfig.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)) {
-                Resource resource = registryConfig.get(APIConstants.API_TENANT_CONF_LOCATION);
-                String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
-                if (content != null) {
-                    JSONObject tenantConfig = (JSONObject) new JSONParser().parse(content);
-
-                    //Read the configuration from the tenant registry
-                    oAuthConfiguration = "";
-                    if (null != tenantConfig.get(property)) {
-                        StringBuilder stringBuilder = new StringBuilder();
-                        stringBuilder.append(tenantConfig.get(property));
-                        oAuthConfiguration = stringBuilder.toString();
-
-                    }
-
-                    if (!StringUtils.isBlank(oAuthConfiguration)){
-
-                        return oAuthConfiguration;
-
-                    } else {
-                        //If tenant registry doesn't have the configuration, then read it from api-manager.xml
-                        APIManagerConfiguration apimConfig = ServiceReferenceHolder.getInstance()
-                                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                        oAuthConfiguration = apimConfig.getFirstProperty(APIConstants.OAUTH_CONFIGS + property);
-
-                        if (!StringUtils.isBlank(oAuthConfiguration)) {
-                            return oAuthConfiguration;
-                        }
-                    }
-                }
-            }
 
         } catch (RegistryException e) {
             String msg = "Error while retrieving " + property + " from tenant registry.";
             throw new APIManagementException(msg, e);
-        } catch (ParseException pe) {
-            String msg = "Couldn't create json object from Swagger object for custom OAuth header.";
-            throw new APIManagementException(msg, pe);
         }
-        return null;
     }
 
     /**
