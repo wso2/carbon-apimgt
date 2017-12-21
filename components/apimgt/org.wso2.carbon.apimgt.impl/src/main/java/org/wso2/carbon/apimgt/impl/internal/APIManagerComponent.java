@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.SignupObserver;
+import org.wso2.carbon.apimgt.impl.observers.TenantLoadMessageSender;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.base.MultitenantConstants;
@@ -156,6 +157,10 @@ public class APIManagerComponent {
 
             SignupObserver signupObserver = new SignupObserver();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), signupObserver, null);
+
+            TenantLoadMessageSender tenantLoadMessageSender =
+                    new TenantLoadMessageSender();
+            bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), tenantLoadMessageSender, null);
 
             APIManagerConfigurationServiceImpl configurationService =
                     new APIManagerConfigurationServiceImpl(configuration);
