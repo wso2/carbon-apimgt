@@ -20,7 +20,7 @@
     <parent>
         <artifactId>apimgt-feature</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>7.0.55</version>
+        <version>7.0.56-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
