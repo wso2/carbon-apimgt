@@ -175,6 +175,7 @@ class Overview extends Component {
                 <Grid item xs={12}>
                     <Card>
                         <CardMedia
+                            src=""
                             style={{backgroundColor: blueGrey[50]}}
                             title="Contemplative Reptile">
                             <img alt="API thumb" width="10%"

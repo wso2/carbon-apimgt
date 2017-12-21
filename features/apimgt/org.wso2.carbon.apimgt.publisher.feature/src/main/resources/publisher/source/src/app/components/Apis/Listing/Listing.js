@@ -33,7 +33,7 @@ import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
 import GridIcon from 'material-ui-icons/GridOn';
 import ListIcon from 'material-ui-icons/List';
-
+import SampleAPI from './SampleAPI';
 
 const menu = (
     <Menu>
@@ -77,7 +77,7 @@ class Listing extends React.Component {
     }
 
     handleApiDelete(api_uuid, name) {
-        const hideMessage = message.loading("Deleting the API ...",0);
+        const hideMessage = message.loading("Deleting the API ...", 0);
         const api = new API();
         let promised_delete = api.deleteAPI(api_uuid);
         promised_delete.then(
@@ -103,6 +103,7 @@ class Listing extends React.Component {
     }
 
     render() {
+        const {apis} = this.state;
         if (this.state.notFound) {
             return <ResourceNotFound/>
         }
@@ -128,56 +129,56 @@ class Listing extends React.Component {
                 //todo: Delete button should be enabled here after M6 based on permission model
             },
         }];
-        return (
-                <Grid container>
+        if (!apis) {
+            return (<Loading/>);
+        } else if (apis.count === 0) {
+            return (<SampleAPI/>);
+        } else {
+            return (
+                <Grid container spacing={0} justify="center">
                     <Grid item xs={12}>
                         <Paper>
                             <Typography className="page-title" type="display2" gutterBottom>
                                 All Apis
-                                <div style={{alignSelf:"flex-end", fontSize:"11px", margin:"auto", width: "200px",
-                                    display:"block", float:"right"}}>
-                                    <Button style={{padding:"0px", margin: "0px"}} color="primary" aria-label="add"  onClick={() => this.setListType('list')}
-                                            >
-                                        <ListIcon style={{width:"30px",height:"30px"}} />
+                                <div style={{
+                                    alignSelf: "flex-end", fontSize: "11px", margin: "auto", width: "200px",
+                                    display: "block", float: "right"
+                                }}>
+                                    <Button style={{padding: "0px", margin: "0px"}} color="primary" aria-label="add"
+                                            onClick={() => this.setListType('list')}
+                                    >
+                                        <ListIcon style={{width: "30px", height: "30px"}}/>
                                     </Button>
-                                    <Button style={{padding:"0px", margin: "0px"}} color="accent" aria-label="edit" onClick={() => this.setListType('grid')}
-                                            >
-                                        <GridIcon style={{width:"30px",height:"30px"}} />
+                                    <Button color="accent" aria-label="edit"
+                                            onClick={() => this.setListType('grid')}
+                                    >
+                                        <GridIcon style={{width: "30px", height: "30px"}}/>
                                     </Button>
                                 </div>
                             </Typography>
                             <Typography type="caption" gutterBottom align="left"
-                                        style={{fontWeight:"300",padding:"10px 0 10px 30px",margin:"0px"}}>
+                                        style={{fontWeight: "300", padding: "10px 0 10px 30px", margin: "0px"}}>
                                 Listing all apis
                             </Typography>
-
                         </Paper>
                     </Grid>
-                    <Grid item xs={12} style={{marginLeft:"40px"}}>
-                            <div className="flex-container">
-
-                            </div>
-                            {
-                                this.state.apis ?
-                                    this.state.listType === "list" ?
-                                        <Row type="flex" justify="start">
-                                            <Col span={24}>
-                                                <Table columns={columns} dataSource={this.state.apis.list} bordered
-                                                       style={{margin: '10px'}}/>
-                                            </Col>
-                                        </Row>
-                                        : <Grid container>
-                                        {this.state.apis.list.map((api, i) => {
-                                            return <ApiThumb key={api.id} listType={this.state.listType} api={api}/>
-                                        })}
-                                    </Grid>
-                                    : <Loading/>
-                            }
-
+                    <Grid item xs={12}>
+                        {this.state.listType === "list" ?
+                            <Row type="flex" justify="start">
+                                <Col span={24}>
+                                    <Table columns={columns} dataSource={this.state.apis.list} bordered />
+                                </Col>
+                            </Row>
+                            : <Grid container spacing={0}>
+                                {this.state.apis.list.map((api, i) => {
+                                    return <ApiThumb key={api.id} listType={this.state.listType} api={api}/>
+                                })}
+                            </Grid>
+                        }
                     </Grid>
                 </Grid>
-
-        );
+            );
+        }
     }
 }
 
