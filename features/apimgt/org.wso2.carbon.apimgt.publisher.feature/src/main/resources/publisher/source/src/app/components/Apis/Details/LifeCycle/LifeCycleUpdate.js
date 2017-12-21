@@ -82,7 +82,6 @@ export default class LifeCycleUpdate extends Component {
             });
     }
 
-
     handleChange = index => (event, checked) => {
         let checkList = this.state.checkList;
         checkList[index].checked = checked;
