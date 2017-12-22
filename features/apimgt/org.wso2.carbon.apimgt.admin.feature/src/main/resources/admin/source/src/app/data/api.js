@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 "use strict";
 import AuthManager from './AuthManager'
-import SingleClient from './SingleClient'
+import APIClientFactory from "./APIClientFactory";
+import Utils from "./Utils";
 
 /**
  * An abstract representation of an API
@@ -26,7 +28,7 @@ class API {
      * @param {string} access_key - Access key for invoking the backend REST API call.
      */
     constructor() {
-        this.client = new SingleClient().client;
+        this.client = new APIClientFactory().getAPIClient(Utils.getEnvironment().label).client;
     }
 
     /**
@@ -41,7 +43,6 @@ class API {
             requestContentType: data['Content-Type'] || "application/json"
         };
         if (data['Accept']) {
-            console.console.log(data['Accept']);
             metaData.responseContentType = data['Accept'];
         }
         return metaData;
