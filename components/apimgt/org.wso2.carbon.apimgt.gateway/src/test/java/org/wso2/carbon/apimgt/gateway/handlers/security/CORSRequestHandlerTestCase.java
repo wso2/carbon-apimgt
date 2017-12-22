@@ -46,6 +46,8 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.metrics.manager.Timer;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -80,6 +82,9 @@ public class CORSRequestHandlerTestCase {
         org.apache.axis2.context.MessageContext axis2MsgCntxt =
                 Mockito.mock(org.apache.axis2.context.MessageContext.class);
         Mockito.when(axis2MsgCntxt.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("GET");
+        Map<String, String> headers = new HashMap<>();
+        Mockito.when(axis2MsgCntxt.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS))
+                .thenReturn(headers);
         Mockito.when(((Axis2MessageContext) messageContext).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
         Mockito.when(messageContext.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("/ishara");
         Mockito.when(messageContext.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("admin-AT-wso2.com--PizzaShackAPI");

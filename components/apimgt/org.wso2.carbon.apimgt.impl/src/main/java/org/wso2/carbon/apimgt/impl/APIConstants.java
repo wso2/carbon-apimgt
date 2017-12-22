@@ -18,12 +18,12 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import javax.xml.namespace.QName;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import javax.xml.namespace.QName;
 
 /**
  * This class represents the constants that are used for APIManager implementation
@@ -831,6 +831,7 @@ public final class APIConstants {
         public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
         public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
         public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
+        public static final String ACCESS_CONTROL_REQUEST_METHOD = "Access-Control-Request-Method";
         public static final String ALLOW_HEADERS_HANDLER_VALUE = "allowHeaders";
         public static final String ALLOW_METHODS_HANDLER_VALUE = "allowedMethods";
         public static final String ALLOW_ORIGIN_HANDLER_VALUE = "allowedOrigins";
