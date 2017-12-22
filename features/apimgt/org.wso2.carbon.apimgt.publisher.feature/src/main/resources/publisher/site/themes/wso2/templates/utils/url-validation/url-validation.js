@@ -1,6 +1,7 @@
 $(document).ready(function(){
     $( document ).on( "click focused", "button.check_url_valid", function() {
         var btn = this;
+        $(btn).prop('disabled', true);
         var url = $(this).parent().parent().find('input:first').val();
         var type = '';
         var attr = $(this).attr('url-type');
@@ -39,6 +40,7 @@ $(document).ready(function(){
             $(btn).removeClass("loadingButton-small");
             $(btn).val(i18n.t('Test URI'));
             var foo = setTimeout(function(){$(toFade).hide()},3000);
+            $(btn).prop('disabled', false);
             return;
         }
         if (!type) {
@@ -82,6 +84,7 @@ $(document).ready(function(){
 
                       $(btn).removeClass("loadingButton-small");
                       $(btn).val(i18n.t('Test URI'));
+                      $(btn).prop('disabled', false);
                   }, "json");
 
     });
