@@ -7,13 +7,13 @@ var query=request.getParameter("query");
             <div class="form-group">
                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                     <div class="input-group input-wrap has-form-control-btn">
-                        <input type="text" name="query" title="Search text" class="form-control" <%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}else{%>
+                        <input type="text" id="apiSearch" name="query" title="Search text" class="form-control"<%if(query!=null){%> value="<%= encode.forHtml(query)%>" <%}else{%>
                         placeholder="<%=i18n.localize("Search")%>"<%}%> />
                         <%var tenant=request.getParameter("tenant");if(tenant!='null'){ %>
                             <input type="hidden" name="tenant" value="<%= encode.forHtml(request.getParameter("tenant"))%>" />
                         <%}%>
                         <div class="input-group-btn">
-                            <button class="form-control-btn" type="submit" title="Search"><i class="fw fw-search" aria-hidden="true"></i></button>
+                            <button id="searchAPI" class="form-control-btn" type="submit" title="Search"><i class="fw fw-search" aria-hidden="true"></i></button>
                         </div>
                         <div class="input-group-btn">
                             <a class="help_popup" help_data="searchAPIHelp" data-trigger="hover" data-placement="bottom" title="Dismissible popover">
