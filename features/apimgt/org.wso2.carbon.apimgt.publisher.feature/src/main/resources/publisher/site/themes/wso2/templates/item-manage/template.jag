@@ -1064,16 +1064,6 @@
                                  <i class="fw fw-circle-outline fw-stack-2x"></i>
                             </span>
                          </a>
-
-
-                         <a data-index='{{ @index }}' class='add_scopes pull-right' title="<%=i18n.localize("Remove Scope")%>">
-                            <span class="fw-stack" style="font-size:10px">
-                                <i class="fw fw-delete fw-stack-1x"></i>
-                                 <i class="fw fw-circle-outline fw-stack-2x"></i>
-                            </span>
-                         </a>
-
-
                          <span><strong>{{ key }}</strong></span>
                          {{#if name }}
                             <span class="text-muted">: {{ name }}</span>

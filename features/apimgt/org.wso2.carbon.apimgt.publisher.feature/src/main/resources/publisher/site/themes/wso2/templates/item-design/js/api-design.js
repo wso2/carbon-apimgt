@@ -503,11 +503,6 @@ APIDesigner.prototype.init_controllers = function(){
    			}, "json");
         });
 
-    this.container.delegate(".add_scopes" ,'click', function(){
-        alert("bing");
-
-       alert($(".scope_select").val());
-    });
 
     this.container.delegate("#define_scopes" ,'click', function(){
         $("#scopeName").val('');
