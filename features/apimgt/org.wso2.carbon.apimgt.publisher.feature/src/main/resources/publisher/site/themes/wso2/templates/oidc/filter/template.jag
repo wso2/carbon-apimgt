@@ -3,9 +3,12 @@
     var site = require("/site/conf/site.json");
     var security =require("oidc");
 
-	var ssoRelyingParty = new security.OIDCRelyingParty(site.oidcConfiguration.issuer);
-	var sessionId = session.getId();
-	var isAuthenticated = ssoRelyingParty.isSessionAuthenticated(sessionId);
+    var ssoRelyingParty = new security.OIDCRelyingParty(site.oidcConfiguration.issuer);
+    var sessionId = session.getId();
+    var isAuthenticated = ssoRelyingParty.isSessionAuthenticated(sessionId);
+    var i18n = require("i18n");
+    var localeResourcesBasePath="/site/conf/locales/jaggery/";
+    i18n.init(request,localeResourcesBasePath);
 
     // this value comes back in the id token and is checked there
     var nonce = ssoRelyingParty.createNonce();
