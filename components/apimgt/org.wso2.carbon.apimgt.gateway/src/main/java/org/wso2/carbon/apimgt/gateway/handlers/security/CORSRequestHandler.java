@@ -105,7 +105,6 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
 
     public boolean handleRequest(MessageContext messageContext) {
 
-        long executionStartTime = System.currentTimeMillis();
         Timer.Context context = startMetricTimer();
 
         try {
@@ -118,6 +117,11 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
             String httpMethod = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext().
                     getProperty(Constants.Configuration.HTTP_METHOD);
             API selectedApi = messageContext.getConfiguration().getAPI(apiName);
+            org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext)
+                    .getAxis2MessageContext();
+            Map headers = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+            String corsRequestMethod = (String) headers.get(APIConstants.CORSHeaders.ACCESS_CONTROL_REQUEST_METHOD);
+
             Resource selectedResource = null;
             String subPath = null;
             String path = getFullRequestPath(messageContext);
@@ -129,25 +133,25 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                     subPath = path.substring(selectedApi.getContext().length());
                 }
             }
-            if ("".equals(subPath)) {
+            if (subPath != null && subPath.isEmpty()) {
                 subPath = "/";
             }
             messageContext.setProperty(RESTConstants.REST_SUB_REQUEST_PATH, subPath);
 
             if (selectedApi != null) {
                 Resource[] allAPIResources = selectedApi.getResources();
-
-                Set<Resource> acceptableResources = new LinkedHashSet<Resource>();
+                Set<Resource> acceptableResources = new LinkedHashSet<>();
 
                 for (Resource resource : allAPIResources) {
                     //If the requesting method is OPTIONS or if the Resource contains the requesting method
-                    if (RESTConstants.METHOD_OPTIONS.equals(httpMethod) ||
+                    if ((RESTConstants.METHOD_OPTIONS.equals(httpMethod) && resource.getMethods() != null &&
+                            Arrays.asList(resource.getMethods()).contains(corsRequestMethod)) ||
                             (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
                         acceptableResources.add(resource);
                     }
                 }
 
-                if (acceptableResources.size() > 0) {
+                if (!acceptableResources.isEmpty()) {
                     for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
                         Resource resource = dispatcher.findResource(messageContext, acceptableResources);
                         if (resource != null) {
@@ -241,12 +245,9 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
         }
 
         //If a resource with a matching URI was not found.
-        if (uriMatchingResource == null) {
-            //Respond with a 404.
-            onResourceNotFoundError(messageContext, HttpStatus.SC_NOT_FOUND,
-                    APIMgtGatewayConstants.RESOURCE_NOT_FOUND_ERROR_MSG);
-            return;
-        }
+        //Respond with a 404.
+        onResourceNotFoundError(messageContext, HttpStatus.SC_NOT_FOUND,
+                APIMgtGatewayConstants.RESOURCE_NOT_FOUND_ERROR_MSG);
     }
 
     private void onResourceNotFoundError(MessageContext messageContext, int statusCode, String errorMessage) {
