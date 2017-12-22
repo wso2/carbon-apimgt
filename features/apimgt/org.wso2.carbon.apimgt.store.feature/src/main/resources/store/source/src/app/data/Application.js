@@ -110,7 +110,8 @@ export default class Application extends Resource {
     }
 
     static get(id) {
-        let promised_get = Application.apiClient.then(
+        let apiClient = new SingleClient();
+        let promised_get = apiClient.client.then(
             (client) => {
                 return client.apis["Application (Individual)"].get_applications__applicationId_({applicationId: id},
                     this._requestMetaData());
@@ -122,7 +123,8 @@ export default class Application extends Resource {
     }
 
     static all() {
-        let promised_all = Application.apiClient.then(
+        let apiClient = new SingleClient();
+        let promised_all = apiClient.client.then(
             (client) => {
                 return client.apis["Application (Collection)"].get_applications({}, this._requestMetaData());
             });
@@ -130,7 +132,8 @@ export default class Application extends Resource {
     }
 
     static deleteApp(id) {
-        let promised_delete = Application.apiClient.then(
+        let apiClient = new SingleClient();
+        let promised_delete = apiClient.client.then(
             (client) => {
                 return client.apis["Application (Individual)"].delete_applications__applicationId_({applicationId: id},
                     this._requestMetaData());
@@ -138,8 +141,6 @@ export default class Application extends Resource {
         return promised_delete.then(response => response.ok);
     }
 }
-
-Application.apiClient = new SingleClient().client;
 
 Application.KEY_TYPES = {
     PRODUCTION: "PRODUCTION",

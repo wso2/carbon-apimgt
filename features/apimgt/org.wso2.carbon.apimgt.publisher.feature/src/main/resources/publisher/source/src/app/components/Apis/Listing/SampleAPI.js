@@ -60,10 +60,25 @@ class SampleAPI extends Component {
     }
 
     _createSampleAPI() {
-        const url = "http://petstore.swagger.io/v2/swagger.json";
-        let data = {};
-        data.url = url;
-        data.type = 'swagger-url';
+        let data = {
+            name: "Swagger Petstore",
+            context: "/v2",
+            version: "1.0.0"
+        };
+        const serviceUrl = "https://localhost:9292/publisher/public/app/petstore/pet/1.json";
+        let production = {
+            type: "production",
+            inline: {
+                name: data.name.replace(/ /g, "_") + data.version.replace(/\./g, "_"), // TODO: It's better to add this name property from the REST api itself, making sure no name conflicts with other inline endpoint definitions ~tmkb
+                endpointConfig: JSON.stringify({serviceUrl: serviceUrl}),
+                endpointSecurity: {enabled: false},
+                type: "http"
+            }
+        };
+        let sandbox = JSON.parse(JSON.stringify(production)); // deep coping the object
+        sandbox.type = "sandbox";
+        sandbox.inline.name += "_sandbox";
+        data['endpoint'] = [production, sandbox];
         this.setState({message: "Creating sample Pet-Store API . . ."});
         return this.sampleApi.create(data)
             .then(response => response.obj)
@@ -77,6 +92,11 @@ class SampleAPI extends Component {
             });
     }
 
+    /**
+     *
+     * @param api {Promise}
+     * @private
+     */
     _updatePolicies(api) {
         let uuid = api.id;
         let promisedApi = this.sampleApi.get(uuid);
@@ -85,6 +105,8 @@ class SampleAPI extends Component {
             this.setState({message: 'Updating API policies with Bronze, Unlimited & Gold. . .'});
             let api = response.obj;
             api.policies = ["Bronze", "Unlimited", "Gold"];
+            api.securityScheme = ["Oauth"];
+
             console.info("Adding policies to the api", api.policies);
             let promised_update = this.sampleApi.update(api);
             return promised_update.then(response => {
@@ -111,7 +133,7 @@ class SampleAPI extends Component {
 
     render() {
         const {message, published, api, deploying} = this.state;
-        const { classes } = this.props;
+        const {classes} = this.props;
 
         if (published && api) {
             const url = "/apis/" + api.id + "/overview";
