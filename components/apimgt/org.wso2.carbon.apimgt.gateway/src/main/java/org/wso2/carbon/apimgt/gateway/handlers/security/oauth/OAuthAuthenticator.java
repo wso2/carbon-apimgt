@@ -63,11 +63,11 @@ public class OAuthAuthenticator implements Authenticator {
     private String clientDomainHeader = "referer";
     private String requestOrigin;
 
-    public OAuthAuthenticator(){
+    public OAuthAuthenticator() {
     }
 
-    public OAuthAuthenticator(String customSecurityHeader, boolean removeOAuthHeader){
-        this.securityHeader = customSecurityHeader;
+    public OAuthAuthenticator(String authorizationHeader, boolean removeOAuthHeader) {
+        this.securityHeader = authorizationHeader;
         this.removeOAuthHeadersFromOutMessage = removeOAuthHeader;
 
     }

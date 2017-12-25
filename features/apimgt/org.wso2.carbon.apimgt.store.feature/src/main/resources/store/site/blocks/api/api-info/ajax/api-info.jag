@@ -151,36 +151,7 @@ var carbon = require('carbon');
            }
            print(obj);
 
-     }  else if (action == "getCustomOAuthHeader" && request.getMethod() == 'POST') {
-            var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
-            var apiUtil = new APIUtil();
-            var tenantVal = request.getParameter("tenant");
-            if (tenantVal == null) {
-                tenantVal = "carbon.super";
-            }
-            var name = request.getParameter("name");
-            var version = request.getParameter("version");
-            var provider = request.getParameter("provider");
-            var tenantID = carbon.server.osgiService('org.wso2.carbon.user.core.service.RealmService').getTenantManager().getTenantId(tenantVal);
-            var customOAuth2Header = apiUtil.getOAuthConfiguration(tenantID, "CustomOAuth2Header", provider, name, version);
-            if(null == customOAuth2Header) {
-                customOAuth2Header = "Authorization";
-            }
-            if (customOAuth2Header.error) {
-                obj = {
-                    error:result.error,
-                    message:msg.error.authError(action, username)
-                };
-            }else{
-                obj = {
-                    error:false,
-                    customHeader:customOAuth2Header
-                }
-            }
-
-            print(obj);
-    }
-    else {
+     } else {
         print({
             error:true,
             message:msg.error.invalidAction(action)

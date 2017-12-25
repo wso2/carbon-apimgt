@@ -38,19 +38,23 @@ jagg.block("api/api-info", {
         var isForumEnabled = mod.isForumEnabled();
         var supportedLangs = jagg.module("sdk").getSupportedLanguages();
 
-        var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
-        var apiUtil = new APIUtil();
-        var tenantVal = request.getParameter("tenant");
-        if (tenantVal == null) {
-            tenantVal = "carbon.super";
-        }
-        var name = request.getParameter("name");
-        var version = request.getParameter("version");
-        var provider = request.getParameter("provider");
-        var tenantID = carbon.server.osgiService('org.wso2.carbon.user.core.service.RealmService').getTenantManager().getTenantId(tenantVal);
-        var customOAuth2Header = apiUtil.getOAuthConfiguration(tenantID, "CustomOAuth2Header", provider, name, version);
-        if(null == customOAuth2Header) {
-            customOAuth2Header = "Authorization";
+        var authorizationHeader = api.authorizationHeader;
+        if (!authorizationHeader) {
+            var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+            var apiUtil = new APIUtil();
+            var tenantVal = request.getParameter("tenant");
+            if (tenantVal == null) {
+                tenantVal = "carbon.super";
+            }
+
+            var tenantID = carbon.server.osgiService('org.wso2.carbon.user.core.service.RealmService').getTenantManager().getTenantId(tenantVal);
+            var authorizationHeader = apiUtil.getOAuthConfigurationFromTenantRegistry(tenantID, "AuthorizationHeader");
+            if(null == authorizationHeader) {
+                authorizationHeader = apiUtil.getOAuthConfigurationFromAPIMConfig("AuthorizationHeader");
+                if (null == authorizationHeader) {
+                    authorizationHeader = "Authorization";
+                }
+            }
         }
 
         if (api) {
@@ -127,7 +131,7 @@ jagg.block("api/api-info", {
                                                 "inputs": {
                                                     "api": api,
                                                     "subscriptions": subscriptions,
-                                                    "customOAuth2Header": customOAuth2Header
+                                                    "authorizationHeader": authorizationHeader
                                                 }
                                             }
                                         ]
@@ -313,7 +317,7 @@ jagg.block("api/api-info", {
                                                 "inputs": {
                                                     "api": api,
                                                     "subscriptions": subscriptions,
-                                                    "customOAuth2Header": customOAuth2Header
+                                                    "authorizationHeader": authorizationHeader
                                                 }
                                             }
                                         ]

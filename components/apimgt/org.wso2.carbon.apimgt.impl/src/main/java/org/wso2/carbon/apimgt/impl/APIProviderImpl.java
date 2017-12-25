@@ -1734,14 +1734,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         corsProperties.put(APIConstants.CORSHeaders.IMPLEMENTATION_TYPE_HANDLER_VALUE, api.getImplementation());
 
         //Get CustomOAuth2Header from tenant registry or api-manager.xml
+        String authorizationHeader = "";
+        if (!StringUtils.isBlank(api.getAuthorizationHeader())) {
+            authorizationHeader = api.getAuthorizationHeader();
+        } else {
+            authorizationHeader = APIUtil.getOAuthConfigurationFromTenantRegistry(tenantId, APIConstants.AUTHORIZATION_HEADER);
+        }
 
-        String customOAuth2Header = APIUtil.getOAuthConfiguration(tenantId,
-                APIConstants.CUSTOM_OAUTH2_HEADER,
-                api.getId().getProviderName(),
-                api.getId().getApiName(),
-                api.getId().getVersion());
-        if (!StringUtils.isBlank(customOAuth2Header)) {
-            corsProperties.put(APIConstants.CUSTOM_OAUTH2_HEADER, customOAuth2Header);
+        if (!StringUtils.isBlank(authorizationHeader)) {
+            corsProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
         }
 
         if (api.getCorsConfiguration() != null && api.getCorsConfiguration().isCorsConfigurationEnabled()) {
@@ -1788,14 +1789,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                 Map<String, String> authProperties = new HashMap<String, String>();
                 //Get CustomOAuth2Header from tenant registry or api-manager.xml
-                if (!StringUtils.isBlank(customOAuth2Header)){
-                    authProperties.put(APIConstants.CUSTOM_OAUTH2_HEADER, customOAuth2Header);
+                if (!StringUtils.isBlank(authorizationHeader)){
+                    authProperties.put(APIConstants.AUTHORIZATION_HEADER, authorizationHeader);
                 }
                 //Get RemoveHeaderFromOutMessage from tenant registry or api-manager.xml
-                String removeHeaderFromOutMessage = APIUtil.getOAuthConfiguration(tenantId, APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);
-                if (!StringUtils.isBlank(removeHeaderFromOutMessage)) {
+                String removeHeaderFromOutMessage = APIUtil.getOAuthConfigurationFromTenantRegistry(tenantId, APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);
+                if (StringUtils.isBlank(removeHeaderFromOutMessage)) {
+                    removeHeaderFromOutMessage = APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE);
+                    if (!StringUtils.isBlank(removeHeaderFromOutMessage)){
+                        authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE, removeHeaderFromOutMessage);
+                    }
+
+                } else {
                     authProperties.put(APIConstants.REMOVE_OAUTH_HEADER_FROM_OUT_MESSAGE, removeHeaderFromOutMessage);
                 }
+
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
                         authProperties);
                 Map<String, String> properties = new HashMap<String, String>();

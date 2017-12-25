@@ -69,8 +69,8 @@ var getAPI = function (api) {
             type:result[52],
             accessControl:result[53],
             accessControlRoles:result[54],
-            additionalProperties:result[55]
-            customOAuth2Header:result[56]
+            additionalProperties:result[55],
+            authorizationHeader:result[56]
         };
         return {
             error:false,

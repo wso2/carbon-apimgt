@@ -2003,6 +2003,7 @@ public class APIStoreHostObject extends ScriptableObject {
                         row.put("transports", row,api.getTransports());
                         row.put("type", row, api.getType());
                         row.put("additionalProperties", row, api.getAdditionalProperties().toJSONString());
+                        row.put("authorizationHeader", row, api.getAuthorizationHeader());
                         myn.put(0, myn, row);
 
                     } else {

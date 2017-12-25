@@ -263,24 +263,25 @@
 
                                                     <% } %>
                                         <!--Response Caching End -->
-                                        <!--Custom OAuth2 Header Start-->
-                                                           <div id="oauthConfigs form-control">
+                                        <!--Custom Authorization Header Start-->
+                                                           <div id="authConfigs form-control">
                                                                 <div class="form-group">
-                                                                    <label class="control-label col-sm-3" for="oauth2Configuration"><%=i18n.localize("Authorization header")%>:<a class="help_popup" help_data="authorization_header_help" title="authorization_header_help" data-trigger="hover" data-placement="bottom">
-                                                                        <span class="icon fw-stack fw-lg" style="font-size:6px">
-                                                                            <i class="fw fw-circle fw-stack-2x"></i>
-                                                                            <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
-                                                                        </span>
+                                                                    <label class="control-label col-sm-3" for="authConfiguration"><%=i18n.localize("Authorization Header")%>:
+                                                                        <a class="help_popup" help_data="authorization_header_help" title="authorization_header_help" data-trigger="hover" data-placement="bottom">
+                                                                            <span class="icon fw-stack fw-lg" style="font-size:6px">
+                                                                                <i class="fw fw-circle fw-stack-2x"></i>
+                                                                                <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+                                                                            </span>
                                                                         </a>
                                                                     <p id="authorization_header_help" class="hide"><%=i18n.localize("Here a custom authorization header can be defined as a replacement to the default <strong>Authorization</strong> header used to send a request. If a value is specified here, that will be used as the header field to send the access token in a request to consume the API")%></p>
                                                                     </label>
-                                                                    <div class="controls col-sm-2">
-                                                                         <input type="text" class="form-control" id="customOAuth2Header" name="customOAuth2Header"
-                                                                           placeholder="Authorization"  value="<%=encode.forHtml(api.customOAuth2Header)%>">
+                                                                    <div class="controls col-sm-4">
+                                                                         <input type="text" class="form-control" id="authorizationHeader" name="authorizationHeader"
+                                                                           placeholder="Authorization"  value="<%=encode.forHtml(api.authorizationHeader)%>">
                                                                     </div>
                                                                 </div>
                                                            </div>
-                                        <!--Custom OAuth2 Header End-->
+                                        <!--Custom Authorization Header End-->
                             </div>
                         </div>
                     </div>

@@ -173,7 +173,7 @@
             <name>Api Policy</name>
      </field>
      <field type="text">
-            <name>Custom OAuth2 Header</name>
+            <name>Authorization Header</name>
      </field>
     </table>
     <table name="URITemplate" columns="4">

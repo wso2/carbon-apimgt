@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.caching.impl.Util;
 import org.wso2.carbon.metrics.manager.MetricManager;
 import org.wso2.carbon.metrics.manager.Timer;
@@ -47,7 +48,7 @@ import java.util.TreeMap;
 * Test class for APIAuthenticationhandler
 * */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({Util.class, MetricManager.class, Timer.Context.class})
+@PrepareForTest({Util.class, MetricManager.class, Timer.Context.class, APIUtil.class})
 public class APIAuthenticationHandlerTestCase {
     private Timer.Context context;
     private SynapseEnvironment synapseEnvironment;
@@ -316,8 +317,10 @@ public class APIAuthenticationHandlerTestCase {
     }
 
     @Test
-    public void testGetAuthenticator(){
+    public void testGetAuthenticator() throws Exception{
       APIAuthenticationHandler apiAuthenticationHandler = new APIAuthenticationHandler();
+      PowerMockito.mockStatic(APIUtil.class);
+      PowerMockito.when(APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER)).thenReturn("AUTH_HEADER");
       Assert.assertNotNull(apiAuthenticationHandler.getAuthenticator());
 
       // test destroy when authenticator is not null todo

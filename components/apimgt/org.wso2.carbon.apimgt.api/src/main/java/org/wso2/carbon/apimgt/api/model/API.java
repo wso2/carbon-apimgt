@@ -107,7 +107,7 @@ public class API implements Serializable {
     private String monetizationCategory;
 
     //Custom authorization header specific to the API
-    private String customOAuth2Header;
+    private String authorizationHeader;
     private Set<Scope> scopes;
 
     private boolean isDefaultVersion = false;
@@ -756,11 +756,11 @@ public class API implements Serializable {
         this.accessControl = accessControl;
     }
 
-    public String getCustomOAuth2Header() {
-        return customOAuth2Header;
+    public String getAuthorizationHeader() {
+        return authorizationHeader;
     }
 
-    public void setCustomOAuth2Header(String customOAuth2Header) {
-        this.customOAuth2Header = customOAuth2Header;
+    public void setAuthorizationHeader(String authorizationHeader) {
+        this.authorizationHeader = authorizationHeader;
     }
 }
