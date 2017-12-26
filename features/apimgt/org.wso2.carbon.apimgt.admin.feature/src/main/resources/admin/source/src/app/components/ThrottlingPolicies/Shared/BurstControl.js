@@ -96,7 +96,7 @@
                         id="lock-menu"
                         anchorEl={this.state.anchorElBurst}
                         open={this.state.openBurst}
-                        onRequestClose={this.handleBurstRequestClose}
+                        onClose={this.handleBurstRequestClose}
                       >
                         {burstControlUnits.map((option, index) => (
                           <MenuItem

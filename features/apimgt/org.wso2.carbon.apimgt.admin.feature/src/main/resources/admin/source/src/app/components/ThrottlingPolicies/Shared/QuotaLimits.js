@@ -135,7 +135,7 @@
                      id="bandwith-menu"
                      anchorEl={this.state.anchorElQuota}
                      open={this.state.openQuota}
-                     onRequestClose={this.handleQuotaRequestClose}
+                     onClose={this.handleQuotaRequestClose}
                    >
                      {bandwidthUnits.map((option, index) => (
                        <MenuItem
@@ -221,7 +221,7 @@
                   id="unit-menu"
                   anchorEl={this.state.anchorElUnit}
                   open={this.state.openUnit}
-                  onRequestClose={this.handleUnitRequestClose}
+                  onClose={this.handleUnitRequestClose}
                 >
                   {unitTimeUnits.map((option, index) => (
                     <MenuItem

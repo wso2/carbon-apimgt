@@ -66,7 +66,7 @@ class EnvironmentMenu extends React.Component {
                     id="simple-menu"
                     anchorEl={this.state.anchorElEnvironmentMenu}
                     open={this.state.openEnvironmentMenu}
-                    onRequestClose={this.handleRequestCloseEnvironmentMenu}
+                    onClose={this.handleRequestCloseEnvironmentMenu}
                     style={{alignItems: "center", justifyContent: "center"}}
                 >
                     {environments.map((environment, index) =>

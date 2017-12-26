@@ -21,7 +21,7 @@ class Confirm extends React.Component{
     }
     render(props){
         return(
-            <Dialog open={this.state.open} onRequestClose={this.handleRequestClose}>
+            <Dialog open={this.state.open} onClose={this.handleRequestClose}>
                 <DialogTitle>
                     { props.title ? props.title : 'Please Confirm' }
                 </DialogTitle>
