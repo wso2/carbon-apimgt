@@ -6841,7 +6841,7 @@ public final class APIUtil {
      * This method is used to get the authorization configurations from the tenant registry
      *
      * @param tenantId The Tenant ID
-     * @param property The configuration to get from tenant registry or api-manager.xml
+     * @param property The configuration to get from tenant registry
      * @return The configuration read from tenant registry or else null
      * @throws APIManagementException Throws if the registry resource doesn't exist
      *                                or the content cannot be parsed to JSON
@@ -6884,7 +6884,7 @@ public final class APIUtil {
     /**
      * This method is used to get the authorization configurations from the api manager configurations
      *
-     * @param property The configuration to get from tenant registry or api-manager.xml
+     * @param property The configuration to get from api-manager.xml
      * @return The configuration read from api-manager.xml or else null
      * @throws APIManagementException Throws if the registry resource doesn't exist
      *                                or the content cannot be parsed to JSON
