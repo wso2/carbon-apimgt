@@ -317,7 +317,7 @@ public class APIAuthenticationHandlerTestCase {
     }
 
     @Test
-    public void testGetAuthenticator() throws Exception{
+    public void testGetAuthenticator() throws Exception {
       APIAuthenticationHandler apiAuthenticationHandler = new APIAuthenticationHandler();
       PowerMockito.mockStatic(APIUtil.class);
       PowerMockito.when(APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER)).thenReturn("AUTH_HEADER");

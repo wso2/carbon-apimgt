@@ -85,7 +85,6 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
         if (authorizationHeader != null) {
             allowHeaders += APIConstants.MULTI_ATTRIBUTE_SEPARATOR_DEFAULT + authorizationHeader;
         }
-
         if (allowedOrigins == null) {
             String allowedOriginsList = APIUtil.getAllowedOrigins();
             if (!allowedOriginsList.isEmpty()) {

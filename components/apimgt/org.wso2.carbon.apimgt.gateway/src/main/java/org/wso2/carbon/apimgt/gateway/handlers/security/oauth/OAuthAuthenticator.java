@@ -69,7 +69,6 @@ public class OAuthAuthenticator implements Authenticator {
     public OAuthAuthenticator(String authorizationHeader, boolean removeOAuthHeader) {
         this.securityHeader = authorizationHeader;
         this.removeOAuthHeadersFromOutMessage = removeOAuthHeader;
-
     }
 
     public void init(SynapseEnvironment env) {

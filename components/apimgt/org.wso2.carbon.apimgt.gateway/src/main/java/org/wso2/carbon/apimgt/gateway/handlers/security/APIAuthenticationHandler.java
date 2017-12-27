@@ -129,7 +129,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                         authorizationHeader = HttpHeaders.AUTHORIZATION;
                     }
                 } catch (APIManagementException e) {
-                    log.error("Error while reading from APIM configurations", e);
+                    log.error("Error while reading authorization header from APIM configurations", e);
                 }
             }
 

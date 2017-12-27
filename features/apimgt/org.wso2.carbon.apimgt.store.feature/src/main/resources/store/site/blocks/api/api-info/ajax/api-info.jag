@@ -1,6 +1,6 @@
 <%
 include("/jagg/jagg.jag");
-var carbon = require('carbon');
+
 (function () {
     var site = require("/site/conf/site.json");
     var ssoEnabled = site.ssoConfiguration.enabled;
