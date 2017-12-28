@@ -29,6 +29,8 @@ import Redirect from "react-router-dom/Redirect";
 import CircularProgress from "material-ui/Progress/CircularProgress";
 import {withStyles} from 'material-ui/styles';
 import green from "material-ui/colors/green";
+import {Create, GetApp} from 'material-ui-icons/';
+import {Link} from 'react-router-dom';
 
 const styles = {
     buttonProgress: {
@@ -143,14 +145,31 @@ class SampleAPI extends Component {
             <Grid container spacing={16} justify="center">
                 <Grid item xs={6} style={{textAlign: "center"}}>
                     <Alert message={message}/>
-                    <Paper>
+                    <Paper elevation={0}>
                         <Typography align="center" type="headline" gutterBottom>
-                            Can't find any APIs!
+                            Welcome to WSO2 API Manager
                         </Typography>
-                        <Button disabled={deploying} raised onClick={this.handleDeploySample} color="primary">
-                            Deploy Sample API
-                        </Button>
-                        {deploying && <CircularProgress size={24} className={classes.buttonProgress}/>}
+
+                        <Typography align="center" type="title" gutterBottom>
+                            To get started with API Manager, do any of the following:
+                        </Typography>
+                        <Grid container spacing={24} justify="center">
+                            <Grid item xs={3}>
+                                <Link to="/api/create/rest">
+                                    <Button raised>
+                                        <Create style={{fontSize: 50}}/>
+                                        Create New API
+                                    </Button>
+                                </Link>
+                            </Grid>
+                            <Grid item xs={3}>
+                                <Button disabled={deploying} raised onClick={this.handleDeploySample}>
+                                    <GetApp style={{fontSize: 50}}/>
+                                    Deploy Sample API
+                                </Button>
+                                {deploying && <CircularProgress size={24} className={classes.buttonProgress}/>}
+                            </Grid>
+                        </Grid>
                     </Paper>
                 </Grid>
             </Grid>
