@@ -1438,7 +1438,7 @@
        <script type="text/javascript">
         jQuery.validator.addMethod("characterValidation", function(value, element) {
             // not allow any special charaters
-            return this.optional( element ) || /^[^`~!@#$%^&*()|+\-=?;:'",.<>\{\}\[\]\\\/\s\t\n]*$/.test( value );
+            return this.optional( element ) || /^[^`~!@#$%^&*()|+\=?;:'",.<>\{\}\[\]\\\/\s\t\n]*$/.test( value );
         }, '<%=i18n.localize("Field contains special characters")%>');
 
         //character validation excluding space
