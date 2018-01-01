@@ -480,15 +480,21 @@ public class APIDefinitionFromSwagger20 implements APIDefinition {
                 getAPIMConfiguration().getKeyManagerConfigs();
         if ((api.getSecurityScheme() & 2) == 2) { //apikey
             log.debug("API security scheme : API Key Scheme");
-            swagger.securityDefinition(APIMgtConstants.SWAGGER_APIKEY, new ApiKeyAuthDefinition(
-                    APIMgtConstants.SWAGGER_APIKEY, In.HEADER));
+            if (swagger.getSecurityDefinitions() == null || !swagger.getSecurityDefinitions().containsKey
+                    (APIMgtConstants.SWAGGER_APIKEY)) {
+                swagger.securityDefinition(APIMgtConstants.SWAGGER_APIKEY, new ApiKeyAuthDefinition(
+                        APIMgtConstants.SWAGGER_APIKEY, In.HEADER));
+            }
         }
         if ((api.getSecurityScheme() & 1) == 1) {
             log.debug("API security Scheme : Oauth");
             OAuth2Definition oAuth2Definition = new OAuth2Definition();
             oAuth2Definition = oAuth2Definition.application(keyMgtConfigurations.getTokenEndpoint());
             oAuth2Definition.setScopes(Collections.emptyMap());
-            swagger.securityDefinition(APIMgtConstants.SWAGGER_OAUTH2, oAuth2Definition);
+            if (swagger.getSecurityDefinitions() == null || !swagger.getSecurityDefinitions().containsKey
+                    (APIMgtConstants.OAUTH2SECURITY)) {
+                swagger.securityDefinition(APIMgtConstants.OAUTH2SECURITY, oAuth2Definition);
+            }
         }
     }
 

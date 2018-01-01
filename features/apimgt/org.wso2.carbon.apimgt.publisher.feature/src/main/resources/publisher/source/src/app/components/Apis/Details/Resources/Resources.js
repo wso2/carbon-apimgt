@@ -17,15 +17,16 @@
  */
 
 import React from 'react'
-import { Input, Icon, Checkbox, Button, Card, Tag, Form } from 'antd';
+import {  Icon, Checkbox, Button, Card, Tag, Form } from 'antd';
 import { Row, Col } from 'antd';
 import Api from '../../../../data/api'
 import Resource from './Resource'
 import Loading from '../../../Base/Loading/Loading'
 import ApiPermissionValidation from '../../../../data/ApiPermissionValidation'
-
+import Select from 'material-ui/Select';
+import {MenuItem} from 'material-ui/Menu';
 const CheckboxGroup = Checkbox.Group;
-
+import Input, {InputLabel} from 'material-ui/Input';
 
 class Resources extends React.Component{
     constructor(props){
@@ -34,7 +35,8 @@ class Resources extends React.Component{
             tmpMethods:[],
             tmpResourceName: '',
             paths:{},
-            swagger:{}
+            swagger:{},
+            scopes:[]
         };
         this.api = new Api();
         this.api_uuid = props.match.params.api_uuid;
@@ -43,7 +45,29 @@ class Resources extends React.Component{
         this.onChangeInput = this.onChangeInput.bind(this);
         this.updatePath = this.updatePath.bind(this);
         this.updateResources = this.updateResources.bind(this);
+        this.handleScopeChange = this.handleScopeChange.bind(this);
+
     }
+    handleScopeChange(e) {
+        this.setState({scopes: e.target.value});
+        this.handleScopeChangeInSwaggerRoot(e.target.value);
+
+    }
+    handleScopeChangeInSwaggerRoot(scopes){
+        let swagger = this.state.swagger;
+        if (swagger.security){
+            swagger.security.map(function(object, i){
+                if(object.OAuth2Security){
+                    object.OAuth2Security = scopes;
+                }
+            });
+        } else{
+            swagger.security = [{"OAuth2Security":scopes}];
+        }
+            this.setState({swagger:swagger});
+        }
+
+
     componentDidMount() {
 
         const api = new Api();
@@ -63,10 +87,35 @@ class Resources extends React.Component{
                 }
             }
         );
+        let promised_scopes_object = api.getScopes(this.api_uuid);
+        promised_scopes_object.then(
+            response => {
+                this.setState({apiScopes: response.obj});
+            }
+        ).catch(
+            error => {
+                if (process.env.NODE_ENV !== "production") {
+                    console.error(error);
+                }
+                let status = error.status;
+                if (status === 404) {
+                    this.setState({notFound: true});
+                }
+            }
+        );
 
         let promised_api = this.api.getSwagger(this.api_uuid);
         promised_api.then((response) => {
-            this.setState({swagger:response.obj});
+            let tempScopes = [];
+            if(response.obj.security && response.obj.security.length!== 0){
+                response.obj.security.map(function(object, i){
+                    if(object.OAuth2Security){
+                        tempScopes =  object.OAuth2Security;
+                    }
+                });
+            }
+            this.setState({swagger: response.obj, scopes: tempScopes});
+
             if(response.obj.paths !== undefined ){
                 this.setState({paths:response.obj.paths})
             }
@@ -227,7 +276,7 @@ class Resources extends React.Component{
                     <Row type="flex" justify="start">
                         <Col span={4}>URL Pattern</Col>
                         <Col span={20}>
-                            <Input addonBefore={selectBefore} onChange={this.onChangeInput}  defaultValue="" />
+                            <Input onChange={this.onChangeInput}  defaultValue="" />
                             <div style={{marginTop:20}}>
                                 <CheckboxGroup options={plainOptions}  onChange={this.onChange} />
                             </div>
@@ -237,6 +286,36 @@ class Resources extends React.Component{
                         </Col>
                     </Row>
                 </Card>
+                {this.state.apiScopes ? <Card title="Assign Global Scopes for API" style={{ width: "100%",marginBottom:20 }}>
+                    <Row type="flex" justify="start">
+                        <Col span={20}>
+                            <Select
+                                margin="none"
+                                multiple
+                                value={this.state.scopes}
+                                onChange={this.handleScopeChange}
+                                MenuProps={{
+                                    PaperProps: {
+                                        style: {
+                                            width: 200,
+                                        },
+                                    },
+                                }}>
+                                {this.state.apiScopes.list.map(tempScope => (
+                                    <MenuItem
+                                        key={tempScope.name}
+                                        value={tempScope.name}
+                                        style={{
+                                            fontWeight: this.state.scopes.indexOf(tempScope.name) !== -1 ? '500' : '400',
+                                        }}
+                                    >
+                                        {tempScope.name}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </Col>
+                    </Row>
+                </Card>: null}
                 {
                     Object.keys(paths).map(
                         (key) => {
@@ -244,7 +323,7 @@ class Resources extends React.Component{
                             let that = this;
                             return (
                                 Object.keys(path).map( (innerKey) => {
-                                    return <Resource path={key} method={innerKey} methodData={path[innerKey]} updatePath={that.updatePath} />
+                                    return <Resource path={key} method={innerKey} methodData={path[innerKey]} updatePath={that.updatePath} apiScopes={this.state.apiScopes}/>
                                 })
                             );
 

@@ -526,38 +526,6 @@ class Permission extends Component {
                                     </Col>
                                 </Row>
                             </Card>
-                            {this.state.oauthField ?
-                                (<Card bodyStyle={{padding: 5}}>
-                                    <Row style={{marginBottom: "10px"}} type="flex" justify="center">
-                                        <Col span={8}>API Scopes</Col>
-                                        <Col span={16}>
-                                            <Row>
-                                                <Col span={8} style={{margin: "10px"}}>
-                                                    <Input name="scopeKey" placeholder="scopeKey"/>
-                                                </Col>
-                                                <Col span={8} style={{margin: "10px"}}>
-                                                    <Input name="scopeName" placeholder="scopeName"/>
-                                                </Col>
-                                            </Row>
-                                            <Row>
-                                                <Col span={16} style={{margin: "10px"}}>
-                                                    <Input name="roles" placeholder="roles"/>
-                                                </Col>
-                                            </Row>
-                                            <Row>
-                                                <Col span={16} style={{margin: "10px"}}>
-                                                    <Input name="descriptions" placeholder="descriptions"/>
-                                                </Col>
-                                            </Row>
-                                            <Row>
-                                                <Col span={16} style={{margin: "10px"}}>
-                                                    <Table columns={columnsOfScopeTable} dataSource={dataOfScopes}/>
-                                                </Col>
-                                            </Row>
-                                        </Col>
-                                    </Row>
-                                </Card>) : <p/>
-                            }
                             {/* Allowing update API with scopes */}
                             <ScopeValidation resourcePath={resourcePath.SINGLE_API} resourceMethod={resourceMethod.PUT}>
                                 <ApiPermissionValidation userPermissions={this.state.api.userPermissionsForApi}>
@@ -566,6 +534,8 @@ class Permission extends Component {
                                 </ApiPermissionValidation>
                             </ScopeValidation>
                         </form>
+                    </Col>
+                    <Col span={4}>
                     </Col>
                 </Row>
             </div>

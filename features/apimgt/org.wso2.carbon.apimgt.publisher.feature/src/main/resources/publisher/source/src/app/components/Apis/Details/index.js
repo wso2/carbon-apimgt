@@ -27,6 +27,7 @@ import Resources from './Resources/Resources'
 import PermissionFormWrapper from './Permission'
 import Endpoints from './Endpoints'
 import Subscriptions from './Subscriptions/Subscriptions'
+import Scopes from './Scopes/Scopes'
 import Security from './Security'
 import NavBar from  './NavBar'
 import Grid from 'material-ui/Grid';
@@ -58,6 +59,7 @@ export default class Details extends Component {
                         <Route path="/apis/:api_uuid/endpoints" component={Endpoints}/>
                         <Route path="/apis/:api_uuid/subscriptions" component={Subscriptions}/>
                         <Route path="/apis/:api_uuid/security" component={Security}/>
+                        <Route path="/apis/:api_uuid/scopes" component={Scopes}/>
                         <Route component={PageNotFound}/>
                     </Switch>
                 </Grid>

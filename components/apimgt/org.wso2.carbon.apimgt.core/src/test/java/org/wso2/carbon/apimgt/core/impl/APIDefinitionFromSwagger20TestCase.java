@@ -51,7 +51,7 @@ public class APIDefinitionFromSwagger20TestCase {
     }
 
     @Test()
-    public void testApiScopePArseSwagger() throws IOException, APIManagementException {
+    public void testApiScopeParseSwagger() throws IOException, APIManagementException {
         APIDefinitionFromSwagger20 apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
         String sampleApi = SampleTestObjectCreator.getSampleApiSwagger();
         Map<String, String> scopeMap = apiDefinitionFromSwagger20.getScopesFromSecurityDefinition(sampleApi);
