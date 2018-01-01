@@ -1807,7 +1807,7 @@ public class APIUtilTest {
     }
 
     @Test
-    public void testGetOAuthConfigurationFromAPIMConfig () throws Exception{
+    public void testGetOAuthConfigurationFromAPIMConfig () throws Exception {
         String property = "AuthorizationHeader";
         ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);

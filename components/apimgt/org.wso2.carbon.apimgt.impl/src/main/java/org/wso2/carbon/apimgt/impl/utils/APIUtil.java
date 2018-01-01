@@ -6870,7 +6870,6 @@ public final class APIUtil {
                     }
                 }
             }
-
         } catch (RegistryException e) {
             String msg = "Error while retrieving " + property + " from tenant registry.";
             throw new APIManagementException(msg, e);
