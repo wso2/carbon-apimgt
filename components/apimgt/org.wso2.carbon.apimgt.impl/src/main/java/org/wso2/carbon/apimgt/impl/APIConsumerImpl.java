@@ -2872,7 +2872,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             return keyDetails;
         } catch (WorkflowException e) {
             log.error("Could not execute Workflow", e);
-            throw new APIManagementException("Could not execute Workflow", e);
+            throw new APIManagementException(e);
         } finally {
             if (isTenantFlowStarted) {
                 endTenantFlow();

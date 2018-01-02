@@ -213,7 +213,7 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
         } catch (APIManagementException e) {
-            if (RestApiUtil.rootCauseMessageMatches(e, "primary key violation")) {
+            if (RestApiUtil.rootCauseMessageMatches(e, "is already registered")) {
                 RestApiUtil
                         .handleResourceAlreadyExistsError("Keys already generated for the application " + applicationId,
                                 e,

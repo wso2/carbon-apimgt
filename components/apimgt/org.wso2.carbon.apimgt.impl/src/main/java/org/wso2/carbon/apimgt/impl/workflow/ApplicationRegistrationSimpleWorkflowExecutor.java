@@ -79,7 +79,7 @@ public class ApplicationRegistrationSimpleWorkflowExecutor extends AbstractAppli
 		} catch (APIManagementException e) {
 			String msg = "Error occurred when updating the status of the Application creation process";
 			log.error(msg, e);
-			throw new WorkflowException(msg, e);
+			throw new WorkflowException(e.getMessage(), e);
 		}
 		return new GeneralWorkflowResponse();
 	}
