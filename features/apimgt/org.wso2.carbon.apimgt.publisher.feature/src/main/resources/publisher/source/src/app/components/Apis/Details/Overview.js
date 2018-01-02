@@ -155,7 +155,7 @@ class Overview extends Component {
                                 userPermissions={this.state.api.userPermissionsForApi}>
                                 <Popconfirm title="Do you want to delete this api?"
                                             onConfirm={this.handleApiDelete}>
-                                    <Button aria-owns="simple-menu" aria-haspopup="true">
+                                    <Button color="accent" aria-owns="simple-menu" aria-haspopup="true">
                                         <Delete /> Delete
                                     </Button>
                                 </Popconfirm>

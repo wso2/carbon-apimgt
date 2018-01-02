@@ -1,4 +1,4 @@
-let path = require('path');
+var path = require('path');
 
 const config = {
     entry: {
@@ -10,7 +10,6 @@ const config = {
         chunkFilename: "[name].bundle.js",
         publicPath: 'public/app/dist/'
     },
-    plugins: [],
     watch: false,
     module: {
         rules: [
@@ -28,8 +27,8 @@ const config = {
                 ]
             },
             {
-              test: /\.css$/,
-              use: [ 'style-loader', 'css-loader' ]
+                test: /\.css$/,
+                use: ['style-loader', 'css-loader']
             },
             {
                 test: /\.less$/,
@@ -46,15 +45,23 @@ const config = {
                 loader: 'url-loader?limit=100000'
             }
         ]
-    }
+    },
+    plugins: []
 };
+
 
 if (process.env.NODE_ENV === "development") {
     config.watch = true;
     config.devtool = "source-map";
 }
 if (process.env.NODE_ENV === 'production') {
-   
+
 }
 
-module.exports = config;
+module.exports = function (env) {
+    if (env && env.analysis) {
+        var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+        config.plugins.push(new BundleAnalyzerPlugin())
+    }
+    return config;
+}
