@@ -220,7 +220,7 @@ var drawAPIResponseFaultCountChart = function(from,to){
 
                             chart.xAxis
                                 .axisLabel('APIs')
-                                .tickFormat(function (d, i) {
+                                .tickFormat(function (i) {
                                 return labels[i];
                             });
                             chart.xAxis.tickValues(dataStructure[0].values.map( function(d){return d.x;}));
