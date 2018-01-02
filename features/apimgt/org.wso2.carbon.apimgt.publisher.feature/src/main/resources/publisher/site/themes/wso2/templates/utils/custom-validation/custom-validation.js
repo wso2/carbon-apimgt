@@ -176,4 +176,9 @@ $(document).ready(function() {
     $.validator.addMethod('validateDescriptionLength', function(value, element) {
         return value.length <= 20000;
     }, i18n.t('maximum support 20000 characters only'));
+    
+    $.validator.addMethod('email-validation', function(value, element) {
+        var validationQuery = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+        return validationQuery.test(value)
+    }, 'Please enter a valid email address.');
 });
