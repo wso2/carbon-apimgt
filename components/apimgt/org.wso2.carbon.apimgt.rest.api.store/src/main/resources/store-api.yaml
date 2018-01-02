@@ -258,7 +258,7 @@ paths:
       x-wso2-request: |
         GET https://localhost:9292/api/am/store/v1.0/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/sdks/java
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-disposition : attachment; filename=\"Swagger Petstore_android_2217676993812388137_1.0.0.zip\"\nContent-type : application/zip"
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-disposition : attachment; filename=\"Swagger Petstore_java_1.0.0.zip\"\nContent-type : application/zip"
       summary: |
         Generate a SDK for an API
       description: |
