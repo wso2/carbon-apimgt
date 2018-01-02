@@ -59,7 +59,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 module.exports = function (env) {
-    if (env.analysis) {
+    if (env && env.analysis) {
         var BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
         config.plugins.push(new BundleAnalyzerPlugin())
     }
