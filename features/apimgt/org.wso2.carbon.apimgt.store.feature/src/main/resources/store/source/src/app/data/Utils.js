@@ -177,7 +177,7 @@ class Utils {
 }
 
 Utils.CONST = {
-    LOCALSTORAGE_ENVIRONMENT: 'environment',
+    LOCALSTORAGE_ENVIRONMENT: 'environment_store',
     SSO_LOGIN: '/login/login',
     LOGOUT: '/login/logout',
     LOGIN_TOKEN_PATH: '/login/token',
