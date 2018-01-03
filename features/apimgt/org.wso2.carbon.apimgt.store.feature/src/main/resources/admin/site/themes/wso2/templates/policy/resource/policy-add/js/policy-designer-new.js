@@ -128,6 +128,36 @@ var addPolicy = function () {
 };
 
 $(document).ready(function () {
+
+    //validate requestCount is numeric
+    $.validator.addMethod('requestCountValidator', function(value,element){
+        return !isNaN(value);
+    }, "Error: Value Entered for Request Count is not valid!!");
+    //validate time is numeric
+    $.validator.addMethod('timeValidator', function(value,element){
+        return !isNaN(value);
+    }, "Error: Value entered for unit time is not valid");
+    //validate bandwidth is numberic
+    $.validator.addMethod('bandwidthValidator', function(value,element){
+        return !isNaN(value);
+    }, "Error: Value entered for bandwidth is not valid");
+
+    $("form.form-horizontal").validate({
+        rules:{
+            'request-count': {
+                requestCountValidator : true
+            },
+            'unit-time-count': {
+                required : true,
+                timeValidator : true
+            },
+            'bandwidth': {
+                bandwidthValidator : true
+            }
+        }
+    })
+
+
     $("#default-policy-level").change(function () {
         var selectedText = "";
         $("#default-policy-level option:selected").each(function () {
@@ -384,6 +414,13 @@ var loadPolicy = function (policyName) {
 };
 
 var addPolicyToBackend = function () {
+
+    //validate the input fields in the form
+    var isValid = $("form.form-horizontal").valid();
+    if(!isValid) {
+      return false;
+    }
+
     var apiPolicyString = JSON.stringify(apiPolicy);
     var apiPolicyNew = JSON.parse(apiPolicyString)
     var policyName = $('#policy-name').val();
