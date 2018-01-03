@@ -54,7 +54,7 @@ class Login extends Component {
             message: '',
             environments: [],
             environmentId: 0,
-            authConfigs: {_updated: false},
+            authConfigs: [],
             redirectToIS: false
         };
         this.fetch_ssoData = this.fetch_ssoData.bind(this);
@@ -75,7 +75,7 @@ class Login extends Component {
             Utils.setEnvironment(environment);
 
             //Fetch SSO data and render
-            this.fetch_ssoData(environment);
+            this.fetch_ssoData(environments);
         });
 
         let queryString = this.props.location.search;
@@ -96,20 +96,21 @@ class Login extends Component {
         }
     }
 
-    fetch_ssoData(environment) {
-        this.state.authConfigs._updated = false;
-        let promised_ssoData = Utils.getPromised_ssoData(environment);
-        promised_ssoData.then(response => {
-            response.data.members._updated = true;
+    fetch_ssoData(environments) {
+        //Array of promises
+        let promised_ssoData = environments.map(
+            environment => Utils.getPromised_ssoData(environment)
+        );
 
+        Promise.all(promised_ssoData).then(responses => {
             this.setState({
-                authConfigs: response.data.members
+                authConfigs: responses.map(response => response.data.members)
             });
         });
     }
 
     handleSubmit = (e) => {
-        const isSsoEnabled = this.state.authConfigs.is_sso_enabled.value;
+        const isSsoEnabled = this.state.authConfigs[this.state.environmentId].is_sso_enabled.value;
         if (isSsoEnabled) {
             this.setState({redirectToIS: true});
             const environment = this.state.environments[this.state.environmentId];
@@ -124,10 +125,11 @@ class Login extends Component {
         if(e){
             e.preventDefault();
         }
-        const authorizationEndpoint = this.state.authConfigs.authorizationEndpoint.value;
-        const client_id = this.state.authConfigs.client_id.value;
-        const callback_URL = `${this.state.authConfigs.callback_url.value}`;
-        const scopes = this.state.authConfigs.scopes.value;
+        const authConfigs = this.state.authConfigs[this.state.environmentId];
+        const authorizationEndpoint = authConfigs.authorizationEndpoint.value;
+        const client_id = authConfigs.client_id.value;
+        const callback_URL = authConfigs.callback_url.value;
+        const scopes = authConfigs.scopes.value;
 
         window.location = `${authorizationEndpoint}?response_type=code&client_id=${client_id}` +
             `&redirect_uri=${callback_URL}&scope=${scopes}`;
@@ -172,13 +174,7 @@ class Login extends Component {
     handleEnvironmentChange = (event) => {
         const environmentId = event.target.value;
         let environment = this.state.environments[environmentId];
-
-        //Get sso data of selected environment
-        this.fetch_ssoData(environment);
-
-        this.setState({
-            environmentId
-        });
+        this.setState({environmentId});
     };
 
     handleRequestClose = () => {
@@ -187,8 +183,8 @@ class Login extends Component {
 
     render() {
         const isMoreThanOneEnvironments = this.state.environments && this.state.environments.length > 1;
-        const isSsoUpdated = this.state.authConfigs._updated;
-        const isSsoEnabled = isSsoUpdated && this.state.authConfigs.is_sso_enabled.value;
+        const isSsoUpdated = this.state.authConfigs.length !== 0;
+        const isSsoEnabled = isSsoUpdated && this.state.authConfigs[this.state.environmentId].is_sso_enabled.value;
 
         //Redirect to IS
         if (this.state.redirectToIS) {
