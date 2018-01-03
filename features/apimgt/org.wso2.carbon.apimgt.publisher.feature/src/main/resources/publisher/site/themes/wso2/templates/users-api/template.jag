@@ -112,7 +112,7 @@
         <i id="icon-spinner" class="fw fw-loader5 fw-4x"></i>
     </div>
 
-    <div class="row add-margin-top-5x">
+    <div class="row add-margin-top-5x add-padding-left-3x">
         <div id="usageByCurrentSubscribersNoData"></div>
         <div class="col-sm-6">
             <h4><%=i18n.localize("Usage by Current Subscribers")%> (v-<%= encode.forHtml(request.getParameter("version"))%>)</h4>
@@ -135,7 +135,7 @@
             <i id="icon-spinner" class="fw fw-loader5 fw-4x"></i>
     </div>
 
-    <div class="row">
+    <div class="row add-padding-left-3x">
         <div id="usageByCurrentSubscribersAcrossAllNoData"></div>
         <div class="col-sm-6">
             <h4><%=i18n.localize("Usage by Current Subscribers (Across All Versions)")%></h4>
