@@ -189,9 +189,9 @@ class Login extends Component {
     };
 
     render() {
-        const isMoreThanTwoEnvironments = this.state.environments && this.state.environments.length > 1;
+        const isMoreThanOneEnvironments = this.state.environments && this.state.environments.length > 1;
         const isSsoUpdated = this.state.authConfigs._updated;
-        const isSsoEnabled = isSsoUpdated ? this.state.authConfigs.is_sso_enabled.value : undefined;
+        const isSsoEnabled = isSsoUpdated && this.state.authConfigs.is_sso_enabled.value;
         const {appName, appLabel} = this.props;
         //Redirect to IS
         if (this.state.redirectToIS) {
@@ -219,7 +219,7 @@ class Login extends Component {
             );
         }
 
-        if (isSsoEnabled && !isMoreThanTwoEnvironments) { // If sso enabled and no more than two environments
+        if (isSsoEnabled && !isMoreThanOneEnvironments) { // If sso enabled and no more than one environments
             this.handleSsoLogin();
         }
 
@@ -266,7 +266,7 @@ class Login extends Component {
                                                 </Typography>
 
                                                 {/*Environments*/}
-                                                {isMoreThanTwoEnvironments &&
+                                                {isMoreThanOneEnvironments &&
                                                 <FormControl style={{width: "100%", marginTop: "2%"}}>
                                                     <InputLabel htmlFor="environment">Environment</InputLabel>
                                                     <Select onChange={this.handleEnvironmentChange}

@@ -83,25 +83,6 @@ class Protected extends Component {
         return (
             <Redirect to={{pathname: '/login', search: params}}/>
         );
-
-        if(this.state.updateSSO) {
-            this.state.updateSSO = false;
-
-            if (this.state.authConfigs) {
-                if (this.state.authConfigs.is_sso_enabled.value) {
-                    const authorizationEndpoint = this.state.authConfigs.authorizationEndpoint.value;
-                    const client_id = this.state.authConfigs.client_id.value;
-                    const callback_URL = `${this.state.authConfigs.callback_url.value}`;
-                    const scopes = this.state.authConfigs.scopes.value;
-                    window.location = `${authorizationEndpoint}?response_type=code&client_id=${client_id}` +
-                        `&redirect_uri=${callback_URL}&scope=${scopes}`;
-                } else {
-
-                }
-            } else {
-                return <LoadingAnimation/>;
-            }
-        }
     }
 }
 

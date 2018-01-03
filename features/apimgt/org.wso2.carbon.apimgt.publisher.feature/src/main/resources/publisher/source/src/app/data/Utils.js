@@ -147,7 +147,7 @@ class Utils {
     }
 
     static getAppSSORequestURL(environment = Utils.getEnvironment()) {
-        const uiService = window.location.origin.replace(/\//g, "%2F").replace(/:/g, "%3A");
+        const uiService = encodeURIComponent(window.location.origin);
         return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.SSO_LOGIN}${Utils.CONST.CONTEXT_PATH}`
             + `?uiService=${uiService}/`;
     }
@@ -157,7 +157,7 @@ class Utils {
     }
 
     static getLoginTokenPath(environment = Utils.getEnvironment()) {
-        const uiService = window.location.origin.replace(/\//g, "%2F").replace(/:/g, "%3A");
+        const uiService = encodeURIComponent(window.location.origin);
         return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_TOKEN_PATH}${Utils.CONST.CONTEXT_PATH}`
             + `?uiService=${uiService}/`;
     }
