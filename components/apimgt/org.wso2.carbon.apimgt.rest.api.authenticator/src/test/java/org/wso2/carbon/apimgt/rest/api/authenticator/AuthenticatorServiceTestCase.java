@@ -153,8 +153,8 @@ public class AuthenticatorServiceTestCase {
         //// Actual response - When authorization code is not null
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
         AccessTokenInfo tokenInfoResponseForValidAuthCode = authenticatorService.getTokens("store",
-                "https://localhost:9292/auth/callback/store?uiService=https://localhost:9292/&code=xxx-auth-code-xxx&session_state=xxx-session-state" +
-                        "-xxx", "authorization_code", null, null, null, 0, "https://localhost:9292/");
+                "authorization_code", null, null, null, 0,
+                "https://localhost:9292/", "xxx-auth-code-xxx");
         Assert.assertEquals(tokenInfoResponseForValidAuthCode, tokenInfo);
 
         // Error Path - 500 - Authorization code grant type
@@ -164,9 +164,8 @@ public class AuthenticatorServiceTestCase {
         AccessTokenInfo tokenInfoResponseForInvalidAuthCode = new AccessTokenInfo();
         try {
             tokenInfoResponseForInvalidAuthCode = authenticatorService.getTokens("store",
-                    "https://localhost:9292/auth/callback/store?uiService=https://localhost:9292/&error=access_denied&session_state=xxx-session-state" +
-                            "-xxx", "authorization_code",
-                    null, null, null, 0, "https://localhost:9292/");
+                    "authorization_code",
+                    null, null, null, 0, "https://localhost:9292/", null);
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "No Authorization Code available.");
             Assert.assertEquals(tokenInfoResponseForInvalidAuthCode, emptyTokenInfo);
@@ -174,15 +173,15 @@ public class AuthenticatorServiceTestCase {
 
         // Happy Path - 200 - Password grant type
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
-        AccessTokenInfo tokenInfoResponseForPasswordGrant = authenticatorService.getTokens("store", null, "password",
-                "admin", "admin", null, 0, "https://localhost:9292/");
+        AccessTokenInfo tokenInfoResponseForPasswordGrant = authenticatorService.getTokens("store", "password",
+                "admin", "admin", null, 0, "https://localhost:9292/", null);
         Assert.assertEquals(tokenInfoResponseForPasswordGrant, tokenInfo);
 
         // Error Path - When token generation fails and throws APIManagementException
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenThrow(KeyManagementException.class);
         try {
-            authenticatorService.getTokens("store", null, "password",
-                    "admin", "admin", null, 0, "https://localhost:9292/");
+            authenticatorService.getTokens("store", "password",
+                    "admin", "admin", null, 0, "https://localhost:9292/", null);
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "Error while receiving tokens for OAuth application : store");
         }

@@ -124,17 +124,19 @@ public class AuthenticatorService {
      * This method returns the access tokens for a given application.
      *
      * @param appName Name of the application which needs to get tokens
-     * @param requestURL Request URL with the authorization code
      * @param grantType Grant type of the application
      * @param userName User name of the user
      * @param password Password of the user
      * @param refreshToken Refresh token
      * @param validityPeriod Validity period of tokens
+     * @param uiServiceURL URL of the UI-Service
+     * @param authorizationCode Authorization Code
      * @return AccessTokenInfo - An object with the generated access token information
      * @throws APIManagementException When receiving access tokens fails
      */
-    public AccessTokenInfo getTokens(String appName, String requestURL, String grantType,
-                                     String userName, String password, String refreshToken, long validityPeriod, String uiServiceURL)
+    public AccessTokenInfo getTokens(String appName, String grantType,
+                                     String userName, String password, String refreshToken,
+                                     long validityPeriod, String uiServiceURL, String authorizationCode)
             throws APIManagementException {
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
@@ -155,13 +157,8 @@ public class AuthenticatorService {
                         .getAPIMAppConfiguration();
                 String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName
                         + "?uiService=" + uiServiceURL;
-                // Get the Authorization Code
-                if (requestURL.contains("code=")) {
-                    String requestURLQueryParameters = requestURL.split("\\?")[1];
-                    String authorizationCode = requestURLQueryParameters.split("&code=")[1].split("&")[0];
-                    if (log.isDebugEnabled()) {
-                        log.debug("Authorization Code for the app " + appName + ": " + authorizationCode);
-                    }
+
+                if (authorizationCode != null) {
                     // Get Access & Refresh Tokens
                     accessTokenRequest.setClientId(consumerKeySecretMap.get("CONSUMER_KEY"));
                     accessTokenRequest.setClientSecret(consumerKeySecretMap.get("CONSUMER_SECRET"));

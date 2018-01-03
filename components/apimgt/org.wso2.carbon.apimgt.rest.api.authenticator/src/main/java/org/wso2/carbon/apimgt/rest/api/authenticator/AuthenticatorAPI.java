@@ -111,8 +111,8 @@ public class AuthenticatorAPI implements Microservice {
                 }
             }
             AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appContext.substring(1),
-                    null, grantType, userName, password, refToken,
-                    Long.parseLong(validityPeriod), uiServiceUrl);
+                    grantType, userName, password, refToken,
+                    Long.parseLong(validityPeriod), uiServiceUrl, null);
             authenticatorService.setAccessTokenData(authResponseBean, accessTokenInfo);
             String accessToken = accessTokenInfo.getAccessToken();
             String refreshToken = accessTokenInfo.getRefreshToken();
@@ -262,6 +262,9 @@ public class AuthenticatorAPI implements Microservice {
      * This is the API which IDP redirects the user after authentication.
      *
      * @param request Request to call /callback api
+     * @param appName Name of the applicatoin (publisher/store/admin)
+     * @param uiServiceUrl URL of the UI-Service to redirect back
+     * @param authorizationCode Authorization-Code
      * @return Response - Response with redirect URL
      */
     @OPTIONS
@@ -269,7 +272,7 @@ public class AuthenticatorAPI implements Microservice {
     @Path("/callback/{appName}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response callback(@Context Request request, @PathParam("appName") String appName,
-                             @QueryParam("uiService") String uiServiceUrl) {
+                             @QueryParam("uiService") String uiServiceUrl, @QueryParam("code") String authorizationCode) {
         String appContext = "/" + appName;
         String logoutContext =
                 AuthenticatorConstants.LOGOUT_SERVICE_CONTEXT + AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
@@ -280,7 +283,6 @@ public class AuthenticatorAPI implements Microservice {
         } else {
             restAPIContext = AuthenticatorConstants.REST_CONTEXT + appContext;
         }
-        String requestURL = (String) request.getProperty(AuthenticatorConstants.REQUEST_URL);
 
         AuthResponseBean authResponseBean = new AuthResponseBean();
         String grantType = KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE;
@@ -288,8 +290,8 @@ public class AuthenticatorAPI implements Microservice {
             KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
             SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
             AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
-            AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appName, requestURL, grantType,
-                    null, null, null, 0, uiServiceUrl);
+            AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appName, grantType,
+                    null, null, null, 0, uiServiceUrl, authorizationCode);
             if (StringUtils.isEmpty(accessTokenInfo.toString())) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                         .entity("Access token generation failed!").build();
