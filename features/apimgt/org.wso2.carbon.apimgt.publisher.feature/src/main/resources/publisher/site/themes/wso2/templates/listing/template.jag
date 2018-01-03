@@ -58,7 +58,7 @@
         }
 
        var apis = <%=outputs.apis%>;
-
+       var mode = "<%=outputs.mode%>";
        if (null != apis) {
             // Get the api count
             var apiCount = apis.length;
@@ -71,8 +71,9 @@
                     var prevText = $helpText.text();
                     $helpText.text($helpText.attr('data-other'));
                     $helpText.attr('data-other',prevText);
-
-                    runEnjoyHintScript(enjoyhint_instance, item_listing_script_data);
+                    if (mode != "search") {
+                        runEnjoyHintScript(enjoyhint_instance, item_listing_script_data);
+                    }
                 }
             } else if (apiCount > 0) {
                 // Check whether the user enabled the tutorial by clicking Documentation sub-menu
