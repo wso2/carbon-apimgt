@@ -1,7 +1,7 @@
 <% jagg.template("policy/subscription/manage", function(inputs, outputs, jagg) {%>
     <div id="listing">
     <div class="page-header">
-        <h2><%=i18n.localize("Subscription Tier List")%></h2>
+        <h2><%=i18n.localize("Subscription Throttling Policies")%></h2>
     </div>
     <div class="content-section shadow-up">
     <div class="content-data">

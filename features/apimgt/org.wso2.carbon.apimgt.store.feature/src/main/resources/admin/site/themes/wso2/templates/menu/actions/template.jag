@@ -153,7 +153,7 @@
                                         <i class="fw fw-add fw-stack-1x" title="<%=i18n.localize("Add Tier")%>"></i>
                                         <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Add Tier")%>"></i>
                                     </span>
-                                    <%=i18n.localize("Add Tier")%>
+                                    <%=i18n.localize("Add New Policy")%>
                                 </a>
                             </li>
                         <%} %>
@@ -164,7 +164,7 @@
                                         <i class="fw fw-add fw-stack-1x" title="<%=i18n.localize("Define Rule")%>"></i>
                                         <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Define Rule")%>"></i>
                                     </span>
-                                    <%=i18n.localize("Define Rule")%>
+                                    <%=i18n.localize("Define Policy")%>
                                 </a>
                             </li>
                         <%} %>
@@ -175,7 +175,7 @@
                                         <i class="fw fw-add fw-stack-1x" title="<%=i18n.localize("Add Item")%>"></i>
                                         <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Add Item")%>"></i>
                                     </span>
-                                    <%=i18n.localize("Add Item")%>
+                                    <%=i18n.localize("Add Blacklist Policy")%>
                                 </a>
                             </li>
                         <%} %>
@@ -186,7 +186,7 @@
                                         <i class="fw fw-add fw-stack-1x" title="<%=i18n.localize("Add Tier")%>"></i>
                                         <i class="fw fw-circle-outline fw-stack-2x" title="<%=i18n.localize("Add Tier")%>"></i>
                                     </span>
-                                    <%=i18n.localize("Add Tier")%>
+                                    <%=i18n.localize("Add New Policy")%>
                                 </a>
                             </li>
                         <%} %>
