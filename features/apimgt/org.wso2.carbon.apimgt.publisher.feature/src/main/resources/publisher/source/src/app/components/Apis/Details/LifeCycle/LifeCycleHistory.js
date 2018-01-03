@@ -38,7 +38,7 @@ const LifeCycleHistory = props => {
                     <div>{entry.user}</div>
                 </div>
                 <ListItemText
-                    primary={"LC has changed from " + entry.postState + " to " + entry.previousState}
+                    primary={"LC has changed from " + entry.previousState + " to " + entry.postState}
                     secondary={entry.updatedTime} />
             </ListItem>
         )}
