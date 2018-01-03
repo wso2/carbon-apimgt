@@ -1160,16 +1160,10 @@
                         "description": "Application Search Query\n",
                         "required": true,
                         "type": "string"
-                    },
-                    {
-                        "$ref": "#/parameters/Accept"
-                    },
-                    {
-                        "$ref": "#/parameters/If-None-Match"
                     }
                 ],
                 "tags": [
-                    "Application (individual)"
+                    "Application (Individual)"
                 ],
                 "responses": {
                     "200": {
@@ -1186,6 +1180,77 @@
                     },
                     "404": {
                         "description": "Not Found.\nRequested Application does not exist.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "406": {
+                        "description": "Not Acceptable.\nThe requested media type is not supported\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    },
+                    "412": {
+                        "description": "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/import/applications": {
+            "post": {
+                "x-scope": "apim:subscribe",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "x-wso2-curl": "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/store/v0.11/import/applications",
+                "x-wso2-request": "POST https://localhost:9443/api/am/store/v0.11/import/applications\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+                "x-wso2-response": "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"groupId\": \"\",\n         \"subscriber\": \"admin\",\n         \"throttlingTier\": \"Unlimited\",\n         \"applicationId\": \"367a2361-8db5-4140-8133-c6c8dc7fa0c4\",\n         \"description\": \"\",\n         \"status\": \"APPROVED\",\n         \"name\": \"app1\"\n      },\n            {\n         \"groupId\": \"\",\n         \"subscriber\": \"admin\",\n         \"throttlingTier\": \"Unlimited\",\n         \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n         \"description\": null,\n         \"status\": \"APPROVED\",\n         \"name\": \"DefaultApplication\"\n      }\n   ],\n   \"count\": 2,\n   \"next\": \"\"\n}",
+                "summary": "Imports an Application.",
+                "description": "This operation can be used to import an existing Application.\n",
+                "parameters": [
+                    {
+                        "name": "file",
+                        "in": "formData",
+                        "description": "Zip archive consisting of exported application configuration\n",
+                        "required": true,
+                        "type": "file"
+                    },
+                    {
+                        "name": "preserveOwner",
+                        "in": "query",
+                        "description": "Preserve Original Creator of the Application\n",
+                        "required": false,
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "addSubscriptions",
+                        "in": "query",
+                        "description": "Import Subscriptions of the Application\n",
+                        "required": false,
+                        "type": "boolean"
+                    }
+                ],
+                "tags": [
+                    "Application (Individual)"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.\nSuccessful response with the updated object as entity in the body.\n",
+                        "schema": {
+                            "$ref": "#/definitions/Application"
+                        },
+                        "headers": {
+                            "Content-Type": {
+                                "description": "The content type of the body.\n",
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request.\nInvalid request or validation error\n",
                         "schema": {
                             "$ref": "#/definitions/Error"
                         }

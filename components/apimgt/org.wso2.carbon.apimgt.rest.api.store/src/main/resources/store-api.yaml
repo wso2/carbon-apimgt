@@ -1237,10 +1237,8 @@ paths:
             Application Search Query
           required: true
           type: string
-        - $ref : "#/parameters/Accept"
-        - $ref : "#/parameters/If-None-Match"
       tags:
-        - Application (individual)
+        - Application (Individual)
       responses:
         200:
           description: |
@@ -1257,6 +1255,75 @@ paths:
           description: |
             Not Found.
             Requested Application does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
+# Import Application Resource API
+######################################################
+  /import/applications:
+
+    post:
+      x-scope: apim:subscribe
+      consumes:
+        - multipart/form-data
+      x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/store/v0.11/import/applications"
+      x-wso2-request: |
+        POST https://localhost:9443/api/am/store/v0.11/import/applications
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"groupId\": \"\",\n         \"subscriber\": \"admin\",\n         \"throttlingTier\": \"Unlimited\",\n         \"applicationId\": \"367a2361-8db5-4140-8133-c6c8dc7fa0c4\",\n         \"description\": \"\",\n         \"status\": \"APPROVED\",\n         \"name\": \"app1\"\n      },\n            {\n         \"groupId\": \"\",\n         \"subscriber\": \"admin\",\n         \"throttlingTier\": \"Unlimited\",\n         \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n         \"description\": null,\n         \"status\": \"APPROVED\",\n         \"name\": \"DefaultApplication\"\n      }\n   ],\n   \"count\": 2,\n   \"next\": \"\"\n}"
+      summary: Imports an Application.
+      description: |
+        This operation can be used to import an existing Application.
+      parameters:
+        - name: file
+          in: formData
+          description: |
+            Zip archive consisting of exported application configuration
+          required: true
+          type: file
+        - name: preserveOwner
+          in: query
+          description: |
+            Preserve Original Creator of the Application
+          required: false
+          type: boolean
+        - name: addSubscriptions
+          in: query
+          description: |
+            Import Subscriptions of the Application
+          required: false
+          type: boolean
+      tags:
+        - Application (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with the updated object as entity in the body.
+          schema:
+            $ref: '#/definitions/Application'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
           schema:
             $ref: '#/definitions/Error'
         406:

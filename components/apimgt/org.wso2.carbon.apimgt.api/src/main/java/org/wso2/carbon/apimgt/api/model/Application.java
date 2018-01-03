@@ -115,6 +115,10 @@ public class Application {
         return subscribedAPIs;
     }
 
+    public void setSubscribedAPIs(Set<SubscribedAPI> subscribedAPIs) {
+        this.subscribedAPIs = subscribedAPIs;
+    }
+
     public void addSubscribedAPIs(Set<SubscribedAPI> subscribedAPIs) {
         for (SubscribedAPI subscribedAPI : subscribedAPIs) {
             subscribedAPI.setApplication(this);

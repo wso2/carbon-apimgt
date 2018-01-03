@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.store.utils;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -8,11 +9,14 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
@@ -20,10 +24,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 /**
@@ -33,9 +39,11 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
     private static final Log log = LogFactory.getLog(FileBasedApplicationImportExportManager.class);
     private static final String IMPORTED_APPLICATIONS_DIRECTORY_NAME = "imported-applications";
     private String path;
+    private APIConsumer apiConsumer;
 
     public FileBasedApplicationImportExportManager(APIConsumer apiConsumer, String path) {
         super(apiConsumer);
+        this.apiConsumer = apiConsumer;
         this.path = path;
     }
 
@@ -43,12 +51,12 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
      * Export a given Application to a file system as zip archive.
      * The export root location is given by {@link FileBasedApplicationImportExportManager#path}/exported-application.
      *
-     * @param application         Application{@link Application} to be exported
+     * @param exportApplication         Application{@link Application} to be exported
      * @param exportDirectoryName Name of directory to be exported
      * @return path to the exported directory with exported artifacts
-     * @throws APIManagementException
+     * @throws APIManagementException if an error occurs while exporting an application to a file system
      */
-    public String exportApplication(Application application, String exportDirectoryName) throws
+    public String exportApplication(Application exportApplication, String exportDirectoryName) throws
             APIManagementException {
 
         String applicationArtifactBaseDirectoryPath = path + File.separator + exportDirectoryName;
@@ -60,7 +68,9 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
             log.error(errorMsg, e);
             throw new APIManagementException(errorMsg, e);
         }
-        Application exportApplication = application;
+        Set<SubscribedAPI> subscriptions = apiConsumer.getSubscribedAPIs(exportApplication.getSubscriber(),
+                exportApplication.getName(), exportApplication.getGroupId());
+        exportApplication.setSubscribedAPIs(subscriptions);
         String applicationExportDirectory = applicationArtifactBaseDirectoryPath + File.separator +
                 exportApplication.getName();
         try {
@@ -85,6 +95,69 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
         return applicationArtifactBaseDirectoryPath;
     }
 
+    public Application importApplication(InputStream uploadedAppArchiveInputStream) throws APIManagementException {
+        String appArchiveLocation = path + File.separator + IMPORTED_APPLICATIONS_DIRECTORY_NAME + ".zip";
+        String archiveExtractLocation;
+        try {
+            archiveExtractLocation = extractUploadedArchiveApplication(uploadedAppArchiveInputStream,
+                    IMPORTED_APPLICATIONS_DIRECTORY_NAME,
+                    appArchiveLocation, path);
+            return parseApplicationFile(archiveExtractLocation);
+        } catch (IOException e) {
+            String errorMsg = "Error occurred while importing Application archive" + appArchiveLocation;
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e);
+        }
+    }
+
+    /**
+     * Extracts the Application to the file system by reading the incoming {@link InputStream} object
+     * uploadedApplicationArchiveInputStream
+     *
+     * @param uploadedAppArchiveInputStream Incoming {@link InputStream}
+     * @param importedDirectoryName         directory to extract the archive
+     * @param appArchiveLocation            full path of the archive location
+     * @param extractLocation               full path to the location to which the archive will be written
+     * @return location to which Applications were extracted
+     * @throws IOException if an error occurs while extracting the archive
+     */
+    private String extractUploadedArchiveApplication(InputStream uploadedAppArchiveInputStream,
+                                                            String importedDirectoryName,
+                                                            String appArchiveLocation, String extractLocation)
+            throws IOException {
+        String archiveExtractLocation;
+        String archiveName;
+        String extractedFilePath;
+        // create api import directory structure
+        Files.createDirectories(Paths.get(extractLocation));
+        // create archive
+        createArchiveFromInputStream(uploadedAppArchiveInputStream, appArchiveLocation);
+        // extract the archive
+        archiveExtractLocation = extractLocation + File.separator + importedDirectoryName;
+        archiveName = extractArchive(appArchiveLocation, archiveExtractLocation);
+        extractedFilePath = archiveExtractLocation + File.separator + archiveName + File.separator +
+                archiveName + ".json";
+        return extractedFilePath;
+    }
+
+    /**
+     * Extracts the details of an Application from a json file
+     *
+     * @param applicationDetailsFilePath Directory which contains the json file
+     * @return an application object containing the details extracted from the json file
+     * @throws IOException if an error occurs while extracting the Application Details
+     */
+    private Application parseApplicationFile(String applicationDetailsFilePath)
+            throws IOException {
+        String applicationDetailsString;
+            applicationDetailsString = new String(Files.readAllBytes(Paths.get(applicationDetailsFilePath)),
+                    StandardCharsets.UTF_8);
+        //convert to bean
+        Gson gson = new GsonBuilder().create();
+        //returns an application object from a json string
+        return gson.fromJson(applicationDetailsString, Application.class);
+    }
+
     /**
      * Creates an archive of the contained application details.
      *
@@ -92,11 +165,11 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
      * @param archiveLocation Directory to generate the zip archive
      * @param archiveName     Name of the zip archive
      * @return path to the created archive file
-     * @throws APIManagementException
+     * @throws APIManagementException if an error occurs while creating an archive from app details
      */
     public String createArchiveFromExportedAppArtifacts(String sourceDirectory, String archiveLocation,
                                                         String archiveName) throws APIManagementException {
-        String archivedFilePath = null;
+        String archivedFilePath;
         try {
             archiveDirectory(sourceDirectory, archiveLocation, archiveName);
         } catch (IOException e) {
@@ -120,11 +193,11 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
      * @param exportLocation file system location to write the Application Details
      * @throws IOException if an error occurs while writing the Application Details
      */
-    private static void exportApplicationDetailsToFileSystem(Application application, String exportLocation)
+    private void exportApplicationDetailsToFileSystem(Application application, String exportLocation)
             throws IOException {
         String applicationFileLocation = exportLocation + File.separator + application.getName() +
                 ".json";
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         try (FileOutputStream fileOutputStream = new FileOutputStream(applicationFileLocation);
              OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream,
                      StandardCharsets.UTF_8)) {
@@ -140,7 +213,7 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
      * @param archiveName     name of the archive to create
      * @throws IOException if an error occurs while creating the archive
      */
-    public static void archiveDirectory(String sourceDirectory, String archiveLocation, String archiveName)
+    private void archiveDirectory(String sourceDirectory, String archiveLocation, String archiveName)
             throws IOException {
 
         File directoryToZip = new File(sourceDirectory);
@@ -159,7 +232,7 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
      * @param sourceDirectory full path to the root directory
      * @param fileList        list containing the files
      */
-    private static void getAllFiles(File sourceDirectory, List<File> fileList) {
+    private void getAllFiles(File sourceDirectory, List<File> fileList) {
         File[] files = sourceDirectory.listFiles();
         if (files != null) {
             for (File file : files) {
@@ -171,10 +244,11 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
         }
     }
 
-    private static void writeArchiveFile(File directoryToZip, List<File> fileList, String archiveLocation,
+    private void writeArchiveFile(File directoryToZip, List<File> fileList, String archiveLocation,
                                          String archiveName) throws IOException {
 
-        try (FileOutputStream fileOutputStream = new FileOutputStream(archiveLocation + File.separator + archiveName
+        try (FileOutputStream fileOutputStream = new FileOutputStream(archiveLocation + File.separator +
+                archiveName
                 + ".zip");
              ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream)) {
             for (File file : fileList) {
@@ -185,7 +259,7 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
         }
     }
 
-    private static void addToArchive(File directoryToZip, File file, ZipOutputStream zipOutputStream)
+    private void addToArchive(File directoryToZip, File file, ZipOutputStream zipOutputStream)
             throws IOException {
         // Add a file to archive
         try (FileInputStream fileInputStream = new FileInputStream(file)) {
@@ -211,7 +285,7 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
      * @return Set of directory path under the root directory given by path
      * @throws IOException if an error occurs while listing directories
      */
-    public static Set<String> getDirectoryList(String path) throws IOException {
+    private Set<String> getDirectoryList(String path) throws IOException {
         Set<String> directoryNames = new HashSet<>();
         try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(path))) {
             for (Path directoryPath : directoryStream) {
@@ -219,5 +293,68 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
             }
         }
         return directoryNames;
+    }
+
+    /**
+     * Creates a zip archive from the given {@link InputStream} inputStream
+     *
+     * @param inputStream {@link InputStream} instance
+     * @param archivePath path to create the zip archive
+     * @throws IOException if an error occurs while creating the archive
+     */
+    private void createArchiveFromInputStream(InputStream inputStream, String archivePath)
+            throws IOException {
+        FileOutputStream outFileStream = new FileOutputStream(new File(archivePath));
+            IOUtils.copy(inputStream, outFileStream);
+    }
+
+    /**
+     * Extracts a given zip archive
+     *
+     * @param archiveFilePath path of the zip archive
+     * @param destination     extract location
+     * @return name of the extracted zip archive
+     * @throws IOException if an error occurs while extracting the archive
+     */
+    private String extractArchive(String archiveFilePath, String destination)
+            throws IOException {
+        String archiveName = null;
+
+        try (ZipFile zip = new ZipFile(new File(archiveFilePath))) {
+            Enumeration zipFileEntries = zip.entries();
+            int index = 0;
+
+            // Process each entry
+            while (zipFileEntries.hasMoreElements()) {
+
+                // grab a zip file entry
+                ZipEntry entry = (ZipEntry) zipFileEntries.nextElement();
+                String currentEntry = entry.getName();
+
+                //This index variable is used to get the extracted folder name; that is root directory
+                if (index == 0) {
+                    archiveName = currentEntry.substring(0, currentEntry.indexOf('/'));
+                    --index;
+                }
+
+                File destinationFile = new File(destination, currentEntry);
+                File destinationParent = destinationFile.getParentFile();
+
+                // create the parent directory structure
+                if (destinationParent.mkdirs()) {
+                    log.debug("Creation of folder is successful. Directory Name : " + destinationParent.getName());
+                }
+
+                if (!entry.isDirectory()) {
+                    try (InputStream zipInputStream = zip.getInputStream(entry);
+                         BufferedInputStream inputStream = new BufferedInputStream(zipInputStream);
+                         // write the current file to the destination
+                         FileOutputStream outputStream = new FileOutputStream(destinationFile)) {
+                        IOUtils.copy(inputStream, outputStream);
+                    }
+                }
+            }
+            return archiveName;
+        }
     }
 }

@@ -40,16 +40,14 @@ public class ExportApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response exportApplicationsGet(@ApiParam(value = "Application Search Query\n",required=true) @QueryParam("appId")  String appId,
-    @ApiParam(value = "Media types acceptable for the response. Default is application/json.\n"  , defaultValue="application/json")@HeaderParam("Accept") String accept,
-    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch)
+    public Response exportApplicationsGet(@ApiParam(value = "Application Search Query\n",required=true) @QueryParam("appId")  String appId)
     {
-    return delegate.exportApplicationsGet(appId,accept,ifNoneMatch);
+    return delegate.exportApplicationsGet(appId);
     }
 
-    public String exportApplicationsGetGetLastUpdatedTime(String appId,String accept,String ifNoneMatch)
+    public String exportApplicationsGetGetLastUpdatedTime(String appId)
     {
-        return delegate.exportApplicationsGetGetLastUpdatedTime(appId,accept,ifNoneMatch);
+        return delegate.exportApplicationsGetGetLastUpdatedTime(appId);
     }
 }
 

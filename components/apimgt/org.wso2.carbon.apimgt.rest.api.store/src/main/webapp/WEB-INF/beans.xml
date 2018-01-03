@@ -13,6 +13,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.store.SwaggerJsonApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.TagsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.ExportApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.store.ImportApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.SubscriptionsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.ApisApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.store.TiersApi"/>

@@ -14,8 +14,8 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import javax.ws.rs.core.Response;
 
 public abstract class ExportApiService {
-    public abstract Response exportApplicationsGet(String appId,String accept,String ifNoneMatch);
+    public abstract Response exportApplicationsGet(String appId);
 
-    public abstract String exportApplicationsGetGetLastUpdatedTime(String appId,String accept,String ifNoneMatch);
+    public abstract String exportApplicationsGetGetLastUpdatedTime(String appId);
 }
 
