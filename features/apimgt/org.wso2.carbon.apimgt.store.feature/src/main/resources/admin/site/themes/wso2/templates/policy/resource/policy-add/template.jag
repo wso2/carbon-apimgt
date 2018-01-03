@@ -61,7 +61,7 @@
                 value='<%=i18n.localize("Name contains spaces")%>'/>
 
        		<div class="form-group">
-	            <label class="control-label col-sm-3"><%=i18n.localize("Tier Name")%>: <span class="requiredAstrix">*</span>
+	            <label class="control-label col-sm-3"><%=i18n.localize("Name")%>: <span class="requiredAstrix">*</span>
 	            		<a class="help_popup" help_data="name_help" data-trigger="hover" data-placement="bottom" title="">
 							<span class="icon fw-stack fw-lg" style="font-size:6px">
 								<i class="fw fw-circle fw-stack-2x" data-original-title="" title=""></i>
@@ -76,7 +76,7 @@
 	            </div>
         	</div>
             <div class="form-group">
-                <label class="control-label col-sm-3" for="policy-description"><%=i18n.localize("Tier Description")%>:
+                <label class="control-label col-sm-3" for="policy-description"><%=i18n.localize("Description")%>:
                     <a class="help_popup" help_data="desc_help" data-trigger="hover" data-placement="bottom" data-original-title="" title="">
                     	<span class="icon fw-stack fw-lg" style="font-size:6px">
 								<i class="fw fw-circle fw-stack-2x" data-original-title="" title=""></i>

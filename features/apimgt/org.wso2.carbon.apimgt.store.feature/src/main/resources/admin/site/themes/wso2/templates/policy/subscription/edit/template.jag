@@ -1,7 +1,7 @@
 <% jagg.template("policy/subscription/edit", function(inputs, outputs, jagg) { %>
 <%
     var policyName = request.getParameter("policyName");
-    var pageTitle = i18n.localize("Add Subscription Tier");
+    var pageTitle = i18n.localize("Add Subscription Throttle Policy");
     var nameFieldDisableStatus = "";
     var policyAction = request.getParameter("action");
 
@@ -9,7 +9,7 @@
     var roleList = "";
 
     if(policyName != null){
-        pageTitle = i18n.localize("Edit Subscription Tier");
+        pageTitle = i18n.localize("Edit Subscription Policy");
         nameFieldDisableStatus = "readonly";
         var subscriptionPolicies = session.get("subscriptionPolicies");
         var tierPermissions = session.get("throttleTierPermissions");

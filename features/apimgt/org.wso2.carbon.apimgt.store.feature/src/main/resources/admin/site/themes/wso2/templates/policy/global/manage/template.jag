@@ -1,7 +1,7 @@
 <% jagg.template("policy/global/manage", function(inputs, outputs, jagg) {%>
     <div id="listing">
     <div class="page-header">
-        <h2><%=i18n.localize("Custom Rules")%></h2>
+        <h2><%=i18n.localize("Custom Throttling Policies")%></h2>
     </div>
     <div class="content-section shadow-up">
     <div class="content-data">
@@ -56,8 +56,8 @@
 </table>
 <%} else { %>
 	<div class="message message-info">
-			<h4><i class="icon fw fw-info"></i><%=i18n.localize("Custom Rules are not defined")%></h4>
-			<p><%=i18n.localize("Custom Rules are not defined")%></p>
+			<h4><i class="icon fw fw-info"></i><%=i18n.localize("Custom Policies are not defined")%></h4>
+			<p><%=i18n.localize("Custom Policies are not defined")%></p>
 		</div>
 <%} %>
 </div>
