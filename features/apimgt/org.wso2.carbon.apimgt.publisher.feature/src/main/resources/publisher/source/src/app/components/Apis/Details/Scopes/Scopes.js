@@ -78,6 +78,10 @@ class Scopes extends React.Component {
         const hideMessage = message.loading("Adding the Scope ...", 0);
         const api = new Api();
         let scope = this.state.apiScope;
+        scope.bindings = {
+            type: "role",
+            values: this.state.roles
+        };
         let promised_scope_add = api.addScope(this.props.match.params.api_uuid, scope);
         promised_scope_add.then(
             response => {
@@ -90,19 +94,17 @@ class Scopes extends React.Component {
                 message.success(scope.name + " Scope added successfully!");
                 let apiScopes = this.state.apiScopes;
                 apiScopes[apiScopes.length] = this.state.apiScope;
-                this.setState({active: false, apiScopes: apiScopes, apiScope: {}});
+                this.setState({active: false, apiScopes: apiScopes, apiScope: {}, roles: []});
                 hideMessage();
             }
         );
     }
 
     handleInputs(event) {
-        const input = event.target;
-        if (input.id === "roles") {
-            let roles = this.state.roles;
-            roles.push(input.value);
-            this.setState({roles: roles});
+        if (Array.isArray(event)) {
+            this.setState({roles: event});
         } else {
+            const input = event.target;
             let apiScope = this.state.apiScope;
             apiScope[input.id] = input.value;
             this.setState({apiScope: apiScope});
@@ -144,25 +146,23 @@ class Scopes extends React.Component {
                     <Row type="flex" justify="start">
                         <Col span={4}>Scope Name</Col>
                         <Col span={10}>
-                            <Input id="name" onChange={this.handleInputs} value={apiScope.name}/>
+                            <Input id="name" onChange={this.handleInputs} value={apiScope.name || ""}/>
                         </Col>
                     </Row>
                     <br/>
                     <Row type="flex" justify="start">
                         <Col span={4}>Description</Col>
                         <Col span={10}>
-                            <Input id="description" onChange={this.handleInputs} value={apiScope.description}/>
+                            <Input id="description" onChange={this.handleInputs} value={apiScope.description || ""}/>
                         </Col>
                     </Row>
                     <br/>
                     <Row type="flex" justify="start">
                         <Col span={4}>Roles</Col>
                         <Col span={10}>
-                            <TagsInput value={roles} onlyUnique={true}
+                            <TagsInput value={roles} onChange={this.handleInputs} onlyUnique={true}
                                        inputProps={{
-                                           placeholder: 'add a role',
-                                           id: "roles",
-                                           onChange: this.handleInputs
+                                           placeholder: 'add a role'
                                        }}/>
                         </Col>
                     </Row>
