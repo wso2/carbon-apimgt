@@ -54,7 +54,7 @@
                                 </div>
                                 <% if(tenantDomain == "carbon.super") { %>
                                     <span><p id="formatTip" style="color:green;"><%=i18n.localize("Format : ")%> ${context}</p></span>
-                                    <span><p id="sampleformatTip" style="color:green;"><%=i18n.localize("Eg : ")%> test/1.0.0</p></span>
+                                    <span><p id="sampleformatTip" style="color:green;"><%=i18n.localize("Eg : ")%> /test/1.0.0</p></span>
                                 <%} else  { %>
                                     <span><p id="formatTip" style="color:green;"><%=i18n.localize("Format : ")%> /t/${tenantDomain}/${context}</p></span>
                                     <span><p id="sampleformatTip" style="color:green;"><%=i18n.localize("Eg : ")%> /t/<%=tenantDomain%>/test/1.0.0</p></span>
@@ -85,7 +85,7 @@
         } else if("api" == type) {
             <% if(tenantDomain == "carbon.super") { %>
                 $('#formatTip').text("Format : ${context}");
-                $('#sampleformatTip').text("<%=i18n.localize("Eg ")%>" + ": test/1.0.0");
+                $('#sampleformatTip').text("<%=i18n.localize("Eg ")%>" + ": /test/1.0.0");
             <%} else  { %>
                 $('#formatTip').text("Format : /t/${tenantDomain}/${context}");
                 $('#sampleformatTip').text("<%=i18n.localize("Eg ")%>" + " : /t/<%=tenantDomain%>/test/1.0.0");

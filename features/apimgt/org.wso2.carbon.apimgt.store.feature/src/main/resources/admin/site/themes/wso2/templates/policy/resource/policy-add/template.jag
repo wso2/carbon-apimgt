@@ -216,9 +216,15 @@
             <i class="icon fw fw-info"></i>
             <strong><%=i18n.localize("Warning!")%></strong>
             <%=i18n.localize("Publishing")%>
-            <% if(!queryParamPublish) { %> <%=i18n.localize("Query Params")%> <%}%>
-            <% if(!headerPublish) { %> <%=i18n.localize("Header Data")%> <%}%>
-            <% if(!jwtPublish) { %> <%=i18n.localize("JWT Token")%><%}%>
+            <% if(!queryParamPublish) { %> <%=i18n.localize("Query Params") %>
+                <% if(!headerPublish && !jwtPublish){ %>
+                    <%=i18n.localize(",")%> <%}
+                else if (!headerPublish || !jwtPublish) { %>
+                    <%=i18n.localize("and")%> <%}}
+            if(!headerPublish){%><%=i18n.localize("Header Data")%> <%
+                if(!jwtPublish){%>
+                <%=i18n.localize("and")%><%=i18n.localize("JWT Token")%> <% }}
+            else{%><%=i18n.localize("JWT Token")%> <%}%>
             <%=i18n.localize("isn't configured. If a policy configured with any of these conditions, it won't be applied.")%>
             <button type="button" class="close" aria-label="close" data-dismiss="alert">
                 <span aria-hidden="true">
