@@ -37,7 +37,7 @@
     "react-select": "^1.0.0-rc.6",
     "react-tap-event-plugin": "^2.0.1",
     "react-toastify": "^1.7.0",
-    "swagger-client": "git://github.com/RenukaFernando/swagger-js.git",
+    "swagger-client": "git://github.com/RenukaFernando/swagger-js.git#v-cors-patch",
     "typeface-roboto": "0.0.35",
     "url-loader": "^0.5.9",
     "react-tagsinput": "3.19.0"
