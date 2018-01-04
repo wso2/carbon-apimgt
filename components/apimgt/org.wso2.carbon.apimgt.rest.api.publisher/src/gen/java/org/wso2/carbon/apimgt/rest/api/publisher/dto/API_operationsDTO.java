@@ -32,6 +32,9 @@ public class API_operationsDTO   {
   @JsonProperty("endpoint")
   private List<API_endpointDTO> endpoint = new ArrayList<API_endpointDTO>();
 
+  @JsonProperty("scopes")
+  private List<String> scopes = new ArrayList<String>();
+
   public API_operationsDTO id(String id) {
     this.id = id;
     return this;
@@ -145,6 +148,29 @@ public class API_operationsDTO   {
     this.endpoint = endpoint;
   }
 
+  public API_operationsDTO scopes(List<String> scopes) {
+    this.scopes = scopes;
+    return this;
+  }
+
+  public API_operationsDTO addScopesItem(String scopesItem) {
+    this.scopes.add(scopesItem);
+    return this;
+  }
+
+   /**
+   * Get scopes
+   * @return scopes
+  **/
+  @ApiModelProperty(value = "")
+  public List<String> getScopes() {
+    return scopes;
+  }
+
+  public void setScopes(List<String> scopes) {
+    this.scopes = scopes;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -160,12 +186,13 @@ public class API_operationsDTO   {
         Objects.equals(this.httpVerb, apIOperations.httpVerb) &&
         Objects.equals(this.authType, apIOperations.authType) &&
         Objects.equals(this.policy, apIOperations.policy) &&
-        Objects.equals(this.endpoint, apIOperations.endpoint);
+        Objects.equals(this.endpoint, apIOperations.endpoint) &&
+        Objects.equals(this.scopes, apIOperations.scopes);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, uritemplate, httpVerb, authType, policy, endpoint);
+    return Objects.hash(id, uritemplate, httpVerb, authType, policy, endpoint, scopes);
   }
 
   @Override
@@ -179,6 +206,7 @@ public class API_operationsDTO   {
     sb.append("    authType: ").append(toIndentedString(authType)).append("\n");
     sb.append("    policy: ").append(toIndentedString(policy)).append("\n");
     sb.append("    endpoint: ").append(toIndentedString(endpoint)).append("\n");
+    sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("}");
     return sb.toString();
   }

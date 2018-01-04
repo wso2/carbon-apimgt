@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
@@ -63,6 +64,10 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPoint_endpointSecurityDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LabelListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeList_listDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.Scope_bindingsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.SubscriptionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThreatProtectionPolicyDTO;
@@ -71,6 +76,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO.Workflo
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -113,6 +119,7 @@ public class MappingUtil {
         for (Policy policy : api.getPolicies()) {
             apidto.addPoliciesItem(policy.getPolicyName());
         }
+        apidto.setScopes(api.getScopes());
         BusinessInformation businessInformation = api.getBusinessInformation();
         API_businessInformationDTO apiBusinessInformationDTO = new API_businessInformationDTO();
         apiBusinessInformationDTO.setBusinessOwner(businessInformation.getBusinessOwner());
@@ -137,6 +144,7 @@ public class MappingUtil {
             apiOperationsDTO.setEndpoint(fromEndpointToList(uriTemplate.getEndpoint()));
             apiOperationsDTO.setHttpVerb(uriTemplate.getHttpVerb());
             apiOperationsDTO.setPolicy(uriTemplate.getPolicy().getPolicyName());
+            apiOperationsDTO.setScopes(uriTemplate.getScopes());
             apidto.addOperationsItem(apiOperationsDTO);
         }
         if (api.getApiPolicy() != null) {
@@ -214,6 +222,7 @@ public class MappingUtil {
             uriTemplateBuilder.authType(operationsDTO.getAuthType());
             uriTemplateBuilder.httpVerb(operationsDTO.getHttpVerb());
             uriTemplateBuilder.policy(new APIPolicy(operationsDTO.getPolicy()));
+            uriTemplateBuilder.scopes(operationsDTO.getScopes());
             if (operationsDTO.getEndpoint() != null && !operationsDTO.getEndpoint().isEmpty()) {
                 uriTemplateBuilder.endpoint(fromEndpointListToMap(operationsDTO.getEndpoint()));
             }
@@ -244,6 +253,7 @@ public class MappingUtil {
                 uriTemplates(uriTemplateList).
                 corsConfiguration(corsConfiguration).
                 wsdlUri(apidto.getWsdlUri()).
+                scopes(apidto.getScopes()).
                 securityScheme(mapSecuritySchemeListToInt(apidto.getSecurityScheme()));
 
         if (apidto.getIsDefaultVersion() != null) {
@@ -601,6 +611,57 @@ public class MappingUtil {
         return securitySchemesList;
     }
 
+    /**
+     * This method used to convert scope map
+     *
+     * @param scopeMap map of scopes
+     * @return ScopeListDTO object
+     */
+    public static ScopeListDTO toScopeListDto(Map<String, String> scopeMap) {
+        ScopeListDTO scopeListDTO = new ScopeListDTO();
+        scopeMap.forEach((name, description) ->{
+            scopeListDTO.addListItem(new ScopeList_listDTO().name(name).description(description));
+        } );
+        scopeListDTO.setCount(scopeMap.size());
+        return scopeListDTO;
+    }
+
+    /**
+     * This method convert {@link ScopeDTO} to {@link Scope}
+     * @param body scopeDto Object
+     * @return scope object
+     */
+    public static Scope toScope(ScopeDTO body) {
+        Scope scope = new Scope();
+        scope.setName(body.getName());
+        scope.setDescription(body.getDescription());
+        Scope_bindingsDTO scopeBindingsDTO = body.getBindings();
+        if (scopeBindingsDTO != null){
+            scope.setBindings(scopeBindingsDTO.getValues());
+        }
+        return scope;
+    }
+
+    /**
+     * used to convert {@link Scope} to {@link ScopeDTO}
+     * @param scope scope Object
+     * @param scopeBindingType type of bindings
+     * @return ScopeDTO object
+     */
+    public static ScopeDTO scopeDto(Scope scope, String scopeBindingType) {
+        ScopeDTO scopeDTO = new ScopeDTO();
+        scopeDTO.setName(scope.getName());
+        scopeDTO.setDescription(scope.getDescription());
+        Scope_bindingsDTO scopeBindingsDTO = new Scope_bindingsDTO();
+        scopeBindingsDTO.setType(scopeBindingType);
+        if (scope.getBindings() != null){
+            scopeBindingsDTO.setValues(scope.getBindings());
+        }else{
+            scopeBindingsDTO.setValues(Collections.emptyList());
+        }
+        scopeDTO.setBindings(scopeBindingsDTO);
+        return scopeDTO;
+    }
     public static ThreatProtectionPolicyDTO toThreatProtectionPolicyDTO(ThreatProtectionPolicy policy) {
         ThreatProtectionPolicyDTO dto = new ThreatProtectionPolicyDTO();
         dto.setUuid(policy.getUuid());

@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.core.models.Scope;
 
 import java.util.Map;
 
@@ -162,5 +163,39 @@ public interface KeyManager {
      */
     void deleteMappedApplication(String consumerKey) throws KeyManagementException;
 
+    /**
+     * This method will be used to create scope on resource Registration Server
+     *
+     * @param scope Scope Object to be created
+     * @return true if scope created
+     * @throws KeyManagementException Error while creating scope
+     */
+    boolean registerScope(Scope scope) throws KeyManagementException;
+
+    /**
+     * This method will be used to retrieve the detail of the scope
+     *
+     * @param name name of scope
+     * @return Scope object contains the binding and other information
+     * @throws KeyManagementException Error while retrieving Scope information
+     */
+    Scope retrieveScope(String name) throws KeyManagementException;
+
+    /**
+     * This method will be used to update the scopee information
+     *
+     * @param scope scope to be update
+     * @throws KeyManagementException Error while updating scope
+     */
+    boolean updateScope(Scope scope) throws KeyManagementException;
+
+    /**
+     * This method will used to delete the scope
+     *
+     * @param name name of the scope to be delete
+     * @return true if scope is delete
+     * @throws KeyManagementException Error while deleting scope
+     */
+    boolean deleteScope(String name) throws KeyManagementException;
 }
 

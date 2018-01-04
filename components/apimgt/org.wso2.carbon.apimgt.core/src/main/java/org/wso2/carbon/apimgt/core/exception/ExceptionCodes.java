@@ -216,7 +216,12 @@ public enum ExceptionCodes implements ErrorHandler {
     BLOCK_CONDITION_UNSUPPORTED_APP_ID_NAME(900978, "Block Condition Error", 400, "Application ID or Name does not " +
             "exist"),
     BLOCK_CONDITION_ALREADY_EXISTS(900979, "The Block Condition exists.", 409, " The Block Condition already exists"),
-    SYSTEM_APP_NOT_FOUND(900980, "System Application not found", 409, "System Application not found");
+    SYSTEM_APP_NOT_FOUND(900980, "System Application not found", 409, "System Application not found"),
+    SCOPE_NOT_FOUND(900981, "Scope not found", 404, "Scope could not be found"),
+    SCOPE_ALREADY_REGISTERED(900982, "Scope already exist", 409, "Scope already exist"),
+    SCOPE_DELETE_FAILED(900983, "Scope couldn't get deleted", 400, "Scope couldn't get deleted"),
+    SCOPE_REGISTRATION_FAILED(900984, "Scope registration failed", 400, "Scope registration failed"),
+    SCOPE_VALIDATION_FAILED(900985, "Scope validation failed", 412, "Scope validation failed");
 
     private final long errorCode;
     private final String errorMessage;

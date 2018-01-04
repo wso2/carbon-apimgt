@@ -16,6 +16,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.LifecycleStateDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO;
 
 import java.util.List;
@@ -94,6 +96,30 @@ public abstract class ApisApiService {
   ,Request request) throws NotFoundException;
     public abstract Response apisApiIdPut(String apiId
  ,APIDTO body
+ ,String ifMatch
+ ,String ifUnmodifiedSince
+  ,Request request) throws NotFoundException;
+    public abstract Response apisApiIdScopesGet(String apiId
+ ,String ifNoneMatch
+  ,Request request) throws NotFoundException;
+    public abstract Response apisApiIdScopesNameDelete(String apiId
+ ,String name
+ ,String ifMatch
+ ,String ifUnmodifiedSince
+  ,Request request) throws NotFoundException;
+    public abstract Response apisApiIdScopesNameGet(String apiId
+ ,String name
+ ,String ifNoneMatch
+ ,String ifModifiedSince
+  ,Request request) throws NotFoundException;
+    public abstract Response apisApiIdScopesNamePut(String apiId
+ ,String name
+ ,ScopeDTO body
+ ,String ifMatch
+ ,String ifUnmodifiedSince
+  ,Request request) throws NotFoundException;
+    public abstract Response apisApiIdScopesPost(String apiId
+ ,ScopeDTO body
  ,String ifMatch
  ,String ifUnmodifiedSince
   ,Request request) throws NotFoundException;

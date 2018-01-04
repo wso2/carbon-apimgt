@@ -54,6 +54,7 @@ class NavBar extends Component {
             {name: "lifecycle", icon: <DonutLarge />},
             {name: "endpoints", icon: <Games />},
             {name: "resources", icon: <FilterNone />},
+            {name: "scopes", icon: <FilterNone />},
             {name: "documents", icon: <InsertDriveFile />},
             {name: "permission", icon: <LockOutline />},
             {name: "mediation", icon: <Tune />},

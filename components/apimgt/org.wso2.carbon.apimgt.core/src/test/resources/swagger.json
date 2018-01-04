@@ -32,21 +32,21 @@
       "flow": "password",
       "tokenUrl": "https://localhost:9443/token",
       "scopes": {
-        "apim:api_view": "View API",
-        "apim:api_create": "Create API",
-        "apim:api_update": "Update API",
-        "apim:api_delete": "Delete API",
-        "apim:apidef_update": "Update API Definition",
-        "apim:api_publish": "Publish API",
-        "apim:subscription_view": "View Subscription",
-        "apim:subscription_block": "Block Subscription"
+        "api_view": "View API",
+        "api_create": "Create API",
+        "api_update": "Update API",
+        "api_delete": "Delete API",
+        "apidef_update": "Update API Definition",
+        "api_publish": "Publish API",
+        "subscription_view": "View Subscription",
+        "subscription_block": "Block Subscription"
       }
     }
   },
   "security": [
     {
       "OAuth2Security": [
-        "apim:api_view"
+        "api_view"
       ]
     }
   ],
@@ -160,7 +160,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_create"
+              "api_create"
             ]
           }
         ],
@@ -282,7 +282,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_update"
+              "api_update"
             ]
           }
         ],
@@ -369,7 +369,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_delete"
+              "api_delete"
             ]
           }
         ],
@@ -480,7 +480,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:apidef_update"
+              "apidef_update"
             ]
           }
         ],
@@ -561,7 +561,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_view"
+              "api_view"
             ]
           }
         ],
@@ -629,7 +629,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_create"
+              "api_create"
             ]
           }
         ],
@@ -774,7 +774,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:apidef_update"
+              "apidef_update"
             ]
           }
         ],
@@ -916,7 +916,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_update"
+              "api_update"
             ]
           }
         ],
@@ -997,7 +997,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_create"
+              "api_create"
             ]
           }
         ],
@@ -1051,7 +1051,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_publish"
+              "api_publish"
             ]
           }
         ],
@@ -1158,7 +1158,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_publish"
+              "api_publish"
             ]
           }
         ],
@@ -1222,7 +1222,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_publish"
+              "api_publish"
             ]
           }
         ],
@@ -1289,7 +1289,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_publish"
+              "api_publish"
             ]
           }
         ],
@@ -1330,7 +1330,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_create"
+              "api_create"
             ]
           }
         ],
@@ -1433,7 +1433,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_create"
+              "api_create"
             ]
           }
         ],
@@ -1549,7 +1549,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_create"
+              "api_create"
             ]
           }
         ],
@@ -1680,7 +1680,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_update"
+              "api_update"
             ]
           }
         ],
@@ -1764,7 +1764,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_delete"
+              "api_delete"
             ]
           }
         ],
@@ -1887,7 +1887,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_create"
+              "api_create"
             ]
           }
         ],
@@ -2043,7 +2043,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_update"
+              "api_update"
             ]
           }
         ],
@@ -2111,7 +2111,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_create"
+              "api_create"
             ]
           }
         ],
@@ -2178,7 +2178,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:subscription_view"
+              "subscription_view"
             ]
           }
         ],
@@ -2238,7 +2238,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:subscription_view"
+              "subscription_view"
             ]
           }
         ],
@@ -2299,7 +2299,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:subscription_block"
+              "subscription_block"
             ]
           }
         ],
@@ -2373,7 +2373,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:subscription_block"
+              "subscription_block"
             ]
           }
         ],
@@ -2436,7 +2436,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_update"
+              "api_update"
             ]
           }
         ],
@@ -2496,7 +2496,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_update"
+              "api_update"
             ]
           }
         ],
@@ -2566,7 +2566,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_view"
+              "api_view"
             ]
           }
         ],
@@ -2618,7 +2618,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_create"
+              "api_create"
             ]
           }
         ],
@@ -2680,7 +2680,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_create"
+              "api_create"
             ]
           }
         ],
@@ -2735,7 +2735,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_create"
+              "api_create"
             ]
           }
         ],
@@ -2790,7 +2790,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_create"
+              "api_create"
             ]
           }
         ],
@@ -2871,7 +2871,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_create"
+              "api_create"
             ]
           }
         ],
@@ -2923,7 +2923,7 @@
         "security": [
           {
             "OAuth2Security": [
-              "apim:api_publish"
+              "api_publish"
             ]
           }
         ],

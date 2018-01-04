@@ -6,17 +6,24 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.APIDefinition;
 import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.core.configuration.APIMConfigurationService;
+import org.wso2.carbon.apimgt.core.configuration.models.KeyMgtConfigurations;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.core.exception.ErrorHandler;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
+import org.wso2.carbon.apimgt.core.impl.APIDefinitionFromSwagger20;
+import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.impl.WSDLProcessFactory;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIResource;
 import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
+import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.WSDLArchiveInfo;
 import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
@@ -29,12 +36,16 @@ import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.NotFoundException;
+import org.wso2.carbon.apimgt.rest.api.publisher.StringUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_operationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.ScopeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThreatProtectionPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
@@ -43,9 +54,6 @@ import org.wso2.carbon.lcm.core.impl.LifecycleState;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FileInfo;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -56,7 +64,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 @javax.annotation.Generated(value = "class org.wso2.maven.plugins.JavaMSF4JServerCodegen", date =
         "2016-11-01T13:47:43.416+05:30")
@@ -110,7 +122,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdContentGet(String apiId, String documentId,
-            String ifNoneMatch, String ifModifiedSince, Request request) throws NotFoundException {
+                                                           String ifNoneMatch, String ifModifiedSince, Request
+                                                                   request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -169,7 +182,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return fingerprint of a particular document content
      */
     public String apisApiIdDocumentsDocumentIdContentGetFingerprint(String apiId, String documentId, String ifNoneMatch,
-            String ifModifiedSince, Request request) {
+                                                                    String ifModifiedSince, Request request) {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
@@ -201,8 +214,10 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdContentPost(String apiId, String documentId,
-            InputStream fileInputStream, FileInfo fileDetail, String inlineContent, String ifMatch,
-            String ifUnmodifiedSince, Request request) throws NotFoundException {
+                                                            InputStream fileInputStream, FileInfo fileDetail, String
+                                                                    inlineContent, String ifMatch,
+                                                            String ifUnmodifiedSince, Request request) throws
+            NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername(request);
             APIPublisher apiProvider = RestAPIPublisherUtil.getApiPublisher(username);
@@ -283,7 +298,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdDelete(String apiId, String documentId, String ifMatch,
-            String ifUnmodifiedSince, Request request) throws
+                                                       String ifUnmodifiedSince, Request request) throws
             NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername(request);
@@ -320,7 +335,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdGet(String apiId, String documentId, String ifNoneMatch,
-            String ifModifiedSince, Request request) throws NotFoundException {
+                                                    String ifModifiedSince, Request request) throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername(request);
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -365,7 +380,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return fingerprint of the document
      */
     public String apisApiIdDocumentsDocumentIdGetFingerprint(String apiId, String documentId,
-            String ifNoneMatch, String ifModifiedSince, Request request) {
+                                                             String ifNoneMatch, String ifModifiedSince, Request
+                                                                     request) {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
@@ -394,7 +410,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdDocumentsDocumentIdPut(String apiId, String documentId, DocumentDTO body, String ifMatch,
-            String ifUnmodifiedSince, Request request) throws NotFoundException {
+                                                    String ifUnmodifiedSince, Request request) throws
+            NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -472,7 +489,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdDocumentsGet(String apiId, Integer limit, Integer offset, String ifNoneMatch,
-            Request request) throws NotFoundException {
+                                          Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -502,7 +519,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdDocumentsPost(String apiId, DocumentDTO body, String ifMatch,
-            String ifUnmodifiedSince, Request request) throws NotFoundException {
+                                           String ifUnmodifiedSince, Request request) throws NotFoundException {
         try {
             String username = RestApiUtil.getLoggedInUsername(request);
             APIPublisher apiProvider = RestAPIPublisherUtil.getApiPublisher(username);
@@ -524,7 +541,8 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (body.getSourceType() == DocumentDTO.SourceTypeEnum.INLINE) {
                 apiProvider.addDocumentationContent(docid, "");
                 if (log.isDebugEnabled()) {
-                    log.debug("The updated source type of the document " + body.getName() + " is: " + body.getSourceType());
+                    log.debug("The updated source type of the document " + body.getName() + " is: " + body
+                            .getSourceType());
                 }
             }
             return Response.status(Response.Status.CREATED).entity(newDocumentDTO).build();
@@ -550,7 +568,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdGatewayConfigGet(String apiId, String ifNoneMatch, String ifModifiedSince,
-            Request request) throws NotFoundException {
+                                              Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -584,7 +602,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return fingerprint of the gateaway config
      */
     public String apisApiIdGatewayConfigGetFingerprint(String apiId, String ifNoneMatch, String ifModifiedSince,
-            Request request) {
+                                                       Request request) {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username).getLastUpdatedTimeOfGatewayConfig(
@@ -611,7 +629,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdGatewayConfigPut(String apiId, String gatewayConfig, String ifMatch,
-            String ifUnmodifiedSince, Request request) throws NotFoundException {
+                                              String ifUnmodifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -726,7 +744,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdLifecycleGet(String apiId, String ifNoneMatch, String ifModifiedSince,
-            Request request) throws NotFoundException {
+                                          Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             LifecycleState lifecycleState = RestAPIPublisherUtil.getApiPublisher(username).getAPILifeCycleData(apiId);
@@ -754,7 +772,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdLifecycleHistoryGet(String apiId, String ifNoneMatch, String ifModifiedSince,
-        Request request) throws NotFoundException {
+                                                 Request request) throws NotFoundException {
 
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
@@ -805,7 +823,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdPut(String apiId, APIDTO body, String ifMatch, String ifUnmodifiedSince,
-            Request request) throws NotFoundException {
+                                 Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -854,7 +872,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdSwaggerGet(String apiId, String ifNoneMatch, String ifModifiedSince,
-            Request request) throws NotFoundException {
+                                        Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -886,7 +904,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return fingerprint of a swagger definition of an API
      */
     public String apisApiIdSwaggerGetFingerprint(String apiId, String ifNoneMatch, String ifModifiedSince,
-            Request request) {
+                                                 Request request) {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username).getLastUpdatedTimeOfAPI(apiId);
@@ -912,7 +930,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String ifMatch,
-            String ifUnmodifiedSince, Request request) throws NotFoundException {
+                                        String ifUnmodifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -920,6 +938,17 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
                 return Response.status(Response.Status.PRECONDITION_FAILED).build();
+            }
+            KeyMgtConfigurations keyManagerConfiguration = APIMConfigurationService.getInstance()
+                    .getApimConfigurations().getKeyManagerConfigs();
+            Map<String,String> scopes = new APIDefinitionFromSwagger20().getScopesFromSecurityDefinition(apiDefinition);
+            for (String scopeName : scopes.keySet()) {
+                if (scopeName.contains(keyManagerConfiguration.getProductRestApiScopesKeyWord())) {
+                    String message = "scope name couldn't have the restricted keyword " + keyManagerConfiguration
+                            .getProductRestApiScopesKeyWord();
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(message, 900313L, message);
+                    return Response.status(Response.Status.PRECONDITION_FAILED).entity(errorDTO).build();
+                }
             }
             apiPublisher.saveSwagger20Definition(apiId, apiDefinition);
             String apiSwagger = apiPublisher.getApiSwaggerDefinition(apiId);
@@ -1025,7 +1054,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdThumbnailGet(String apiId, String ifNoneMatch, String ifModifiedSince,
-            Request request) throws NotFoundException {
+                                          Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -1064,7 +1093,7 @@ public class ApisApiServiceImpl extends ApisApiService {
      * @return current fingerprint of the thumbnail image of the API
      */
     public String apisApiIdThumbnailGetFingerprint(String apiId, String ifNoneMatch, String ifModifiedSince,
-            Request request) {
+                                                   Request request) {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             String lastUpdatedTime = RestAPIPublisherUtil.getApiPublisher(username)
@@ -1092,7 +1121,8 @@ public class ApisApiServiceImpl extends ApisApiService {
      */
     @Override
     public Response apisApiIdThumbnailPost(String apiId, InputStream fileInputStream, FileInfo fileDetail,
-            String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
+                                           String ifMatch, String ifUnmodifiedSince, Request request) throws
+            NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -1126,16 +1156,16 @@ public class ApisApiServiceImpl extends ApisApiService {
      * Retrieves the WSDL of the particular API. If the WSDL is added as a single file/URL, the text content of the WSDL
      * will be retrived. If the WSDL is added as an archive, the binary content of the archive will be retrieved.
      *
-     * @param apiId UUID of API
-     * @param ifNoneMatch If-None-Match header value
+     * @param apiId           UUID of API
+     * @param ifNoneMatch     If-None-Match header value
      * @param ifModifiedSince If-Modified-Since header value
-     * @param request msf4j request
+     * @param request         msf4j request
      * @return WSDL archive/file content
      * @throws NotFoundException
      */
     @Override
     public Response apisApiIdWsdlGet(String apiId, String ifNoneMatch, String ifModifiedSince,
-            Request request) throws NotFoundException {
+                                     Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -1175,21 +1205,22 @@ public class ApisApiServiceImpl extends ApisApiService {
     }
 
     /**
-     * Updates the WSDL of an existing API. File can be uploaded as a single WSDL (.wsdl) or a zipped WSDL 
-     * archive (.zip). 
-     * 
-     * @param apiId UUID of API
-     * @param fileInputStream file content stream
-     * @param fileDetail file details
-     * @param ifMatch If-Match header value
+     * Updates the WSDL of an existing API. File can be uploaded as a single WSDL (.wsdl) or a zipped WSDL
+     * archive (.zip).
+     *
+     * @param apiId             UUID of API
+     * @param fileInputStream   file content stream
+     * @param fileDetail        file details
+     * @param ifMatch           If-Match header value
      * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param request msf4j request
+     * @param request           msf4j request
      * @return 200 OK if upadating was successful.
      * @throws NotFoundException
      */
     @Override
     public Response apisApiIdWsdlPut(String apiId, InputStream fileInputStream, FileInfo fileDetail,
-            String ifMatch, String ifUnmodifiedSince, Request request) throws NotFoundException {
+                                     String ifMatch, String ifUnmodifiedSince, Request request) throws
+            NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
@@ -1262,11 +1293,11 @@ public class ApisApiServiceImpl extends ApisApiService {
                     URI location = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId);
                     return Response.status(Response.Status.ACCEPTED).header(RestApiConstants.LOCATION_HEADER, location)
                             .entity(response).build();
-                } else {                    
+                } else {
                     return Response.ok().entity(response).build();
-                }                
+                }
             }
-            
+
         } catch (APIManagementException e) {
             String errorMessage = "Error while updating lifecycle of API" + apiId + " to " + action;
             Map<String, String> paramList = new HashMap<>();
@@ -1398,23 +1429,24 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Import an API from a Swagger or WSDL
-     * 
-     * @param type definition type. If not specified, default will be SWAGGER
-     * @param fileInputStream file content stream, can be either archive or a single text file
-     * @param fileDetail file details
-     * @param url URL of the definition
+     *
+     * @param type                 definition type. If not specified, default will be SWAGGER
+     * @param fileInputStream      file content stream, can be either archive or a single text file
+     * @param fileDetail           file details
+     * @param url                  URL of the definition
      * @param additionalProperties Additional attributes specified as a stringified JSON with API's schema
-     * @param ifMatch If-Match header value
-     * @param ifUnmodifiedSince If-Unmodified-Since header value
-     * @param implementationType WSDL based API implementation type (SOAP or HTTP_BINDING)
-     * @param request msf4j request object
+     * @param ifMatch              If-Match header value
+     * @param ifUnmodifiedSince    If-Unmodified-Since header value
+     * @param implementationType   WSDL based API implementation type (SOAP or HTTP_BINDING)
+     * @param request              msf4j request object
      * @return Imported API
      * @throws NotFoundException When the particular resource does not exist in the system
      */
     @Override
     public Response apisImportDefinitionPost(String type, InputStream fileInputStream, FileInfo fileDetail,
-            String url, String additionalProperties, String implementationType, String ifMatch,
-            String ifUnmodifiedSince, Request request) throws NotFoundException {
+                                             String url, String additionalProperties, String implementationType,
+                                             String ifMatch,
+                                             String ifUnmodifiedSince, Request request) throws NotFoundException {
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
             if (StringUtils.isBlank(type)) {
@@ -1422,8 +1454,9 @@ public class ApisApiServiceImpl extends ApisApiService {
             }
 
             Response response = buildResponseIfParamsInvalid(type, fileInputStream, url);
-            if (response != null)
+            if (response != null) {
                 return response;
+            }
 
             API.APIBuilder apiBuilder = null;
             APIDTO additionalPropertiesAPI = null;
@@ -1464,14 +1497,14 @@ public class ApisApiServiceImpl extends ApisApiService {
                 if (additionalPropertiesAPI != null) {
                     final String soap = RestApiConstants.IMPORT_DEFINITION_WSDL_IMPL_TYPE_SOAP;
                     final String httpBinding = RestApiConstants.IMPORT_DEFINITION_WSDL_IMPL_TYPE_HTTP;
-                    
+
                     if (implementationType != null && !soap.equals(implementationType) && !httpBinding
                             .equals(implementationType)) {
                         String msg =
                                 "Invalid implementation type. Should be one of '" + soap + "' or '" + httpBinding + "'";
                         log.error(msg);
                         ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900700L, msg);
-                        return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();                        
+                        return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
                     }
 
                     boolean isHttpBinding = httpBinding.equals(implementationType);
@@ -1483,7 +1516,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900700L, msg);
                             return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
                         }
-                        
+
                         if (fileDetail.getFileName().endsWith(".zip")) {
                             uuid = apiPublisher.addAPIFromWSDLArchive(apiBuilder, fileInputStream, isHttpBinding);
                             if (log.isDebugEnabled()) {
@@ -1532,8 +1565,8 @@ public class ApisApiServiceImpl extends ApisApiService {
     /**
      * Creates a new API
      *
-     * @param body        DTO model including the API details
-     * @param request     msf4j request object
+     * @param body    DTO model including the API details
+     * @param request msf4j request object
      * @return Newly created API
      * @throws NotFoundException When the particular resource does not exist in the system
      */
@@ -1570,18 +1603,18 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Validates a provided API definition
-     * 
-     * @param type API definition type (SWAGGER or WSDL)
+     *
+     * @param type            API definition type (SWAGGER or WSDL)
      * @param fileInputStream file content stream
-     * @param fileDetail file details
-     * @param url URL of the definition
-     * @param request msf4j request
+     * @param fileDetail      file details
+     * @param url             URL of the definition
+     * @param request         msf4j request
      * @return API definition validation information
      * @throws NotFoundException
      */
     @Override
     public Response apisValidateDefinitionPost(String type, InputStream fileInputStream, FileInfo fileDetail,
-            String url, Request request) throws NotFoundException {
+                                               String url, Request request) throws NotFoundException {
         String errorMessage = "Error while validating the definition";
         String username = RestApiUtil.getLoggedInUsername(request);
         try {
@@ -1653,9 +1686,9 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Remove pending lifecycle state change workflow tasks.
-     * 
-     * @param apiId api id
-     * @param request     msf4j request object
+     *
+     * @param apiId   api id
+     * @param request msf4j request object
      * @return Empty payload
      * @throws NotFoundException When the particular resource does not exist in the system
      */
@@ -1679,10 +1712,10 @@ public class ApisApiServiceImpl extends ApisApiService {
 
     /**
      * Validate API deefinition import/validate parameters
-     * 
-     * @param type API definition type (SWAGGER or WSDL)
+     *
+     * @param type            API definition type (SWAGGER or WSDL)
      * @param fileInputStream file content stream
-     * @param url URL of the definition
+     * @param url             URL of the definition
      * @return Response if any parameter is invalid. Otherwise returns null.
      */
     private Response buildResponseIfParamsInvalid(String type, InputStream fileInputStream, String url) {
@@ -1709,5 +1742,121 @@ public class ApisApiServiceImpl extends ApisApiService {
             return Response.status(Response.Status.BAD_REQUEST).entity(errorDTO).build();
         }
         return null;
+    }
+
+    @Override
+    public Response apisApiIdScopesGet(String apiId, String ifNoneMatch, Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            Map<String,String> scopeSet = apiPublisher.getScopesForApi(apiId);
+            ScopeListDTO scopeListDTO = MappingUtil.toScopeListDto(scopeSet);
+            return Response.ok().entity(scopeListDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving scopes of API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    @Override
+    public Response apisApiIdScopesNameDelete(String apiId, String name, String ifMatch, String ifUnmodifiedSince,
+                                              Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            apiPublisher.deleteScopeFromApi(apiId, name);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while deleting scopes of API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            paramList.put(APIMgtConstants.ExceptionsConstants.SCOPE_NAME, name);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    @Override
+    public Response apisApiIdScopesNameGet(String apiId, String name, String ifNoneMatch, String ifModifiedSince,
+                                           Request request) throws NotFoundException {
+        String username = RestApiUtil.getLoggedInUsername(request);
+        try {
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            Scope scope = apiPublisher.getScopeInformationOfApi(apiId, name);
+            KeyMgtConfigurations keyManagerConfiguration = APIMConfigurationService.getInstance()
+                    .getApimConfigurations().getKeyManagerConfigs();
+            ScopeDTO scopeDTO = MappingUtil.scopeDto(scope, keyManagerConfiguration.getScopeBindingType());
+            return Response.ok().entity(scopeDTO).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while retrieving swagger definition of API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+
+    }
+
+    @Override
+    public Response apisApiIdScopesNamePut(String apiId, String name, ScopeDTO body, String ifMatch, String
+            ifUnmodifiedSince, Request request) throws NotFoundException {
+        try {
+            String username = RestApiUtil.getLoggedInUsername(request);
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            Scope scope = MappingUtil.toScope(body);
+            apiPublisher.updateScopeOfTheApi(apiId, scope);
+            return Response.ok().entity(body).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while updating the scope of API : " + apiId;
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            paramList.put(APIMgtConstants.ExceptionsConstants.SCOPE_NAME, body.getName());
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        }
+    }
+
+    @Override
+    public Response apisApiIdScopesPost(String apiId, ScopeDTO body, String ifMatch, String ifUnmodifiedSince,
+                                        Request request) throws NotFoundException {
+        try {
+            String username = RestApiUtil.getLoggedInUsername(request);
+            APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+            KeyMgtConfigurations keyManagerConfiguration = APIMConfigurationService.getInstance()
+                    .getApimConfigurations().getKeyManagerConfigs();
+
+            if (body.getBindings() != null && StringUtils.isNotEmpty(body.getBindings().getType())) {
+                if (!keyManagerConfiguration.getScopeBindingType().equalsIgnoreCase(body.getBindings().getType())) {
+                    String message = "binding type not valid";
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(message, 900313L, message);
+                    return Response.status(Response.Status.PRECONDITION_FAILED).entity(errorDTO).build();
+                }
+            }
+            Scope scope = MappingUtil.toScope(body);
+            apiPublisher.addScopeToTheApi(apiId, scope);
+            URI location = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId + "/scopes/" + scope.getName());
+            return Response.created(location).entity(body).build();
+        } catch (APIManagementException e) {
+            String errorMessage = "Error while creating scope" + body.getName();
+            HashMap<String, String> paramList = new HashMap<String, String>();
+            paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+            paramList.put(APIMgtConstants.ExceptionsConstants.SCOPE_NAME, body.getName());
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+            log.error(errorMessage, e);
+            return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving source URI location of " + body.getName();
+            ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorMessage, 900313L, errorMessage);
+            log.error(errorMessage, e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(errorDTO).build();
+        }
+
     }
 }

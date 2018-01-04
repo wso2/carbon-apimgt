@@ -41,7 +41,7 @@ public interface APIDefinition {
      *
      * @param resourceConfigsJSON resource json
      * @return SwaggerAPIResourceData
-     * @throws APIManagementException   If error occurs while parsing swagger resources.
+     * @throws APIManagementException If error occurs while parsing swagger resources.
      */
     List<APIResource> parseSwaggerAPIResources(StringBuilder resourceConfigsJSON) throws APIManagementException;
 
@@ -50,7 +50,7 @@ public interface APIDefinition {
      *
      * @param resourceConfigsJSON resource json
      * @return scopes   Map of the scopes.
-     * @throws APIManagementException   If error occurs while parsing swagger resources.
+     * @throws APIManagementException If error occurs while parsing swagger resources.
      */
     Map<String, Scope> getScopes(String resourceConfigsJSON) throws APIManagementException;
 
@@ -61,14 +61,14 @@ public interface APIDefinition {
      * @return Map of the scopes
      * @throws APIManagementException If error occurs while parsing swagger resources.
      */
-    Map<String, Scope> getScopesFromSecurityDefinition(String resourceConfigJSON) throws APIManagementException;
+    Map<String, String> getScopesFromSecurityDefinition(String resourceConfigJSON) throws APIManagementException;
 
     /**
      * This method extracts the scope from the API definition matching to a resource path
      *
      * @param resourceConfigsJSON resource json
      * @return request   HttpRequest being processed.
-     * @throws APIManagementException   If error occurs while parsing swagger resources.
+     * @throws APIManagementException If error occurs while parsing swagger resources.
      */
     String getScopeOfResourcePath(String resourceConfigsJSON, Request request, ServiceMethodInfo serviceMethodInfo)
             throws APIManagementException;
@@ -92,21 +92,78 @@ public interface APIDefinition {
     /**
      * return API Object
      *
-     * @param apiDefinition     API definition as a string
-     * @param provider          Provider of the API
-     * @return                  API object.
-     * @throws APIManagementException   If error occurs while generate swagger from resources.
+     * @param apiDefinition API definition as a string
+     * @param provider      Provider of the API
+     * @return API object.
+     * @throws APIManagementException If error occurs while generate swagger from resources.
      */
     API.APIBuilder generateApiFromSwaggerResource(String provider, String apiDefinition) throws APIManagementException;
 
     /**
      * return CompositeAPI Object
      *
-     * @param apiDefinition     API definition as a string
-     * @param provider          Provider of the API
-     * @return                  CompositeAPI.Builder object.
-     * @throws APIManagementException   If error occurs while generate swagger from resources.
+     * @param apiDefinition API definition as a string
+     * @param provider      Provider of the API
+     * @return CompositeAPI.Builder object.
+     * @throws APIManagementException If error occurs while generate swagger from resources.
      */
     CompositeAPI.Builder generateCompositeApiFromSwaggerResource(String provider, String apiDefinition)
             throws APIManagementException;
+
+    /**
+     * This method used to remove scope from swagger
+     *
+     * @param resourceConfigJSON resource json
+     * @param name               scope to Remove
+     */
+    String removeScopeFromSwaggerDefinition(String resourceConfigJSON, String name);
+
+    /**
+     * This method used to update the scope of swagger definition
+     *
+     * @param resourceConfigJSON resource json
+     * @param scope              Scope to be update
+     * @return updated swaggerDefinition
+     */
+    String updateScopesOnSwaggerDefinition(String resourceConfigJSON, Scope scope);
+
+    /**
+     * This method used to add scope into swagger definition
+     *
+     * @param resourceConfigJSON resource json
+     * @param scope              Scope to be add
+     * @return updated swagger definition with scope
+     */
+    String addScopeToSwaggerDefinition(String resourceConfigJSON, Scope scope);
+
+
+    /**
+     * Get Scopes Extracted from the API definition for Product apis
+     *
+     * @param resourceConfigJSON resource json
+     * @return Map of the scopes
+     * @throws APIManagementException If error occurs while parsing swagger resources.
+     */
+    Map<String, Scope> getScopesFromSecurityDefinitionForWebApps(String resourceConfigJSON) throws
+            APIManagementException;
+
+    /**
+     * get scopes assigned Globally
+     *
+     * @param resourceConfigJson swagger
+     * @return set of scopes
+     * @throws APIManagementException if Error occurred while passing swagger
+     */
+
+    List<String> getGlobalAssignedScopes(String resourceConfigJson) throws APIManagementException;
+
+
+    /**
+     * Used to generate merged swagger definition
+     *
+     * @param resourceConfigJson swagger definition
+     * @param api                api model
+     * @return merged swagger
+     */
+    String generateMergedResourceDefinition(String resourceConfigJson, API api);
 }

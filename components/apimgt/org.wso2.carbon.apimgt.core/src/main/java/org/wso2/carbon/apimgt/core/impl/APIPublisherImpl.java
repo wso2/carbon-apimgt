@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.api.WSDLProcessor;
 import org.wso2.carbon.apimgt.core.api.WorkflowExecutor;
 import org.wso2.carbon.apimgt.core.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.core.configuration.models.KeyMgtConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.NotificationConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.ServiceDiscoveryImplConfig;
@@ -58,6 +59,7 @@ import org.wso2.carbon.apimgt.core.exception.ApiDeleteFailureException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
+import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.exception.LabelException;
 import org.wso2.carbon.apimgt.core.exception.NotificationException;
 import org.wso2.carbon.apimgt.core.exception.ServiceDiscoveryException;
@@ -73,6 +75,7 @@ import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.LifeCycleEvent;
 import org.wso2.carbon.apimgt.core.models.Provider;
+import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.SubscriptionValidationData;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
@@ -228,6 +231,26 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 String permissionString = api.getApiPermission();
                 if (!StringUtils.isEmpty(permissionString)) {
                     api.setApiPermission(replaceGroupIdWithName(permissionString));
+                }
+                if (!getScopesForApi(uuid).isEmpty()) {
+                    String swagger = getApiSwaggerDefinition(uuid);
+                    List<String> globalScopes = new APIDefinitionFromSwagger20().getGlobalAssignedScopes(swagger);
+                    List<APIResource> apiResourceList = new APIDefinitionFromSwagger20().parseSwaggerAPIResources
+                            (new StringBuilder(swagger));
+                    api.setScopes(globalScopes);
+                    for (APIResource apiResource : apiResourceList) {
+                        if (apiResource.getUriTemplate().getScopes().isEmpty()) {
+                            UriTemplate retrievedUriTemplateFromApi = api.getUriTemplates().get(apiResource
+                                    .getUriTemplate().getTemplateId());
+                            if (retrievedUriTemplateFromApi != null) {
+                                UriTemplate.UriTemplateBuilder uriTemplate = new UriTemplate.UriTemplateBuilder
+                                        (retrievedUriTemplateFromApi);
+                                uriTemplate.scopes(apiResource.getScope());
+                                api.getUriTemplates().replace(apiResource.getUriTemplate().getTemplateId(), uriTemplate
+                                        .build());
+                            }
+                        }
+                    }
                 }
             }
         } catch (ParseException e) {
@@ -431,8 +454,10 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
     private void validateApiPolicy(Policy policy) throws APIManagementException {
         if (policy != null) {
-            Policy apiPolicy = getPolicyByName(APIMgtAdminService.PolicyLevel.api, policy.getPolicyName());
-            policy.setUuid(apiPolicy.getUuid());
+            if (!APIMgtConstants.DEFAULT_API_POLICY.equalsIgnoreCase(policy.getPolicyName())) {
+                Policy apiPolicy = getPolicyByName(APIMgtAdminService.PolicyLevel.api, policy.getPolicyName());
+                policy.setUuid(apiPolicy.getUuid());
+            }
         }
     }
 
@@ -504,7 +529,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     createUriTemplateList(apiBuilder, true);
                     validateApiPolicy(apiBuilder.getApiPolicy());
                     validateSubscriptionPolicies(apiBuilder);
-                    String updatedSwagger = apiDefinitionFromSwagger20.generateSwaggerFromResources(apiBuilder);
+                    String updatedSwagger = apiDefinitionFromSwagger20.generateMergedResourceDefinition(getApiDAO()
+                            .getApiSwaggerDefinition(apiBuilder.getId()), apiBuilder.build());
                     String gatewayConfig = getApiGatewayConfig(apiBuilder.getId());
                     GatewaySourceGenerator gatewaySourceGenerator = getGatewaySourceGenerator();
                     APIConfigContext apiConfigContext = new APIConfigContext(apiBuilder.build(), config
@@ -979,7 +1005,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             }
             getApiDAO().addAPI(apiBuilder.build());
             newVersionedId = apiBuilder.getId();
-            sendEmailNotification(apiId, apiBuilder.getName(), newVersion);
+            sendNotification(apiId, apiBuilder.getName(), newVersion);
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't create new API version from " + apiId;
             log.error(errorMsg, e);
@@ -1231,7 +1257,19 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 if (log.isDebugEnabled()) {
                     log.debug("API : " + api.getName() + " has been successfully removed from the gateway");
                 }
-
+                if (!getApiDAO().isAPIVersionsExist(api.getName())) {
+                    Map<String, String> scopeMap = apiDefinitionFromSwagger20.getScopesFromSecurityDefinition
+                            (getApiSwaggerDefinition(identifier));
+                    for (String scope : scopeMap.keySet()) {
+                        try {
+                            getKeyManager().deleteScope(scope);
+                        } catch (KeyManagementException e) {
+                            // We ignore the error due to if scope get deleted from other end that will affect to delete
+                            // api.
+                            log.warn("Scope couldn't delete from Key Manager", e);
+                        }
+                    }
+                }
                 getApiDAO().deleteAPI(identifier);
                 getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
                 APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
@@ -1571,8 +1609,14 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public String addApiFromDefinition(InputStream apiDefinition) throws APIManagementException {
         try {
             String apiDefinitionString = IOUtils.toString(apiDefinition);
+            validateScope(apiDefinitionString);
             API.APIBuilder apiBuilder = apiDefinitionFromSwagger20.generateApiFromSwaggerResource(getUsername(),
                     apiDefinitionString);
+            Map<String, String> scopes = apiDefinitionFromSwagger20.getScopesFromSecurityDefinition
+                    (apiDefinitionString);
+            for (Map.Entry<String, String> scopeEntry : scopes.entrySet()) {
+                getKeyManager().registerScope(new Scope(scopeEntry.getKey(), scopeEntry.getValue()));
+            }
             apiBuilder.corsConfiguration(new CorsConfiguration());
             apiBuilder.apiDefinition(apiDefinitionString);
             addAPI(apiBuilder);
@@ -1614,6 +1658,25 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
     public void saveSwagger20Definition(String apiId, String jsonText) throws APIManagementException {
         try {
             LocalDateTime localDateTime = LocalDateTime.now();
+            Map<String, String> oldScopes = apiDefinitionFromSwagger20.getScopesFromSecurityDefinition
+                    (getApiSwaggerDefinition(apiId));
+            Map<String, String> newScopes = apiDefinitionFromSwagger20.getScopesFromSecurityDefinition(jsonText);
+            Map<String, String> updatedScopes = new HashMap<>(newScopes);
+            updatedScopes.keySet().retainAll(oldScopes.keySet());
+            oldScopes.keySet().removeAll(updatedScopes.keySet());
+            newScopes.keySet().removeAll(updatedScopes.keySet());
+            for (Map.Entry<String, String> scopeEntry : newScopes.entrySet()) {
+                getKeyManager().registerScope(new Scope(scopeEntry.getKey(), scopeEntry.getValue()));
+            }
+            for (Map.Entry<String, String> scopeEntry : oldScopes.entrySet()) {
+                getKeyManager().deleteScope(scopeEntry.getKey());
+            }
+            for (Map.Entry<String, String> scopeEntry : updatedScopes.entrySet()) {
+                Scope scope = getKeyManager().retrieveScope(scopeEntry.getKey());
+                scope.setDescription(scopeEntry.getValue());
+                getKeyManager().updateScope(scope);
+            }
+
             API api = getAPIbyUUID(apiId);
             Map<String, UriTemplate> oldUriTemplateMap = api.getUriTemplates();
             List<APIResource> apiResourceList = apiDefinitionFromSwagger20.parseSwaggerAPIResources(new StringBuilder
@@ -1626,6 +1689,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     updatedUriTemplateMap);
             API.APIBuilder apiBuilder = new API.APIBuilder(api);
             apiBuilder.uriTemplates(uriTemplateMapNeedTobeUpdate);
+            createUriTemplateList(apiBuilder, true);
             apiBuilder.updatedBy(getUsername());
             apiBuilder.lastUpdatedTime(localDateTime);
 
@@ -2128,7 +2192,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         }
     }
 
-    private void sendEmailNotification(String apiId, String apiName, String newVersion)
+    private void sendNotification(String apiId, String apiName, String newVersion)
             throws APIManagementException {
         Set<String> subscriberList;
         NotificationConfigurations notificationConfigurations = ServiceReferenceHolder.getInstance().
@@ -2222,5 +2286,92 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             throw new APIManagementException(msg, e, ExceptionCodes.ERROR_LOADING_SERVICE_DISCOVERY_IMPL_CLASS);
         }
         return discoveredEndpointList;
+    }
+
+    @Override
+    public Map<String, String> getScopesForApi(String apiId) throws APIManagementException {
+
+        String swagger = getApiSwaggerDefinition(apiId);
+        return apiDefinitionFromSwagger20.getScopesFromSecurityDefinition(swagger);
+    }
+
+    @Override
+    public Scope getScopeInformationOfApi(String apiId, String scopeName) throws APIManagementException {
+        String swagger = getApiSwaggerDefinition(apiId);
+        Map<String, String> scopeMap = apiDefinitionFromSwagger20.getScopesFromSecurityDefinition(swagger);
+        if (scopeMap.containsKey(scopeName)) {
+            return getKeyManager().retrieveScope(scopeName);
+        } else {
+            throw new APIManagementException("Scope couldn't found by name: " + scopeName, ExceptionCodes
+                    .SCOPE_NOT_FOUND);
+        }
+    }
+
+    @Override
+    public void addScopeToTheApi(String apiId, Scope scope) throws APIManagementException {
+        validateScopeName(scope.getName());
+        String swagger = getApiSwaggerDefinition(apiId);
+        Map<String, String> scopeMap = apiDefinitionFromSwagger20.getScopesFromSecurityDefinition(swagger);
+        if (!scopeMap.containsKey(scope.getName())) {
+            if (getKeyManager().registerScope(scope)) {
+                String updatedSwagger = apiDefinitionFromSwagger20.addScopeToSwaggerDefinition(swagger, scope);
+                getApiDAO().updateApiDefinition(apiId, updatedSwagger, getUsername());
+            } else {
+                throw new APIManagementException("Scope already registered", ExceptionCodes.SCOPE_ALREADY_REGISTERED);
+            }
+        } else {
+            throw new APIManagementException("Scope already registered", ExceptionCodes.SCOPE_ALREADY_REGISTERED);
+        }
+    }
+
+    @Override
+    public void updateScopeOfTheApi(String apiId, Scope scope) throws APIManagementException {
+        String swagger = getApiSwaggerDefinition(apiId);
+        Map<String, String> scopeMap = apiDefinitionFromSwagger20.getScopesFromSecurityDefinition(swagger);
+        if (scopeMap.containsKey(scope.getName())) {
+            if (getKeyManager().updateScope(scope)) {
+                String updatedSwaggerDefinition = new APIDefinitionFromSwagger20().updateScopesOnSwaggerDefinition
+                        (swagger, scope);
+                getApiDAO().updateApiDefinition(apiId, updatedSwaggerDefinition, getUsername());
+            }
+        } else {
+            throw new APIManagementException("Scope couldn't found by name: " + scope.getName(), ExceptionCodes
+                    .SCOPE_NOT_FOUND);
+        }
+    }
+
+    @Override
+    public void deleteScopeFromApi(String apiId, String scopeName) throws APIManagementException {
+        String swagger = getApiSwaggerDefinition(apiId);
+        Map<String, String> scopeMap = apiDefinitionFromSwagger20.getScopesFromSecurityDefinition(swagger);
+        if (scopeMap.containsKey(scopeName)) {
+            String scopeDeletedApiDefinition = apiDefinitionFromSwagger20.removeScopeFromSwaggerDefinition(swagger,
+                    scopeName);
+            if (getKeyManager().deleteScope(scopeName)) {
+                getApiDAO().updateApiDefinition(apiId, scopeDeletedApiDefinition, getUsername());
+            }
+
+        } else {
+            throw new APIManagementException("Scope couldn't found by name: " + scopeName, ExceptionCodes
+                    .SCOPE_NOT_FOUND);
+        }
+    }
+
+    private boolean validateScope(String swagger) throws APIManagementException {
+        List<String> scopes = apiDefinitionFromSwagger20.getGlobalAssignedScopes(swagger);
+        for (String scope : scopes) {
+            validateScopeName(scope);
+        }
+        return true;
+    }
+
+    private boolean validateScopeName(String scopeName) throws APIManagementException {
+        KeyMgtConfigurations keyManagerConfiguration = getConfig().getKeyManagerConfigs();
+        if (scopeName.contains(keyManagerConfiguration.getProductRestApiScopesKeyWord())) {
+            String message = "scope name couldn't have the restricted keyword " + keyManagerConfiguration
+                    .getProductRestApiScopesKeyWord();
+            throw new APIManagementException(message, ExceptionCodes.SCOPE_VALIDATION_FAILED);
+        }
+        return true;
     }
 }

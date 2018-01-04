@@ -19,7 +19,8 @@
 import React from 'react'
 import { Input, Icon, Checkbox, Button, Card, Tag, Form } from 'antd';
 import { Row, Col } from 'antd';
-
+import Select from 'material-ui/Select';
+import {MenuItem} from 'material-ui/Menu';
 const FormItem = Form.Item;
 
 function hasErrors(fieldsError) {
@@ -123,15 +124,41 @@ class InlineEditableField extends React.Component{
 class Resource extends React.Component{
     constructor(props){
         super(props);
+        let tempScopes = [];
+        if(this.props.methodData.security && this.props.methodData.security.length!== 0){
+            this.props.methodData.security.map(function(object, i){
+                if(object.OAuth2Security){
+                    tempScopes =  object.OAuth2Security;
+                }
+            });
+        }
         this.state = {
             visible: false,
-            method:this.props.methodData
+            method:this.props.methodData,
+            scopes:tempScopes
         };
         console.info(this.props);
         this.propsSubmitHandler = this.propsSubmitHandler.bind(this);
         this.saveFieldCallback = this.saveFieldCallback.bind(this);
         this.toggleMethodData = this.toggleMethodData.bind(this);
         this.deleteResource = this.deleteResource.bind(this);
+        this.handleScopeChange = this.handleScopeChange.bind(this);
+
+    }
+    handleScopeChange(e) {
+        this.setState({scopes: e.target.value});
+        this.handleScopeChangeInSwaggerRoot(e.target.value);
+
+    }
+    handleScopeChangeInSwaggerRoot(scopes){
+        let tempMethod = this.props.methodData;
+        tempMethod.security.map(function(object, i){
+            if(object.OAuth2Security){
+                object.OAuth2Security = scopes;
+            }
+        });
+        this.setState({method: tempMethod});
+        this.props.updatePath(this.props.path,this.props.method,this.state.method);
     }
     propsSubmitHandler(values){
         const defaultParams = {
@@ -202,7 +229,33 @@ class Resource extends React.Component{
                     <Col span={20}>
                         <InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldValue={this.state.method.consumes} fieldName="consumes" />
                     </Col>
-
+                    <Col span={4}><strong>Scopes</strong></Col>
+                    <Col span={20}>
+                    <Select
+                        margin="none"
+                        multiple
+                        value={this.state.scopes}
+                        onChange={this.handleScopeChange}
+                        MenuProps={{
+                            PaperProps: {
+                                style: {
+                                    width: 200,
+                                },
+                            },
+                        }}>
+                        {this.props.apiScopes.list.map(tempScope => (
+                            <MenuItem
+                                key={tempScope.name}
+                                value={tempScope.name}
+                                style={{
+                                    fontWeight: this.state.scopes.indexOf(tempScope.name) !== -1 ? '500' : '400',
+                                }}
+                            >
+                                {tempScope.name}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                    </Col>
                     <Col span={24}>
                         <h3>Parameters:</h3>
                         <div className="parameter-add-wrapper">
