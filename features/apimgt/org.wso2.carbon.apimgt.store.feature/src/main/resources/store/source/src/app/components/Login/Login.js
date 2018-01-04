@@ -18,7 +18,7 @@
 
 import React, {Component} from 'react'
 import './login.css'
-import {Switch, Redirect} from 'react-router-dom'
+import {Redirect, Switch} from 'react-router-dom'
 import AuthManager from '../../data/AuthManager'
 import qs from 'qs'
 import TextField from 'material-ui/TextField';
@@ -26,8 +26,17 @@ import Paper from 'material-ui/Paper';
 import Button from 'material-ui/Button';
 import Typography from 'material-ui/Typography';
 import Snackbar from 'material-ui/Snackbar';
-import User from '../../data/User'
 import Footer from '../Base/Footer/Footer'
+import User from '../../data/User'
+import ConfigManager from "../../data/ConfigManager";
+import Utils from "../../data/Utils";
+import Input, {InputLabel} from 'material-ui/Input';
+import Select from 'material-ui/Select';
+import {FormControl} from 'material-ui/Form';
+import {MenuItem} from 'material-ui/Menu';
+import {CircularProgress} from "material-ui/Progress";
+import Grid from 'material-ui/Grid';
+import {withRouter} from 'react-router-dom';
 
 class Login extends Component {
 
@@ -42,35 +51,35 @@ class Login extends Component {
             password: '',
             validate: false,
             messageOpen: false,
-            message:''
+            message: '',
+            environments: [],
+            environmentId: 0,
+            authConfigs: [],
+            redirectToIS: false
         };
-    }
-
-
-    handleSubmit = (e) => {
-        e.preventDefault();
-        this.setState({loading: true});
-        this.setState({validate: true});
-        let username = this.state.username;
-        let password = this.state.password;
-        if(!username || !password){
-            this.setState({ messageOpen: true });
-            this.setState({message: 'Please fill both username and password fields'});
-            return;
-        }
-        let loginPromise = this.authManager.authenticateUser(username, password);
-        loginPromise.then((response) => {
-            this.setState({isLogin: AuthManager.getUser(), loading: false});
-        }).catch((error) => {
-                this.setState({ messageOpen: true });
-                this.setState({message: error});
-                console.log(error);
-                this.setState({loading: false});
-            }
-        );
+        this.fetch_ssoData = this.fetch_ssoData.bind(this);
     }
 
     componentDidMount() {
+        const {appName} = this.props;
+
+        //Get Environments and SSO data
+        ConfigManager.getConfigs().environments.then(response => {
+            const environments = response.data.environments;
+            const environmentId = Utils.getEnvironmentID(environments);
+
+            // Do not need to render before fetch sso data
+            this.state.environments = environments;
+            this.state.environmentId = environmentId;
+
+            // Update environment to discard default environment configuration
+            const environment = environments[environmentId];
+            Utils.setEnvironment(environment);
+
+            //Fetch SSO data and render
+            this.fetch_ssoData(environments);
+        });
+
         let queryString = this.props.location.search;
         queryString = queryString.replace(/^\?/, '');
         /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
@@ -82,87 +91,251 @@ class Login extends Component {
             this.setState({isLogin: true});
             const validityPeriod = params.validity_period; // In seconds
             const WSO2_AM_TOKEN_1 = params.partial_token;
-            const user = new User(params.user_name, params.id_token);
-            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/store");
+            const user = new User(Utils.getEnvironment().label, params.user_name, params.id_token);
+            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, `/${appName}`);
             user.scopes = params.scopes.split(" ");
             AuthManager.setUser(user);
         }
     }
 
+    fetch_ssoData(environments) {
+        //Array of promises
+        let promised_ssoData = environments.map(
+            environment => Utils.getPromised_ssoData(environment)
+        );
 
-    handleUsernameChange = (event) => {
+        Promise.all(promised_ssoData).then(responses => {
+            this.setState({
+                authConfigs: responses.map(response => response.data.members)
+            });
+        });
+    }
+
+    handleSubmit = (e) => {
+        const isSsoEnabled = this.state.authConfigs[this.state.environmentId].is_sso_enabled.value;
+        if (isSsoEnabled) {
+            this.setState({redirectToIS: true});
+            const environment = this.state.environments[this.state.environmentId];
+            Utils.setEnvironment(environment);
+            this.handleSsoLogin(e);
+        } else {
+            this.handleDefaultLogin(e);
+        }
+    };
+
+    handleSsoLogin = (e) => {
+        if(e){
+            e.preventDefault();
+        }
+        const authConfigs = this.state.authConfigs[this.state.environmentId];
+        const authorizationEndpoint = authConfigs.authorizationEndpoint.value;
+        const client_id = authConfigs.client_id.value;
+        const callback_URL = authConfigs.callback_url.value;
+        const scopes = authConfigs.scopes.value;
+
+        window.location = `${authorizationEndpoint}?response_type=code&client_id=${client_id}` +
+            `&redirect_uri=${callback_URL}&scope=${scopes}`;
+    };
+
+    handleDefaultLogin = (e) => {
+        e.preventDefault();
+        this.setState({loading: true});
+        this.setState({validate: true});
+        let username = this.state.username;
+        let password = this.state.password;
+        let environment = this.state.environments[this.state.environmentId];
+
+        if (!username || !password) {
+            this.setState({messageOpen: true});
+            this.setState({message: 'Please fill both username and password fields'});
+            return;
+        }
+
+        let loginPromise = this.authManager.authenticateUser(username, password, environment);
+        loginPromise.then((response) => {
+            this.setState({isLogin: AuthManager.getUser(), loading: false});
+        }).catch((error) => {
+                this.setState({messageOpen: true});
+                this.setState({message: error});
+                console.log(error);
+                this.setState({loading: false});
+            }
+        );
+    };
+
+    handleInputChange = (event) => {
+        const target = event.target;
+        const value = target.type === 'checkbox' ? target.checked : target.value;
+        const name = target.id;
+
         this.setState({
-           username : event.target.value
+            [name]: value
         });
     };
-    handlePasswordChange = (event) => {
-        this.setState({
-           password : event.target.value
-        });
+
+    handleEnvironmentChange = (event) => {
+        const environmentId = event.target.value;
+        let environment = this.state.environments[environmentId];
+        this.setState({environmentId});
     };
 
     handleRequestClose = () => {
-        this.setState({ messageOpen: false });
+        this.setState({messageOpen: false});
     };
+
     render() {
+        const isMoreThanOneEnvironments = this.state.environments && this.state.environments.length > 1;
+        const isSsoUpdated = this.state.authConfigs.length !== 0;
+        const isSsoEnabled = isSsoUpdated && this.state.authConfigs[this.state.environmentId].is_sso_enabled.value;
+        const {appName, appLabel} = this.props;
+        //Redirect to IS
+        if (this.state.redirectToIS) {
+            return (
+                // Redirect page
+                <div className="login-flex-container">
+                    <Grid container justify={"center"} alignItems={"center"} spacing={0} style={{height: "100vh"}}>
+                        <Grid item lg={6} md={8} xs={10}>
+                            <Grid container alignItems={"center"}>
+                                <Grid item sm={2} xs={12}>
+                                    <CircularProgress style={{float: "right"}}/>
+                                </Grid>
+                                <Grid item sm={10} xs={12}>
+                                    <div className="login-main-content">
+                                        <Paper elevation={5} square={true} className="login-paper"
+                                               style={{fontSize: "medium", padding: "15px"}}>
+                                            You are now being redirected to Identity Provider.
+                                        </Paper>
+                                    </div>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </div>
+            );
+        }
+
+        if (isSsoEnabled && !isMoreThanOneEnvironments) { // If sso enabled and no more than one environments
+            this.handleSsoLogin();
+        }
+
+        // Show login page if sso disabled or more than two environments
         if (!this.state.isLogin) { // If not logged in, go to login page
             return (
-            <div className="login-flex-container">
-                <Snackbar
-                    anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-                    open={this.state.messageOpen}
-                    onRequestClose={this.handleRequestClose}
-                    SnackbarContentProps={{
-                        'aria-describedby': 'message-id',
-                    }}
-                    message={<span id="message-id">{this.state.message}</span>}
-                />
-                <div className="login-main-content">
-                    <Paper elevation={0} square={true} className="branding">
-                      <div>
-                          <img className="brand" src="/store/public/app/images/logo.svg" alt="wso2-logo"/>
-                          <Typography type="headline" align="right" gutterBottom>
-                              API STORE
-                          </Typography>
-                      </div>
-                    </Paper>
-                    <Paper elevation={1} square={true} className="login-paper">
-                        <form onSubmit={this.handleSubmit} className="login-form">
-                          <Typography type="body1" gutterBottom>
-                              Sign in to your account
-                          </Typography>
-                            <TextField
-                                error={!this.state.username && this.state.validate}
-                                id="username"
-                                label="Username"
-                                type="text"
-                                autoComplete="username"
-                                margin="normal"
-                                style={{width:"100%"}}
-                                onChange={this.handleUsernameChange}
-                            />
-                            <TextField
-                                error={!this.state.password && this.state.validate}
-                                id="password"
-                                label="Password"
-                                type="password"
-                                autoComplete="current-password"
-                                margin="normal"
-                                style={{width:"100%"}}
-                                onChange={this.handlePasswordChange}
-                            />
+                <div className="login-flex-container">
+                    <Snackbar
+                        anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                        open={this.state.messageOpen}
+                        onRequestClose={this.handleRequestClose}
+                        SnackbarContentProps={{
+                            'aria-describedby': 'message-id',
+                        }}
+                        message={<span id="message-id">{this.state.message}</span>}
+                    />
+                    <Grid container justify={"center"} alignItems={"center"} spacing={0} style={{height: "100vh"}}>
+                        <Grid item lg={6} md={8} xs={10}>
+                            <Grid container>
+                                {/*Brand*/}
+                                <Grid item sm={3} xs={12}>
+                                    <Grid container direction={"column"}>
+                                        <Grid item>
+                                            <img className="brand"
+                                                 src={`/${appName}/public/app/images/logo.svg`}
+                                                 alt="wso2-logo"/>
+                                        </Grid>
+                                        <Grid item>
+                                            <Typography type="subheading" align="right" gutterBottom>
+                                                {`API ${appLabel}`}
+                                            </Typography>
+                                        </Grid>
 
-                            <Button type="submit" raised color="primary" className="login-form-submit">
-                                Login
-                            </Button>
-                            <Button type="button" className="login-form-back">
-                                Go Back
-                            </Button>
-                        </form>
-                    </Paper>
+                                    </Grid>
+                                </Grid>
+
+                                {/*Login Form*/}
+                                <Grid item sm={9} xs={12}>
+                                    <div className="login-main-content">
+                                        <Paper elevation={1} square={true} className="login-paper">
+                                            <form onSubmit={this.handleSubmit} className="login-form">
+                                                <Typography type="body1" gutterBottom>
+                                                    Sign in to your account
+                                                </Typography>
+
+                                                {/*Environments*/}
+                                                {isMoreThanOneEnvironments &&
+                                                <FormControl style={{width: "100%", marginTop: "2%"}}>
+                                                    <InputLabel htmlFor="environment">Environment</InputLabel>
+                                                    <Select onChange={this.handleEnvironmentChange}
+                                                            value={this.state.environmentId}
+                                                            input={<Input id="environment"/>}>
+                                                        {this.state.environments.map((environment, index) =>
+                                                            <MenuItem value={index}
+                                                                      key={index}>{environment.label}</MenuItem>
+                                                        )}
+                                                    </Select>
+                                                </FormControl>
+                                                }
+
+                                                {isSsoUpdated ?
+                                                    <span>
+                                                    {isSsoEnabled ?
+                                                        <FormControl style={{
+                                                            width: '100%',
+                                                            fontSize: 'medium',
+                                                            marginTop: "5%"
+                                                        }}>
+                                                            Single Sign On is enabled.
+                                                        </FormControl>
+                                                        :
+                                                        <FormControl style={{width: "100%"}}>
+                                                            <TextField
+                                                                error={!this.state.username && this.state.validate}
+                                                                id="username"
+                                                                label="Username"
+                                                                type="text"
+                                                                autoComplete="username"
+                                                                margin="normal"
+                                                                style={{width: "100%"}}
+                                                                onChange={this.handleInputChange}
+                                                            />
+                                                            <TextField
+                                                                error={!this.state.password && this.state.validate}
+                                                                id="password"
+                                                                label="Password"
+                                                                type="password"
+                                                                autoComplete="current-password"
+                                                                margin="normal"
+                                                                style={{width: "100%"}}
+                                                                onChange={this.handleInputChange}
+                                                            />
+                                                        </FormControl>
+                                                    }
+                                                    </span>
+                                                    :
+                                                    <FormControl
+                                                        style={{width: '100%', fontSize: 'medium', marginTop: "5%"}}>
+                                                        <CircularProgress style={{margin: 'auto', display: 'block'}}/>
+                                                    </FormControl>
+                                                }
+
+                                                {/*Buttons*/}
+                                                <Button
+                                                    type="submit"
+                                                    raised color="primary"
+                                                    className="login-form-submit"
+                                                    disabled={!isSsoUpdated}
+                                                >
+                                                    {isSsoEnabled ? "Visit Login Page" : "Login"}
+                                                </Button>
+                                            </form>
+                                        </Paper>
+                                    </div>
+                                </Grid>
+                            </Grid>
+
+                        </Grid>
+                    </Grid>
+                    <Footer/>
                 </div>
-                <Footer/>
-            </div>
 
             );
         } else {// If logged in, redirect to /apis page
@@ -175,4 +348,4 @@ class Login extends Component {
     }
 }
 
-export default Login;
+export default withRouter(Login);

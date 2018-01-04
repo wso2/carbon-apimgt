@@ -63,19 +63,19 @@ public class AuthenticatorServiceTestCase {
 
         //// Get data object to be passed to the front-end
         Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(oAuthApplicationInfo);
-        JsonObject responseOAuthDataObj = authenticatorService.getAuthenticationConfigurations("store");
+        JsonObject responseOAuthDataObj = authenticatorService.getAuthenticationConfigurations("store", "https://localhost:9292/");
         Assert.assertEquals(responseOAuthDataObj, oAuthData);
 
         // Error Path - 500 - When OAuthApplicationInfo is null
         JsonObject emptyOAuthDataObj = new JsonObject();
         Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(null);
-        JsonObject responseEmptyOAuthDataObj = authenticatorService.getAuthenticationConfigurations("store");
+        JsonObject responseEmptyOAuthDataObj = authenticatorService.getAuthenticationConfigurations("store", "https://localhost:9292/");
         Assert.assertEquals(responseEmptyOAuthDataObj, emptyOAuthDataObj);
 
         // Error Path - When DCR application creation fails and throws an APIManagementException
         Mockito.when(keyManager.createApplication(Mockito.any())).thenThrow(KeyManagementException.class);
         try {
-            authenticatorService.getAuthenticationConfigurations("store");
+            authenticatorService.getAuthenticationConfigurations("store", "https://localhost:9292/");
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "Error while creating the keys for OAuth application : store");
         }
@@ -89,7 +89,7 @@ public class AuthenticatorServiceTestCase {
         Mockito.when(systemApplicationDao.isConsumerKeyExistForApplication("store")).thenReturn(false);
         OAuthApplicationInfo oAuthApplicationInfo = new OAuthApplicationInfo();
         oAuthApplicationInfo.setClientId("xxx-client-id-xxx");
-        oAuthApplicationInfo.setCallBackURL("https://localhost/9292/login/callback/publisher");
+        oAuthApplicationInfo.setCallBackURL("https://localhost:9292/login/callback/publisher");
 
         //// Expected data object to be passed to the front-end
         JsonObject oAuthData = new JsonObject();
@@ -108,7 +108,7 @@ public class AuthenticatorServiceTestCase {
 
         //// Get data object to be passed to the front-end
         Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(oAuthApplicationInfo);
-        JsonObject responseOAuthDataObj = authenticatorService.getAuthenticationConfigurations("publisher");
+        JsonObject responseOAuthDataObj = authenticatorService.getAuthenticationConfigurations("publisher", "https://localhost:9292/");
         String[] scopesActual = responseOAuthDataObj.get(KeyManagerConstants.TOKEN_SCOPES).toString().split(" ");
         String[] scopesExpected = oAuthData.get(KeyManagerConstants.TOKEN_SCOPES).toString().split(" ");
         Assert.assertEquals(scopesActual.length, scopesExpected.length);
@@ -116,13 +116,13 @@ public class AuthenticatorServiceTestCase {
         // Error Path - 500 - When OAuthApplicationInfo is null
         JsonObject emptyOAuthDataObj = new JsonObject();
         Mockito.when(keyManager.createApplication(Mockito.any())).thenReturn(null);
-        JsonObject responseEmptyOAuthDataObj = authenticatorService.getAuthenticationConfigurations("publisher");
+        JsonObject responseEmptyOAuthDataObj = authenticatorService.getAuthenticationConfigurations("publisher", "https://localhost:9292/");
         Assert.assertEquals(responseEmptyOAuthDataObj, emptyOAuthDataObj);
 
         // Error Path - When DCR application creation fails and throws an APIManagementException
         Mockito.when(keyManager.createApplication(Mockito.any())).thenThrow(KeyManagementException.class);
         try {
-            authenticatorService.getAuthenticationConfigurations("publisher");
+            authenticatorService.getAuthenticationConfigurations("publisher", "https://localhost:9292/");
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "Error while creating the keys for OAuth application : publisher");
         }
@@ -153,8 +153,8 @@ public class AuthenticatorServiceTestCase {
         //// Actual response - When authorization code is not null
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
         AccessTokenInfo tokenInfoResponseForValidAuthCode = authenticatorService.getTokens("store",
-                "https://localhost:9292/auth/callback/store?code=xxx-auth-code-xxx&session_state=xxx-session-state" +
-                        "-xxx", "authorization_code", null, null, null, 0);
+                "authorization_code", null, null, null, 0,
+                "https://localhost:9292/", "xxx-auth-code-xxx");
         Assert.assertEquals(tokenInfoResponseForValidAuthCode, tokenInfo);
 
         // Error Path - 500 - Authorization code grant type
@@ -164,9 +164,8 @@ public class AuthenticatorServiceTestCase {
         AccessTokenInfo tokenInfoResponseForInvalidAuthCode = new AccessTokenInfo();
         try {
             tokenInfoResponseForInvalidAuthCode = authenticatorService.getTokens("store",
-                    "https://localhost:9292/auth/callback/store?error=access_denied&session_state=xxx-session-state" +
-                            "-xxx", "authorization_code",
-                    null, null, null, 0);
+                    "authorization_code",
+                    null, null, null, 0, "https://localhost:9292/", null);
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "No Authorization Code available.");
             Assert.assertEquals(tokenInfoResponseForInvalidAuthCode, emptyTokenInfo);
@@ -174,15 +173,15 @@ public class AuthenticatorServiceTestCase {
 
         // Happy Path - 200 - Password grant type
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
-        AccessTokenInfo tokenInfoResponseForPasswordGrant = authenticatorService.getTokens("store", null, "password",
-                "admin", "admin", null, 0);
+        AccessTokenInfo tokenInfoResponseForPasswordGrant = authenticatorService.getTokens("store", "password",
+                "admin", "admin", null, 0, "https://localhost:9292/", null);
         Assert.assertEquals(tokenInfoResponseForPasswordGrant, tokenInfo);
 
         // Error Path - When token generation fails and throws APIManagementException
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenThrow(KeyManagementException.class);
         try {
-            authenticatorService.getTokens("store", null, "password",
-                    "admin", "admin", null, 0);
+            authenticatorService.getTokens("store", "password",
+                    "admin", "admin", null, 0, "https://localhost:9292/", null);
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "Error while receiving tokens for OAuth application : store");
         }

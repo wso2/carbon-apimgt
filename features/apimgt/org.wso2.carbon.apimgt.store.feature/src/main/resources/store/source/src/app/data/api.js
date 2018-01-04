@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 "use strict";
-import SingleClient from './SingleClient'
+import APIClientFactory from "./APIClientFactory";
 import Resource from "./Resource";
+import Utils from "./Utils";
 
 /**
  * An abstract representation of an API
@@ -27,7 +29,7 @@ export default class API extends Resource {
      */
     constructor() {
         super();
-        this.client = new SingleClient().client;
+        this.client = new APIClientFactory().getAPIClient(Utils.getEnvironment().label).client;
         this._requestMetaData = Resource._requestMetaData;
     }
 
@@ -66,7 +68,6 @@ export default class API extends Resource {
         if (callback) {
             return promise_get.then(callback);
         } else {
-            console.info("returninng promise");
             return promise_get;
         }
     }
@@ -89,7 +90,6 @@ export default class API extends Resource {
         if (callback) {
             return promise_get.then(callback);
         } else {
-            console.info("returninng promise");
             return promise_get;
         }
     }

@@ -7,13 +7,12 @@ html, body {
     flex-direction: column;
     height: 100%;
     background: #efefef;
+    margin: auto;
 }
 .login-flex-container .login-main-content {
     flex: 1;
-    display: flex;
     align-items: flex-start;
     justify-content: center;
-    margin-top: 10%;
 }
 .login-flex-container .login-main-content > div{
 
@@ -44,7 +43,7 @@ html, body {
     height: 100%;
 }
 .login-form-submit{
-  margin-right: 4px;
+    margin-right: 4px;
 }
 
 @media (max-width: 601px){
