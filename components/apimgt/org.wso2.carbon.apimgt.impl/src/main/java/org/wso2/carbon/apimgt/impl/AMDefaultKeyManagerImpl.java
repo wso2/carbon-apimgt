@@ -91,6 +91,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                 OAUTH_CLIENT_USERNAME);
         String applicationName = oAuthApplicationInfo.getClientName();
         String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
+        String callBackURL = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_CALLBACK_URL);
         if (keyType != null) {
             applicationName = applicationName + '_' + keyType;
         }
@@ -109,7 +110,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo applicationToCreate =
                     new org.wso2.carbon.apimgt.api.model.xsd.OAuthApplicationInfo();
             applicationToCreate.setIsSaasApplication(oAuthApplicationInfo.getIsSaasApplication());
-            applicationToCreate.setCallBackURL(oAuthApplicationInfo.getCallBackURL());
+            applicationToCreate.setCallBackURL(callBackURL);
             applicationToCreate.setClientName(applicationName);
             applicationToCreate.setAppOwner(userId);
             applicationToCreate.setJsonString(oAuthApplicationInfo.getJsonString());

@@ -41,9 +41,6 @@ import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.DocumentationMapping
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -53,6 +50,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  * This is the service implementation class for Store API related operations
@@ -115,7 +115,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             Set<API> sortedSet = (Set<API>) allMatchedApisMap.get("apis"); // This is a SortedSet
             ArrayList<API> allMatchedApis = new ArrayList<>(sortedSet);
 
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, offset, limit);
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
             APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, allMatchedApis.size());
 
             //Add pagination section in the response
