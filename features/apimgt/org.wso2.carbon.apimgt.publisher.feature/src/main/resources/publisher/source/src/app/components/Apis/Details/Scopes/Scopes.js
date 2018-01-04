@@ -156,7 +156,7 @@ class Scopes extends React.Component {
                      <Row type="flex" justify="start">
                          <Col span={4}>Roles</Col>
                          <Col span={10}>
-                             <TagsInput value={values} onChange={this.onChangeScopeRoleAddition} onlyUnique={true} inputProps={{ placeholder: 'add a valid role' }}/>
+                             <TagsInput value={values} onChange={this.onChangeScopeRoleAddition} onlyUnique={true} inputProps={{ placeholder: 'add role' }}/>
                          </Col>
                      </Row>
                      <br/>
