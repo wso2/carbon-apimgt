@@ -47,8 +47,7 @@ $(document).ready(function() {
     $.validator.addMethod('validAPIName', function(value, element) {
         var illegalChars = /([~!@#;:%^*()+={}|\\<>"',&\/$])/;
         return !illegalChars.test(value);
-    }, i18n.t('Name contains one or more illegal characters  (~ ! @ #  ; : % ^ & * + = { } () | &lt; &gt;, \' " \\ $)
-    .'));
+    }, i18n.t('Name contains one or more illegal characters  (~ ! @ #  ; : % ^ & * + = { } () | &lt; &gt;, \' " \\ $) .'));
 
     $.validator.addMethod('validContextTemplate', function(value, element) {
         var illegalChars = /([~!@#;%^&*+=\|\\<>\"\',])/;
