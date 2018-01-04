@@ -86,7 +86,7 @@
                     <p id="desc_help" class="hide"><%=i18n.localize("Description of the throttle policy.")%></p>
                 </label>
                 <div class="col-sm-9">
-                	<textarea class="form-control required validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="policy-description" cols="40" rows="2" name="policy-description"><%=encode.forHtml(String(policyDesc))%></textarea>
+                	<textarea class="form-control validRegistryName validateForwardSlashAtEnd validInput apiNameExists noSpace" id="policy-description" cols="40" rows="2" name="policy-description"><%=encode.forHtml(String(policyDesc))%></textarea>
                 </div>
             </div>            
             <!--<div class="form-group">
