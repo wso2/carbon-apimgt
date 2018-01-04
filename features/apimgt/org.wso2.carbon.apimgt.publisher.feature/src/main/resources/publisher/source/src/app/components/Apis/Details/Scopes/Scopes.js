@@ -36,16 +36,6 @@ class Scopes extends React.Component {
             apiScope: {},
             roles: []
         };
-        /*
-         * {
-         name: "",
-         description: "",
-         bindings: {
-         type: "role",
-         values: []
-         }
-         }
-         */
         this.deleteScope = this.deleteScope.bind(this);
         this.updateScope = this.updateScope.bind(this);
         this.handleInputs = this.handleInputs.bind(this);
