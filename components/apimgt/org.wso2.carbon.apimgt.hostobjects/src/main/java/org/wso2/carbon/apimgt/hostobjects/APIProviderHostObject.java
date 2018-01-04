@@ -4446,7 +4446,6 @@ public class APIProviderHostObject extends ScriptableObject {
         }
 
         try {
-            String[] roles = APIUtil.getRoleNames(username);
             String[] userRoleList = null;
 
             if (validateAgainstUserRoles) {
@@ -4456,14 +4455,14 @@ public class APIProviderHostObject extends ScriptableObject {
                     userRoleList = APIUtil.getListOfRoles(username, true);
                 }
             }
-            if (roles != null && inputRoles != null) {
+            if (inputRoles != null) {
                 for (String inputRole : inputRoles) {
                     if (validateAgainstUserRoles && !foundUserRole) {
                         if (APIUtil.compareRoleList(userRoleList, inputRole)) {
                             foundUserRole = true;
                         }
                     }
-                    if (!APIUtil.compareRoleList(roles, inputRole)) {
+                    if (!APIUtil.isRoleNameExist(username, inputRole)) {
                         return false;
                     }
                 }
