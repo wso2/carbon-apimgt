@@ -26,4 +26,13 @@ public interface NewPostLoginExecutor extends LoginPostExecutor {
      * @return String Array containing all the groups
      */
     String[] getGroupingIdentifierList(String response);
+
+    /**
+     * Returns True to enable multi group application sharing for the implementations based on NewPostLoginExecutor
+     *
+     * @return true
+     */
+    default public boolean isMultiGrpAppSharing() {
+        return true;
+    }
 }
