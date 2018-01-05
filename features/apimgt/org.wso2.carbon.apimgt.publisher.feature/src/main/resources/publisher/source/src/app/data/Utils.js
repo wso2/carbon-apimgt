@@ -147,9 +147,7 @@ class Utils {
     }
 
     static getAppSSORequestURL(environment = Utils.getEnvironment()) {
-        const uiService = encodeURIComponent(window.location.origin);
-        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.SSO_LOGIN}${Utils.CONST.CONTEXT_PATH}`
-            + `?uiService=${uiService}/`;
+        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.SSO_LOGIN}${Utils.CONST.CONTEXT_PATH}`;
     }
 
     static getAppLogoutURL() {
@@ -157,9 +155,7 @@ class Utils {
     }
 
     static getLoginTokenPath(environment = Utils.getEnvironment()) {
-        const uiService = encodeURIComponent(window.location.origin);
-        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_TOKEN_PATH}${Utils.CONST.CONTEXT_PATH}`
-            + `?uiService=${uiService}/`;
+        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_TOKEN_PATH}${Utils.CONST.CONTEXT_PATH}`;
     }
 
     static getSwaggerURL() {
