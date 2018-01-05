@@ -1002,7 +1002,7 @@ public class APIConsumerImplTest {
             apiConsumer.getGroupIds("login");
             Assert.fail("Class cast exception not thrown for error scenario");
         } catch (APIManagementException e) {
-            Assert.assertTrue(e.getMessage().contains("is not found in run time"));
+            Assert.assertTrue(e.getMessage().contains("is not found in runtime"));
         }
         try {
             apiConsumer.getGroupIds("login");
@@ -1017,7 +1017,7 @@ public class APIConsumerImplTest {
         } catch (APIManagementException e) {
             Assert.assertTrue(e.getMessage().contains("Error occurred while instantiating"));
         }
-        Assert.assertEquals(apiConsumer.getGroupIds("login"), "success");
+        Assert.assertEquals(apiConsumer.getGroupIds("login")[0], "success");
     }
 
     @Test
