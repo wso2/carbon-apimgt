@@ -52,7 +52,7 @@ import java.util.List;
 /**
  * API Manager default implementation of {@link IdentityProvider}
  */
-public class DefaultIdentityProviderImpl extends LightWeightKeyManagerImpl implements IdentityProvider {
+public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implements IdentityProvider {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultIdentityProviderImpl.class);
 

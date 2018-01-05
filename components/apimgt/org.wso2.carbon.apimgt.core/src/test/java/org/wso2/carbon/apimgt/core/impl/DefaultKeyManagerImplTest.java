@@ -43,7 +43,7 @@ import java.util.Map;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
-public class LightWeightKeyManagerImplTest {
+public class DefaultKeyManagerImplTest {
     private String clientName = "SampleApplication";
     private String callBackURL = "http://myhost/callback";
     private String applicationKeyType = "Application";
@@ -55,7 +55,7 @@ public class LightWeightKeyManagerImplTest {
         KeyMgtConfigurations keyManagerConfigs = Mockito.mock(KeyMgtConfigurations.class);
         Mockito.when(keyManagerConfigs.getDcrEndpoint())
                 .thenReturn("https://localhost:9282/api/identity/oauth2/dcr/v1.0/register");
-        LightWeightKeyManagerImpl kmImpl = new LightWeightKeyManagerImpl(keyManagerConfigs, restCallUtil);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(keyManagerConfigs, restCallUtil);
         OAuthAppRequest oAuthAppRequest = new OAuthAppRequest(clientName, callBackURL, applicationKeyType, grantTypes);
 
         HttpResponse response = new HttpResponse();
@@ -148,7 +148,7 @@ public class LightWeightKeyManagerImplTest {
         String consumerKey = "f9efe623-23ce-4a62-bb90-7c09217601b5";
         RestCallUtil restCallUtil = Mockito.mock(RestCallUtil.class);
         KeyMgtConfigurations keyManagerConfigs = Mockito.mock(KeyMgtConfigurations.class);
-        LightWeightKeyManagerImpl kmImpl = new LightWeightKeyManagerImpl(keyManagerConfigs, restCallUtil);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(keyManagerConfigs, restCallUtil);
         OAuthApplicationInfo oAuthApplicationInfo;
         try {
             oAuthApplicationInfo = kmImpl.retrieveApplication(null);
@@ -225,7 +225,7 @@ public class LightWeightKeyManagerImplTest {
     public void testGetNewAccessToken() throws Exception {
         RestCallUtil restCallUtil = Mockito.mock(RestCallUtil.class);
         KeyMgtConfigurations keyManagerConfigs = Mockito.mock(KeyMgtConfigurations.class);
-        LightWeightKeyManagerImpl kmImpl = new LightWeightKeyManagerImpl(keyManagerConfigs, restCallUtil);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(keyManagerConfigs, restCallUtil);
 
         String clientId = "f9efe623-23ce-4a62-bb90-7c09217601b5";
         String clientSecret = "6c58f018-c9cb-47d7-894b-11dc3fdc2527";
@@ -356,7 +356,7 @@ public class LightWeightKeyManagerImplTest {
         String accessToken = "nTgf8peXegVLAH-r9pUtxim0MU9gNXo_99hhKZwokPA";
         RestCallUtil restCallUtil = Mockito.mock(RestCallUtil.class);
         KeyMgtConfigurations keyManagerConfigs = Mockito.mock(KeyMgtConfigurations.class);
-        LightWeightKeyManagerImpl kmImpl = new LightWeightKeyManagerImpl(keyManagerConfigs, restCallUtil);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(keyManagerConfigs, restCallUtil);
         Mockito.when(keyManagerConfigs.getIntrospectEndpoint())
                 .thenReturn("https://localhost:9282/api/identity/oauth2/introspect/v1.0/introspection");
         HttpResponse response = new HttpResponse();
