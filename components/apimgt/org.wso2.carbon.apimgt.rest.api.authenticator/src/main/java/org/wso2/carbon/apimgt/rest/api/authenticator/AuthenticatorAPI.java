@@ -272,13 +272,14 @@ public class AuthenticatorAPI implements Microservice {
     @Produces(MediaType.APPLICATION_JSON)
     public Response callback(@Context Request request, @PathParam("appName") String appName,
                              @QueryParam("code") String authorizationCode) {
-        String appContext = "/" + appName;
+        String appContext = AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
         String logoutContext =
                 AuthenticatorConstants.LOGOUT_SERVICE_CONTEXT + AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
         String restAPIContext;
         if (AuthenticatorConstants.EDITOR_APPLICATION.equals(appName) ||
                 request.getUri().contains(AuthenticatorConstants.PUBLISHER_APPLICATION)) {
-            restAPIContext = AuthenticatorConstants.REST_CONTEXT + "/" + AuthenticatorConstants.PUBLISHER_APPLICATION;
+            restAPIContext = AuthenticatorConstants.REST_CONTEXT + AuthenticatorConstants.URL_PATH_SEPERATOR +
+                    AuthenticatorConstants.PUBLISHER_APPLICATION;
         } else {
             restAPIContext = AuthenticatorConstants.REST_CONTEXT + appContext;
         }
@@ -322,10 +323,22 @@ public class AuthenticatorAPI implements Microservice {
                 //The first host in the list "allowedHosts" is the host of UI-Service
                 String uiServiceHost = APIMConfigurationService.getInstance().getApimConfigurations()
                         .getEnvironmentConfigurations().getAllowedHosts().get(0);
-                if (uiServiceHost.isEmpty()) {
+                if (StringUtils.isEmpty(uiServiceHost)) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("The first string in the list " +
+                                "'wso2.carbon.apimgt:environmentConfigurations:allowedHosts' configuration is empty.");
+                        log.debug("Read UI Service from 'wso2.carbon.apimgt.application:apimBaseUrl' configuration.");
+                    }
                     uiServiceUrl = ServiceReferenceHolder.getInstance().getAPIMAppConfiguration().getApimBaseUrl();
                 } else {
-                    uiServiceUrl = "https://" + uiServiceHost + "/";
+                    if (log.isDebugEnabled()) {
+                        log.debug("The first string in the list " +
+                                "'wso2.carbon.apimgt:environmentConfigurations:allowedHosts' configuration" +
+                                " is not empty. value: " + uiServiceHost);
+                    }
+                    uiServiceUrl = AuthenticatorConstants.HTTPS_PROTOCOL + AuthenticatorConstants.PROTOCOL_SEPERATOR +
+                            uiServiceHost + AuthenticatorConstants.URL_PATH_SEPERATOR;
+                    log.info("UI Service: {}", uiServiceUrl);
                 }
 
                 URI targetURIForRedirection = new URI(uiServiceUrl + appName);

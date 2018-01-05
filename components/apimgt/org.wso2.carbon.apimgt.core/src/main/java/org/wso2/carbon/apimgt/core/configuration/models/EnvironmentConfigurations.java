@@ -16,8 +16,8 @@ public class EnvironmentConfigurations {
     @Element(description = "current environment's label from the list of environments")
     private String environmentLabel = "Default";
 
-    @Element(description = "list of web clients (eg: 127.0.0.1:9292) to allow make requests"
-            + "to current environment\n(use '" + APIMgtConstants.CORSAllowOriginConstants.ALLOW_ALL_ORIGINS +
+    @Element(description = "list of web clients (eg: 127.0.0.1:9292) to allow make requests" +
+            " to current environment\n(use '" + APIMgtConstants.CORSAllowOriginConstants.ALLOW_ALL_ORIGINS +
             "' to allow any web client)\nthe first host is used as UI-Service")
     //If the first host is an empty string, use "wso2.carbon.apimgt.application: apimBaseUrl" as UI-Service
     private List<String> allowedHosts = Collections.singletonList("");
