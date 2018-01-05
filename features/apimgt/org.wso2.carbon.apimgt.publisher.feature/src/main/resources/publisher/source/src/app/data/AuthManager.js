@@ -149,25 +149,6 @@ class AuthManager {
     }
 
     /**
-     * Get login token path from given environment or get default login token path
-     * @param {Object} environment: environment object
-     * @returns {String} loginTokenPath: login token path of the given environment
-     */
-    getTokenEndpoint(environment) {
-        let loginTokenPath;
-        if (environment) {
-            let origin = Utils.CONST.PROTOCOL;
-            //The default value of `host` in back-end java code is an empty string.
-            origin += environment.host || Utils.getEnvironment().host;
-            loginTokenPath = origin + environment.loginTokenPath + Utils.CONST.CONTEXT_PATH;
-        } else {
-            //If no environment return default loginTokenPath
-            loginTokenPath = Utils.getLoginTokenPath();
-        }
-        return loginTokenPath;
-    }
-
-    /**
      * By given username and password Authenticate the user, Since this REST API has no swagger definition,
      * Can't use swaggerjs to generate client.Hence using Axios to make AJAX calls
      * @param {String} username : Username of the user
@@ -189,7 +170,7 @@ class AuthManager {
             scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage '
             + 'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover'
         };
-        let promised_response = axios(this.getTokenEndpoint(environment), {
+        let promised_response = axios(Utils.getLoginTokenPath(environment), {
             method: "POST",
             data: qs.stringify(data),
             headers: headers,
@@ -207,7 +188,7 @@ class AuthManager {
             user.scopes = response.data.scopes.split(" ");
             AuthManager.setUser(user);
         }).catch(error => {
-            console.log("Authentication Error:\n", error);
+            console.error("Authentication Error:\n", error);
             Utils.setEnvironment(previous_environment);
         });
         return promised_response;

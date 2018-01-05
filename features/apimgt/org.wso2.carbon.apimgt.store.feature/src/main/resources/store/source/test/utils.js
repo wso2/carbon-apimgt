@@ -18,7 +18,7 @@
 
 import AuthManager from "../src/app/data/AuthManager.js"
 import Os from 'os'
-import Utils from '../src/app/data/utils'
+import Utils from '../src/app/data/Utils'
 import User from '../src/app/data/User'
 
 class TestUtils {

@@ -108,6 +108,7 @@ public class BundleActivator {
         } catch (APIManagementException e) {
             log.error("Error occurred while encrypting files", e);
         }
+
     }
 
     @Reference(

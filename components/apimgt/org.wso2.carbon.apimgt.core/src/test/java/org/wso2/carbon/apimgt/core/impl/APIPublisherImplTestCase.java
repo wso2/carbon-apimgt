@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.core.api.APIPublisher;
 import org.wso2.carbon.apimgt.core.api.EventObserver;
 import org.wso2.carbon.apimgt.core.api.GatewaySourceGenerator;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
+import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.dao.APISubscriptionDAO;
 import org.wso2.carbon.apimgt.core.dao.ApiDAO;
 import org.wso2.carbon.apimgt.core.dao.ApplicationDAO;
@@ -55,6 +56,7 @@ import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Event;
 import org.wso2.carbon.apimgt.core.models.Label;
+import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.Subscription;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.WorkflowConfig;
@@ -76,6 +78,7 @@ import org.wso2.carbon.lcm.sql.beans.LifecycleHistoryBean;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -326,6 +329,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
                 .thenReturn(DEVELOPER_ROLE);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         apiPublisher.updateApiGatewayConfig(uuid, configString);
         Mockito.verify(apiDAO, Mockito.times(1)).updateGatewayConfig(uuid, configString, USER);
 
@@ -355,6 +359,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
         Mockito.doThrow(new APIMgtDAOException("Couldn't update configuration for apiId " + uuid)).when(apiDAO)
                 .updateGatewayConfig(uuid, configString, USER);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         apiPublisher.updateApiGatewayConfig(uuid, configString);
     }
 
@@ -394,7 +399,7 @@ public class APIPublisherImplTestCase {
     }
 
     @Test(description = "Test add api with API Lifecycle failed",
-            expectedExceptions = { LifecycleException.class, APIManagementException.class })
+            expectedExceptions = {LifecycleException.class, APIManagementException.class})
     public void testAddAPILifecycleFailure() throws LifecycleException, APIManagementException {
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
@@ -456,6 +461,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
                 .thenReturn(DEVELOPER_ROLE);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         apiPublisher.getAPIbyUUID(uuid);
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
     }
@@ -479,6 +485,7 @@ public class APIPublisherImplTestCase {
         //Assuming the user role list retrieved from IS is null
         Mockito.when(identityProvider.getIdOfUser(ALTERNATIVE_USER)).thenReturn(USER_ID);
         Mockito.when(identityProvider.getRoleIdsOfUser(USER_ID)).thenReturn(null);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         try {
             apiPublisher.deleteAPI(uuid);
         } catch (APIManagementException ex) {
@@ -501,14 +508,17 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(ALTERNATIVE_USER, identityProvider, apiDAO,
-                apiSubscriptionDAO, apiLifecycleManager, gateway);
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiSubscriptionDAO,
+                apiLifecycleManager, null, gateway, keyManager);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         Mockito.when(identityProvider.getIdOfUser(ALTERNATIVE_USER)).thenReturn(USER_ID);
         Mockito.when(identityProvider.getRoleIdsOfUser(USER_ID)).thenReturn(roleIdsOfUser);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
                 .thenReturn(DEVELOPER_ROLE);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         apiPublisher.deleteAPI(uuid);
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).removeLifecycle(lifecycleId);
@@ -530,8 +540,10 @@ public class APIPublisherImplTestCase {
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiSubscriptionDAO,
-                apiLifecycleManager, workflowDAO, gateway);
+                apiLifecycleManager, workflowDAO, gateway, keyManager);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         String externalRef = UUID.randomUUID().toString();
         Mockito.when(
                 workflowDAO.getExternalWorkflowReferenceForPendingTask(uuid, WorkflowConstants.WF_TYPE_AM_API_STATE))
@@ -546,6 +558,13 @@ public class APIPublisherImplTestCase {
         Mockito.verify(apiDAO, Mockito.times(1)).deleteAPI(uuid);
         Mockito.verify(workflowDAO, Mockito.times(1))
                 .getExternalWorkflowReferenceForPendingTask(uuid, WorkflowConstants.WF_TYPE_AM_API_STATE);
+    }
+
+    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, ApiDAO apiDAO, APISubscriptionDAO
+            apiSubscriptionDAO, APILifecycleManager apiLifecycleManager, WorkflowDAO workflowDAO, APIGateway gateway,
+                                                 KeyManager keyManager) {
+        return new APIPublisherImpl(USER, identityProvider, keyManager, apiDAO, null, apiSubscriptionDAO, null,
+                apiLifecycleManager, null, workflowDAO, null, null, null, gateway);
     }
 
     @Test(description = "Exception when getting api subscription count by API",
@@ -573,13 +592,15 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiSubscriptionDAO.getSubscriptionCountByAPI(uuid)).thenReturn(0L);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(USER, identityProvider, apiDAO, apiSubscriptionDAO,
-                apiLifecycleManager, gateway);
+                apiLifecycleManager, gateway, keyManager);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
 
         //LifeCycleException
         Mockito.doThrow(LifecycleException.class).when(apiLifecycleManager)
                 .removeLifecycle(api.getLifecycleInstanceId());
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         try {
             apiPublisher.deleteAPI(uuid);
         } catch (APIManagementException e) {
@@ -700,6 +721,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
                 .thenReturn(DEVELOPER_ROLE);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
         Mockito.doThrow(new LifecycleException("Error occurred while Disassociating the API with Lifecycle id " + uuid))
                 .when(apiLifecycleManager).removeLifecycle(lifecycleId);
@@ -749,6 +771,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.isAPIContextExists(api.getContext())).thenReturn(true);
         String configString = SampleTestObjectCreator.createSampleGatewayConfig();
         Mockito.when(apiDAO.getGatewayConfigOfAPI(uuid)).thenReturn(configString);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         apiPublisher.updateAPI(api.lifeCycleStatus(APIStatus.CREATED.getStatus()).id(uuid));
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
         Mockito.verify(apiDAO, Mockito.times(0)).isAPIContextExists(api.getContext());
@@ -769,6 +792,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
                 .thenReturn(DEVELOPER_ROLE);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         apiPublisher.updateAPI(api.lifeCycleStatus(APIStatus.PUBLISHED.getStatus()));
     }
 
@@ -798,6 +822,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
         Mockito.when(identityProvider.getRoleId(ADMIN_ROLE)).thenReturn(ADMIN_ROLE_ID);
         Mockito.when(identityProvider.getRoleId(DEVELOPER_ROLE)).thenReturn(DEVELOPER_ROLE_ID);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         apiPublisher.updateAPI(api.context("test"));
         Mockito.verify(apiDAO, Mockito.times(1)).updateAPI(uuid, api.context("test").build());
     }
@@ -814,6 +839,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
                 .thenReturn(DEVELOPER_ROLE);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
         apiPublisher.updateAPI(api.name("testApi"));
     }
@@ -831,6 +857,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
                 .thenReturn(DEVELOPER_ROLE);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         apiPublisher.updateAPI(api.version("1.1.0"));
     }
 
@@ -848,6 +875,7 @@ public class APIPublisherImplTestCase {
         String uuid = api.getId();
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
         Mockito.when(identityProvider.getIdOfUser(newProvider)).thenReturn("acfde54e-4342-412a-b4dc-84a6f6b8d053");
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         apiPublisher.updateAPI(api.provider(newProvider));
     }
 
@@ -865,6 +893,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
                 .thenReturn(DEVELOPER_ROLE);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         apiPublisher.updateAPI(api.version("1.1.0").context("test"));
     }
 
@@ -900,6 +929,7 @@ public class APIPublisherImplTestCase {
         //APIMgtDAOException
         Mockito.doThrow(new APIMgtDAOException("Error occurred while updating the API - " + api.getName())).when(apiDAO)
                 .updateAPI(uuid, api.build());
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         try {
             apiPublisher.updateAPI(api);
         } catch (APIManagementException e) {
@@ -976,6 +1006,7 @@ public class APIPublisherImplTestCase {
                 .thenReturn(new SubscriptionPolicy(BRONZE_TIER));
         APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
                 gatewaySourceGenerator, gateway, policyDAO);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
         Mockito.when(identityProvider.getRoleId(ADMIN_ROLE)).thenReturn(ADMIN_ROLE_ID);
         Mockito.when(identityProvider.getRoleId(DEVELOPER_ROLE)).thenReturn(DEVELOPER_ROLE_ID);
@@ -1002,6 +1033,7 @@ public class APIPublisherImplTestCase {
                 APIMgtConstants.DEFAULT_API_POLICY)).thenReturn(apiPolicy);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
                 gatewaySourceGenerator, gateway, policyDAO);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
         Mockito.when(apiDAO.isAPIContextExists("testContext")).thenReturn(true);
         Mockito.when(identityProvider.getRoleId(ADMIN_ROLE)).thenReturn(ADMIN_ROLE_ID);
@@ -1053,6 +1085,7 @@ public class APIPublisherImplTestCase {
         String configString = SampleTestObjectCreator.createSampleGatewayConfig();
         Mockito.when(apiDAO.getGatewayConfigOfAPI(uuid)).thenReturn(configString);
         Mockito.when(identityProvider.getRoleId(ADMIN_ROLE)).thenReturn(ADMIN_ROLE_ID);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         Mockito.when(identityProvider.getRoleId(DEVELOPER_ROLE)).thenReturn(DEVELOPER_ROLE_ID);
         apiPublisher.updateAPI(api.lifeCycleStatus(APIStatus.CREATED.getStatus()).id(uuid));
         Mockito.verify(apiDAO, Mockito.times(1)).getAPI(uuid);
@@ -1088,6 +1121,7 @@ public class APIPublisherImplTestCase {
         APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, apiLifecycleManager,
                 gatewaySourceGenerator, gateway, policyDAO);
         Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api.build());
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         Mockito.when(identityProvider.getRoleId(ADMIN_ROLE)).thenReturn(ADMIN_ROLE_ID);
         Mockito.when(identityProvider.getRoleId(DEVELOPER_ROLE)).thenReturn(DEVELOPER_ROLE_ID);
         apiPublisher.updateAPI(api.context("testContext"));
@@ -1125,7 +1159,7 @@ public class APIPublisherImplTestCase {
                         USER, api);
     }
 
-    @Test(description = "Update api status", expectedExceptions = { APIManagementException.class })
+    @Test(description = "Update api status", expectedExceptions = {APIManagementException.class})
     public void testUpdateAPIStatusWhileAPINotAvailable() throws APIManagementException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
@@ -1144,7 +1178,7 @@ public class APIPublisherImplTestCase {
     }
 
     @Test(description = "Update api status",
-            expectedExceptions = { APIMgtDAOException.class, APIManagementException.class })
+            expectedExceptions = {APIMgtDAOException.class, APIManagementException.class})
     public void testUpdateAPIStatusWhileGettingDBFailure() throws APIManagementException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
@@ -1325,6 +1359,7 @@ public class APIPublisherImplTestCase {
         Mockito.when(apiDAO.isAPIContextExists(api.getContext())).thenReturn(true);
         String configString = SampleTestObjectCreator.createSampleGatewayConfig();
         Mockito.when(apiDAO.getGatewayConfigOfAPI(uuid)).thenReturn(configString);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(api.getId())).thenReturn(SampleTestObjectCreator.apiDefinition);
         try {
             apiPublisher.updateAPI(api.lifeCycleStatus(APIStatus.CREATED.getStatus()).id(uuid));
         } catch (APIManagementException e) {
@@ -1514,7 +1549,7 @@ public class APIPublisherImplTestCase {
     }
 
     @Test(description = "Create new  API version with APIID and new API lifecycle add get failed",
-            expectedExceptions = { LifecycleException.class, APIManagementException.class })
+            expectedExceptions = {LifecycleException.class, APIManagementException.class})
     public void testCreateNewAPIVersionAndCheckNewApiLifecycleAddFailure()
             throws APIManagementException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
@@ -1531,7 +1566,7 @@ public class APIPublisherImplTestCase {
     }
 
     @Test(description = "Create new  API version with APIID and new API lifecycle add get failed",
-            expectedExceptions = { APIMgtDAOException.class, APIManagementException.class })
+            expectedExceptions = {APIMgtDAOException.class, APIManagementException.class})
     public void testCreateNewAPIVersionAndGetAPIByUuidFailure() throws APIManagementException, LifecycleException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APILifecycleManager apiLifecycleManager = Mockito.mock(APILifecycleManager.class);
@@ -1558,7 +1593,7 @@ public class APIPublisherImplTestCase {
     }
 
     @Test(description = "Check if api exist with invalid uuid",
-            expectedExceptions = { APIMgtDAOException.class, APIManagementException.class })
+            expectedExceptions = {APIMgtDAOException.class, APIManagementException.class})
     public void testCheckIfAPIExistWhileGettingJDBCConnectionFailure() throws APIManagementException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
@@ -2148,7 +2183,7 @@ public class APIPublisherImplTestCase {
     }
 
     @Test(description = "Save swagger definition for API")
-    public void testSaveSwagger20Definition() throws APIManagementException {
+    public void testSaveSwagger20Definition() throws APIManagementException, IOException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
@@ -2156,17 +2191,28 @@ public class APIPublisherImplTestCase {
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator, gateway);
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
+                gateway, keyManager);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
                 .thenReturn(DEVELOPER_ROLE);
+        String oldSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
+                .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
+                ".yaml"));
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(uuid)).thenReturn(oldSwagger);
+        Mockito.when(keyManager.retrieveScope("apim:api_create")).thenReturn(new Scope("apim:api_create", "Create " +
+                "API"));
+        Mockito.when(keyManager.retrieveScope("apim:api_delete")).thenReturn(new Scope("apim:api_delete", "Create " +
+                "API"));
+
         apiPublisher.saveSwagger20Definition(uuid, SampleTestObjectCreator.apiDefinition);
         Mockito.verify(apiDAO, Mockito.times(1)).updateApiDefinition(uuid, SampleTestObjectCreator.apiDefinition, USER);
     }
 
     @Test(description = "Exception when saving swagger definition for API",
             expectedExceptions = APIManagementException.class)
-    public void testSaveSwagger20DefinitionException() throws APIManagementException {
+    public void testSaveSwagger20DefinitionException() throws APIManagementException, IOException {
         ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
         API api = SampleTestObjectCreator.createDefaultAPI().build();
         String uuid = api.getId();
@@ -2176,11 +2222,26 @@ public class APIPublisherImplTestCase {
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
         IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
-        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator, gateway);
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
+                gateway, keyManager);
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
                 .thenReturn(DEVELOPER_ROLE);
+        Mockito.when(keyManager.retrieveScope("apim:api_create")).thenReturn(new Scope("apim:api_create", "Create " +
+                "API"));
+        String oldSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
+                .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
+                ".yaml"));
         Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(uuid)).thenReturn(oldSwagger);
         apiPublisher.saveSwagger20Definition(uuid, SampleTestObjectCreator.apiDefinition);
+    }
+
+    private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, ApiDAO apiDAO,
+                                                 GatewaySourceGenerator gatewaySourceGenerator, APIGateway gateway,
+                                                 KeyManager keyManager) {
+        return new APIPublisherImpl(USER, identityProvider, keyManager, apiDAO, null, null, null, null,
+                null, null, null, null, gatewaySourceGenerator, gateway);
     }
 
     @Test(description = "Test getting all endpoints")
@@ -2284,14 +2345,23 @@ public class APIPublisherImplTestCase {
         GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
         APIGateway gateway = Mockito.mock(APIGateway.class);
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
         Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api,
                 APIMgtConstants.DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway, policyDAO);
+                gateway, policyDAO, keyManager);
         String def = SampleTestObjectCreator.apiDefinition;
         InputStream apiDefinition = new ByteArrayInputStream(def.getBytes());
         apiPublisher.addApiFromDefinition(apiDefinition);
         Mockito.verify(apiLifecycleManager, Mockito.times(1)).addLifecycle(APIMgtConstants.API_LIFECYCLE, USER);
+    }
+
+    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APILifecycleManager apiLifecycleManager,
+                                                 GatewaySourceGenerator
+                                                         gatewaySourceGenerator, APIGateway gateway, PolicyDAO
+                                                         policyDAO, KeyManager keyManager) {
+        return new APIPublisherImpl(USER, null, keyManager, apiDAO, null, null, policyDAO, apiLifecycleManager, null,
+                null, null, null, gatewaySourceGenerator, gateway);
     }
 
     @Test(description = "Add api from definition using httpUrlConnection")
@@ -2307,8 +2377,9 @@ public class APIPublisherImplTestCase {
         PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
         Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.api,
                 APIMgtConstants.DEFAULT_API_POLICY)).thenReturn(new APIPolicy(APIMgtConstants.DEFAULT_API_POLICY));
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
-                gateway, policyDAO);
+                gateway, policyDAO, keyManager);
         String def = SampleTestObjectCreator.apiDefinition;
         InputStream apiDefinition = new ByteArrayInputStream(def.getBytes());
         Mockito.when(httpURLConnection.getInputStream()).thenReturn(apiDefinition);
@@ -2506,7 +2577,7 @@ public class APIPublisherImplTestCase {
     }
 
     @Test(description = "Test add api with Api Specific Endpoint",
-            expectedExceptions = { APIManagementException.class })
+            expectedExceptions = {APIManagementException.class})
     public void testAddApiSpecificEndpoint() throws APIManagementException, LifecycleException {
         /**
          * this test method verify the API Add with correct API object get invoked correctly
@@ -2544,7 +2615,7 @@ public class APIPublisherImplTestCase {
     }
 
     @Test(description = "Test add api with Api Specific Endpoint",
-            expectedExceptions = { APIManagementException.class })
+            expectedExceptions = {APIManagementException.class})
     public void testAddAlreadyAddedEndpointToApi() throws APIManagementException, LifecycleException {
         /**
          * this test method verify the API Add with correct API object get invoked correctly
@@ -2576,7 +2647,7 @@ public class APIPublisherImplTestCase {
     }
 
     @Test(description = "Test add api with Api Specific Endpoint",
-            expectedExceptions = { APIManagementException.class })
+            expectedExceptions = {APIManagementException.class})
     public void testApiLevelEndpointAddWhileDbGetError() throws APIManagementException, LifecycleException {
         /**
          * this test method verify the API Add with correct API object get invoked correctly
@@ -2662,7 +2733,7 @@ public class APIPublisherImplTestCase {
     }
 
     @Test(description = "Test add api with Api Specific Endpoint",
-            expectedExceptions = { APIManagementException.class })
+            expectedExceptions = {APIManagementException.class})
     public void testAddResourceLevelEndpointWhileResourceEndpointAlreadyExists()
             throws APIManagementException, LifecycleException {
         /**
@@ -2706,7 +2777,7 @@ public class APIPublisherImplTestCase {
     }
 
     @Test(description = "Test add api with Api Specific Endpoint",
-            expectedExceptions = { APIManagementException.class })
+            expectedExceptions = {APIManagementException.class})
     public void testAddResourceLevelEndpointWhileResourceEndpointAlreadyExistsWhileDatabaseFailure()
             throws APIManagementException, LifecycleException {
         /**
@@ -2844,6 +2915,8 @@ public class APIPublisherImplTestCase {
                 .thenReturn(endpointMap.get(APIMgtConstants.PRODUCTION_ENDPOINT));
         Mockito.when(apiDAO.getEndpointByName(endpointMap.get(APIMgtConstants.SANDBOX_ENDPOINT).getName()))
                 .thenReturn(endpointMap.get(APIMgtConstants.SANDBOX_ENDPOINT));
+        Mockito.when(apiDAO.getApiSwaggerDefinition(apiBuilder.getId())).thenReturn(SampleTestObjectCreator
+                .apiDefinition);
         apiBuilder.description("aaaaaa");
         apiPublisher.updateAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).updateAPI(apiBuilder.getId(), apiBuilder.build());
@@ -2887,11 +2960,13 @@ public class APIPublisherImplTestCase {
         Map<String, Endpoint> updatedEndpointMap = new HashMap<>(endpointMap);
         updatedEndpointMap.replace(APIMgtConstants.SANDBOX_ENDPOINT, endpoint3);
         apiBuilder.endpoint(updatedEndpointMap);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(apiBuilder.getId())).thenReturn(SampleTestObjectCreator
+                .apiDefinition);
         apiPublisher.updateAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).updateAPI(apiBuilder.getId(), apiBuilder.build());
     }
 
-    @Test(description = "Test add api with production endpoint", expectedExceptions = { APIManagementException.class },
+    @Test(description = "Test add api with production endpoint", expectedExceptions = {APIManagementException.class},
             expectedExceptionsMessageRegExp = "Endpoint Already Exist By Name : endpoint2")
     public void testUpdateApiEndpointWithAlreadyAvailableEndpointName() throws APIManagementException {
         /**
@@ -2927,6 +3002,8 @@ public class APIPublisherImplTestCase {
         Map<String, Endpoint> updatedEndpointMap = new HashMap<>(endpointMap);
         updatedEndpointMap.replace(APIMgtConstants.SANDBOX_ENDPOINT, endpoint3);
         apiBuilder.endpoint(updatedEndpointMap);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(apiBuilder.getId())).thenReturn(SampleTestObjectCreator
+                .apiDefinition);
         apiPublisher.updateAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).updateAPI(apiBuilder.getId(), apiBuilder.build());
     }
@@ -2960,6 +3037,8 @@ public class APIPublisherImplTestCase {
         APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, apiLifecycleManager, gatewaySourceGenerator,
                 gateway, policyDAO);
         Mockito.when(apiDAO.getEndpoint(endpoint1.getId())).thenReturn(endpoint1);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(apiBuilder.getId())).thenReturn(SampleTestObjectCreator
+                .apiDefinition);
         Mockito.when(apiDAO.getEndpoint(endpoint2.getId())).thenReturn(endpoint2);
         Mockito.when(apiDAO.getEndpoint(endpoint1.getName())).thenReturn(endpoint1);
         Mockito.when(apiDAO.getEndpointByName(endpoint2.getName())).thenReturn(endpoint2);
@@ -2971,7 +3050,7 @@ public class APIPublisherImplTestCase {
         Mockito.verify(apiDAO, Mockito.times(1)).updateAPI(apiBuilder.getId(), apiBuilder.build());
     }
 
-    @Test(description = "Test add api with production endpoint", expectedExceptions = { APIManagementException.class },
+    @Test(description = "Test add api with production endpoint", expectedExceptions = {APIManagementException.class},
             expectedExceptionsMessageRegExp = "Endpoint Already Exist By Name : endpoint3")
     public void testUpdateApiEndpointNameWithAlreadyExistingName() throws APIManagementException {
         /**
@@ -3006,6 +3085,8 @@ public class APIPublisherImplTestCase {
         Map<String, Endpoint> updatedEndpointMap = new HashMap<>(endpointMap);
         updatedEndpointMap.replace(APIMgtConstants.SANDBOX_ENDPOINT, endpoint3);
         apiBuilder.endpoint(updatedEndpointMap);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(apiBuilder.getId())).thenReturn(SampleTestObjectCreator
+                .apiDefinition);
         apiPublisher.updateAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).updateAPI(apiBuilder.getId(), apiBuilder.build());
     }
@@ -3046,6 +3127,8 @@ public class APIPublisherImplTestCase {
         Map<String, Endpoint> updatedEndpointMap = new HashMap<>(endpointMap);
         updatedEndpointMap.replace(APIMgtConstants.SANDBOX_ENDPOINT, endpoint3);
         apiBuilder.endpoint(updatedEndpointMap);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(apiBuilder.getId())).thenReturn(SampleTestObjectCreator
+                .apiDefinition);
         apiPublisher.updateAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).updateAPI(apiBuilder.getId(), apiBuilder.build());
     }
@@ -3083,10 +3166,286 @@ public class APIPublisherImplTestCase {
                 gateway, policyDAO);
         Mockito.when(apiDAO.getEndpoint(endpoint1.getId())).thenReturn(endpoint1);
         Mockito.when(apiDAO.getEndpoint(endpoint2.getId())).thenReturn(endpoint2);
+        Mockito.when(apiDAO.getApiSwaggerDefinition(apiBuilder.getId())).thenReturn(SampleTestObjectCreator
+                .apiDefinition);
         Mockito.when(apiDAO.getEndpoint(endpoint1.getName())).thenReturn(endpoint1);
         Mockito.when(apiDAO.getEndpointByName(endpoint2.getName())).thenReturn(endpoint2);
         apiPublisher.updateAPI(apiBuilder);
         Mockito.verify(apiDAO, Mockito.times(1)).updateAPI(apiBuilder.getId(), apiBuilder.build());
+    }
+
+    @Test(description = "Save swagger definition for API")
+    public void testUpdateSwagger20DefinitionWithDifferentSwagger() throws APIManagementException, IOException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        String uuid = api.getId();
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        APIGateway gateway = Mockito.mock(APIGateway.class);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
+                gateway, keyManager);
+        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
+                .thenReturn(DEVELOPER_ROLE);
+        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
+        String oldSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
+                .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
+                ".yaml"));
+        Mockito.when(apiDAO.getApiSwaggerDefinition(uuid)).thenReturn(oldSwagger);
+        Mockito.when(keyManager.retrieveScope("apim:api_create")).thenReturn(new Scope("apim:api_create", "Create " +
+                "API"));
+        apiPublisher.saveSwagger20Definition(uuid, SampleTestObjectCreator.apiDefinition);
+        Mockito.verify(apiDAO, Mockito.times(1)).updateApiDefinition(uuid, SampleTestObjectCreator.apiDefinition, USER);
+    }
+
+    @Test(description = "Save swagger definition for API")
+    public void testUpdateSwagger20DefinitionWithDifferentSwagger2() throws APIManagementException, IOException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        String uuid = api.getId();
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        APIGateway gateway = Mockito.mock(APIGateway.class);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
+                gateway, keyManager);
+        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.DEVELOPER_ROLE_ID))
+                .thenReturn(DEVELOPER_ROLE);
+        Mockito.when(identityProvider.getRoleName(SampleTestObjectCreator.ADMIN_ROLE_ID)).thenReturn(ADMIN_ROLE);
+        String newSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
+                .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
+                ".yaml"));
+        Mockito.when(apiDAO.getApiSwaggerDefinition(uuid)).thenReturn(SampleTestObjectCreator.apiDefinition);
+        Mockito.when(keyManager.retrieveScope("apim:api_create")).thenReturn(new Scope("apim:api_create", "Create " +
+                "API"));
+        apiPublisher.saveSwagger20Definition(uuid, newSwagger);
+        Mockito.verify(apiDAO, Mockito.times(1)).updateApiDefinition(uuid, newSwagger, USER);
+    }
+
+    @Test(description = "Save swagger definition for API")
+    public void testGetScopesFromApi() throws APIManagementException, IOException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO);
+        String newSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
+                .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
+                ".yaml"));
+        Mockito.when(apiDAO.getApiSwaggerDefinition("abcd")).thenReturn(newSwagger);
+        Map<String, String> scopesSet = apiPublisher.getScopesForApi("abcd");
+        Map<String, String> scopes = new APIDefinitionFromSwagger20().getScopesFromSecurityDefinition(newSwagger);
+        scopesSet.keySet().removeAll(scopes.keySet());
+        Assert.assertTrue(scopesSet.isEmpty());
+    }
+
+    @Test
+    public void testGetScopeInformationFromApi() throws APIManagementException, IOException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, keyManager);
+        String newSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
+                .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
+                ".yaml"));
+        Mockito.when(apiDAO.getApiSwaggerDefinition("abcd")).thenReturn(newSwagger);
+        Scope scope = new Scope("apim:api_create", "apim:api_create");
+        Mockito.when(keyManager.retrieveScope("apim:api_create")).thenReturn(scope);
+        Scope retrievedScope = apiPublisher.getScopeInformationOfApi("abcd", "apim:api_create");
+        Assert.assertEquals(scope, retrievedScope);
+    }
+
+    @Test
+    public void testGetScopeInformationForNonExistingScope() throws APIManagementException, IOException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(apiDAO, keyManager);
+        String newSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
+                .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
+                ".yaml"));
+        Mockito.when(apiDAO.getApiSwaggerDefinition("abcd")).thenReturn(newSwagger);
+        Scope scope = new Scope("apim:api_create", "apim:api_delete");
+        Mockito.when(keyManager.retrieveScope("apim:api_create")).thenReturn(scope);
+        try {
+            apiPublisher.getScopeInformationOfApi("abcd", "apim:api_delete");
+            Assert.fail();
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getErrorHandler().getErrorCode(), 900981);
+
+        }
+    }
+
+
+    @Test(description = "Add Scope to API")
+    public void testAddScopeToApi() throws APIManagementException, IOException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        String uuid = api.getId();
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        APIGateway gateway = Mockito.mock(APIGateway.class);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
+                gateway, keyManager);
+        String oldSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
+                .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
+                ".yaml"));
+        Scope deleteScope = new Scope("api_delete", "apim:api_delete");
+        Mockito.when(keyManager.registerScope(deleteScope)).thenReturn(true);
+        Mockito.when(keyManager.retrieveScope(deleteScope.getName())).thenReturn(deleteScope);
+        Mockito.when(keyManager.retrieveScope("apim:api_create")).thenReturn(new Scope("apim:api_create", "Create " +
+                "API"));
+        Mockito.when(apiDAO.getApiSwaggerDefinition(uuid)).thenReturn(oldSwagger);
+        apiPublisher.addScopeToTheApi(api.getId(), deleteScope);
+    }
+
+    @Test(description = "Add existing Scope to API")
+    public void testAddExistingScopeToApi() throws APIManagementException, IOException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        String uuid = api.getId();
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        APIGateway gateway = Mockito.mock(APIGateway.class);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
+                gateway, keyManager);
+        String oldSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
+                .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
+                ".yaml"));
+        Scope scope = new Scope("api_create", "api_create");
+        Mockito.when(apiDAO.getApiSwaggerDefinition(uuid)).thenReturn(oldSwagger);
+        try {
+            apiPublisher.addScopeToTheApi(api.getId(), scope);
+            Assert.fail();
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Scope already registered");
+        }
+    }
+
+    @Test(description = "Add existing Scope to API")
+    public void testAddExistingScopeToApi2() throws APIManagementException, IOException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        String uuid = api.getId();
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        APIGateway gateway = Mockito.mock(APIGateway.class);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
+                gateway, keyManager);
+        String oldSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
+                .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
+                ".yaml"));
+        Scope scope = new Scope("api_delete", "api_delete");
+        Mockito.when(apiDAO.getApiSwaggerDefinition(uuid)).thenReturn(oldSwagger);
+        Mockito.when(keyManager.registerScope(scope)).thenReturn(false);
+        try {
+            apiPublisher.addScopeToTheApi(api.getId(), scope);
+            Assert.fail();
+        } catch (APIManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Scope already registered");
+        }
+    }
+
+    @Test(description = "update existing Scope to API")
+    public void testUpdateScopeToApi() throws APIManagementException, IOException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        String uuid = api.getId();
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        APIGateway gateway = Mockito.mock(APIGateway.class);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
+                gateway, keyManager);
+        String oldSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
+                .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
+                ".yaml"));
+        Scope scope = new Scope("apim:api_create", "apim:api_create");
+        Mockito.when(apiDAO.getApiSwaggerDefinition(uuid)).thenReturn(oldSwagger);
+        Mockito.when(keyManager.updateScope(scope)).thenReturn(true);
+        Mockito.when(keyManager.retrieveScope("apim:api_create")).thenReturn(new Scope("apim:api_create", "Create " +
+                "API"));
+        apiPublisher.updateScopeOfTheApi(api.getId(), scope);
+    }
+
+    @Test(description = "update existing Scope to API")
+    public void testUpdateScopeOfNonExistingScope() throws APIManagementException, IOException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        String uuid = api.getId();
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        APIGateway gateway = Mockito.mock(APIGateway.class);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
+                gateway, keyManager);
+        String oldSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
+                .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
+                ".yaml"));
+        Scope scope = new Scope("apim:api_delete", "apim:api_delete");
+        Mockito.when(apiDAO.getApiSwaggerDefinition(uuid)).thenReturn(oldSwagger);
+        try {
+            apiPublisher.updateScopeOfTheApi(api.getId(), scope);
+            Assert.fail();
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Scope couldn't found by name: "));
+        }
+    }
+
+    @Test(description = "Delete existing Scope of API")
+    public void testDeleteScopeToApi() throws APIManagementException, IOException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        String uuid = api.getId();
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        APIGateway gateway = Mockito.mock(APIGateway.class);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
+                gateway, keyManager);
+        String oldSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
+                .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
+                ".yaml"));
+        Scope scope = new Scope("apim:api_create", "apim:api_create");
+        Mockito.when(apiDAO.getApiSwaggerDefinition(uuid)).thenReturn(oldSwagger);
+        Mockito.when(keyManager.deleteScope(scope.getName())).thenReturn(true);
+        apiPublisher.deleteScopeFromApi(api.getId(), scope.getName());
+    }
+
+    @Test(description = "delete existing Scope to API")
+    public void testDeleteScopeOfNonExistingScope() throws APIManagementException, IOException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        API api = SampleTestObjectCreator.createDefaultAPI().build();
+        String uuid = api.getId();
+        Mockito.when(apiDAO.getAPI(uuid)).thenReturn(api);
+        GatewaySourceGenerator gatewaySourceGenerator = Mockito.mock(GatewaySourceGenerator.class);
+        APIGateway gateway = Mockito.mock(APIGateway.class);
+        IdentityProvider identityProvider = Mockito.mock(IdentityProvider.class);
+        KeyManager keyManager = Mockito.mock(KeyManager.class);
+        APIPublisherImpl apiPublisher = getApiPublisherImpl(identityProvider, apiDAO, gatewaySourceGenerator,
+                gateway, keyManager);
+        String oldSwagger = IOUtils.toString(new FileInputStream("src" + File.separator + "test" + File
+                .separator + "resources" + File.separator + "swagger" + File.separator + "swaggerWithAuthorization" +
+                ".yaml"));
+        Scope scope = new Scope("apim:api_delete", "apim:api_delete");
+        Mockito.when(apiDAO.getApiSwaggerDefinition(uuid)).thenReturn(oldSwagger);
+        try {
+            apiPublisher.deleteScopeFromApi(api.getId(), scope.getName());
+            Assert.fail();
+        } catch (APIManagementException e) {
+            Assert.assertTrue(e.getMessage().contains("Scope couldn't found by name: "));
+        }
+    }
+
+    private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, KeyManager keyManager) {
+        return new APIPublisherImpl(USER, null, keyManager, apiDAO, null, null, null, null, null, null, null, null,
+                null, null);
     }
 
     private PolicyDAO getDefaultMockedPolicyDAO() throws APIManagementException {
@@ -3119,14 +3478,15 @@ public class APIPublisherImplTestCase {
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APILifecycleManager apiLifecycleManager,
-            APIGateway apiGatewayPublisher) {
+                                                 APIGateway apiGatewayPublisher) {
         return new APIPublisherImpl(USER, null, null, apiDAO, null, null,
                 null, apiLifecycleManager, null, null, null,
                 null, new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
     }
 
     private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, ApiDAO apiDAO,
-            APILifecycleManager apiLifecycleManager, APIGateway apiGatewayPublisher) {
+                                                 APILifecycleManager apiLifecycleManager, APIGateway
+                                                         apiGatewayPublisher) {
         return new APIPublisherImpl(USER, identityProvider, null, apiDAO, null,
                 null, null, apiLifecycleManager, null, null, null,
                 null, new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
@@ -3153,7 +3513,8 @@ public class APIPublisherImplTestCase {
     }
 
     private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, ApiDAO apiDAO,
-            APISubscriptionDAO apiSubscriptionDAO, APILifecycleManager apiLifecycleManager) {
+                                                 APISubscriptionDAO apiSubscriptionDAO, APILifecycleManager
+                                                         apiLifecycleManager) {
         return new APIPublisherImpl(USER, identityProvider, null, apiDAO, null,
                 apiSubscriptionDAO, null, apiLifecycleManager, null, null, null,
                 null, new GatewaySourceGeneratorImpl(), new APIGatewayPublisherImpl());
@@ -3185,8 +3546,9 @@ public class APIPublisherImplTestCase {
     }
 
     private APIPublisherImpl getApiPublisherImpl(IdentityProvider identityProvider, ApiDAO apiDAO,
-            APISubscriptionDAO apiSubscriptionDAO, APILifecycleManager apiLifecycleManager, WorkflowDAO workfloDAO,
-            APIGateway apiGatewayPublisher) {
+                                                 APISubscriptionDAO apiSubscriptionDAO, APILifecycleManager
+                                                         apiLifecycleManager, WorkflowDAO workfloDAO,
+                                                 APIGateway apiGatewayPublisher) {
         return new APIPublisherImpl(USER, identityProvider, null, apiDAO, null,
                 apiSubscriptionDAO, null, apiLifecycleManager, null, workfloDAO, null,
                 null, new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
@@ -3225,14 +3587,14 @@ public class APIPublisherImplTestCase {
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, APILifecycleManager apiLifecycleManager,
                                                  GatewaySourceGenerator gatewaySourceGenerator,
                                                  APIGateway gatewayPublisher) {
-        return new APIPublisherImpl(USER, null,  null, apiDAO, null, null,
+        return new APIPublisherImpl(USER, null, null, apiDAO, null, null,
                 null, apiLifecycleManager, null, null, null,
                 null, gatewaySourceGenerator, gatewayPublisher);
     }
 
     private APIPublisherImpl getApiPublisherImpl(ApiDAO apiDAO, GatewaySourceGenerator gatewaySourceGenerator,
                                                  APIGateway apiGatewayPublisher) {
-        return new APIPublisherImpl(USER, null,  null, apiDAO, null, null,
+        return new APIPublisherImpl(USER, null, null, apiDAO, null, null,
                 null, null, null, null, null,
                 null, gatewaySourceGenerator, apiGatewayPublisher);
     }
@@ -3248,14 +3610,14 @@ public class APIPublisherImplTestCase {
     private APIPublisherImpl getApiPublisherImpl(String user, ApiDAO apiDAO, APILifecycleManager apiLifecycleManager,
                                                  GatewaySourceGenerator gatewaySourceGenerator,
                                                  APIGateway apiGatewayPublisher) {
-        return new APIPublisherImpl(user, null,  null, apiDAO, null, null,
+        return new APIPublisherImpl(user, null, null, apiDAO, null, null,
                 null, apiLifecycleManager, null, null, null,
                 null, gatewaySourceGenerator, apiGatewayPublisher);
     }
 
     private APIPublisherImpl getApiPublisherImpl(APILifecycleManager apiLifecycleManager, ApiDAO apiDAO, WorkflowDAO
             workflowDAO, APIGateway apiGatewayPublisher) {
-        return new APIPublisherImpl(USER, null,  null, apiDAO, null, null,
+        return new APIPublisherImpl(USER, null, null, apiDAO, null, null,
                 null, apiLifecycleManager, null, workflowDAO
                 , null, null, new GatewaySourceGeneratorImpl(), apiGatewayPublisher);
     }
@@ -3264,7 +3626,7 @@ public class APIPublisherImplTestCase {
             apiSubscriptionDAO, APILifecycleManager apiLifecycleManager, GatewaySourceGenerator
                                                          gatewaySourceGenerator, WorkflowDAO workflowDAO,
                                                  APIGateway apiGatewayPublisher) {
-        return new APIPublisherImpl(USER, null,  null, apiDAO, applicationDAO, apiSubscriptionDAO,
+        return new APIPublisherImpl(USER, null, null, apiDAO, applicationDAO, apiSubscriptionDAO,
                 null, apiLifecycleManager, null, workflowDAO, null, null,
                 gatewaySourceGenerator, apiGatewayPublisher);
     }
@@ -3308,4 +3670,14 @@ public class APIPublisherImplTestCase {
                 null, null, apiLifecycleManager, null, null, null,
                 null, gatewaySourceGenerator, gateway);
     }
+
+    private APIPublisherImpl getApiPublisherImpl(String user, IdentityProvider identityProvider, ApiDAO apiDAO,
+                                                 APISubscriptionDAO apiSubscriptionDAO, APILifecycleManager
+                                                         apiLifecycleManager,
+                                                 APIGateway gateway, KeyManager keyManager) {
+
+        return new APIPublisherImpl(user, identityProvider, keyManager, apiDAO, null, apiSubscriptionDAO, null,
+                apiLifecycleManager, null, null, null, null, null, gateway);
+    }
+
 }

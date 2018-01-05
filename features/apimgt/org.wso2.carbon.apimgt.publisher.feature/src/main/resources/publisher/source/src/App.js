@@ -18,7 +18,7 @@
 
 import React, {Component} from 'react'
 
-import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom'
+import {BrowserRouter as Router, Redirect, Route, Switch} from 'react-router-dom'
 // import {Apis, Base, Login, Logout, Endpoints} from './app/components'
 import {PageNotFound} from './app/components/Base/Errors'
 // import ApiCreate from './app/components/Apis/Create/ApiCreate'
@@ -47,24 +47,9 @@ const Logout = () => import(/* webpackChunkName: "logout" */ './app/components/L
 class Protected extends Component {
     constructor(props) {
         super(props);
-        this.state = {showLeftMenu: false, authConfigs: null};
+        this.state = {showLeftMenu: false};
         message.config({top: '48px'}); // .custom-header height + some offset
         /* TODO: need to fix the header to avoid conflicting with messages ~tmkb*/
-        this.handleResponse = this.handleResponse.bind(this);
-        Axios.get(Utils.getAppLoginURL()).then(this.handleResponse).catch(this.handleReject);
-    }
-
-    handleResponse = (response) => {
-        this.setState({authConfigs: response.data});
-    }
-
-    /**
-     * Handle invalid login url in localStorage - environment object
-     * @param reject
-     */
-    handleReject = reject => {
-        Utils.setEnvironment(); //Set Default environment
-        Axios.get(Utils.getAppLoginURL()).then(this.handleResponse); //Try login
     }
 
     /**
@@ -81,8 +66,6 @@ class Protected extends Component {
         // Note: AuthManager.getUser() method is a passive check, which simply check the user availability in browser storage,
         // Not actively check validity of access token from backend
         if (AuthManager.getUser()) {
-
-
             return (
                 <BaseLayout>
                     <Switch>
@@ -95,22 +78,11 @@ class Protected extends Component {
                 </BaseLayout>
             );
         }
+
         let params = qs.stringify({referrer: this.props.location.pathname});
-        if (this.state.authConfigs) {
-            if (this.state.authConfigs.is_sso_enabled) {
-                var authorizationEndpoint = this.state.authConfigs.authorizationEndpoint;
-                var client_id = this.state.authConfigs.client_id;
-                var callback_URL = this.state.authConfigs.callback_url;
-                var scopes = this.state.authConfigs.scopes;
-                window.location = authorizationEndpoint + "?response_type=code&client_id=" + client_id + "&redirect_uri=" + callback_URL + "&scope=" + scopes;
-            } else {
-                return (
-                    <Redirect to={{pathname: '/login', search: params}}/>
-                );
-            }
-        } else {
-            return <LoadingAnimation/>;
-        }
+        return (
+            <Redirect to={{pathname: '/login', search: params}}/>
+        );
     }
 }
 

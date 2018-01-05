@@ -27,17 +27,22 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.auth.DCRMServiceStub;
 import org.wso2.carbon.apimgt.core.auth.OAuth2ServiceStubs;
+import org.wso2.carbon.apimgt.core.auth.ScopeRegistrationServiceStub;
 import org.wso2.carbon.apimgt.core.auth.dto.DCRClientInfo;
 import org.wso2.carbon.apimgt.core.auth.dto.OAuth2IntrospectionResponse;
 import org.wso2.carbon.apimgt.core.auth.dto.OAuth2TokenInfo;
+import org.wso2.carbon.apimgt.core.auth.dto.ScopeInfo;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
 import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -52,7 +57,9 @@ public class DefaultKeyManagerImplTestCase {
     public void testCreateApplication() throws Exception {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
 
         //happy path - 201
         ////request object to key manager
@@ -142,7 +149,9 @@ public class DefaultKeyManagerImplTestCase {
     public void testUpdateApplication() throws Exception {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
         final String consumerKey = "xxx-xxx-xxx-xxx";
 
         //happy path - 200
@@ -235,7 +244,9 @@ public class DefaultKeyManagerImplTestCase {
     public void testDeleteApplication() throws Exception {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
         final String consumerKey = "xxx-xxx-xxx-xxx";
 
         //happy path - 204
@@ -285,7 +296,9 @@ public class DefaultKeyManagerImplTestCase {
     public void testRetrieveApplication() throws Exception {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
 
         //happy path - 200
         ////mocked response object from dcr api
@@ -362,7 +375,9 @@ public class DefaultKeyManagerImplTestCase {
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         OAuth2ServiceStubs.TokenServiceStub tokenStub = Mockito.mock(OAuth2ServiceStubs.TokenServiceStub.class);
         OAuth2ServiceStubs.RevokeServiceStub revokeStub = Mockito.mock(OAuth2ServiceStubs.RevokeServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
 
         //happy path - 200 - password grant type
         ////request to key manager
@@ -413,7 +428,9 @@ public class DefaultKeyManagerImplTestCase {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         OAuth2ServiceStubs.TokenServiceStub tokenStub = Mockito.mock(OAuth2ServiceStubs.TokenServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
 
         //happy path - 200 - refresh grant type
         ////request to key manager
@@ -450,7 +467,9 @@ public class DefaultKeyManagerImplTestCase {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         OAuth2ServiceStubs.TokenServiceStub tokenStub = Mockito.mock(OAuth2ServiceStubs.TokenServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
 
         //happy path - 200 - client credentials grant type
         ////request to key manager
@@ -487,7 +506,9 @@ public class DefaultKeyManagerImplTestCase {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         OAuth2ServiceStubs.TokenServiceStub tokenStub = Mockito.mock(OAuth2ServiceStubs.TokenServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
 
         //happy path - 200 - authorization code grant type
         ////request to key manager
@@ -527,7 +548,9 @@ public class DefaultKeyManagerImplTestCase {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         OAuth2ServiceStubs.TokenServiceStub tokenStub = Mockito.mock(OAuth2ServiceStubs.TokenServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
 
         //error case - tokenRequest is null
         try {
@@ -599,7 +622,9 @@ public class DefaultKeyManagerImplTestCase {
         OAuth2ServiceStubs.IntrospectionServiceStub introspectionStub = Mockito.mock(
                 OAuth2ServiceStubs.IntrospectionServiceStub.class);
         Mockito.when(oAuth2ServiceStub.getIntrospectionServiceStub()).thenReturn(introspectionStub);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
         final String accessToken = "aaa-aaa-aaa-aaa";
 
         //happy path - 200 - token is active
@@ -688,7 +713,9 @@ public class DefaultKeyManagerImplTestCase {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         OAuth2ServiceStubs.RevokeServiceStub revokeStub = Mockito.mock(OAuth2ServiceStubs.RevokeServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
 
         //happy path - 200
         Response revokeTokenResponse = Response.builder()
@@ -731,6 +758,219 @@ public class DefaultKeyManagerImplTestCase {
             Assert.fail("Exception was expected, but wasn't thrown");
         } catch (KeyManagementException ex) {
             Assert.assertTrue(ex.getMessage().startsWith("Token revocation failed. HTTP error code: " + errorCode));
+        }
+    }
+
+    @Test
+    public void testAddScope() throws APIManagementException {
+        DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
+        OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
+        ScopeInfo scopeInfo = new ScopeInfo();
+        scopeInfo.setName("abc");
+        scopeInfo.setDescription("cde");
+        Mockito.when(scopeRegistrationServiceStub.registerScope(scopeInfo)).thenReturn(Response.builder().status(201)
+                .headers(new HashMap<>()).body(new Gson().toJson(scopeInfo), feign.Util.UTF_8)
+                .build());
+        Mockito.when(scopeRegistrationServiceStub.isScopeExist(scopeInfo.getName())).thenReturn(Response.builder()
+                .status(404).headers(Collections.emptyMap()).build());
+        Scope scope = new Scope();
+        scope.setName("abc");
+        scope.setDescription("cde");
+        Assert.assertTrue(kmImpl.registerScope(scope));
+    }
+
+    @Test
+    public void testAddScopeWhileScopeExist() throws APIManagementException {
+        DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
+        OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
+        ScopeInfo scopeInfo = new ScopeInfo();
+        scopeInfo.setName("abc");
+        scopeInfo.setDescription("cde");
+        Mockito.when(scopeRegistrationServiceStub.isScopeExist(scopeInfo.getName())).thenReturn(Response.builder()
+                .status(200).headers(Collections.emptyMap()).build());
+        Scope scope = new Scope();
+        scope.setName("abc");
+        scope.setDescription("cde");
+        Assert.assertFalse(kmImpl.registerScope(scope));
+    }
+
+    @Test
+    public void testScopeRegistrationFailed() throws APIManagementException {
+        DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
+        OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
+        ScopeInfo scopeInfo = new ScopeInfo();
+        scopeInfo.setName("abc");
+        scopeInfo.setDescription("cde");
+        Mockito.when(scopeRegistrationServiceStub.registerScope(scopeInfo)).thenReturn(Response.builder().status(400)
+                .headers(new HashMap<>()).body(new Gson().toJson(scopeInfo), feign.Util.UTF_8)
+                .build());
+        Mockito.when(scopeRegistrationServiceStub.isScopeExist(scopeInfo.getName())).thenReturn(Response.builder()
+                .status(404).headers(Collections.emptyMap()).build());
+        Scope scope = new Scope();
+        scope.setName("abc");
+        scope.setDescription("cde");
+        try {
+            kmImpl.registerScope(scope);
+            Assert.fail();
+        } catch (KeyManagementException e) {
+            Assert.assertEquals(e.getMessage(), "Scope Registration Failed");
+        }
+    }
+
+    @Test
+    public void testRetrievescope() throws APIManagementException {
+        DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
+        OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
+        ScopeInfo scopeInfo = new ScopeInfo();
+        scopeInfo.setName("abc");
+        scopeInfo.setDescription("cde");
+        Mockito.when(scopeRegistrationServiceStub.getScopeByName(scopeInfo.getName())).thenReturn(Response.builder()
+                .status(200).headers(new HashMap<>()).body(new Gson().toJson(scopeInfo), feign.Util.UTF_8).build());
+        Scope retrievedScope = kmImpl.retrieveScope(scopeInfo.getName());
+        Assert.assertEquals(scopeInfo.getName(), retrievedScope.getName());
+        Assert.assertEquals(scopeInfo.getDescription(), retrievedScope.getDescription());
+        Assert.assertEquals(Collections.emptyList(), retrievedScope.getBindings());
+    }
+
+    @Test
+    public void testRetrieveScopeWithBindings() throws APIManagementException {
+        DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
+        OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
+        ScopeInfo scopeInfo = new ScopeInfo();
+        scopeInfo.setName("abc");
+        scopeInfo.setDescription("cde");
+        List<String> list = new ArrayList<>();
+        list.add("apim:api_create");
+        scopeInfo.setBindings(list);
+        Mockito.when(scopeRegistrationServiceStub.getScopeByName(scopeInfo.getName())).thenReturn(Response.builder()
+                .status(200).headers(new HashMap<>()).body(new Gson().toJson(scopeInfo), feign.Util.UTF_8).build());
+        Scope retrievedScope = kmImpl.retrieveScope(scopeInfo.getName());
+        Assert.assertEquals(scopeInfo.getName(), retrievedScope.getName());
+        Assert.assertEquals(scopeInfo.getDescription(), retrievedScope.getDescription());
+        Assert.assertEquals(list, retrievedScope.getBindings());
+    }
+
+    @Test
+    public void testRetrieveNonExistingScope() throws APIManagementException {
+        DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
+        OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
+        Mockito.when(scopeRegistrationServiceStub.getScopeByName("abc")).thenReturn(Response.builder()
+                .status(404).headers(new HashMap<>()).build());
+        try {
+            kmImpl.retrieveScope("abc");
+            Assert.fail();
+        } catch (KeyManagementException e) {
+            Assert.assertEquals(e.getErrorHandler().getErrorCode(), 900981);
+
+        }
+    }
+
+    @Test
+    public void testRetrieveExistingScopeWhileBackendsendInternalServerError() throws APIManagementException {
+        DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
+        OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
+        Mockito.when(scopeRegistrationServiceStub.getScopeByName("abc")).thenReturn(Response.builder()
+                .status(500).headers(new HashMap<>()).build());
+        try {
+            kmImpl.retrieveScope("abc");
+            Assert.fail();
+        } catch (KeyManagementException e) {
+            Assert.assertEquals(e.getErrorHandler().getErrorCode(), 900967);
+
+        }
+    }
+
+    @Test
+    public void testUpdateScope() throws APIManagementException {
+        DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
+        OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
+        ScopeInfo scopeInfo = new ScopeInfo();
+        scopeInfo.setDescription("cde");
+        scopeInfo.setDisplayName("abc");
+        Scope scope = new Scope();
+        scope.setName("abc");
+        scope.setDescription("cde");
+        Mockito.when(scopeRegistrationServiceStub.updateScope(scopeInfo, scope.getName())).thenReturn(Response
+                .builder()
+                .status(200).headers(new HashMap<>()).body(new Gson().toJson(scopeInfo), feign.Util.UTF_8).build());
+        boolean status = kmImpl.updateScope(scope);
+        Assert.assertTrue(status);
+    }
+
+    @Test
+    public void testUpdateScopeWhileAuthorizationServerThrowsInternalError() throws APIManagementException {
+        DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
+        OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
+        ScopeInfo scopeInfo = new ScopeInfo();
+        scopeInfo.setDescription("cde");
+        scopeInfo.setDisplayName("abc");
+        Scope scope = new Scope();
+        scope.setName("abc");
+
+        scope.setDescription("cde");
+        Mockito.when(scopeRegistrationServiceStub.updateScope(scopeInfo, scope.getName())).thenReturn(Response
+                .builder()
+                .status(500).headers(new HashMap<>()).build());
+        try {
+            boolean status = kmImpl.updateScope(scope);
+        } catch (KeyManagementException e) {
+            Assert.assertEquals(e.getErrorHandler().getErrorCode(), 900967);
+        }
+    }
+    @Test
+    public void testDeleteScope() throws APIManagementException {
+        DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
+        OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
+        Mockito.when(scopeRegistrationServiceStub.deleteScope("abc")).thenReturn(Response
+                .builder()
+                .status(200).headers(new HashMap<>()).build());
+        boolean status = kmImpl.deleteScope("abc");
+        Assert.assertTrue(status);
+    }
+
+    @Test
+    public void testDeleteScopeWhileAuthorizationServerThrowsInternalError() throws APIManagementException {
+        DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
+        OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
+        Mockito.when(scopeRegistrationServiceStub.deleteScope("abc")).thenReturn(Response
+                .builder().status(500).headers(new HashMap<>()).build());
+        try {
+            boolean status = kmImpl.deleteScope("abc");
+        } catch (KeyManagementException e) {
+            Assert.assertEquals(e.getErrorHandler().getErrorCode(), 900983);
         }
     }
 

@@ -226,6 +226,89 @@ class API {
     }
 
     /**
+     * Get the scopes of an API
+     * @param id {String} UUID of the API in which the swagger is needed
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getScopes(id, callback = null) {
+        var promise_get = this.client.then(
+            (client) => {
+                return client.apis["Scope (Collection)"].get_apis__apiId__scopes(
+                    {apiId: id}, this._requestMetaData());
+            }
+        );
+        if (callback) {
+            return promise_get.then(callback);
+        } else {
+            return promise_get;
+        }
+    }
+    /**
+     * Get the detail of scope of an API
+     * @param id {String} UUID of the API in which the scopes is needed
+     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @returns {promise} With given callback attached to the success chain else API invoke promise.
+     */
+    getScopeDetail(api_id,name,callback = null) {
+        var promise_get_Scope_detail = this.client.then(
+            (client) => {
+                return client.apis["Scope (Individual)"].get_apis__apiId__scopes__name_({
+                        apiId: api_id,
+                        name: name
+                    },
+                    this._requestMetaData());
+            }
+        );
+        if (callback) {
+            return promise_get_Scope_detail.then(callback);
+        } else {
+            return promise_get_Scope_detail;
+        }
+    }
+
+    updateScope(api_id, scopeName, body) {
+        var promised_updateScope = this.client.then(
+            (client) => {
+                let payload = {
+                    apiId: api_id,
+                    body: body,
+                    name: scopeName,
+                    "Content-Type": "application/json"
+                };
+                return client.apis["Scope (Individual)"].put_apis__apiId__scopes__name_(
+                    payload, this._requestMetaData());
+            }
+        );
+        return promised_updateScope;
+    }
+    addScope(api_id, body) {
+        var promised_addScope = this.client.then(
+            (client) => {
+                let payload = {
+                    apiId: api_id,
+                    body: body,
+                    "Content-Type": "application/json"
+                };
+                return client.apis["Scope (Collection)"].post_apis__apiId__scopes(
+                    payload, this._requestMetaData());
+            }
+        );
+        return promised_addScope;
+    }
+    deleteScope(api_id, scope_name) {
+        var promise_deleteScope = this.client.then(
+            (client) => {
+                return client.apis["Scope (Individual)"].delete_apis__apiId__scopes__name_({
+                        apiId: api_id,
+                        name: scope_name
+                    },
+                    this._requestMetaData());
+            }
+        );
+        return promise_deleteScope;
+    }
+    /**
      * Update an api via PUT HTTP method, Need to give the updated API object as the argument.
      * @param api {Object} Updated API object(JSON) which needs to be updated
      */

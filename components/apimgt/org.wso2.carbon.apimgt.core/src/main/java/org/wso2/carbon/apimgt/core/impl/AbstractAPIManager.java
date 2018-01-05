@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.core.models.DocumentContent;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Label;
 import org.wso2.carbon.apimgt.core.models.Subscription;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.workflow.Workflow;
 
 import java.io.InputStream;
@@ -249,7 +250,7 @@ public abstract class AbstractAPIManager implements APIManager {
     @Override
     public String getApiSwaggerDefinition(String api) throws APIManagementException {
         try {
-            return getApiDAO().getApiSwaggerDefinition(api);
+            return APIUtils.yamlToJson(getApiDAO().getApiSwaggerDefinition(api));
 
         } catch (APIMgtDAOException e) {
             String errorMsg = "Couldn't retrieve swagger definition for apiId " + api;

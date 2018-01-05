@@ -16,22 +16,54 @@
  * under the License.
  */
 
-import {Axios} from 'axios'
-import DefaultConfig from './DefaultConfigs.json'
+import axios from 'axios'
 
 class ConfigManager {
 
-    constructor() {
-        this.preBuildConfigs = DefaultConfig;
-        this.runTimeConfigs = {};
-        this.runTimeConfigLocation = ""; // URL to fetch runtime config JSON
+    /**
+     * get promised config and update the configMap
+     * @param configPath: Path to read configs from
+     * @returns {Promise Object}: promised config
+     * @private
+     */
+    static _getPromisedConfigs(configPath) {
+        let promisedConfig = ConfigManager._promisedConfigMap.get(configPath);
+        if (promisedConfig) {
+            return promisedConfig;
+        }
+        let origin = window.location.origin;
+        let requestUrl = origin + configPath;
+
+        promisedConfig = axios.get(requestUrl);
+        ConfigManager._promisedConfigMap.set(configPath, promisedConfig);
+        return promisedConfig;
     }
 
-    checkRunTimeConfigs() {
-
-    }
-
-    getConfigs() {
-
+    /**
+     * get configurations from server: deployment.yaml
+     * @returns {Object}: configuration object
+     */
+    static getConfigs() {
+        return {
+            'environments': ConfigManager._getPromisedConfigs(ConfigRequestPaths.ENVIRONMENT_CONFIG_PATH)
+        };
     }
 }
+
+/**
+ * @type {{ConstPath: StringPath}} ConfigRequestPaths: Configuration requesting url paths
+ */
+const ConfigRequestPaths = {
+    ENVIRONMENT_CONFIG_PATH: "/configService/environments"
+};
+
+/**
+ * The map of single instance promised configs objects
+ * {key}: ConfigRequestPaths
+ * {value}: promised config
+ * @type {Map}
+ * @private
+ */
+ConfigManager._promisedConfigMap = new Map();
+
+export default ConfigManager;

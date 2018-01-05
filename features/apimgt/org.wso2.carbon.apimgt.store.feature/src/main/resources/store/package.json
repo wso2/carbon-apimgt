@@ -13,7 +13,7 @@
     "url": "git://github.com/wso2/carbon-apimgt"
   },
   "author": "WSO2 Org",
-  "license": "Apache License 2.0",
+  "license": "Apache-2.0",
   "dependencies": {
     "antd": "^2.13.2",
     "axios": "^0.16.1",
@@ -36,7 +36,7 @@
     "react-select": "^1.0.0-rc.10",
     "react-tap-event-plugin": "^2.0.1",
     "react-toastify": "^1.7.0",
-    "swagger-client": "3.0.19",
+    "swagger-client": "git://github.com/RenukaFernando/swagger-js.git#v-cors-patch",
     "typeface-roboto": "0.0.35",
     "url-loader": "^0.5.9"
   },

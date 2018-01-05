@@ -21,21 +21,24 @@ import AuthManager from "./AuthManager";
 /**
  * Utility class for Admin Portal application
  */
-class AdminPortalUtils {
+class Utils {
 
-      /**
+    /**
      * Get JavaScript accessible cookies saved in browser, by giving the cooke name.
      * @param {String} name : Name of the cookie which need to be retrived
      * @returns {String|null} : If found a cookie with given name , return its value,Else null value is returned
      */
     static getCookie(name) {
+        //Append environment name to cookie
+        let environmentName = "_" + Utils.getEnvironment().label;
+
         let pairs = document.cookie.split(";");
         let cookie = null;
         for (let pair of pairs) {
             pair = pair.split("=");
             let cookie_name = pair[0].trim();
             let value = encodeURIComponent(pair[1]);
-            if (cookie_name === name) {
+            if (cookie_name === name + environmentName) {
                 cookie = value;
                 break;
             }
@@ -46,9 +49,11 @@ class AdminPortalUtils {
     /**
      * Delete a browser cookie given its name
      * @param {String} name : Name of the cookie which need to be deleted
+     * @param {String} path : Path of the cookie which need to be deleted
      */
-    static delete_cookie(name) {
-        document.cookie = name + '=; Path=' + "/" + '; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+    static delete_cookie(name, path) {
+        //Environment name is appended to the cookie name
+        document.cookie = `${name}_${Utils.getEnvironment().label}=; path=${path}; expires=Thu, 01 Jan 1970 00:00:01 GMT`;
     }
 
     /**
@@ -61,15 +66,121 @@ class AdminPortalUtils {
      * @param {boolean} secured : secured parameter is set
      */
     static setCookie(name, value, validityPeriod, path = "/", secured = true) {
-        let expires = "";
+        let expiresDirective = "";
         const securedDirective = secured ? "; Secure" : "";
         if (validityPeriod) {
             const date = new Date();
             date.setTime(date.getTime() + validityPeriod * 1000);
-            expires = "; expires=" + date.toUTCString();
+            expiresDirective = "; expires=" + date.toUTCString();
         }
-        document.cookie = name + "=" + value + expires + "; path=" + path + securedDirective;
+
+        document.cookie = `${name}_${Utils.getEnvironment().label}=${value}; path=${path}${expiresDirective}${securedDirective}`;
+    }
+
+    /**
+     * Given an object returns whether the object is empty or not
+     * @param {Object} object : Any JSON object
+     * @returns {boolean}
+     */
+    static isEmptyObject(object) {
+        return Object.keys(object).length === 0 && object.constructor === Object
+    }
+
+    /**
+     * Get the current environment from local-storage
+     * @returns {Object} environment: {label, host, loginTokenPath}
+     */
+    static getEnvironment() {
+        if (Utils._environment) {
+            return Utils._environment;
+        }
+
+        let environmentData = localStorage.getItem(Utils.CONST.LOCALSTORAGE_ENVIRONMENT);
+        if (!environmentData) {
+            return Utils._getDefaultEnvironment();
+        }
+
+        return JSON.parse(environmentData);
+    }
+
+    /**
+     * Get current environment's index from the given environment array
+     * @param {array} environments
+     * @returns {number}
+     */
+    static getEnvironmentID(environments) {
+        let environment = Utils.getEnvironment();
+
+        for (let i = 0; i < environments.length; i++) {
+            if (environment.label === environments[i].label) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Store the given environment in local-storage
+     * @param {object} environment
+     */
+    static setEnvironment(environment) {
+        if (!environment) {
+            environment = Utils._getDefaultEnvironment();
+        }
+
+        if (!environment.host) {
+            environment.host = window.location.host;
+        }
+        //Store environment.
+        Utils._environment = environment;
+        localStorage.setItem(Utils.CONST.LOCALSTORAGE_ENVIRONMENT, JSON.stringify(environment));
+
+        //Read the user of stored environment.
+        let user = AuthManager.getUser(true);
+        //If user is null store only in memory.
+        AuthManager.setUser(user);
+    }
+
+    static getAppLoginURL() {
+        return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGIN + Utils.CONST.CONTEXT_PATH;
+    }
+
+    static getAppLogoutURL() {
+        return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGOUT + Utils.CONST.CONTEXT_PATH;
+    }
+
+    static getLoginTokenPath() {
+        return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGIN_TOKEN_PATH + Utils.CONST.CONTEXT_PATH;
+    }
+
+    static getSwaggerURL() {
+        return "https://" + Utils.getEnvironment().host + Utils.CONST.SWAGGER_YAML;
+    }
+
+    /**
+     * Get an environment object with default values.
+     * @returns {Object} environment: {label: string, host: string, loginTokenPath: string}
+     * @private
+     */
+    static _getDefaultEnvironment(){
+        return {label: 'Default', host: window.location.host, loginTokenPath: '/login/token'};
     }
 }
 
-export default AdminPortalUtils;
+Utils.CONST = {
+    LOCALSTORAGE_ENVIRONMENT: 'environment',
+    LOGIN: '/login/login',
+    LOGOUT: '/login/logout',
+    LOGIN_TOKEN_PATH: '/login/token',
+    SWAGGER_YAML: '/api/am/publisher/v1.0/apis/swagger.yaml',
+    PROTOCOL: 'https://',
+    CONTEXT_PATH: '/publisher'
+};
+
+/**
+ * Current environment
+ * @type {object} environment object
+ * @private
+ */
+Utils._environment = undefined;
+export default Utils;

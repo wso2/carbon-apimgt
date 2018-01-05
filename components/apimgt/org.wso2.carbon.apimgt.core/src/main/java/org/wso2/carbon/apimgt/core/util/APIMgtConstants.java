@@ -337,6 +337,7 @@ public class APIMgtConstants {
         public static final String COMMENT_ID = "COMMENT_ID";
         public static final String RATING_ID = "RATING_ID";
         public static final String USERNAME = "USERNAME";
+        public static final String SCOPE_NAME = "scope";
     }
 
     /**

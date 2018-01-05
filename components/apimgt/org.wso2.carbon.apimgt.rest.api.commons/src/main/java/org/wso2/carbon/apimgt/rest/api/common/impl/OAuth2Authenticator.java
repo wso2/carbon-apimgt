@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.common.impl;
 
 import com.google.gson.reflect.TypeToken;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIDefinition;
@@ -260,7 +261,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
                 try {
                     String apiResourceDefinitionScopes = apiDefinition.getScopeOfResourcePath(restAPIResource, request,
                             serviceMethodInfo);
-                    if (apiResourceDefinitionScopes == null) {
+                    if (StringUtils.isEmpty(apiResourceDefinitionScopes)) {
                         if (log.isDebugEnabled()) {
                             log.debug("Scope not defined in swagger for matching resource " + path + " and verb "
                                     + verb + " . Hence consider as anonymous permission and let request to continue.");

@@ -18,18 +18,17 @@
 
 import React, {Component} from 'react'
 
-import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom'
-import {Apis, Applications, ApplicationCreate, Base, Login, Logout } from './app/components'
+import {BrowserRouter as Router, Redirect, Route, Switch} from 'react-router-dom'
+import {Apis, ApplicationCreate, Applications, Base, Login, Logout} from './app/components'
 import {PageNotFound} from './app/components/Base/Errors'
 import AuthManager from './app/data/AuthManager'
 import qs from 'qs'
-import Axios from 'axios';
-import LoadingAnimation from './app/components/Base/Loading/Loading.js';
 
 import 'antd/dist/antd.css'
 import {message} from 'antd'
 import './App.css'
 import 'typeface-roboto'
+
 // import './materialize.css'
 
 /**
@@ -38,16 +37,9 @@ import 'typeface-roboto'
 class Protected extends Component {
     constructor(props) {
         super(props);
-        this.state = {showLeftMenu: false, authConfigs: null};
+        this.state = {showLeftMenu: false};
         message.config({top: '48px'}); // .custom-header height + some offset
         /* TODO: need to fix the header to avoid conflicting with messages ~tmkb*/
-        this.handleResponse = this.handleResponse.bind(this);
-        /* TODO: Get apim base url from config*/
-        Axios.get(location.origin + "/login/login/store").then(this.handleResponse);
-    }
-
-    handleResponse = (response) => {
-        this.setState({ authConfigs: response.data});
     }
 
     /**
@@ -63,49 +55,36 @@ class Protected extends Component {
                 <Base>
                     <Switch>
                         <Redirect exact from="/" to="/apis"/>
-                        <Route path={"/apis"} component={Apis} />
-                        <Route path={"/applications"} component={Applications} />
-                        <Route path={"/application/create"} component={ApplicationCreate} />
+                        <Route path={"/apis"} component={Apis}/>
+                        <Route path={"/applications"} component={Applications}/>
+                        <Route path={"/application/create"} component={ApplicationCreate}/>
                         <Route component={PageNotFound}/>
                     </Switch>
                 </Base>
             );
         }
+
         let params = qs.stringify({referrer: this.props.location.pathname});
-        if (this.state.authConfigs) {
-            if (this.state.authConfigs.is_sso_enabled) {
-                var authorizationEndpoint = this.state.authConfigs.authorizationEndpoint;
-                var client_id = this.state.authConfigs.client_id;
-                var callback_URL = this.state.authConfigs.callback_url;
-                var scopes = this.state.authConfigs.scopes;
-                window.location = authorizationEndpoint+"?response_type=code&client_id="+client_id+"&redirect_uri="+callback_URL+"&scope="+scopes;
-            } else {
-                return (
-                            <Redirect to={{pathname: '/login', search: params}}/>
-                        );
-            }
-        } else {
-            return <LoadingAnimation/>;
-        }
+        return (
+            <Redirect to={{pathname: '/login', search: params}}/>
+        );
     }
 }
 
 /**
  * Define base routes for the application
  */
-class Store extends Component {
 
-    render() {
-        return (
-            <Router basename="/store">
-                <Switch>
-                    <Route path={"/login"} component={Login}/>
-                    <Route path={"/logout"} component={Logout}/>
-                    <Route component={Protected}/>
-                </Switch>
-            </Router>
-        );
-    }
+const Store = (props) => {
+    return (
+        <Router basename="/store">
+            <Switch>
+                <Route path={"/login"} render={() => <Login appName={"store"} appLabel={"STORE"} />}/>
+                <Route path={"/logout"} component={Logout}/>
+                <Route component={Protected}/>
+            </Switch>
+        </Router>
+    );
 }
 
 export default Store;

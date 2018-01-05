@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.core.models.HttpResponse;
 import org.wso2.carbon.apimgt.core.models.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
 import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
@@ -427,6 +428,26 @@ public class LightWeightKeyManagerImpl implements KeyManager {
     @Override
     public void deleteMappedApplication(String consumerKey) throws KeyManagementException {
 
+    }
+
+    @Override
+    public boolean registerScope(Scope scope) throws KeyManagementException {
+        return false;
+    }
+
+    @Override
+    public Scope retrieveScope(String name) throws KeyManagementException {
+        return null;
+    }
+
+    @Override
+    public boolean updateScope(Scope scope) throws KeyManagementException {
+        return false;
+    }
+
+    @Override
+    public boolean deleteScope(String name) throws KeyManagementException {
+        return false;
     }
 
     private OAuthApplicationInfo getOAuthApplicationInfo(HttpResponse response) throws ParseException {

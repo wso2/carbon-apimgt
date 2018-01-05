@@ -31,11 +31,11 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.CompositeAPI;
-import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.UriTemplate;
 import org.wso2.carbon.apimgt.core.models.policy.APIPolicy;
 import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
+import org.yaml.snakeyaml.Yaml;
 
 import java.time.Duration;
 import java.time.temporal.Temporal;
@@ -66,22 +66,6 @@ public class APIUtils {
         if (log.isDebugEnabled()) {
             log.debug(msg);
         }
-    }
-
-    /**
-     * Find scope object in a set based on the key
-     *
-     * @param scopes - Set of scopes
-     * @param key    - Key to search with
-     * @return Scope - scope object
-     */
-    public static Scope findScopeByKey(Set<Scope> scopes, String key) {
-        for (Scope scope : scopes) {
-            if (scope.getKey().equals(key)) {
-                return scope;
-            }
-        }
-        return null;
     }
 
     /**
@@ -218,16 +202,15 @@ public class APIUtils {
  * used to generate operationId according to the uri template and http verb
  */
     public static String generateOperationIdFromPath(String path, String httpVerb) {
-        //TODO need to write proper way of creating operationId
         StringTokenizer stringTokenizer = new StringTokenizer(path, "/");
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(httpVerb.toLowerCase());
         while (stringTokenizer.hasMoreElements()) {
             String part1 = stringTokenizer.nextToken();
             if (part1.contains("{")) {
-/*
-                stringBuilder.append("By" + pathParam);
-*/
+                part1 = part1.replace("{", "").replace("}", "");
+                part1 = StringUtils.capitalize(part1);
+                stringBuilder.append("By" + part1);
             } else if (part1.contains("*")) {
                 stringBuilder.append(part1.replaceAll("\\*", "_star_"));
             } else {
@@ -394,9 +377,9 @@ public class APIUtils {
      * @return Map of permission values.
      * @throws ParseException If failed to parse the json string.
      */
-    public static HashMap getAPIPermissionArray(String permissionJsonString) throws ParseException {
+    public static HashMap<String, Integer> getAPIPermissionArray(String permissionJsonString) throws ParseException {
 
-        HashMap roleNamePermissionList = new HashMap();
+        HashMap<String, Integer> roleNamePermissionList = new HashMap<String, Integer>();
         JSONParser jsonParser = new JSONParser();
 
         JSONArray baseJsonArray = (JSONArray) jsonParser.parse(permissionJsonString);
@@ -537,7 +520,7 @@ public class APIUtils {
     }
 
     /**
-     * Utility for Ip to Long convrsion
+     * Utility for Ip to Long conversion
      * @param ip ip value
      * @return return long value of Ip
      */
@@ -554,5 +537,17 @@ public class APIUtils {
             }
         }
         return ipAddressinLong;
+    }
+
+    /**
+     * Utility for Yaml to Json Conversion
+     * @param yamlString yaml value
+     * @return json of yaml content
+     */
+    public static String yamlToJson(String yamlString) {
+        Yaml yaml = new Yaml();
+        Map map = (Map) yaml.load(yamlString);
+        JSONObject jsonObject = new JSONObject(map);
+        return jsonObject.toString();
     }
 }

@@ -19,7 +19,6 @@
 
 import axios from 'axios'
 import qs from 'qs'
-import Configs from './ConfigManager'
 import Utils from './utils'
 import User from './User'
 

@@ -37,6 +37,8 @@ public class KeyMgtConfigurations {
     private String revokeEndpoint = "https://localhost:9443/oauth2/revoke";
     @Element(description = "Introspect Endpoint URL")
     private String introspectEndpoint = "https://localhost:9282/api/identity/oauth2/introspect/v1.0/introspection";
+    @Element(description = "Scope Registration Endpoint URL")
+    private String scopeRegistrationEndpoint = "https://localhost:9443/api/identity/oauth2/v1.0/scopes";
     @Element(description = "Key manager Credentials")
     private CredentialConfigurations keyManagerCredentials = new CredentialConfigurations();
     @Element(description = "Alias of Key Manager Certificate in Client Trust Store")
@@ -45,6 +47,10 @@ public class KeyMgtConfigurations {
     private long defaultTokenValidityPeriod = 3600L;
     @Element(description = "OpenId Connect Userinfo Response JWT Signing Algorithm")
     private String oidcUserinfoJWTSigningAlgo = "SHA256withRSA";
+    @Element(description = "Type of scope binding")
+    private String scopeBindingType = "role";
+    @Element(description = "Type of scope binding")
+    private String productRestApiScopesKeyWord = "apim:";
 
     public String getKeyManagerImplClass() {
         return keyManagerImplClass;
@@ -116,5 +122,25 @@ public class KeyMgtConfigurations {
 
     public void setOidcUserinfoJWTSigningAlgo(String oidcUserinfoJWTSigningAlgo) {
         this.oidcUserinfoJWTSigningAlgo = oidcUserinfoJWTSigningAlgo;
+    }
+
+    public String getScopeRegistrationEndpoint() {
+        return scopeRegistrationEndpoint;
+    }
+
+    public void setScopeRegistrationEndpoint(String scopeRegistrationEndpoint) {
+        this.scopeRegistrationEndpoint = scopeRegistrationEndpoint;
+    }
+
+    public String getScopeBindingType() {
+        return scopeBindingType;
+    }
+
+    public String getProductRestApiScopesKeyWord() {
+        return productRestApiScopesKeyWord;
+    }
+
+    public void setProductRestApiScopesKeyWord(String productRestApiScopesKeyWord) {
+        this.productRestApiScopesKeyWord = productRestApiScopesKeyWord;
     }
 }

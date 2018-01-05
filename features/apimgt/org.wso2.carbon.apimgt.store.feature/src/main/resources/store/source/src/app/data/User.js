@@ -17,21 +17,31 @@
  */
 "use strict";
 
-import Utils from './utils'
+import Utils from './Utils'
+
 /**
  * Represent an user logged in to the application, There will be allays one user per session and
  * this user details will be persist in browser localstorage.
  */
 export default class User {
-    constructor(name, id_token, remember = false) {
-        if (User._instance) {
-            return User._instance;
+    /**
+     * Create a user for the given environment
+     * @param {string} environment
+     * @param {string} name
+     * @param {string} id_token
+     * @param {boolean} remember
+     * @returns {User|null} user object
+     */
+    constructor(environment, name, id_token, remember = false) {
+        const user = User._userMap.get(environment);
+        if (user) {
+            return user;
         }
         this.name = name;
         this._scopes = [];
         this._idToken = id_token;
         this._remember = remember;
-        User._instance = this;
+        User._userMap.set(environment, this);
     }
 
     /**
@@ -65,7 +75,7 @@ export default class User {
      * @param path Path which need to be set to cookie
      */
     setPartialToken(newToken, validityPeriod, path) {
-        Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1);
+        Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, path);
         Utils.setCookie(User.CONST.WSO2_AM_TOKEN_1, newToken, validityPeriod, path);
     }
 
@@ -99,7 +109,7 @@ export default class User {
         if (!userJson.name) {
             throw "Need to provide user `name` key in the JSON object, to create an user";
         }
-        const _user = new User(userJson.name);
+        const _user = new User(Utils.getEnvironment().label, userJson.name);
         _user.scopes = userJson.scopes;
         _user.idToken = userJson.idToken;
         _user.rememberMe = userJson.remember;
@@ -107,5 +117,14 @@ export default class User {
     }
 }
 
-User.CONST = {WSO2_AM_TOKEN_MSF4J: "WSO2_AM_TOKEN_MSF4J", WSO2_AM_TOKEN_1: "WSO2_AM_TOKEN_1", LOCALSTORAGE_USER: "wso2_user"};
-User._instance = null; // A private class variable to preserve the single instance of a swaggerClient
+User.CONST = {
+    WSO2_AM_TOKEN_MSF4J: "WSO2_AM_TOKEN_MSF4J",
+    WSO2_AM_TOKEN_1: "WSO2_AM_TOKEN_1",
+    LOCALSTORAGE_USER: "wso2_user_store"
+};
+/**
+ * Map of users (key = environmentLabel, value = User instance)
+ * @type {Map}
+ * @private
+ */
+User._userMap = new Map();

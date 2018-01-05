@@ -24,7 +24,7 @@ const LifeCycleHistory = props => {
         <Timeline>
             {props.lcHistory.map(entry =>
                 <Timeline.Item key={entry.updatedTime}>
-                    {"LC has changed from " + entry.postState + " to " + entry.previousState
+                    {"LC has changed from " + entry.previousState + " to " + entry.postState
                     + " on " + entry.updatedTime + " by " + entry.user}</Timeline.Item>)}
         </Timeline>
     );

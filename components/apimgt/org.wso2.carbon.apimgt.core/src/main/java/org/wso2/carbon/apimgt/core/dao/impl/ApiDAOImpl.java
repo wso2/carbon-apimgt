@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.core.dao.impl;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -1613,6 +1614,26 @@ public class ApiDAOImpl implements ApiDAO {
     }
 
     @Override
+    public boolean isAPIVersionsExist(String apiName) throws APIMgtDAOException {
+        final String query = "SELECT COUNT (NAME) FROM AM_API WHERE NAME = ?";
+        try (Connection connection = DAOUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, apiName);
+            statement.execute();
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next() && rs.getInt(1) > 1) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        } catch (SQLException e) {
+            String errorMessage = "getting existence of versioned API: " + apiName;
+            throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + errorMessage, e);
+        }
+    }
+
+    @Override
     public double getAverageRating(String apiId) throws APIMgtDAOException {
         final String query = "SELECT AVG(RATING) FROM AM_API_RATINGS WHERE API_ID = ?";
         try (Connection connection = DAOUtil.getConnection();
@@ -2453,42 +2474,76 @@ public class ApiDAOImpl implements ApiDAO {
             IOException {
         final String query = "SELECT operationMapping.OPERATION_ID AS OPERATION_ID,operationMapping.API_ID AS API_ID," +
                 "operationMapping.HTTP_METHOD AS HTTP_METHOD,operationMapping.URL_PATTERN AS URL_PATTERN," +
-                "operationMapping.AUTH_SCHEME AS AUTH_SCHEME,apiPolicy.NAME AS POLICY_NAME FROM " +
-                "AM_API_OPERATION_MAPPING operationMapping,AM_API_POLICY apiPolicy WHERE operationMapping" +
-                ".API_POLICY_ID =apiPolicy.UUID AND operationMapping.API_ID = ?";
+                "operationMapping.AUTH_SCHEME AS AUTH_SCHEME,operationMapping.API_POLICY_ID AS API_POLICY_ID FROM " +
+                "AM_API_OPERATION_MAPPING operationMapping WHERE operationMapping.API_ID = ?";
         Map<String, UriTemplate> uriTemplateSet = new HashMap();
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, apiId);
             statement.execute();
             try (ResultSet rs = statement.getResultSet()) {
                 while (rs.next()) {
-                    UriTemplate uriTemplate = new UriTemplate.UriTemplateBuilder()
+                    UriTemplate.UriTemplateBuilder uriTemplateBuilder = new UriTemplate.UriTemplateBuilder()
                             .uriTemplate(rs.getString("URL_PATTERN")).authType(rs.getString("AUTH_SCHEME"))
-                            .httpVerb(rs.getString("HTTP_METHOD"))
-                            .policy(new APIPolicy(rs.getString("POLICY_NAME"))).templateId
-                                    (rs.getString("OPERATION_ID")).endpoint(getEndPointsForOperation(connection,
-                                    apiId, rs.getString("OPERATION_ID"))).build();
-                    uriTemplateSet.put(uriTemplate.getTemplateId(), uriTemplate);
+                            .httpVerb(rs.getString("HTTP_METHOD")).templateId(rs.getString("OPERATION_ID")).
+                                    endpoint(getEndPointsForOperation(connection, apiId, rs.getString("OPERATION_ID")
+                                    ));
+                    String apiPolicyId = rs.getString("API_POLICY_ID");
+                    if (StringUtils.isNotEmpty(apiPolicyId)) {
+                        uriTemplateBuilder.policy(getApiPolicyByUuid(connection, apiPolicyId));
+                    }
+                    uriTemplateSet.put(uriTemplateBuilder.build().getTemplateId(), uriTemplateBuilder.build());
                 }
             }
         }
         return uriTemplateSet;
     }
 
+    private Policy getApiPolicyByUuid(Connection connection, String uuid) throws SQLException {
+
+        String sqlQuery = "SELECT NAME from AM_API_POLICY WHERE UUID = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sqlQuery)) {
+            preparedStatement.setString(1, uuid);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    APIPolicy apiPolicy = new APIPolicy(resultSet
+                            .getString(APIMgtConstants.ThrottlePolicyConstants.COLUMN_NAME));
+                    return apiPolicy;
+                }
+            }
+        }
+        return null;
+    }
+
     private void addSubscriptionPolicies(Connection connection, Set<Policy> policies, String apiID)
             throws SQLException {
         final String query =
-                "INSERT INTO AM_API_SUBS_POLICY_MAPPING (API_ID, SUBSCRIPTION_POLICY_ID) " + "VALUES (?, ?)";
+                "INSERT INTO AM_API_SUBS_POLICY_MAPPING (API_ID, SUBSCRIPTION_POLICY_ID) " + "VALUES (?,?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             for (Policy policy : policies) {
                 statement.setString(1, apiID);
-                statement.setString(2, policy.getUuid());
+
+                statement.setString(2, getSubscriptionPolicyUUIDByName(connection, policy.getPolicyName()));
                 statement.addBatch();
             }
             statement.executeBatch();
         }
     }
 
+    private String getSubscriptionPolicyUUIDByName(Connection connection, String policyName) throws SQLException {
+        final String query = "SELECT UUID FROM AM_SUBSCRIPTION_POLICY WHERE NAME = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, policyName);
+            statement.execute();
+            try (ResultSet rs = statement.getResultSet()) {
+                if (rs.next()) {
+                    return rs.getString("UUID");
+                } else {
+                    return null;
+                }
+            }
+        }
+    }
     private void addApiPolicy(Connection connection, String apiPolicy, String apiID)
             throws SQLException {
         final String query =

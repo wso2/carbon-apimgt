@@ -20,19 +20,21 @@
 
 package org.wso2.carbon.apimgt.core.models;
 
+import java.util.List;
+
 /**
  * Contains resource level information of a specific API resource extracted by parsing the Swagger definition
  */
 
 public class APIResource {
     private final UriTemplate uriTemplate;
-    private final Scope scope;
+    private final List<String> scopes;
     private final String produces;
     private final String consumes;
 
     private APIResource(Builder builder) {
         uriTemplate = builder.uriTemplate;
-        scope = builder.scope;
+        scopes = builder.scopes;
         produces = builder.produces;
         consumes = builder.consumes;
     }
@@ -42,8 +44,8 @@ public class APIResource {
         return uriTemplate;
     }
 
-    public Scope getScope() {
-        return scope;
+    public List<String> getScope() {
+        return scopes;
     }
 
 
@@ -60,7 +62,7 @@ public class APIResource {
      */
     public static final class Builder {
         private UriTemplate uriTemplate;
-        private Scope scope;
+        private List<String> scopes;
         private String produces;
         private String consumes;
 
@@ -69,7 +71,7 @@ public class APIResource {
 
         public Builder(APIResource copy) {
             this.uriTemplate = copy.uriTemplate;
-            this.scope = copy.scope;
+            this.scopes = copy.scopes;
             this.produces = copy.produces;
             this.consumes = copy.consumes;
         }
@@ -87,14 +89,14 @@ public class APIResource {
         }
 
         /**
-         * Sets the {@code scope} and returns a reference to this Builder
+         * Sets the {@code scopes} and returns a reference to this Builder
          * so that the methods can be chained together.
          *
-         * @param scope the {@code scope} to set
+         * @param scopes the {@code scopes} to set
          * @return a reference to this Builder
          */
-        public Builder scope(Scope scope) {
-            this.scope = scope;
+        public Builder scopes(List<String> scopes) {
+            this.scopes = scopes;
             return this;
         }
 
@@ -130,5 +132,12 @@ public class APIResource {
         public APIResource build() {
             return new APIResource(this);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "APIResource{" +
+                "uriTemplate=" + uriTemplate +
+                '}';
     }
 }

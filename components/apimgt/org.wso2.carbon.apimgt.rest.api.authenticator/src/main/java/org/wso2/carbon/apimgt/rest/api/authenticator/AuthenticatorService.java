@@ -74,10 +74,11 @@ public class AuthenticatorService {
      * This method returns the details of a DCR application.
      *
      * @param appName Name of the application to be created
+     * @param uiServiceURL  URL of the UI Service to be appended to the callback URL
      * @return oAuthData - A JsonObject with DCR application details, scopes, auth endpoint, and SSO is enabled or not
      * @throws APIManagementException When creating DCR application fails
      */
-    public JsonObject getAuthenticationConfigurations(String appName)
+    public JsonObject getAuthenticationConfigurations(String appName, String uiServiceURL)
             throws APIManagementException {
         JsonObject oAuthData = new JsonObject();
         List<String> grantTypes = new ArrayList<>();
@@ -85,7 +86,8 @@ public class AuthenticatorService {
         grantTypes.add(KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE);
         grantTypes.add(KeyManagerConstants.REFRESH_GRANT_TYPE);
         APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance().getAPIMAppConfiguration();
-        String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName;
+        String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL
+                + appName + "?uiService=" + uiServiceURL;
         // Get scopes of the application
         String scopes = getApplicationScopes(appName);
         if (log.isDebugEnabled()) {
@@ -122,17 +124,19 @@ public class AuthenticatorService {
      * This method returns the access tokens for a given application.
      *
      * @param appName Name of the application which needs to get tokens
-     * @param requestURL Request URL with the authorization code
      * @param grantType Grant type of the application
      * @param userName User name of the user
      * @param password Password of the user
      * @param refreshToken Refresh token
      * @param validityPeriod Validity period of tokens
+     * @param uiServiceURL URL of the UI-Service
+     * @param authorizationCode Authorization Code
      * @return AccessTokenInfo - An object with the generated access token information
      * @throws APIManagementException When receiving access tokens fails
      */
-    public AccessTokenInfo getTokens(String appName, String requestURL, String grantType,
-                                     String userName, String password, String refreshToken, long validityPeriod)
+    public AccessTokenInfo getTokens(String appName, String grantType,
+                                     String userName, String password, String refreshToken,
+                                     long validityPeriod, String uiServiceURL, String authorizationCode)
             throws APIManagementException {
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
@@ -151,14 +155,10 @@ public class AuthenticatorService {
                 // Access token for authorization code grant type
                 APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance()
                         .getAPIMAppConfiguration();
-                String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName;
-                // Get the Authorization Code
-                if (requestURL.contains("code=")) {
-                    String requestURLQueryParameters = requestURL.split("\\?")[1];
-                    String authorizationCode = requestURLQueryParameters.split("=")[1].split("&")[0];
-                    if (log.isDebugEnabled()) {
-                        log.debug("Authorization Code for the app " + appName + ": " + authorizationCode);
-                    }
+                String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName
+                        + "?uiService=" + uiServiceURL;
+
+                if (authorizationCode != null) {
                     // Get Access & Refresh Tokens
                     accessTokenRequest.setClientId(consumerKeySecretMap.get("CONSUMER_KEY"));
                     accessTokenRequest.setClientSecret(consumerKeySecretMap.get("CONSUMER_SECRET"));
@@ -272,15 +272,8 @@ public class AuthenticatorService {
         try {
             if (applicationRestAPI != null) {
                 APIDefinition apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
-                Map<String, Scope> applicationScopesMap;
-                //Todo: when all swaggers modified with no vendor extension, following swagger parser should be modified.
-                //todo: for now only publisher swagger have been modified for no vendor extensions
-                if (AuthenticatorConstants.PUBLISHER_APPLICATION.equals(appName)) {
-                    applicationScopesMap = apiDefinitionFromSwagger20
-                            .getScopesFromSecurityDefinition(applicationRestAPI);
-                } else {
-                    applicationScopesMap = apiDefinitionFromSwagger20.getScopes(applicationRestAPI);
-                }
+                Map<String, Scope> applicationScopesMap = apiDefinitionFromSwagger20
+                        .getScopesFromSecurityDefinitionForWebApps(applicationRestAPI);
                 scopes = String.join(" ", applicationScopesMap.keySet());
                 // Set openid scope
                 if (StringUtils.isEmpty(scopes)) {

@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 "use strict";
-import SingleClient from "./SingleClient";
+import APIClientFactory from "./APIClientFactory";
 import Resource from "./Resource";
+import Utils from "./Utils";
 
 /***
  * Class to expose Application {Resource} related operations i:e: Get all Application , Delete, Generate Keys ect..
@@ -24,7 +26,7 @@ export default class Application extends Resource {
     constructor(name, description, throttlingTier, kwargs) {
         super();
         this.id = kwargs ? kwargs.applicationId : null;
-        this.client = new SingleClient().client;
+        this.client = new APIClientFactory().getAPIClient(Utils.getEnvironment().label).client;
         this.keys = new Map();
         this.tokens = new Map();
         for (let key in kwargs) {
@@ -110,7 +112,7 @@ export default class Application extends Resource {
     }
 
     static get(id) {
-        let apiClient = new SingleClient();
+        let apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
         let promised_get = apiClient.client.then(
             (client) => {
                 return client.apis["Application (Individual)"].get_applications__applicationId_({applicationId: id},
@@ -123,7 +125,7 @@ export default class Application extends Resource {
     }
 
     static all() {
-        let apiClient = new SingleClient();
+        let apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
         let promised_all = apiClient.client.then(
             (client) => {
                 return client.apis["Application (Collection)"].get_applications({}, this._requestMetaData());
@@ -132,7 +134,7 @@ export default class Application extends Resource {
     }
 
     static deleteApp(id) {
-        let apiClient = new SingleClient();
+        let apiClient = new APIClientFactory().getAPIClient(Utils.getEnvironment());
         let promised_delete = apiClient.client.then(
             (client) => {
                 return client.apis["Application (Individual)"].delete_applications__applicationId_({applicationId: id},
