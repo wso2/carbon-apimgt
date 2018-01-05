@@ -559,9 +559,9 @@ public class APIMappingUtil {
     public static APIListDTO fromAPIListToDTO(List<API> apiList) {
         APIListDTO apiListDTO = new APIListDTO();
         List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
-        if(apiList !=null) {
-            for (int i = 0; i <= apiList.size() - 1; i++) {
-                apiInfoDTOs.add(fromAPIToInfoDTO(apiList.get(i)));
+        if (apiList != null) {
+            for (API api : apiList) {
+                apiInfoDTOs.add(fromAPIToInfoDTO(api));
             }
         }
         apiListDTO.setCount(apiInfoDTOs.size());
