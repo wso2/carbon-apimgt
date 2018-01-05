@@ -203,8 +203,8 @@ public class RestCallUtilImpl implements RestCallUtil {
      * {@inheritDoc}
      */
     @Override
-    public HttpResponse postRequest(URI uri, MediaType acceptContentType, List<String> cookies,
-                                    Entity entity, MediaType payloadContentType) throws APIManagementException {
+    public HttpResponse postRequest(URI uri, MediaType acceptContentType, List<String> cookies, Entity entity,
+            MediaType payloadContentType, Map<String, String> headers) throws APIManagementException {
         if (uri == null) {
             throw new IllegalArgumentException("The URI must not be null");
         }
@@ -233,6 +233,11 @@ public class RestCallUtilImpl implements RestCallUtil {
                 }
             }
 
+            if (headers != null) {
+                for (Map.Entry<String, String> header : headers.entrySet()) {
+                    httpConnection.addRequestProperty(header.getKey(), header.getValue());
+                }
+            }
             OutputStream outputStream = httpConnection.getOutputStream();
             outputStream.write(entity.getEntity().toString().getBytes(StandardCharsets.UTF_8));
             outputStream.flush();

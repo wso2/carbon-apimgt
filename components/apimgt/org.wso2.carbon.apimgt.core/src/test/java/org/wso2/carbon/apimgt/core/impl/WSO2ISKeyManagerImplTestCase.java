@@ -48,7 +48,7 @@ import java.util.List;
 
 import static org.mockito.Matchers.any;
 
-public class DefaultKeyManagerImplTestCase {
+public class WSO2ISKeyManagerImplTestCase {
 
     private static final String consumerKey = "xxx-xxx-xxx-xxx";
     private static final String consumerSecret = "yyy-yyy-yyy-yyy";
@@ -58,7 +58,7 @@ public class DefaultKeyManagerImplTestCase {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
 
         //happy path - 201
@@ -150,7 +150,7 @@ public class DefaultKeyManagerImplTestCase {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
         final String consumerKey = "xxx-xxx-xxx-xxx";
 
@@ -245,7 +245,7 @@ public class DefaultKeyManagerImplTestCase {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
         final String consumerKey = "xxx-xxx-xxx-xxx";
 
@@ -297,7 +297,7 @@ public class DefaultKeyManagerImplTestCase {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
 
         //happy path - 200
@@ -376,7 +376,7 @@ public class DefaultKeyManagerImplTestCase {
         OAuth2ServiceStubs.TokenServiceStub tokenStub = Mockito.mock(OAuth2ServiceStubs.TokenServiceStub.class);
         OAuth2ServiceStubs.RevokeServiceStub revokeStub = Mockito.mock(OAuth2ServiceStubs.RevokeServiceStub.class);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
 
         //happy path - 200 - password grant type
@@ -429,7 +429,7 @@ public class DefaultKeyManagerImplTestCase {
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         OAuth2ServiceStubs.TokenServiceStub tokenStub = Mockito.mock(OAuth2ServiceStubs.TokenServiceStub.class);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
 
         //happy path - 200 - refresh grant type
@@ -468,7 +468,7 @@ public class DefaultKeyManagerImplTestCase {
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         OAuth2ServiceStubs.TokenServiceStub tokenStub = Mockito.mock(OAuth2ServiceStubs.TokenServiceStub.class);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
 
         //happy path - 200 - client credentials grant type
@@ -507,7 +507,7 @@ public class DefaultKeyManagerImplTestCase {
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         OAuth2ServiceStubs.TokenServiceStub tokenStub = Mockito.mock(OAuth2ServiceStubs.TokenServiceStub.class);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
 
         //happy path - 200 - authorization code grant type
@@ -549,7 +549,7 @@ public class DefaultKeyManagerImplTestCase {
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         OAuth2ServiceStubs.TokenServiceStub tokenStub = Mockito.mock(OAuth2ServiceStubs.TokenServiceStub.class);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
 
         //error case - tokenRequest is null
@@ -623,7 +623,7 @@ public class DefaultKeyManagerImplTestCase {
                 OAuth2ServiceStubs.IntrospectionServiceStub.class);
         Mockito.when(oAuth2ServiceStub.getIntrospectionServiceStub()).thenReturn(introspectionStub);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
         final String accessToken = "aaa-aaa-aaa-aaa";
 
@@ -714,7 +714,7 @@ public class DefaultKeyManagerImplTestCase {
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         OAuth2ServiceStubs.RevokeServiceStub revokeStub = Mockito.mock(OAuth2ServiceStubs.RevokeServiceStub.class);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
 
         //happy path - 200
@@ -766,7 +766,7 @@ public class DefaultKeyManagerImplTestCase {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
         ScopeInfo scopeInfo = new ScopeInfo();
         scopeInfo.setName("abc");
@@ -787,7 +787,7 @@ public class DefaultKeyManagerImplTestCase {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
         ScopeInfo scopeInfo = new ScopeInfo();
         scopeInfo.setName("abc");
@@ -805,7 +805,7 @@ public class DefaultKeyManagerImplTestCase {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
         ScopeInfo scopeInfo = new ScopeInfo();
         scopeInfo.setName("abc");
@@ -831,7 +831,7 @@ public class DefaultKeyManagerImplTestCase {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
         ScopeInfo scopeInfo = new ScopeInfo();
         scopeInfo.setName("abc");
@@ -849,7 +849,7 @@ public class DefaultKeyManagerImplTestCase {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
         ScopeInfo scopeInfo = new ScopeInfo();
         scopeInfo.setName("abc");
@@ -870,7 +870,7 @@ public class DefaultKeyManagerImplTestCase {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
         Mockito.when(scopeRegistrationServiceStub.getScopeByName("abc")).thenReturn(Response.builder()
                 .status(404).headers(new HashMap<>()).build());
@@ -888,7 +888,7 @@ public class DefaultKeyManagerImplTestCase {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
         Mockito.when(scopeRegistrationServiceStub.getScopeByName("abc")).thenReturn(Response.builder()
                 .status(500).headers(new HashMap<>()).build());
@@ -906,7 +906,7 @@ public class DefaultKeyManagerImplTestCase {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
         ScopeInfo scopeInfo = new ScopeInfo();
         scopeInfo.setDescription("cde");
@@ -926,7 +926,7 @@ public class DefaultKeyManagerImplTestCase {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
         ScopeInfo scopeInfo = new ScopeInfo();
         scopeInfo.setDescription("cde");
@@ -949,7 +949,7 @@ public class DefaultKeyManagerImplTestCase {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
         Mockito.when(scopeRegistrationServiceStub.deleteScope("abc")).thenReturn(Response
                 .builder()
@@ -963,7 +963,7 @@ public class DefaultKeyManagerImplTestCase {
         DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
         OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
         ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
-        DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
                 scopeRegistrationServiceStub);
         Mockito.when(scopeRegistrationServiceStub.deleteScope("abc")).thenReturn(Response
                 .builder().status(500).headers(new HashMap<>()).build());

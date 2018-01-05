@@ -233,6 +233,7 @@ public class AuthenticatorServiceTestCase {
         expectedResponseBean.setType(AuthenticatorConstants.BEARER_PREFIX);
         expectedResponseBean.setValidityPeriod(invalidTokenInfo.getValidityPeriod());
         expectedResponseBean.setIdToken(invalidTokenInfo.getIdToken());
+        expectedResponseBean.setAuthUser("admin");
 
         //// Actual response when id token is null
         AuthResponseBean responseBean = new AuthResponseBean();

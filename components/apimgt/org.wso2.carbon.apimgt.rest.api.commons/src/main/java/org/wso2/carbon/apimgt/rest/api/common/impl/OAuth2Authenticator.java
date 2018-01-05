@@ -125,7 +125,7 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
     private String getEndUserName(String accessToken) throws APIMgtSecurityException {
         String loggedInUser;
         loggedInUser = validateToken(accessToken).getEndUserName();
-        return loggedInUser.substring(0, loggedInUser.lastIndexOf("@"));
+        return loggedInUser;
     }
 
     /**

@@ -76,7 +76,6 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
                                 OAuth2ServiceStubs oAuth2ServiceStubs, ScopeRegistrationServiceStub
                                         scopeRegistrationServiceStub) throws
             APIManagementException {
-        super(dcrmServiceStub, oAuth2ServiceStubs, scopeRegistrationServiceStub);
         this.scimServiceStub = scimServiceStub;
     }
 

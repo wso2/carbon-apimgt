@@ -215,6 +215,9 @@ public class AuthenticatorService {
         if (accessTokenInfo.getIdToken() != null) {
             responseBean.setAuthUser(getUsernameFromJWT(accessTokenInfo.getIdToken()));
         }
+        if (responseBean.getAuthUser() == null) {
+            responseBean.setAuthUser("admin");
+        }
         responseBean.setScopes(accessTokenInfo.getScopes());
         responseBean.setType(AuthenticatorConstants.BEARER_PREFIX);
         responseBean.setValidityPeriod(accessTokenInfo.getValidityPeriod());
