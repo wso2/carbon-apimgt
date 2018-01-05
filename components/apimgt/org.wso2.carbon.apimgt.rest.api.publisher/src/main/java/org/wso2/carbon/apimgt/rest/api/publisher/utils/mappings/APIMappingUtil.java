@@ -551,6 +551,24 @@ public class APIMappingUtil {
     }
 
     /**
+     * Converts a List object of APIs into a DTO
+     *
+     * @param apiList List of APIs
+     * @return APIListDTO object containing APIDTOs
+     */
+    public static APIListDTO fromAPIListToDTO(List<API> apiList) {
+        APIListDTO apiListDTO = new APIListDTO();
+        List<APIInfoDTO> apiInfoDTOs = apiListDTO.getList();
+        if (apiList != null) {
+            for (API api : apiList) {
+                apiInfoDTOs.add(fromAPIToInfoDTO(api));
+            }
+        }
+        apiListDTO.setCount(apiInfoDTOs.size());
+        return apiListDTO;
+    }
+
+    /**
      * Sets pagination urls for a APIListDTO object given pagination parameters and url parameters
      *
      * @param apiListDTO a APIListDTO object

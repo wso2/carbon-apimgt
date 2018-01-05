@@ -2818,6 +2818,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                             callbackUrl, authScopeString, jsonString);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.VALIDITY_PERIOD, validityTime);
             request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_KEY_TYPE, tokenType);
+            request.getOAuthApplicationInfo().addParameter(ApplicationConstants.APP_CALLBACK_URL, callbackUrl);
 
             // Setting request values in WorkflowDTO - In future we should keep
             // Application/OAuthApplication related

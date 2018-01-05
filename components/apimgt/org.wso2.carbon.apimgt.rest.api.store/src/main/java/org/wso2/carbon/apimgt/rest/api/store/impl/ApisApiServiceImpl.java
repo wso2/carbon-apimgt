@@ -115,7 +115,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             Set<API> sortedSet = (Set<API>) allMatchedApisMap.get("apis"); // This is a SortedSet
             ArrayList<API> allMatchedApis = new ArrayList<>(sortedSet);
 
-            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis, offset, limit);
+            apiListDTO = APIMappingUtil.fromAPIListToDTO(allMatchedApis);
             APIMappingUtil.setPaginationParams(apiListDTO, query, offset, limit, allMatchedApis.size());
 
             //Add pagination section in the response
