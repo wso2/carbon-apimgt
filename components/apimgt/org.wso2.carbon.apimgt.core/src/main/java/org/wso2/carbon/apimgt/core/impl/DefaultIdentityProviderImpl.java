@@ -50,7 +50,7 @@ import java.util.List;
 /**
  * API Manager default implementation of {@link IdentityProvider}
  */
-public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implements IdentityProvider {
+public class DefaultIdentityProviderImpl extends LightWeightKeyManagerImpl implements IdentityProvider {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultIdentityProviderImpl.class);
 
@@ -71,7 +71,7 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
 
     DefaultIdentityProviderImpl(SCIMServiceStub scimServiceStub, DCRMServiceStub dcrmServiceStub,
                                        OAuth2ServiceStubs oAuth2ServiceStubs) throws APIManagementException {
-        super(dcrmServiceStub, oAuth2ServiceStubs);
+//        super(dcrmServiceStub, oAuth2ServiceStubs);
         this.scimServiceStub = scimServiceStub;
     }
 

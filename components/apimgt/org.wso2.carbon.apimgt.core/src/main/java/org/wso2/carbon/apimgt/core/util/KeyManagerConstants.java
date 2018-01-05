@@ -53,6 +53,7 @@ public class KeyManagerConstants {
     public static final String OAUTH_CLIENT_NOACCESSTOKEN = "NO ACCESS TOKEN";
     public static final String OAUTH_CLIENT_JSONPARAMSTRING = "jsonParams";
     public static final String OAUTH_CLIENT_USERNAME = "username";
+    public static final String OAUTH_CLIENT_PASSWORD = "password";
     public static final String OAUTH_CLIENT_APPLICATION = "application";
     public static final String VALIDITY_PERIOD = "validityPeriod";
     public static final String TOKEN_SCOPES = "scopes";
@@ -73,11 +74,15 @@ public class KeyManagerConstants {
     public static final String OAUTH_RESPONSE_ACCESSTOKEN = "access_token";
     public static final String OAUTH_RESPONSE_REFRESH_TOKEN = "refresh_token";
     public static final String OAUTH_RESPONSE_EXPIRY_TIME = "expires_in";
+    public static final String OAUTH_RESPONSE_SCOPE = "scope";
     public static final String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
     public static final String PASSWORD_GRANT_TYPE = "password";
     public static final String AUTHORIZATION_CODE_GRANT_TYPE = "authorization_code";
     public static final String REFRESH_GRANT_TYPE = "refresh_token";
     public static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
+    public static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final String APPLICATION_CLIENT_ID = "clientId";
+    public static final String APPLICATION_CLIENT_SECRET = "clientSecret";
 
     /**
      * Status codes used in key-validation process

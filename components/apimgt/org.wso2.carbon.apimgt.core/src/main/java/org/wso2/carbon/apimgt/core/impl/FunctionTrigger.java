@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.core.models.HttpResponse;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.client.Entity;
@@ -120,8 +121,8 @@ public class FunctionTrigger implements EventObserver {
             for (Function function : functions) {
                 HttpResponse response = null;
                 try {
-                    response = restCallUtil.postRequest(function.getEndpointURI(), null, null,
-                            Entity.json(jsonPayload), MediaType.APPLICATION_JSON_TYPE);
+                    response = restCallUtil.postRequest(function.getEndpointURI(), null, null, Entity.json(jsonPayload),
+                            MediaType.APPLICATION_JSON_TYPE, Collections.EMPTY_MAP);
                 } catch (APIManagementException e) {
                     log.error("Failed to make http request: -function: " + function.getName() + " -endpoint URI: "
                             + function.getEndpointURI() + " -event: " + event + " -Username: " + username, e);
