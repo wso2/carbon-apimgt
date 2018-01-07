@@ -197,7 +197,13 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                                            }
                                         }
                                 %>
+
+                                    <%if(jagg.isMultiGroupEnabled()){%>
+                                        <div class="form-group multi-grp-application-dropdown" id="application-selection-list">
+                                   <%}else{ %>
                                         <div class="form-group" id="application-selection-list">
+                                    <%}%>
+
                                             <label for="application-list"><%=i18n.localize("Applications")%></label>
                                             <select id="application-list" class="form-control">
                                                 <%if(!subscribedToDefault){%>
