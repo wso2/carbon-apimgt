@@ -787,9 +787,18 @@ var jagg = jagg || (function () {
         //log.info(message);
     }
 
-    var isMultiGroupEnabled = function() {
+    var isMultiGroupEnabled = function () {
         var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
-        return APIUtil.isMultiGroupSharingEnabled();
+        var log = new Log();
+        if (APIUtil.isMultiGroupSharingEnabled()) {
+            var groupId = session.get("groupId");
+            if (groupId == null || groupId == "") {
+                return false;
+            }
+            return true;
+        } else {
+            return false;
+        }
     };
 
     var isCSRFTokenValid = function(){
