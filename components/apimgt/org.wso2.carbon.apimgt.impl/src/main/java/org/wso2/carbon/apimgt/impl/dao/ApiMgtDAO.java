@@ -1304,11 +1304,12 @@ public class ApiMgtDAO {
                     }
                     String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
                     String groupIdArr[] = groupingId.split(",");
-                    int paramIndex = groupIdArr.length + 2;
+
                     ps = fillQueryParams(connection, sqlQuery, groupIdArr, 3);
                     int tenantId = APIUtil.getTenantId(subscriber.getName());
                     ps.setInt(1, tenantId);
                     ps.setString(2, applicationName);
+                    int paramIndex = groupIdArr.length + 2;
                     ps.setString(++paramIndex, tenantDomain);
                     ps.setString(++paramIndex, subscriber.getName());
                 } else {
@@ -1392,10 +1393,11 @@ public class ApiMgtDAO {
                     String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
                     sqlQuery += whereClauseWithMultiGroupId;
                     String[] groupIdArr = groupingId.split(",");
-                    int paramIndex = groupIdArr.length + 2;
+
                     ps = fillQueryParams(connection, sqlQuery, groupIdArr, 3);
                     ps.setString(1, applicationName);
                     ps.setInt(2, tenantId);
+                    int paramIndex = groupIdArr.length + 2;
                     ps.setString(++paramIndex, tenantDomain);
                     ps.setString(++paramIndex, subscriber.getName());
                 } else {
@@ -1567,7 +1569,7 @@ public class ApiMgtDAO {
 
         String whereClauseWithMultiGroupId = " AND  ( (APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
                 "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR  ( SUB.USER_ID = ? ))";
-        String whereClauseWithGroupIdMultiCaseInsensitiveComp = "  AND  ( (APP.APPLICATION_ID IN (SELECT " +
+        String whereClauseWithMultiGroupIdCaseInsensitiveComp = "  AND  ( (APP.APPLICATION_ID IN (SELECT " +
                 "APPLICATION_ID  FROM " +
                 "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR  ( LOWER(SUB.USER_ID) = LOWER(?) ))";
         try {
@@ -1577,16 +1579,17 @@ public class ApiMgtDAO {
 
                 if (multiGropIdEnabled) {
                     if (forceCaseInsensitiveComparisons) {
-                        sqlQuery += whereClauseWithGroupIdMultiCaseInsensitiveComp;
+                        sqlQuery += whereClauseWithMultiGroupIdCaseInsensitiveComp;
                     } else {
                         sqlQuery += whereClauseWithMultiGroupId;
                     }
                     String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
                     String[] groupIdArr = groupingId.split(",");
-                    int paramIndex = groupIdArr.length + 2;
+
                     ps = fillQueryParams(connection, sqlQuery, groupIdArr, 2);
                     int tenantId = APIUtil.getTenantId(subscriber.getName());
                     ps.setInt(1, tenantId);
+                    int paramIndex = groupIdArr.length + 1;
                     ps.setString(++paramIndex, tenantDomain);
                     ps.setString(++paramIndex, subscriber.getName());
                 } else {
@@ -4126,7 +4129,6 @@ public class ApiMgtDAO {
         try {
             connection = APIMgtDBUtil.getConnection();
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
-                //ssb
 
                 if (multiGropIdEnabled) {
                     if (forceCaseInsensitiveComparisons) {
@@ -4163,7 +4165,6 @@ public class ApiMgtDAO {
                 prepStmt = connection.prepareStatement(sqlQuery);
                 prepStmt.setString(1, subscriber.getName());
                 prepStmt.setString(2, "%" + search + "%");
-
             }
 
             resultSet = prepStmt.executeQuery();
@@ -4230,7 +4231,6 @@ public class ApiMgtDAO {
             // sortColumn, sortOrder variable values has sanitized in jaggery level (applications-list.jag)for security.
             sqlQuery = sqlQuery.replace("$1", sortColumn);
             sqlQuery = sqlQuery.replace("$2", sortOrder);
-
 
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
                 if (multiGropIdEnabled) {
@@ -4317,12 +4317,13 @@ public class ApiMgtDAO {
                         "OR (LOWER(SUB.USER_ID) = LOWER(?)))";
             } else {
                 whereClauseWithGroupId = "   AND " + "     (GROUP_ID= ? " + "      OR "
-                        + "     ((GROUP_ID='' OR GROUP_ID IS NULL) AND LOWER(SUB.USER_ID) = LOWER(?)))";
+                        + "     ((GROUP_ID='' OR GROUP_ID IS NULL) AND LOWER(SUB.USER_ID) = LOWER(?))) ";
             }
         } else {
             if (multiGropIdEnabled) {
                 whereClauseWithGroupId = " AND ( (APP.APPLICATION_ID IN (SELECT APPLICATION_ID " +
-                        "FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR  ( SUB.USER_ID = ? ))";
+                        "FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  " +
+                        "OR  ( SUB.USER_ID = ? )) ";
             } else {
                 whereClauseWithGroupId = "   AND " + "     (GROUP_ID= ? " + "      OR "
                         + "     ((GROUP_ID='' OR GROUP_ID IS NULL) AND SUB.USER_ID=?))";
@@ -4397,7 +4398,7 @@ public class ApiMgtDAO {
                 for (APIKey key : keys) {
                     application.addKey(key);
                 }
-                if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty() && multiGropIdEnabled) {
+                if (multiGropIdEnabled) {
                     application.setGroupId(getGroupId(application.getId()));
                     application.setOwner(rs.getString("CREATED_BY"));
                 }
@@ -4677,14 +4678,14 @@ public class ApiMgtDAO {
                     Subscriber subscriber = getSubscriber(subscriberId);
                     String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
                     String groupIDArray[] = groupingId.split(",");
-                    int paramIndex = groupIDArray.length + 3;
                     sqlQuery += whereClauseWithMultiGroupId;
                     prepStmt = fillQueryParams(connection, sqlQuery, groupIDArray, 3);
                     prepStmt = connection.prepareStatement(sqlQuery);
                     prepStmt.setString(1, applicationName);
                     prepStmt.setString(2, keyType);
+                    int paramIndex = groupIDArray.length + 2;
                     prepStmt.setString(++paramIndex, tenantDomain);
-                    prepStmt.setString(paramIndex, subscriberId);
+                    prepStmt.setString(++paramIndex, subscriberId);
                 } else {
                     sqlQuery += whereClauseWithGroupId;
                     prepStmt = connection.prepareStatement(sqlQuery);
