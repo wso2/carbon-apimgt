@@ -9,20 +9,33 @@ html, body {
     background: #efefef;
     margin: auto;
 }
+
+.redirect-flex-container .redirect-grid-container {
+    height: 100vh;
+}
+
 .redirect-flex-container .redirect-main-content {
     flex: 1;
     align-items: flex-start;
     justify-content: center;
 }
-.redirect-paper{
-    border-left: 2px solid #f17a20;
+
+.redirect-loadingbar {
+    float: right;
 }
-#react-root{
+
+.redirect-paper {
+    border-left: 2px solid #f17a20;
+    fontSize: medium;
+    padding: 15px;
+}
+
+#react-root {
     height: 100%;
 }
 
-@media (max-width: 601px){
-    .redirect-paper{
+@media (max-width: 601px) {
+    .redirect-paper {
         align-items: flex-start;
         display: flex;
         width: 100%;

@@ -27,16 +27,15 @@ const Redirecting = (props) => {
 
     return (
         <div className="redirect-flex-container">
-            <Grid container justify={"center"} alignItems={"center"} spacing={0} style={{height: "100vh"}}>
+            <Grid container justify={"center"} alignItems={"center"} spacing={0} className={"redirect-grid-container"}>
                 <Grid item lg={6} md={8} xs={10}>
                     <Grid container alignItems={"center"}>
                         <Grid item sm={2} xs={12}>
-                            <CircularProgress style={{float: "right"}}/>
+                            <CircularProgress className={"redirect-loadingbar"}/>
                         </Grid>
                         <Grid item sm={10} xs={12}>
                             <div className="redirect-main-content">
-                                <Paper elevation={5} square={true} className="redirect-paper"
-                                       style={{fontSize: "medium", padding: "15px"}}>
+                                <Paper elevation={5} square={true} className="redirect-paper">
                                     {message}
                                 </Paper>
                             </div>
