@@ -30,7 +30,7 @@ public class ExportApi  {
     @Path("/applications")
     @Consumes({ "application/json" })
     @Produces({ "application/json", "application/zip" })
-    @io.swagger.annotations.ApiOperation(value = "Export details related to an Application.", notes = "This operation can be used to export details related to a perticular application.\n", response = File.class)
+    @io.swagger.annotations.ApiOperation(value = "Export an Application", notes = "This operation can be used to export the details of a particular Application as a zip file.\n", response = File.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nExport Successful.\n"),
         

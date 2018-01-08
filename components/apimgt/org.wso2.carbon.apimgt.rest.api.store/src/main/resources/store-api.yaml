@@ -1224,12 +1224,12 @@ paths:
         - application/zip
       x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET https://localhost:9443/api/am/store/v0.11/export/applications?appId=xxx > exported-application.zip"
       x-wso2-request: |
-        GET https://localhost:9443/api/am/store/v0.11/applications/export/applications?appId=xxx
+        GET https://localhost:9443/api/am/store/v0.11/export/applications?appId=xxx
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
       x-wso2-response: "HTTP/1.1 200 OK\n Connection: keep-alive\n  Content-Disposition: attachment; filename=\"exported-applications.zip\"\n  Content-Type: application/zip"
-      summary: Export details related to an Application.
+      summary: Export an Application
       description: |
-        This operation can be used to export details related to a perticular application.
+        This operation can be used to export the details of a particular Application as a zip file.
       parameters:
         - name: appId
           in: query
@@ -1283,15 +1283,15 @@ paths:
       x-wso2-request: |
         POST https://localhost:9443/api/am/store/v0.11/import/applications
         Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
-      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"groupId\": \"\",\n         \"subscriber\": \"admin\",\n         \"throttlingTier\": \"Unlimited\",\n         \"applicationId\": \"367a2361-8db5-4140-8133-c6c8dc7fa0c4\",\n         \"description\": \"\",\n         \"status\": \"APPROVED\",\n         \"name\": \"app1\"\n      },\n            {\n         \"groupId\": \"\",\n         \"subscriber\": \"admin\",\n         \"throttlingTier\": \"Unlimited\",\n         \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n         \"description\": null,\n         \"status\": \"APPROVED\",\n         \"name\": \"DefaultApplication\"\n      }\n   ],\n   \"count\": 2,\n   \"next\": \"\"\n}"
-      summary: Imports an Application.
+      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/store/v0.11/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\nContent-Type: application/json\n\n{\n   \"groupId\": null,\n   \"callbackUrl\": \"http://my.server.com/callback\",\n   \"subscriber\": \"admin\",\n   \"throttlingTier\": \"Unlimited\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"description\": \"sample app description\",\n   \"status\": \"APPROVED\",\n   \"name\": \"sampleapp\",\n   \"keys\": []\n}"
+      summary: Import an Application
       description: |
         This operation can be used to import an existing Application.
       parameters:
         - name: file
           in: formData
           description: |
-            Zip archive consisting of exported application configuration
+            Zip archive consisting of exported Application Configuration.
           required: true
           type: file
         - name: preserveOwner

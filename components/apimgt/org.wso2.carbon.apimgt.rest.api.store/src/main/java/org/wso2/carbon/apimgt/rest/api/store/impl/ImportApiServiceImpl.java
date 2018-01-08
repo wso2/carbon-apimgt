@@ -7,11 +7,16 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.rest.api.store.ImportApiService;
+import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.utils.FileBasedApplicationImportExportManager;
+import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.File;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.UUID;
 import javax.ws.rs.core.Response;
 
@@ -45,8 +50,11 @@ public class ImportApiServiceImpl extends ImportApiService {
                 importExportManager.importSubscriptions(applicationDetails, username, appId);
             }
             Application importedApplication = consumer.getApplicationById(appId);
-            return Response.ok().entity(importedApplication).build();
-        } catch (APIManagementException e) {
+            ApplicationDTO importedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(importedApplication);
+            URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
+                    importedApplicationDTO.getApplicationId());
+            return Response.created(location).entity(importedApplicationDTO).build();
+        } catch (APIManagementException | URISyntaxException e) {
             RestApiUtil
                     .handleInternalServerError("Error while importing Application" + username, e, log);
         }

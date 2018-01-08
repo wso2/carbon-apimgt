@@ -31,7 +31,7 @@ public class ImportApi  {
     @Path("/applications")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Imports an Application.", notes = "This operation can be used to import an existing Application.\n", response = ApplicationDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Import an Application", notes = "This operation can be used to import an existing Application.\n", response = ApplicationDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSuccessful response with the updated object as entity in the body.\n"),
         
@@ -41,8 +41,8 @@ public class ImportApi  {
         
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
-    public Response importApplicationsPost(@ApiParam(value = "Zip archive consisting of exported application configuration\n") @Multipart(value = "file") InputStream fileInputStream,
-    @ApiParam(value = "Zip archive consisting of exported application configuration\n : details") @Multipart(value = "file" ) Attachment fileDetail,
+    public Response importApplicationsPost(@ApiParam(value = "Zip archive consisting of exported Application Configuration.\n") @Multipart(value = "file") InputStream fileInputStream,
+    @ApiParam(value = "Zip archive consisting of exported Application Configuration.\n : details") @Multipart(value = "file" ) Attachment fileDetail,
     @ApiParam(value = "Preserve Original Creator of the Application\n") @QueryParam("preserveOwner")  Boolean preserveOwner,
     @ApiParam(value = "Import Subscriptions of the Application\n") @QueryParam("addSubscriptions")  Boolean addSubscriptions)
     {
