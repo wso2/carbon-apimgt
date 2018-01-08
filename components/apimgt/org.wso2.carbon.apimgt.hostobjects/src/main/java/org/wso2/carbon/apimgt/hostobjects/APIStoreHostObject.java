@@ -1940,6 +1940,16 @@ public class APIStoreHostObject extends ScriptableObject {
                                     policyObj.put("tierDisplayName", policyObj, policy.getName() != null ? policy.getName() : "");
                                     policyObj.put("tierDescription", policyObj,
                                             policy.getDescription() != null ? policy.getDescription() : "");
+                                    if (policy.getTierAttributes() != null) {
+                                        Map<String, Object> attributes;
+                                        attributes = policy.getTierAttributes();
+                                        StringBuilder attributesListBuilder = new StringBuilder();
+                                        for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
+                                            attributesListBuilder.append(attribute.getKey()).append("::").append(
+                                                    attribute.getValue()).append(",");
+                                        }
+                                        policyObj.put("tierAttributes", policyObj, attributesListBuilder.toString());
+                                    }
                                     tierArr.put(j, tierArr, policyObj);
                                     j++;
 
