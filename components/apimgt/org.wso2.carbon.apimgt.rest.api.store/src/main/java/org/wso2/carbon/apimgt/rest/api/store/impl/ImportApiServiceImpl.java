@@ -28,7 +28,7 @@ public class ImportApiServiceImpl extends ImportApiService {
     @Override
     public Response importApplicationsPost(InputStream fileInputStream, Attachment fileDetail,
                                            Boolean preserveOwner, Boolean addSubscriptions) {
-        APIConsumer consumer = null;
+        APIConsumer consumer;
         String username = RestApiUtil.getLoggedInUsername();
         String tempDirPath = System.getProperty("java.io.tmpdir") + File.separator + "imported-app-archive-" +
                 UUID.randomUUID().toString();
