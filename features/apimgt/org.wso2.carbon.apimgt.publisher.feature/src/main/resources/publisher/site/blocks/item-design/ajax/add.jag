@@ -55,6 +55,7 @@ if(jagg.isCSRFTokenValid())
             var swagger = null;
             var wsdl = null;
             var supportedSwaggerVersion = "2.0";
+            var supportedOpenAPIVersion = "3.0.0";
             var parser = new SwaggerParser();
             if(type == "rest"){
                 var url = request.getParameter("swagger-url");
