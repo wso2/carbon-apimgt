@@ -49,14 +49,6 @@
                 '<div class="calendar second right"></div>' +
                 '<div class="ranges">' +
                   '<div class="range_inputs">' +
-                    '<div class="daterangepicker_start_input">' +
-                      '<label for="daterangepicker_start"></label>' +
-                      '<input class="input-mini" type="text" name="daterangepicker_start" value="" />' +
-                    '</div>' +
-                    '<div class="daterangepicker_end_input">' +
-                      '<label for="daterangepicker_end"></label>' +
-                      '<input class="input-mini" type="text" name="daterangepicker_end" value="" />' +
-                    '</div>' +
                     '<button class="applyBtn" disabled="disabled"></button>&nbsp;' +
                     '<button class="cancelBtn"></button>' +
                   '</div>' +
