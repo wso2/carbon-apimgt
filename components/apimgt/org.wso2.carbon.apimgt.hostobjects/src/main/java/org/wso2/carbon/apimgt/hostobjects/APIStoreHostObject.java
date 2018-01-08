@@ -2565,7 +2565,7 @@ public class APIStoreHostObject extends ScriptableObject {
                     row.put("prodKey", row, getKey(api, APIConstants.API_KEY_TYPE_PRODUCTION));
                     row.put("sandboxKey", row, getKey(api, APIConstants.API_KEY_TYPE_SANDBOX));
 
-                    if (APIUtil.isMultiGroupSharingEnabled()) {
+                    if (APIUtil.isMultiGroupAppSharingEnabled()) {
                         row.put("owner", row, api.getApplication().getOwner());
                     }
 
@@ -3409,7 +3409,7 @@ public class APIStoreHostObject extends ScriptableObject {
             updatedApplication.setCallbackUrl(callbackUrl);
             updatedApplication.setDescription(description);
 
-            if (APIUtil.isMultiGroupSharingEnabled()) {
+            if (APIUtil.isMultiGroupAppSharingEnabled()) {
                 String newGroupId = null;
                 if (args.length > 7 && args[7] != null) {
                     newGroupId = (String) args[7];

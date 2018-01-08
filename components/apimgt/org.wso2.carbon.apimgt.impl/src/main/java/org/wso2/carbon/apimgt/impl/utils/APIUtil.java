@@ -6771,7 +6771,7 @@ public final class APIUtil {
      *
      * @return returns true if ENABLE_MULTIPLE_GROUPID is set to True
      */
-    public static boolean isMultiGroupSharingEnabled() {
+    public static boolean isMultiGroupAppSharingEnabled() {
 
         if (multiGrpAppSharing == null) {
 

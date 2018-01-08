@@ -149,7 +149,7 @@ public class ApiMgtDAO {
             forceCaseInsensitiveComparisons = Boolean.parseBoolean(caseSensitiveComparison);
         }
 
-        multiGroupAppSharingEnabled = APIUtil.isMultiGroupSharingEnabled();
+        multiGroupAppSharingEnabled = APIUtil.isMultiGroupAppSharingEnabled();
     }
 
     public List<String> getAPIVersionsMatchingApiName(String apiName,String username) throws APIManagementException {

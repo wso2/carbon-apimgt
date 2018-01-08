@@ -3169,7 +3169,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 LoginPostExecutor groupingExtractor = (LoginPostExecutor) APIUtil.getClassForName
                         (groupingExtractorClass).newInstance();
                 //switching 2.1.0 and 2.2.0
-                if (APIUtil.isMultiGroupSharingEnabled()) {
+                if (APIUtil.isMultiGroupAppSharingEnabled()) {
                     NewPostLoginExecutor newGroupIdListExtractor = (NewPostLoginExecutor) groupingExtractor;
                     return newGroupIdListExtractor.getGroupingIdentifierList(response);
                 } else {
