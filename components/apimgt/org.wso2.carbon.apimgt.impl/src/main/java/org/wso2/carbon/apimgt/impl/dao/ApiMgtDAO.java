@@ -10175,7 +10175,7 @@ public class ApiMgtDAO {
                         valid = true;
                     } else {
                         throw new APIManagementException("Couldn't Save Block Condition Due to Invalid Application " +
-                                "name " + appName + "from Application " +
+                                "name " + appName + " from Application " +
                                 "Owner " + appOwner);
                     }
                 }
