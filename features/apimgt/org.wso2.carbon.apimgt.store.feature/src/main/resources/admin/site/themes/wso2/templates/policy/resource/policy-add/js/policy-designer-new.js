@@ -205,6 +205,67 @@ var onExecutionFlowTypeChange = function (id, optionTextOb) {
     }
 };
 
+var onIPChange = function (IPtextEle) {
+    //validate the IP
+    var IP_value = $(IPtextEle).val();
+    var blocks = IP_value.split(".");
+    var elementId = $(IPtextEle)[0].id;
+    var element = $('#' + elementId);
+
+    if (blocks.length != 4 || !blocks.every(valid_block)) {
+        element.css("border", "1px solid red");
+        $('#label' + elementId).remove();
+        element.parent().append('<label class="error" id="label' + elementId + '" >Invalid IP</label>');
+        return false;
+    }
+    else {
+        $('#label' + elementId).remove();
+        element.css("border", "1px solid #cccccc");
+        return true;
+    }
+};
+
+var onEndIPChange = function (IPtextEle) {
+
+    var validIP = onIPChange(IPtextEle);
+    if(validIP) {
+        var temp = $(IPtextEle)[0].id.split("-");
+        var startIP = $('#ip-range-start-address-input-'+temp[5]);
+        var validIPRange = validIPRange(startIP,$(IPtextEle).val());
+        var elementId = $(IPtextEle)[0].id;
+        var element = $('#' + elementId);
+        if(!validIPRange){
+            element.css("border", "1px solid red");
+            $('#label' + elementId).remove();
+            element.parent().append('<label class="error" id="label' + elementId + '" >Invalid IP Range</label>');
+        }
+        else {
+            $('#label' + elementId).remove();
+            element.css("border", "1px solid #cccccc");
+        }
+    }
+};
+
+var valid_block = function (block) {
+
+    if (block > 0 && block < 255) {
+        return true;
+    }
+    return false;
+};
+
+var validIPRange = function (startIP, endIP) {
+
+    var startIPBlocks = startIP.split(".");
+    var endIPBlocks = endIP.split(".");
+
+    for (var i = 0; i < 4; i++) {
+        if (startIPBlocks[i] > endIPBlocks[i]) {
+            return false;
+        }
+    }
+};
+
 var onDateConditionChange = function (id, optionTextOb) {
     var selectedText = $(optionTextOb).val();
     if (selectedText == 'dateRange') {
