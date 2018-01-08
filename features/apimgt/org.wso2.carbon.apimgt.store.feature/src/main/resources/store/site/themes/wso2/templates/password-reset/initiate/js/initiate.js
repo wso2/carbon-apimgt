@@ -24,7 +24,15 @@ function doSubmit() {
                         window.location.href = "index.jag";
                     }
                 });
-            } else if (response.message.indexOf("Invalid User name") != -1) {
+            } else if (response.message.indexOf("Error while validating captcha") != -1) {
+                jagg.message({
+                    content: 'Error occurred while validating captcha. Please disable captcha and try again.',
+                    type: 'error',
+                    cbk: function () {
+                        window.location.href = "initiate.jag";
+                    }
+                });
+            } else if (response.message.indexOf("User does not exist") != -1) {
                 jagg.message({
                     content: 'No account found with the given email. Please try again with a correct email.',
                     type: 'error',
@@ -34,8 +42,7 @@ function doSubmit() {
                 });
             } else {
                 jagg.message({
-                    content: 'Error occurred while resetting your password. Please try again after few minutes.' +
-                    ' If you still have issues, please contact us <a href="mailto:cloud@wso2.com">(cloud@wso2.com)</a>',
+                    content: 'Error occurred while resetting your password. Please try again after few minutes.',
                     type: 'error',
                     cbk: function () {
                         window.location.href = "index.jag";
