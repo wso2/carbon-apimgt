@@ -62,6 +62,9 @@ $(document).ready(function ($) {
                 required: true
             }
         },
+        messages: {
+            email: "Please enter your username"
+        },
         submitHandler: function (form) {
             doSubmit();
         }
