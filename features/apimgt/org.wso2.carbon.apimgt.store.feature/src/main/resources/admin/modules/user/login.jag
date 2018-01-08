@@ -251,10 +251,12 @@ var checkWorkflowServerStatus = function (serverUrl) {
         httpClient.execute(httpPost);
         return true;
     } catch (e) {
-        var errorMessage = e.message;
-        var BPSerror = "java.lang.IllegalArgumentException";
-        if (errorMessage.indexOf(BPSerror) !== -1) {
-            return false;
+        if (e.message != null) {
+            var errorMessage = e.message;
+            var BPSerror = "java.lang.IllegalArgumentException";
+            if (errorMessage.indexOf(BPSerror) !== -1) {
+                return false;
+            }
         }
         log.warn("Not Retrieving Pending Tasks. Check BPS Connectivity. " + e.message);
         return false;

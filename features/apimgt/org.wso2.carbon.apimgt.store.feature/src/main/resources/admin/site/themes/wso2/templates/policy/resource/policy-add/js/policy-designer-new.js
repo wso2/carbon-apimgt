@@ -1,18 +1,18 @@
 var index = 0;
 $.fn.editableform.buttons =
-    '<button type="submit" class="btn btn-primary btn-sm editable-submit">'+
-    '<i class="fw fw-check"></i>'+
-    '</button>'+
-    '<button type="button" class="btn btn-secondary btn-sm editable-cancel">'+
-    '<i class="fw fw-cancel"></i>'+
+    '<button type="submit" class="btn btn-primary btn-sm editable-submit">' +
+    '<i class="fw fw-check"></i>' +
+    '</button>' +
+    '<button type="button" class="btn btn-secondary btn-sm editable-cancel">' +
+    '<i class="fw fw-cancel"></i>' +
     '</button>';
 
 Handlebars.registerHelper('if_eq', function (a, b, opts) {
-  if (a == b) {
-      return opts.fn(this);
-  } else {
-      return opts.inverse(this);
-  }
+    if (a == b) {
+        return opts.fn(this);
+    } else {
+        return opts.inverse(this);
+    }
 });
 
 var apiPolicy =
@@ -32,35 +32,35 @@ var apiPolicy =
     }
 };
 
-var changeStatusIcon = function(flowId, type, checkBoxOb) {
+var changeStatusIcon = function (flowId, type, checkBoxOb) {
     var spanId;
     var iconId;
-    if(type == "IP") {
-       spanId = "ip-condition-configured-" + flowId;
+    if (type == "IP") {
+        spanId = "ip-condition-configured-" + flowId;
         iconId = "ip-condition-configured-icon-" + flowId;
-    } else if(type == "Header") {
+    } else if (type == "Header") {
         spanId = "header-condition-configured-" + flowId;
         iconId = "header-condition-configured-icon-" + flowId;
-    } else if(type == "QueryParam") {
+    } else if (type == "QueryParam") {
         spanId = "queryparam-condition-configured-" + flowId;
         iconId = "queryparam-condition-configured-icon-" + flowId;
-    } else if(type == "JWTClaim") {
+    } else if (type == "JWTClaim") {
         spanId = "claim-condition-configured-" + flowId;
         iconId = "claim-condition-configured-icon-" + flowId;
     } else {
         return;
     }
 
-    if($(checkBoxOb).is(":checked")) {
-        $('#'+spanId).removeClass('has-configured');
-        $('#'+iconId).removeClass('fw-circle-outline');
-        $('#'+spanId).addClass('has-success');
-        $('#'+iconId).addClass('fw-check');
+    if ($(checkBoxOb).is(":checked")) {
+        $('#' + spanId).removeClass('has-configured');
+        $('#' + iconId).removeClass('fw-circle-outline');
+        $('#' + spanId).addClass('has-success');
+        $('#' + iconId).addClass('fw-check');
     } else {
-        $('#'+spanId).removeClass('has-success');
-        $('#'+iconId).removeClass('fw-check');
-        $('#'+spanId).addClass('has-configured');
-        $('#'+iconId).addClass('fw-circle-outline');
+        $('#' + spanId).removeClass('has-success');
+        $('#' + iconId).removeClass('fw-check');
+        $('#' + spanId).addClass('has-configured');
+        $('#' + iconId).addClass('fw-circle-outline');
     }
 };
 
@@ -130,29 +130,29 @@ var addPolicy = function () {
 $(document).ready(function () {
 
     //validate requestCount is numeric
-    $.validator.addMethod('requestCountValidator', function(value,element){
+    $.validator.addMethod('requestCountValidator', function (value, element) {
         return !isNaN(value);
     }, "Error: Value Entered for Request Count is not valid!!");
     //validate time is numeric
-    $.validator.addMethod('timeValidator', function(value,element){
+    $.validator.addMethod('timeValidator', function (value, element) {
         return !isNaN(value);
     }, "Error: Value entered for unit time is not valid");
     //validate bandwidth is numberic
-    $.validator.addMethod('bandwidthValidator', function(value,element){
+    $.validator.addMethod('bandwidthValidator', function (value, element) {
         return !isNaN(value);
     }, "Error: Value entered for bandwidth is not valid");
 
     $("form.form-horizontal").validate({
-        rules:{
+        rules: {
             'request-count': {
-                requestCountValidator : true
+                requestCountValidator: true
             },
             'unit-time-count': {
-                required : true,
-                timeValidator : true
+                required: true,
+                timeValidator: true
             },
             'bandwidth': {
-                bandwidthValidator : true
+                bandwidthValidator: true
             }
         }
     })
@@ -171,8 +171,12 @@ $(document).ready(function () {
             }
         });
     });
-    $('body').on('click', '.editable-click', function(e){e.stopPropagation();});
-    $('body').on('click', '.editable-submit', function(e){e.stopPropagation();});
+    $('body').on('click', '.editable-click', function (e) {
+        e.stopPropagation();
+    });
+    $('body').on('click', '.editable-submit', function (e) {
+        e.stopPropagation();
+    });
 });
 
 var showAdvanceOperation = function (operation, button, id) {
@@ -228,13 +232,13 @@ var onIPChange = function (IPtextEle) {
 var onEndIPChange = function (IPtextEle) {
 
     var validIP = onIPChange(IPtextEle);
-    if(validIP) {
+    if (validIP) {
         var temp = $(IPtextEle)[0].id.split("-");
-        var startIP = $('#ip-range-start-address-input-'+temp[5]);
-        var validIPRange = validIPRange(startIP,$(IPtextEle).val());
+        var startIP = $('#ip-range-start-address-input-' + temp[5]).val();
+        var IsValidIPRange = validIPRange(startIP, $(IPtextEle).val());
         var elementId = $(IPtextEle)[0].id;
         var element = $('#' + elementId);
-        if(!validIPRange){
+        if (!IsValidIPRange) {
             element.css("border", "1px solid red");
             $('#label' + elementId).remove();
             element.parent().append('<label class="error" id="label' + elementId + '" >Invalid IP Range</label>');
@@ -256,14 +260,18 @@ var valid_block = function (block) {
 
 var validIPRange = function (startIP, endIP) {
 
+    if (startIP == null || endIP == null || startIP == "" || endIP == "") {
+        return false;
+    }
     var startIPBlocks = startIP.split(".");
     var endIPBlocks = endIP.split(".");
 
     for (var i = 0; i < 4; i++) {
-        if (startIPBlocks[i] > endIPBlocks[i]) {
+        if (startIPBlocks[i] >= endIPBlocks[i]) {
             return false;
         }
     }
+    return true;
 };
 
 var onDateConditionChange = function (id, optionTextOb) {
