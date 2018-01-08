@@ -137,7 +137,7 @@ public class ApiMgtDAO {
     private static ApiMgtDAO INSTANCE = null;
 
     private boolean forceCaseInsensitiveComparisons = false;
-    private boolean multiGropIdEnabled = false;
+    private boolean multiGroupAppSharingEnabled = false;
 
     private ApiMgtDAO() {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance()
@@ -149,7 +149,7 @@ public class ApiMgtDAO {
             forceCaseInsensitiveComparisons = Boolean.parseBoolean(caseSensitiveComparison);
         }
 
-        multiGropIdEnabled = APIUtil.isMultiGroupSharingEnabled();
+        multiGroupAppSharingEnabled = APIUtil.isMultiGroupSharingEnabled();
     }
 
     public List<String> getAPIVersionsMatchingApiName(String apiName,String username) throws APIManagementException {
@@ -1296,7 +1296,7 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
 
-                if (multiGropIdEnabled) {
+                if (multiGroupAppSharingEnabled) {
                     if (forceCaseInsensitiveComparisons) {
                         sqlQuery += whereClauseWithMultiGroupIdCaseInsensitive;
                     } else {
@@ -1389,7 +1389,7 @@ public class ApiMgtDAO {
 
             boolean hasGrouping = false;
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
-                if (multiGropIdEnabled) {
+                if (multiGroupAppSharingEnabled) {
                     String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
                     sqlQuery += whereClauseWithMultiGroupId;
                     String[] groupIdArr = groupingId.split(",");
@@ -1470,7 +1470,7 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             int tenantId = APIUtil.getTenantId(subscriber.getName());
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
-                if (multiGropIdEnabled) {
+                if (multiGroupAppSharingEnabled) {
                     String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
                     if (forceCaseInsensitiveComparisons) {
                         sqlQuery += whereClauseWithMultiGroupIdCaseInsensitive;
@@ -1577,7 +1577,7 @@ public class ApiMgtDAO {
 
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
 
-                if (multiGropIdEnabled) {
+                if (multiGroupAppSharingEnabled) {
                     if (forceCaseInsensitiveComparisons) {
                         sqlQuery += whereClauseWithMultiGroupIdCaseInsensitiveComp;
                     } else {
@@ -1652,7 +1652,7 @@ public class ApiMgtDAO {
                         application.addOAuthApp(entry.getKey(), entry.getValue());
                     }
 
-                    if (multiGropIdEnabled) {
+                    if (multiGroupAppSharingEnabled) {
                         application.setGroupId(getGroupId(application.getId()));
                         application.setOwner(result.getString("OWNER"));
                     }
@@ -3374,7 +3374,7 @@ public class ApiMgtDAO {
             conn.setAutoCommit(false);
             applicationId = addApplication(application, loginUserName, conn);
 
-            if (multiGropIdEnabled) {
+            if (multiGroupAppSharingEnabled) {
                 Subscriber subscriber = getSubscriber(userId);
                 String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
                 groupIdMappingUpdated = updateGroupIDMappings(conn, applicationId, application.getGroupId(),
@@ -3785,7 +3785,7 @@ public class ApiMgtDAO {
             }
 
             String groupId = application.getGroupId();
-            if (multiGropIdEnabled) {
+            if (multiGroupAppSharingEnabled) {
                 // setting an empty groupId since groupid's should be saved in groupId mapping table
                 groupId = "";
             }
@@ -3835,7 +3835,7 @@ public class ApiMgtDAO {
 
             ps.executeUpdate();
 
-            if (multiGropIdEnabled) {
+            if (multiGroupAppSharingEnabled) {
                 Subscriber subscriber = application.getSubscriber();
                 String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
                 transactionCompleted = updateGroupIDMappings(conn, application.getId(), application.getGroupId(),
@@ -3993,7 +3993,7 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
 
             if (!StringUtils.isEmpty(groupId)) {
-                if (multiGropIdEnabled) {
+                if (multiGroupAppSharingEnabled) {
                     if (forceCaseInsensitiveComparisons) {
                         sqlQuery += whereClauseWithMultiGroupIdCaseInsensitive;
                     } else {
@@ -4130,7 +4130,7 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
 
-                if (multiGropIdEnabled) {
+                if (multiGroupAppSharingEnabled) {
                     if (forceCaseInsensitiveComparisons) {
                         sqlQuery = SQLConstants.GET_APPLICATIONS_COUNNT_CASESENSITVE_WITH_MULTIGROUPID;
                     } else {
@@ -4205,7 +4205,7 @@ public class ApiMgtDAO {
         String sqlQuery = null;
 
         if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
-            if (multiGropIdEnabled) {
+            if (multiGroupAppSharingEnabled) {
                 if (forceCaseInsensitiveComparisons) {
                     sqlQuery = SQLConstantManagerFactory.getSQlString("GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITH_MULTIGROUPID");
                 } else {
@@ -4233,7 +4233,7 @@ public class ApiMgtDAO {
             sqlQuery = sqlQuery.replace("$2", sortOrder);
 
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
-                if (multiGropIdEnabled) {
+                if (multiGroupAppSharingEnabled) {
                     String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
                     String[] grpIdArray = groupingId.split(",");
                     int noOfParams = grpIdArray.length;
@@ -4272,7 +4272,7 @@ public class ApiMgtDAO {
                 application.setUUID(rs.getString("UUID"));
                 application.setIsBlackListed(rs.getBoolean("ENABLED"));
 
-                if(multiGropIdEnabled) {
+                if(multiGroupAppSharingEnabled) {
                     application.setOwner(rs.getString("CREATED_BY"));
                     application.setGroupId(getGroupId(application.getId()));
                 }
@@ -4311,7 +4311,7 @@ public class ApiMgtDAO {
         String whereClauseWithMultiGroupId;
 
         if (forceCaseInsensitiveComparisons) {
-            if (multiGropIdEnabled) {
+            if (multiGroupAppSharingEnabled) {
                 whereClauseWithGroupId = " AND ( (APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
                         "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?)) " +
                         "OR (LOWER(SUB.USER_ID) = LOWER(?)))";
@@ -4320,7 +4320,7 @@ public class ApiMgtDAO {
                         + "     ((GROUP_ID='' OR GROUP_ID IS NULL) AND LOWER(SUB.USER_ID) = LOWER(?))) ";
             }
         } else {
-            if (multiGropIdEnabled) {
+            if (multiGroupAppSharingEnabled) {
                 whereClauseWithGroupId = " AND ( (APP.APPLICATION_ID IN (SELECT APPLICATION_ID " +
                         "FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  " +
                         "OR  ( SUB.USER_ID = ? )) ";
@@ -4358,7 +4358,7 @@ public class ApiMgtDAO {
             }
 
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
-                if (multiGropIdEnabled) {
+                if (multiGroupAppSharingEnabled) {
                     String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
                     String groupIDArray[] = groupingId.split(",");
                     int paramIndex = groupIDArray.length;
@@ -4398,7 +4398,7 @@ public class ApiMgtDAO {
                 for (APIKey key : keys) {
                     application.addKey(key);
                 }
-                if (multiGropIdEnabled) {
+                if (multiGroupAppSharingEnabled) {
                     application.setGroupId(getGroupId(application.getId()));
                     application.setOwner(rs.getString("CREATED_BY"));
                 }
@@ -4495,7 +4495,7 @@ public class ApiMgtDAO {
             prepStmt.setInt(1, application.getId());
             rs = prepStmt.executeQuery();
 
-            if (multiGropIdEnabled) {
+            if (multiGroupAppSharingEnabled) {
                 transactionCompleted = updateGroupIDMappings(connection, application.getId(), null,null);
             }
 
@@ -4674,7 +4674,7 @@ public class ApiMgtDAO {
             connection = APIMgtDBUtil.getConnection();
 
             if (groupingId != null && !"null".equals(groupingId) && !groupingId.isEmpty()) {
-                if (multiGropIdEnabled) {
+                if (multiGroupAppSharingEnabled) {
                     Subscriber subscriber = getSubscriber(subscriberId);
                     String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
                     String groupIDArray[] = groupingId.split(",");
@@ -5603,7 +5603,7 @@ public class ApiMgtDAO {
                     "AND APP.NAME = ? AND SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID";
 
             if (groupId != null && !"null".equals(groupId) && !groupId.isEmpty()) {
-                if (multiGropIdEnabled) {
+                if (multiGroupAppSharingEnabled) {
                     Subscriber subscriber = getSubscriber(userId);
                     String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
                     query += whereClauseWithMultiGroupId;
@@ -5649,7 +5649,7 @@ public class ApiMgtDAO {
                 application.setUUID(rs.getString("UUID"));
                 application.setGroupId(rs.getString("GROUP_ID"));
 
-                if (multiGropIdEnabled) {
+                if (multiGroupAppSharingEnabled) {
                     application.setGroupId(getGroupId(application.getId()));
                 }
             }
