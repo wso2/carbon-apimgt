@@ -23,8 +23,7 @@ function doSubmit() {
                 });
             } else {
                 jagg.message({
-                    content: 'Error occurred while resetting your password. Please try again after few minutes.' +
-                    ' If you still have issues, please contact us at <a href="mailto:cloud@wso2.com">cloud@wso2.com</a>',
+                    content: 'Error occurred while resetting your password. Please try again after few minutes.',
                     type: 'error',
                     cbk: function () {
                         window.location.href = "index.jag";
