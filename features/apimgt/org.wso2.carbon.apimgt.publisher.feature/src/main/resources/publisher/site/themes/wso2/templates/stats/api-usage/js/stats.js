@@ -45,7 +45,7 @@ currentLocation=window.location.pathname;
 
                     //date picker
                     $('#date-range').daterangepicker({
-                          timePicker: true,
+                          timePicker: false,
                           timePickerIncrement: 30,
                           format: 'YYYY-MM-DD h:mm',
                           opens: 'left',
@@ -62,7 +62,7 @@ currentLocation=window.location.pathname;
                        to = convertTimeString(picker.endDate);
                        var fromStr = from.split(" ");
                        var toStr = to.split(" ");
-                       var dateStr = fromStr[0] + " <i>" + fromStr[1] + "</i> <b>to</b> " + toStr[0] + " <i>" + toStr[1] + "</i>";
+                       var dateStr = fromStr[0] + " <b>to</b> " + toStr[0];
                        $("#date-range span").html(dateStr);
                        drawProviderAPIUsage(from,to,apiFilter);
                     });
@@ -470,7 +470,7 @@ function getDateTime(currentDay,fromDay){
     from = convertTimeString(fromDay);
     var toDate = to.split(" ");
     var fromDate = from.split(" ");
-    var dateStr= fromDate[0]+" <i>"+fromDate[1]+"</i> <b>to</b> "+toDate[0]+" <i>"+toDate[1]+"</i>";
+    var dateStr= fromDate[0] + " <b>to</b> " + toDate[0];
     $("#date-range span").html(dateStr);
     $('#date-range').data('daterangepicker').setStartDate(from);
     $('#date-range').data('daterangepicker').setEndDate(to);
