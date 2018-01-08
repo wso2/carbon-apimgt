@@ -313,7 +313,7 @@ APIDesigner.prototype.has_resources = function(){
     if (this.api_doc == undefined) {
         return false;
     }
-    if(Object.keys(this.api_doc.paths).length == 0)
+    if(!this.api_doc.paths || Object.keys(this.api_doc.paths).length == 0)
         return false;
     else
         return true;
@@ -912,6 +912,9 @@ APIDesigner.prototype.add_resource = function(resource, path){
     
     if(path.charAt(0) != "/")
         path = "/" + path;
+    if (!this.api_doc.paths) {
+        this.api_doc.paths = {};
+    }
     if(this.api_doc.paths[path] == undefined){
         this.api_doc.paths[path] = resource;  
     }
@@ -1286,7 +1289,7 @@ function updateContextPattern(){
     var version = $('#version').val();
 
     if(context != ""){
-        if(context.indexOf("{version}") < 0){
+        if(context && context.indexOf("{version}") < 0){
             context = context + '/';
             context = context + "{version}";
         }
