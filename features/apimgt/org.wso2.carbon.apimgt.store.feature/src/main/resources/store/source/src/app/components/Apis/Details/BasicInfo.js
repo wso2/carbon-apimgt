@@ -216,14 +216,7 @@ class BasicInfo extends Component {
         promised_subscribe.then(response => {
             console.log("Subscription created successfully with ID : " + response.body.subscriptionId);
             this.addNotifications();
-            let applications = [];
-            for (let i = 0; i < this.state.options.length; i++) {
-                let subscribeApplicationId = this.state.options[i].value;
-                let applicationName = this.state.options[i].label;
-                if (subscribeApplicationId !== applicationId) {
-                    applications.push({value: applicationId, label: applicationName});
-                }
-            }
+            let applications = this.state.options.filter(application => applicationId !== application.value );
             this.setState({options: applications});
         }).catch(error => {
                 console.log("Error while creating the subscription.");
