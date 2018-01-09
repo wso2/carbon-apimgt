@@ -1,6 +1,7 @@
 {
   "presets": [
-    "es2015"
+    "env",
+    "react"
   ],
-  "plugins": ["dynamic-import-webpack"]
+  "plugins": ["transform-class-properties","dynamic-import-webpack"]
 }
