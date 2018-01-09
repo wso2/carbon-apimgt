@@ -195,7 +195,13 @@ include("/jagg/jagg.jag");
         username = user.username;
 
         mod = jagg.module("subscription");
-        result = mod.getAPISubscriptionsForApplication(username,appname);
+
+        var groupId = session.get("groupId");
+        if (jagg.isMultiGroupEnabled()) {
+            groupId = request.getParameter("groupId");
+        }
+
+        result = mod.getAPISubscriptionsForApplication(username, appname, groupId);
 
         if (result.error) {
             if (result.error.javaException instanceof org.wso2.carbon.apimgt.api.ApplicationNotFoundException) {

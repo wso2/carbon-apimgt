@@ -10241,4 +10241,8 @@ header .nav .dropdown-menu > li:not(.divider) {
   right: 0;
 }
 
+.bootstrap-tagsinput {
+  width: 100%;
+}
+
 /*# sourceMappingURL=apim-store.css.map */

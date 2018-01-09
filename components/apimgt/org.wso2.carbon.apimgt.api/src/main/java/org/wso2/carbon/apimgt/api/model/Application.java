@@ -42,6 +42,7 @@ public class Application {
     private String status;
     private String groupId;
     private Boolean isBlackListed;
+    private String owner;
 
     private String createdTime;
     private String lastUpdatedTime;
@@ -215,5 +216,11 @@ public class Application {
         this.isBlackListed = isBlackListed;
     }
 
+    public String getOwner() {
+        return owner;
+    }
 
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
 }

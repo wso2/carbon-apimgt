@@ -554,3 +554,8 @@ a.remove_rating:hover{
     width: 211px;
     word-wrap: break-word;
 }
+
+.multi-grp-application-dropdown {
+    margin-bottom: 25px;
+    padding-top: 3px;
+}

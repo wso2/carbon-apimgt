@@ -118,6 +118,7 @@ encode = new encode.Encode();
             obj = {
                 error:false,
                 applications:result.applications,
+                grpIdList:jagg.isMultiGroupEnabled(),
                 draw:encode.forHtml(draw),
                 iTotalRecords:totalRecordsCount,
                 iTotalDisplayRecords:totalRecordsCount

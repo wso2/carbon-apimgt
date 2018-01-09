@@ -614,7 +614,8 @@ public class SQLConstants {
             "   APP.NAME AS APP_NAME, " +
             "   APP.CALLBACK_URL AS CALLBACK_URL, " +
             "   SUBS.UUID AS SUB_UUID, " +
-            "   APP.UUID AS APP_UUID " +
+            "   APP.UUID AS APP_UUID, " +
+            "   APP.CREATED_BY AS OWNER" +
             " FROM " +
             "   AM_SUBSCRIBER SUB," +
             "   AM_APPLICATION APP, " +
@@ -1304,7 +1305,8 @@ public class SQLConstants {
             "   APPLICATION_STATUS, " +
             "   USER_ID, " +
             "   GROUP_ID, " +
-            "   UUID " +
+            "   UUID, " +
+            "   APP.CREATED_BY " +
             " FROM" +
             "   AM_APPLICATION APP, " +
             "   AM_SUBSCRIBER SUB  " +
@@ -1336,6 +1338,35 @@ public class SQLConstants {
                 "   (GROUP_ID= ?  OR ((GROUP_ID = '' OR GROUP_ID IS NULL) AND SUB.USER_ID=?))" +
                 " And "+
                 "    NAME like ?";
+
+    public static final String GET_APPLICATIONS_COUNNT_CASESENSITVE_WITH_MULTIGROUPID = "SELECT " +
+            "   count(*) count " +
+            " FROM" +
+            "   AM_APPLICATION APP, " +
+            "   AM_SUBSCRIBER SUB  " +
+            " WHERE " +
+            "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+            " AND (" +
+            "   (APPLICATION_ID IN ( SELECT APPLICATION_ID FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?)) " +
+            "           OR   " +
+            "   LOWER (SUB.USER_ID) = LOWER(?) )"+
+            " And "+
+            "    NAME like ?";
+
+
+    public static final String GET_APPLICATIONS_COUNNT_NONE_CASESENSITVE_WITH_MULTIGROUPID = "SELECT " +
+            "   count(*) count " +
+            " FROM" +
+            "   AM_APPLICATION APP, " +
+            "   AM_SUBSCRIBER SUB  " +
+            " WHERE " +
+            "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+            " AND (" +
+            "    (APPLICATION_ID IN ( SELECT APPLICATION_ID FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?)) " +
+            "        OR " +
+            "    SUB.USER_ID = ? )" +
+            " And "+
+            "    NAME like ?";
 
         public static final String GET_APPLICATIONS_COUNNT_CASESENSITVE = "SELECT " +
                 "   count(*) count " +
@@ -2568,6 +2599,16 @@ public class SQLConstants {
             "AND TOKEN.CONSUMER_KEY_ID = CON_APP.ID " +
             "AND CON_APP.CONSUMER_KEY=AKM.CONSUMER_KEY " +
             "AND AKM.APPLICATION_ID = APP.APPLICATION_ID";
+
+
+    public static final String REMOVE_GROUP_ID_MAPPING_SQL =
+            "DELETE FROM AM_APPLICATION_GROUP_MAPPING WHERE APPLICATION_ID = ? ";
+
+    public static final String ADD_GROUP_ID_MAPPING_SQL =
+            "INSERT INTO AM_APPLICATION_GROUP_MAPPING (APPLICATION_ID, GROUP_ID, TENANT) VALUES (?,?,?)";
+
+    public static final String GET_GROUP_ID_SQL =
+            "SELECT GROUP_ID  FROM AM_APPLICATION_GROUP_MAPPING WHERE APPLICATION_ID = ?";
 
     /** Throttle related constants**/
 

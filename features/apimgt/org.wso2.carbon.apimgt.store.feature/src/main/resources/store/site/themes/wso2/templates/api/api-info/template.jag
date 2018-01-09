@@ -197,7 +197,13 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                                            }
                                         }
                                 %>
+
+                                    <%if(jagg.isMultiGroupEnabled()){%>
+                                        <div class="form-group multi-grp-application-dropdown" id="application-selection-list">
+                                   <%}else{ %>
                                         <div class="form-group" id="application-selection-list">
+                                    <%}%>
+
                                             <label for="application-list"><%=i18n.localize("Applications")%></label>
                                             <select id="application-list" class="form-control">
                                                 <%if(!subscribedToDefault){%>
@@ -213,9 +219,12 @@ var urlPrefix = jagg.getTenantURLPrefix("&");
                                                    %>
                                                    <%if (app.name=="DefaultApplication"){%>
                                                    <option selected value="<%=app.id%>"><%= encode.forHtml(app.name)%></option>
-                                                   <%}else{%>
-                                                   <option value="<%=app.id%>"><%= encode.forHtml(app.name)%></option>
-                                                   <% }}} %>
+                                                   <%}else{
+                                                       if(jagg.isMultiGroupEnabled()){
+                                                   %>   <option value="<%=app.id%>" data-content="<span><strong><%= app.name%><br />owner-</strong> <span style='color:blue;'><%= encode.forHtml(app.owner) %></span> </span>" ><%= encode.forHtml(app.name)%></option>
+                                                    <%   }else{%>
+                                                        <option value="<%=app.id%>"><%= encode.forHtml(app.name)%></option>
+                                                   <%} }}} %>
                                                </optgroup>
                                             </select>
                                         </div>

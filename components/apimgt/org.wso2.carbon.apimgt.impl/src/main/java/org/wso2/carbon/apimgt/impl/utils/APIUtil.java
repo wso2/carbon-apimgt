@@ -58,6 +58,8 @@ import org.json.simple.parser.ParseException;
 import org.w3c.dom.Document;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.LoginPostExecutor;
+import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
@@ -242,6 +244,7 @@ public final class APIUtil {
     public static final String ALLOW_ALL = "AllowAll";
     public static final String DEFAULT_AND_LOCALHOST = "DefaultAndLocalhost";
     public static final String HOST_NAME_VERIFIER = "httpclient.hostnameVerifier";
+    public static String multiGrpAppSharing = null;
 
 
     //Need tenantIdleTime to check whether the tenant is in idle state in loadTenantConfig method
@@ -6761,6 +6764,47 @@ public final class APIUtil {
             Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(APIConstants
                     .API_PUBLISHER_USER_ROLE_CACHE).remove(userName);
         }
+    }
+
+    /**
+     * Used in application sharing to check if this featuer is enabled
+     *
+     * @return returns true if ENABLE_MULTIPLE_GROUPID is set to True
+     */
+    public static boolean isMultiGroupAppSharingEnabled() {
+
+        if (multiGrpAppSharing == null) {
+
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                    getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+            String groupIdExtractorClass = config.getFirstProperty(APIConstants
+                    .API_STORE_GROUP_EXTRACTOR_IMPLEMENTATION);
+
+            if (groupIdExtractorClass != null && !groupIdExtractorClass.isEmpty()) {
+                try {
+
+                    LoginPostExecutor groupingExtractor = (LoginPostExecutor) APIUtil.getClassForName
+                            (groupIdExtractorClass).newInstance();
+
+                    if (groupingExtractor instanceof NewPostLoginExecutor) {
+                        multiGrpAppSharing = "true";
+                    } else {
+                        multiGrpAppSharing = "false";
+                    }
+                    // if there is a exception the default flow will work hence ingnoring the applications
+                } catch (InstantiationException e) {
+                    multiGrpAppSharing = "false";
+                } catch (IllegalAccessException e) {
+                    multiGrpAppSharing = "false";
+                } catch (ClassNotFoundException e) {
+                    multiGrpAppSharing = "false";
+                }
+            } else {
+                multiGrpAppSharing = "false";
+            }
+        }
+        return Boolean.valueOf(multiGrpAppSharing);
     }
 
     /**

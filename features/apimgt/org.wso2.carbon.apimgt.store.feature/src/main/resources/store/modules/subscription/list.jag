@@ -69,13 +69,12 @@ var getAPISubscriptions = function (api, username) {
     }
 };
 
-var getAPISubscriptionsForApplication = function (username, appName) {
+var getAPISubscriptionsForApplication = function (username, appName, groupingId) {
     var subscriptions,
             log = new Log(),
             store = jagg.module("manager").getAPIStoreObj();
 
     try {
-        var groupingId = session.get("groupId");
         subscriptions = store.getSubscriptionsByApplication(appName, username, groupingId);
         if (log.isDebugEnabled()) {
             log.debug("getSubscriptions : " + stringify(subscriptions));

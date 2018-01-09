@@ -787,6 +787,20 @@ var jagg = jagg || (function () {
         //log.info(message);
     }
 
+    var isMultiGroupEnabled = function () {
+        var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
+        var log = new Log();
+        if (APIUtil.isMultiGroupAppSharingEnabled()) {
+            var groupId = session.get("groupId");
+            if (groupId == null || groupId == "") {
+                return false;
+            }
+            return true;
+        } else {
+            return false;
+        }
+    };
+
     var isCSRFTokenValid = function(){
         var log = new Log();
         var cookie = request.getCookie("csrftoken");
@@ -900,7 +914,8 @@ var jagg = jagg || (function () {
         isCSRFTokenValid:isCSRFTokenValid,
         validateInputs:validateInputs,
         getTenantURLPrefix:getTenantURLPrefix,
-        log:log
+        log:log,
+        isMultiGroupEnabled:isMultiGroupEnabled
     };
 
 }());

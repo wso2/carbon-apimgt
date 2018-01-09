@@ -85,6 +85,74 @@ public class SQLConstantsMSSQL extends SQLConstants{
             " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)"+
             " ORDER BY $1 $2 ";
 
+
+    public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE_WITH_MULTIGROUPID =
+            "select distinct x.*,bl.ENABLED from (" +
+                    "SELECT * FROM (" +
+                    "   SELECT " +
+                    "   ROW_NUMBER() OVER (ORDER BY APPLICATION_ID) as row ," +
+                    "   APPLICATION_ID, " +
+                    "   cast(NAME as varchar(100)) collate SQL_Latin1_General_CP1_CI_AS as NAME," +
+                    "   APPLICATION_TIER," +
+                    "   APP.SUBSCRIBER_ID,  " +
+                    "   CALLBACK_URL,  " +
+                    "   DESCRIPTION, " +
+                    "   APPLICATION_STATUS, " +
+                    "   USER_ID, " +
+                    "   GROUP_ID, " +
+                    "   UUID " +
+                    " FROM" +
+                    "   AM_APPLICATION APP, " +
+                    "   AM_SUBSCRIBER SUB  " +
+                    " WHERE " +
+                    "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                    " AND (" +
+                    "    (APPLICATION_ID IN ( SELECT APPLICATION_ID FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?)) " +
+                    "           OR " +
+                    "    (LOWER (SUB.USER_ID) = LOWER(?))" +
+                    " )" +
+                    " And "+
+                    "    NAME like ?" +
+                    " ) a WHERE a.row > ? and a.row <= a.row + ?"+
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)"+
+                    " ORDER BY $1 $2 ";
+
+
+
+
+    public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITH_MULTIGROUPID =
+            "select distinct x.*,bl.ENABLED from (" +
+                    "SELECT * FROM (" +
+                    "   SELECT " +
+                    "   ROW_NUMBER() OVER (ORDER BY APPLICATION_ID) as row," +
+                    "   APPLICATION_ID, " +
+                    "   cast(NAME as varchar(100)) collate SQL_Latin1_General_CP1_CI_AS as NAME," +
+                    "   APPLICATION_TIER," +
+                    "   APP.SUBSCRIBER_ID,  " +
+                    "   CALLBACK_URL,  " +
+                    "   DESCRIPTION, " +
+                    "   APPLICATION_STATUS, " +
+                    "   USER_ID, " +
+                    "   GROUP_ID, " +
+                    "   UUID " +
+                    " FROM" +
+                    "   AM_APPLICATION APP, " +
+                    "   AM_SUBSCRIBER SUB  " +
+                    " WHERE " +
+                    "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                    " AND (" +
+                    "    (APPLICATION_ID IN ( SELECT APPLICATION_ID FROM AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID " +
+                    " IN ($params) AND TENANT = ? ))" +
+                    "           OR " +
+                    "    (SUB.USER_ID = ? )" +
+                    " )" +
+                    " And " +
+                    "    NAME like ?"+
+                    " ) a WHERE a.row > ? and a.row <= a.row + ?"+
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.VALUE = (x.USER_ID + ':') + x.NAME)"+
+                    " ORDER BY $1 $2 ";
+
+
     public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE =
             "select distinct x.*,bl.ENABLED from (" +
             "SELECT * FROM (" +

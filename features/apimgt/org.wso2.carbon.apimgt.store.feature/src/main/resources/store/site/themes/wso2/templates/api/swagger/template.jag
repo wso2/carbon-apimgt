@@ -205,11 +205,20 @@ function checkOnKeyPress(e) {
           <label for="" class="col-sm-3 control-label">Try</label>
           <div class="col-sm-9">
             <select id="sub_app_list" class="form-control subapp">
-              <% for(var i = 0 ;subscriptions.length > i;i++){ %>
+              <% for(var i = 0 ;subscriptions.length > i;i++){
+                    var applicationTxt = "";
+                    if (jagg.isMultiGroupEnabled()) {
+                        applicationTxt = encode.forHtml(subscriptions[i].application)
+                                        + " (" + encode.forHtml(subscriptions[i].owner)+") "
+                    } else {
+                        applicationTxt = encode.forHtml(subscriptions[i].application);
+                    }
+
+            %>
                 <option value="" data-sandbox="<%=subscriptions[i].SANDBOX_KEY%>" data-production="<%=subscriptions[i].PRODUCTION_KEY%>">
-                     <%= encode.forHtml(subscriptions[i].application)%>
+                     <%= applicationTxt%>
                 </option>
-              <% } %>
+              <% }  %>
             </select>
           </div>
       </div>

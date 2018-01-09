@@ -29,4 +29,13 @@ public interface LoginPostExecutor {
      * @return organization identifier
      */
     String getGroupingIdentifiers(String response);
+
+    /**
+     * Returns false to disable multi group application sharing for the implementations based on LoginPostExecutor
+     *
+     * @return false
+     */
+    default public boolean isMultiGrpAppSharing() {
+        return false;
+    }
 }
