@@ -1911,12 +1911,14 @@ public class APIStoreHostObject extends ScriptableObject {
                                     tierObj.put("tierDescription", tierObj,
                                             tier.getDescription() != null ? tier.getDescription() : "");
                                     if (tier.getTierAttributes() != null) {
-                                        Map<String, Object> attributes;
-                                        attributes = tier.getTierAttributes();
+                                        Map<String, Object> attributes = tier.getTierAttributes();
                                         StringBuilder attributesListBuilder = new StringBuilder();
                                         for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
+                                            if (attributesListBuilder.length() > 0) {
+                                                attributesListBuilder.append(",");
+                                            }
                                             attributesListBuilder.append(attribute.getKey()).append("::").append(
-                                                    attribute.getValue()).append(",");
+                                                    attribute.getValue());
                                         }
                                         tierObj.put("tierAttributes", tierObj, attributesListBuilder.toString());
                                     }
@@ -1940,6 +1942,18 @@ public class APIStoreHostObject extends ScriptableObject {
                                     policyObj.put("tierDisplayName", policyObj, policy.getName() != null ? policy.getName() : "");
                                     policyObj.put("tierDescription", policyObj,
                                             policy.getDescription() != null ? policy.getDescription() : "");
+                                    if (policy.getTierAttributes() != null) {
+                                        Map<String, Object> attributes = policy.getTierAttributes();
+                                        StringBuilder attributesListBuilder = new StringBuilder();
+                                        for (Map.Entry<String, Object> attribute : attributes.entrySet()) {
+                                            if (attributesListBuilder.length() > 0) {
+                                                attributesListBuilder.append(",");
+                                            }
+                                            attributesListBuilder.append(attribute.getKey()).append("::").append(
+                                                    attribute.getValue());
+                                        }
+                                        policyObj.put("tierAttributes", policyObj, attributesListBuilder.toString());
+                                    }
                                     tierArr.put(j, tierArr, policyObj);
                                     j++;
 
