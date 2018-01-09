@@ -252,9 +252,9 @@ public class APIMWSDLReader {
 			wsdlReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
 			wsdlReader.setFeature("javax.wsdl.importDocuments", false);
 
-            if (wsdlReader instanceof WSDLReaderImpl) {
-                ((WSDLReaderImpl) wsdlReader).setIgnoreSchemaContent(true);
-            }
+			if (wsdlReader instanceof WSDLReaderImpl) {
+			    ((WSDLReaderImpl) wsdlReader).setIgnoreSchemaContent(true);
+			}
 
 			Definition wsdlDefinition = wsdlReader.readWSDL(null, getSecuredParsedDocumentFromContent(wsdl));
 
