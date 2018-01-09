@@ -30,6 +30,7 @@
     "react-dom": "^15.5.4",
     "react-dropzone": "^3.13.3",
     "react-modal": "^2.3.2",
+    "react-notification-system": "^0.2.16",
     "react-quill": "1.0.0",
     "react-router": "^4.1.1",
     "react-router-dom": "^4.1.1",
