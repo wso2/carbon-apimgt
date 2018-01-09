@@ -112,7 +112,7 @@ i18n.init(request,localeResourcesBasePath);
                 } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_ABNORMALBACKENDTIMEALERTSTREAM") {
                     type = "Abnormal Backend Time";
                 } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_APIHEALTHMONITORALERTSTREAM") {
-                    type = "Availability of APIs";
+                    type = "Health Availability";
                 } else if (tableName == "ORG_WSO2_ANALYTICS_APIM_REQUESTPATTERNCHANGEDSTREAM") {
                     type = "Abnormal Resource Access Pattern";
                 }
