@@ -523,6 +523,46 @@
                 <version>${java-mail.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.wso2.orbit.com.squareup.okio</groupId>
+                <artifactId>okio</artifactId>
+                <version>${wso2.okio.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
+                <artifactId>okhttp-ws</artifactId>
+                <version>${wso2.okhttp-ws.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>${wso2.okhttp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
+                <artifactId>logging-interceptor</artifactId>
+                <version>${wso2.okhttp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.dnsjava</groupId>
+                <artifactId>dnsjava</artifactId>
+                <version>${wso2.dnsjava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>${org.json.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${snakeyaml.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.orbit.io.fabric8</groupId>
+                <artifactId>kubernetes-client</artifactId>
+                <version>${wso2.kubernetes-client.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.orbit.io.swagger</groupId>
                 <artifactId>swagger-codegen</artifactId>
                 <version>${swagger.codegen.version}</version>
@@ -974,6 +1014,7 @@
         <org.json.version>20160212</org.json.version>
         <wso2.okio.version>1.6.0.wso2v1</wso2.okio.version>
         <wso2.kubernetes-client.version>2.5.2.wso2v3</wso2.kubernetes-client.version>
+        <wso2.dnsjava.version>2.1.7.wso2v1</wso2.dnsjava.version>
         <nimbusds.version>2.26.1.wso2v2</nimbusds.version>
         <nimbusds.import.version.range>[2.26.1, 2.26.2)</nimbusds.import.version.range>
         <geronimo-jms.version>1.1.1</geronimo-jms.version>

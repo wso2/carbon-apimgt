@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.APIStatus;
 import org.wso2.carbon.apimgt.core.models.APISummary;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BlockConditions;
@@ -44,8 +45,10 @@ import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.BrokerUtil;
+import org.wso2.carbon.apimgt.core.util.ContainerBasedGatewayConstants;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * This is responsible for handling API gateway related operations
@@ -77,9 +80,12 @@ public class APIGatewayPublisherImpl implements APIGateway {
         if (log.isDebugEnabled()) {
             log.debug("API : " + api.getName() + " created event has been successfully published to broker");
         }
-
+        //Do not create the Container Based gateway based on hasOwnGateway value as this is in created state.
     }
 
+    /**
+     * @see APIGateway#addCompositeAPI(CompositeAPI api)
+     */
     @Override
     public void addCompositeAPI(CompositeAPI api) throws GatewayException {
 
@@ -93,7 +99,6 @@ public class APIGatewayPublisherImpl implements APIGateway {
         apiSummary.setThreatProtectionPolicies(api.getThreatProtectionPolicies());
         gatewayDTO.setApiSummary(apiSummary);
         publishToPublisherTopic(gatewayDTO);
-
     }
 
     @Override
@@ -118,6 +123,10 @@ public class APIGatewayPublisherImpl implements APIGateway {
         publishToPublisherTopic(apiDeleteEvent);
         if (log.isDebugEnabled()) {
             log.debug("API : " + api.getName() + " deleted event has been successfully published to broker");
+        }
+        if (api.hasOwnGateway()) {
+            // Delete the Gateway - check how we can assume that we complete the deletion
+            removeContainerBasedGateway(api.getLabels().toArray()[0].toString(), api.getId());
         }
     }
 
@@ -424,6 +433,68 @@ public class APIGatewayPublisherImpl implements APIGateway {
             if (log.isDebugEnabled()) {
                 log.debug("BlockCondition : " + blockConditions.getUuid() + " delete event has been successfully " +
                         "published " + "to broker");
+            }
+        }
+    }
+    /**
+     * @see APIGateway#createContainerBasedGateway(String, String)
+     */
+    @Override
+    public void createContainerBasedGateway(String apiId, String label) throws GatewayException {
+
+        if (ContainerBasedGatewayConstants.K8.equalsIgnoreCase(config.getContainerGatewayConfigs().getCmsType())) {
+            KubernetesGatewayImpl kubernetesGateway = new KubernetesGatewayImpl();
+            kubernetesGateway.createContainerGateway(apiId, label);
+
+        } else if (ContainerBasedGatewayConstants.OPENSHIFT.equalsIgnoreCase(config.getContainerGatewayConfigs()
+                .getCmsType())) {
+            OpenShiftGatewayImpl openShiftGateway = new OpenShiftGatewayImpl();
+            openShiftGateway.createContainerGateway(apiId, label);
+        }
+        // todo : Add other cmsTypes
+
+    }
+
+    /**
+     * @see APIGateway#removeContainerBasedGateway(String, String)
+     */
+    @Override
+    public void removeContainerBasedGateway(String label, String apiId) throws GatewayException {
+
+        if (ContainerBasedGatewayConstants.K8.equalsIgnoreCase(config.getContainerGatewayConfigs().getCmsType())) {
+            KubernetesGatewayImpl kubernetesGateway = new KubernetesGatewayImpl();
+            kubernetesGateway.removeContainerBasedGateway(label, apiId, config.getContainerGatewayConfigs()
+                    .getKubernetesGatewayConfigurations().getNamespace());
+
+        } else if (ContainerBasedGatewayConstants.OPENSHIFT.equalsIgnoreCase(config.getContainerGatewayConfigs()
+                .getCmsType())) {
+            OpenShiftGatewayImpl openShiftGateway = new OpenShiftGatewayImpl();
+            openShiftGateway.removeContainerBasedGateway(label, apiId, config.getContainerGatewayConfigs()
+                    .getOpenshiftGatewayConfigurations().getNamespace());
+        }
+        // todo : Add other cmsTypes
+    }
+
+    /**
+     * @see APIGateway#updateDedicatedGateway(API, Set, boolean)
+     */
+    @Override
+    public void updateDedicatedGateway(API api, Set<String> labelSet, boolean isDedicatedGatewayEnabled)
+            throws GatewayException {
+
+        // If API is a published,prototyped or a deprecated
+        if (api.getLifeCycleStatus().equalsIgnoreCase(APIStatus.PUBLISHED.getStatus()) ||
+                api.getLifeCycleStatus().equalsIgnoreCase(APIStatus.PROTOTYPED.getStatus()) ||
+                api.getLifeCycleStatus().equalsIgnoreCase(APIStatus.DEPRECATED.getStatus())) {
+
+            if (isDedicatedGatewayEnabled) {
+                // label is created beforehand.
+                createContainerBasedGateway(api.getId(), api.getLabels().toArray()[0].toString());
+            }
+            if (isDedicatedGatewayEnabled) {
+                //label is deleted beforehand.
+                removeContainerBasedGateway(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + api.getId()
+                        , api.getId());
             }
         }
     }

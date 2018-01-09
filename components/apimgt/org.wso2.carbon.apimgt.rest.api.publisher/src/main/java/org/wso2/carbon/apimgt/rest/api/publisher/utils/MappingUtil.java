@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
 import org.wso2.carbon.apimgt.core.models.BusinessInformation;
 import org.wso2.carbon.apimgt.core.models.CorsConfiguration;
+import org.wso2.carbon.apimgt.core.models.DedicatedGateway;
 import org.wso2.carbon.apimgt.core.models.DocumentInfo;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.core.models.Label;
@@ -58,6 +59,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_operationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_threatProtectionPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.API_threatProtectionPolicies_listDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.dto.DedicatedGatewayDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.EndPointDTO;
@@ -112,6 +114,7 @@ public class MappingUtil {
         apidto.setLifeCycleStatus(api.getLifeCycleStatus());
         apidto.setWorkflowStatus(api.getWorkflowStatus());
         apidto.setTags(new ArrayList<>(api.getTags()));
+        apidto.hasOwnGateway(api.hasOwnGateway());
         apidto.setLabels(new ArrayList<>(api.getLabels()));
         apidto.setTransport(new ArrayList<>(api.getTransport()));
         apidto.setUserPermissionsForApi(api.getUserSpecificApiPermissions());
@@ -247,6 +250,7 @@ public class MappingUtil {
                 apiPermission(apidto.getPermission()).
                 tags(new HashSet<>(apidto.getTags())).
                 labels(new HashSet<>(apidto.getLabels())).
+                hasOwnGateway(apidto.getHasOwnGateway()).
                 transport(new HashSet<>(apidto.getTransport())).
                 isResponseCachingEnabled(Boolean.valueOf(apidto.getResponseCaching())).
                 businessInformation(businessInformation).
@@ -671,4 +675,32 @@ public class MappingUtil {
         return dto;
     }
 
+    /**
+     * This method maps the the DedicatedGateway object to DedicatedGatewayDTO
+     *
+     * @param dedicatedGateway  DedicatedGateway object
+     * @return Dedicated Gateway Object
+     */
+    public static DedicatedGatewayDTO toDedicatedGatewayDTO(DedicatedGateway dedicatedGateway) {
+
+        DedicatedGatewayDTO dedicatedGatewayDTO = new DedicatedGatewayDTO();
+        dedicatedGatewayDTO.setIsEnabled(dedicatedGateway.isEnabled());
+        return dedicatedGatewayDTO;
+    }
+
+    /**
+     * This method maps the the DedicatedGatewayDTO object to DedicatedGateway Object
+     *
+     * @param dedicatedGatewayDTO contains data of DedicatedGateway
+     * @param apiId UUID of the API
+     * @return Dedicated Gateway Object
+     */
+    public static DedicatedGateway fromDTOtoDedicatedGateway(DedicatedGatewayDTO dedicatedGatewayDTO, String apiId) {
+
+        DedicatedGateway dedicatedGateway = new DedicatedGateway();
+        dedicatedGateway.setApiId(apiId);
+        dedicatedGateway.setEnabled(dedicatedGatewayDTO.getIsEnabled());
+        return dedicatedGateway;
+
+    }
 }

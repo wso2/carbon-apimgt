@@ -131,7 +131,7 @@
 
     <properties>
         <private.package>org.wso2.carbon.apimgt.rest.api.configurations.*</private.package>
-        <import.package>
+        <import.package>  
             org.wso2.msf4j.*; version="${msf4j.package.import.version.range}",
             org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
             org.apache.commons.lang3.*; version="${apache.commons.lang3.import.version.range}",
