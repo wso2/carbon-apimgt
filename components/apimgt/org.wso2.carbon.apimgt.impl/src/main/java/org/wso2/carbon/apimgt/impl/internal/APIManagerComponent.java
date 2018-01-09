@@ -52,6 +52,7 @@ import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterConfiguration
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
 import org.wso2.carbon.event.output.adapter.core.exception.OutputEventAdapterException;
 import org.wso2.carbon.governance.api.util.GovernanceConstants;
+import org.wso2.carbon.identity.oauth2.OAuth2ScopeService;
 import org.wso2.carbon.registry.api.Collection;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.core.ActionConstants;
@@ -113,6 +114,10 @@ import java.util.List;
  * interface="org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService"
  * cardinality="1..1" policy="dynamic"  bind="setOutputEventAdapterService"
  * unbind="unsetOutputEventAdapterService"
+ * @scr.reference name="org.wso2.carbon.identity.oauth2.oauth2scopeservice"
+ * interface="org.wso2.carbon.identity.oauth2.OAuth2ScopeService"
+ * cardinality="1..1" policy="dynamic"  bind="setoAuth2ScopeService"
+ * unbind="unsetoAuth2ScopeService"
  */
 public class APIManagerComponent {
     //TODO refactor caching implementation
@@ -632,5 +637,23 @@ public class APIManagerComponent {
      */
     protected void unsetOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService){
         ServiceReferenceHolder.getInstance().setOutputEventAdapterService(null);
+    }
+
+    /**
+     * Initialize the OAuth2Scope Service  dependency
+     *
+     * @param oAuth2ScopeService oAuth2ScopeService reference
+     */
+    protected void setoAuth2ScopeService(OAuth2ScopeService oAuth2ScopeService) {
+        ServiceReferenceHolder.getInstance().setoAuth2ScopeService(oAuth2ScopeService);
+    }
+
+    /**
+     * De-reference the OAuth2Scope Service  dependency.
+     *
+     * @param oAuth2ScopeService oAuth2ScopeService reference
+     */
+    protected void unsetoAuth2ScopeService(OAuth2ScopeService oAuth2ScopeService) {
+        ServiceReferenceHolder.getInstance().setoAuth2ScopeService(null);
     }
 }
