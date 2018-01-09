@@ -158,7 +158,6 @@ class AuthManager {
      */
     authenticateUser(username, password, environment) {
         const headers = {
-            'Authorization': 'Basic deidwe',
             'Accept': 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded'
         };
@@ -166,7 +165,7 @@ class AuthManager {
             username: username,
             password: password,
             grant_type: 'password',
-            validity_period: 3600,
+            validity_period: -1,
             scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage '
             + 'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover'
         };

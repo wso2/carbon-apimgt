@@ -115,7 +115,7 @@ class ProductionKeys extends React.Component {
                     <Grid item xs={6}>
                         <Paper className={classes.paper}>
                             <TextField
-                                disabled={true}
+                                inputProps={{readonly: true}}
                                 label="Consumer Key"
                                 id="consumerKey"
                                 value={consumerKey || "Keys are not generated yet. Click the Generate token button to generate the keys."}
@@ -131,7 +131,7 @@ class ProductionKeys extends React.Component {
                             <FormControl fullWidth={true} margin="none">
                                 <InputLabel htmlFor="consumerSecret">Consumer Secret</InputLabel>
                                 <Input
-                                    disabled={true}
+                                    inputProps={{readonly: true}}
                                     id="consumerSecret"
                                     type={(this.state.showCS || !consumerSecret) ? 'text' : 'password'}
                                     value={consumerSecret || "Keys are not generated yet. Click the Generate token button to generate the keys."}
@@ -154,7 +154,7 @@ class ProductionKeys extends React.Component {
                                 className={classes.button}>Generate Token</Button>
                         <Paper className={classes.paper}>
                             <TextField
-                                disabled={true}
+                                inputProps={{readonly: true}}
                                 label="Access Token"
                                 id="accessToken"
                                 value={accessToken || "Click on Generate Token button to generate Access Token."}
