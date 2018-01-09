@@ -84,10 +84,12 @@ import org.wso2.carbon.apimgt.impl.utils.RemoteUserManagerClient;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowExecutorFactory;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.oauth.IdentityOAuthAdminException;
+import org.wso2.carbon.identity.oauth2.OAuth2ScopeService;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.DBUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -7496,7 +7498,9 @@ public class ApiMgtDAO {
     }
 
     public void addScopes(Set<?> objects, int api_id, int tenantID) throws APIManagementException {
-
+        OAuth2ScopeService oAuth2ScopeService = (OAuth2ScopeService) PrivilegedCarbonContext
+                .getThreadLocalCarbonContext()
+                .getOSGiService(OAuth2ScopeService.class, null);
         Connection conn = null;
         PreparedStatement ps = null, ps2 = null;
         ResultSet rs = null;
