@@ -36,7 +36,6 @@ public class APIEntitlementCallbackHandler extends EntitlementCallbackHandler {
         String userName = null;
         if (authContext != null) {
             userName = authContext.getUsername();
-
         }
         log.debug("UserName ---" + userName);
         return userName;
@@ -54,7 +53,6 @@ public class APIEntitlementCallbackHandler extends EntitlementCallbackHandler {
                 getProperty(org.apache.axis2.Constants.Configuration.HTTP_METHOD));
         return (String) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(org.apache.axis2.Constants.Configuration.HTTP_METHOD);
-
     }
 
     public String findOperationName(MessageContext synCtx) {
