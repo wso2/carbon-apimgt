@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.keymgt.service;
 
 import org.apache.axis2.AxisFault;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -11,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -565,7 +567,7 @@ public class APIKeyMgtSubscriberServiceTest {
             Assert.assertEquals("Error while creating tokens - Connection Error", e.getMessage());
         }
 
-        PowerMockito.whenNew(UrlEncodedFormEntity.class).withAnyArguments()
+        PowerMockito.whenNew(UrlEncodedFormEntity.class).withArguments(Matchers.anyObject(), Matchers.anyString())
                 .thenThrow(new UnsupportedEncodingException("Unsupported Encoding"));
         try {
             status = apiKeyMgtSubscriberService.revokeTokensOfUserByApp(USER_NAME, APPLICATION_NAME);
