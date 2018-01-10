@@ -91,13 +91,13 @@ class Login extends Component {
             this.setState({isLogin: AuthManager.getUser(), loading: false});
         }).catch((error) => {
                 this.setState({messageOpen: true});
-                if(error.response.data.code === 900964){ //Error while generating a new access token.
+                if (error.response.data.code === 900964) { //Error while generating a new access token.
                     this.setState({message: "Invalid Username or Password."});
-                }else{
+                } else {
                     this.setState({message: error.message});
                 }
                 console.log(error);
-                this.setState({loading: false});
+                this.setState({loading: false});q
             }
         );
     };
@@ -188,28 +188,28 @@ class Login extends Component {
                                                 </FormControl>
                                                 }
 
-                                                    <FormControl style={{width: "100%"}}>
-                                                            <TextField
-                                                                error={!this.state.username && this.state.validate}
-                                                                id="username"
-                                                                label="Username"
-                                                                type="text"
-                                                                autoComplete="username"
-                                                                margin="normal"
-                                                                style={{width: "100%"}}
-                                                                onChange={this.handleInputChange}
-                                                            />
-                                                            <TextField
-                                                                error={!this.state.password && this.state.validate}
-                                                                id="password"
-                                                                label="Password"
-                                                                type="password"
-                                                                autoComplete="current-password"
-                                                                margin="normal"
-                                                                style={{width: "100%"}}
-                                                                onChange={this.handleInputChange}
-                                                            />
-                                                        </FormControl>
+                                                <FormControl style={{width: "100%"}}>
+                                                    <TextField
+                                                        error={!this.state.username && this.state.validate}
+                                                        id="username"
+                                                        label="Username"
+                                                        type="text"
+                                                        autoComplete="username"
+                                                        margin="normal"
+                                                        style={{width: "100%"}}
+                                                        onChange={this.handleInputChange}
+                                                    />
+                                                    <TextField
+                                                        error={!this.state.password && this.state.validate}
+                                                        id="password"
+                                                        label="Password"
+                                                        type="password"
+                                                        autoComplete="current-password"
+                                                        margin="normal"
+                                                        style={{width: "100%"}}
+                                                        onChange={this.handleInputChange}
+                                                    />
+                                                </FormControl>
 
                                                 {/*Buttons*/}
                                                 <Button

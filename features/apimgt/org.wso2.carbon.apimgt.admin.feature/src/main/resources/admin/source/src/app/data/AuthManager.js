@@ -21,7 +21,6 @@ import axios from 'axios'
 import qs from 'qs'
 import Utils from './Utils'
 import User from './User'
-import APIClient from './APIClient'
 import APIClientFactory from "./APIClientFactory";
 
 class AuthManager {
@@ -160,7 +159,7 @@ class AuthManager {
             grant_type: 'password',
             validity_period: 3600,
             scopes: 'apim:tier_view apim:tier_manage apim:bl_view apim:bl_manage apim:label_view ' +
-                          'apim:label_manage apim:workflow_view apim:workflow_approve'
+            'apim:label_manage apim:workflow_view apim:workflow_approve'
 
         };
         let promised_response = axios(Utils.getLoginTokenPath(environment), {
@@ -212,7 +211,7 @@ class AuthManager {
             grant_type: 'refresh_token',
             validity_period: '3600',
             scopes: 'apim:tier_view apim:tier_manage apim:bl_view apim:bl_manage apim:label_view ' +
-                          'apim:label_manage apim:workflow_view apim:workflow_approve'
+            'apim:label_manage apim:workflow_view apim:workflow_approve'
         };
         let referrer = (document.referrer.indexOf("https") !== -1) ? document.referrer : null;
         let url = Utils.CONST.CONTEXT_PATH + '/auth/apis/login/token';

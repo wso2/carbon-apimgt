@@ -61,6 +61,22 @@ export default class User {
     }
 
     /**
+     * User utility method to create an user from JSON object.
+     * @param {JSON} userJson : Need to provide user information in JSON structure to create an user object
+     * @returns {User} : An instance of User(this) class.
+     */
+    static fromJson(userJson) {
+        if (!userJson.name) {
+            throw "Need to provide user `name` key in the JSON object, to create an user";
+        }
+        const _user = new User(Utils.getEnvironment().label, userJson.name);
+        _user.scopes = userJson.scopes;
+        _user.idToken = userJson.idToken;
+        _user.rememberMe = userJson.remember;
+        return _user;
+    }
+
+    /**
      * Get the JS accessible access token fragment from cookie storage.
      * @returns {String|null}
      */
@@ -98,22 +114,6 @@ export default class User {
             idToken: this._idToken,
             remember: this._remember
         };
-    }
-
-    /**
-     * User utility method to create an user from JSON object.
-     * @param {JSON} userJson : Need to provide user information in JSON structure to create an user object
-     * @returns {User} : An instance of User(this) class.
-     */
-    static fromJson(userJson) {
-        if (!userJson.name) {
-            throw "Need to provide user `name` key in the JSON object, to create an user";
-        }
-        const _user = new User(Utils.getEnvironment().label, userJson.name);
-        _user.scopes = userJson.scopes;
-        _user.idToken = userJson.idToken;
-        _user.rememberMe = userJson.remember;
-        return _user;
     }
 }
 

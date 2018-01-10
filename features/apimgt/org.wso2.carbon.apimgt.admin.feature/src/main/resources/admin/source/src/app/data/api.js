@@ -38,7 +38,8 @@ class API {
      * @private
      */
     _requestMetaData(data = {}) {
-        AuthManager.refreshTokenOnExpire(); /* TODO: This should be moved to an interceptor ~tmkb*/
+        AuthManager.refreshTokenOnExpire();
+        /* TODO: This should be moved to an interceptor ~tmkb*/
         let metaData = {
             requestContentType: data['Content-Type'] || "application/json"
         };
@@ -57,7 +58,7 @@ class API {
         return this.client.then(
             (client) => {
                 return client.apis["Workflows (Collection)"].get_workflows(
-                    {workflowType:type}, this._requestMetaData());
+                    {workflowType: type}, this._requestMetaData());
             }
         );
     }
@@ -70,16 +71,16 @@ class API {
      */
     completeWorkflow(id, status) {
         let body = {
-                 status: status
-               }
+            status: status
+        }
         return this.client.then(
             (client) => {
                 return client.apis["Workflows (Individual)"].put_workflows__workflowReferenceId_(
-                  {
-                      workflowReferenceId: id,
-                      body: body,
-                      'Content-Type': 'application/json'
-                  }, this._requestMetaData());
+                    {
+                        workflowReferenceId: id,
+                        body: body,
+                        'Content-Type': 'application/json'
+                    }, this._requestMetaData());
             }
         );
     }
@@ -128,7 +129,7 @@ class API {
      * @returns {Promise} Promised policies response
      */
     updateSubscriptionLevelPolicy(id, body) {
-      let payload = {id: id, body: body, "Content-Type": "application/json"};
+        let payload = {id: id, body: body, "Content-Type": "application/json"};
         return this.client.then(
             (client) => {
                 return client.apis["Subscription Policies"].put_policies_throttling_subscription__id_(
@@ -142,7 +143,7 @@ class API {
      * @returns {Promise} Promised policies response
      */
     createSubscriptionLevelPolicy(body) {
-      let payload = {body: body, "Content-Type": "application/json"};
+        let payload = {body: body, "Content-Type": "application/json"};
         return this.client.then(
             (client) => {
                 return client.apis["Subscription Policies"].post_policies_throttling_subscription(
@@ -195,7 +196,7 @@ class API {
      * @returns {Promise} Promised policies response
      */
     updateAPILevelPolicy(id, body) {
-      let payload = {id: id, body: body, "Content-Type": "application/json"};
+        let payload = {id: id, body: body, "Content-Type": "application/json"};
         return this.client.then(
             (client) => {
                 return client.apis["Advanced Policies"].put_policies_throttling_advanced__id_(
@@ -209,7 +210,7 @@ class API {
      * @returns {Promise} Promised policies response
      */
     createAPILevelPolicy(body) {
-      let payload = {body: body, "Content-Type": "application/json"};
+        let payload = {body: body, "Content-Type": "application/json"};
         return this.client.then(
             (client) => {
                 return client.apis["Advanced Policies"].post_policies_throttling_advanced(
@@ -262,7 +263,7 @@ class API {
      * @returns {Promise} Promised policies response
      */
     updateApplicationLevelPolicy(id, body) {
-      let payload = {id: id, body: body, "Content-Type": "application/json"};
+        let payload = {id: id, body: body, "Content-Type": "application/json"};
         return this.client.then(
             (client) => {
                 return client.apis["Application Policies"].put_policies_throttling_application__id_(
@@ -276,7 +277,7 @@ class API {
      * @returns {Promise} Promised policies response
      */
     createApplicationLevelPolicy(body) {
-      let payload = {body: body, "Content-Type": "application/json"};
+        let payload = {body: body, "Content-Type": "application/json"};
         return this.client.then(
             (client) => {
                 return client.apis["Application Policies"].post_policies_throttling_application(
@@ -305,8 +306,7 @@ class API {
     getThreatProtectionPolicy(id) {
         return this.client.then(
             (client) => {
-                return client.apis["Threat Protection Policy"].
-                get_threat_protection_policies__threatProtectionPolicyId_({threatProtectionPolicyId: id});
+                return client.apis["Threat Protection Policy"].get_threat_protection_policies__threatProtectionPolicyId_({threatProtectionPolicyId: id});
             }
         );
     }
@@ -322,10 +322,9 @@ class API {
             console.log(policy);
             return this.client.then(
                 (client) => {
-                    return client.apis["Update Threat Protection Policy"].
-                    post_threat_protection_policies__threatProtectionPolicyId_(
-                            {threatProtectionPolicyId: policy.uuid, threatProtectionPolicy: policy}
-                        )
+                    return client.apis["Update Threat Protection Policy"].post_threat_protection_policies__threatProtectionPolicyId_(
+                        {threatProtectionPolicyId: policy.uuid, threatProtectionPolicy: policy}
+                    )
                 }
             );
         } else {
@@ -333,8 +332,7 @@ class API {
             //add policy
             return this.client.then(
                 (client) => {
-                    return client.apis["Add Threat Protection Policy"].
-                    post_threat_protection_policies(
+                    return client.apis["Add Threat Protection Policy"].post_threat_protection_policies(
                         {threatProtectionPolicy: policy}
                     )
                 }
@@ -349,8 +347,7 @@ class API {
     deleteThreatProtectionPolicy(id) {
         return this.client.then(
             (client) => {
-                return client.apis["Delete Threat Protection Policy"].
-                    delete_threat_protection_policies__threatProtectionPolicyId_({threatProtectionPolicyId: id});
+                return client.apis["Delete Threat Protection Policy"].delete_threat_protection_policies__threatProtectionPolicyId_({threatProtectionPolicyId: id});
             }
         );
     }

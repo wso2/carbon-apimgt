@@ -142,7 +142,7 @@ class Utils {
         AuthManager.setUser(user);
     }
 
-    static getPromised_ssoData(environment){
+    static getPromised_ssoData(environment) {
         return Axios.get(Utils.getAppSSORequestURL(environment));
     }
 
@@ -167,7 +167,7 @@ class Utils {
      * @returns {Object} environment: {label: string, host: string, loginTokenPath: string}
      * @private
      */
-    static _getDefaultEnvironment(){
+    static _getDefaultEnvironment() {
         return {label: 'Default', host: window.location.host, loginTokenPath: '/login/token'};
     }
 }
