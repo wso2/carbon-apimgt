@@ -26,6 +26,7 @@ class APIClientFactory {
         }
 
         this._APIClientMap = new Map();
+        APIClientFactory._instance = this;
     }
 
     getAPIClient(environmentLabel) {
@@ -38,6 +39,10 @@ class APIClientFactory {
         api_Client = new APIClient(Utils.getEnvironment().host);
         this._APIClientMap.set(environmentLabel, api_Client);
         return api_Client;
+    }
+
+    destroyAPIClient(environmentLabel) {
+        this._APIClientMap.delete(environmentLabel);
     }
 }
 

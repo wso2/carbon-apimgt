@@ -192,7 +192,7 @@ class AuthManager {
     logout() {
         let authHeader = "Bearer " + AuthManager.getUser().getPartialToken();
         //TODO Will have to change the logout end point url to contain the app context(i.e. admin/store, etc.)
-        let url = Utils.getAppLogoutURL()
+        let url = Utils.getAppLogoutURL();
         let headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -202,7 +202,7 @@ class AuthManager {
         return promisedLogout.then(response => {
             Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, Utils.CONST.CONTEXT_PATH);
             localStorage.removeItem(User.CONST.LOCALSTORAGE_USER);
-            new APIClientFactory().getAPIClient(Utils.getEnvironment().label)._instance = null; // Single client should be re initialize after log out
+            new APIClientFactory().destroyAPIClient(Utils.getEnvironment().label); // Single client should be re initialize after log out
         });
     }
 
