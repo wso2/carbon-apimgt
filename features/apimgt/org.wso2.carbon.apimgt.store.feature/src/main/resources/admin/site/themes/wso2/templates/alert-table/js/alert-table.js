@@ -164,7 +164,7 @@ $( document ).ready(function() {
                         fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("Method") + '</span>'+method+'<br/>';
                     }
                     if (backendTime != null) {
-                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("Backend Time") + '</span>'+backendTime+'<br/>';
+                        fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("Backend Time") + '</span>'+backendTime+'ms<br/>';
                     }
                     if (requestPerMin != null) {
                         fullMessage = fullMessage + '<span class="label label-primary add-margin-right-1x">' + i18n.t("Requests Per-Min") + '</span>'+requestPerMin+'<br/>';
