@@ -1240,8 +1240,8 @@
                 <version>${carbon.apimgt.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.wsdl4j</groupId>
-                <artifactId>wsdl4j.wso2</artifactId>
+                <groupId>wsdl4j.wso2</groupId>
+                <artifactId>wsdl4j</artifactId>
                 <version>${wsdl4j.version}</version>
             </dependency>
             <dependency>
@@ -1447,7 +1447,7 @@
         <waffle-jna.version>1.6.wso2v2</waffle-jna.version>
         <commons-lang3.version>3.4.0.wso2v1</commons-lang3.version>
         <version.snake.yaml>1.17</version.snake.yaml>
-        <wsdl4j.version>1.6.3.wso2v1</wsdl4j.version>
+        <wsdl4j.version>1.6.2.wso2v4</wsdl4j.version>
         <slf4j.test.version>1.7.7</slf4j.test.version>
         <reflection.version>0.9.11</reflection.version>
         <jacoco.version>0.7.9</jacoco.version>

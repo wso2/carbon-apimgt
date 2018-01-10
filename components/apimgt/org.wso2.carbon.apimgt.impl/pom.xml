@@ -76,8 +76,8 @@
             <artifactId>poi-ooxml</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.wsdl4j</groupId>
-            <artifactId>wsdl4j.wso2</artifactId>
+            <groupId>wsdl4j.wso2</groupId>
+            <artifactId>wsdl4j</artifactId>
 
         </dependency>
         <dependency>
@@ -378,6 +378,7 @@
                             org.apache.axis2.*; version="${imp.pkg.version.axis2}",
                             org.apache.commons.*,
                             org.apache.http.*,
+                            org.apache.synapse.*,
                             org.osgi.framework.*,
                             org.osgi.util.*,
                             org.osgi.service.*,
