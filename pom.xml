@@ -1401,7 +1401,7 @@
         <commons-logging.version>1.1.1</commons-logging.version>
         <commons-io.version>2.4.0.wso2v1</commons-io.version>
         <google.code.gson.version>2.7</google.code.gson.version>
-        <httpcomponents.version>4.5.3</httpcomponents.version>
+        <httpcomponents.version>4.2.5</httpcomponents.version>
         <commons-codec.version>1.4.0.wso2v1</commons-codec.version>
         <com.nimbusds.wso2.version>2.26.1.wso2v2</com.nimbusds.wso2.version>
         <org.apache.velocity.version>1.7</org.apache.velocity.version>
