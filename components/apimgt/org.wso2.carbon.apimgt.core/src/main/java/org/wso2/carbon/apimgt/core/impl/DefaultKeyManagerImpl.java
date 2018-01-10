@@ -92,10 +92,14 @@ public class DefaultKeyManagerImpl implements KeyManager {
         HttpResponse httpResponse = null;
         try {
             String url = keyManagerConfigs.getDcrEndpoint();
+            Map<String, String> map = new HashMap<>();
+            map.put(KeyManagerConstants.AUTHORIZATION_HEADER, "Basic " + Base64.getEncoder().encodeToString(
+                    (keyManagerConfigs.getKeyManagerCredentials().getUsername() + ":" + keyManagerConfigs
+                            .getKeyManagerCredentials().getPassword()).getBytes(Charset.defaultCharset())));
             String payload = "{'" + KeyManagerConstants.OAUTH_CLIENT_NAME + "':'" + applicationName + "'}";
             httpResponse = restCallUtil
                     .postRequest(new URI(url), MediaType.APPLICATION_JSON_TYPE, null, Entity.text(payload),
-                            MediaType.APPLICATION_JSON_TYPE, Collections.EMPTY_MAP);
+                            MediaType.APPLICATION_JSON_TYPE, map);
         } catch (URISyntaxException e) {
             throw new KeyManagementException("Error occurred while parsing DCR endpoint", e,
                     ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
@@ -442,8 +446,7 @@ public class DefaultKeyManagerImpl implements KeyManager {
         JSONObject jsonObject = (JSONObject) obj;
 
         OAuthApplicationInfo oAuthApplicationInfoResponse = new OAuthApplicationInfo();
-
-        //        oAuthApplicationInfoResponse.setClientName(dcrClientInfoResponse.getClientName());
+        oAuthApplicationInfoResponse.setClientName(KeyManagerConstants.APPLICATION_CLIENT_NAME);
         oAuthApplicationInfoResponse.setClientId((String) jsonObject.get(KeyManagerConstants.APPLICATION_CLIENT_ID));
         oAuthApplicationInfoResponse
                 .setClientSecret((String) jsonObject.get(KeyManagerConstants.APPLICATION_CLIENT_SECRET));

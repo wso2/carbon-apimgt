@@ -83,6 +83,7 @@ public class KeyManagerConstants {
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String APPLICATION_CLIENT_ID = "client_id";
     public static final String APPLICATION_CLIENT_SECRET = "client_secret";
+    public static final String APPLICATION_CLIENT_NAME = "client_name";
 
     /**
      * Status codes used in key-validation process
