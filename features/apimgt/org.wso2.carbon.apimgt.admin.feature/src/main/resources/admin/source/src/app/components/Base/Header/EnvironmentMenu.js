@@ -27,26 +27,31 @@ class EnvironmentMenu extends React.Component {
         this.state = {
             openEnvironmentMenu: false
         };
+
+        this.handleClickEnvironmentMenu = this.handleClickEnvironmentMenu.bind(this);
+        this.handleRequestCloseEnvironmentMenu = this.handleRequestCloseEnvironmentMenu.bind(this);
+        this.handleEnvironmentChange = this.handleEnvironmentChange.bind(this);
     }
 
-    handleClickEnvironmentMenu = event => {
+    handleClickEnvironmentMenu(event) {
         this.setState({openEnvironmentMenu: true, anchorElEnvironmentMenu: event.currentTarget});
     };
 
-    handleRequestCloseEnvironmentMenu = () => {
+    handleRequestCloseEnvironmentMenu() {
         this.setState({openEnvironmentMenu: false});
         //TODO: [rnk] Temporary Fix: Reload the web page when environment changed
         document.location.reload();
     };
 
+    handleEnvironmentChange(event) {
+        this.props.handleEnvironmentChange(event);
+        this.handleRequestCloseEnvironmentMenu(event);
+    }
+
     render() {
         //Props list
         const environments = this.props.environments;
         const environmentLabel = this.props.environmentLabel;
-        const handleEnvironmentChange = (event) => {
-            this.props.handleEnvironmentChange(event);
-            this.handleRequestCloseEnvironmentMenu(event);
-        };
 
         let showEnvironments = environments && environments.length > 1;
 
@@ -70,7 +75,7 @@ class EnvironmentMenu extends React.Component {
                     style={{alignItems: "center", justifyContent: "center"}}
                 >
                     {environments.map((environment, index) =>
-                        <MenuItem onClick={handleEnvironmentChange}
+                        <MenuItem onClick={this.handleEnvironmentChange}
                                   id={index}>{environment.label}</MenuItem>
                     )}
                 </Menu>
