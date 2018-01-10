@@ -103,11 +103,11 @@
                                 <artifactItem>
                                     <groupId>org.apache.httpcomponents</groupId>
                                     <artifactId>httpmime</artifactId>
-                                    <version>4.5.3</version>
+                                    <version>4.2.5</version>
                                     <type>jar</type>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>${project.build.directory}/external/libs</outputDirectory>
-                                    <destFileName>httpmime-4.5.3.jar</destFileName>
+                                    <destFileName>httpmime-4.2.5.jar</destFileName>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.owasp.encoder</groupId>
