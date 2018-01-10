@@ -45,7 +45,6 @@ public class APIEntitlementCallbackHandler extends EntitlementCallbackHandler {
         String path = ((String) synCtx.getProperty(RESTConstants.REST_SUB_REQUEST_PATH));
         log.debug("SERVICE - REST SUB REQUEST ---" + path);
         return path;
-
     }
 
     public String findAction(MessageContext synCtx) {
