@@ -62,8 +62,8 @@ public class DefaultKeyManagerImplTest {
         response.setResponseCode(APIMgtConstants.HTTPStatusCodes.SC_201_CREATED);
         String clientId = "f9efe623-23ce-4a62-bb90-7c09217601b5";
         String clientSecret = "6c58f018-c9cb-47d7-894b-11dc3fdc2527";
-        String payload = "{\"clientId\":\"" + clientId + "\",\"clientSecret\":\"" + clientSecret
-                + "\",\"redirectUris\":[\"regexp\\u003d\"]}";
+        String payload = "{\"client_id\":\"" + clientId + "\",\"client_secret\":\"" + clientSecret
+                + "\",\"redirect_uris\":[\"regexp\\u003d\"]}";
         response.setResults(payload);
 
         Mockito.when(restCallUtil
@@ -173,8 +173,8 @@ public class DefaultKeyManagerImplTest {
         response.setResponseCode(APIMgtConstants.HTTPStatusCodes.SC_200_OK);
         String clientId = "f9efe623-23ce-4a62-bb90-7c09217601b5";
         String clientSecret = "6c58f018-c9cb-47d7-894b-11dc3fdc2527";
-        String payload = "{\"clientId\":\"" + clientId + "\",\"clientSecret\":\"" + clientSecret
-                + "\",\"redirectUris\":[\"regexp\\u003d\"]}";
+        String payload = "{\"client_id\":\"" + clientId + "\",\"client_secret\":\"" + clientSecret
+                + "\",\"redirect_uris\":[\"regexp\\u003d\"]}";
         response.setResults(payload);
 
         Mockito.when(

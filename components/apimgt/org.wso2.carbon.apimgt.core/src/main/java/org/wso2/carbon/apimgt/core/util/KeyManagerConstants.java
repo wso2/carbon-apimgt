@@ -81,8 +81,8 @@ public class KeyManagerConstants {
     public static final String REFRESH_GRANT_TYPE = "refresh_token";
     public static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
     public static final String AUTHORIZATION_HEADER = "Authorization";
-    public static final String APPLICATION_CLIENT_ID = "clientId";
-    public static final String APPLICATION_CLIENT_SECRET = "clientSecret";
+    public static final String APPLICATION_CLIENT_ID = "client_id";
+    public static final String APPLICATION_CLIENT_SECRET = "client_secret";
 
     /**
      * Status codes used in key-validation process
