@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.utils;
 import com.ibm.wsdl.extensions.http.HTTPAddressImpl;
 import com.ibm.wsdl.extensions.soap.SOAPAddressImpl;
 import com.ibm.wsdl.extensions.soap12.SOAP12AddressImpl;
+import com.ibm.wsdl.xml.WSDLReaderImpl;
 import org.apache.axiom.om.OMElement;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -250,6 +251,11 @@ public class APIMWSDLReader {
 			// switch off the verbose mode
 			wsdlReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
 			wsdlReader.setFeature("javax.wsdl.importDocuments", false);
+
+			if (wsdlReader instanceof WSDLReaderImpl) {
+			    ((WSDLReaderImpl) wsdlReader).setIgnoreSchemaContent(true);
+			}
+
 			Definition wsdlDefinition = wsdlReader.readWSDL(null, getSecuredParsedDocumentFromContent(wsdl));
 
 			// Update transports
@@ -393,6 +399,10 @@ public class APIMWSDLReader {
 		// switch off the verbose mode
 		reader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
 		reader.setFeature("javax.wsdl.importDocuments", false);
+
+		if (reader instanceof WSDLReaderImpl) {
+			((WSDLReaderImpl) reader).setIgnoreSchemaContent(true);
+		}
 
 		if (log.isDebugEnabled()) {
 			log.debug("Reading  the WSDL. Base uri is " + baseURI);

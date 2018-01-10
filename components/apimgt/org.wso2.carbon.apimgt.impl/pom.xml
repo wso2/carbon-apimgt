@@ -35,6 +35,10 @@
                     <groupId>wsdl4j</groupId>
                     <artifactId>wsdl4j</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>wsdl4j.wso2</groupId>
+                    <artifactId>wsdl4j</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -59,6 +63,10 @@
                     <groupId>jboss</groupId>
                     <artifactId>javassist</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>wsdl4j.wso2</groupId>
+                    <artifactId>wsdl4j</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -76,13 +84,18 @@
             <artifactId>poi-ooxml</artifactId>
         </dependency>
         <dependency>
-            <groupId>wsdl4j.wso2</groupId>
-            <artifactId>wsdl4j</artifactId>
-
+            <groupId>org.wso2.wsdl4j</groupId>
+            <artifactId>wsdl4j.wso2</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
             <artifactId>org.wso2.carbon.core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>wsdl4j.wso2</groupId>
+                    <artifactId>wsdl4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
@@ -91,6 +104,12 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.keymgt.client</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>wsdl4j.wso2</groupId>
+                    <artifactId>wsdl4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
@@ -110,6 +129,10 @@
             <exclusions>
                 <exclusion>
                     <groupId>wsdl4j</groupId>
+                    <artifactId>wsdl4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>wsdl4j.wso2</groupId>
                     <artifactId>wsdl4j</artifactId>
                 </exclusion>
             </exclusions>
@@ -315,7 +338,6 @@
                                     </classpath>
                                     <fileset file="${basedir}/src/test/resources/dbscripts/h2.sql" />
                                     <fileset file="${basedir}/src/test/resources/dbscripts/h2-sample-data.sql" />
-
                                 </sql>
                                 <echo message="##################### END ########################" />
                             </tasks>
@@ -378,7 +400,6 @@
                             org.apache.axis2.*; version="${imp.pkg.version.axis2}",
                             org.apache.commons.*,
                             org.apache.http.*,
-                            org.apache.synapse.*,
                             org.osgi.framework.*,
                             org.osgi.util.*,
                             org.osgi.service.*,
@@ -402,7 +423,7 @@
                             org.json.*,
                             org.slf4j,
                             org.w3c.dom,
-                            com.ibm.wsdl.*,
+                            com.ibm.wsdl.*; version="${wsdl4j.version.range}",
                             net.sf.saxon.*,
                             org.wso2.carbon.identity.oauth.*;version="${carbon.identity-inbound-auth-oauth.imp.pkg.version}",
                             org.wso2.carbon.identity.oauth2.*;version="${carbon.identity-inbound-auth-oauth.imp.pkg.version}",
