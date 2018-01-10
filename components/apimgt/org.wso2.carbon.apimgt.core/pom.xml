@@ -252,6 +252,14 @@
             <groupId>org.wso2.orbit.io.fabric8</groupId>
             <artifactId>kubernetes-client</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.messaging</groupId>
+            <artifactId>broker-amqp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.messaging</groupId>
+            <artifactId>broker-core</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -894,6 +902,10 @@
             io.swagger.codegen.*;version="${swagger.codegen.version}",
             org.wso2.carbon.config.*;version="${carbon.config.package.import.version.range}",
             org.wso2.carbon.utils.*;version="${carbon.utils.package.import.version.range}",
+            org.wso2.broker.amqp.*;version="${broker.package.import.version.range}",
+            org.wso2.broker.common.*;version="${broker.package.import.version.range}",
+            org.wso2.broker.core.*;version="${broker.package.import.version.range}",
+            org.wso2.broker.rest.*;version="${broker.package.import.version.range}",
             feign.gson.*;version="${feign.version}",
         </import.package>
         <export.package>

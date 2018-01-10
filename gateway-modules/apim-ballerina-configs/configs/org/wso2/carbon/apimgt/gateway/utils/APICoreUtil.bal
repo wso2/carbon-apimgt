@@ -245,7 +245,7 @@ function getAPICoreURL () (string) {
     if (getSystemProperty(Constants:API_CORE_URL) != "") {
         apiCoreURL = getSystemProperty(Constants:API_CORE_URL);
     } else {
-        apiCoreURL = "https://localhost:9292";
+        apiCoreURL = "https://localhost:9443";
     }
     return apiCoreURL;
 }

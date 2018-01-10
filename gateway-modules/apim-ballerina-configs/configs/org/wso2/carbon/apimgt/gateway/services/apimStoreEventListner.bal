@@ -10,11 +10,11 @@ import org.wso2.carbon.apimgt.gateway.constants as Constants;
 import org.wso2.carbon.apimgt.gateway.utils as gatewayUtil;
 
 @jms:config {
-    initialContextFactory:"org.apache.activemq.jndi.ActiveMQInitialContextFactory",
-    providerUrl:"tcp://localhost:61616",
+    initialContextFactory:"org.wso2.andes.jndi.PropertiesFileInitialContextFactory",
     connectionFactoryType:"topic",
     connectionFactoryName:"TopicConnectionFactory",
-    destination:"StoreTopic"
+    destination:"StoreTopic",
+    properties: ["connectionfactory.TopicConnectionFactory=amqp://admin:admin@clientID/carbon?brokerlist='tcp://localhost:5672'"]
 }
 
 service<jms> apimStoreEventListner {

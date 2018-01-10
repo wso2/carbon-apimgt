@@ -2,33 +2,28 @@ package org.wso2.carbon.apimgt.rest.api.store;
 
 
 import io.swagger.annotations.ApiParam;
-
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.CommentListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.RatingDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.RatingListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.factories.ApisApiServiceFactory;
-
 import org.wso2.msf4j.Microservice;
 import org.wso2.msf4j.Request;
-import org.wso2.msf4j.formparam.FileInfo;
-import org.wso2.msf4j.formparam.FormDataParam;
-import org.osgi.service.component.annotations.Component;
 
-import java.io.InputStream;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
-import javax.ws.rs.HEAD;
-import javax.ws.rs.OPTIONS;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -50,6 +45,27 @@ import javax.ws.rs.core.Response;
 @io.swagger.annotations.Api(description = "the apis API")
 public class ApisApi implements Microservice  {
    private final ApisApiService delegate = ApisApiServiceFactory.getApisApi();
+
+ /**
+  * This is the activation method of ServiceComponent. This will be called when it's references are fulfilled
+  *
+  * @throws Exception this will be thrown if an issue occurs while executing the activate method
+  */
+ @Activate
+ protected void start() throws Exception {
+     System.out.println(ApisApi.class.getName() + " service component has  started.");
+ }
+
+ /**
+  * This is the deactivation method of ServiceComponent. This will be called when this component
+  * is being stopped or references are satisfied during runtime.
+  *
+  * @throws Exception this will be thrown if an issue occurs while executing the de-activate method
+  */
+ @Deactivate
+ protected void stop() throws Exception {
+     System.out.println(ApisApi.class.getName() + " service component has stop.");
+ }
 
     @OPTIONS
     @DELETE

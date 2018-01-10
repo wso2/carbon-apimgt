@@ -21,11 +21,8 @@ package org.wso2.carbon.apimgt.core.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.Broker;
-import org.wso2.carbon.apimgt.core.configuration.models.BrokerConfigurations;
-import org.wso2.carbon.apimgt.core.configuration.models.JMSConnectionConfiguration;
 import org.wso2.carbon.apimgt.core.exception.BrokerException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.util.BrokerUtil;
 
 import java.lang.reflect.Constructor;
@@ -40,20 +37,19 @@ import javax.jms.TopicConnectionFactory;
  */
 public class BrokerImpl implements Broker {
 
-    private BrokerConfigurations config;
     private TopicConnectionFactory connFactory = null;
     private static final Logger log = LoggerFactory.getLogger(BrokerUtil.class);
 
     public BrokerImpl() {
-        config = ServiceReferenceHolder.getInstance().getAPIMConfiguration().getBrokerConfigurations();
-        JMSConnectionConfiguration jmsConnectionConfiguration = config.getJmsConnectionConfiguration();
         Class<?> clientClass = null;
         Constructor<?> construct = null;
         Object clientInst = null;
         try {
-            clientClass = Class.forName("org.apache.activemq.ActiveMQConnectionFactory");
+            clientClass = Class.forName("org.wso2.andes.client.AMQConnectionFactory");
             construct = clientClass.getConstructor(String.class);
-            clientInst = construct.newInstance(jmsConnectionConfiguration.getTopicConnectionFactoryURL());
+
+            String url = "amqp://admin:admin@clientID/carbon?brokerlist='tcp://localhost:5672'";
+            clientInst = construct.newInstance(url);
             connFactory = (TopicConnectionFactory) clientInst;
         } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException
                 | InvocationTargetException e) {

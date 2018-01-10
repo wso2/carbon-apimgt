@@ -96,10 +96,6 @@
             <artifactId>swagger-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.transport</groupId>
-            <artifactId>org.wso2.carbon.transport.http.netty</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.carbon.messaging</groupId>
             <artifactId>org.wso2.carbon.messaging</artifactId>
             <scope>provided</scope>
@@ -156,7 +152,7 @@
             org.wso2.carbon.apimgt.core.*; version="${carbon.apimgt.version}",
             org.apache.commons.lang3.*; version="${apache.commons.lang3.import.version.range}",
             org.wso2.carbon.messaging.*;version="${carbon.messaging.package.import.version.range}",
-            org.wso2.carbon.transport.http.netty.config.*;version="${carbon.transport.package.import.version.range}",
+            org.wso2.transport.http.netty.config.*;version="${carbon.transport.package.import.version.range}",
             org.yaml.snakeyaml.*;version="${snakeyaml.version.range}",
             org.json.simple.*,
             org.apache.commons.io.*;

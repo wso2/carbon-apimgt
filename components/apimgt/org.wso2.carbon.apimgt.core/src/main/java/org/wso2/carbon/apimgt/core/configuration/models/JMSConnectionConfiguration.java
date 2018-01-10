@@ -32,7 +32,7 @@ public class JMSConnectionConfiguration {
     @Element(description = "JMS Connectiontion factory JNDI name")
     private String jmsConnectionFactoryJNDIName = "TopicConnectionFactory";
     @Element(description = "Topic connection factory URL")
-    private String topicConnectionFactoryURL = "tcp://localhost:61616";
+    private String topicConnectionFactoryURL = "tcp://localhost:5672";
     @Element(description = "Destination topic name")
     private String topic = "myTopic";
 

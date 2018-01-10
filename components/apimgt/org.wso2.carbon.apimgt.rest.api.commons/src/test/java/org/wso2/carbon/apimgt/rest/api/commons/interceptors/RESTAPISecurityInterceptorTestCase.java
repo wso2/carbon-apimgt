@@ -23,27 +23,21 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.testng.Assert;
-
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.interceptors.RESTAPISecurityInterceptor;
-import org.wso2.carbon.messaging.CarbonMessage;
-import org.wso2.carbon.messaging.Header;
-import org.wso2.carbon.messaging.Headers;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.Response;
 import org.wso2.msf4j.ServiceMethodInfo;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 public class RESTAPISecurityInterceptorTestCase {
 
     @Test
     public void testGetApisSuccess() throws APIManagementException {
 
-        CarbonMessage carbonMessage = Mockito.mock(CarbonMessage.class);
+        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
         Request requestObj = Mockito.mock(Request.class);
 
         try {
@@ -51,25 +45,12 @@ public class RESTAPISecurityInterceptorTestCase {
         } catch (Exception e) {
             throw new APIMgtSecurityException("Error while mocking Request Object ", e);
         }
-        Header authHeader = Mockito.mock(Header.class);
-        authHeader.setName(RestApiConstants.AUTHORIZATION_HTTP_HEADER);
-        authHeader.setValue("Authorization:  053d68ee-12bc-36b0-ab9c-31752ef5bda9");
-
-        Header pathHeader = Mockito.mock(Header.class);
-        pathHeader.setName("REQUEST_URL");
-        pathHeader.setValue("http://localhost:9090/api/am/publisher/v1/api");
-
-        List<Header> headersList = new ArrayList<Header>(2);
-        headersList.add(authHeader);
-        headersList.add(pathHeader);
-
-        Headers headers = Mockito.mock(Headers.class);
-        headers.set(headersList);
-        Mockito.when(requestObj.getHeaders()).thenReturn(headers);
-        requestObj.getHeaders().set(headersList);
 
         Response responseObj = Mockito.mock(Response.class);
-
+        Mockito.when(requestObj.getHeader(RestApiConstants.AUTHORIZATION_HTTP_HEADER)).
+                                            thenReturn("Authorization:  053d68ee-12bc-36b0-ab9c-31752ef5bda9");
+        Mockito.when(requestObj.getHeader("REQUEST_URL")).
+                thenReturn("http://localhost:9090/api/am/publisher/v1/api");
         ServiceMethodInfo serviceMethodInfoObj = Mockito.mock(ServiceMethodInfo.class);
         RESTAPISecurityInterceptor interceptor = Mockito.mock(RESTAPISecurityInterceptor.class);
         boolean isAuthorized = interceptor.preCall(requestObj, responseObj, serviceMethodInfoObj);

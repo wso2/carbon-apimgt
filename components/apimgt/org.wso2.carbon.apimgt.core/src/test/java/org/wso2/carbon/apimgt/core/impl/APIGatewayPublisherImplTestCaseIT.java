@@ -54,6 +54,11 @@ public class APIGatewayPublisherImplTestCaseIT {
             public Object getConfigurationObject(String s) throws ConfigurationException {
                 return null;
             }
+
+            @Override
+            public <T> T getConfigurationObject(String s, Class<T> aClass) throws ConfigurationException {
+                return null;
+            }
         });
         ConfigProvider configProvider = Mockito.mock(ConfigProvider.class);
         ServiceReferenceHolder.getInstance().setConfigProvider(configProvider);
