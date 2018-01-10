@@ -28,6 +28,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class APIEntitlementCallbackHandler extends EntitlementCallbackHandler {
+
     private static final Log log = LogFactory.getLog(APIEntitlementCallbackHandler.class);
 
     public String getUserName(MessageContext synCtx) {
@@ -37,20 +38,22 @@ public class APIEntitlementCallbackHandler extends EntitlementCallbackHandler {
             userName = authContext.getUsername();
 
         }
-        log.debug("UserName ---"+userName);
+        log.debug("UserName ---" + userName);
         return userName;
     }
 
     public String findServiceName(MessageContext synCtx) {
         String path = ((String) synCtx.getProperty(RESTConstants.REST_SUB_REQUEST_PATH));
-        log.debug("SERVICE - REST SUB REQUEST ---"+path);
+        log.debug("SERVICE - REST SUB REQUEST ---" + path);
         return path;
 
     }
 
     public String findAction(MessageContext synCtx) {
-        log.debug("Operation Name ---"+(String)((Axis2MessageContext) synCtx).getAxis2MessageContext().getProperty(org.apache.axis2.Constants.Configuration.HTTP_METHOD));
-        return (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().getProperty(org.apache.axis2.Constants.Configuration.HTTP_METHOD);
+        log.debug("Operation Name ---" + (String) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
+                getProperty(org.apache.axis2.Constants.Configuration.HTTP_METHOD));
+        return (String) ((Axis2MessageContext) synCtx).getAxis2MessageContext().
+                getProperty(org.apache.axis2.Constants.Configuration.HTTP_METHOD);
 
     }
 
