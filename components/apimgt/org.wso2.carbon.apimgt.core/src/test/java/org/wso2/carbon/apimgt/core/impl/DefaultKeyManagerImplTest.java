@@ -22,6 +22,7 @@ import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.api.RestCallUtil;
+import org.wso2.carbon.apimgt.core.configuration.models.CredentialConfigurations;
 import org.wso2.carbon.apimgt.core.configuration.models.KeyMgtConfigurations;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
@@ -53,8 +54,13 @@ public class DefaultKeyManagerImplTest {
     public void testCreateApplication() throws Exception {
         RestCallUtil restCallUtil = Mockito.mock(RestCallUtil.class);
         KeyMgtConfigurations keyManagerConfigs = Mockito.mock(KeyMgtConfigurations.class);
+        CredentialConfigurations credentialConfigurations = Mockito.mock(CredentialConfigurations.class);
         Mockito.when(keyManagerConfigs.getDcrEndpoint())
                 .thenReturn("https://localhost:9282/api/identity/oauth2/dcr/v1.0/register");
+        Mockito.when(keyManagerConfigs.getKeyManagerCredentials()).thenReturn(credentialConfigurations);
+        Mockito.when(credentialConfigurations.getUsername()).thenReturn("admin");
+        Mockito.when(credentialConfigurations.getPassword()).thenReturn("admin");
+
         DefaultKeyManagerImpl kmImpl = new DefaultKeyManagerImpl(keyManagerConfigs, restCallUtil);
         OAuthAppRequest oAuthAppRequest = new OAuthAppRequest(clientName, callBackURL, applicationKeyType, grantTypes);
 
