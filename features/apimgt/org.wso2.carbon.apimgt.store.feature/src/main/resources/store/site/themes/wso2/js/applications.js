@@ -403,7 +403,7 @@ GrantTypes.prototype.getMap = function(selected){
 })( jQuery, window, document );
 
 $(document).ready(function() {
-    $('.copy-button').click(function(event) {
+    $(document.body).on('click','.copy-button', function(event) {
         var text = this.getAttribute("data-clipboard-text");
 
         if (document.queryCommandSupported('copy')) {
