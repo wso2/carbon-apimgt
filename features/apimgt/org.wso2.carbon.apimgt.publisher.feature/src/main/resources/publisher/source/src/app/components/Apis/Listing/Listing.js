@@ -34,6 +34,8 @@ import Button from 'material-ui/Button';
 import GridIcon from 'material-ui-icons/GridOn';
 import ListIcon from 'material-ui-icons/List';
 import SampleAPI from './SampleAPI';
+import NotificationSystem from 'react-notification-system';
+import {ScopeValidation ,resourceMethod, resourcePath} from "../../../data/ScopeValidation";
 
 const menu = (
     <Menu>
@@ -77,18 +79,24 @@ class Listing extends React.Component {
     }
 
     handleApiDelete(api_uuid, name) {
-        const hideMessage = message.loading("Deleting the API ...", 0);
+        this.refs.notificationSystem.addNotification( {
+            message: 'Deleting the API ...', position: 'tc', level: 'success', autoDismiss: 1
+        });
         const api = new API();
         let promised_delete = api.deleteAPI(api_uuid);
         promised_delete.then(
             response => {
                 if (response.status !== 200) {
                     console.log(response);
-                    message.error("Something went wrong while deleting the " + name + " API!");
-                    hideMessage();
+                    this.refs.notificationSystem.addNotification( {
+                        message: 'Something went wrong while deleting the ' + name + ' API!', position: 'tc',
+                        level: 'error'
+                    });
                     return;
                 }
-                message.success(name + " API deleted successfully!");
+                this.refs.notificationSystem.addNotification( {
+                    message: name + ' API deleted Successfully', position: 'tc', level: 'success'
+                });
                 let api = this.state.apis;
                 for (let apiIndex in api.list) {
                     if (api.list.hasOwnProperty(apiIndex) && api.list[apiIndex].id === api_uuid) {
@@ -97,7 +105,6 @@ class Listing extends React.Component {
                     }
                 }
                 this.setState({active: false, apis: api});
-                hideMessage();
             }
         );
     }
@@ -124,10 +131,12 @@ class Listing extends React.Component {
         }, {
             title: 'Action',
             key: 'action',
-            render: text => {
-                return null;
-                //todo: Delete button should be enabled here after M6 based on permission model
-            },
+            render: (record) => <ScopeValidation resourcePath={resourcePath.SINGLE_API}
+                                                 resourceMethod={resourceMethod.DELETE}>
+                <Button style={{fontSize: 10, padding: "0px", margin: "0px"}} color="primary"
+                        onClick={() => this.handleApiDelete(record.id, record.name)}>
+                    Delete
+                </Button></ScopeValidation>
         }];
         if (!apis) {
             return (<Loading/>);
@@ -167,6 +176,7 @@ class Listing extends React.Component {
                             <Row type="flex" justify="start">
                                 <Col span={24}>
                                     <Table columns={columns} dataSource={this.state.apis.list} bordered />
+                                    <NotificationSystem ref="notificationSystem"/>
                                 </Col>
                             </Row>
                             : <Grid container spacing={0}>
