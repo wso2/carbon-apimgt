@@ -65,8 +65,7 @@ class ApiThumb extends React.Component {
                         message: 'Something went wrong while deleting the ' + name + ' API!', position: 'tc',
                         level: 'error'
                     });
-                    this.setState({open: false});
-                    this.setState({openUserMenu: false})
+                    this.setState({open: false, openUserMenu: false});
                     return;
                 }
                 this.refs.notificationSystem.addNotification( {
