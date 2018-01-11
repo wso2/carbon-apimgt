@@ -4,6 +4,7 @@ var log = new Log();
 var encode = require('encode');
 encode = new encode.Encode();
 var CryptoUtil = Packages.org.wso2.carbon.core.util.CryptoUtil;
+var SwaggerParser = Packages.io.swagger.parser.SwaggerParser;
 
 function loadSwaggerObj(path)
 {
@@ -18,6 +19,17 @@ function loadSwaggerObj(path)
 
 function isPositiveInteger(s) {
     return !!s.match(/^[0-9]+$/);
+}
+
+function getSwaggerError(errorsList) {
+    var errorCount = errorsList.size();
+    var errorMsg = "<ol>" ;
+    var count = 0;
+    for (count = 0; count < errorCount; count++) {
+        errorMsg = errorMsg + "<li>" + errorsList.get(count) + "</li>";
+    }
+    errorMsg = errorMsg + "</ol></div>";
+    return errorMsg;
 }
 
 if(jagg.isCSRFTokenValid())
@@ -43,6 +55,7 @@ if(jagg.isCSRFTokenValid())
             var swagger = null;
             var wsdl = null;
             var supportedSwaggerVersion = "2.0";
+            var parser = new SwaggerParser();
             if(type == "rest"){
                 var url = request.getParameter("swagger-url");
                 var file = request.getFile("swagger-file");
@@ -53,27 +66,22 @@ if(jagg.isCSRFTokenValid())
                     try {
                         var content = get(url, data);
                         swagger = content.data;
-                        var keywords = [/swagger/i, /info/i, /paths/i, /version/i];
-                        var valid = true;
-                        for (var i = 0; i < keywords.length; i++) {
-                            if ((m = keywords[i].exec(content.data)) == null) {
-                                swagger = "undefined";
-                                print({error: true, message: url + " contains invalid swagger definition"});
-                                return;
-                            }
-                        }
-                        var swaggerJSON = parse(swagger);
+                        var swaggerDeserializationResult = parser.readWithInfo(swagger);
+                        var swaggerObj = swaggerDeserializationResult.getSwagger();
+                        var swaggerErrors = swaggerDeserializationResult.getMessages();
+
                         //Supported swagger version check
-                        if(swaggerJSON.swagger != supportedSwaggerVersion){
+                        if(swaggerObj.swagger != supportedSwaggerVersion){
                             print({
                                 error: true,
-                                message: "Unsupported swagger version provided. Please re-imported with swagger " + supportedSwaggerVersion
+                                message: "Unsupported swagger version provided. Please re-import with swagger " + supportedSwaggerVersion
                             });
                             return;
                         }
                         //Validate swagger definition with mandatory swagger elements
-                        if(swaggerJSON.swagger == null || swaggerJSON.paths == null || swaggerJSON.info == null){
-                            print({error: true, message: url + " contains invalid swagger definition"});
+                        if (swaggerErrors.size() > 0) {
+                            errorMsg = getSwaggerError(swaggerErrors);
+                            print({error: true, message: "<div><div>" + file.getName() + " contains invalid swagger definition" + "</div>" + errorMsg});
                             return;
                         }
 
@@ -87,32 +95,27 @@ if(jagg.isCSRFTokenValid())
                         file.open("r");
                         swagger = file.readAll();
                         file.close();
-                        var keywords = [/swagger/i, /info/i, /paths/i, /version/i];
-                        var valid = true;
-                        for (var i = 0; i < keywords.length; i++) {
-                            if ((m = keywords[i].exec(swagger)) == null) {
-                                swagger = "undefined";
-                                print({error: true, message: file.getName() + " contains invalid swagger definition"});
-                                return;
-                            }
-                        }
-                        var swaggerJSON = parse(swagger);
+                        var swaggerDeserializationResult = parser.readWithInfo(swagger);
+                        var swaggerObj = swaggerDeserializationResult.getSwagger();
+                        var swaggerErrors = swaggerDeserializationResult.getMessages();
 
                         //Supported swagger version check
-                        if (swaggerJSON.swagger != supportedSwaggerVersion) {
+                        if(swaggerObj.swagger != supportedSwaggerVersion){
                             print({
                                 error: true,
-                                message: "Unsupported swagger version provided. Please re-imported with swagger " + supportedSwaggerVersion
+                                message: "Unsupported swagger version provided. Please re-import with swagger " + supportedSwaggerVersion
                             });
                             return;
                         }
                         //Validate swagger definition with mandatory swagger elements
-                        if (swaggerJSON.swagger == null || swaggerJSON.paths == null || swaggerJSON.info == null) {
-                            print({error: true, message: file.getName() + " contains invalid Swagger definition"});
+                        if (swaggerErrors.size() > 0) {
+                            errorMsg = getSwaggerError(swaggerErrors);
+                            print({error: true, message: "<div><div>" + file.getName() + " contains invalid swagger definition" + "</div>" + errorMsg});
                             return;
                         }
+
                     } catch (e) {
-                        print({error: true, message: file.getName() + " contains invalid swagger definitio"});
+                        print({error: true, message: file.getName() + " contains invalid swagger definition"});
                         return;
                     }
                 }else{
