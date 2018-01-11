@@ -18,7 +18,7 @@
 
 import React, {Component} from 'react'
 
-import {BrowserRouter as Router, Route, Switch, Redirect} from 'react-router-dom'
+import {BrowserRouter as Router, Redirect, Route, Switch} from 'react-router-dom'
 import {Base, Login, Logout, Tasks} from './app/components/'
 import {PageNotFound} from './app/components/Base/Errors'
 import AuthManager from './app/data/AuthManager'
@@ -28,6 +28,7 @@ import './App.css'
 
 import ThrottlingPolicies from './app/components/ThrottlingPolicies'
 import Security from './app/components/Security'
+
 /**
  * Render protected application paths
  */
@@ -44,14 +45,15 @@ class Protected extends Component {
                 <Base>
                     <Switch>
                         <Redirect exact from="/" to="/policies"/>
-                        <Route path={"/policies"} component={ThrottlingPolicies} />
-                        <Route path={"/tasks"} component={Tasks} />
-                        <Route path={"/security"} component={Security} />
+                        <Route path={"/policies"} component={ThrottlingPolicies}/>
+                        <Route path={"/tasks"} component={Tasks}/>
+                        <Route path={"/security"} component={Security}/>
                         <Route component={PageNotFound}/>
                     </Switch>
                 </Base>
             );
         }
+
         let params = qs.stringify({referrer: this.props.location.pathname});
         return (
             <Redirect to={{pathname: '/login', search: params}}/>
@@ -62,19 +64,16 @@ class Protected extends Component {
 /**
  * Define base routes for the application
  */
-class AdminPortal extends Component {
-
-    render() {
-        return (
-            <Router basename="/admin">
-                <Switch>
-                    <Route path={"/login"} component={Login}/>
-                    <Route path={"/logout"} component={Logout}/>
-                    <Route component={Protected}/>
-                </Switch>
-            </Router>
-        );
-    }
+const AdminPortal = (props) => {
+    return (
+        <Router basename="/admin">
+            <Switch>
+                <Route path={"/login"} render={() => <Login appName={"admin"} appLabel={"ADMIN PORTAL"} />}/>
+                <Route path={"/logout"} component={Logout}/>
+                <Route component={Protected}/>
+            </Switch>
+        </Router>
+    );
 }
 
 export default AdminPortal;

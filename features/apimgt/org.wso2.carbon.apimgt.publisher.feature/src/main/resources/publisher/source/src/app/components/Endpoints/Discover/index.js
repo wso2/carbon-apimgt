@@ -174,7 +174,7 @@ export default class EndpointsDiscover extends Component {
                                 anchorEl={this.state.anchorElEndpointsMenu}
                                 anchorOrigin={{horizontal: 'right', vertical: 'top'}}
                                 transformOrigin={{horizontal: 'left', vertical: 'top'}}
-                                onRequestClose={this.handleCloseGlEndpointMenu}
+                                onClose={this.handleCloseGlEndpointMenu}
                             >
                                 <div>
                                     <MenuItem component={Link} to='/endpoints'>View all</MenuItem>

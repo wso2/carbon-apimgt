@@ -59,7 +59,7 @@ class Message extends React.Component{
                 }}
                 open={this.state.open}
                 autoHideDuration={12000}
-                onRequestClose={this.handleRequestClose}
+                onClose={this.handleRequestClose}
                 SnackbarContentProps={{
                     'aria-describedby': 'message-id',
                 }}

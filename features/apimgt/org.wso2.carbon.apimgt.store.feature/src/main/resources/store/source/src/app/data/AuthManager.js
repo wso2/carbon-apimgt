@@ -21,7 +21,6 @@ import axios from 'axios'
 import qs from 'qs'
 import Utils from './Utils'
 import User from './User'
-import APIClient from './APIClient'
 import APIClientFactory from "./APIClientFactory";
 
 class AuthManager {
@@ -201,7 +200,7 @@ class AuthManager {
         return promisedLogout.then(response => {
             Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, Utils.CONST.CONTEXT_PATH);
             localStorage.removeItem(User.CONST.LOCALSTORAGE_USER);
-            new APIClientFactory().getAPIClient(Utils.getEnvironment().label)._instance = null; // Single client should be re initialize after log out
+            new APIClientFactory().destroyAPIClient(Utils.getEnvironment().label); // Single client should be re initialize after log out
         });
     }
 

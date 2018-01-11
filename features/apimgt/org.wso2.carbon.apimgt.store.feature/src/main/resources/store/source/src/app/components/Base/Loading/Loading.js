@@ -17,24 +17,14 @@
  */
 
 import React from 'react'
-import PropTypes from 'prop-types'
-import Grid from 'material-ui/Grid'
-import { LinearProgress } from 'material-ui/Progress';
+import {CircularProgress} from "material-ui/Progress";
 
 const LoadingAnimation = (props) => {
     return (
-        <Grid container spacing={24}>
-            <Grid item xs={12}>
-                <LinearProgress color="accent"/>
-            </Grid>
-        </Grid>
+        <div>
+            <CircularProgress style={{margin: "auto", display: "block"}}/>
+        </div>
     );
 };
 
-LoadingAnimation.propTypes = {
-    message: PropTypes.string
-};
-LoadingAnimation.defaultProps = {
-    message: "Loading . . ."
-};
 export default LoadingAnimation

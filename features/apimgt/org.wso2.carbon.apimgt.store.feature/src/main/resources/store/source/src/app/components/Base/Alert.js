@@ -69,7 +69,7 @@ class Alert extends React.Component {
                     }}
                     open={this.state.open}
                     autoHideDuration={6000}
-                    onRequestClose={this.handleRequestClose}
+                    onClose={this.handleRequestClose}
                     SnackbarContentProps={{
                         'aria-describedby': 'message-id',
                     }}

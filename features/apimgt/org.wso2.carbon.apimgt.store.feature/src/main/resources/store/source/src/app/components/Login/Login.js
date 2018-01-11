@@ -37,6 +37,8 @@ import {MenuItem} from 'material-ui/Menu';
 import {CircularProgress} from "material-ui/Progress";
 import Grid from 'material-ui/Grid';
 import {withRouter} from 'react-router-dom';
+import Loading from "../Base/Loading/Loading";
+import Redirecting from "../Shared/Redirecting";
 
 class Login extends Component {
 
@@ -191,26 +193,7 @@ class Login extends Component {
         //Redirect to IS
         if (this.state.redirectToIS) {
             return (
-                // Redirect page
-                <div className="login-flex-container">
-                    <Grid container justify={"center"} alignItems={"center"} spacing={0} style={{height: "100vh"}}>
-                        <Grid item lg={6} md={8} xs={10}>
-                            <Grid container alignItems={"center"}>
-                                <Grid item sm={2} xs={12}>
-                                    <CircularProgress style={{float: "right"}}/>
-                                </Grid>
-                                <Grid item sm={10} xs={12}>
-                                    <div className="login-main-content">
-                                        <Paper elevation={5} square={true} className="login-paper"
-                                               style={{fontSize: "medium", padding: "15px"}}>
-                                            You are now being redirected to Identity Provider.
-                                        </Paper>
-                                    </div>
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </div>
+                <Redirecting message={"You are now being redirected to Identity Provider."}/>
             );
         }
 
@@ -311,9 +294,8 @@ class Login extends Component {
                                                     }
                                                     </span>
                                                     :
-                                                    <FormControl
-                                                        style={{width: '100%', fontSize: 'medium', marginTop: "5%"}}>
-                                                        <CircularProgress style={{margin: 'auto', display: 'block'}}/>
+                                                    <FormControl style={{width: '100%', margin: "10% 0 6% 0"}}>
+                                                        <Loading/>
                                                     </FormControl>
                                                 }
 

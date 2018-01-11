@@ -72,7 +72,7 @@ class ApiThumb extends React.Component {
             return null;
         }
         return (
-            <Grid item xs={12} sm={6} md={3} lg={2} xl={2}>
+            <Grid item xs={6} sm={4} md={3} lg={2} xl={2}>
                 <Card>
                     <CardMedia image="/publisher/public/app/images/api/api-default.png">
                         <img src="/publisher/public/app/images/api/api-default.png" style={{width:"100%"}}/>
@@ -93,7 +93,7 @@ class ApiThumb extends React.Component {
                                 More...
                             </Button>
                         </Link>
-                        <Dialog open={this.state.openUserMenu} transition={Slide} onRequestClose={this.handleRequestClose}>
+                        <Dialog open={this.state.openUserMenu} transition={Slide} onClose={this.handleRequestClose}>
                             <DialogTitle>
                                 {"Use Google's location service?"}
                             </DialogTitle>

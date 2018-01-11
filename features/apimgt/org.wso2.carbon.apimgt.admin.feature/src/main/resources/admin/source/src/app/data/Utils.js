@@ -17,6 +17,7 @@
  */
 
 import AuthManager from "./AuthManager";
+import Axios from "axios";
 
 /**
  * Utility class for Admin Portal application
@@ -141,16 +142,20 @@ class Utils {
         AuthManager.setUser(user);
     }
 
-    static getAppLoginURL() {
-        return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGIN + Utils.CONST.CONTEXT_PATH;
+    static getPromised_ssoData(environment) {
+        return Axios.get(Utils.getAppSSORequestURL(environment));
+    }
+
+    static getAppSSORequestURL(environment = Utils.getEnvironment()) {
+        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.SSO_LOGIN}${Utils.CONST.CONTEXT_PATH}`;
     }
 
     static getAppLogoutURL() {
         return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGOUT + Utils.CONST.CONTEXT_PATH;
     }
 
-    static getLoginTokenPath() {
-        return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGIN_TOKEN_PATH + Utils.CONST.CONTEXT_PATH;
+    static getLoginTokenPath(environment = Utils.getEnvironment()) {
+        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_TOKEN_PATH}${Utils.CONST.CONTEXT_PATH}`;
     }
 
     static getSwaggerURL() {
@@ -162,19 +167,19 @@ class Utils {
      * @returns {Object} environment: {label: string, host: string, loginTokenPath: string}
      * @private
      */
-    static _getDefaultEnvironment(){
+    static _getDefaultEnvironment() {
         return {label: 'Default', host: window.location.host, loginTokenPath: '/login/token'};
     }
 }
 
 Utils.CONST = {
     LOCALSTORAGE_ENVIRONMENT: 'environment',
-    LOGIN: '/login/login',
+    SSO_LOGIN: '/login/login',
     LOGOUT: '/login/logout',
     LOGIN_TOKEN_PATH: '/login/token',
-    SWAGGER_YAML: '/api/am/publisher/v1.0/apis/swagger.yaml',
+    SWAGGER_YAML: '/api/am/admin/v1.0/apis/swagger.yaml',
     PROTOCOL: 'https://',
-    CONTEXT_PATH: '/publisher'
+    CONTEXT_PATH: '/admin'
 };
 
 /**
