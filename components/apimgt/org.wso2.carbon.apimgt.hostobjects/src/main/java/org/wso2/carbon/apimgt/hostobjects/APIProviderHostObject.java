@@ -1695,7 +1695,7 @@ public class APIProviderHostObject extends ScriptableObject {
         ResourceFile thumbIcon = new ResourceFile(inputStream, contentType);
         String thumbPath = APIUtil.getIconPath(api.getId());
         String thumbnailUrl = apiProvider.addResourceFile(thumbPath, thumbIcon);
-        api.setThumbnailUrl(APIUtil.prependTenantPrefix(thumbnailUrl, api.getId().getProviderName()));
+        api.setThumbnailUrl(thumbnailUrl);
 
         /*Set permissions to anonymous role for thumbPath*/
         APIUtil.setResourcePermissions(api.getId().getProviderName(), null, null, thumbPath);
