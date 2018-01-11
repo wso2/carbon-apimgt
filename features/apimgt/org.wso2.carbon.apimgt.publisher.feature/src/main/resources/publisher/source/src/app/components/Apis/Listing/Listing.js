@@ -53,6 +53,7 @@ class Listing extends React.Component {
         super(props);
         this.state = {listType: 'grid', apis: null};
         this.handleApiDelete = this.handleApiDelete.bind(this);
+        this.updateApi = this.updateApi.bind(this);
     }
 
     componentDidMount() {
@@ -76,6 +77,17 @@ class Listing extends React.Component {
 
     setListType = (value) => {
         this.setState({listType: value});
+    }
+
+    updateApi(api_uuid){
+        let api = this.state.apis;
+        for (let apiIndex in api.list) {
+            if (api.list.hasOwnProperty(apiIndex) && api.list[apiIndex].id === api_uuid) {
+                api.list.splice(apiIndex, 1);
+                break;
+            }
+        }
+        this.setState({apis: api});
     }
 
     handleApiDelete(api_uuid, name) {
@@ -181,7 +193,8 @@ class Listing extends React.Component {
                             </Row>
                             : <Grid container spacing={0}>
                                 {this.state.apis.list.map((api, i) => {
-                                    return <ApiThumb key={api.id} listType={this.state.listType} api={api}/>
+                                    return <ApiThumb key={api.id} listType={this.state.listType} api={api}
+                                                     updateApi={this.updateApi}/>
                                 })}
                             </Grid>
                         }

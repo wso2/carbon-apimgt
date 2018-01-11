@@ -72,6 +72,7 @@ class ApiThumb extends React.Component {
                 this.refs.notificationSystem.addNotification( {
                     message: name + ' API deleted Successfully', position: 'tc', level: 'success'
                 });
+                this.props.updateApi(api_uuid);
                 this.setState({active: false, loading: false});
             }
         );
@@ -120,10 +121,9 @@ class ApiThumb extends React.Component {
                                 </DialogContentText>
                             </DialogContent>
                             <DialogActions>
-                                <Link to={"/apis/"}>
-                                    <Button dense color="primary" onClick={this.handleApiDelete}>
-                                        <NotificationSystem ref="notificationSystem"/>Delete
-                                    </Button></Link>
+                                <Button dense color="primary" onClick={this.handleApiDelete}>
+                                    <NotificationSystem ref="notificationSystem"/>Delete
+                                </Button>
                                 <Button dense color="primary" onClick={this.handleRequestClose}>
                                     Cancel
                                 </Button>
