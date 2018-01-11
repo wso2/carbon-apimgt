@@ -10,7 +10,8 @@ function APISamples () {
     " contains URL of newly created entity.\"},\"400\":{\"schema\":{\"$ref\":" +
     "\"#/definitions/Error\"},\"description\":\"Bad Request. Invalid request or validation error.\"}" +
     ",\"415\":{\"schema\":{\"$ref\":\"#/definitions/Error\"},\"description\":" +
-    "\"Unsupported Media Type. The entity of the request was in a not supported format.\"}}}}," +
+    "\"Unsupported Media Type. The entity of the request was in a not supported format.\"}},\"security\":" +
+    "[{\"pizzashack_auth\":[\"write:order\",\"read:order\"]}]}}," +
     "\"/menu\":{\"get\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":" +
     "\"" + "$.{defaultResourceLevelTier}" + "\",\"description\":\"Return a list of available menu items\"," +
     "\"parameters\":" +
@@ -18,7 +19,8 @@ function APISamples () {
     "\"type\":\"array\"},\"description\":\"OK. List of APIs is returned.\"},\"304\":{\"description\":" +
     "\"Not Modified. Empty body because the client has already the latest version of the requested " +
     "resource.\"},\"406\":{\"schema\":{\"$ref\":\"#/definitions/Error\"},\"description\":" +
-    "\"Not Acceptable. The requested media type is not supported\"}}}},\"/order/{orderId}\"" +
+    "\"Not Acceptable. The requested media type is not supported\"}},\"security\":[{\"pizzashack_auth\":" +
+    "[\"read:menu\"]}]}},\"/order/{orderId}\"" +
     ":{\"put\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":" +
     "\"" + "$.{defaultResourceLevelTier}" + "\",\"description\":\"Update an existing Order\"," +
     "\"parameters\":[{\"description\"" +
@@ -33,7 +35,8 @@ function APISamples () {
     "Invalid request or validation error\"},\"404\":{\"schema\":{\"$ref\":\"#/definitions/Error\"}" +
     ",\"description\":\"Not Found. The resource to be updated does not exist.\"},\"412\":{\"schema\"" +
     ":{\"$ref\":\"#/definitions/Error\"},\"description\":\"Precondition Failed. The request has " +
-    "not been performed because one of the preconditions is not met.\"}}},\"get\":{\"x-auth-type\"" +
+    "not been performed because one of the preconditions is not met.\"}},\"security\":[{\"pizzashack_auth\":" +
+    "[\"write:order\",\"read:order\"]}]},\"get\":{\"x-auth-type\"" +
     ":\"Application & Application User\",\"x-throttling-tier\":\"" + "$.{defaultResourceLevelTier}" + "\"," +
     "\"description\":\"" +
     "Get details of an Order\",\"parameters\":[{\"description\":\"Order Id\",\"name\":\"orderId\"," +
@@ -44,15 +47,20 @@ function APISamples () {
     "requested resource.\"},\"404\":{\"schema\":{\"$ref\":\"#/definitions/Error\"},\"description\"" +
     ":\"Not Found. Requested API does not exist.\"},\"406\":{\"schema\":{\"$ref\":" +
     "\"#/definitions/Error\"},\"description\":\"Not Acceptable. The requested media type is" +
-    " not supported\"}}},\"delete\":{\"x-auth-type\":\"Application & Application User\"," +
+    " not supported\"}},\"security\":[{\"pizzashack_auth\":[\"write:order\", \"read:order\"]}]},\"delete\":" +
+    "{\"x-auth-type\":\"Application & Application User\"," +
     "\"x-throttling-tier\":\"" + "$.{defaultResourceLevelTier}" + "\",\"description\":\"Delete an existing Order\"," +
     "\"parameters\":[{\"description\":\"Order Id\",\"name\":\"orderId\",\"format\":\"string\"," +
     "\"type\":\"string\",\"required\":true,\"in\":\"path\"}],\"responses\":{\"200\":{\"description\"" +
     ":\"OK. Resource successfully deleted.\"},\"404\":{\"schema\":{\"$ref\":\"#/definitions/Error\"}" +
     ",\"description\":\"Not Found. Resource to be deleted does not exist.\"},\"412\":{\"schema\"" +
     ":{\"$ref\":\"#/definitions/Error\"},\"description\":\"Precondition Failed. The request has " +
-    "not been performed because one of the preconditions is not met.\"}}}}},\"schemes\":[\"https\"]" +
-    ",\"produces\":[\"application/json\"],\"swagger\":\"2.0\",\"definitions\":{\"ErrorListItem\":" +
+    "not been performed because one of the preconditions is not met.\"}},\"security\":[{\"pizzashack_auth\":" +
+    "[\"write:order\",\"read:order\"]}]}}},\"schemes\":[\"https\"]" +
+    ",\"produces\":[\"application/json\"],\"swagger\":\"2.0\", \"securityDefinitions\"" +
+    ":{\"pizzashack_auth\":{\"type\":\"oauth2\",\"authorizationUrl\": \"http://wso2.swagger.io/api/oauth/dialog\"," +
+    "\"flow\": \"implicit\", \"scopes\":{\"write:order\": \"modify order in your account\",\"read:order\":" +
+    "\"read your order\", \"read:menu\": \"read your menu\"}}},\"definitions\":{\"ErrorListItem\":" +
     "{\"title\":\"Description of individual errors that may have occored during a request.\"," +
     "\"properties\":{\"message\":{\"description\":\"Description about individual errors occored\"," +
     "\"type\":\"string\"},\"code\":{\"format\":\"int64\",\"type\":\"integer\"}},\"required\":" +
