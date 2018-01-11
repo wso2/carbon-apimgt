@@ -244,12 +244,21 @@ var getAuthCookieBySAMLToken = function (serverUrl) {
 
 var checkWorkflowServerStatus = function (serverUrl) {
     var log = new Log();
-    var endpoint = serverUrl + "AuthenticationAdmin";
+    var endpoint;
+    var services = "services";
+    if (serverUrl.length - serverUrl.lastIndexOf(services) == services.length + 1) {
+        serverUrl = serverUrl.substring(0, serverUrl.length - (services.length + 1));
+    }
+    endpoint = serverUrl + "carbon";
     try {
         var httpClient = new Packages.org.apache.http.impl.client.DefaultHttpClient();
-        var httpPost = new Packages.org.apache.http.client.methods.HttpPost(endpoint);
-        httpClient.execute(httpPost);
-        return true;
+        var httpGet = new Packages.org.apache.http.client.methods.HttpGet(endpoint);
+        var response = httpClient.execute(httpGet);
+        if (response.getStatusLine().getStatusCode() == 200) {
+            return true;
+        } else {
+            return false;
+        }
     } catch (e) {
         if (e.message != null) {
             var errorMessage = e.message;
