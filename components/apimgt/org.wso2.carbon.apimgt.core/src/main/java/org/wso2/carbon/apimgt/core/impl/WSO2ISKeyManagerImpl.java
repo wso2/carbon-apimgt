@@ -57,6 +57,7 @@ import java.util.Map;
  */
 public class WSO2ISKeyManagerImpl implements KeyManager {
     private static final Logger log = LoggerFactory.getLogger(WSO2ISKeyManagerImpl.class);
+    private static final String SUPER_TENANT_SUFFIX = "@carbon.super";
 
     private DCRMServiceStub dcrmServiceStub;
     private OAuth2ServiceStubs oAuth2ServiceStubs;
@@ -361,7 +362,9 @@ public class WSO2ISKeyManagerImpl implements KeyManager {
                     tokenInfo.setAccessToken(accessToken);
                     tokenInfo.setScopes(introspectResponse.getScope());
                     tokenInfo.setConsumerKey(introspectResponse.getClientId());
-                    tokenInfo.setEndUserName(introspectResponse.getUsername());
+                    if (introspectResponse.getUsername() != null) {
+                        tokenInfo.setEndUserName(introspectResponse.getUsername().replace(SUPER_TENANT_SUFFIX, ""));
+                    }
                     tokenInfo.setIssuedTime(introspectResponse.getIat());
                     tokenInfo.setExpiryTime(introspectResponse.getExp());
 
