@@ -81,7 +81,7 @@ if(jagg.isCSRFTokenValid())
                         //Validate swagger definition with mandatory swagger elements
                         if (swaggerErrors.size() > 0) {
                             errorMsg = getSwaggerError(swaggerErrors);
-                            print({error: true, message: "<div><div>" + file.getName() + " contains invalid swagger definition" + "</div>" + errorMsg});
+                            print({error: true, message: "<div><div>" + url + " contains invalid swagger definition" + "</div>" + errorMsg});
                             return;
                         }
 
