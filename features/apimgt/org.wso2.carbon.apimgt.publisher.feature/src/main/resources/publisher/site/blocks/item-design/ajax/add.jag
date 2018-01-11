@@ -71,7 +71,7 @@ if(jagg.isCSRFTokenValid())
                         var swaggerErrors = swaggerDeserializationResult.getMessages();
 
                         //Supported swagger version check
-                        if(swaggerObj.swagger != supportedSwaggerVersion){
+                        if (swaggerObj.swagger != supportedSwaggerVersion) {
                             print({
                                 error: true,
                                 message: "Unsupported swagger version provided. Please re-import with swagger " + supportedSwaggerVersion
@@ -100,7 +100,7 @@ if(jagg.isCSRFTokenValid())
                         var swaggerErrors = swaggerDeserializationResult.getMessages();
 
                         //Supported swagger version check
-                        if(swaggerObj.swagger != supportedSwaggerVersion){
+                        if (swaggerObj.swagger != supportedSwaggerVersion) {
                             print({
                                 error: true,
                                 message: "Unsupported swagger version provided. Please re-import with swagger " + supportedSwaggerVersion
