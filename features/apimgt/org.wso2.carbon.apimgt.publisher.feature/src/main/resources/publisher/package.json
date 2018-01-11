@@ -31,16 +31,17 @@
     "react-dom": "^15.5.4",
     "react-dropzone": "^3.13.4",
     "react-modal": "^2.2.2",
+    "react-notification-system": "^0.2.16",
     "react-quill": "1.0.0",
     "react-router": "^4.1.1",
     "react-router-dom": "^4.1.1",
     "react-select": "^1.0.0-rc.6",
+    "react-tagsinput": "3.19.0",
     "react-tap-event-plugin": "^2.0.1",
     "react-toastify": "^1.7.0",
     "swagger-client": "git://github.com/RenukaFernando/swagger-js.git#v-cors-patch",
     "typeface-roboto": "0.0.35",
-    "url-loader": "^0.5.9",
-    "react-tagsinput": "3.19.0"
+    "url-loader": "^0.5.9"
   },
   "devDependencies": {
     "babel-core": "^6.24.1",
