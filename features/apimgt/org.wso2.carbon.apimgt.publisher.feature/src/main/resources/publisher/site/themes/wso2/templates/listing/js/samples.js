@@ -22,7 +22,7 @@ function APISamples () {
     ":{\"put\":{\"x-auth-type\":\"Application & Application User\",\"x-throttling-tier\":" +
     "\"" + "$.{defaultResourceLevelTier}" + "\",\"description\":\"Update an existing Order\"," +
     "\"parameters\":[{\"description\"" +
-    ":\"Order Id\",\"name\":\"orderId\",\"format\":\"integer\",\"type\":\"number\",\"required\"" +
+    ":\"Order Id\",\"name\":\"orderId\",\"format\":\"string\",\"type\":\"string\",\"required\"" +
     ":true,\"in\":\"path\"},{\"schema\":{\"$ref\":\"#/definitions/Order\"},\"description\":\"" +
     "Order object that needs to be added\",\"name\":\"body\",\"required\":true,\"in\":\"body\"}]," +
     "\"responses\":{\"200\":{\"headers\":{\"Location\":{\"description\":\"The URL " +
@@ -37,7 +37,7 @@ function APISamples () {
     ":\"Application & Application User\",\"x-throttling-tier\":\"" + "$.{defaultResourceLevelTier}" + "\"," +
     "\"description\":\"" +
     "Get details of an Order\",\"parameters\":[{\"description\":\"Order Id\",\"name\":\"orderId\"," +
-    "\"format\":\"integer\",\"type\":\"number\",\"required\":true,\"in\":\"path\"}],\"responses\":" +
+    "\"format\":\"string\",\"type\":\"string\",\"required\":true,\"in\":\"path\"}],\"responses\":" +
     "{\"200\":{\"schema\":{\"$ref\":\"#/definitions/Order\"},\"headers\":{}," +
     "\"description\":\"OK Requested Order will be returned\"},\"304\":{\"description\":" +
     "\"Not Modified. Empty body because the client has already the latest version of the " +
@@ -46,8 +46,8 @@ function APISamples () {
     "\"#/definitions/Error\"},\"description\":\"Not Acceptable. The requested media type is" +
     " not supported\"}}},\"delete\":{\"x-auth-type\":\"Application & Application User\"," +
     "\"x-throttling-tier\":\"" + "$.{defaultResourceLevelTier}" + "\",\"description\":\"Delete an existing Order\"," +
-    "\"parameters\":[{\"description\":\"Order Id\",\"name\":\"orderId\",\"format\":\"integer\"," +
-    "\"type\":\"number\",\"required\":true,\"in\":\"path\"}],\"responses\":{\"200\":{\"description\"" +
+    "\"parameters\":[{\"description\":\"Order Id\",\"name\":\"orderId\",\"format\":\"string\"," +
+    "\"type\":\"string\",\"required\":true,\"in\":\"path\"}],\"responses\":{\"200\":{\"description\"" +
     ":\"OK. Resource successfully deleted.\"},\"404\":{\"schema\":{\"$ref\":\"#/definitions/Error\"}" +
     ",\"description\":\"Not Found. Resource to be deleted does not exist.\"},\"412\":{\"schema\"" +
     ":{\"$ref\":\"#/definitions/Error\"},\"description\":\"Precondition Failed. The request has " +
@@ -62,7 +62,7 @@ function APISamples () {
     "\"Pizza Order\",\"properties\":{\"customerName\":{\"type\":\"string\"},\"delivered\":{\"" +
     "type\":\"boolean\"},\"address\":{\"type\":\"string\"},\"pizzaType\":{\"type\":\"string\"}," +
     "\"creditCardNumber\":{\"type\":\"string\"},\"quantity\":{\"type\":\"number\"},\"orderId\":" +
-    "{\"type\":\"integer\"}},\"required\":[\"orderId\"]},\"Error\":{\"title\":\"Error object" +
+    "{\"type\":\"string\"}},\"required\":[\"orderId\"]},\"Error\":{\"title\":\"Error object" +
     " returned with 4XX HTTP status\",\"properties\":{\"message\":{\"description\":\"Error " +
     "message.\",\"type\":\"string\"},\"error\":{\"items\":{\"$ref\":\"#/definitions/ErrorListItem\"}" +
     ",\"description\":\"If there are more than one error list them out. Ex. list out validation" +
