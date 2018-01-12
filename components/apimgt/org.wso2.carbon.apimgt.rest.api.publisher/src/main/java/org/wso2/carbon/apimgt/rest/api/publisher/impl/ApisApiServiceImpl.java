@@ -93,12 +93,12 @@ public class ApisApiServiceImpl extends ApisApiService {
             String username = RestApiUtil.getLoggedInUsername(request);
             try {
                 APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
-                String existingFingerprint =
-                        apisApiIdGetFingerprint(apiId, null, null, request);
+                String existingFingerprint = apisApiIdGetFingerprint(apiId, null, null, request);
                 if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                         .contains(existingFingerprint)) {
                     return Response.notModified().build();
                 }
+
                 DedicatedGateway dedicatedGateway  = apiPublisher.getDedicatedGateway(apiId);
                 if (dedicatedGateway != null) {
                     DedicatedGatewayDTO dedicatedGatewayDTO = MappingUtil.toDedicatedGatewayDTO(dedicatedGateway);
@@ -109,7 +109,6 @@ public class ApisApiServiceImpl extends ApisApiService {
                     String msg = "Dedicated Gateway not found for " + apiId;
                     log.error(msg);
                     ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
-                    log.error(msg);
                     return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
                 }
 

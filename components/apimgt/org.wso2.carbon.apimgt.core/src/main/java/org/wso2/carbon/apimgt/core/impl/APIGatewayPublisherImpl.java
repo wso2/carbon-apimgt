@@ -442,15 +442,15 @@ public class APIGatewayPublisherImpl implements APIGateway {
     @Override
     public void createContainerBasedGateway(String apiId, String label) throws GatewayException {
 
-        if (ContainerBasedGatewayConstants.K8.equalsIgnoreCase(config.getContainerGatewayConfigs().getCmsType())) {
-            KubernetesGatewayImpl kubernetesGateway = new KubernetesGatewayImpl();
-            kubernetesGateway.createContainerGateway(apiId, label);
-
-        } else if (ContainerBasedGatewayConstants.OPENSHIFT.equalsIgnoreCase(config.getContainerGatewayConfigs()
-                .getCmsType())) {
-            OpenShiftGatewayImpl openShiftGateway = new OpenShiftGatewayImpl();
-            openShiftGateway.createContainerGateway(apiId, label);
-        }
+//        if (ContainerBasedGatewayConstants.K8.equalsIgnoreCase(config.getContainerGatewayConfigs().getCmsType())) {
+//            KubernetesGatewayImpl kubernetesGateway = new KubernetesGatewayImpl();
+//            kubernetesGateway.createContainerGateway(apiId, label);
+//
+//        } else if (ContainerBasedGatewayConstants.OPENSHIFT.equalsIgnoreCase(config.getContainerGatewayConfigs()
+// .getCmsType())) {
+//            OpenShiftGatewayImpl openShiftGateway = new OpenShiftGatewayImpl();
+//            openShiftGateway.createContainerGateway(apiId, label);
+//        }
         // todo : Add other cmsTypes
 
     }
@@ -461,17 +461,17 @@ public class APIGatewayPublisherImpl implements APIGateway {
     @Override
     public void removeContainerBasedGateway(String label, String apiId) throws GatewayException {
 
-        if (ContainerBasedGatewayConstants.K8.equalsIgnoreCase(config.getContainerGatewayConfigs().getCmsType())) {
-            KubernetesGatewayImpl kubernetesGateway = new KubernetesGatewayImpl();
-            kubernetesGateway.removeContainerBasedGateway(label, apiId, config.getContainerGatewayConfigs()
-                    .getKubernetesGatewayConfigurations().getNamespace());
-
-        } else if (ContainerBasedGatewayConstants.OPENSHIFT.equalsIgnoreCase(config.getContainerGatewayConfigs()
-                .getCmsType())) {
-            OpenShiftGatewayImpl openShiftGateway = new OpenShiftGatewayImpl();
-            openShiftGateway.removeContainerBasedGateway(label, apiId, config.getContainerGatewayConfigs()
-                    .getOpenshiftGatewayConfigurations().getNamespace());
-        }
+//        if (ContainerBasedGatewayConstants.K8.equalsIgnoreCase(config.getContainerGatewayConfigs().getCmsType())) {
+//            KubernetesGatewayImpl kubernetesGateway = new KubernetesGatewayImpl();
+//            kubernetesGateway.removeContainerBasedGateway(label, apiId, config.getContainerGatewayConfigs()
+//                    .getKubernetesGatewayConfigurations().getNamespace());
+//
+//        } else if (ContainerBasedGatewayConstants.OPENSHIFT.equalsIgnoreCase(config.getContainerGatewayConfigs()
+// .getCmsType())) {
+//            OpenShiftGatewayImpl openShiftGateway = new OpenShiftGatewayImpl();
+//            openShiftGateway.removeContainerBasedGateway(label, apiId, config.getContainerGatewayConfigs()
+//                    .getOpenshiftGatewayConfigurations().getNamespace());
+//        }
         // todo : Add other cmsTypes
     }
 

@@ -78,8 +78,8 @@ public class ContainerBasedGatewayTemplateBuilder {
                 templateValues.get(ContainerBasedGatewayConstants.GATEWAY_LABEL));
         context.put(ContainerBasedGatewayConstants.CONTAINER_NAME,
                 templateValues.get(ContainerBasedGatewayConstants.CONTAINER_NAME));
-        context.put(ContainerBasedGatewayConstants.DOCKER_IMAGE,
-                templateValues.get(ContainerBasedGatewayConstants.DOCKER_IMAGE));
+        context.put(ContainerBasedGatewayConstants.IMAGE,
+                templateValues.get(ContainerBasedGatewayConstants.IMAGE));
         context.put(ContainerBasedGatewayConstants.API_CORE_URL,
                 templateValues.get(ContainerBasedGatewayConstants.API_CORE_URL));
         context.put(ContainerBasedGatewayConstants.BROKER_HOST,

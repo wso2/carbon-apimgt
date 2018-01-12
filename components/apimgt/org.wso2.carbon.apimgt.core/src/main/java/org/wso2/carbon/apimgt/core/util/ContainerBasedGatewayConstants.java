@@ -34,7 +34,7 @@ public final class ContainerBasedGatewayConstants {
     public static final String SERVICE_NAME = "serviceName";
     public static final String DEPLOYMENT_NAME = "deploymentName";
     public static final String CONTAINER_NAME = "containerName";
-    public static final String DOCKER_IMAGE = "image";
+    public static final String IMAGE = "image";
     public static final String API_CORE_URL = "apiCoreURL";
     public static final String BROKER_HOST = "brokerHost";
     public static final String CMS_TYPE = "cmsType";
@@ -48,4 +48,8 @@ public final class ContainerBasedGatewayConstants {
     public static final String PROPERTY_KUB_CONFIG_BASE64_ENCODED_DATA = "KubernetesClusterConfig.Base64EncodedData";
     public static final String PROPERTY_KUB_TMP_CONFIG = "KubernetesClusterConfig.TempKubeConfigFile";
 
+    public static final String KUBERNETES_IMPL_CLASS = "org.wso2.carbon.apimgt.core.impl.KubernetesGatewayImpl";
+    public static final String MASTER_URL = "masterUrl";
+    public static final String SERVICE_ACCOUNT_SECRET = "serviceAccountSecret";
+    public static final String SA_TOKEN_FILE = "saTokenFile";
 }

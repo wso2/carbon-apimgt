@@ -27,18 +27,13 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 
-
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.carbon.apimgt.core.api.ContainerBasedGatewayGenerator;
-import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
-import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.template.ContainerBasedGatewayTemplateBuilder;
 import org.wso2.carbon.apimgt.core.util.ContainerBasedGatewayConstants;
-
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -55,19 +50,28 @@ import java.util.Map;
 /**
  * This is responsible to handle the gateways created in Kubernetes
  */
-public class KubernetesGatewayImpl implements ContainerBasedGatewayGenerator {
+public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
 
-    private static final Logger log = LoggerFactory.getLogger(DefaultIdentityProviderImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(KubernetesGatewayImpl.class);
 
-  //  private static String carbonHome = System.getProperty(Constants.CARBON_HOME);
-    private static APIMConfigurations apimConfigurations
-            = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
-    private String masterURL = apimConfigurations.getContainerGatewayConfigs().getKubernetesGatewayConfigurations()
-            .getMasterURL();
-    private String certFile = apimConfigurations.getContainerGatewayConfigs().getKubernetesGatewayConfigurations()
-            .getCertFile();
-    private static String saTokenFile = apimConfigurations.getContainerGatewayConfigs()
-            .getKubernetesGatewayConfigurations().getSaTokenFile();
+    private String masterURL;
+    private String certFile;
+    private String namespace;
+    private String image;
+    private String apiCoreUrl;
+    private String brokerHost;
+    private String saTokenFile;
+
+    @Override
+    void initImpl(Map<String, String> implParameters) throws GatewayException {
+        masterURL = implParameters.get(ContainerBasedGatewayConstants.MASTER_URL);
+        certFile = implParameters.get(ContainerBasedGatewayConstants.CERT_FILE_LOCATION);
+        saTokenFile = implParameters.get(ContainerBasedGatewayConstants.SA_TOKEN_FILE);
+        namespace = implParameters.get(ContainerBasedGatewayConstants.NAMESPACE);
+        image = implParameters.get(ContainerBasedGatewayConstants.IMAGE);
+        apiCoreUrl = implParameters.get(ContainerBasedGatewayConstants.API_CORE_URL);
+        brokerHost = implParameters.get(ContainerBasedGatewayConstants.BROKER_HOST);
+    }
 
     /**
      * @see ContainerBasedGatewayGenerator#createContainerBasedService(String gatewayServiceTemplate, String apiId,
@@ -210,25 +214,19 @@ public class KubernetesGatewayImpl implements ContainerBasedGatewayGenerator {
      */
     @Override
     public void createContainerGateway(String apiId, String label) throws GatewayException {
-        Map<String , String> templateValues = new HashMap<>();
+        Map<String, String> templateValues = new HashMap<>();
 
-        templateValues.put(ContainerBasedGatewayConstants.NAMESPACE,
-                apimConfigurations.getContainerGatewayConfigs().getKubernetesGatewayConfigurations().getNamespace());
+        templateValues.put(ContainerBasedGatewayConstants.NAMESPACE, namespace);
         templateValues.put(ContainerBasedGatewayConstants.GATEWAY_LABEL, label);
         templateValues.put(ContainerBasedGatewayConstants.SERVICE_NAME, label +
                 ContainerBasedGatewayConstants.CMS_SERVICE_SUFFIX);
         templateValues.put(ContainerBasedGatewayConstants.DEPLOYMENT_NAME, label + "-deployment");
         templateValues.put(ContainerBasedGatewayConstants.CONTAINER_NAME, label + "-container");
-        templateValues.put(ContainerBasedGatewayConstants.DOCKER_IMAGE, apimConfigurations.getContainerGatewayConfigs()
-                .getKubernetesGatewayConfigurations().getImage());
-        templateValues.put(ContainerBasedGatewayConstants.API_CORE_URL, apimConfigurations.getContainerGatewayConfigs()
-                .getKubernetesGatewayConfigurations().getApiCoreURL());
-        templateValues.put(ContainerBasedGatewayConstants.BROKER_HOST, apimConfigurations.getContainerGatewayConfigs()
-                .getKubernetesGatewayConfigurations().getBrokerHost());
-        templateValues.put(ContainerBasedGatewayConstants.SERVICE_ACCOUNT_TOKEN_FILE,
-                apimConfigurations.getContainerGatewayConfigs().getKubernetesGatewayConfigurations().getSaTokenFile());
-        templateValues.put(ContainerBasedGatewayConstants.CERT_FILE_LOCATION,
-                apimConfigurations.getContainerGatewayConfigs().getKubernetesGatewayConfigurations().getCertFile());
+        templateValues.put(ContainerBasedGatewayConstants.IMAGE, image);
+        templateValues.put(ContainerBasedGatewayConstants.API_CORE_URL, apiCoreUrl);
+        templateValues.put(ContainerBasedGatewayConstants.BROKER_HOST, brokerHost);
+        templateValues.put(ContainerBasedGatewayConstants.SERVICE_ACCOUNT_TOKEN_FILE, saTokenFile);
+        templateValues.put(ContainerBasedGatewayConstants.CERT_FILE_LOCATION, certFile);
 
         ContainerBasedGatewayTemplateBuilder builder = new ContainerBasedGatewayTemplateBuilder();
         //Create gateway Service
