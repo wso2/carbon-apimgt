@@ -49,6 +49,8 @@ class Overview extends Component {
         this.api_uuid = this.props.match.params.api_uuid;
         this.downloadWSDL = this.downloadWSDL.bind(this);
         this.handleApiDelete = this.handleApiDelete.bind(this);
+        this.handleRequestClose = this.handleRequestClose.bind(this);
+        this.handleRequestOpen = this.handleRequestOpen.bind(this);
     }
 
     componentDidMount() {
@@ -71,11 +73,11 @@ class Overview extends Component {
         );
     }
 
-    handleRequestClose = () => {
+    handleRequestClose() {
         this.setState({ openMenu: false });
     };
 
-    handleRequestOpen = () => {
+    handleRequestOpen() {
         this.setState({ openMenu: true });
     };
 
