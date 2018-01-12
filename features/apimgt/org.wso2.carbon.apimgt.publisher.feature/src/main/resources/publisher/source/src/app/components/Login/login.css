@@ -45,6 +45,13 @@ html, body {
 .login-form-submit{
     margin-right: 4px;
 }
+.footer-logo{
+    text-align: center;
+    width: 39px;
+    color: #333;
+    vertical-align: middle;
+    padding-bottom: 3px;
+}
 
 @media (max-width: 601px){
     .login-flex-container .login-main-content .login-form {

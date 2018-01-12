@@ -21,8 +21,8 @@ import React from 'react'
 export const Footer = () => (
     <footer className="footer">
         <div style={{margin: "5% 0 0 0", 'textAlign': "center"}} className="container-fluid">
-            <p>WSO2 APIM Publisher v3.0.0 | © 2017 <a href="http://wso2.com/" target="_blank"><i
-                className="icon fw fw-wso2"/> Inc</a>.</p>
+            <p>WSO2 APIM Publisher v3.0.0 | © 2017 <a href="http://wso2.com/" target="_blank">
+                <img className="footer-logo" src="/publisher/public/app/images/logo-footer.svg" alt="wso2-logo"/> Inc</a>.</p>
         </div>
     </footer>
 );
