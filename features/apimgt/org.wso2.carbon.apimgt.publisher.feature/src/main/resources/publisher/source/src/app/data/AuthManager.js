@@ -158,7 +158,6 @@ class AuthManager {
      */
     authenticateUser(username, password, environment) {
         const headers = {
-            'Authorization': 'Basic deidwe',
             'Accept': 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded'
         };
@@ -166,7 +165,7 @@ class AuthManager {
             username: username,
             password: password,
             grant_type: 'password',
-            validity_period: 3600,
+            validity_period: -1,
             scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage '
             + 'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover'
         };
@@ -200,7 +199,7 @@ class AuthManager {
     logout() {
         let authHeader = "Bearer " + AuthManager.getUser().getPartialToken();
         //TODO Will have to change the logout end point url to contain the app context(i.e. publisher/store, etc.)
-        let url = Utils.getAppLogoutURL()
+        let url = Utils.getAppLogoutURL();
         let headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -210,7 +209,7 @@ class AuthManager {
         return promisedLogout.then(response => {
             Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, Utils.CONST.CONTEXT_PATH);
             localStorage.removeItem(User.CONST.LOCALSTORAGE_USER);
-            new APIClientFactory().getAPIClient(Utils.getEnvironment().label)._instance = null; // Single client should be re initialize after log out
+            new APIClientFactory().destroyAPIClient(Utils.getEnvironment().label); // Single client should be re initialize after log out
         });
     }
 

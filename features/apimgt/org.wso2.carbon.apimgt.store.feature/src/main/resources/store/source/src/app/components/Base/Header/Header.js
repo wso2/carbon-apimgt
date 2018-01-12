@@ -151,7 +151,7 @@ class Header extends React.Component {
                             id="tip-menu"
                             anchorEl={this.state.anchorElTips}
                             open={this.state.openTips}
-                            onRequestClose={this.handleRequestCloseTips}
+                            onClose={this.handleRequestCloseTips}
                         >
                             <List dense={true}>
                                 {helpTips.map((tip) => {
@@ -189,7 +189,7 @@ class Header extends React.Component {
                                     id="simple-menu"
                                     anchorEl={this.state.anchorElMainMenu}
                                     open={this.state.openMainMenu}
-                                    onRequestClose={this.handleRequestCloseMainMenu}
+                                    onClose={this.handleRequestCloseMainMenu}
                                     style={{alignItems: "center", justifyContent: "center"}}
                                 >
 
@@ -214,7 +214,7 @@ class Header extends React.Component {
                                     id="simple-menu"
                                     anchorEl={this.state.anchorElUserMenu}
                                     open={this.state.openUserMenu}
-                                    onRequestClose={this.handleRequestCloseUserMenu}
+                                    onClose={this.handleRequestCloseUserMenu}
                                     style={{alignItems: "center", justifyContent: "center"}}
                                 >
                                     <MenuItem onClick={this.handleRequestCloseUserMenu}>Change Password</MenuItem>

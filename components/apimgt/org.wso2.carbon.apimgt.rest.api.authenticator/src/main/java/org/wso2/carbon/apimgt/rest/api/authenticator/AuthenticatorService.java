@@ -74,11 +74,10 @@ public class AuthenticatorService {
      * This method returns the details of a DCR application.
      *
      * @param appName Name of the application to be created
-     * @param uiServiceURL  URL of the UI Service to be appended to the callback URL
      * @return oAuthData - A JsonObject with DCR application details, scopes, auth endpoint, and SSO is enabled or not
      * @throws APIManagementException When creating DCR application fails
      */
-    public JsonObject getAuthenticationConfigurations(String appName, String uiServiceURL)
+    public JsonObject getAuthenticationConfigurations(String appName)
             throws APIManagementException {
         JsonObject oAuthData = new JsonObject();
         List<String> grantTypes = new ArrayList<>();
@@ -86,8 +85,7 @@ public class AuthenticatorService {
         grantTypes.add(KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE);
         grantTypes.add(KeyManagerConstants.REFRESH_GRANT_TYPE);
         APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance().getAPIMAppConfiguration();
-        String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL
-                + appName + "?uiService=" + uiServiceURL;
+        String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName;
         // Get scopes of the application
         String scopes = getApplicationScopes(appName);
         if (log.isDebugEnabled()) {
@@ -129,14 +127,13 @@ public class AuthenticatorService {
      * @param password Password of the user
      * @param refreshToken Refresh token
      * @param validityPeriod Validity period of tokens
-     * @param uiServiceURL URL of the UI-Service
      * @param authorizationCode Authorization Code
      * @return AccessTokenInfo - An object with the generated access token information
      * @throws APIManagementException When receiving access tokens fails
      */
     public AccessTokenInfo getTokens(String appName, String grantType,
                                      String userName, String password, String refreshToken,
-                                     long validityPeriod, String uiServiceURL, String authorizationCode)
+                                     long validityPeriod, String authorizationCode)
             throws APIManagementException {
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
@@ -155,8 +152,7 @@ public class AuthenticatorService {
                 // Access token for authorization code grant type
                 APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance()
                         .getAPIMAppConfiguration();
-                String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName
-                        + "?uiService=" + uiServiceURL;
+                String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName;
 
                 if (authorizationCode != null) {
                     // Get Access & Refresh Tokens
@@ -214,6 +210,9 @@ public class AuthenticatorService {
         responseBean.setTokenValid(true);
         if (accessTokenInfo.getIdToken() != null) {
             responseBean.setAuthUser(getUsernameFromJWT(accessTokenInfo.getIdToken()));
+        }
+        if (responseBean.getAuthUser() == null) {
+            responseBean.setAuthUser("admin");
         }
         responseBean.setScopes(accessTokenInfo.getScopes());
         responseBean.setType(AuthenticatorConstants.BEARER_PREFIX);

@@ -34,6 +34,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import javax.ws.rs.core.MediaType;
@@ -61,8 +62,10 @@ public class FunctionTriggerTestCase {
         ZonedDateTime eventTime = ZonedDateTime.now();
 
         Mockito.when(functionDAO.getUserFunctionsForEvent(USER_NAME, event)).thenReturn(functions);
-        Mockito.when(restCallUtil.postRequest(Mockito.eq(function.getEndpointURI()), Mockito.eq(null), Mockito.eq(null),
-                Mockito.any(), Mockito.eq(MediaType.APPLICATION_JSON_TYPE))).thenReturn(response);
+        Mockito.when(restCallUtil
+                .postRequest(Mockito.eq(function.getEndpointURI()), Mockito.eq(null), Mockito.eq(null), Mockito.any(),
+                        Mockito.eq(MediaType.APPLICATION_JSON_TYPE), Mockito.eq(Collections.emptyMap())))
+                .thenReturn(response);
         functionTrigger.captureEvent(event, USER_NAME, eventTime, new HashMap<>());
 
         //Error path

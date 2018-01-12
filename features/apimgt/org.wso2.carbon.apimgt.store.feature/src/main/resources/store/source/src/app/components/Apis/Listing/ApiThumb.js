@@ -103,7 +103,7 @@ class ApiThumb extends React.Component {
                                 More...
                             </Button>
                         </Link>
-                        <Dialog open={this.state.openUserMenu} transition={Slide} onRequestClose={this.handleRequestClose}>
+                        <Dialog open={this.state.openUserMenu} transition={Slide} onClose={this.handleRequestClose}>
                             <DialogTitle>
                                 {"Use Google's location service?"}
                             </DialogTitle>

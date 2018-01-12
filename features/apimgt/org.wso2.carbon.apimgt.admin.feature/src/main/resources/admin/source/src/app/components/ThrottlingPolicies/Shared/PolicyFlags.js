@@ -110,7 +110,7 @@
                 id="lock-menu"
                 anchorEl={this.state.anchorElBilling}
                 open={this.state.openBilling}
-                onRequestClose={this.handleBillingRequestClose}
+                onClose={this.handleBillingRequestClose}
               >
                 {billingOptions.map((option, index) => (
                   <MenuItem

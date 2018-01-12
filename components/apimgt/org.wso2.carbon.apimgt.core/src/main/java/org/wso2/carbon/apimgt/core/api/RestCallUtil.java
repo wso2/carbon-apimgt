@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.core.models.HttpResponse;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
@@ -90,11 +91,12 @@ public interface RestCallUtil {
      * @param cookies            List of cookies to be added with the request, if any
      * @param entity             Entity which needs to be sent to the service with the POST request
      * @param payloadContentType MediaType of the payload added in the request
+     * @param headers            additional header key/value map
      * @return HttpResponse from service
      * @throws APIManagementException In case of any failures, when trying to make a POST request
      */
     HttpResponse postRequest(URI uri, MediaType acceptContentType, List<String> cookies, Entity entity,
-                             MediaType payloadContentType) throws APIManagementException;
+            MediaType payloadContentType, Map<String, String> headers) throws APIManagementException;
 
     /**
      * Http PUT request.

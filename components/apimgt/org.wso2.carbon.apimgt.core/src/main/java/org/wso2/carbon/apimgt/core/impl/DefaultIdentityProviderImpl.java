@@ -42,17 +42,26 @@ import org.wso2.carbon.apimgt.core.auth.dto.SCIMUser;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
+import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
+import org.wso2.carbon.apimgt.core.models.API;
+import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
+import org.wso2.carbon.apimgt.core.models.AccessTokenRequest;
+import org.wso2.carbon.apimgt.core.models.KeyManagerConfiguration;
+import org.wso2.carbon.apimgt.core.models.OAuthAppRequest;
+import org.wso2.carbon.apimgt.core.models.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.core.models.Scope;
 import org.wso2.carbon.apimgt.core.models.User;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * API Manager default implementation of {@link IdentityProvider}
  */
-public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implements IdentityProvider {
+public class DefaultIdentityProviderImpl implements IdentityProvider {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultIdentityProviderImpl.class);
 
@@ -76,7 +85,6 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
                                 OAuth2ServiceStubs oAuth2ServiceStubs, ScopeRegistrationServiceStub
                                         scopeRegistrationServiceStub) throws
             APIManagementException {
-        super(dcrmServiceStub, oAuth2ServiceStubs, scopeRegistrationServiceStub);
         this.scimServiceStub = scimServiceStub;
     }
 
@@ -364,4 +372,96 @@ public class DefaultIdentityProviderImpl extends DefaultKeyManagerImpl implement
         return errorMessage.toString();
     }
 
+    @Override
+    public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest)
+            throws KeyManagementException {
+        return APIManagerFactory.getInstance().getKeyManager().createApplication(oauthAppRequest);
+    }
+
+    @Override
+    public OAuthApplicationInfo updateApplication(OAuthApplicationInfo oAuthApplicationInfo)
+            throws KeyManagementException {
+        return APIManagerFactory.getInstance().getKeyManager().updateApplication(oAuthApplicationInfo);
+    }
+
+    @Override
+    public void deleteApplication(String consumerKey) throws KeyManagementException {
+        APIManagerFactory.getInstance().getKeyManager().deleteApplication(consumerKey);
+    }
+
+    @Override
+    public OAuthApplicationInfo retrieveApplication(String consumerKey) throws KeyManagementException {
+        return APIManagerFactory.getInstance().getKeyManager().retrieveApplication(consumerKey);
+    }
+
+    @Override
+    public AccessTokenInfo getNewAccessToken(AccessTokenRequest tokenRequest) throws KeyManagementException {
+        return APIManagerFactory.getInstance().getKeyManager().getNewAccessToken(tokenRequest);
+    }
+
+    @Override
+    public AccessTokenInfo getTokenMetaData(String accessToken) throws KeyManagementException {
+        return APIManagerFactory.getInstance().getKeyManager().getTokenMetaData(accessToken);
+    }
+
+    @Override
+    public KeyManagerConfiguration getKeyManagerConfiguration() throws KeyManagementException {
+        return APIManagerFactory.getInstance().getKeyManager().getKeyManagerConfiguration();
+    }
+
+    @Override
+    public void revokeAccessToken(String accessToken, String clientId, String clientSecret)
+            throws KeyManagementException {
+        APIManagerFactory.getInstance().getKeyManager().revokeAccessToken(accessToken, clientId, clientSecret);
+    }
+
+    @Override
+    public void loadConfiguration(KeyManagerConfiguration configuration) throws KeyManagementException {
+        APIManagerFactory.getInstance().getKeyManager().loadConfiguration(configuration);
+    }
+
+    @Override
+    public boolean registerNewResource(API api, Map resourceAttributes) throws KeyManagementException {
+        return APIManagerFactory.getInstance().getKeyManager().registerNewResource(api, resourceAttributes);
+    }
+
+    @Override
+    public Map getResourceByApiId(String apiId) throws KeyManagementException {
+        return APIManagerFactory.getInstance().getKeyManager().getResourceByApiId(apiId);
+    }
+
+    @Override
+    public boolean updateRegisteredResource(API api, Map resourceAttributes) throws KeyManagementException {
+        return APIManagerFactory.getInstance().getKeyManager().updateRegisteredResource(api, resourceAttributes);
+    }
+
+    @Override
+    public void deleteRegisteredResourceByAPIId(String apiID) throws KeyManagementException {
+        APIManagerFactory.getInstance().getKeyManager().deleteRegisteredResourceByAPIId(apiID);
+    }
+
+    @Override
+    public void deleteMappedApplication(String consumerKey) throws KeyManagementException {
+        APIManagerFactory.getInstance().getKeyManager().deleteMappedApplication(consumerKey);
+    }
+
+    @Override
+    public boolean registerScope(Scope scope) throws KeyManagementException {
+        return APIManagerFactory.getInstance().getKeyManager().registerScope(scope);
+    }
+
+    @Override
+    public Scope retrieveScope(String name) throws KeyManagementException {
+        return APIManagerFactory.getInstance().getKeyManager().retrieveScope(name);
+    }
+
+    @Override
+    public boolean updateScope(Scope scope) throws KeyManagementException {
+        return APIManagerFactory.getInstance().getKeyManager().updateScope(scope);
+    }
+
+    @Override
+    public boolean deleteScope(String name) throws KeyManagementException {
+        return APIManagerFactory.getInstance().getKeyManager().deleteScope(name);
+    }
 }

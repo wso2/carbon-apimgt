@@ -3,21 +3,25 @@ html, body {
 }
 
 .login-flex-container {
-    border: 1px solid #ccc;
     display: flex;
     flex-direction: column;
     height: 100%;
+    background: #efefef;
+    margin: auto;
 }
 .login-flex-container .login-main-content {
-    background: #efefef;
     flex: 1;
-    display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
 }
+.login-flex-container .login-main-content > div{
+
+}
+.login-flex-container .login-main-content .branding {
+    padding:20px;
+    background: none;
+}
 .login-flex-container .login-main-content .login-form {
-    width: 450px;
-    min-height: 500px;
     padding:20px;
 }
 .login-flex-container .login-footer {
@@ -30,10 +34,18 @@ html, body {
 }
 .brand{
     width:100px;
+    float: right;
+}
+.login-paper{
+    border-left: 2px solid #f17a20;
 }
 #react-root{
     height: 100%;
 }
+.login-form-submit{
+    margin-right: 4px;
+}
+
 @media (max-width: 601px){
     .login-flex-container .login-main-content .login-form {
         width: 100%;

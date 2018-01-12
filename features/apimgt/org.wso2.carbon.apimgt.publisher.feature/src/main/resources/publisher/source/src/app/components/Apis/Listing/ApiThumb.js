@@ -32,17 +32,23 @@ import Dialog, {
 import Slide from 'material-ui/transitions/Slide';
 import Grid from 'material-ui/Grid';
 import DeleteIcon from 'material-ui-icons/Delete';
+import NotificationSystem from 'react-notification-system';
+import {ScopeValidation ,resourceMethod, resourcePath} from "../../../data/ScopeValidation";
 
 
 class ApiThumb extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {active: true, loading: false, open: false};
+        this.state = {active: true, loading: false, open: false, openUserMenu: false};
         this.handleApiDelete = this.handleApiDelete.bind(this);
     }
 
     handleRequestClose = () => {
         this.setState({ openUserMenu: false });
+    };
+
+    handleRequestOpen = () => {
+        this.setState({ openUserMenu: true });
     };
 
     handleApiDelete(e) {
@@ -55,11 +61,17 @@ class ApiThumb extends React.Component {
             response => {
                 if (response.status !== 200) {
                     console.log(response);
-                    message.error("Something went wrong while deleting the " + name + " API!");
-                    this.setState({open: false});
+                    this.refs.notificationSystem.addNotification( {
+                        message: 'Something went wrong while deleting the ' + name + ' API!', position: 'tc',
+                        level: 'error'
+                    });
+                    this.setState({open: false, openUserMenu: false});
                     return;
                 }
-                message.success(name + " API deleted successfully!");
+                this.refs.notificationSystem.addNotification( {
+                    message: name + ' API deleted Successfully', position: 'tc', level: 'success'
+                });
+                this.props.updateApi(api_uuid);
                 this.setState({active: false, loading: false});
             }
         );
@@ -72,7 +84,7 @@ class ApiThumb extends React.Component {
             return null;
         }
         return (
-            <Grid item xs={12} sm={6} md={3} lg={2} xl={2}>
+            <Grid item xs={6} sm={4} md={3} lg={2} xl={2}>
                 <Card>
                     <CardMedia image="/publisher/public/app/images/api/api-default.png">
                         <img src="/publisher/public/app/images/api/api-default.png" style={{width:"100%"}}/>
@@ -93,9 +105,14 @@ class ApiThumb extends React.Component {
                                 More...
                             </Button>
                         </Link>
-                        <Dialog open={this.state.openUserMenu} transition={Slide} onRequestClose={this.handleRequestClose}>
+                        <ScopeValidation resourcePath={resourcePath.SINGLE_API}
+                                         resourceMethod={resourceMethod.DELETE}>
+                            <Button dense color="primary" onClick={this.handleRequestOpen}>Delete</Button>
+                        </ScopeValidation>
+                        <Dialog open={this.state.openUserMenu} transition={Slide}
+                                onRequestClose={this.handleRequestClose}>
                             <DialogTitle>
-                                {"Use Google's location service?"}
+                                {"Confirm"}
                             </DialogTitle>
                             <DialogContent>
                                 <DialogContentText>
@@ -103,14 +120,14 @@ class ApiThumb extends React.Component {
                                 </DialogContentText>
                             </DialogContent>
                             <DialogActions>
-                                <Button onClick={this.handleRequestClose} color="primary">
+                                <Button dense color="primary" onClick={this.handleApiDelete}>
+                                    <NotificationSystem ref="notificationSystem"/>Delete
+                                </Button>
+                                <Button dense color="primary" onClick={this.handleRequestClose}>
                                     Cancel
                                 </Button>
-                                //todo:Delete button should be enabled after M6 based on permission model
                             </DialogActions>
                         </Dialog>
-
-
                     </CardActions>
                 </Card>
             </Grid>

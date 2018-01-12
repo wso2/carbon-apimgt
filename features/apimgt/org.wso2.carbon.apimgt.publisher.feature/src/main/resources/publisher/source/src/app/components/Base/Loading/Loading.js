@@ -17,23 +17,14 @@
  */
 
 import React from 'react'
-import PropTypes from 'prop-types'
-import {Spin, Row, Col} from 'antd'
+import {CircularProgress} from "material-ui/Progress";
 
 const LoadingAnimation = (props) => {
     return (
-        <Row type="flex" justify="center" align="middle">
-            <Col span={24} style={{textAlign: "center"}}>
-                <Spin spinning={true} size="large"/>
-            </Col>
-        </Row>
+        <div>
+            <CircularProgress style={{margin: "auto", display: "block"}}/>
+        </div>
     );
 };
 
-LoadingAnimation.propTypes = {
-    message: PropTypes.string
-};
-LoadingAnimation.defaultProps = {
-    message: "Loading . . ."
-};
 export default LoadingAnimation

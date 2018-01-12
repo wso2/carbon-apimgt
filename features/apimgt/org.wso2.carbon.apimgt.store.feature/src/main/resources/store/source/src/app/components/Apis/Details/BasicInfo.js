@@ -38,6 +38,7 @@ import Select from 'material-ui/Select';
 import 'react-select/dist/react-select.css';
 import Subscriptions  from 'material-ui-icons/Subscriptions';
 import {FormControl} from 'material-ui/Form';
+import NotificationSystem from 'react-notification-system';
 
 const styles = theme => ({
     fullWidth: {
@@ -197,6 +198,14 @@ class BasicInfo extends Component {
         this.setState({[name]: event.target.value});
     };
 
+    addNotifications() {
+        this.refs.notificationSystem.addNotification( {
+            message: 'Subscribe to API successfully',
+            position: 'tc',
+            level: 'success'
+        });
+    };
+
     createSubscription = (e) => {
         e.preventDefault();
         let apiId = this.api_uuid;
@@ -206,6 +215,9 @@ class BasicInfo extends Component {
         let promised_subscribe = api.subscribe(apiId, applicationId, policy);
         promised_subscribe.then(response => {
             console.log("Subscription created successfully with ID : " + response.body.subscriptionId);
+            this.addNotifications();
+            let applications = this.state.options.filter(application => applicationId !== application.value );
+            this.setState({options: applications});
         }).catch(error => {
                 console.log("Error while creating the subscription.");
                 console.error(error);
@@ -380,6 +392,7 @@ class BasicInfo extends Component {
                             <br />
                             <Button onClick={this.createSubscription} raised color="primary"
                                     style={{paddingTop: '20px'}}>
+                                <NotificationSystem ref="notificationSystem"/>
                                 <Subscriptions style={{paddingRight: '10px'}}/> Subscribe
                             </Button>
 

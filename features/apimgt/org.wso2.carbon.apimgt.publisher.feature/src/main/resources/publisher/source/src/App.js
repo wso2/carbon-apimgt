@@ -47,10 +47,29 @@ const Logout = () => import(/* webpackChunkName: "logout" */ './app/components/L
 class Protected extends Component {
     constructor(props) {
         super(props);
-        this.state = {showLeftMenu: false};
+        this.state = {
+            showLeftMenu: false,
+            authConfigs: null
+        };
         message.config({top: '48px'}); // .custom-header height + some offset
         /* TODO: need to fix the header to avoid conflicting with messages ~tmkb*/
     }
+
+    handleResponse = (response) => {
+        this.setState({
+            authConfigs: response.data.members
+        });
+    };
+
+    /**
+     * Handle invalid login url in localStorage - environment object
+     * @param reject
+     */
+    handleReject = reject => {
+        console.log("Error: Single Sign On:\n", reject);
+        Utils.setEnvironment(); //Set Default environment
+        Axios.get(Utils.getAppLoginURL()).then(this.handleResponse); //Try login
+    };
 
     /**
      * Change the visibility state of left side navigation menu bar
