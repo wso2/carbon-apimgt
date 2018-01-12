@@ -27,6 +27,7 @@ import Api from '../../../data/api'
 import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation'
 import ApiPermissionValidation from '../../../data/ApiPermissionValidation'
 
+import Dialog, {DialogActions, DialogContent, DialogContentText, DialogTitle} from 'material-ui/Dialog';
 import Paper from 'material-ui/Paper';
 import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
@@ -35,17 +36,21 @@ import Card, {CardActions, CardContent, CardMedia} from 'material-ui/Card';
 import Table, {TableBody, TableCell, TableRow} from 'material-ui/Table';
 import blueGrey from 'material-ui/colors/blueGrey';
 import {Delete, Edit, CreateNewFolder, Description}from 'material-ui-icons';
+import Slide from "material-ui/transitions/Slide";
 
 class Overview extends Component {
     constructor(props) {
         super(props);
         this.state = {
             api: null,
-            notFound: false
+            notFound: false,
+            openMenu: false
         };
         this.api_uuid = this.props.match.params.api_uuid;
         this.downloadWSDL = this.downloadWSDL.bind(this);
         this.handleApiDelete = this.handleApiDelete.bind(this);
+        this.handleRequestClose = this.handleRequestClose.bind(this);
+        this.handleRequestOpen = this.handleRequestOpen.bind(this);
     }
 
     componentDidMount() {
@@ -67,6 +72,14 @@ class Overview extends Component {
             }
         );
     }
+
+    handleRequestClose() {
+        this.setState({ openMenu: false });
+    };
+
+    handleRequestOpen() {
+        this.setState({ openMenu: true });
+    };
 
     handleApiDelete(e) {
         this.setState({loading: true});
@@ -153,14 +166,30 @@ class Overview extends Component {
                             <ApiPermissionValidation
                                 checkingPermissionType={ApiPermissionValidation.permissionType.DELETE}
                                 userPermissions={this.state.api.userPermissionsForApi}>
-                                <Popconfirm title="Do you want to delete this api?"
-                                            onConfirm={this.handleApiDelete}>
-                                    <Button color="accent" aria-owns="simple-menu" aria-haspopup="true">
+                                    <Button onClick={this.handleRequestOpen} color="accent" aria-owns="simple-menu"
+                                            aria-haspopup="true">
                                         <Delete /> Delete
                                     </Button>
-                                </Popconfirm>
                             </ApiPermissionValidation>
                         </ScopeValidation>
+                                <Dialog open={this.state.openMenu} transition={Slide}>
+                                    <DialogTitle>
+                                        {"Confirm"}
+                                    </DialogTitle>
+                                    <DialogContent>
+                                        <DialogContentText>
+                                            Are you sure you want to delete the API ({api.name} - {api.version})?
+                                        </DialogContentText>
+                                    </DialogContent>
+                                    <DialogActions>
+                                        <Button dense color="primary" onClick={this.handleApiDelete}>
+                                            Delete
+                                        </Button>
+                                        <Button dense color="primary" onClick={this.handleRequestClose}>
+                                            Cancel
+                                        </Button>
+                                    </DialogActions>
+                                </Dialog>
                         {/* allowing to create new version based on scopes */}
                         <ScopeValidation resourcePath={resourcePath.API_COPY} resourceMethod={resourceMethod.POST}>
                             <Button aria-owns="simple-menu" aria-haspopup="true">
