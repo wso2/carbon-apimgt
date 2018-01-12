@@ -42,6 +42,9 @@ const config = {
             }
         ]
     },
+    externals: {
+        Config: "Configurations"
+    },
     plugins: []
 };
 
