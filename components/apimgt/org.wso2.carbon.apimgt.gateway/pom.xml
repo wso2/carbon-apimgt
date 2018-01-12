@@ -147,10 +147,6 @@
             <artifactId>org.wso2.carbon.apimgt.usage.publisher</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.carbon.mediation</groupId>
-            <artifactId>org.wso2.carbon.identity.entitlement.mediator</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
             <scope>test</scope>
