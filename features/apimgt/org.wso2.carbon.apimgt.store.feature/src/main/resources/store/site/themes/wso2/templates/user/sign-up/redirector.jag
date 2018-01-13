@@ -19,7 +19,15 @@ var site = require("/site/conf/site.json");
 	}else{
 		queryString = "?tenant="+tenant;
 	}
-	
+
+	var redirectURL = null ;
+  //If we use a custom domain mapping we will not use the context.
+	if (site.reverseProxy.tenantHeader != null && request.getHeader(site.reverseProxy.tenantHeader) != null) {
+		redirectURL = jagg.getHttpsUrl("/");
+	} else {
+		redirectURL = openRedirectValidation(request.getParameter("redirectToHome")) + queryString;
+	}
+
     session.put("showLogin", "true");
-    response.sendRedirect(openRedirectValidation(request.getParameter("redirectToHome")) + queryString);
+    response.sendRedirect(redirectURL);
 %>

@@ -191,7 +191,16 @@ if(jagg.isCSRFTokenValid())
             var wsdlUrl = request.getParameter("wsdl");
             if (wsdlUrl != null) {
                 if (!wsdlUrl.match(org.wso2.carbon.apimgt.impl.APIConstants.API_WSDL_RESOURCE_LOCATION)) {
-                    org.wso2.carbon.apimgt.impl.utils.APIUtil.isWSDL2Document(wsdlUrl);
+                    try {
+                        org.wso2.carbon.apimgt.impl.utils.APIUtil.isWSDL2Document(wsdlUrl);
+                    } catch (e) {
+                        obj = {
+                            error:true,
+                            message:"Please enter a valid WSDL URL"
+                        };
+                        print(obj);
+                        return;
+                    }
                 }
             }
 
