@@ -1,0 +1,3 @@
+var Configurations = {
+    defaultColor: "red"
+};
