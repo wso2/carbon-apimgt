@@ -350,6 +350,8 @@
     "Please select at least one transport.": "Please select at least one transport.",
     "Please specify a production or sandbox endpoint.": "Please specify a production or sandbox endpoint.",
     "Please use a valid WSDL endpoint": "Please use a valid WSDL endpoint",
+    "Please use a valid swagger file": "Please use a valid swagger file",
+    "Please use a valid swagger url": "Please use a valid swagger url",
     "Policy": "Policy",
     "Produces": "Produces",
     "Production & Sandbox": "Production & Sandbox",

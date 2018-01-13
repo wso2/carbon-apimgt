@@ -54,8 +54,51 @@ $( document ).ready(function() {
             }, dataType: 'json'
         });
     });
-    
+
+    $('#swagger-file').change(function () {
+        $('.swaggerFileError').hide();
+        $('#swagger-file').removeClass('error');
+    });
+
+    $('#swagger-file').keyup(function () {
+        $('.swaggerFileError').hide();
+        $('#swagger-file').removeClass('error');
+        if ($('#swagger-file').val().length != 0) {
+            $('#startFromExistingAPI').removeAttr("disabled");
+        }
+    });
+
+    $('#swagger-url').change(function () {
+        $('.swaggerUrlError').hide();
+        $('#swagger-url').removeClass('error');
+    });
+
+    $('#swagger-url').keyup(function () {
+        $('.swaggerUrlError').hide();
+        $('#swagger-url').removeClass('error');
+        if ($('#swagger-url').val().length != 0) {
+            $('#startFromExistingAPI').removeAttr("disabled");
+        }
+    });
+
     $("#startFromExistingAPI").click(function(){
+        var importDefinition = $("input[name=import-definition]:checked").val();
+        var swaggerUrl = $('#swagger-url').val();
+        var swaggerFile = $('#swagger-file').val();
+        if (importDefinition == "swagger-file") {
+            if (swaggerFile.trim() == "") {
+                $('#swagger-file').addClass('error');
+                $('.swaggerFileError').show();
+                return;
+            }
+        } else {
+            if (swaggerUrl.trim() == "") {
+                $('#swagger-url').addClass('error');
+                $('.swaggerUrlError').show();
+                return;
+            }
+        }
+
         var btn = $(this);
         $(btn).buttonLoader('start');
         $('#startFromExistingAPI-form').ajaxSubmit({
@@ -104,13 +147,11 @@ $( document ).ready(function() {
 
     $("#startFromExistingSOAPEndpoint").click(function(){
         var wsdlURL = $('#wsdl-url').val();
-        if(wsdlURL!=""){
-            if (wsdlURL.toLowerCase().indexOf("wsdl") < 0) {
+        if (wsdlURL.trim() == "" || wsdlURL.toLowerCase().indexOf("wsdl") < 0) {
                 $('#wsdl-url').addClass('error');
                 $('.wsdlError').show();
                 console.log("Wrong endpoint.");
                 return;
-            }
         }
 
         var btn = $(this);
