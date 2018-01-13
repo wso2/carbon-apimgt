@@ -29,5 +29,5 @@ var site = require("/site/conf/site.json");
 	}
 
     session.put("showLogin", "true");
-	response.sendRedirect(redirectURL);
+    response.sendRedirect(redirectURL);
 %>
