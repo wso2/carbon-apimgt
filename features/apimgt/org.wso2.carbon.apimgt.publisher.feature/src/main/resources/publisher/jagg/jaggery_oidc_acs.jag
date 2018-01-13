@@ -45,13 +45,18 @@
     var api = jagg.module("api");
 
     var isUserCreatePermitted = api.hasUserPermissions(oidcRelyingParty.getLoggedInUser(sessionId));
-    isUserCreatePermitted = {permitted: true};
+
 
     //First check whether user is having sufficent permissions [create/publish]
     if (isUserCreatePermitted.permitted) {
         jagg.setUser({username: oidcRelyingParty.getLoggedInUser(sessionId), cookie: null});
         session.put("LOGGED_IN_USER", oidcRelyingParty.getLoggedInUser(sessionId));
+    } else {
+       oidcRelyingParty.invalidateSessionBySessionId(sessionId);
+       response.sendRedirect("../site/pages/error-pages/403.html");
+       return;
     }
+
     var isCreatePermitted = api.hasCreatePermission();
     var isPublishPermitted = api.hasPublishPermission();
     var showStoreURL = api.showStoreURL();
