@@ -16,6 +16,13 @@
 img.brand{
     width: 100px;
 }
+.footer-logo{
+    text-align: center;
+    width: 39px;
+    color: #333;
+    vertical-align: middle;
+    padding-bottom: 3px;
+}
 .MuiDrawer-docked-101 .MuiDrawer-paper-96{
     background: rgb(236,239,241);
 }
