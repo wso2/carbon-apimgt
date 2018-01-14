@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.APIEndpointURLsDTO;
 
@@ -64,6 +63,9 @@ public class APIDTO  {
   private String thumbnailUrl = null;
   
   
+  private Map<String, String> additionalProperties = new HashMap<String, String>();
+  
+  
   private List<APIEndpointURLsDTO> endpointURLs = new ArrayList<APIEndpointURLsDTO>();
   
   
@@ -72,8 +74,6 @@ public class APIDTO  {
   private String lastUpdatedTime = null;
 
   private String createdTime = null;
-
-  private Map<String, String> additionalProperties = new HashMap<>();
 
   /**
   * gets and sets the lastUpdatedTime for APIDTO
@@ -279,6 +279,19 @@ public class APIDTO  {
 
   
   /**
+   * Custom(user defined) properties of API\n
+   **/
+  @ApiModelProperty(value = "Custom(user defined) properties of API\n")
+  @JsonProperty("additionalProperties")
+  public Map<String, String> getAdditionalProperties() {
+    return additionalProperties;
+  }
+  public void setAdditionalProperties(Map<String, String> additionalProperties) {
+    this.additionalProperties = additionalProperties;
+  }
+
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("endpointURLs")
@@ -301,17 +314,7 @@ public class APIDTO  {
     this.businessInformation = businessInformation;
   }
 
-  /**
-   * Custom properties of API
-   */
-  @ApiModelProperty(value = "Custom properties for the API")
-  @JsonProperty("additionalProperties")
-  public Map<String, String> getAdditionalProperties() {
-    return additionalProperties;
-  }
-  public void setAdditionalProperties(Map<String, String> additionalProperties) {
-    this.additionalProperties = additionalProperties;
-  }
+  
 
   @Override
   public String toString()  {
@@ -332,6 +335,7 @@ public class APIDTO  {
     sb.append("  tags: ").append(tags).append("\n");
     sb.append("  tiers: ").append(tiers).append("\n");
     sb.append("  thumbnailUrl: ").append(thumbnailUrl).append("\n");
+    sb.append("  additionalProperties: ").append(additionalProperties).append("\n");
     sb.append("  endpointURLs: ").append(endpointURLs).append("\n");
     sb.append("  businessInformation: ").append(businessInformation).append("\n");
     sb.append("}\n");

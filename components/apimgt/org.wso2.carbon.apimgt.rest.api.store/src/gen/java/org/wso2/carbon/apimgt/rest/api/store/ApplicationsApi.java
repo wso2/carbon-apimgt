@@ -1,44 +1,27 @@
-/*
- *  Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *  http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- *
- */
-
 package org.wso2.carbon.apimgt.rest.api.store;
 
-import io.swagger.annotations.ApiOperation;
+import org.wso2.carbon.apimgt.rest.api.store.dto.*;
+import org.wso2.carbon.apimgt.rest.api.store.ApplicationsApiService;
+import org.wso2.carbon.apimgt.rest.api.store.factories.ApplicationsApiServiceFactory;
+
 import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+
+import org.wso2.carbon.apimgt.rest.api.store.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ApplicationListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.dto.ScopeListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.factories.ApplicationsApiServiceFactory;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import java.util.List;
+
+import java.io.InputStream;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.apache.cxf.jaxrs.ext.multipart.Multipart;
+
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.*;
 
 @Path("/applications")
 @Consumes({ "application/json" })
@@ -137,7 +120,8 @@ public class ApplicationsApi  {
 
     public Response applicationsApplicationIdKeysKeyTypePut(@ApiParam(value = "Application Identifier consisting of the UUID of the Application.\n",required=true ) @PathParam("applicationId")  String applicationId,
     @ApiParam(value = "**Application Key Type** standing for the type of the keys (i.e. Production or Sandbox).\n",required=true, allowableValues="{values=[PRODUCTION, SANDBOX]}" ) @PathParam("keyType")  String keyType,
-    @ApiParam(value = "Grant types/Callback URL update request object\n" ,required=true ) ApplicationKeyDTO body)
+    @ApiParam(value = "Grant types/Callback URL update request object\n" ,required=true ) @NotNull ApplicationKeyDTO
+body)
     {
     return delegate.applicationsApplicationIdKeysKeyTypePut(applicationId,keyType,body);
     }
@@ -161,7 +145,8 @@ public class ApplicationsApi  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met.\n") })
 
     public Response applicationsApplicationIdPut(@ApiParam(value = "Application Identifier consisting of the UUID of the Application.\n",required=true ) @PathParam("applicationId")  String applicationId,
-    @ApiParam(value = "Application object that needs to be updated\n" ,required=true ) ApplicationDTO body,
+    @ApiParam(value = "Application object that needs to be updated\n" ,required=true ) @NotNull ApplicationDTO
+body,
     @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future).\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
@@ -188,7 +173,8 @@ public class ApplicationsApi  {
         @io.swagger.annotations.ApiResponse(code = 412, message = "Precondition Failed.\nThe request has not been performed because one of the preconditions is not met (Will be supported in future).\n") })
 
     public Response applicationsGenerateKeysPost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application.\n",required=true) @QueryParam("applicationId")  String applicationId,
-    @ApiParam(value = "Application object the keys of which are to be generated\n" ,required=true ) ApplicationKeyGenerateRequestDTO body,
+    @ApiParam(value = "Application object the keys of which are to be generated\n" ,required=true ) @NotNull ApplicationKeyGenerateRequestDTO
+body,
     @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType,
     @ApiParam(value = "Validator for conditional requests; based on ETag.\n"  )@HeaderParam("If-Match") String ifMatch,
     @ApiParam(value = "Validator for conditional requests; based on Last Modified header (Will be supported in future).\n"  )@HeaderParam("If-Unmodified-Since") String ifUnmodifiedSince)
@@ -242,7 +228,8 @@ public class ApplicationsApi  {
         
         @io.swagger.annotations.ApiResponse(code = 415, message = "Unsupported media type.\nThe entity of the request was in a not supported format.\n") })
 
-    public Response applicationsPost(@ApiParam(value = "Application object that is to be created.\n" ,required=true ) ApplicationDTO body,
+    public Response applicationsPost(@ApiParam(value = "Application object that is to be created.\n" ,required=true ) @NotNull ApplicationDTO
+body,
     @ApiParam(value = "Media type of the entity in the body. Default is application/json.\n" ,required=true , defaultValue="application/json")@HeaderParam("Content-Type") String contentType)
     {
     return delegate.applicationsPost(body,contentType);
@@ -252,40 +239,33 @@ public class ApplicationsApi  {
     {
         return delegate.applicationsPostGetLastUpdatedTime(body,contentType);
     }
-
     @GET
     @Path("/scopes/{applicationId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get scopes associated with a particular application based on subscribed APIs ",
-            notes = "Get scopes associated with a particular application based on subscribed APIs ",
-            response = ScopeListDTO.class, tags={ "Application" })
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK. Scope returned. ", response = ScopeListDTO.class),
-            @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest "
-                    + "version of the requested resource. ", response = ScopeListDTO.class),
-            @ApiResponse(code = 401, message = "Un authorized. The user is not authorized to view the application . ",
-                    response = ScopeListDTO.class),
-            @ApiResponse(code = 404, message = "Not Found. Requested application does not exist. ",
-                    response = ScopeListDTO.class),
-            @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported ",
-                    response = ScopeListDTO.class) })
-    public Response applicationsScopesApplicationIdGet(
-            @ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true)
-            @PathParam("applicationId") String applicationId,
-            @ApiParam(value = "Filter user by roles. ")
-            @QueryParam("filterByUserRoles") boolean filterByUserRoles,
-            @ApiParam(value = "Media types acceptable for the response. Default is application/json. " ,
-                    defaultValue="application/json")
-            @HeaderParam("Accept") String accept,
-            @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant "
-                    + "of the resource. " )
-            @HeaderParam("If-None-Match") String ifNoneMatch,
-            @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the formerly "
-                    + "retrieved variant of the resource (Will be supported in future). " )
-            @HeaderParam("If-Modified-Since") String ifModifiedSince) {
-     return delegate.applicationsApplicationScopesGet(applicationId, filterByUserRoles, accept, ifNoneMatch,
-             ifModifiedSince);
+    @io.swagger.annotations.ApiOperation(value = "Get scopes associated with a particular application based on subscribed APIs\n", notes = "Get scopes associated with a particular application based on subscribed APIs\n", response = ScopeListDTO.class)
+    @io.swagger.annotations.ApiResponses(value = { 
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nScope returned.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 304, message = "Not Modified.\nEmpty body because the client has already the latest version of the requested resource.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 401, message = "Un authorized.\nThe user is not authorized to view the application .\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested application does not exist.\n"),
+        
+        @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
+
+    public Response applicationsScopesApplicationIdGet(@ApiParam(value = "Application Identifier consisting of the UUID of the Application.\n",required=true ) @PathParam("applicationId")  String applicationId,
+    @ApiParam(value = "Filter user by roles.\n") @QueryParam("filterByUserRoles")  Boolean filterByUserRoles,
+    @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved\nvariant of the resource.\n"  )@HeaderParam("If-None-Match") String ifNoneMatch,
+    @ApiParam(value = "Validator for conditional requests; based on Last Modified header of the\nformerly retrieved variant of the resource (Will be supported in future).\n"  )@HeaderParam("If-Modified-Since") String ifModifiedSince)
+    {
+    return delegate.applicationsScopesApplicationIdGet(applicationId,filterByUserRoles,ifNoneMatch,ifModifiedSince);
+    }
+
+    public String applicationsScopesApplicationIdGetGetLastUpdatedTime(String applicationId,Boolean filterByUserRoles,String ifNoneMatch,String ifModifiedSince)
+    {
+        return delegate.applicationsScopesApplicationIdGetGetLastUpdatedTime(applicationId,filterByUserRoles,ifNoneMatch,ifModifiedSince);
     }
 }
 
