@@ -1925,6 +1925,14 @@
                     "type": "string",
                     "example": ""
                 },
+                "additionalProperties": {
+                    "description": "Custom(user defined) properties of API\n",
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "example": {}
+                },
                 "endpointURLs": {
                     "type": "array",
                     "items": {

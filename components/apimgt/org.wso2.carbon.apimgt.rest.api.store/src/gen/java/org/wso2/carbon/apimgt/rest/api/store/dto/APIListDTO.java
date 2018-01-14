@@ -29,12 +29,13 @@ public class APIListDTO  {
   
   
   private List<APIInfoDTO> list = new ArrayList<APIInfoDTO>();
+  
+  
+  private APIListPaginationDTO pagination = null;
 
   private String lastUpdatedTime = null;
 
   private String createdTime = null;
-
-  private APIListPaginationDTO pagination = null;
 
   /**
   * gets and sets the lastUpdatedTime for APIListDTO
@@ -59,7 +60,7 @@ public class APIListDTO  {
     this.createdTime=createdTime;
   }
 
-
+  
   /**
    * Number of APIs returned.\n
    **/

@@ -47,11 +47,11 @@ import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationMappingUt
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Map;
+import javax.ws.rs.core.Response;
 
 /**
  * This is the service implementation class for Store application related operations
@@ -440,14 +440,13 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
      *
      * @param applicationId     Application Identifier.
      * @param filterByUserRoles Whether to filter scope by user roles.
-     * @param accept            accepted media type of the client
      * @param ifNoneMatch       If-None-Match header value
      * @param ifModifiedSince   If-Modified-Since header value.
      * @return the scopes
      */
     @Override
-    public Response applicationsApplicationScopesGet(String applicationId, boolean filterByUserRoles,
-            String accept,String ifNoneMatch, String ifModifiedSince) {
+    public Response applicationsScopesApplicationIdGet(String applicationId, Boolean filterByUserRoles,
+            String ifNoneMatch, String ifModifiedSince) {
         String userName = RestApiUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = RestApiUtil.getConsumer(userName);
@@ -458,8 +457,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
                 if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
-                    ScopeListDTO filteredScopes = RestAPIStoreUtils
-                            .getScopesForApplication(userName, application, filterByUserRoles);
+                    ScopeListDTO filteredScopes = RestAPIStoreUtils.getScopesForApplication(userName, application,
+                            ((filterByUserRoles != null) ? filterByUserRoles : false));
 
                     return Response.ok().entity(filteredScopes).build();
                 } else {
@@ -529,6 +528,12 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
 
     @Override
     public String applicationsPostGetLastUpdatedTime(ApplicationDTO body, String contentType) {
+        return null;
+    }
+
+    @Override
+    public String applicationsScopesApplicationIdGetGetLastUpdatedTime(String applicationId,
+            Boolean filterByUserRoles, String ifNoneMatch, String ifModifiedSince) {
         return null;
     }
 

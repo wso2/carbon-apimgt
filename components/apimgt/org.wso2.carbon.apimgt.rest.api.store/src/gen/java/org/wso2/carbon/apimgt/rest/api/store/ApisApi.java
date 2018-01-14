@@ -18,6 +18,7 @@ import java.io.InputStream;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.*;
 
@@ -200,7 +201,7 @@ public class ApisApi  {
     @Path("/generate-sdk/")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Generate SDK for an API\n", notes = "This operation can be used to generate SDK for an API by providing the id of the API along with the preferred language.\n\n`X-WSO2-Tenant` header can be used to retrive the generated SDK of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.\n\n**NOTE:**\n* This operation does not require an Authorization header by default. But in order to generate a restricted API's SDK, you need to provide Authorization header.\n", response = void.class)
+    @io.swagger.annotations.ApiOperation(value = "Generate SDK for an API\n", notes = "This operation can be used to generate SDK for an API by providing the id of the API along with the preferred language.\n", response = void.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSDK generated successfully.\n"),
         

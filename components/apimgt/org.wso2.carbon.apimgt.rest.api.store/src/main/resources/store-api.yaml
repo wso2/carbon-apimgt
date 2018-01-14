@@ -2053,8 +2053,12 @@ definitions:
         type: string
         example: ""
       additionalProperties:
+        description: |
+          Custom(user defined) properties of API
         type: object
-        description : Custom(user defined) properties of API
+        additionalProperties:
+          type: string
+        example: {}
       endpointURLs:
         type: array
         items:

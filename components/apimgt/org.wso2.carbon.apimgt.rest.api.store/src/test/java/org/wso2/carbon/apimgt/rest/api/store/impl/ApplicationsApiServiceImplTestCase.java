@@ -67,7 +67,7 @@ public class ApplicationsApiServiceImplTestCase {
         PowerMockito.doReturn(ADMIN_USERNAME).when(RestApiUtil.class, "getLoggedInUsername");
         PowerMockito.doReturn(apiConsumer).when(RestApiUtil.class, "getConsumer", ADMIN_USERNAME);
         Mockito.doReturn(null).when(apiConsumer).getApplicationByUUID(NON_EXISTING_APPLICATION);
-        applicationsApiService.applicationsApplicationScopesGet(NON_EXISTING_APPLICATION, false, null, null, null);
+        applicationsApiService.applicationsScopesApplicationIdGet(NON_EXISTING_APPLICATION, false, null, null);
     }
 
     /**
@@ -85,7 +85,7 @@ public class ApplicationsApiServiceImplTestCase {
         PowerMockito.doReturn(apiConsumer).when(RestApiUtil.class, "getConsumer", ADMIN_USERNAME);
         Mockito.doReturn(application).when(apiConsumer).getApplicationByUUID(NON_EXISTING_APPLICATION);
         PowerMockito.doReturn(false).when(RestAPIStoreUtils.class, "isUserAccessAllowedForApplication", application);
-        applicationsApiService.applicationsApplicationScopesGet(NON_EXISTING_APPLICATION, false, null, null, null);
+        applicationsApiService.applicationsScopesApplicationIdGet(NON_EXISTING_APPLICATION, false, null, null);
     }
 
     /**
@@ -102,7 +102,7 @@ public class ApplicationsApiServiceImplTestCase {
         PowerMockito.doReturn(apiConsumer).when(RestApiUtil.class, "getConsumer", ADMIN_USERNAME);
         Mockito.doReturn(application).when(apiConsumer).getApplicationByUUID(NON_EXISTING_APPLICATION);
         PowerMockito.doReturn(true).when(RestAPIStoreUtils.class, "isUserAccessAllowedForApplication", application);
-        applicationsApiService.applicationsApplicationScopesGet(NON_EXISTING_APPLICATION, false, null, null, null);
+        applicationsApiService.applicationsScopesApplicationIdGet(NON_EXISTING_APPLICATION, false, null, null);
         ScopeListDTO scopeListDTO = new ScopeListDTO();
         ApplicationScopeDTO applicationScopeDTO = new ApplicationScopeDTO();
         applicationScopeDTO.setKey("admin");
@@ -113,7 +113,7 @@ public class ApplicationsApiServiceImplTestCase {
                 .when(RestAPIStoreUtils.class, "getScopesForApplication", Mockito.anyString(),
                         Mockito.any(Application.class), Mockito.anyBoolean());
         Response response = applicationsApiService
-                .applicationsApplicationScopesGet(NON_EXISTING_APPLICATION, false, null, null, null);
+                .applicationsScopesApplicationIdGet(NON_EXISTING_APPLICATION, false, null, null);
         Assert.assertEquals("Scope retrieval did not succeed with the correct inputs", response.getStatus(),
                 Response.Status.OK.getStatusCode());
     }
@@ -128,13 +128,13 @@ public class ApplicationsApiServiceImplTestCase {
         PowerMockito.doThrow(new APIManagementException("error"))
                 .when(RestApiUtil.class, "getConsumer", ADMIN_USERNAME);
         Response response = applicationsApiService
-                .applicationsApplicationScopesGet(NON_EXISTING_APPLICATION, false, null, null, null);
+                .applicationsScopesApplicationIdGet(NON_EXISTING_APPLICATION, false, null, null);
         Assert.assertNull("API call succeeded for wrong inputs", response);
 
         PowerMockito.doThrow(new APIManagementException("MultiTenantUserAdmin"))
                 .when(RestApiUtil.class, "getConsumer", ADMIN_USERNAME);
         response = applicationsApiService
-                .applicationsApplicationScopesGet(NON_EXISTING_APPLICATION, false, null, null, null);
+                .applicationsScopesApplicationIdGet(NON_EXISTING_APPLICATION, false, null, null);
         Assert.assertNull("API call succeeded for wrong inputs", response);
     }
 
