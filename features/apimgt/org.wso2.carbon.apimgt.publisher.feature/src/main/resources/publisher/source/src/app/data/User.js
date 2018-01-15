@@ -88,6 +88,16 @@ export default class User {
     }
 
     /**
+     * Get the JS accessible refresh token fragment from cookie storage.
+     * @returns {String|null}
+     */
+    getRefreshPartialToken() {
+        //Append environment name to cookie
+        const environmentName = "_" + Utils.getEnvironment().label;
+        return Utils.getCookie(User.CONST.WSO2_AM_REFRESH_TOKEN_1 + environmentName);
+    }
+
+    /**
      * Store the JavaScript accessible access token segment in cookie storage
      * @param {String} newToken : Part of the access token which needs when accessing REST API
      * @param {Number} validityPeriod : Validity period of the cookie in seconds
@@ -115,7 +125,7 @@ export default class User {
     setExpiryTime(expireTime) {
         const currentTime = Date.now();
         const timeDiff = (1000 * expireTime);
-        localStorage.setItem(User.CONST.USER_EXPIRY_TIME, currentTime+timeDiff);
+        localStorage.setItem(User.CONST.USER_EXPIRY_TIME, currentTime + timeDiff);
         this.expiryTime = new Date(currentTime + timeDiff);
         return this.expiryTime;
     }
@@ -147,6 +157,7 @@ export default class User {
 User.CONST = {
     WSO2_AM_TOKEN_MSF4J: "WSO2_AM_TOKEN_MSF4J",
     WSO2_AM_TOKEN_1: "WSO2_AM_TOKEN_1",
+    WSO2_AM_REFRESH_TOKEN_1: "WSO2_AM_REFRESH_TOKEN_1",
     LOCALSTORAGE_USER: "wso2_user_publisher",
     USER_EXPIRY_TIME: "user_expiry_time"
 };

@@ -215,14 +215,14 @@ class AuthManager {
     }
 
     static refresh() {
-        const authHeader = "Bearer " + AuthManager.getUser().getPartialToken();
+        const authHeader = "Bearer " + AuthManager.getUser().getRefreshPartialToken();
         let params = {
             grant_type: 'refresh_token',
             validity_period: -1,
             scopes: AuthManager.CONST.USER_SCOPES
         };
         let referrer = (document.referrer.indexOf("https") !== -1) ? document.referrer : null;
-        let url = '/login/token/' + Utils.CONST.CONTEXT_PATH;
+        let url = '/login/token' + Utils.CONST.CONTEXT_PATH;
         /* TODO: Fetch this from configs ~tmkb*/
         let headers = {
             'Authorization': authHeader,
