@@ -50,6 +50,10 @@ for(var i=0;i < outputs.tiers.length; i++){
        <div class="col-sm-9 " style="width: 200px">
          <%
             var groupId = encode.forHtml(application.groupId).replace(/,/g," ");
+
+            if (groupId == "" || groupId == "null") {
+                groupId = i18n.localize("No groups assigned");
+            }
          %>
          <p class="form-control-static" style="width: 100%"><span style="font-weight: bold;"><%= encode.forHtml(groupId)%></span></p>
        </div>

@@ -789,7 +789,6 @@ var jagg = jagg || (function () {
 
     var isMultiGroupEnabled = function () {
         var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
-        var log = new Log();
         if (APIUtil.isMultiGroupAppSharingEnabled()) {
             return true;
         } else {
