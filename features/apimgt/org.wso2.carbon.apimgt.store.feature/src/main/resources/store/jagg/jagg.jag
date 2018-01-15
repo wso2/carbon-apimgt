@@ -791,10 +791,6 @@ var jagg = jagg || (function () {
         var APIUtil = org.wso2.carbon.apimgt.impl.utils.APIUtil;
         var log = new Log();
         if (APIUtil.isMultiGroupAppSharingEnabled()) {
-            var groupId = session.get("groupId");
-            if (groupId == null || groupId == "") {
-                return false;
-            }
             return true;
         } else {
             return false;
