@@ -30,16 +30,14 @@ class Utils {
      * @param {String} environmentName : label of the environment of the cookie
      * @returns {String|null} : If found a cookie with given name , return its value,Else null value is returned
      */
-    static getCookie(cookieName, environmentName) {
-        environmentName = environmentName || Utils.getEnvironment().label;
-
+    static getCookie(name) {
         let pairs = document.cookie.split(";");
         let cookie = null;
         for (let pair of pairs) {
             pair = pair.split("=");
             let cookie_name = pair[0].trim();
             let value = encodeURIComponent(pair[1]);
-            if (cookie_name === `${cookieName}_${environmentName}`) {
+            if (cookie_name === name) {
                 cookie = value;
                 break;
             }
@@ -61,11 +59,11 @@ class Utils {
     /**
      * Set a cookie with given name and value assigned to it. Cookies can be only set to the same origin,
      * which the script is running
-     * @param {String} name : Name of the cookie which need to be set
-     * @param {String} value : Value of the cookie, expect it to be URLEncoded
-     * @param {number} validityPeriod :  (Optional) Validity period of the cookie in seconds
-     * @param {String} path : Path which needs to set the given cookie
-     * @param {boolean} secured : secured parameter is set
+     * @param {String} name - Name of the cookie which need to be set
+     * @param {String} value - Value of the cookie, expect it to be URLEncoded
+     * @param {number} validityPeriod -  (Optional) Validity period of the cookie in seconds
+     * @param {String} path - Path which needs to set the given cookie
+     * @param {boolean} secured - secured parameter is set
      */
     static setCookie(name, value, validityPeriod, path = "/", environmentName, secured = true) {
         environmentName = environmentName || Utils.getEnvironment().label;
@@ -77,7 +75,7 @@ class Utils {
             expiresDirective = "; expires=" + date.toUTCString();
         }
 
-        document.cookie = `${name}_${environmentName}=${value}; path=${path}${expiresDirective}${securedDirective}`;
+        document.cookie = `${name}=${value}; path=${path}${expiresDirective}${securedDirective}`;
     }
 
     /**
@@ -160,12 +158,22 @@ class Utils {
     }
 
     /**
+     * Return the time difference between the current time and the given time in the Date object in seconds
+     * @param targetTime {Date|Integer} Date object which needs to be compared with current time
+     * @returns {Integer} Time difference in seconds
+     */
+    static timeDifference(targetTime) {
+        const currentTime = Date.now();
+        return ~~((targetTime - currentTime) / 1000);
+    }
+
+    /**
      * Get an environment object with default values.
      * @returns {Object} environment: {label: string, host: string, loginTokenPath: string}
      * @private
      */
-    static _getDefaultEnvironment(){
-        return {label: 'Default', host: window.location.host, loginTokenPath: '/login/token'};
+    static _getDefaultEnvironment() {
+        return { label: 'Default', host: window.location.host, loginTokenPath: '/login/token' };
     }
 }
 

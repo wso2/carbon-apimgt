@@ -38,6 +38,7 @@ export default class User {
             return user;
         }
         this.name = name;
+        this.environment = environment;
         this._scopes = [];
         this._idToken = id_token;
         this._remember = remember;
@@ -81,7 +82,9 @@ export default class User {
      * @returns {String|null}
      */
     getPartialToken() {
-        return Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1);
+        //Append environment name to cookie
+        const environmentName = "_" + Utils.getEnvironment().label;
+        return Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1 + environmentName);
     }
 
     /**
@@ -92,7 +95,29 @@ export default class User {
      */
     setPartialToken(newToken, validityPeriod, path) {
         Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, path);
-        Utils.setCookie(User.CONST.WSO2_AM_TOKEN_1, newToken, validityPeriod, path);
+        const cookieName = `${User.CONST.WSO2_AM_TOKEN_1}_${Utils.getEnvironment().label}`;
+        Utils.setCookie(cookieName, newToken, validityPeriod, path);
+    }
+
+    /**
+     * Get the expiry time of the user
+     * @returns {Date} JS Date object of the expiring time of the user
+     */
+    getExpiryTime() {
+        const expireTime = +localStorage.getItem(User.CONST.USER_EXPIRY_TIME);
+        return new Date(expireTime);
+    }
+
+    /**
+     * Set user expiry time, User validity expires with the expiry of user's access token
+     * @param expireTime {Integer} Number of seconds till the expire time from the current time
+     */
+    setExpiryTime(expireTime) {
+        const currentTime = Date.now();
+        const timeDiff = (1000 * expireTime);
+        localStorage.setItem(User.CONST.USER_EXPIRY_TIME, currentTime+timeDiff);
+        this.expiryTime = new Date(currentTime + timeDiff);
+        return this.expiryTime;
     }
 
     /**
@@ -112,7 +137,9 @@ export default class User {
             name: this.name,
             scopes: this._scopes,
             idToken: this._idToken,
-            remember: this._remember
+            remember: this._remember,
+            expiryTime: this.getExpiryTime(),
+            environment: this.environment
         };
     }
 }
@@ -120,7 +147,8 @@ export default class User {
 User.CONST = {
     WSO2_AM_TOKEN_MSF4J: "WSO2_AM_TOKEN_MSF4J",
     WSO2_AM_TOKEN_1: "WSO2_AM_TOKEN_1",
-    LOCALSTORAGE_USER: "wso2_user_publisher"
+    LOCALSTORAGE_USER: "wso2_user_publisher",
+    USER_EXPIRY_TIME: "user_expiry_time"
 };
 /**
  * Map of users (key = environmentLabel, value = User instance)
