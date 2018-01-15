@@ -155,7 +155,7 @@ class SampleAPI extends Component {
                         </Typography>
                         <Grid container spacing={24} justify="center">
                             <Grid item xs={3}>
-                                <Link to="/api/create/rest">
+                                <Link to="/api/create/home">
                                     <Button raised>
                                         <Create style={{fontSize: 50}}/>
                                         Create New API

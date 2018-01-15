@@ -201,7 +201,7 @@ class Header extends React.Component {
                                     style={{alignItems: "center", justifyContent: "center"}}
                                 >
 
-                                    <Link to="/api/create/rest">
+                                    <Link to="/api/create/home">
                                         <MenuItem onClick={this.handleRequestCloseAddMenu}>Create new API</MenuItem>
                                     </Link>
                                     <Link to="/api/create/swagger">
