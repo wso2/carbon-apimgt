@@ -103,7 +103,7 @@ if(jagg.isMultiGroupEnabled()){
 
             <label class="tags-error error pull-left" style="display:none"></label>
             <label class="add-tags-error error pull-left" style="display:none"></label>
-            <p class="help-block" id="rolesHelp"><%=i18n.localize("Type a Group and Enter")%></p>
+            <p class="help-block" id="rolesHelp"><%=i18n.localize("Type a group and enter")%></p>
         </div>
     </div>
 <%}%>
