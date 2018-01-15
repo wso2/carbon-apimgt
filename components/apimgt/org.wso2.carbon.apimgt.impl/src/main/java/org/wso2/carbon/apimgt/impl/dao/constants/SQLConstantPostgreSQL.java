@@ -36,7 +36,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   APPLICATION_STATUS, " +
                     "   USER_ID, " +
                     "   GROUP_ID, " +
-                    "   UUID " +
+                    "   UUID, " +
+                    "   APP.CREATED_BY AS CREATED_BY " +
                     " FROM" +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIBER SUB  " +
@@ -63,7 +64,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   APPLICATION_STATUS, " +
                     "   USER_ID, " +
                     "   GROUP_ID, " +
-                    "   UUID " +
+                    "   UUID, " +
+                    "   APP.CREATED_BY AS CREATED_BY " +
                     " FROM" +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIBER SUB  " +
@@ -89,7 +91,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   APPLICATION_STATUS, " +
                     "   USER_ID, " +
                     "   GROUP_ID, " +
-                    "   UUID " +
+                    "   UUID, " +
+                    "   APP.CREATED_BY AS CREATED_BY " +
                     " FROM" +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIBER SUB  " +
@@ -119,7 +122,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   APPLICATION_STATUS, " +
                     "   USER_ID, " +
                     "   GROUP_ID, " +
-                    "   UUID " +
+                    "   UUID, " +
+                    "   APP.CREATED_BY AS CREATED_BY " +
                     " FROM" +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIBER SUB  " +
@@ -150,7 +154,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   APPLICATION_STATUS, " +
                     "   USER_ID, " +
                     "   GROUP_ID, " +
-                    "   UUID " +
+                    "   UUID, " +
+                    "   APP.CREATED_BY AS CREATED_BY " +
                     " FROM" +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIBER SUB  " +
@@ -176,7 +181,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   APPLICATION_STATUS, " +
                     "   USER_ID, " +
                     "   GROUP_ID, " +
-                    "   UUID " +
+                    "   UUID, " +
+                    "   APP.CREATED_BY AS CREATED_BY " +
                     " FROM" +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIBER SUB  " +
