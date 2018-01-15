@@ -52,5 +52,6 @@ public class AuthenticatorConstants {
     public static final String URL_PATH_SEPERATOR = "/";
     public static final String PROTOCOL_SEPERATOR = "://";
     public static final String LOGOUT_SERVICE_CONTEXT = "/login/logout";
+    public static final String LOGIN_SERVICE_CONTEXT = "/login/token";
     public static final String HTTPS_PROTOCOL = "https";
 }
