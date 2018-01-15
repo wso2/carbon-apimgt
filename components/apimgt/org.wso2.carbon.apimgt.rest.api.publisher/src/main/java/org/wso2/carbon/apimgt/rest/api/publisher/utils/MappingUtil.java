@@ -250,7 +250,6 @@ public class MappingUtil {
                 apiPermission(apidto.getPermission()).
                 tags(new HashSet<>(apidto.getTags())).
                 labels(new HashSet<>(apidto.getLabels())).
-                hasOwnGateway(apidto.getHasOwnGateway()).
                 transport(new HashSet<>(apidto.getTransport())).
                 isResponseCachingEnabled(Boolean.valueOf(apidto.getResponseCaching())).
                 businessInformation(businessInformation).
@@ -272,6 +271,9 @@ public class MappingUtil {
         if (apidto.getApiPolicy() != null) {
             Policy policy = new APIPolicy(apidto.getApiPolicy());
             apiBuilder.apiPolicy(policy);
+        }
+        if (apidto.getHasOwnGateway() != null) {
+            apiBuilder.hasOwnGateway(apidto.getHasOwnGateway());
         }
 
         if (apidto.getThreatProtectionPolicies() != null) {
