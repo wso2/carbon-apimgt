@@ -17,86 +17,130 @@
  */
 "use strict";
 import React, {Component} from 'react';
-import PropTypes from 'prop-types';
-import {withStyles} from 'material-ui/styles';
-import Button from 'material-ui/Button';
-import Snackbar from 'material-ui/Snackbar';
-import IconButton from 'material-ui/IconButton';
-import CloseIcon from 'material-ui-icons/Close';
-import Info from 'material-ui-icons/Info';
-import Error from 'material-ui-icons/Error';
-import Warning from 'material-ui-icons/Warning';
+import Message from './Message'
+import Notification from 'rc-notification';
 
-
-const styles = theme => ({
-    close: {
-        width: theme.spacing.unit * 4,
-        height: theme.spacing.unit * 4,
-    },
-});
 /**
  * Common alerting/message displaying component for Store application, Pre-set vertical: 'top',
  horizontal: 'center' and close action for consistent UX through out the app.
  */
-class Alert extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            open: Boolean(props.message),
-        };
-    }
-
-    componentWillReceiveProps(nextProps) {
-        this.setState({open: Boolean(nextProps.message)});
-    }
-
-    handleClick = () => {
-        this.setState({open: true});
-    };
-
-    handleRequestClose = (event, reason) => {
-        if (reason === 'clickaway') {
-            return;
+class Alert {
+    constructor(message, type, duration, onClose) {
+        this.defaultTop = 1;
+        this.key = Alert.count++;
+        this.type = type;
+        this.message = message;
+        this.onClose = onClose;
+        this.duration = duration || Alert.defaultDuration;
+        if (typeof duration === 'function') {
+            this.onClose = duration;
+            this.duration = Alert.defaultDuration;
         }
-
-        this.setState({open: false});
-    };
-
-    render() {
-        const {classes, message} = this.props;
-        return (
-            <div>
-                <Snackbar
-                    anchorOrigin={{
-                        vertical: 'top',
-                        horizontal: 'center',
-                    }}
-                    open={this.state.open}
-                    autoHideDuration={6000}
-                    onClose={this.handleRequestClose}
-                    SnackbarContentProps={{
-                        'aria-describedby': 'message-id',
-                    }}
-                    message={<span id="message-id">{message}</span>}
-                    action={[
-                        <IconButton
-                            key="close"
-                            aria-label="Close"
-                            color="inherit"
-                            className={classes.close}
-                            onClick={this.handleRequestClose}
-                        >
-                            <CloseIcon />
-                        </IconButton>,
-                    ]}
-                />
-            </div>
-        );
+        this.remove = this.remove.bind(this);
     }
+
+    /**
+     * Show the alert message according to the parameters given in the constructor, Using the Alert.messageInstance
+     */
+    show() {
+        const promisedInstance = this._getMessageInstance();
+        const onClose = this.onClose;
+        promisedInstance.then(instance => {
+            instance.notice({
+                closable: true,
+                onClose,
+                key: this.key,
+                duration: this.duration,
+                content: (
+                    <div >
+                        <Message handleClose={this.remove} message={this.message} type={this.type}/>
+                    </div>
+                ),
+            });
+        }).catch(error => console.error("Error while showing alert" + error))
+    }
+
+    /**
+     * Remove current message from view
+     */
+    remove() {
+        const promisedInstance = this._getMessageInstance();
+        promisedInstance.then(instance => {
+            instance.removeNotice(this.key);
+        });
+    }
+
+    /**
+     * Return a promise resolving to an instance of RC-Notification which can be use to display a notification on screen
+     * @returns {Promise}
+     * @private
+     */
+    _getMessageInstance() {
+        return new Promise((resolve, reject) => {
+            if (Alert.messageInstance) {
+                resolve(Alert.messageInstance);
+            } else {
+                Notification.newInstance({
+                    transitionName: 'move-down',
+                    style: {top: 0, marginLeft: '45%', position: 'absolute'},
+                }, (instance) => {
+                    Alert.messageInstance = instance;
+                    resolve(Alert.messageInstance);
+                });
+            }
+        });
+    }
+
+    /**
+     * Can be used to configure the global Alert configurations, Currently support position top alignment and message display duration in seconds
+     * If set here , will use in all the places where Alert has been used
+     * @param options i:e {top: '10px', duration: 30}
+     */
+    static config(options) {
+        if (options.top !== undefined) {
+            Alert.defaultTop = options.top;
+            Alert.messageInstance = null; // delete messageInstance for new defaultTop
+        }
+        if (options.duration !== undefined) {
+            Alert.defaultDuration = options.duration;
+        }
+    }
+
 }
 
-Alert.propTypes = {
-    classes: PropTypes.object.isRequired,
-};
+Alert.messageInstance = null;
+/* Class property to hold a RC-Notification instance*/
+Alert.count = 1;
+/* Number of Notifications showed, This is used to generate unique key for each message */
+Alert.defaultDuration = 5;
+/* In seconds */
+Alert.defaultTop = 0;
 
-export default withStyles(styles)(Alert);
+export default {
+    info: (message, duration, onClose) => {
+        let msg = new Alert(message, 'info', duration, onClose);
+        msg.show();
+        return msg
+    },
+    success: (message, duration, onClose) => {
+        let msg = new Alert(message, 'success', duration, onClose);
+        msg.show();
+        return msg
+    },
+    error: (message, duration, onClose) => {
+        let msg = new Alert(message, 'error', duration, onClose);
+        msg.show();
+        return msg
+    },
+    warning: (message, duration, onClose) => {
+        let msg = new Alert(message, 'warning', duration, onClose);
+        msg.show();
+        return msg
+    },
+    loading: (message, duration, onClose) => {
+        let msg = new Alert(message, 'loading', duration, onClose);
+        msg.show();
+        return msg
+    },
+    configs: Alert.config
+};
