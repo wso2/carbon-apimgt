@@ -1550,7 +1550,7 @@ public class ApiDAOImpl implements ApiDAO {
     public List<Rating> getRatingsListForApi(String apiId) throws APIMgtDAOException {
         final String query = "SELECT UUID, API_ID, RATING, USER_IDENTIFIER, " +
                 "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
-                + "FROM AM_API_RATINGS WHERE API_ID = ?";
+                + "FROM AM_API_RATINGS WHERE UUID = ?";
         List<Rating> ratingsList = new ArrayList<>();
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -1629,7 +1629,7 @@ public class ApiDAOImpl implements ApiDAO {
         // 3. null - when API is updated from dedicatedGatewayIsEnabled=true from dedicatedGatewayIsEnabled=false
 
         final String query = "UPDATE AM_API SET HAS_OWN_GATEWAY = ?, LAST_UPDATED_TIME = ?, UPDATED_BY = ? " +
-                "WHERE API_ID = ?";
+                "WHERE UUID = ?";
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             try {
@@ -1666,7 +1666,7 @@ public class ApiDAOImpl implements ApiDAO {
      */
     @Override
     public DedicatedGateway getDedicatedGateway(String apiId) throws APIMgtDAOException {
-        final String query = "SELECT HAS_OWN_GATEWAY FROM AM_API WHERE API_ID = ?";
+        final String query = "SELECT HAS_OWN_GATEWAY FROM AM_API WHERE UUID = ?";
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
