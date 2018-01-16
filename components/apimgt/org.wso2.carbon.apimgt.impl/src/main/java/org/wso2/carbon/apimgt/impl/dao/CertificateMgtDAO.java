@@ -212,7 +212,7 @@ public class CertificateMgtDAO {
             }
         } catch (SQLException e) {
             if (log.isDebugEnabled()) {
-                log.debug("Error occurred in finally block while retrieving certificate metadata. ", e);
+                log.debug("Error occurred in finally block while adding certificate metadata. ", e);
             }
         }
         return result;
