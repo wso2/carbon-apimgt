@@ -294,7 +294,7 @@ paths:
     post:
       x-scope: apim:subscribe
       x-wso2-request: |
-        POST https://localhost:9443/api/am/store/v0.11/apis/generate-sdk
+        POST https://localhost:9443/api/am/store/v0.11/apis/generate-sdk?apiId=e93fb282-b456-48fc-8981-003fb89086ae&language=java
         Authorization: Bearer 2e29904b-f3b0-366e-ba13-b469abedd88e
       x-wso2-curl: "curl -k -H \"Authorization: Bearer 2e29904b-f3b0-366e-ba13-b469abedd88e\" -X POST 'https://localhost:9443/api/am/store/v0.11/apis/generate-sdk?apiId=5721d128-76d0-4cb9-b300-2bd9578beddb&language=java' > PizzaAPI_Java_SDK.zip"
       x-wso2-response: "HTTP/1.1 200 OK \nContent-Disposition: attachment; filename=\"PizzaShackAPI_1.0.0_java.zip\"\nContent-Type: application/zip\n\n[zip content]"
