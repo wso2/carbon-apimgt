@@ -1035,6 +1035,8 @@ public class APIUtilTest {
         Assert.assertTrue(APIUtil.isRoleNameExist(userName, null));
 
         Assert.assertTrue(APIUtil.isRoleNameExist(userName, ""));
+
+        System.setProperty(DISABLE_ROLE_VALIDATION_AT_SCOPE_CREATION, null);
     }
 
     @Test
