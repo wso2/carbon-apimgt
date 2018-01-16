@@ -81,5 +81,6 @@
     "SubscriberRole" : {
       "CreateOnTenantLoad" : true
     }
-  }
+  },
+  "AuthorizationHeader":"TENANT_AUTH"
 }

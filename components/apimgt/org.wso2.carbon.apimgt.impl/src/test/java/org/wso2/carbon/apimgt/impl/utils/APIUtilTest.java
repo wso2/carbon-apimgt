@@ -106,6 +106,8 @@ import java.util.UUID;
 
 import static org.mockito.Matchers.eq;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.DISABLE_ROLE_VALIDATION_AT_SCOPE_CREATION;
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getOAuthConfigurationFromAPIMConfig;
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getOAuthConfigurationFromTenantRegistry;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest( {LogFactory.class, ServiceReferenceHolder.class, SSLSocketFactory.class, CarbonUtils.class,
@@ -1780,4 +1782,48 @@ public class APIUtilTest {
                 , APIConstants.API_WSDL_RESOURCE_LOCATION + "publisher1" + "--" + "test" + "1.0.0" + ".wsdl");
     }
 
+    @Test
+    public void testGetOAuthConfigurationFromTenantRegistry () throws Exception{
+        final int tenantId = -1234;
+        final String property = "AuthorizationHeader";
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        RegistryService registryService = Mockito.mock(RegistryService.class);
+        UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
+        Resource resource = Mockito.mock(Resource.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
+        Mockito.when(registryService.getConfigSystemRegistry(tenantId)).thenReturn(userRegistry);
+        Mockito.when(userRegistry.resourceExists(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(true);
+        Mockito.when(userRegistry.get(APIConstants.API_TENANT_CONF_LOCATION)).thenReturn(resource);
+        File siteConfFile = new File(Thread.currentThread().getContextClassLoader().
+                getResource("tenant-conf.json").getFile());
+        String tenantConfValue = FileUtils.readFileToString(siteConfFile);
+        Mockito.when(resource.getContent()).thenReturn(tenantConfValue.getBytes());
+        JSONParser parser = new JSONParser();
+        JSONObject json = (JSONObject) parser.parse(tenantConfValue);
+        String authorizationHeader = (String)json.get(property);
+        String authHeader = getOAuthConfigurationFromTenantRegistry(tenantId,property);
+        Assert.assertEquals(authorizationHeader, authHeader);
+    }
+
+    @Test
+    public void testGetOAuthConfigurationFromAPIMConfig () throws Exception {
+        String property = "AuthorizationHeader";
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        APIManagerConfigurationService apiManagerConfigurationService =
+                Mockito.mock(APIManagerConfigurationService.class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
+                .thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.OAUTH_CONFIGS + property))
+                .thenReturn("APIM_AUTH");
+
+        String authHeader = getOAuthConfigurationFromAPIMConfig(property);
+        Assert.assertEquals("APIM_AUTH", authHeader);
+    }
 }

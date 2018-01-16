@@ -418,6 +418,7 @@ public class APIProviderHostObject extends ScriptableObject {
             JSONParser parser = new JSONParser();
             properties = (JSONObject) parser.parse(additionalProperties);
         }
+        String authorizationHeader = (String) apiData.get("authorizationHeader", apiData);
 
         int cacheTimeOut = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
         if (APIConstants.ENABLED.equalsIgnoreCase(responseCache)) {
@@ -498,6 +499,8 @@ public class APIProviderHostObject extends ScriptableObject {
             api.setCorsConfiguration(corsConfiguration);
         }
         api.setAdditionalProperties(properties);
+        api.setAuthorizationHeader(authorizationHeader);
+
         Set<Tier> availableTier = new HashSet<Tier>();
         String[] tierNames;
         if (tier != null) {
@@ -2799,6 +2802,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 myn.put(53, myn, checkValue((api.getAccessControl())));
                 myn.put(54, myn, checkValue((api.getAccessControlRoles())));
                 myn.put(55, myn, checkValue(api.getAdditionalProperties().toJSONString()));
+                myn.put(56, myn, checkValue(api.getAuthorizationHeader()));
             } else {
                 handleException("Cannot find the requested API- " + apiName +
                         "-" + version);

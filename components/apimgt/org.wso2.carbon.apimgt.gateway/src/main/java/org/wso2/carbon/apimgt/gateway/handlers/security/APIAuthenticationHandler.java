@@ -36,6 +36,7 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
@@ -73,6 +74,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     private SynapseEnvironment synapseEnvironment;
 
+    private String authorizationHeader;
+    private boolean removeOAuthHeadersFromOutMessage = true;
+
     public void init(SynapseEnvironment synapseEnvironment) {
         this.synapseEnvironment = synapseEnvironment;
         if (log.isDebugEnabled()) {
@@ -81,6 +85,22 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         if (getApiManagerConfigurationService() != null) {
             initializeAuthenticator();
         }
+    }
+
+    public String getAuthorizationHeader() {
+        return authorizationHeader;
+    }
+
+    public void setAuthorizationHeader(String authorizationHeader) {
+        this.authorizationHeader = authorizationHeader;
+    }
+
+    public boolean getRemoveOAuthHeadersFromOutMessage() {
+        return removeOAuthHeadersFromOutMessage;
+    }
+
+    public void setRemoveOAuthHeadersFromOutMessage(boolean removeOAuthHeadersFromOutMessage) {
+        this.removeOAuthHeadersFromOutMessage = removeOAuthHeadersFromOutMessage;
     }
 
     protected APIManagerConfigurationService getApiManagerConfigurationService() {
@@ -102,8 +122,20 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
     protected Authenticator getAuthenticator() {
         if (authenticator == null) {
-            authenticator = new OAuthAuthenticator();
+            if (authorizationHeader == null) {
+                try {
+                    authorizationHeader = APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER);
+                    if (authorizationHeader == null) {
+                        authorizationHeader = HttpHeaders.AUTHORIZATION;
+                    }
+                } catch (APIManagementException e) {
+                    log.error("Error while reading authorization header from APIM configurations", e);
+                }
+            }
+
+            authenticator = new OAuthAuthenticator(authorizationHeader, removeOAuthHeadersFromOutMessage);
         }
+
         return authenticator;
     }
 

@@ -218,7 +218,8 @@ var getAPI = function (api) {
             hasDefaultVersion:hasDefaultVersion,
             currentDefaultVersion:defaultVersion,
             availableSubscriptionPolicy:result[50],
-            apiLevelPolicy:result[51]
+            apiLevelPolicy:result[51],
+            authorizationHeader:result[56]
         };
         return {
             error:false,
