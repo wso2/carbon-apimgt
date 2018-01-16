@@ -97,7 +97,7 @@ class Login extends Component {
                     this.setState({message: error.message});
                 }
                 console.log(error);
-                this.setState({loading: false});q
+                this.setState({loading: false});
             }
         );
     };
