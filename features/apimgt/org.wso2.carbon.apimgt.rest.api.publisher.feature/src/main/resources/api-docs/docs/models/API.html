@@ -362,7 +362,7 @@
                                 <a href="#!/models#string">string</a>
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
-                        <td class="parameter"> <p class="marked">{&quot;production_endpoints&quot;:{&quot;url&quot;:&quot;https://localhost:9443/am/sample/calculator/v1/api&quot;,&quot;config&quot;:null},&quot;implementation_status&quot;:&quot;managed&quot;,&quot;endpoint_type&quot;:&quot;http&quot;}</p></td>
+                        <td class="parameter"> <p class="marked">{&quot;production_endpoints&quot;:{&quot;url&quot;:&quot;https://localhost:9443/am/sample/pizzashack/v1/api/&quot;,&quot;config&quot;:{&quot;suspendErrorCode&quot;:&quot;101000&quot;,&quot;suspendDuration&quot;:&quot;2000&quot;,&quot;suspendMaxDuration&quot;:&quot;3&quot;,&quot;factor&quot;:&quot;2&quot;,&quot;retryErroCode&quot;:&quot;101000&quot;,&quot;retryTimeOut&quot;:&quot;4&quot;,&quot;retryDelay&quot;:&quot;1000&quot;,&quot;actionSelect&quot;:&quot;fault&quot;,&quot;actionDuration&quot;:&quot;3000&quot;}},&quot;sandbox_endpoints&quot;:{&quot;url&quot;:&quot;https://localhost:9443/am/sample/pizzashack/v1/api/&quot;,&quot;config&quot;:null},&quot;endpoint_type&quot;:&quot;http&quot;}</p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
@@ -438,6 +438,51 @@
                         </td>
                         <td class="parameter"> <p class="marked">null</p></td>
                         <td class="parameter"> <p class="marked">[]</p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>additionalProperties</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">Map of custom properties of API</p></td>
+                        <td class="parameter">
+                                <a href="#!/models#object">object</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>accessControl</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">Is the API is restricted to certain set of publishers or creators or is it visible to all the publishers and creators. If the accessControl restriction is none, this API can be modified by all the publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,  based on the restriction.        enum: - NONE - RESTRICTED </p></td>
+                        <td class="parameter">
+                                <a href="#!/models#string">string</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked"></p></td>
+                    </tr>
+                    <tr>
+                        <td class="parameter">
+                            <p>accessControlRoles</p>
+                            <p class="param-required">
+                                
+                                optional
+                            </p>
+                        </td>
+                        <td class="parameter"><p class="marked">The user roles that are able to view/modify as API publisher or creator.</p></td>
+                        <td class="parameter">
+                                <a href="#!/models#array">array</a>
+                        </td>
+                        <td class="parameter"> <p class="marked">null</p></td>
+                        <td class="parameter"> <p class="marked">[&quot;admin&quot;]</p></td>
                     </tr>
                     <tr>
                         <td class="parameter">
