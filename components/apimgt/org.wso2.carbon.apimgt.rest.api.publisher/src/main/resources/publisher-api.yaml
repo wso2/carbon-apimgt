@@ -3021,7 +3021,7 @@ definitions:
         example: []
       endpointConfig:
         type: string
-        example: "{\"production_endpoints\":{\"url\":\"https://localhost:9443/am/sample/calculator/v1/api\",\"config\":null},\"implementation_status\":\"managed\",\"endpoint_type\":\"http\"}"
+        example: "{\"production_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":{\"suspendErrorCode\":\"101000\",\"suspendDuration\":\"2000\",\"suspendMaxDuration\":\"3\",\"factor\":\"2\",\"retryErroCode\":\"101000\",\"retryTimeOut\":\"4\",\"retryDelay\":\"1000\",\"actionSelect\":\"fault\",\"actionDuration\":\"3000\"}},\"sandbox_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v1/api/\",\"config\":null},\"endpoint_type\":\"http\"}"
       endpointSecurity:
         properties:
           type:
@@ -3063,11 +3063,11 @@ definitions:
         description : Map of custom properties of API
       accessControl:
         type: string
-        description: Is the API is restricted to certain set of publishers or creators or is it visible to all the
-        publishers and creators. If the accessControl restriction is none, this API can be modified by all the
-        publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,
-         based on the restriction.
-        enum:
+        description: |
+          Is the API is restricted to certain set of publishers or creators or is it visible to all the
+          publishers and creators. If the accessControl restriction is none, this API can be modified by all the
+          publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,
+           based on the restriction.        enum:
           - NONE
           - RESTRICTED
       accessControlRoles:
