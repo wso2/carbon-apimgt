@@ -83,6 +83,7 @@ public class AuthenticatorService {
         List<String> grantTypes = new ArrayList<>();
         grantTypes.add(KeyManagerConstants.PASSWORD_GRANT_TYPE);
         grantTypes.add(KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE);
+        grantTypes.add(KeyManagerConstants.JWT_GRANT_TYPE);
         grantTypes.add(KeyManagerConstants.REFRESH_GRANT_TYPE);
         APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance().getAPIMAppConfiguration();
         String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName;
@@ -106,6 +107,7 @@ public class AuthenticatorService {
                 oAuthData.addProperty(KeyManagerConstants.AUTHORIZATION_ENDPOINT,
                         appConfigs.getAuthorizationEndpoint());
                 oAuthData.addProperty(AuthenticatorConstants.SSO_ENABLED, appConfigs.isSsoEnabled());
+                oAuthData.addProperty(AuthenticatorConstants.AUTO_LOGIN_ENABLED, true);
             } else {
                 String errorMsg = "No information available in OAuth application.";
                 log.error(errorMsg, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);
@@ -133,7 +135,7 @@ public class AuthenticatorService {
      */
     public AccessTokenInfo getTokens(String appName, String grantType,
                                      String userName, String password, String refreshToken,
-                                     long validityPeriod, String authorizationCode)
+                                     long validityPeriod, String authorizationCode, String assertion)
             throws APIManagementException {
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
@@ -180,6 +182,13 @@ public class AuthenticatorService {
                         .createAccessTokenRequest(userName, password, grantType, refreshToken,
                                 null, validityPeriod, scopes,
                                 consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
+                accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
+            } else if (AuthenticatorConstants.JWT_GRANT.equals(grantType)){
+                accessTokenRequest.setClientId(consumerKeySecretMap.get("CONSUMER_KEY"));
+                accessTokenRequest.setClientSecret(consumerKeySecretMap.get("CONSUMER_SECRET"));
+                accessTokenRequest.setGrantType(grantType);
+                accessTokenRequest.setAssertion(assertion);
+                accessTokenRequest.setScopes(scopes);
                 accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
             }
         } catch (KeyManagementException e) {

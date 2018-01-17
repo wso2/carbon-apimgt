@@ -154,7 +154,7 @@ public class AuthenticatorServiceTestCase {
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
         AccessTokenInfo tokenInfoResponseForValidAuthCode = authenticatorService.getTokens("store",
                 "authorization_code", null, null, null, 0,
-                "xxx-auth-code-xxx");
+                "xxx-auth-code-xxx", null);
         Assert.assertEquals(tokenInfoResponseForValidAuthCode, tokenInfo);
 
         // Error Path - 500 - Authorization code grant type
@@ -164,7 +164,7 @@ public class AuthenticatorServiceTestCase {
         AccessTokenInfo tokenInfoResponseForInvalidAuthCode = new AccessTokenInfo();
         try {
             tokenInfoResponseForInvalidAuthCode = authenticatorService.getTokens("store",
-                    "authorization_code", null, null, null, 0, null);
+                    "authorization_code", null, null, null, 0, null, null);
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "No Authorization Code available.");
             Assert.assertEquals(tokenInfoResponseForInvalidAuthCode, emptyTokenInfo);
@@ -173,14 +173,14 @@ public class AuthenticatorServiceTestCase {
         // Happy Path - 200 - Password grant type
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
         AccessTokenInfo tokenInfoResponseForPasswordGrant = authenticatorService.getTokens("store", "password",
-                "admin", "admin", null, 0, null);
+                "admin", "admin", null, 0, null, null);
         Assert.assertEquals(tokenInfoResponseForPasswordGrant, tokenInfo);
 
         // Error Path - When token generation fails and throws APIManagementException
         Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenThrow(KeyManagementException.class);
         try {
             authenticatorService.getTokens("store", "password",
-                    "admin", "admin", null, 0, null);
+                    "admin", "admin", null, 0, null, null);
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "Error while receiving tokens for OAuth application : store");
         }

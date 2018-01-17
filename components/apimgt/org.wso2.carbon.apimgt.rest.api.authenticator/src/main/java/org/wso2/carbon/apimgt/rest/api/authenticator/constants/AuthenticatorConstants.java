@@ -33,6 +33,7 @@ public class AuthenticatorConstants {
     public static final String SECURE_COOKIE = "Secure";
     public static final String PASSWORD_GRANT = "password";
     public static final String REFRESH_GRANT = "refresh_token";
+    public static final String JWT_GRANT = "urn:ietf:params:oauth:grant-type:jwt-bearer";
     public static final String COOKIE_HEADER = "Cookie";
     public static final String AUTHORIZATION_HTTP_HEADER = "Authorization";
     public static final String BEARER_PREFIX = "bearer";
@@ -42,6 +43,7 @@ public class AuthenticatorConstants {
     public static final String CONSUMER_KEY = "CONSUMER_KEY";
     public static final String CONSUMER_SECRET = "CONSUMER_SECRET";
     public static final String SSO_ENABLED = "is_sso_enabled";
+    public static final String AUTO_LOGIN_ENABLED = "is_auto_login_enabled";
     public static final String APPLICATION_KEY_TYPE = "Application";
     public static final String REQUEST_URL = "REQUEST_URL";
     public static final String STORE_APPLICATION = "store";

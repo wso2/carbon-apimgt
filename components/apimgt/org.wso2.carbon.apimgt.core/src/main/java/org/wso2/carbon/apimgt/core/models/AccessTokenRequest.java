@@ -35,6 +35,7 @@ public class AccessTokenRequest {
     private long validityPeriod;
     private String tokenToRevoke;
     private String authorizationCode;
+    private String assertion;
 
     // This map can be used to store additional properties not captured by above list of fields.
     private HashMap<String, Object> requestParameters = new HashMap<String, Object>();
@@ -134,6 +135,14 @@ public class AccessTokenRequest {
 
     public void setAuthorizationCode(String authorizationCode) {
         this.authorizationCode = authorizationCode;
+    }
+
+    public String getAssertion() {
+        return assertion;
+    }
+
+    public void setAssertion(String assertion) {
+        this.assertion = assertion;
     }
 }
 
