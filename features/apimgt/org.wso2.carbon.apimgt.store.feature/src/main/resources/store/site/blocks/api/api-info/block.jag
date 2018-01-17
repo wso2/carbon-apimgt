@@ -38,8 +38,8 @@ jagg.block("api/api-info", {
         var isForumEnabled = mod.isForumEnabled();
         var supportedLangs = jagg.module("sdk").getSupportedLanguages();
 
-        var authorizationHeader = api.authorizationHeader;
-        if (!authorizationHeader) {
+        if (api != null && ! api.authorizationHeader) {
+            var authorizationHeader = api.authorizationHeader;
             var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
             var apiUtil = new APIUtil();
             var tenantVal = request.getParameter("tenant");
