@@ -4259,9 +4259,8 @@ public class ApiMgtDAO {
             isAppUpdated = true;
 
         } catch (SQLException e) {
-            handleException("Error when updating application owner for user " + userId, e);
             isAppUpdated = false;
-
+            handleException("Error when updating application owner for user " + userId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
