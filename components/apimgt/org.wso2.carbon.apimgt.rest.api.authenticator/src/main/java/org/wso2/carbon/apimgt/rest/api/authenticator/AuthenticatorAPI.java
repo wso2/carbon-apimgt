@@ -127,7 +127,7 @@ public class AuthenticatorAPI implements Microservice {
             authResponseBean.setPartialToken(accessTokenPart1);
             // Cookie should be set to the log out context in order to revoke the token when log out happens.
 
-            NewCookie httpOnlyCookieWithLogInContext = AuthUtil
+            NewCookie logoutContextCookie = AuthUtil
                     .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, accessTokenPart2, logoutContext,
                             true, true, "");
             NewCookie restAPIContextCookie = AuthUtil
@@ -146,7 +146,7 @@ public class AuthenticatorAPI implements Microservice {
                         .cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_2, refTokenPart2, appContext, true, true,
                                 "");
                 return Response.ok(authResponseBean, MediaType.APPLICATION_JSON)
-                        .cookie(httpOnlyCookieWithLogInContext, restAPIContextCookie,
+                        .cookie(logoutContextCookie, restAPIContextCookie,
                                 refreshTokenCookie, refreshTokenHttpOnlyCookie).header(AuthenticatorConstants.
                                         REFERER_HEADER,
                                 (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
@@ -159,7 +159,7 @@ public class AuthenticatorAPI implements Microservice {
                         .build();
             } else {
                 return Response.ok(authResponseBean, MediaType.APPLICATION_JSON)
-                        .cookie(httpOnlyCookieWithLogInContext, restAPIContextCookie)
+                        .cookie(logoutContextCookie, restAPIContextCookie)
                         .header(AuthenticatorConstants.
                                         REFERER_HEADER,
                                 (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
@@ -306,7 +306,7 @@ public class AuthenticatorAPI implements Microservice {
                 String accessTokenPart2 = accessToken.substring(accessToken.length() / 2);
 
                 authResponseBean.setPartialToken(accessTokenPart1);
-                NewCookie httpOnlyCookieWithLogoutContext = AuthUtil
+                NewCookie logoutContextCookie = AuthUtil
                         .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, accessTokenPart2, logoutContext,
                                 true, true, "");
                 NewCookie restAPIContextCookie = AuthUtil
@@ -352,12 +352,12 @@ public class AuthenticatorAPI implements Microservice {
                             .replaceAll("\\+", "%20").replaceAll("%26", "&").replaceAll("%3D", "="));
                     return Response.status(Response.Status.FOUND)
                             .header(HttpHeaders.LOCATION, redirectURI)
-                            .cookie(httpOnlyCookieWithLogoutContext, restAPIContextCookie)
+                            .cookie(logoutContextCookie, restAPIContextCookie)
                             .build();
                 } else {
                     return Response.status(Response.Status.FOUND)
                             .header(HttpHeaders.LOCATION, targetURIForRedirection).entity(authResponseBean)
-                            .cookie(httpOnlyCookieWithLogoutContext, restAPIContextCookie, authUserCookie)
+                            .cookie(logoutContextCookie, restAPIContextCookie, authUserCookie)
                             .build();
                 }
             }
