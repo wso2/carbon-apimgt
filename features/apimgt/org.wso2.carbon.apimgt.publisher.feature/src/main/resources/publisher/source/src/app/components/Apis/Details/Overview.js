@@ -231,7 +231,7 @@ class Overview extends Component {
                                 </TableRow>
                                 <TableRow>
                                     <TableCell>Published
-                                        Environments</TableCell><TableCell>not-supported-yet</TableCell>
+                                        Environments</TableCell><TableCell>{api.labels}</TableCell>
                                 </TableRow>
                                 <TableRow>
                                     <TableCell>Policies</TableCell>

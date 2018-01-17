@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.core.models.WSDLInfo;
 import org.wso2.carbon.apimgt.core.models.WorkflowStatus;
 import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
+import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.ETagUtils;
 import org.wso2.carbon.apimgt.core.workflow.GeneralWorkflowResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -93,6 +94,18 @@ public class ApisApiServiceImpl extends ApisApiService {
             String username = RestApiUtil.getLoggedInUsername(request);
             try {
                 APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+
+                if (!apiPublisher.isAPIExists(apiId)) {
+                    String errorMessage = "API not found : " + apiId;
+                    APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
+                            ExceptionCodes.API_NOT_FOUND);
+                    HashMap<String, String> paramList = new HashMap<String, String>();
+                    paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+                    ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                    log.error(errorMessage, e);
+                    return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+                }
+
                 String existingFingerprint = apisApiIdGetFingerprint(apiId, null, null, request);
                 if (!StringUtils.isEmpty(ifNoneMatch) && !StringUtils.isEmpty(existingFingerprint) && ifNoneMatch
                         .contains(existingFingerprint)) {
@@ -107,7 +120,7 @@ public class ApisApiServiceImpl extends ApisApiService {
 
                 } else {
                     String msg = "Dedicated Gateway not found for " + apiId;
-                    log.error(msg);
+                    APIUtils.logDebug(msg, log);
                     ErrorDTO errorDTO = RestApiUtil.getErrorDTO(msg, 900314L, msg);
                     return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
                 }

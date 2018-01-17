@@ -1633,7 +1633,7 @@ public class ApiDAOImpl implements ApiDAO {
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             try {
-
+                connection.setAutoCommit(false);
                 statement.setBoolean(1, dedicatedGateway.isEnabled());
                 statement.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
                 statement.setString(3, dedicatedGateway.getUpdatedBy());
@@ -1667,6 +1667,7 @@ public class ApiDAOImpl implements ApiDAO {
     @Override
     public DedicatedGateway getDedicatedGateway(String apiId) throws APIMgtDAOException {
         final String query = "SELECT HAS_OWN_GATEWAY FROM AM_API WHERE UUID = ?";
+        DedicatedGateway dedicatedGateway;
 
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -1675,7 +1676,10 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.execute();
                 try (ResultSet rs = statement.getResultSet()) {
                     if (rs.next()) {
-                        rs.getBoolean(ContainerBasedGatewayConstants.IS_DEDICATED_GATEWAY_ENABLED);
+                        dedicatedGateway = new DedicatedGateway();
+                        dedicatedGateway.setEnabled(rs.getBoolean(
+                                ContainerBasedGatewayConstants.IS_DEDICATED_GATEWAY_ENABLED));
+                        return dedicatedGateway;
                     } else {
                         throw new APIMgtDAOException("Couldn't Find Dedicated Gateway details ", ExceptionCodes
                                 .ENDPOINT_CONFIG_NOT_FOUND);                    }
@@ -1690,7 +1694,6 @@ public class ApiDAOImpl implements ApiDAO {
             log.error(message, e);
             throw new APIMgtDAOException(message, ExceptionCodes.APIM_DAO_EXCEPTION);
         }
-        return null;
     }
 
     @Override

@@ -278,16 +278,21 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             if (dedicatedGateway.isEnabled()) {
 
                 // create a label if not exist for container based gateway
-                if (api.getLabels().contains(autoGenlabel)) {
-                    // create a label
-                    List<Label> labelList = new ArrayList<>();
-                    // todo : add the access URL of the gateway here itself
-                    Label autoGenLabel = new Label.Builder().id(UUID.randomUUID().toString()).
-                            name(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId).
-                            accessUrls(null).build();
-                    labelList.add(autoGenLabel);
-                    //Add to the db
-                    getLabelDAO().addLabels(labelList);
+                if (!api.getLabels().contains(autoGenlabel)) {
+
+                    Label label = getLabelDAO().getLabelByName(autoGenlabel);
+                    if (label == null) {
+                        // create a label
+                        List<Label> labelList = new ArrayList<>();
+                        // todo : add the access URL of the gateway here itself
+                        Label autoGenLabel = new Label.Builder().id(UUID.randomUUID().toString()).
+                                name(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId).
+                                accessUrls(null).build();
+                        labelList.add(autoGenLabel);
+                        //Add to the db
+                        getLabelDAO().addLabels(labelList);
+                    }
+
                     //add to the API
                     labelSet.add(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId);
                 }
