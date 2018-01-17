@@ -112,3 +112,16 @@ h2 span{
         font-size: 7em!important;
     }
 }
+.parent-container {
+    margin: 50px 0 !important;
+}
+.add-item-left-padding{
+    padding-left:30px;
+}
+.add-item-right-padding{
+    padding-right:30px;
+}
+.tab-grid{
+    width: 100%;
+    padding: 5%;
+}
