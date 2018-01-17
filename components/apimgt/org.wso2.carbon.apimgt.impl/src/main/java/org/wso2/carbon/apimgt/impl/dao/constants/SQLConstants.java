@@ -1313,6 +1313,26 @@ public class SQLConstants {
             " WHERE " +
             "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID ";
 
+    public static final String GET_APPLICATIONS_BY_OWNER =
+            "SELECT " +
+            "   UUID, " +
+            "   APPLICATION_ID, " +
+            "   NAME," +
+            "   CREATED_BY, " +
+            "   APPLICATION_STATUS, " +
+            "   GROUP_ID  " +
+            " FROM" +
+            "   AM_APPLICATION " +
+            " WHERE " +
+            "   CREATED_BY = ? ";
+
+    public static final String UPDATE_APPLICATION_OWNER =
+            "UPDATE AM_APPLICATION " +
+            " SET " +
+                "CREATED_BY = ? , " +
+                "SUBSCRIBER_ID = ? " +
+            " WHERE " +
+            "   UUID = ? ";
 
         public static final String GET_APPLICATIONS_COUNNT_CASESENSITVE_WITHGROUPID = "SELECT " +
                 "   count(*) count " +

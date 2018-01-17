@@ -392,7 +392,22 @@ public interface APIConsumer extends APIManager {
      */
     void deleteOAuthApplication(String consumerKey) throws APIManagementException;
 
+    /**
+     * Returns a list of applications created by the given user
+     * @param userId
+     * @return
+     * @throws APIManagementException
+     */
+    Application[] getApplicationsByOwner(String userId) throws APIManagementException;
 
+    /**
+     * Updates the application owner
+     * @param newUserId
+     * @param application
+     * @return
+     * @throws APIManagementException
+     */
+    boolean updateApplicationOwner(String newUserId , Application application ) throws APIManagementException;
 
     /**
      * Returns a list of applications for a given subscriber

@@ -103,6 +103,10 @@ public class Application {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public Subscriber getSubscriber() {
         return subscriber;
     }
