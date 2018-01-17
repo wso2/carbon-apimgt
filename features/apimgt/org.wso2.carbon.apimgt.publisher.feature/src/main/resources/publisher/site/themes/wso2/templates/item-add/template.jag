@@ -141,6 +141,10 @@
 			<div id="accordion1-collapse3" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
 				<div class="panel-body">
 					<form class="form-horizontal" id="designNewAPI-form" enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>">
+                         <select class="select required form-control" id="apiDefType" name="apiDefType" >
+                                                    <option value="3.0" id="openapi3">Open API 3.0</option>
+                                                    <option value="2.0" id="openapi2">Open API 2.0 </option>
+                                                </select>
                         <input name="action" value="start" type="hidden"/>
                         <input name="type" value="new" type="hidden"/>
 	                        <button id="designNewAPI" class="btn btn-primary has-spinner" type="button"><%=i18n.localize("Start Creating")%></button>

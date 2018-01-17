@@ -874,7 +874,20 @@
 	                    }
 	                }
                 });
-        <% } %>
-    });
-</script>    
+        <% }
+            var apiDefinitionType = session.get("apiDefinitionType");
+            if(apiDefinitionType){
+                %>
+              $.get( jagg.site.context + "/site/blocks/item-design/ajax/add.jag", { "action" : "getAPIDefinitionType"} , function( data ) {
+                    if(data != null && data != ""){
+                        var apiDocVersion = data;
+                        var designer = APIDesigner();
+	                    designer.load_api_base_document(apiDocVersion);
+                    }
+                });
+                <%
+             }
+    %>
+});
+</script>
 <% }); %>
