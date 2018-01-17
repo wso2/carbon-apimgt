@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.rest.api.store.utils.FileBasedApplicationImportExp
 import org.wso2.carbon.apimgt.rest.api.store.utils.mappings.ApplicationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import java.io.File;
 import java.io.InputStream;
@@ -73,7 +74,7 @@ public class ImportApiServiceImpl extends ImportApiService {
             URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
                     importedApplicationDTO.getApplicationId());
             return Response.created(location).entity(importedApplicationDTO).build();
-        } catch (APIManagementException | URISyntaxException e) {
+        } catch (APIManagementException | URISyntaxException | UserStoreException e) {
             RestApiUtil
                     .handleInternalServerError("Error while importing Application" + username, e, log);
         }

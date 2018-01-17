@@ -1,7 +1,5 @@
 package org.wso2.carbon.apimgt.rest.api.store.impl;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +22,6 @@ public class ExportApiServiceImplTestCase {
     private final String USER = "admin";
     private ExportApiService exportApiService;
     private APIConsumer apiConsumer;
-    private static final Log log = LogFactory.getLog(ExportApiServiceImpl.class);
 
     @Before
     public void init() throws Exception {
@@ -36,8 +33,8 @@ public class ExportApiServiceImplTestCase {
     public void testExportApplicationsGetNotFound() throws Exception {
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiConsumer);
-        Response response= exportApiService.exportApplicationsGet(null);
-        Assert.assertEquals(response.getStatus(),404);
+        Response response = exportApiService.exportApplicationsGet(null);
+        Assert.assertEquals(response.getStatus(), 404);
     }
 
     @Test
@@ -55,7 +52,6 @@ public class ExportApiServiceImplTestCase {
         testApp.setTier("Unlimited");
         PowerMockito.mockStatic(RestApiUtil.class);
         PowerMockito.when(RestApiUtil.getLoggedInUsername()).thenReturn(USER);
-        //PowerMockito.doReturn(USER).when(RestApiUtil.class, "getLoggedInUsername");
         PowerMockito.when(RestApiUtil.getConsumer(USER)).thenReturn(apiConsumer);
         Mockito.when(apiConsumer.getApplicationByUUID("testUUID")).thenReturn(testApp);
         FileBasedApplicationImportExportManager importExportManager =
