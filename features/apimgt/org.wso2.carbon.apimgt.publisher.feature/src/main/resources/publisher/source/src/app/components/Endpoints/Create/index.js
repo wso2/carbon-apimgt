@@ -18,9 +18,15 @@
 'use strict';
 
 import React, {Component} from 'react'
-import {Row, Col, Input, Radio, InputNumber, Switch, Button, message} from 'antd'
-const RadioButton = Radio.Button;
-const RadioGroup = Radio.Group;
+import Table, {TableBody, TableCell, TableRow} from 'material-ui/Table';
+import Radio, {RadioGroup} from 'material-ui/Radio';
+import Switch from 'material-ui/Switch';
+import Button from 'material-ui/Button';
+import Paper from 'material-ui/Paper';
+import Grid from 'material-ui/Grid';
+import NotificationSystem from 'react-notification-system';
+import {FormControlLabel} from 'material-ui/Form';
+import TextField from 'material-ui/TextField';
 
 import API from '../../../data/api'
 
@@ -31,24 +37,20 @@ export default class EndpointCreate extends Component {
         this.state = {
             endpointType: 'http',
             secured: false,
-            creating: false
+            creating: false,
+            securityType: null,
+            maxTPS: 10
         };
         this.handleSubmit = this.handleSubmit.bind(this);
         this.handleInputs = this.handleInputs.bind(this);
-        this.handleSwitch = this.handleSwitch.bind(this);
-        this.handleMaxTPS = this.handleMaxTPS.bind(this);
     }
 
-    handleSwitch(secured) {
-        this.setState({secured: secured});
-    }
+    handleChange = name => (event, checked) => {
+        this.setState({[name]: checked});
+    };
 
     handleInputs(e) {
         this.setState({[e.target.name]: e.target.value});
-    }
-
-    handleMaxTPS(maxTPS) {
-        this.setState({maxTPS: maxTPS});
     }
 
     handleSubmit(e) {
@@ -74,14 +76,20 @@ export default class EndpointCreate extends Component {
         return promisedEndpoint.then(
             response => {
                 const {name, id} = response.obj;
-                message.success("New endpoint " + name + " created successfully");
+                this.refs.notificationSystem.addNotification({
+                    message: 'New endpoint ' + name + ' created successfully', position: 'tc',
+                    level: 'success'
+                });
                 let redirect_url = "/endpoints/" + id + "/";
                 this.props.history.push(redirect_url);
             }
         ).catch(
             error => {
                 console.error(error);
-                message.error("Error occurred while creating the endpoint!");
+                this.refs.notificationSystem.addNotification({
+                    message: 'Error occurred while creating the endpoint!', position: 'tc',
+                    level: 'error'
+                });
                 this.setState({loading: false});
             }
         )
@@ -89,84 +97,101 @@ export default class EndpointCreate extends Component {
 
     render() {
         return (
-            <div>
-                <h4>
-                    Add new Global Endpoint
-                </h4>
-                <form onSubmit={this.handleSubmit}>
-                    <Row style={{marginBottom: "10px"}} type="flex" justify="center">
-                        <Col span={4}>Name</Col>
-                        <Col span={8}>
-                            <Input name="name" onChange={this.handleInputs} placeholder="Endpoint Name"/>
-                        </Col>
-                    </Row>
-
-                    <Row style={{marginBottom: "10px"}} type="flex" justify="center">
-                        <Col span={4}>Type</Col>
-                        <Col span={8}>
-                            <RadioGroup value={this.state.endpointType}
-                                        onChange={e => {
-                                            e.target["name"] = "endpointType";
-                                            this.handleInputs(e)
-                                        }}>
-                                <RadioButton value={"http"}>HTTP</RadioButton>
-                                <RadioButton value={"https"}>HTTPS</RadioButton>
-                            </RadioGroup>
-                        </Col>
-                    </Row>
-                    <Row style={{marginBottom: "10px"}} type="flex" justify="center">
-                        <Col span={4}>Max TPS</Col>
-                        <Col span={8}>
-                            <InputNumber onChange={this.handleMaxTPS} defaultValue={10}/>
-                        </Col>
-                    </Row>
-                    <Row style={{marginBottom: "10px"}} type="flex" justify="center">
-                        <Col span={4}>Service URL</Col>
-                        <Col span={8}>
-                            <Input name="serviceUrl" onChange={this.handleInputs} style={{width: '100%'}}
-                                   addonBefore={this.state.endpointType + "://"}/>
-                        </Col>
-                    </Row>
-                    <Row style={{marginBottom: "10px"}} type="flex" justify="center">
-                        <Col span={4}>Secured</Col>
-                        <Col span={8}>
-                            <Switch onChange={this.handleSwitch} defaultChecked={this.state.secured}/>
-                        </Col>
-                    </Row>
-                    {this.state.secured && (
-                        <Row style={{marginBottom: "10px"}}>
-                            <Col offset={10}>
-                                <Row style={{marginBottom: "10px"}}>
-                                    <Col span={4}>Type</Col>
-                                    <Col span={8}>
-                                        <RadioGroup value={this.state.securityType}
+            <Grid container justify="center" spacing={0}>
+                <Grid item xs={10}>
+                    <Paper>
+                        <Grid item>
+                            <h4>
+                                Add new Global Endpoint
+                            </h4>
+                        </Grid>
+                        {/*<Grid item><form onSubmit={this.handleSubmit}>*/}<Grid>
+                            <Table><TableBody>
+                                <TableRow style={{marginBottom: "10px"}} type="flex">
+                                    <TableCell span={4}>Name</TableCell>
+                                    <TableCell span={8}>
+                                        <TextField name="name" onChange={this.handleInputs}
+                                                   placeholder="Endpoint Name"/>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow style={{marginBottom: "10px"}} type="flex">
+                                    <TableCell span={4}>Type</TableCell>
+                                    <TableCell span={8}>
+                                        <RadioGroup value={this.state.endpointType}
                                                     onChange={e => {
-                                                        e.target["name"] = "securityType";
+                                                        e.target["name"] = "endpointType";
                                                         this.handleInputs(e)
                                                     }}>
-                                            <RadioButton value={"basic"}>Basic</RadioButton>
-                                            <RadioButton value={"digest"}>Digest</RadioButton>
+                                            <FormControlLabel value={"http"} control={<Radio/>} label="HTTP"/>
+                                            <FormControlLabel value={"https"} control={<Radio/>} label="HTTPS"/>
                                         </RadioGroup>
-                                    </Col>
-                                </Row>
-                                <Row style={{marginBottom: "10px"}}>
-                                    <Col span={4}>Username</Col>
-                                    <Col span={8}>
-                                        <Input name="username" onChange={this.handleInputs} placeholder="Username"/>
-                                    </Col>
-                                </Row>
-                                <Row style={{marginBottom: "10px"}}>
-                                    <Col span={4}>Password</Col>
-                                    <Col span={8}>
-                                        <Input name="password" onChange={this.handleInputs} placeholder="Password"/>
-                                    </Col>
-                                </Row>
-                            </Col>
-                        </Row>
-                    )}
-                    <Button loading={this.state.creating} type="primary" onClick={this.handleSubmit}>Create</Button>
-                </form>
-            </div>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow style={{marginBottom: "10px"}} type="flex">
+                                    <TableCell span={4}>Max TPS</TableCell>
+                                    <TableCell span={8}>
+                                        <TextField type="number" onChange={e => {
+                                            e.target["name"] = "maxTPS";
+                                            this.handleInputs(e)
+                                        }}/>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow style={{marginBottom: "10px"}} type="flex">
+                                    <TableCell span={4}>Service URL</TableCell>
+                                    <TableCell span={8}>
+                                        <TextField name="serviceUrl" onChange={this.handleInputs}
+                                                   style={{width: '100%'}}/>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell span={4}>Secured</TableCell>
+                                    <TableCell span={8}>
+                                        <Switch
+                                            checked={this.state.secured}
+                                            onChange={this.handleChange('secured')}
+                                        />
+                                    </TableCell>
+                                </TableRow>
+                                {this.state.secured && (
+                                    <TableRow style={{marginBottom: "10px"}}>
+                                        <TableRow style={{marginBottom: "10px"}}>
+                                            <TableCell span={4}>Type</TableCell>
+                                            <TableCell span={8}>
+                                                <RadioGroup value={this.state.securityType}
+                                                            onChange={e => {
+                                                                e.target["name"] = "securityType";
+                                                                this.handleInputs(e)
+                                                            }}>
+                                                    <FormControlLabel value={"basic"} control={<Radio/>}
+                                                                      label="Basic"/>
+                                                    <FormControlLabel value={"digest"} control={<Radio/>}
+                                                                      label="Digest"/>
+                                                </RadioGroup>
+                                            </TableCell>
+                                        </TableRow>
+                                        <TableRow style={{marginBottom: "10px"}}>
+                                            <TableCell span={4}>Username</TableCell>
+                                            <TableCell span={8}>
+                                                <TextField name="username" onChange={this.handleInputs}
+                                                           placeholder="Username"/>
+                                            </TableCell>
+                                        </TableRow>
+                                        <TableRow style={{marginBottom: "10px"}}>
+                                            <TableCell span={4}>Password</TableCell>
+                                            <TableCell span={8}>
+                                                <TextField name="password" onChange={this.handleInputs}
+                                                           placeholder="Password"/>
+                                            </TableCell>
+                                        </TableRow>
+                                    </TableRow>
+                                )}</TableBody></Table>
+                            <Button type="primary" onClick={this.handleSubmit}>
+                                <NotificationSystem ref="notificationSystem"/>
+                                Create</Button>
+                        </Grid>
+                    </Paper>
+                </Grid>
+            </Grid>
         );
     }
 }
