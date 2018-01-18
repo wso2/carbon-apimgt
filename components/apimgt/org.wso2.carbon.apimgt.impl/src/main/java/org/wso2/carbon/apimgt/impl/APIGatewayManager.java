@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.impl.utils.EndpointAdminClient;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
@@ -95,8 +96,10 @@ public class APIGatewayManager {
                 continue;
             }
             APIGatewayAdminClient client;
+            EndpointAdminClient endpointClient;
             try {
                 client = new APIGatewayAdminClient(api.getId(), environment);
+                endpointClient = new EndpointAdminClient(api.getId(), environment);
 			String operation;
 			// If the API exists in the Gateway
 			if (client.getApi(tenantDomain, api.getId()) != null) {
@@ -176,6 +179,7 @@ public class APIGatewayManager {
                         } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT
                                 .equalsIgnoreCase(api.getImplementation())) {
                             client.addApi(builder, tenantDomain, api.getId());
+                            endpointClient.addEndpoint(builder, tenantDomain, api.getId());
                         }
 
                         if (api.isDefaultVersion()) {
