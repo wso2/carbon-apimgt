@@ -27,11 +27,12 @@ import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
 import { Delete, Edit, CreateNewFolder, Description  }from 'material-ui-icons';
 import TextField from 'material-ui/TextField';
-
+import IconButton from 'material-ui/IconButton';
 import Paper from 'material-ui/Paper';
-import Input from 'material-ui/Input';
+import Input, { InputLabel } from 'material-ui/Input';
 import Select from 'material-ui/Select';
-import { FormControl } from 'material-ui/Form';
+import { FormControl, FormHelperText } from 'material-ui/Form';
+import BackIcon from 'material-ui-icons/ArrowBack';
 
 class ApplicationCreate extends Component {
 
@@ -107,55 +108,54 @@ class ApplicationCreate extends Component {
 
     render() {
         return (
-            <Grid>
-                <Grid item xs={12}>
-                    <Paper style={{display:"flex"}}>
-                        <Typography type="display2" gutterBottom className="page-title">
-                            Applications
-                        </Typography>
+            <Grid container justify="center" alignItems="center" className="fullWidth">
+                <Grid item xs={12} sm={12} md={8} lg={8} xl={8} >
+                    <Typography type="display1" gutterBottom>
                         <Link to={"/applications"}>
-                            <Button aria-owns="simple-menu" aria-haspopup="true" >
-                                <CreateNewFolder /> Applications
-                            </Button>
-                        </Link>
-                    </Paper>
-                </Grid>
-                <Grid item xs={12}  style={{paddingLeft:"40px", paddingRight:"20px  "}}>
-                        <p className="help-text">
-                            An application is a logical collection of APIs. Applications allow you to use a single access
-                            token to invoke a collection of APIs and to subscribe to one API multiple times with different
-                            SLA levels. The DefaultApplication is pre-created and allows unlimited access by default.
-                        </p>
-                    <Input name="applicationName" placeholder="Application Name" onChange={this.handleChange('name')}/>
-                        <Typography type="caption" style={{marginTop:"20px"}} gutterBottom >
-                            Per Token Quota
-                        </Typography>
+                            <IconButton aria-label="Back">
+                                <BackIcon/>
+                            </IconButton>
+                        </Link>Create Applications
+                    </Typography>
+                    <Paper className="add-form-padding">
+                        <TextField
+                            required
+                            label="Application Name"
+                            margin="normal"
+                            onChange={this.handleChange('name')}
+                        />
+                        <br />
                         {this.state.tiers &&
-                        <FormControl style={{width:"40%",marginBottom:"20px"}}>
+
+                        <FormControl margin="normal">
+                            <InputLabel htmlFor="quota-helper">Per Token Quota</InputLabel>
                             <Select
-                                style={{width:"50%"}}
+                                style={{width:"30%"}}
                                 value={this.state.quota}
                                 onChange={this.handlePolicyChange('quota')}
+                                input={<Input name="quota" id="quota-helper" />}
                             >
                                 {this.state.tiers.map((tier) => <MenuItem key={tier} value={tier}>{tier}</MenuItem>)}
                             </Select>
+                            <FormHelperText>Assign API request quota per access token. Allocated quota will be
+                            shared among all the subscribed APIs of the application.</FormHelperText>
                         </FormControl>
                         }
-                        <br />
-                        <Typography type="caption" gutterBottom>
-                            This feature allows you to assign an API request quota per access token. Allocated quota will be
-                            shared among all the subscribed APIs of the application.
-                        </Typography>
-                        <br />
-                        <Input name="description" placeholder="Application Description" onChange={this.handleChange('description')}/>
-
-                        <br />
-                    <Button onClick={this.handleSubmit} raised color="primary" style={{marginRight:"20px"}}>
-                        Add Application
-                    </Button>
-                    <Button raised >
-                        Cancel
-                    </Button>
+                        <TextField
+                            label="Application Description"
+                            margin="normal"
+                            onChange={this.handleChange('description')}
+                            fullWidth
+                        />
+                        <div className="form-buttons">
+                            <Button onClick={this.handleSubmit} raised color="primary" style={{marginRight:"20px"}}>
+                                Add Application
+                            </Button>
+                            <Button raised >
+                                Cancel
+                            </Button>
+                        </div>    
+                    </Paper>
                 </Grid>
             </Grid>
         );

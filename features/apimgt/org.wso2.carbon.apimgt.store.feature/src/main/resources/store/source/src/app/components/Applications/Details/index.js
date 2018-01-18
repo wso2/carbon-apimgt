@@ -20,17 +20,25 @@ import React, {Component} from 'react'
 import BasicTabs from './NavTab.js'
 import Overview from './Overview.js'
 import ProductionKeys from './ProductionKeys.js'
+import SandboxKeys from './SandboxKeys.js'
+import Subscriptions from './Subscriptions'
 import {Route, Switch, Redirect} from 'react-router-dom'
 import API from '../../../data/api.js'
 import {PageNotFound} from '../../Base/Errors/index'
+import Grid from 'material-ui/Grid';
+import Typography from 'material-ui/Typography';
 import AppBar from 'material-ui/AppBar';
 import Tabs, {Tab} from 'material-ui/Tabs';
 import PhoneIcon from 'material-ui-icons/Phone';
+import ComputerIcon from 'material-ui-icons/Computer';
+import SubscriptionsIcon  from 'material-ui-icons/Subscriptions';
+import KeysIcon  from 'material-ui-icons/VpnKey';
 import FavoriteIcon from 'material-ui-icons/Favorite';
 import BasicInfo from './BasicInfo'
 import PersonPinIcon from 'material-ui-icons/PersonPin';
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
+
 
 export default class Details extends Component {
 
@@ -77,31 +85,35 @@ export default class Details extends Component {
         }
 
         return (
-            <div className="tab-content">
-                <BasicInfo uuid={this.props.match.params.application_uuid}/>
-                <AppBar position="static" color="default" style={{margin: "10px 0px 10px 35px"}}>
-                    <Tabs
-                        value={this.state.value}
-                        onChange={this.handleChange}
-                        fullWidth
-                        indicatorColor="accent"
-                        textColor="accent"
-                    >
-                        <Tab value="overview" icon={<PhoneIcon />} label="Overview"/>
-                        <Tab value="productionkeys" icon={<PhoneIcon />} label="Production Keys"/>
-                        <Tab value="sandBoxkeys" icon={<PhoneIcon />} label="SandBox Keys"/>
-                        <Tab value="subscriptions" icon={<PhoneIcon />} label="Subscriptions"/>
-                    </Tabs>
-                </AppBar>
-                <Switch>
-                    <Redirect exact from="/applications/:applicationId" to={redirect_url}/>
-                    <Route path="/applications/:applicationId/overview" component={Overview}/>
-                    <Route path="/applications/:applicationId/productionkeys" component={ProductionKeys}/>
-                    <Route path="/applications/:applicationId/sandBoxkeys" component={Overview}/>
-                    <Route path="/applications/:applicationId/subscriptions" component={Overview}/>
-                    <Route component={PageNotFound}/>
-                </Switch>
-            </div>
+            <Grid container spacing={0} justify="center">
+                <Grid item xs={12} sm={6} md={8} lg={8} xl={10} >
+                    <Typography type="display1" gutterBottom>
+                        {this.state.application.name}
+                    </Typography>
+                    <AppBar position="static">
+                        <Tabs
+                            value={this.state.value}
+                            onChange={this.handleChange}
+                            fullWidth
+                            indicatorColor="accent"
+                            textColor="accent"
+                        >
+                            <Tab value="overview" icon={<ComputerIcon />} label="Overview"/>
+                            <Tab value="productionkeys" icon={<KeysIcon />} label="Production Keys"/>
+                            <Tab value="sandBoxkeys" icon={<KeysIcon />} label="SandBox Keys"/>
+                            <Tab value="subscriptions" icon={<SubscriptionsIcon />} label="Subscriptions"/>
+                        </Tabs>
+                    </AppBar>
+                    <Switch>
+                        <Redirect exact from="/applications/:applicationId" to={redirect_url}/>
+                        <Route path="/applications/:applicationId/overview" component={Overview}/>
+                        <Route path="/applications/:applicationId/productionkeys" component={ProductionKeys}/>
+                        <Route path="/applications/:applicationId/sandBoxkeys" component={SandboxKeys}/>
+                        <Route path="/applications/:applicationId/subscriptions" component={Subscriptions}/>
+                        <Route component={PageNotFound}/>
+                    </Switch>
+                </Grid>
+        </Grid>
         );
     }
 

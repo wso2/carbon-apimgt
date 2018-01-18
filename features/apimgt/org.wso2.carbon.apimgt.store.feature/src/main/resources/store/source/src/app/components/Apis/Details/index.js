@@ -61,11 +61,11 @@ export default class Details extends Component {
         const {api} = this.state;
         return (
             <Grid container spacing={0} justify="center">
-                <Grid item xs={12} sm={6} md={9} lg={9} xl={10} >
-                    <Typography type="display1" gutterBottom className="heading-margin">
+                <Grid item xs={12} sm={6} md={8} lg={8} xl={10} >
+                    <Typography type="display1" gutterBottom>
                         {api && api.name}  <span style={{fontSize: "50%"}}>{api && api.version} </span>
                     </Typography>
-                    <AppBar position="static" color="default">
+                    <AppBar position="static">
                         <Tabs
                             value={this.state.value}
                             onChange={this.handleChange}

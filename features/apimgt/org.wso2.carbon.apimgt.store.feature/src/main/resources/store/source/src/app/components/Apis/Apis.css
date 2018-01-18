@@ -113,7 +113,7 @@ h2 span{
     }
 }
 .parent-container {
-    margin: 50px 0 !important;
+    padding: 82px 0 !important;
 }
 .add-item-left-padding{
     padding-left:30px;
@@ -123,5 +123,14 @@ h2 span{
 }
 .tab-grid{
     width: 100%;
-    padding: 5%;
+    padding:4%;
+}
+.fullWidth{
+    width: 100%;
+}
+.add-form-padding{
+    padding: 0 4% 4% 4%;
+}
+.form-buttons {
+   margin-top: 3%;
 }

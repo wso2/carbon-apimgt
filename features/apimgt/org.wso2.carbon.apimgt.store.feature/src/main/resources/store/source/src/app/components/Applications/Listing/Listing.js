@@ -35,10 +35,12 @@ import Alert from "../../Base/Alert";
 import qs from 'qs';
 
 const styles = theme => ({
-    fullWidth: {
-        width: "100%",
-        "margin-top": "1%"
-    }
+    fab: {
+        position:'fixed',
+        float: 'right',
+        right: theme.spacing.unit * 3,
+        bottom: theme.spacing.unit * 3,
+    },
 });
 
 class ApplicationTableHead extends Component {
@@ -154,24 +156,22 @@ class Listing extends Component {
         return (
             <div>
                 {alertMessage && <Alert message={alertMessage}/>}
-                <Grid className={classes.fullWidth} container justify="center" alignItems="center">
-                    <Grid item xs={11}>
+                <Grid className="fullWidth" container justify="center" alignItems="center">
+                    <Grid item xs={12} sm={12} md={8} lg={8} xl={8} >
+                        <Typography type="display1" gutterBottom className="heading-margin">
+                            Applications
+                        </Typography>
+
+                        <Typography type="caption"  paragraph={true}>
+                            An application is a logical collection of APIs. Applications allow you to use a
+                            single
+                            access
+                            token to invoke a collection of APIs and to subscribe to one API multiple times with
+                            different
+                            SLA levels. The DefaultApplication is pre-created and allows unlimited access by
+                            default.
+                        </Typography>
                         <Paper>
-                            <Grid item xs={10}>
-                                <Typography type="display1" className="page-title">
-                                    Applications
-                                </Typography>
-                                <Typography type="caption" className="page-title" paragraph={true}>
-                                    An application is a logical collection of APIs. Applications allow you to use a
-                                    single
-                                    access
-                                    token to invoke a collection of APIs and to subscribe to one API multiple times with
-                                    different
-                                    SLA levels. The DefaultApplication is pre-created and allows unlimited access by
-                                    default.
-                                </Typography>
-                            </Grid>
-                            <hr/>
                             {data.size > 0 ? (
                                 <Table>
                                     <ApplicationTableHead order={order} orderBy={orderBy}
@@ -188,21 +188,16 @@ class Listing extends Component {
                                 </Grid>
                             )}
                         </Paper>
-                    </Grid>
-                    <Grid className={classes.fullWidth} container justify="flex-end" alignItems="center">
-                        <Grid item xs={1}>
-                            <Link to={"/application/create"}>
-                                <Tooltip title="Create an Application" placement="bottom">
-                                    <Button fab color="accent" aria-label="add" className={classes.button}>
-                                        <AddIcon />
-                                    </Button>
-                                </Tooltip>
-                            </Link>
-                        </Grid>
+                        <Link to={"/application/create"}>
+                            <Tooltip title="Create Application" placement="bottom">
+                                <Button fab color="accent" className={classes.fab} aria-label="add" >
+                                    <AddIcon />
+                                </Button>
+                            </Tooltip>
+                        </Link>
                     </Grid>
                 </Grid>
             </div>
-
         );
     }
 }
