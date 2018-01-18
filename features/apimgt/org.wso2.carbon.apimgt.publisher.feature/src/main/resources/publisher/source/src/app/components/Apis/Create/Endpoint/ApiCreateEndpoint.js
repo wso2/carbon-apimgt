@@ -28,7 +28,6 @@ import Grid from 'material-ui/Grid';
 import {withStyles} from 'material-ui/styles';
 import grey from 'material-ui/colors/grey';
 import green from 'material-ui/colors/green';
-import Alert from "../../../Shared/Alert";
 import {CircularProgress} from 'material-ui/Progress';
 
 const styles = theme => ({
@@ -37,8 +36,7 @@ const styles = theme => ({
             marginTop: 30,
         },
         paper: {
-            padding: 20,
-            textAlign: 'left',
+            padding: theme.spacing.unit * 2,
         },
         subHeadings: {
             fontWeight: "300",
@@ -188,7 +186,6 @@ class ApiCreateEndpoint extends React.Component {
         };
         return (
             <div className={classes.root}>
-                <Alert message={message}/>
                 <Grid container spacing={0} justify="center">
                     <Grid item md={10} className="page-content">
                         <Paper className={classes.paper}>

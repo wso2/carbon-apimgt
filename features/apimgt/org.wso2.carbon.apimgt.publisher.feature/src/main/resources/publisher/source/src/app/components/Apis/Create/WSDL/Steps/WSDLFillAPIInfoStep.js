@@ -16,10 +16,6 @@
  * under the License.
  */
 import React from 'react';
-import SingleInput from '../../FormComponents/SingleInput';
-import {Redirect} from 'react-router-dom'
-import API from '../../../../../data/api.js'
-import {toast} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
 
 
