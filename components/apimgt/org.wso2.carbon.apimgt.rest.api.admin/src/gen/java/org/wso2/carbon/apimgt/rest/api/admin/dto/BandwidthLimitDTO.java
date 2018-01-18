@@ -16,15 +16,16 @@ public class BandwidthLimitDTO extends ThrottleLimitDTO {
   
   
   
-  private Long dataAmount = 0l;
+  private Long dataAmount = null;
   
   
   private String dataUnit = null;
 
   
   /**
+   * Amount of data allowed to be transfered
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Amount of data allowed to be transfered")
   @JsonProperty("dataAmount")
   public Long getDataAmount() {
     return dataAmount;
@@ -35,8 +36,9 @@ public class BandwidthLimitDTO extends ThrottleLimitDTO {
 
   
   /**
+   * Unit of data allowed to be transfered. Allowed values are \"KB\", \"MB\" and \"GB\"
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Unit of data allowed to be transfered. Allowed values are \"KB\", \"MB\" and \"GB\"")
   @JsonProperty("dataUnit")
   public String getDataUnit() {
     return dataUnit;

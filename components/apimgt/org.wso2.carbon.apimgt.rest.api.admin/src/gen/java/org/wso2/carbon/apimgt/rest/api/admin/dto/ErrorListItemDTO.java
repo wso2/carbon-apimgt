@@ -22,8 +22,9 @@ public class ErrorListItemDTO  {
 
   
   /**
+   * Error code
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "Error code")
   @JsonProperty("code")
   public String getCode() {
     return code;

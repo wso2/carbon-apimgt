@@ -23,8 +23,9 @@ public class CustomRuleDTO extends ThrottlePolicyDTO {
 
   
   /**
+   * Siddhi query which represents the custom throttling policy
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Siddhi query which represents the custom throttling policy")
   @JsonProperty("siddhiQuery")
   public String getSiddhiQuery() {
     return siddhiQuery;
@@ -35,8 +36,9 @@ public class CustomRuleDTO extends ThrottlePolicyDTO {
 
   
   /**
+   * The specific combination of attributes that are checked in the policy.
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "The specific combination of attributes that are checked in the policy.")
   @JsonProperty("keyTemplate")
   public String getKeyTemplate() {
     return keyTemplate;

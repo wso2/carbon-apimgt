@@ -29,8 +29,9 @@ public class ConditionalGroupDTO  {
 
   
   /**
+   * Description of the Conditional Group
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Description of the Conditional Group")
   @JsonProperty("description")
   public String getDescription() {
     return description;
@@ -41,8 +42,9 @@ public class ConditionalGroupDTO  {
 
   
   /**
+   * Individual throttling conditions. They can be defined as either HeaderCondition, IPCondition, JWTClaimsCondition, QueryParameterCondition\nPlease see schemas of each of those throttling condition in Definitions section.\n
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "Individual throttling conditions. They can be defined as either HeaderCondition, IPCondition, JWTClaimsCondition, QueryParameterCondition\nPlease see schemas of each of those throttling condition in Definitions section.\n")
   @JsonProperty("conditions")
   public List<ThrottleConditionDTO> getConditions() {
     return conditions;

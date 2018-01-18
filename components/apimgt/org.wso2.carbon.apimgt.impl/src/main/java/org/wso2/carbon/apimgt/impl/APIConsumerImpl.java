@@ -90,6 +90,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -3299,7 +3300,50 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         }
     }
 
-	public JSONObject resumeWorkflow(Object[] args) {
+    @Override
+    public Application[] getApplicationsByOwner(String userId) throws APIManagementException {
+        return apiMgtDAO.getApplicationsByOwner(userId);
+    }
+
+    @Override
+    public boolean updateApplicationOwner(String userId, Application application) throws APIManagementException {
+
+        boolean isAppUpdated = false;
+
+        try {
+            String oldUserRoles[];
+            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                    .getTenantId(MultitenantUtils.getTenantDomain(username));
+            UserStoreManager userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
+            String oldUserName = application.getSubscriber().getName();
+            oldUserRoles = userStoreManager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(oldUserName));
+            List<String> roleList = new ArrayList<String>();
+            for (String role : oldUserRoles) {
+                if (role.contains(application.getName())) {
+                    roleList.add(role);
+                }
+            }
+
+            String[] roleArr = roleList.toArray(new String[roleList.size()]);
+            userStoreManager.updateRoleListOfUser(userId, null, roleArr);
+            isAppUpdated = true;
+
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            handleException("Error when getting the tenant's UserStoreManager or when getting roles of user ", e);
+        }
+
+        if (isAppUpdated) {
+            isAppUpdated = apiMgtDAO.updateApplicationOwner(userId, application);
+        }
+
+        //todo update Outh application once the oauth component supports to update the owner
+
+        return isAppUpdated;
+    }
+
+
+    public JSONObject resumeWorkflow(Object[] args) {
     	JSONObject row = new JSONObject();
 
         if (args != null && APIUtil.isStringArray(args)) {

@@ -23,8 +23,9 @@ public class JWTClaimsConditionDTO extends ThrottleConditionDTO {
 
   
   /**
+   * JWT claim URL
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "JWT claim URL")
   @JsonProperty("claimUrl")
   public String getClaimUrl() {
     return claimUrl;
@@ -35,8 +36,9 @@ public class JWTClaimsConditionDTO extends ThrottleConditionDTO {
 
   
   /**
+   * Attribute to be matched
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Attribute to be matched")
   @JsonProperty("attribute")
   public String getAttribute() {
     return attribute;
