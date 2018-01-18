@@ -40,4 +40,13 @@ public class EndpointAdminClient {
             throw new AxisFault("Error while deleting Endpoint from the gateway. " + e.getMessage(), e);
         }
     }
+
+    public void saveEndpoint(APITemplateBuilder builder) throws AxisFault {
+        try {
+            String endpointConfig = builder.getConfigStringForEndpointTemplate(environment);
+            endpointAdminStub.saveEndpoint(endpointConfig);
+        } catch (Exception e) {
+            throw new AxisFault("Error updating Endpoint file" + e.getMessage(), e);
+        }
+    }
 }
