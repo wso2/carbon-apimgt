@@ -3327,10 +3327,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             isAppUpdated = true;
 
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
-            // Log and return since we do not want to update the APIM datbase if we cannot assign the roles to the
-            // new user
-            isAppUpdated = false;
-            log.error("Error when getting the tenant's UserStoreManager or when getting roles of user ", e);
+            handleException("Error when getting the tenant's UserStoreManager or when getting roles of user ", e);
         }
 
         if (isAppUpdated) {
