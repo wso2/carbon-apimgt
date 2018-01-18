@@ -234,7 +234,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     }
 
     @Override
-    public String getConfigStringForEndpointTemplate(Environment environment) throws APITemplateException {
+    public String getConfigStringForEndpointTemplate(String endpointType) throws APITemplateException {
         StringWriter writer = new StringWriter();
 
         try {
@@ -259,6 +259,8 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                 velocityengine.setProperty( "runtime.log.logsystem.log4j.logger", getVelocityLogger());
             }
             velocityengine.init();
+
+            context.put("type", endpointType);
 
             Template t = velocityengine.getTemplate(this.getEndpointTemplatePath());
 

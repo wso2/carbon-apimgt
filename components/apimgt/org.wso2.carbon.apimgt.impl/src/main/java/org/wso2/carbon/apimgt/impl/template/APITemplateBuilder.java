@@ -29,6 +29,6 @@ public interface APITemplateBuilder {
 
     String getConfigStringForDefaultAPITemplate(String defaultVersion) throws APITemplateException;
 
-    String getConfigStringForEndpointTemplate(Environment environment) throws APITemplateException;
+    String getConfigStringForEndpointTemplate(String endpointType) throws APITemplateException;
 
 }

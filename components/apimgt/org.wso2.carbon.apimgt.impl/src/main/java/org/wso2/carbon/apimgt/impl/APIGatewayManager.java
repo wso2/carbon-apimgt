@@ -180,7 +180,7 @@ public class APIGatewayManager {
                         } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT
                                 .equalsIgnoreCase(api.getImplementation())) {
                             client.addApi(builder, tenantDomain, api.getId());
-                            endpointClient.addEndpoint(builder, tenantDomain, api.getId());
+                            endpointClient.addEndpoint(api, builder);
                         }
 
                         if (api.isDefaultVersion()) {
