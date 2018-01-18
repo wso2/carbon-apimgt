@@ -248,6 +248,7 @@ public class APIGatewayManager {
                     }
 
                     APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
+                    EndpointAdminClient endpointClient = new EndpointAdminClient(api.getId(), environment);
                     if(!APIConstants.APIType.WS.toString().equals(api.getType())) {
                         if (client.getApi(tenantDomain, api.getId()) != null) {
                             if (debugEnabled) {
@@ -255,6 +256,7 @@ public class APIGatewayManager {
                                         environment.getName());
                             }
                             client.deleteApi(tenantDomain, api.getId());
+                            endpointClient.deleteEndpoint(api.getId().getApiName() + "--" + api.getId().getVersion());
                             undeployCustomSequences(api, tenantDomain, environment);
                         }
                     } else {
