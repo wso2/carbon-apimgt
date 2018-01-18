@@ -39,12 +39,17 @@ import 'react-select/dist/react-select.css';
 import Subscriptions  from 'material-ui-icons/Subscriptions';
 import {FormControl} from 'material-ui/Form';
 import NotificationSystem from 'react-notification-system';
+import FavoriteIcon from 'material-ui-icons/Favorite';
+import ShareIcon from 'material-ui-icons/Share';
+import IconButton from 'material-ui/IconButton';
+import Divider from 'material-ui/Divider';
+import CodeIcon from 'material-ui-icons/Code';
+import EmailIcon from 'material-ui-icons/Email';
 
 const styles = theme => ({
-    fullWidth: {
-        width: "100%",
-        "margin-top": "1%"
-    }
+    media: {
+        height: 200,
+    },
 });
 
 class BasicInfo extends Component {
@@ -275,12 +280,7 @@ class BasicInfo extends Component {
         return (
             this.state.api ?
                 <div>
-                    <Grid className={classes.fullWidth} container justify="center" alignItems="center">
-                        <Grid item xs={12}>
-                            <Paper style={{display: "flex"}}>
-                                <Typography type="display2" gutterBottom className="page-title">
-                                    {api.name} - <span style={{fontSize: "50%"}}>Overview</span>
-                                </Typography>
+                    <Grid container className="tab-grid" spacing={0} >
                                 {/*<Button aria-owns="simple-menu" aria-haspopup="true" >
                                  <Edit /> Edit
                                  </Button>
@@ -290,47 +290,52 @@ class BasicInfo extends Component {
                                  <Button aria-owns="simple-menu" aria-haspopup="true" >
                                  <Description /> View Swagger
                                  </Button>*/}
-                            </Paper>
-                        </Grid>
-                        <Grid item xs={12} sm={12} md={3} lg={3} xl={2} style={{paddingLeft: "40px"}}>
-
-                            <Card>
-                                <CardMedia image="/store/public/app/images/api/api-default.png">
-                                </CardMedia>
+                        <Grid item xs={12} sm={12} md={6} lg={3} xl={2}>
+                            <Card >
+                                <CardMedia  className={classes.media}
+                                    image="/store/public/app/images/api/api-default.png"
+                                    title="API icon"
+                                />
                                 <CardContent>
-                                    <div className="custom-card">
-                                        <Badge status="processing" text={api.lifeCycleStatus}/>
-                                        <p>11 Apps</p>
-                                        <a href={"/store/apis/" + this.api_uuid} target="_blank" title="Store">View in
-                                            store</a>
-                                    </div>
+                                    <Typography type="headline" component="h2">
+                                        {api.name}
+                                    </Typography>
+                                    <Typography type="subheading" color="secondary">
+                                        {api.version} by {api.provider}
+                                    </Typography>
+                                    <StarRatingBar apiIdProp={this.api_uuid}></StarRatingBar>
                                 </CardContent>
-                                <CardActions>
-                                    {api.lifeCycleStatus}
-
-                                    <Button dense color="primary">
-                                        <a href={"/store/apis/" + this.api_uuid} target="_blank" title="Store">View in
-                                            store</a>
-                                    </Button>
+                                <Divider />
+                                <CardActions disableActionSpacing>
+                                    <IconButton aria-label="Add to favorites">
+                                        <FavoriteIcon />
+                                    </IconButton>
+                                    <IconButton aria-label="Share">
+                                        <ShareIcon />
+                                    </IconButton>
+                                    <IconButton aria-label="Embed">
+                                        <CodeIcon />
+                                    </IconButton>
+                                    <IconButton aria-label="Email">
+                                        <EmailIcon />
+                                    </IconButton>
                                 </CardActions>
                             </Card>
                         </Grid>
-                        <Grid item xs={12} sm={6} md={3} lg={3} xl={2} style={{paddingLeft: "40px"}}>
+                        <Grid item xs={12} sm={12} md={6} lg={4} xl={4} className="add-item-left-padding ">
                             <Table>
                                 <TableBody>
-
-
                                     <TableRow>
-                                        <TableCell>Version</TableCell><TableCell>{api.version}</TableCell>
+                                        <TableCell>
+                                            Status</TableCell><TableCell><Badge status="processing" text={api.lifeCycleStatus}/></TableCell>
                                     </TableRow>
-
                                     <TableRow>
                                         <TableCell>Context</TableCell><TableCell>{api.context}</TableCell>
                                     </TableRow>
                                     <TableRow>
-                                        <TableCell>Context</TableCell><TableCell>{api.provider}</TableCell>
+                                        <TableCell>Default API
+                                            Version</TableCell><TableCell>{api.isDefaultVersion}</TableCell>
                                     </TableRow>
-
                                     <TableRow>
                                         <TableCell>Date Created</TableCell><TableCell>{api.createdTime}</TableCell>
                                     </TableRow>
@@ -338,27 +343,16 @@ class BasicInfo extends Component {
                                         <TableCell>Date Last
                                             Updated</TableCell><TableCell>{api.lastUpdatedTime}</TableCell>
                                     </TableRow>
-
                                     <TableRow>
-                                        <TableCell>Default API
-                                            Version</TableCell><TableCell>{api.isDefaultVersion}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>Default API
-                                            Version</TableCell><TableCell>{api.lifeCycleStatus}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>Rating</TableCell>
+                                        <TableCell>Rate it</TableCell>
                                         <TableCell>
                                             <StarRatingBar apiIdProp={this.api_uuid}></StarRatingBar>
                                         </TableCell>
                                     </TableRow>
-
-
                                 </TableBody>
                             </Table>
                         </Grid>
-                        <Grid item xs={12} sm={6} md={6} lg={6} xl={8} style={{paddingLeft: "40px"}}>
+                        <Grid item xs={12}>
                             <Typography type="subheading" gutterBottom>
                                 Applications
                             </Typography>

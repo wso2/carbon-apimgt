@@ -22,7 +22,8 @@ import {Button, message} from 'antd';
 import DocumentsTable from './DocumentsTable';
 import Loading from '../../../Base/Loading/Loading'
 import Grid from 'material-ui/Grid';
-import Paper from 'material-ui/Paper'
+import Paper from 'material-ui/Paper';
+import Typography from 'material-ui/Typography';
 
 
 class Documents extends Component {
@@ -113,16 +114,17 @@ class Documents extends Component {
                                         viewDocContentHandler={this.viewDocContentHandler}
                                         downloadFile={this.downloadFile}
                         /> ) :
-	    (<Grid container style={{paddingLeft:"40px"}}>
-                    <Grid item xs={12} sm={6} md={9} lg={9} xl={10} >
-                        <Paper style={{paddingLeft:"40px"}}>
-            <div style={{paddingTop: 20}}>
-                <h3 style={{paddingBottom: 15}}>No documents added into the API</h3>
-            </div>
-                        </Paper>
-                    </Grid>
-                </Grid>)
-             }
+                        (<Paper>
+                            <Grid container className="tab-grid" spacing={0} justify="center">
+                                <Grid item xs={12}>
+                                    <Typography type="display1" gutterBottom >
+                                        <span style={{fontSize: "50%"}}>No documents added into the API</span>
+                                    </Typography>
+                                </Grid>
+                            </Grid>
+                         </Paper>
+                        )
+                }
             </div>
         );
     }
