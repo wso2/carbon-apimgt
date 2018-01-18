@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.axis2.AxisFault;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -92,10 +93,14 @@ import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.user.mgt.stub.UserAdminStub;
+import org.wso2.carbon.user.mgt.stub.UserAdminUserAdminException;
+import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.nio.charset.Charset;
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -3311,14 +3316,18 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         boolean isAppUpdated = false;
 
         try {
-            String oldUserRoles[];
             RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(MultitenantUtils.getTenantDomain(username));
             UserStoreManager userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
             String oldUserName = application.getSubscriber().getName();
-            oldUserRoles = userStoreManager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(oldUserName));
+            String[] oldUserRoles = userStoreManager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername
+                    (oldUserName));
+            String[] newUserRoles = userStoreManager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername
+                    (userId));
+
             List<String> roleList = new ArrayList<String>();
+            roleList.addAll(Arrays.asList(newUserRoles));
             for (String role : oldUserRoles) {
                 if (role.contains(application.getName())) {
                     roleList.add(role);
@@ -3326,10 +3335,23 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             }
 
             String[] roleArr = roleList.toArray(new String[roleList.size()]);
-            userStoreManager.updateRoleListOfUser(userId, null, roleArr);
+
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                    .getAPIManagerConfiguration();
+            String serverURL = config.getFirstProperty(APIConstants.AUTH_MANAGER_URL) + "UserAdmin";
+            String adminUsername = config.getFirstProperty(APIConstants.AUTH_MANAGER_USERNAME);
+            String adminPassword = config.getFirstProperty(APIConstants.AUTH_MANAGER_PASSWORD);
+
+            UserAdminStub userAdminStub = new UserAdminStub(serverURL);
+            CarbonUtils.setBasicAccessSecurityHeaders(adminUsername, adminPassword, userAdminStub._getServiceClient());
+            userAdminStub.updateRolesOfUser(userId, roleArr);
             isAppUpdated = true;
 
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            handleException("Error when getting the tenant's UserStoreManager or when getting roles of user ", e);
+        } catch (RemoteException e) {
+            handleException("Server couldn't establish connection with auth manager ", e);
+        } catch (UserAdminUserAdminException e) {
             handleException("Error when getting the tenant's UserStoreManager or when getting roles of user ", e);
         }
 

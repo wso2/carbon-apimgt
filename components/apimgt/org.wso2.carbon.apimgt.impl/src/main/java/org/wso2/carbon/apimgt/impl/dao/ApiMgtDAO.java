@@ -4234,11 +4234,13 @@ public class ApiMgtDAO {
 
     /**
      * Returns all applications created by given user Id
-     * @param userId
+     *
+     * @param userName
      * @return
      * @throws APIManagementException
      */
-    public boolean updateApplicationOwner(String userId, Application application) throws APIManagementException {
+    public boolean updateApplicationOwner(String userName, Application application) throws
+            APIManagementException {
 
         boolean isAppUpdated = false;
         Connection connection = null;
@@ -4248,19 +4250,22 @@ public class ApiMgtDAO {
         String sqlQuery = SQLConstants.UPDATE_APPLICATION_OWNER;
 
         try {
-
-            int subscriberId = getSubscriber(userId).getId();
-            connection = APIMgtDBUtil.getConnection();
-            prepStmt = connection.prepareStatement(sqlQuery);
-            prepStmt.setString(1, userId);
-            prepStmt.setInt(2, subscriberId);
-            prepStmt.setString(3, application.getUUID());
-            prepStmt.executeUpdate();
-            isAppUpdated = true;
-
+            Subscriber subscriber = getSubscriber(userName);
+            if (subscriber != null) {
+                int subscriberId = getSubscriber(userName).getId();
+                connection = APIMgtDBUtil.getConnection();
+                prepStmt = connection.prepareStatement(sqlQuery);
+                prepStmt.setString(1, userName);
+                prepStmt.setInt(2, subscriberId);
+                prepStmt.setString(3, application.getUUID());
+                prepStmt.executeUpdate();
+                isAppUpdated = true;
+            } else {
+                String errorMessage = "Error when retrieving subscriber details for user " + userName;
+                handleException(errorMessage, new APIManagementException(errorMessage));
+            }
         } catch (SQLException e) {
-            isAppUpdated = false;
-            handleException("Error when updating application owner for user " + userId, e);
+            handleException("Error when updating application owner for user " + userName, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
