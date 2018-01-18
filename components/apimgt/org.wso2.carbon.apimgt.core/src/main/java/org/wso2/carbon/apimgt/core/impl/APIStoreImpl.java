@@ -1799,13 +1799,16 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
         APIGateway gateway = getApiGateway();
         API api = getAPIbyUUID(apiId);
         try {
-            // label generation for the API
-            Set<String> labelSet = new HashSet<>();
-            String autoGenlabel = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId;
-            if (dedicatedGateway.isEnabled()) {
 
-                // create a label if not exist for container based gateway
-                if (!api.getLabels().contains(autoGenlabel)) {
+            // label generation for the API
+            String autoGenLabelName = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId;
+            Set<String> labelSet = new HashSet<>();
+
+            if (dedicatedGateway.isEnabled() && !api.hasOwnGateway()) {
+
+                Label label = getLabelDAO().getLabelByName(autoGenLabelName);
+
+                if (label == null) {
                     // create a label
                     List<Label> labelList = new ArrayList<>();
                     // todo : add the access URL of the gateway here itself
@@ -1815,16 +1818,19 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                     labelList.add(autoGenLabel);
                     //Add to the db
                     getLabelDAO().addLabels(labelList);
-                    //add to the API
-                    labelSet.add(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId);
                 }
-            } else {
-                labelSet = getAPIbyUUID(apiId).getLabels();
-            }
-            // create or remove dedicated Gateway
-            gateway.updateDedicatedGateway(api, labelSet, dedicatedGateway.isEnabled());
 
-            getApiDAO().updateDedicatedGateway(dedicatedGateway, apiId, labelSet);
+                // create or remove dedicated Gateway
+                gateway.updateDedicatedGateway(api, autoGenLabelName, dedicatedGateway.isEnabled());
+                getApiDAO().updateDedicatedGateway(dedicatedGateway, apiId, labelSet);
+            } else {
+                if (api.hasOwnGateway()) {
+                    gateway.updateDedicatedGateway(api, autoGenLabelName, dedicatedGateway.isEnabled());
+                    labelSet.add(APIMgtConstants.DEFAULT_LABEL_NAME);
+                    getApiDAO().updateDedicatedGateway(dedicatedGateway, apiId, labelSet);
+                }
+            }
+
         } catch (APIMgtDAOException e) {
             throw new APIManagementException("Error occurred while updating dedicatedGateway details of API with id "
                     + apiId, e, e.getErrorHandler());

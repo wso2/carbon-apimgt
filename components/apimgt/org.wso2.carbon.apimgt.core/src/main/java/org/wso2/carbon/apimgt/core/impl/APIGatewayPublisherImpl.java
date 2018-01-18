@@ -45,10 +45,8 @@ import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.BrokerUtil;
-import org.wso2.carbon.apimgt.core.util.ContainerBasedGatewayConstants;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * This is responsible for handling API gateway related operations
@@ -476,10 +474,10 @@ public class APIGatewayPublisherImpl implements APIGateway {
     }
 
     /**
-     * @see APIGateway#updateDedicatedGateway(API, Set, boolean)
+     * @see APIGateway#updateDedicatedGateway(API, String, boolean)
      */
     @Override
-    public void updateDedicatedGateway(API api, Set<String> labelSet, boolean isDedicatedGatewayEnabled)
+    public void updateDedicatedGateway(API api, String labelName, boolean isDedicatedGatewayEnabled)
             throws GatewayException {
 
         // If API is a published,prototyped or a deprecated
@@ -489,12 +487,10 @@ public class APIGatewayPublisherImpl implements APIGateway {
 
             if (isDedicatedGatewayEnabled) {
                 // label is created beforehand.
-                createContainerBasedGateway(api.getId(), api.getLabels().toArray()[0].toString());
-            }
-            if (isDedicatedGatewayEnabled) {
+                createContainerBasedGateway(api.getId(), labelName);
+            } else {
                 //label is deleted beforehand.
-                removeContainerBasedGateway(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + api.getId()
-                        , api.getId());
+                removeContainerBasedGateway(labelName, api.getId());
             }
         }
     }

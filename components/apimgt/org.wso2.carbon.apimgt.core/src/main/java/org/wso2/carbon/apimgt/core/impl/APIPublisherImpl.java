@@ -273,35 +273,36 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         try {
 
             // label generation for the API
+            String autoGenLabelName = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId;
             Set<String> labelSet = new HashSet<>();
-            String autoGenlabel = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId;
-            if (dedicatedGateway.isEnabled()) {
 
-                // create a label if not exist for container based gateway
-                if (!api.getLabels().contains(autoGenlabel)) {
+            if (dedicatedGateway.isEnabled() && !api.hasOwnGateway()) {
 
-                    Label label = getLabelDAO().getLabelByName(autoGenlabel);
-                    if (label == null) {
-                        // create a label
-                        List<Label> labelList = new ArrayList<>();
-                        // todo : add the access URL of the gateway here itself
-                        Label autoGenLabel = new Label.Builder().id(UUID.randomUUID().toString()).
-                                name(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId).
-                                accessUrls(null).build();
-                        labelList.add(autoGenLabel);
-                        //Add to the db
-                        getLabelDAO().addLabels(labelList);
-                    }
+                Label label = getLabelDAO().getLabelByName(autoGenLabelName);
 
-                    //add to the API
-                    labelSet.add(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId);
+                if (label == null) {
+                    // create a label
+                    List<Label> labelList = new ArrayList<>();
+                    // todo : add the access URL of the gateway here itself
+                    Label autoGenLabel = new Label.Builder().id(UUID.randomUUID().toString()).
+                            name(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId).
+                            accessUrls(null).build();
+                    labelList.add(autoGenLabel);
+                    //Add to the db
+                    getLabelDAO().addLabels(labelList);
                 }
+
+                // create or remove dedicated Gateway
+                gateway.updateDedicatedGateway(api, autoGenLabelName, dedicatedGateway.isEnabled());
+                getApiDAO().updateDedicatedGateway(dedicatedGateway, apiId, labelSet);
             } else {
-                labelSet = getAPIbyUUID(apiId).getLabels();
+                if (api.hasOwnGateway()) {
+                    gateway.updateDedicatedGateway(api, autoGenLabelName, dedicatedGateway.isEnabled());
+                    labelSet.add(APIMgtConstants.DEFAULT_LABEL_NAME);
+                    getApiDAO().updateDedicatedGateway(dedicatedGateway, apiId, labelSet);
+                }
             }
-            // create or remove dedicated Gateway
-            gateway.updateDedicatedGateway(api, labelSet, dedicatedGateway.isEnabled());
-            getApiDAO().updateDedicatedGateway(dedicatedGateway, apiId, labelSet);
+
         } catch (APIMgtDAOException e) {
             throw new APIManagementException("Error occurred while updating dedicatedGateway details of API with id "
                     + apiId, e, e.getErrorHandler());

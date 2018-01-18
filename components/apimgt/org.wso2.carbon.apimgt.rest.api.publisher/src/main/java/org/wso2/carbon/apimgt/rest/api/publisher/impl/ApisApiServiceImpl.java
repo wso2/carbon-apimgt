@@ -153,6 +153,18 @@ public class ApisApiServiceImpl extends ApisApiService {
 
         try {
             APIPublisher apiPublisher = RestAPIPublisherUtil.getApiPublisher(username);
+
+            if (!apiPublisher.isAPIExists(apiId)) {
+                String errorMessage = "API not found : " + apiId;
+                APIMgtResourceNotFoundException e = new APIMgtResourceNotFoundException(errorMessage,
+                        ExceptionCodes.API_NOT_FOUND);
+                HashMap<String, String> paramList = new HashMap<String, String>();
+                paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
+                ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
+                log.error(errorMessage, e);
+                return Response.status(e.getErrorHandler().getHttpStatusCode()).entity(errorDTO).build();
+            }
+
             String existingFingerprint = apisApiIdGetFingerprint(apiId, null, null, request);
             if (!StringUtils.isEmpty(ifMatch) && !StringUtils.isEmpty(existingFingerprint) && !ifMatch
                     .contains(existingFingerprint)) {
