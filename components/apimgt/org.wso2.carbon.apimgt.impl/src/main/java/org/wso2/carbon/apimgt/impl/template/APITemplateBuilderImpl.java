@@ -63,6 +63,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     public static final String TEMPLATE_TYPE_VELOCITY = "velocity_template";
     public static final String TEMPLATE_TYPE_PROTOTYPE = "prototype_template";
     public static final String TEMPLATE_DEFAULT_API = "default_api_template";
+    public static final String TEMPLATE_TYPE_ENDPOINT = "endpoint_template";
     private API api;
     private String velocityLogPath = null;
     private List<HandlerConfig> handlers = new ArrayList<HandlerConfig>();
@@ -232,6 +233,43 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         return writer.toString();
     }
 
+    @Override
+    public String getConfigStringForEndpointTemplate(Environment environment) throws APITemplateException {
+        StringWriter writer = new StringWriter();
+
+        try {
+
+            ConfigContext configcontext = new APIConfigContext(this.api);
+            configcontext = new EndpointBckConfigContext(configcontext, api);
+            configcontext = new EndpointConfigContext(configcontext, api);
+            configcontext = new TemplateUtilContext(configcontext);
+
+            //@todo: this validation might be better to do when the builder is initialized.
+            configcontext.validate();
+
+            VelocityContext context = configcontext.getContext();
+
+            context.internalGetKeys();
+
+            /*  first, initialize velocity engine  */
+            VelocityEngine velocityengine = new VelocityEngine();
+            if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
+                velocityengine.setProperty( RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
+                        "org.apache.velocity.runtime.log.Log4JLogChute" );
+                velocityengine.setProperty( "runtime.log.logsystem.log4j.logger", getVelocityLogger());
+            }
+            velocityengine.init();
+
+            Template t = velocityengine.getTemplate(this.getEndpointTemplatePath());
+
+            t.merge(context, writer);
+
+        } catch (Exception e) {
+            log.error("Velocity Error");
+            throw new APITemplateException("Velocity Error", e);
+        }
+        return writer.toString();
+    }
 
     @Override
     public OMElement getConfigXMLForTemplate(Environment environment) throws APITemplateException {
@@ -263,6 +301,10 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
     public String getDefaultAPITemplatePath() {
         return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator + APITemplateBuilderImpl.TEMPLATE_DEFAULT_API + ".xml";
+    }
+
+    public String getEndpointTemplatePath() {
+        return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator + APITemplateBuilderImpl.TEMPLATE_TYPE_ENDPOINT + ".xml";
     }
 
     public String getVelocityLogger() {
