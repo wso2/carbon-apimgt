@@ -22,5 +22,14 @@ import Store from "./src/App.js"
 import 'typeface-roboto'
 import 'material-design-icons'
 import 'material-ui-icons'
+import {MuiThemeProvider, createMuiTheme} from 'material-ui/styles';
 
-ReactDOM.render(<Store/>, document.getElementById("react-root"));
+const theme = createMuiTheme({
+    palette: {
+        type: 'light', // Switching the dark mode on is a single property value change.
+    },
+});
+
+ReactDOM.render(<MuiThemeProvider theme={theme}>
+        <Store/>
+    </MuiThemeProvider>, document.getElementById("react-root"));
