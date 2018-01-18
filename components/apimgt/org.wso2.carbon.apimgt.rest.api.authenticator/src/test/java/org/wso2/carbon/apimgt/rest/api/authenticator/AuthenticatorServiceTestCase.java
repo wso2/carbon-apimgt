@@ -24,6 +24,7 @@ import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.configuration.APIMConfigurationService;
 import org.wso2.carbon.apimgt.core.dao.SystemApplicationDao;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
@@ -57,6 +58,8 @@ public class AuthenticatorServiceTestCase {
         oAuthData.addProperty(KeyManagerConstants.AUTHORIZATION_ENDPOINT, "https://localhost:9443/oauth2/authorize");
         oAuthData.addProperty(AuthenticatorConstants.SSO_ENABLED, ServiceReferenceHolder.getInstance()
                 .getAPIMAppConfiguration().isSsoEnabled());
+        oAuthData.addProperty(AuthenticatorConstants.AUTO_LOGIN_ENABLED, APIMConfigurationService.getInstance().getApimConfigurations()
+                .getEnvironmentConfigurations().getMultiEnvironmentOverview().isEnabled());
 
         KeyManager keyManager = Mockito.mock(KeyManager.class);
         AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
