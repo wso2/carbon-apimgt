@@ -2038,15 +2038,15 @@ Should be formatted as **provider-name-version**.
                         </td>
                         <td>
                             <p class="param-description marked">
-You can specify additional checklist items by using an **&quot;attribute:&quot;** modifier.
-
-Eg: &quot;Deprecate Old Versions:true&quot; will deprecate older versions of a particular API when it is promoted to
-Published state from Created state. Multiple checklist items can be given in &quot;attribute1:true, attribute2:false&quot;
-format.
-
 Supported checklist items are as follows.
 1. **Deprecate Old Versions**: Setting this to true will deprecate older versions of a particular API when it is promoted to Published state from Created state.
 2. **Require Re-Subscription**: If you set this to true, users need to re subscribe to the API although they may have subscribed to an older version.
+
+You can specify additional checklist items by using an **&quot;attribute:&quot;** modifier.
+
+Eg: &quot;Deprecate Old Versions:true&quot; will deprecate older versions of a particular API when it is promoted to Published state from Created state. Multiple checklist items can be given in &quot;attribute1:true, attribute2:false&quot; format.
+
+**Sample CURL :**  curl -k -H &quot;Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8&quot; -X POST &quot;https://localhost:9443/api/am/publisher/v0.11/apis/change-lifecycle?apiId&#x3D;890a4f4d-09eb-4877-a323-57f6ce2ed79b&amp;action&#x3D;Publish&amp;lifecycleChecklist&#x3D;Deprecate Old Versions:true,Require Re-Subscription:true&quot;
 </p>
                         </td>
                         <td>
