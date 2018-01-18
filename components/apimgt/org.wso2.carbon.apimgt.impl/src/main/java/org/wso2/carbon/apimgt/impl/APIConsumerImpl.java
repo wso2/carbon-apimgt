@@ -3318,12 +3318,15 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             UserStoreManager userStoreManager = realmService.getTenantUserRealm(tenantId).getUserStoreManager();
             String oldUserName = application.getSubscriber().getName();
             oldUserRoles = userStoreManager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(oldUserName));
-
+            List<String> roleList = new ArrayList<String>();
             for (String role : oldUserRoles) {
                 if (role.contains(application.getName())) {
-                    userStoreManager.updateRoleListOfUser(userId, null, new String[] {role});
+                    roleList.add(role);
                 }
             }
+
+            String[] roleArr = roleList.toArray(new String[roleList.size()]);
+            userStoreManager.updateRoleListOfUser(userId, null, roleArr);
             isAppUpdated = true;
 
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
@@ -3334,7 +3337,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             isAppUpdated = apiMgtDAO.updateApplicationOwner(userId, application);
         }
 
-        //todo update Outh application
+        //todo update Outh application once the oauth component supports to update the owner
 
         return isAppUpdated;
     }
