@@ -23,7 +23,7 @@ import {TableCell, TableRow} from 'material-ui/Table';
 import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation';
 import Dialog, {DialogActions, DialogContent, DialogContentText, DialogTitle} from 'material-ui/Dialog';
 import Button from 'material-ui/Button';
-import {Delete} from 'material-ui-icons';
+import Delete from 'material-ui-icons/Delete';
 import Slide from "material-ui/transitions/Slide";
 
 
@@ -83,4 +83,4 @@ class EndpointTableRows extends React.Component {
     }
 }
 
-export default EndpointTableRows
+export default EndpointTableRows;

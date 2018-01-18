@@ -24,6 +24,7 @@ import Switch from 'material-ui/Switch';
 import Button from 'material-ui/Button';
 import Paper from 'material-ui/Paper';
 import Grid from 'material-ui/Grid';
+import Typography from 'material-ui/Typography';
 import NotificationSystem from 'react-notification-system';
 import {FormControlLabel} from 'material-ui/Form';
 import TextField from 'material-ui/TextField';
@@ -101,11 +102,11 @@ export default class EndpointCreate extends Component {
                 <Grid item xs={10}>
                     <Paper>
                         <Grid item>
-                            <h4>
+                            <Typography type="headline" component="h4">
                                 Add new Global Endpoint
-                            </h4>
+                            </Typography>
                         </Grid>
-                        {/*<Grid item><form onSubmit={this.handleSubmit}>*/}<Grid>
+                        <Grid>
                             <Table><TableBody>
                                 <TableRow style={{marginBottom: "10px"}} type="flex">
                                     <TableCell span={4}>Name</TableCell>

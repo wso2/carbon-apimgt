@@ -99,7 +99,6 @@ export default class EndpointsListing extends Component {
         this.setState({openAddMenu: true, anchorEl: event.currentTarget});
     };
 
-
     render() {
         const {anchorEl} = this.state;
 
