@@ -22,8 +22,9 @@ public class CustomAttributeDTO  {
 
   
   /**
+   * Name of the custom attribute
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "Name of the custom attribute")
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -34,8 +35,9 @@ public class CustomAttributeDTO  {
 
   
   /**
+   * Value of the custom attribute
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "Value of the custom attribute")
   @JsonProperty("value")
   public String getValue() {
     return value;

@@ -32,8 +32,9 @@ public class IPConditionDTO extends ThrottleConditionDTO {
 
   
   /**
+   * Type of the IP condition. Allowed values are \"IPRange\" and \"IPSpecific\"
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Type of the IP condition. Allowed values are \"IPRange\" and \"IPSpecific\"")
   @JsonProperty("ipConditionType")
   public IpConditionTypeEnum getIpConditionType() {
     return ipConditionType;
@@ -44,8 +45,9 @@ public class IPConditionDTO extends ThrottleConditionDTO {
 
   
   /**
+   * Specific IP when \"IPSpecific\" is used as the ipConditionType
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Specific IP when \"IPSpecific\" is used as the ipConditionType")
   @JsonProperty("specificIP")
   public String getSpecificIP() {
     return specificIP;
@@ -56,8 +58,9 @@ public class IPConditionDTO extends ThrottleConditionDTO {
 
   
   /**
+   * Staring IP when \"IPRange\" is used as the ipConditionType
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Staring IP when \"IPRange\" is used as the ipConditionType")
   @JsonProperty("startingIP")
   public String getStartingIP() {
     return startingIP;
@@ -68,8 +71,9 @@ public class IPConditionDTO extends ThrottleConditionDTO {
 
   
   /**
+   * Ending IP when \"IPRange\" is used as the ipConditionType
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Ending IP when \"IPRange\" is used as the ipConditionType")
   @JsonProperty("endingIP")
   public String getEndingIP() {
     return endingIP;

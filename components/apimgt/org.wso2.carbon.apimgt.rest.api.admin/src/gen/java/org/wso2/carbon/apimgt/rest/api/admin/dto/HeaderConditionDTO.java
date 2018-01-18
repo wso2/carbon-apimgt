@@ -23,8 +23,9 @@ public class HeaderConditionDTO extends ThrottleConditionDTO {
 
   
   /**
+   * Name of the header
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Name of the header")
   @JsonProperty("headerName")
   public String getHeaderName() {
     return headerName;
@@ -35,8 +36,9 @@ public class HeaderConditionDTO extends ThrottleConditionDTO {
 
   
   /**
+   * Value of the header
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Value of the header")
   @JsonProperty("headerValue")
   public String getHeaderValue() {
     return headerValue;

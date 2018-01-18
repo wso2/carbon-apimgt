@@ -32,8 +32,9 @@ public class ThrottleLimitDTO  {
 
   
   /**
+   * Type of the throttling limit. Allowed values are \"RequestCountLimit\" and \"BandwidthLimit\".\nPlease see schemas of each of those throttling limit types in Definitions section.\n
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "Type of the throttling limit. Allowed values are \"RequestCountLimit\" and \"BandwidthLimit\".\nPlease see schemas of each of those throttling limit types in Definitions section.\n")
   @JsonProperty("type")
   public TypeEnum getType() {
     return type;
@@ -44,8 +45,9 @@ public class ThrottleLimitDTO  {
 
   
   /**
+   * Unit of the time. Allowed values are \"sec\", \"min\", \"hour\", \"day\"
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "Unit of the time. Allowed values are \"sec\", \"min\", \"hour\", \"day\"")
   @JsonProperty("timeUnit")
   public String getTimeUnit() {
     return timeUnit;
@@ -56,8 +58,9 @@ public class ThrottleLimitDTO  {
 
   
   /**
+   * Time limit that the throttling limit applies.
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "Time limit that the throttling limit applies.")
   @JsonProperty("unitTime")
   public Integer getUnitTime() {
     return unitTime;

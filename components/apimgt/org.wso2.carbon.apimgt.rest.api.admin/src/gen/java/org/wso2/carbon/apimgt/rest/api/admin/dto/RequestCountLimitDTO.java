@@ -16,12 +16,13 @@ public class RequestCountLimitDTO extends ThrottleLimitDTO {
   
   
   
-  private Long requestCount = 0l;
+  private Long requestCount = null;
 
   
   /**
+   * Maximum number of requests allowed
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Maximum number of requests allowed")
   @JsonProperty("requestCount")
   public Long getRequestCount() {
     return requestCount;

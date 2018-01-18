@@ -34,8 +34,9 @@ public class ErrorDTO  {
 
   
   /**
+   * Error code
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "Error code")
   @JsonProperty("code")
   public Long getCode() {
     return code;
