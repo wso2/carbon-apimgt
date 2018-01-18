@@ -101,6 +101,8 @@ import java.util.TreeSet;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.UN_AUTHORIZED_ERROR_MESSAGE;
+
 /**
  * The basic abstract implementation of the core APIManager interface. This implementation uses
  * the governance system registry for storing APIs and related metadata.
@@ -116,6 +118,9 @@ public abstract class AbstractAPIManager implements APIManager {
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
     protected String tenantDomain;
     protected String username;
+    // Property to indicate whether access control restriction feature is enabled.
+    protected boolean isAccessControlRestrictionEnabled = false;
+
     private LRUCache<String, GenericArtifactManager> genericArtifactCache = new LRUCache<String, GenericArtifactManager>(
             5);
 
@@ -359,6 +364,65 @@ public abstract class AbstractAPIManager implements APIManager {
      */
     protected void checkAccessControlPermission(APIIdentifier identifier) throws APIManagementException {
         // Not implemented. This is needed specifically for API Provider, for API store, we do not need to anything.
+        if (identifier == null || !isAccessControlRestrictionEnabled) {
+            if (!isAccessControlRestrictionEnabled && log.isDebugEnabled()) {
+                log.debug("Publisher access control restriction is not enabled. Hence the API " + identifier
+                        + " can be editable and viewable by all the API publishers and creators.");
+            }
+            return;
+        }
+        String apiPath = APIUtil.getAPIPath(identifier);
+        try {
+            if (!registry.resourceExists(apiPath)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Resource does not exist in the path : " + apiPath + " this can happen if this in the "
+                            + "middle of the new API creation, hence not checking the access control");
+                }
+                return;
+            }
+            Resource apiResource = registry.get(apiPath);
+            if (apiResource == null) {
+                return;
+            }
+            String accessControlProperty = apiResource.getProperty(APIConstants.ACCESS_CONTROL);
+            if (accessControlProperty == null || accessControlProperty.trim().isEmpty() || accessControlProperty
+                    .equalsIgnoreCase(APIConstants.NO_ACCESS_CONTROL)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("API in the path  " + apiPath + " does not have any access control restriction");
+                }
+                return;
+            }
+            if (APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN, true)) {
+                return;
+            }
+            String publisherAccessControlRoles = apiResource.getProperty(APIConstants.PUBLISHER_ROLES);
+            if (publisherAccessControlRoles != null && !publisherAccessControlRoles.trim().isEmpty()) {
+                String[] accessControlRoleList = publisherAccessControlRoles.replaceAll("\\s+", "").split(",");
+                if (log.isDebugEnabled()) {
+                    log.debug("API has restricted access to creators and publishers with the roles : " + Arrays
+                            .toString(accessControlRoleList));
+                }
+                String[] userRoleList = APIUtil.getListOfRoles(username, true);
+                if (log.isDebugEnabled()) {
+                    log.debug("User " + username + " has roles " + Arrays.toString(userRoleList));
+                }
+                for (String role : accessControlRoleList) {
+                    if (!role.equalsIgnoreCase(APIConstants.NULL_USER_ROLE_LIST) && APIUtil
+                            .compareRoleList(userRoleList, role)) {
+                        return;
+                    }
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("API " + identifier + " cannot be accessed by user '" + username + "'. It "
+                            + "has a publisher access control restriction");
+                }
+                throw new APIManagementException(UN_AUTHORIZED_ERROR_MESSAGE + " view or modify the API " + identifier);
+            }
+        } catch (RegistryException e) {
+            throw new APIManagementException(
+                    "Registry Exception while trying to check the access control restriction of API " + identifier
+                            .getApiName(), e);
+        }
     }
 
     protected API getApi(GovernanceArtifact artifact) throws APIManagementException {

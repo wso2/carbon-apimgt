@@ -2835,6 +2835,10 @@ public final class APIUtil {
         }
     }
 
+    public static void setResourcePermissions(String username, String visibility, String[] roles, String
+            artifactPath) throws APIManagementException {
+        setResourcePermissions(username, visibility, roles, artifactPath, null);
+    }
 
     /**
      * This function is to set resource permissions based on its visibility
@@ -2844,14 +2848,35 @@ public final class APIUtil {
      * @param artifactPath API resource path
      * @throws APIManagementException Throwing exception
      */
-    public static void setResourcePermissions(String username, String visibility, String[] roles, String artifactPath)
-            throws APIManagementException {
+    public static void setResourcePermissions(String username, String visibility, String[] roles, String
+            artifactPath, Registry registry) throws APIManagementException {
         try {
             String resourcePath = RegistryUtils.getAbsolutePath(RegistryContext.getBaseInstance(),
                     APIUtil.getMountedPath(RegistryContext.getBaseInstance(),
                             RegistryConstants.GOVERNANCE_REGISTRY_BASE_PATH)
                             + artifactPath);
+            Resource registryResource = null;
 
+            if (registry != null && registry.resourceExists(artifactPath)) {
+                registryResource = registry.get(artifactPath);
+            }
+            StringBuilder publisherAccessRoles = new StringBuilder(APIConstants.NULL_USER_ROLE_LIST);
+
+            if (registryResource != null) {
+                String publisherRole = registryResource.getProperty(APIConstants.PUBLISHER_ROLES);
+                if (publisherRole != null) {
+                    publisherAccessRoles = new StringBuilder(publisherRole);
+                }
+                if (StringUtils.isEmpty(publisherAccessRoles.toString())) {
+                    publisherAccessRoles = new StringBuilder(APIConstants.NULL_USER_ROLE_LIST);
+                }
+
+                if (visibility.equalsIgnoreCase(APIConstants.API_GLOBAL_VISIBILITY)) {
+                    registryResource.setProperty(APIConstants.STORE_VIEW_ROLES, APIConstants.NULL_USER_ROLE_LIST);
+                } else {
+                    registryResource.setProperty(APIConstants.STORE_VIEW_ROLES, publisherAccessRoles.toString());
+                }
+            }
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(username));
             if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().
@@ -2876,6 +2901,7 @@ public final class APIUtil {
                                     isRoleEveryOne = true;
                                 }
                                 authManager.authorizeRole(role, resourcePath, ActionConstants.GET);
+                                publisherAccessRoles.append(",").append(role.toLowerCase());
 
                             }
                         }
@@ -2915,6 +2941,7 @@ public final class APIUtil {
                                 isRoleEveryOne = true;
                             }
                             authorizationManager.authorizeRole(role, resourcePath, ActionConstants.GET);
+                            publisherAccessRoles.append(",").append(role.toLowerCase());
 
                         }
                     }
@@ -2942,10 +2969,15 @@ public final class APIUtil {
                     authorizationManager.authorizeRole(APIConstants.ANONYMOUS_ROLE, resourcePath, ActionConstants.GET);
                 }
             }
-
+            if (registryResource != null) {
+                registryResource.setProperty(APIConstants.STORE_VIEW_ROLES, publisherAccessRoles.toString());
+                registry.put(artifactPath, registryResource);
+            }
 
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while adding role permissions to API", e);
+        } catch (RegistryException e) {
+            throw new APIManagementException("Registry exception while adding role permissions to API", e);
         }
     }
 

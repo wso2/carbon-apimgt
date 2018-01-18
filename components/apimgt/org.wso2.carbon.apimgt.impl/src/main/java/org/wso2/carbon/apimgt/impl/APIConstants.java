@@ -1357,4 +1357,6 @@ public final class APIConstants {
      * Parameter for enabling tenant load notifications to members in the same HZ cluster
      */
     public static final String ENABLE_TENANT_LOAD_NOTIFICATION = "enableTenantLoadNotification";
+
+    public static final String STORE_VIEW_ROLES = "store_view_roles";
 }
