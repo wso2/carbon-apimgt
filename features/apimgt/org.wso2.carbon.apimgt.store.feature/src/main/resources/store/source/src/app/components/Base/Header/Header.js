@@ -27,7 +27,7 @@ import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
 import Menu, {MenuItem} from 'material-ui/Menu';
 import SearchIcon from 'material-ui-icons/Search';
-import MenuIcon from 'material-ui-icons/Menu';
+import AppsIcon from 'material-ui-icons/Apps';
 import CloseIcon from 'material-ui-icons/Close';
 import TextField from 'material-ui/TextField';
 import InfoIcon from 'material-ui-icons/Info';
@@ -128,10 +128,9 @@ class Header extends React.Component {
             input && input.focus();
         };
         return (
-            <AppBar position="static">
+            <AppBar position="fixed">
                 {this.state.searchVisible ?
                     <Toolbar>
-
                         <IconButton aria-label="Search" color="contrast">
                             <CloseIcon onClick={this.toggleSearch}/>
                         </IconButton>
@@ -183,7 +182,7 @@ class Header extends React.Component {
 
                                 <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClickMainMenu}
                                         color="contrast">
-                                    <MenuIcon/>
+                                    <AppsIcon/>
                                 </Button>
                                 <Menu
                                     id="simple-menu"
@@ -192,9 +191,8 @@ class Header extends React.Component {
                                     onClose={this.handleRequestCloseMainMenu}
                                     style={{alignItems: "center", justifyContent: "center"}}
                                 >
-
                                     <Link to="/">
-                                        <MenuItem onClick={this.handleRequestCloseMainMenu}>List API</MenuItem>
+                                        <MenuItem onClick={this.handleRequestCloseMainMenu}>APIs</MenuItem>
                                     </Link>
                                     <Link to="/applications">
                                         <MenuItem onClick={this.handleRequestCloseMainMenu}>Applications</MenuItem>

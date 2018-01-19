@@ -73,31 +73,28 @@ class Overview extends Component {
             return <Loading/>
         }
         return (
-                <Grid container style={{paddingLeft:"40px"}}>
-                    <Grid item xs={12} sm={6} md={9} lg={9} xl={10} >
-                        <Paper>
-                            <Table>
-                                <TableBody>
-
-                                    <TableRow>
-                                        <TableCell style={{width:"100px"}}>Application Name</TableCell><TableCell>{application.name}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>Throttling Tier</TableCell><TableCell>{application.throttlingTier}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>Life Cycle State</TableCell><TableCell>{application.lifeCycleStatus}</TableCell>
-                                    </TableRow>
-				    <TableRow>
-                                        <TableCell>Application Description</TableCell><TableCell>{application.description}</TableCell>
-                                    </TableRow>
-                                   
-                                </TableBody>
-                            </Table>
-                        </Paper>
-
+            <Paper>
+                <Grid container className="tab-grid" spacing={0} >
+                    <Grid item xs={12} sm={12} md={4} lg={4} xl={4}>
+                        <Table>
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell>Application Name</TableCell><TableCell>{application.name}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Throttling Tier</TableCell><TableCell>{application.throttlingTier}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Life Cycle State</TableCell><TableCell>{application.lifeCycleStatus}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>Application Description</TableCell><TableCell>{application.description}</TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
                     </Grid>
                 </Grid>
+            </Paper>
         );
     }
 }

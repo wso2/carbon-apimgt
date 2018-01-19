@@ -75,34 +75,9 @@ class BasicInfo extends Component {
         }
         return (
             this.state.application ?
-                <Grid container>
-                    <Grid item xs={12}>
-                        <Paper style={{display:"flex"}}>
-                            <Typography type="display2" gutterBottom className="page-title">
-                                {this.state.application.name} - <span style={{fontSize:"50%"}}>Application Overview</span>
-                            </Typography>
-                        </Paper>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3} lg={3} xl={2} style={{paddingLeft:"40px"}}>
-                        <Table>
-                            <TableBody>
-				 <TableRow>
-                                        <TableCell style={{width:"100px"}}>Application Name</TableCell><TableCell>{this.state.application.name}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>Throttling Tier</TableCell><TableCell>{this.state.application.throttlingTier}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>Life Cycle State</TableCell><TableCell>{this.state.application.lifeCycleStatus}</TableCell>
-                                    </TableRow>
-				    <TableRow>
-                                        <TableCell>Application Description</TableCell><TableCell>{this.state.application.description}</TableCell>
-                                    </TableRow>
-                                   
-                            </TableBody>
-                        </Table>
-                    </Grid>
-                </Grid>
+                <Typography type="display1" gutterBottom>
+                    {this.state.application.name}  
+                </Typography>
                 : <Loading/>
         );
     }

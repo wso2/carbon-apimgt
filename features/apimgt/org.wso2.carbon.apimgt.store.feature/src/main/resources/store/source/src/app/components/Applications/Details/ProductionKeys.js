@@ -19,8 +19,6 @@ import VisibilityOff from 'material-ui-icons/VisibilityOff';
 const styles = theme => ({
     root: {
         flexGrow: 1,
-        marginTop: 30,
-        width: "95%"
     },
     paper: {
         padding: 16,
@@ -107,52 +105,50 @@ class ProductionKeys extends React.Component {
         let accessToken = this.state.application.tokens.has(type) && this.state.application.tokens.get(type).accessToken;
         return (
             <div className={classes.root}>
-                <Grid container spacing={24}>
-                    <Grid alignContent="stretch" alignItems="baseline" container justify="center" item xs={12}>
-                        { !consumerKey &&
-                        <Button raised color="accent" onClick={() => this.handleClickToken()}>Generate Token</Button>}
-                    </Grid>
-                    <Grid item xs={6}>
-                        <Paper className={classes.paper}>
-                            <TextField
-                                inputProps={{readonly: true}}
-                                label="Consumer Key"
-                                id="consumerKey"
-                                value={consumerKey || "Keys are not generated yet. Click the Generate token button to generate the keys."}
-                                className={"textField"}
-                                helperText="Consumer Key of the application"
-                                margin="none"
-                                fullWidth={true}
-                            />
-                        </Paper>
-                    </Grid>
-                    <Grid item xs={6}>
-                        <Paper className={classes.paper}>
-                            <FormControl fullWidth={true} margin="none">
-                                <InputLabel htmlFor="consumerSecret">Consumer Secret</InputLabel>
-                                <Input
+                <Paper>
+                    <Grid container className="tab-grid" spacing={20} >
+                        <Grid item xs={12}>
+                            { !consumerKey &&
+                            <Button raised  color="primary" onClick={() => this.handleClickToken()}>Generate Keys</Button>}
+                        </Grid>
+                        <Grid item xs={7}>
+                                <TextField
                                     inputProps={{readonly: true}}
-                                    id="consumerSecret"
-                                    type={(this.state.showCS || !consumerSecret) ? 'text' : 'password'}
-                                    value={consumerSecret || "Keys are not generated yet. Click the Generate token button to generate the keys."}
-                                    endAdornment={
-                                        <InputAdornment position="end">
-                                            <IconButton classes="" onClick={this.handleShowCS}
-                                                        onMouseDown={this.handleMouseDownGeneric}>
-                                                {this.state.showCS ? <VisibilityOff/> : <Visibility/>}
-                                            </IconButton>
-                                        </InputAdornment>
-                                    }
+                                    label="Consumer Key"
+                                    id="consumerKey"
+                                    value={consumerKey || "Keys are not generated yet. Click the Generate token button to generate the keys."}
+                                    className={"textField"}
+                                    helperText="Consumer Key of the application"
+                                    margin="normal"
+                                    fullWidth={true}
                                 />
-                                <FormHelperText>Consumer Secret of the application</FormHelperText>
-                            </FormControl>
-                        </Paper>
-                    </Grid>
-                    <Grid item xs={8}>
-                        <Button disabled={this.state.showAT || accessToken} onMouseDown={this.handleMouseDownGeneric}
-                                onClick={this.handleShowToken} raised color="primary"
-                                className={classes.button}>Generate Token</Button>
-                        <Paper className={classes.paper}>
+                        </Grid>
+                        <Grid item xs={7}>
+                                <FormControl fullWidth={true} margin="normal">
+                                    <InputLabel htmlFor="consumerSecret">Consumer Token</InputLabel>
+                                    <Input
+                                        inputProps={{readonly: true}}
+                                        id="consumerSecret"
+                                        type={(this.state.showCS || !consumerSecret) ? 'text' : 'password'}
+                                        value={consumerSecret || "Keys are not generated yet. Click the Generate token button to generate the keys."}
+                                        endAdornment={
+                                            <InputAdornment position="end">
+                                                <IconButton classes="" onClick={this.handleShowCS}
+                                                            onMouseDown={this.handleMouseDownGeneric}>
+                                                    {this.state.showCS ? <VisibilityOff/> : <Visibility/>}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        }
+                                    />
+                                    <FormHelperText>Consumer Secret of the application</FormHelperText>
+                                </FormControl>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Button disabled={this.state.showAT || accessToken} onMouseDown={this.handleMouseDownGeneric}
+                                    onClick={this.handleShowToken} raised color="accent"
+                                    className="form-buttons">Generate Token</Button>
+                        </Grid>
+                        <Grid item xs={7}>
                             <TextField
                                 inputProps={{readonly: true}}
                                 label="Access Token"
@@ -161,12 +157,12 @@ class ProductionKeys extends React.Component {
                                 // type={(this.state.showAT || !accessToken) ? 'text' : 'password'} TODO: add visibility icon ~tmkb
                                 className={"textField"}
                                 helperText="Access Token for the Application"
-                                margin="none"
+                                margin="normal"
                                 fullWidth={true}
                             />
-                        </Paper>
+                        </Grid>
                     </Grid>
-                </Grid>
+                </Paper>
             </div>
         );
     }
