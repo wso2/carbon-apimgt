@@ -11,6 +11,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import java.io.FileInputStream;
+import java.io.File;
 import java.util.zip.ZipInputStream;
 
 @RunWith(PowerMockRunner.class)
@@ -20,8 +21,9 @@ public class TenantManagerHostObjectTest {
 
     @Test
     public void testGetStoreTenantThemesPath() throws Exception {
-        Assert.assertEquals(TenantManagerHostObject.getStoreTenantThemesPath(), "repository/deployment/server/" +
-                "jaggeryapps/store/site/tenant_themes/");
+        Assert.assertEquals(TenantManagerHostObject.getStoreTenantThemesPath(), "repository"+File.separator+"deployment"
+        +File.separator+"server"+File.separator+"jaggeryapps"+File.separator+"store"+File.separator+"site"+File.separator+
+        "tenant_themes"+File.separator+"");
     }
 
     @Test
