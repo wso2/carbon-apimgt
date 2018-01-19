@@ -24,9 +24,7 @@ import FileUpload from './FileUpload'
 import Alert from '../../../../Shared/Alert'
 import API from '../../../../../data/api'
 
-const styles = theme => ({});
-
-class WSDLValidation extends Component {
+export default class WSDLValidation extends Component {
     constructor(props) {
         super(props);
         this.state = {uploadMethod: 'file', file: {}, url: '', valid: null};
@@ -117,5 +115,3 @@ class WSDLValidation extends Component {
         );
     }
 }
-
-export default withStyles(styles)(WSDLValidation)
