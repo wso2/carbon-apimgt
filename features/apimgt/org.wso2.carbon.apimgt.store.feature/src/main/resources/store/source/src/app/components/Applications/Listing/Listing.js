@@ -156,7 +156,7 @@ class Listing extends Component {
         return (
             <div>
                 {alertMessage && <Alert message={alertMessage}/>}
-                <Grid className="fullWidth" container justify="center" alignItems="center">
+                <Grid className="full-width" container justify="center" alignItems="center">
                     <Grid item xs={12} sm={12} md={8} lg={8} xl={8} >
                         <Typography type="display1" gutterBottom className="heading-margin">
                             Applications
@@ -189,7 +189,7 @@ class Listing extends Component {
                             )}
                         </Paper>
                         <Link to={"/application/create"}>
-                            <Tooltip title="Create Application" placement="bottom">
+                            <Tooltip title="Create Application" placement="bottom" aria-label="Create Application">
                                 <Button fab color="accent" className={classes.fab} aria-label="add" >
                                     <AddIcon />
                                 </Button>

@@ -108,7 +108,7 @@ class ApplicationCreate extends Component {
 
     render() {
         return (
-            <Grid container justify="center" alignItems="center" className="fullWidth">
+            <Grid container justify="center" alignItems="center" className="full-width">
                 <Grid item xs={12} sm={12} md={8} lg={8} xl={8} >
                     <Typography type="display1" gutterBottom>
                         <Link to={"/applications"}>
@@ -126,11 +126,9 @@ class ApplicationCreate extends Component {
                         />
                         <br />
                         {this.state.tiers &&
-
                         <FormControl margin="normal">
                             <InputLabel htmlFor="quota-helper">Per Token Quota</InputLabel>
                             <Select
-                                style={{width:"30%"}}
                                 value={this.state.quota}
                                 onChange={this.handlePolicyChange('quota')}
                                 input={<Input name="quota" id="quota-helper" />}

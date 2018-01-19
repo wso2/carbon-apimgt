@@ -17,13 +17,13 @@
  */
 
 import React, {Component} from 'react'
-import BasicTabs from './NavTab.js'
-import Overview from './Overview.js'
-import ProductionKeys from './ProductionKeys.js'
-import SandboxKeys from './SandboxKeys.js'
+import BasicTabs from './NavTab'
+import Overview from './Overview'
+import ProductionKeys from './ProductionKeys'
+import SandboxKeys from './SandboxKeys'
 import Subscriptions from './Subscriptions'
 import {Route, Switch, Redirect} from 'react-router-dom'
-import API from '../../../data/api.js'
+import API from '../../../data/api'
 import {PageNotFound} from '../../Base/Errors/index'
 import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
