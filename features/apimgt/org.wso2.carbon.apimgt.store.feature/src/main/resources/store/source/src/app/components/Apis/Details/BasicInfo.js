@@ -46,6 +46,7 @@ import CodeIcon from 'material-ui-icons/Code';
 import Input, {InputLabel} from 'material-ui/Input';
 import EmailIcon from 'material-ui-icons/Email';
 import Slide from "material-ui/transitions/Slide";
+import Popover from 'material-ui/Popover';
 
 const styles = theme => ({
     media: {
@@ -71,11 +72,15 @@ class BasicInfo extends Component {
             tiers: [],
             applicationId: null,
             policyName: null,
+            openPopup: false,
+            anchorEl: null
         };
         this.api_uuid = this.props.uuid;
         this.logChange = this.logChange.bind(this);
         this.openSubscribeMenu = this.openSubscribeMenu.bind(this);
         this.closeSubscribeMenu = this.closeSubscribeMenu.bind(this);
+        this.handlePopupOpen = this.handlePopupOpen.bind(this);
+        this.handlePopupClose = this.handlePopupClose.bind(this);
     }
 
     componentDidMount() {
@@ -254,6 +259,13 @@ class BasicInfo extends Component {
         this.setState({openSubscribeMenu: false});
     }
 
+    handlePopupClose() {
+        this.setState({openPopup: false});
+    };
+
+    handlePopupOpen(event) {
+        this.setState({openPopup: true, anchorEl: event.currentTarget});
+    };
     selectChange() {
         this.setState({matDropVisible: !this.state.matDropVisible})
     }
@@ -322,7 +334,37 @@ class BasicInfo extends Component {
                                     <IconButton aria-label="Add to favorites">
                                         <FavoriteIcon/>
                                     </IconButton>
-                                    <IconButton aria-label="Share">
+                                    <IconButton aria-label="Share" onClick={this.handlePopupOpen}>
+                                        <Popover
+                                            open={this.state.openPopup}
+                                            anchorEl={this.state.anchorEl}
+                                            onClose={this.handlePopupClose}>
+                                            <div id="share_div_social" className="share_dives">
+                                                {/* Facebook */}
+                                                <a className="social_links" id="facebook"
+                                                   href="http://www.facebook.com/sharer.php?u=https%3A%2F%2F172.17.0.1%3A9444%2Fstore%2Fapis%2Finfo%3Fname%3Dfoo%26version%3D1.0.0%26provider%3Dadmin"
+                                                   target="_blank" title="facebook">
+                                                    <img src="/store/public/app/images/social/facebook.png" alt="Facebook" />
+                                                </a>
+                                                {/* Twitter */}
+                                                <a className="social_links" id="twitter"
+                                                   href="http://twitter.com/share?url=https%3A%2F%2F172.17.0.1%3A9444%2Fstore%2Fapis%2Finfo%3Fname%3Dfoo%26version%3D1.0.0%26provider%3Dadmin&text=API%20Store%20-%20foo%20%3A%20try%20this%20API%20at%20https%3A%2F%2F172.17.0.1%3A9444%2Fstore%2Fapis%2Finfo%3Fname%3Dfoo%26version%3D1.0.0%26provider%3Dadmin"
+                                                   target="_blank" title="twitter">
+                                                    <img src="/store/public/app/images/social/twitter.png" alt="Twitter" /></a>
+                                                {/* Google+ */}
+                                                <a className="social_links" id="googleplus"
+                                                   href="https://plus.google.com/share?url=https%3A%2F%2F172.17.0.1%3A9444%2Fstore%2Fapis%2Finfo%3Fname%3Dfoo%26version%3D1.0.0%26provider%3Dadmin"
+                                                   target="_blank" title="googleplus">
+                                                    <img src="/store/public/app/images/social/google.png" alt="Google" /></a>
+                                                {/* Digg */}
+                                                <a className="social_links" id="digg"
+                                                   href="http://www.digg.com/submit?url=https%3A%2F%2F172.17.0.1%3A9444%2Fstore%2Fapis%2Finfo%3Fname%3Dfoo%26version%3D1.0.0%26provider%3Dadmin"
+                                                   target="_blank" title="digg">
+                                                    <img src="/store/public/app/images/social/diggit.png" alt="Digg" /></a>
+                                                <div className="clearfix">
+                                                </div>
+                                            </div>
+                                        </Popover>
                                         <ShareIcon/>
                                     </IconButton>
                                     <IconButton aria-label="Embed">
