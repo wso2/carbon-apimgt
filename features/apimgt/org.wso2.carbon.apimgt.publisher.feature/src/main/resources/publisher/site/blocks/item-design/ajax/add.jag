@@ -4,6 +4,7 @@ var log = new Log();
 var encode = require('encode');
 encode = new encode.Encode();
 var CryptoUtil = Packages.org.wso2.carbon.core.util.CryptoUtil;
+var SwaggerParser = Packages.io.swagger.parser.SwaggerParser;
 
 function loadSwaggerObj(path)
 {
@@ -20,46 +21,15 @@ function isPositiveInteger(s) {
     return !!s.match(/^[0-9]+$/);
 }
 
-var validateSwaggerDefinition = function (swaggerDefinition, source) {
-    var supportedSwaggerVersion = "2.0";
-    var supportedOpenAPIVersion = "3.0.0";
-    var error = {};
-
-    try {
-        var swaggerJSON = parse(swaggerDefinition);
-
-        //Validate swagger definition for OpenAPI 3.0 or Swagger 2.0
-        if (swaggerJSON.swagger) {
-
-            //Supported swagger version check
-            if (swaggerJSON.swagger != supportedSwaggerVersion) {
-                error = {
-                    error: true,
-                    message: "Unsupported swagger version provided. Please re-import with swagger " + supportedSwaggerVersion
-                };
-            }
-        } else if (swaggerJSON.openapi) {
-
-            //Supported openAPI version check
-            if (swaggerJSON.openapi != supportedOpenAPIVersion) {
-                error = {
-                    error: true,
-                    message: "Unsupported OpenAPI version provided. Please re-import with OpenAPI " + supportedOpenAPIVersion
-                };
-            }
-        } else {
-            error = {error: true, message: source + " is not a valid Swagger Definition"};
-        }
-
-        //Validate swagger definition with mandatory swagger elements
-        if (swaggerJSON.paths == null || swaggerJSON.info == null || swaggerJSON.info.version == null) {
-            error = {error: true, message: source + " contains invalid swagger definition"};
-        }
-    } catch (e) {
-        error = {error: true, message: source + " contains invalid swagger definition"};
+function getSwaggerError(errorsList) {
+    var errorCount = errorsList.size();
+    var errorMsg = "<ol>" ;
+    var count = 0;
+    for (count = 0; count < errorCount; count++) {
+        errorMsg = errorMsg + "<li>" + errorsList.get(count) + "</li>";
     }
-
-    return error;
+    errorMsg = errorMsg + "</ol></div>";
+    return errorMsg;
 }
 
 if(jagg.isCSRFTokenValid())
@@ -84,20 +54,37 @@ if(jagg.isCSRFTokenValid())
             var type = request.getParameter("type");
             var swagger = null;
             var wsdl = null;
+            var supportedSwaggerVersion = "2.0";
+            var parser = new SwaggerParser();
             if(type == "rest"){
                 var url = request.getParameter("swagger-url");
                 var file = request.getFile("swagger-file");
                 var import_type = request.getParameter("import-definition");
-                if (import_type == "swagger-url" && url) {
+                if(import_type == "swagger-url" && url){
                     url = url.trim();
                     var data = {};
                     try {
                         var content = get(url, data);
                         swagger = content.data;
-                        var errorObj = validateSwaggerDefinition(swagger, url);
-                        if (errorObj.error) {
-                            print(errorObj);
+                        var swaggerDeserializationResult = parser.readWithInfo(swagger);
+                        var swaggerObj = swaggerDeserializationResult.getSwagger();
+                        var swaggerErrors = swaggerDeserializationResult.getMessages();
+
+                        //Supported swagger version check
+                        if (swaggerObj.swagger != supportedSwaggerVersion) {
+                            print({
+                                error: true,
+                                message: "Unsupported swagger version provided. Please re-import with swagger " + supportedSwaggerVersion
+                            });
+                            return;
                         }
+                        //Validate swagger definition with mandatory swagger elements
+                        if (swaggerErrors.size() > 0) {
+                            errorMsg = getSwaggerError(swaggerErrors);
+                            print({error: true, message: "<div><div>" + url + " contains invalid swagger definition" + "</div>" + errorMsg});
+                            return;
+                        }
+
                     } catch (e) {
                         print({error: true, message: url + " is not a valid Swagger Definition url"});
                         return;
@@ -108,16 +95,30 @@ if(jagg.isCSRFTokenValid())
                         file.open("r");
                         swagger = file.readAll();
                         file.close();
-                        var errorObj = validateSwaggerDefinition(swagger, file.getName());
-                        if (errorObj.error) {
-                            print(errorObj);
+                        var swaggerDeserializationResult = parser.readWithInfo(swagger);
+                        var swaggerObj = swaggerDeserializationResult.getSwagger();
+                        var swaggerErrors = swaggerDeserializationResult.getMessages();
+
+                        //Supported swagger version check
+                        if (swaggerObj.swagger != supportedSwaggerVersion) {
+                            print({
+                                error: true,
+                                message: "Unsupported swagger version provided. Please re-import with swagger " + supportedSwaggerVersion
+                            });
                             return;
                         }
+                        //Validate swagger definition with mandatory swagger elements
+                        if (swaggerErrors.size() > 0) {
+                            errorMsg = getSwaggerError(swaggerErrors);
+                            print({error: true, message: "<div><div>" + file.getName() + " contains invalid swagger definition" + "</div>" + errorMsg});
+                            return;
+                        }
+
                     } catch (e) {
                         print({error: true, message: file.getName() + " contains invalid swagger definition"});
                         return;
                     }
-                } else {
+                }else{
                     var obj = require("/site/blocks/item-design/ajax/default_swagger.json");
                     swagger = stringify(obj);
                 }
@@ -394,7 +395,16 @@ if(jagg.isCSRFTokenValid())
             var wsdlUrl = request.getParameter("wsdl");
             if (wsdlUrl != null) {
                 if (!wsdlUrl.match(org.wso2.carbon.apimgt.impl.APIConstants.API_WSDL_RESOURCE_LOCATION)) {
-                    org.wso2.carbon.apimgt.impl.utils.APIUtil.isWSDL2Document(wsdlUrl);
+                    try {
+                        org.wso2.carbon.apimgt.impl.utils.APIUtil.isWSDL2Document(wsdlUrl);
+                    } catch (e) {
+                        obj = {
+                            error:true,
+                            message:"Please enter a valid WSDL URL"
+                        };
+                        print(obj);
+                        return;
+                    }
                 }
             }
 
@@ -593,6 +603,7 @@ if(jagg.isCSRFTokenValid())
             apiData.sandboxTps = request.getParameter("sandboxTps");
             apiData.corsConfiguration=request.getParameter("corsConfiguration","UTF-8");
             apiData.additionalProperties = request.getParameter("additionalProperties", "UTF-8");
+            apiData.authorizationHeader = request.getParameter("authorizationHeader");
             var errorMsg = null;
             if(apiData.productionTps != null && apiData.productionTps != ""  && !isPositiveInteger(apiData.productionTps)){
                 errorMsg = "Invalid input for Production TPS";
