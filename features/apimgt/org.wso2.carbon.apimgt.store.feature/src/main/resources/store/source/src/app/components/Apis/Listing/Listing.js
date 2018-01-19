@@ -96,9 +96,7 @@ class Listing extends React.Component {
                             this.state.apis ?
                                 this.state.listType === "grid" ?
                                     <Grid container >
-                                        {this.state.apis.list.map(api => {
-                                            return <ApiThumb api={api} key={api.id}/>
-                                        })}
+                                        {this.state.apis.list.map( api => <ApiThumb api={api} key={api.id}/> )}
                                     </Grid>
                                     :
                                     <Grid container>
@@ -114,9 +112,7 @@ class Listing extends React.Component {
                                                         </TableRow>
                                                     </TableHead>
                                                     <TableBody>
-                                                        {this.state.apis.list.map(api => {
-                                                            return <APiTableRow api={api} key={api.id}/>
-                                                        })}
+                                                        {this.state.apis.list.map( api => <APiTableRow api={api} key={api.id}/> )}
                                                     </TableBody>
                                                 </Table>
                                             </Paper>

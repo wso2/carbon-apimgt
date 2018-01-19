@@ -68,7 +68,12 @@ class ApiThumb extends React.Component {
                 this.setState({active: false, loading: false});
             }
         );
-    }
+    };
+    
+    firstTwoLetters(name) {
+        let two_letters = name.substr(0,2);
+        return two_letters.charAt(0).toUpperCase() + two_letters.slice(1);
+    };
 
     render() {
         let details_link = "/apis/" + this.props.api.id;
@@ -76,17 +81,14 @@ class ApiThumb extends React.Component {
         if (!this.state.active) { // Controls the delete state, We set the state to inactive on delete success call
             return null;
         }
-        let firstTwoLetters = n => {
-            let m = n.substr(0,2);
-            return m.charAt(0).toUpperCase() + m.slice(1);
-        };
+
         let randomApiThumbColor = Color.getColor({shades: ['400']});
         return (
             <Grid item xs={12} sm={6} md={3} lg={3} xl={3}>
                 <Link to={details_link}>
                     <GridListTile className="api-list-tile">
                         <Avatar className="default-thumb" style={{backgroundColor: randomApiThumbColor}}>
-                                    {firstTwoLetters(name)}
+                                    {this.firstTwoLetters(name)}
                                  </Avatar>
                         <GridListTileBar
                             title= {name}
