@@ -46,27 +46,6 @@ import javax.ws.rs.core.Response;
 public class ApisApi implements Microservice  {
    private final ApisApiService delegate = ApisApiServiceFactory.getApisApi();
 
- /**
-  * This is the activation method of ServiceComponent. This will be called when it's references are fulfilled
-  *
-  * @throws Exception this will be thrown if an issue occurs while executing the activate method
-  */
- @Activate
- protected void start() throws Exception {
-     System.out.println(ApisApi.class.getName() + " service component has  started.");
- }
-
- /**
-  * This is the deactivation method of ServiceComponent. This will be called when this component
-  * is being stopped or references are satisfied during runtime.
-  *
-  * @throws Exception this will be thrown if an issue occurs while executing the de-activate method
-  */
- @Deactivate
- protected void stop() throws Exception {
-     System.out.println(ApisApi.class.getName() + " service component has stop.");
- }
-
     @OPTIONS
     @DELETE
     @Path("/{apiId}/comments/{commentId}")

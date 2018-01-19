@@ -35,6 +35,10 @@ public class JMSConnectionConfiguration {
     private String topicConnectionFactoryURL = "tcp://localhost:5672";
     @Element(description = "Destination topic name")
     private String topic = "myTopic";
+    @Element(description = "Broker connection username")
+    private String username = "admin";
+    @Element(description = "Broker connection password")
+    private String password = "admin";
 
     public String getJavaNamingFactoryInitial() {
         return javaNamingFactoryInitial;
@@ -66,5 +70,21 @@ public class JMSConnectionConfiguration {
 
     public void setTopic(String topic) {
         this.topic = topic;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
