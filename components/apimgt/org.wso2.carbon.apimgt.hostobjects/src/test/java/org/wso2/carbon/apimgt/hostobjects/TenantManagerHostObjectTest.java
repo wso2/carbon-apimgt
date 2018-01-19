@@ -10,8 +10,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
-import java.io.FileInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.zip.ZipInputStream;
 
 @RunWith(PowerMockRunner.class)
