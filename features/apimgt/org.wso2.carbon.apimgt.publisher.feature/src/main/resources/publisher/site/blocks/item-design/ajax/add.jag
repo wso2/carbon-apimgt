@@ -56,6 +56,8 @@ if(jagg.isCSRFTokenValid())
             var wsdl = null;
             var supportedSwaggerVersion = "2.0";
             var parser = new SwaggerParser();
+            var apiDefinitionVersion = request.getParameter("apiDefinitionVersion");
+
             if(type == "rest"){
                 var url = request.getParameter("swagger-url");
                 var file = request.getFile("swagger-file");
@@ -345,6 +347,7 @@ if(jagg.isCSRFTokenValid())
                 session.put("ws",null);
                 session.put("wsdl",null);
                 session.put("swagger",null);
+                session.put("apiDefinitionVersion",apiDefinitionVersion);
             }
             if(swagger){
                 session.put("ws",null);
@@ -820,7 +823,12 @@ if(jagg.isCSRFTokenValid())
             } else {
                 print({error: false, message: {"action": "add", "code": result.response}});
             }
-        }else {
+        } else if (request.getMethod() == 'GET' && action === 'getAPIDefinitionVersion') {
+
+            var apiDefinitionVersion = session.get("apiDefinitionVersion");
+            session.put("apiDefinitionVersion", null);
+            print(apiDefinitionVersion);
+        } else {
             print({
                       error:true,
                       message:msg.error.invalidAction(action)

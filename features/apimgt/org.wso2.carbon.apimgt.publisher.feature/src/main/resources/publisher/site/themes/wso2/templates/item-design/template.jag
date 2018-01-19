@@ -875,14 +875,14 @@
 	                }
                 });
         <% }
-            var apiDefinitionType = session.get("apiDefinitionType");
-            if(apiDefinitionType){
+            var apiDefinitionVersion = session.get("apiDefinitionVersion");
+            if(apiDefinitionVersion){
                 %>
-              $.get( jagg.site.context + "/site/blocks/item-design/ajax/add.jag", { "action" : "getAPIDefinitionType"} , function( data ) {
+              $.get( jagg.site.context + "/site/blocks/item-design/ajax/add.jag", { "action" : "getAPIDefinitionVersion"} , function( data ) {
                     if(data != null && data != ""){
-                        var apiDocVersion = data;
+                        var apiDefinitionVersion = data;
                         var designer = APIDesigner();
-	                    designer.load_api_base_document(apiDocVersion);
+	                    designer.load_api_base_document(apiDefinitionVersion);
                     }
                 });
                 <%

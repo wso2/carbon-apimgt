@@ -213,15 +213,6 @@ function APIDesigner(){
             if (m.index === re.lastIndex) {
                 re.lastIndex++;
             }
-<<<<<<< HEAD
-            parameters.push({
-                name : m[0].replace("{","").replace("}",""),
-                "in": "path",
-                "required": true,
-				"type":"string"
-            })            
-        }        
-=======
             if (designer.is_openapi3()) {
                 parameters.push({
                     name: m[0].replace("{", "").replace("}", ""),
@@ -239,7 +230,6 @@ function APIDesigner(){
                 });
             }
         }
->>>>>>> Adding openAPI 3.0.0 support for API design UI
 
         var vc=0;
         var ic=0;
