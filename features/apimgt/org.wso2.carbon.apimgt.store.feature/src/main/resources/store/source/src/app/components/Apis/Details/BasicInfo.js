@@ -374,7 +374,8 @@ class BasicInfo extends Component {
                                             </Select>
                                         </FormControl>
                                         }
-                                        <br/> </DialogContent>
+                                        <br/>
+                                    </DialogContent>
                                     <DialogActions>
                                         <Button onClick={this.closeSubscribeMenu} color="primary">
                                             <NotificationSystem ref="notificationSystem"/>
@@ -383,8 +384,8 @@ class BasicInfo extends Component {
                                         <Button onClick={this.createSubscription} color="primary">
                                             <NotificationSystem ref="notificationSystem"/>
                                             Subscribe
-                                        </Button></DialogActions>
-
+                                        </Button>
+                                    </DialogActions>
                                 </Dialog>
                             </Grid>
                         </Grid>
