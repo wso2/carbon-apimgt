@@ -38,21 +38,23 @@ jagg.block("api/api-info", {
         var isForumEnabled = mod.isForumEnabled();
         var supportedLangs = jagg.module("sdk").getSupportedLanguages();
 
-        if (api != null && ! api.authorizationHeader) {
+        if (api != null) {
             var authorizationHeader = api.authorizationHeader;
-            var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
-            var apiUtil = new APIUtil();
-            var tenantVal = request.getParameter("tenant");
-            if (tenantVal == null) {
-                tenantVal = "carbon.super";
-            }
+            if (!authorizationHeader) {        
+                var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
+                var apiUtil = new APIUtil();
+                var tenantVal = request.getParameter("tenant");
+                if (tenantVal == null) {
+                    tenantVal = "carbon.super";
+                }
 
-            var tenantID = carbon.server.osgiService('org.wso2.carbon.user.core.service.RealmService').getTenantManager().getTenantId(tenantVal);
-            var authorizationHeader = apiUtil.getOAuthConfigurationFromTenantRegistry(tenantID, "AuthorizationHeader");
-            if(null == authorizationHeader) {
-                authorizationHeader = apiUtil.getOAuthConfigurationFromAPIMConfig("AuthorizationHeader");
-                if (null == authorizationHeader) {
-                    authorizationHeader = "Authorization";
+                var tenantID = carbon.server.osgiService('org.wso2.carbon.user.core.service.RealmService').getTenantManager().getTenantId(tenantVal);
+                var authorizationHeader = apiUtil.getOAuthConfigurationFromTenantRegistry(tenantID, "AuthorizationHeader");
+                if(null == authorizationHeader) {
+                    authorizationHeader = apiUtil.getOAuthConfigurationFromAPIMConfig("AuthorizationHeader");
+                    if (null == authorizationHeader) {
+                        authorizationHeader = "Authorization";
+                    }
                 }
             }
         }
