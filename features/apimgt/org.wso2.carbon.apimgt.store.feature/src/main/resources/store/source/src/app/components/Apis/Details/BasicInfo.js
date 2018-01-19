@@ -375,9 +375,10 @@ class BasicInfo extends Component {
                                     </IconButton>
                                 </CardActions>
                             </Card>
-                            <Grid>
-                                <Button onClick={this.openSubscribeMenu}> Subscribe to an
-                                    Application </Button>
+                            <Button onClick={this.openSubscribeMenu} color="accent" raised 
+                                    className="form-buttons full-width"> Subscribe to an Application </Button>
+                        </Grid>
+                        <Grid item xs={12} sm={12} md={6} lg={4} xl={4} className="add-item-left-padding ">
                                 <Dialog open={this.state.openSubscribeMenu} transition={Slide}
                                         onClose={this.closeSubscribeMenu}>
                                     <DialogTitle>
@@ -429,9 +430,6 @@ class BasicInfo extends Component {
                                         </Button>
                                     </DialogActions>
                                 </Dialog>
-                            </Grid>
-                        </Grid>
-                        <Grid item xs={12} sm={12} md={6} lg={4} xl={4} className="add-item-left-padding ">
                             <Table>
                                 <TableBody>
                                     <TableRow>

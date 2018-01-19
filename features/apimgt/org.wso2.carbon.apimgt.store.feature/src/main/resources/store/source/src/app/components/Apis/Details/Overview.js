@@ -213,33 +213,12 @@ class Overview extends Component {
                     <BasicInfo uuid={this.props.match.params.api_uuid}/>
                     <Grid container className="tab-grid" spacing={0} >
                         <Grid item xs={12} sm={12} md={6} lg={6} xl={4}>
-                            <Typography type="title" gutterBottom>
-                                Production and Sandbox Endpoints
-                            </Typography>
-                            <TextField
-                                inputProps={{readonly: true}}
-                                label="Production Endpoint"
-                                id="prodEnd"
-                                className={"textField"}
-                                helperText=""
-                                margin="normal"
-                                fullWidth={true}
-                            />
-                            <TextField
-                                inputProps={{readonly: true}}
-                                label="Sandbox Endpoint"
-                                id="sandEnd"
-                                className={"textField"}
-                                helperText=""
-                                margin="normal"
-                                fullWidth={true}
-                            />
                             { api.endpoint ?
                                 api.endpoint.map( ep => <div>
                                     <span>{ep.type}</span>
                                     <span>{ep.inline ? ep.inline.endpointConfig.serviceUrl : ''}</span>
                                 </div>)
-                                : <span>....</span>
+                                : <span></span>
                             }
                         </Grid>
                     </Grid>
