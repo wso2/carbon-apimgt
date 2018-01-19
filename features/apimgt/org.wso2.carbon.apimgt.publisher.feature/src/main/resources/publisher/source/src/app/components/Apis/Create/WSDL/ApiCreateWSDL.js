@@ -15,280 +15,91 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import {Alert, Form, Icon, Input, Button, message, Upload, Radio , Steps, Spin} from 'antd';
-import WSDLValidationStep from './Steps/WSDLValidationStep'
+import React, {Component} from 'react';
+/* MUI Imports */
+import {Grid, Paper, Button, Divider, Typography} from 'material-ui'
+import Arrow from 'material-ui-icons/ArrowForward'
+import {withStyles} from 'material-ui'
+import {FormControl, Input, InputLabel, FormHelperText} from 'material-ui'
+import CreateAPI from '../Endpoint/ApiCreateEndpoint'
+
+import Alert from '../../../Shared/Alert'
+import WSDLValidation from './Steps/WSDLValidation'
 import WSDLFillAPIInfoStep from './Steps/WSDLFillAPIInfoStep'
 import API from '../../../../data/api.js'
 
-const Step = Steps.Step;
+const styles = theme => ({
+    button: {
+        margin: theme.spacing.unit,
+    },
+    leftIcon: {
+        marginRight: theme.spacing.unit,
+    },
+    rightIcon: {
+        marginLeft: theme.spacing.unit,
+    },
+    paper: {
+        padding: theme.spacing.unit * 2,
+    }
+});
 
-class ApiCreateWSDLSteppedForm extends React.Component {
-
+class ApiCreateWSDL extends Component {
     constructor(props) {
         super(props);
-
         this.state = {
-            current: 0,
-            uploadMethod: "file",
-            file: null,
-            wsdlUrl: null,
-            isValidating: false,
-            validationFailed: false,
-            endpoints: [],
-            apiName: null,
-            apiVersion: null,
-            apiContext: null,
-            apiEndpoint: null,
-            implementationType: null,
-            validationFailedMessage: null,
-            bindingInfo: {
-                hasSoapBinding: false,
-                hasHttpBinding: false
-            }
+            validWSDL: false,
+            doValidate: false,
+            wsdlBean: null,
+            currentStep: 1
         };
-        
-        this.handleFillAPIInfoStepUpdate = this.handleFillAPIInfoStepUpdate.bind(this);
-        this.handleCreateWSDLAPI = this.handleCreateWSDLAPI.bind(this);
+        this.submitWSDL = this.submitWSDL.bind(this);
+        this.updateWSDLValidity = this.updateWSDLValidity.bind(this);
     }
 
-    next() {
-        if (this.state.current === 0) { // validation form
-            this.setState({isValidating: true, validationFailed:false});
-            if (this.state.uploadMethod === "url") {
-                this.validateWSDLUrlInCurrentState();
-            } else { // WSDL file
-                this.validateWSDLFileInCurrentState();
-            }
+    submitWSDL() {
+        this.setState({doValidate: true});
+    }
+
+    updateWSDLValidity(validity, wsdlBean) {
+        let currentStep = this.state.currentStep;
+        if (validity) {
+            currentStep = 2;
         }
+        this.setState({validWSDL: validity, wsdlBean: wsdlBean, doValidate: false, currentStep: currentStep});
     }
-    prev() {
-        const current = this.state.current - 1;
-        this.setState({ current });
-    }
-
-    setWSDLUrl(url) {
-        this.setState({wsdlUrl: url});
-    }
-
-    setUploadMethod(method) {
-        this.setState({uploadMethod: method});
-    }
-
-    setWSDLFile(wsdlFile) {
-        this.setState({file: wsdlFile});
-    }
-
-    handleFillAPIInfoStepUpdate(e) {
-        if (e.hasOwnProperty('target')) {
-            this.setState({[e.target.name]: e.target.value});
-        } else {
-            this.setState({"apiEndpoint": e});
-        }
-    }
-
-    validateWSDLUrlInCurrentState() {
-        let wsdlUrl = this.state.wsdlUrl;
-        let new_api = new API('');
-        let promised_validationResponse = new_api.validateWSDLUrl(wsdlUrl);
-        promised_validationResponse.then(this.validateWSDLUrlCallback).catch(this.validateWSDLUrlCallbackOnError);
-    }
-
-    validateWSDLFileInCurrentState() {
-        let file = this.state.file;
-        let new_api = new API('');
-        let promised_validationResponse = new_api.validateWSDLFile(file.originFileObj);
-        promised_validationResponse.then(this.validateWSDLUrlCallback).catch(this.validateWSDLUrlCallbackOnError);
-    }
-
-    validateWSDLUrlCallback = (response) => {
-        let data = JSON.parse(response.data);
-        if (data.isValid) {
-            const current = this.state.current + 1;
-            let uniqueEndpointSet = new Set();
-            let allEndpoints = data.wsdlInfo.endpoints;
-            let apiEndpoint = null;
-            let hasHttpBinding = false;
-            let hasSoapBinding = false;
-            let defaultImplementationType = "soap";
-            
-            for (let i = 0; i < allEndpoints.length; i++) {
-                uniqueEndpointSet.add(allEndpoints[i].location);
-            }
-            let uniqueEndpoints = Array.from(uniqueEndpointSet);
-            
-            if (uniqueEndpoints.length > 0) {
-                apiEndpoint = uniqueEndpoints[0];
-            }
-
-            if (data.wsdlInfo.bindingInfo) {
-                hasHttpBinding = data.wsdlInfo.bindingInfo.hasHttpBinding;
-                defaultImplementationType = "httpBinding"
-            }
-
-            if (data.wsdlInfo.bindingInfo) {
-                hasSoapBinding = data.wsdlInfo.bindingInfo.hasSoapBinding;
-                defaultImplementationType = "soap"
-            }
-
-            this.setState({
-                current: current,
-                isValidating: false,
-                endpoints: uniqueEndpoints,
-                apiEndpoint: apiEndpoint,
-                hasSoapBinding: hasSoapBinding,
-                hasHttpBinding: hasHttpBinding,
-                implementationType: defaultImplementationType
-            });
-        } else {
-            this.setState({
-                isValidating: false,
-                validationFailed: true,
-                validationFailedMessage: "Invalid WSDL Content"
-            });
-        }
-    };
-
-    validateWSDLUrlCallbackOnError = (response) => {
-        this.setState({
-            isValidating: false,
-            validationFailed: true,
-            validationFailedMessage: response.response.body.description
-        });
-    };
-
-    handleCreateWSDLAPI() {
-        let new_api = new API('');
-        let apiName = this.state.apiName;
-        let apiVersion = this.state.apiVersion;
-        let apiContext = this.state.apiContext;
-        let apiEndpoint = this.state.apiEndpoint;
-        let wsdlUrl = this.state.wsdlUrl;
-        let file = this.state.file;
-        let uploadMethod = this.state.uploadMethod;
-        let implementationType = this.state.implementationType;
-        let production = {
-            type: "production",
-            inline: {
-                name: apiName + "_" + apiVersion + "_PRODUCTION",
-                endpointConfig: JSON.stringify({serviceUrl: apiEndpoint}),
-                endpointSecurity: {enabled: false},
-                type: "http"
-            }
-        };
-        
-        let sandbox = {
-            type: "sandbox",
-            inline: {
-                name: apiName + "_" + apiVersion + "_SANDBOX",
-                endpointConfig: JSON.stringify({serviceUrl: apiEndpoint}),
-                endpointSecurity: {enabled: false},
-                type: "http"
-            }
-        };
-        let api_attributes = {
-            name: apiName,
-            version: apiVersion,
-            context: apiContext,
-            endpoint: [production, sandbox]
-        };
-        let api_data = {
-            additionalProperties: JSON.stringify(api_attributes),
-            implementationType: implementationType
-        };
-
-        if (uploadMethod === "url"){
-            api_data.url = wsdlUrl;
-        } else {
-            api_data.file = file.originFileObj;
-        }
-        new_api.importWSDL(api_data).then(this.handleAPICreateResponse).catch(
-            function (error_response) {
-                let error_data = JSON.parse(error_response.data);
-                let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
-                message.error(messageTxt);
-            });
-    }
-
-    handleAPICreateResponse = (response) => {
-        let uuid = JSON.parse(response.data).id;
-        let redirect_url = "/apis/" + uuid + "/overview";
-        this.props.history.push(redirect_url);
-        message.success("API Created Successfully. Now you can add/modify resources, define endpoints etc..", opts);
-    };
 
     render() {
-        const { current } = this.state;
-        let steps = [{
-            title: 'Provide WSDL URL/File',
-            content: <WSDLValidationStep
-                onUploadMethodChanged={(method) => this.setUploadMethod(method)}
-                onWSDLFileChanged={(file) => this.setWSDLFile(file)}
-                onWSDLUrlChanged={(url) => this.setWSDLUrl(url)}
-            />,
-        }, {
-            title: 'Create API',
-            content: <WSDLFillAPIInfoStep endpoints={this.state.endpoints}
-                                          handleFillAPIInfoStepUpdate={(e) => this.handleFillAPIInfoStepUpdate(e)}
-                                          hasSoapBinding={this.state.hasSoapBinding}
-                                          hasHttpBinding={this.state.hasHttpBinding}
-                                          implementationType={this.state.implementationType}
-                                          apiEndpoint={this.state.apiEndpoint}
-            />,
-        }];
+        const {classes} = this.props;
+        const {doValidate, currentStep, wsdlBean} = this.state;
 
         return (
             <div>
-                <Steps current={current}>
-                    {steps.map(item => <Step key={item.title} title={item.title} />)}
-                </Steps>
-                <div className="steps-content">{steps[this.state.current].content}</div>
-                <div className="steps-action">
-                    {
-                        this.state.current < steps.length - 1
-                        &&
-                        <Button type="primary" onClick={() => this.next()}>Next</Button>
-                    }
-                    {
-                        this.state.current === steps.length - 1
-                        &&
-                        <Button type="primary" onClick={this.handleCreateWSDLAPI}>Done</Button>
-                    }
-                    {
-                        this.state.current > 0
-                        &&
-                        <Button style={{ marginLeft: 8 }} onClick={() => this.prev()}>
-                            Previous
-                        </Button>
-                    }
-                    {
-                        this.state.isValidating &&
-                        <Spin tip=" Validating..."/>
-                    }
-                    {
-                        this.state.validationFailed &&
-                        <Alert
-                            message="Validation Failed"
-                            type="error"
-                            description={this.state.validationFailedMessage}
-                            showIcon
-                        />
-                    }
-                </div>
+                <Grid container spacing={0} justify="center">
+                    <Grid item xs={10}>
+                        <Paper className={classes.paper}>
+                            <Typography type="headline" gutterBottom>
+                                Create API Using WSDL
+                            </Typography>
+                            <Divider />
+                            {currentStep === 1 ? (
+                                <WSDLValidation updateWSDLValidity={this.updateWSDLValidity} validate={doValidate}/>
+                            ) : (
+                                <CreateAPI/>
+                            )}
+
+                            <Divider />
+                            <Grid container spacing={0} justify="flex-end">
+                                <Button className={classes.button} onClick={this.submitWSDL} raised color="primary">
+                                    Next
+                                    <Arrow className={classes.rightIcon}>send</Arrow>
+                                </Button>
+                            </Grid>
+                        </Paper>
+                    </Grid>
+                </Grid>
             </div>
         );
     }
 }
 
-
-const ApiCreateWSDLSteppedFormGenerated = Form.create()(ApiCreateWSDLSteppedForm);
-
-class ApiCreateWSDL extends React.Component {
-    constructor(props) {
-        super(props);
-
-    }
-    render = () => {return  <ApiCreateWSDLSteppedFormGenerated history={this.props.history} /> }
-}
-
-export default ApiCreateWSDL;
+export default withStyles(styles)(ApiCreateWSDL)

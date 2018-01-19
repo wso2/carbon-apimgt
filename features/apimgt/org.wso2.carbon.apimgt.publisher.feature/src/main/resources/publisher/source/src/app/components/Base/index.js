@@ -73,21 +73,18 @@ class Layout extends React.Component {
             this.setState({drawerOpen: true, layoutLeftOffset: defaultOffset});
     }
 
-
     render() {
         return (
             <div style={{marginLeft: this.state.layoutLeftOffset}}>
-                <Grid container spacing={0}>
+                <Grid container style={{height: '100vh'}} justify="space-between" spacing={0}>
                     <Grid item xs={12}>
                         <Header toggleDrawer={this.toggleDrawer} showLeftMenu={this.state.showLeftMenu}/>
                     </Grid>
                     <Grid item xs={12}>
                         {this.props.children}
                     </Grid>
-                    <Grid container spacing={0} justify="center">
-                        <Grid item xs={6}>
-                            <Footer/>
-                        </Grid>
+                    <Grid item xs={12}>
+                        <Footer/>
                     </Grid>
                 </Grid>
             </div>
