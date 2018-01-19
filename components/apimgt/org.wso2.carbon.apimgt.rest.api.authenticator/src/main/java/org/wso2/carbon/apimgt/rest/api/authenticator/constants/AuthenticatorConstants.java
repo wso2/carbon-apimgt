@@ -33,7 +33,6 @@ public class AuthenticatorConstants {
     public static final String SECURE_COOKIE = "Secure";
     public static final String PASSWORD_GRANT = "password";
     public static final String REFRESH_GRANT = "refresh_token";
-    public static final String JWT_GRANT = "urn:ietf:params:oauth:grant-type:jwt-bearer";
     public static final String COOKIE_HEADER = "Cookie";
     public static final String AUTHORIZATION_HTTP_HEADER = "Authorization";
     public static final String BEARER_PREFIX = "bearer";

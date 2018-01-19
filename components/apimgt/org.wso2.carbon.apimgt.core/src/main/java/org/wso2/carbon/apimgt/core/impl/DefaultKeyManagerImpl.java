@@ -302,6 +302,8 @@ public class DefaultKeyManagerImpl implements KeyManager {
                     throw new KeyManagementException("Error occurred while parsing token endpoint", e,
                             ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
                 }
+            } else if (KeyManagerConstants.JWT_GRANT_TYPE.equals(tokenRequest.getGrantType())) {
+                //todo: implement
             } else {
                 throw new KeyManagementException(
                         "Invalid access token request. Unsupported grant type: " + tokenRequest.getGrantType(),

@@ -89,10 +89,11 @@ public class OAuth2ServiceStubs {
                                      @Param("username") String username,
                                      @Param("password") String password,
                                      @Param("scope") String scopes,
-                                     @Param("validity_period") long validityPeriod);
+                                     @Param("validity_period") long validityPeriod,
+                                     @Param("assertion") String assertion);
 
         /**
-         * Get a access token by Client Credentials grant type
+         * Get an access token by Client Credentials grant type
          *
          * @param scopes         Required scopes (space separated) for the access token
          * @param validityPeriod Validity period of the token
@@ -105,11 +106,11 @@ public class OAuth2ServiceStubs {
             String credentials = clientId + ':' + clientSecret;
             String authToken = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
             return generateAccessToken(authToken, KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE,
-                    null, null, null, null, null, scopes, validityPeriod);
+                    null, null, null, null, null, scopes, validityPeriod, null);
         }
 
         /**
-         * Get a access token by Password grant type
+         * Get an access token by Password grant type
          *
          * @param username       Username of the user
          * @param password       Password of the user
@@ -125,11 +126,11 @@ public class OAuth2ServiceStubs {
             String credentials = clientId + ':' + clientSecret;
             String authToken = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
             return generateAccessToken(authToken, KeyManagerConstants.PASSWORD_GRANT_TYPE, null, null, null,
-                    username, password, scopes, validityPeriod);
+                    username, password, scopes, validityPeriod, null);
         }
 
         /**
-         * Get a access token by Authorization Code grant type
+         * Get an access token by Authorization Code grant type
          *
          * @param code           Authorization Code
          * @param redirectUri    Callback URL
@@ -145,11 +146,11 @@ public class OAuth2ServiceStubs {
             String credentials = clientId + ':' + clientSecret;
             String authToken = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
             return generateAccessToken(authToken, KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE, code, redirectUri,
-                    null, null, null, scopes, validityPeriod);
+                    null, null, null, scopes, validityPeriod, null);
         }
 
         /**
-         * Get a access token by Refresh grant type
+         * Get an access token by Refresh grant type
          *
          * @param refreshToken   Refresh Token
          * @param scopes         Required scopes (space separated) for the access token
@@ -164,7 +165,27 @@ public class OAuth2ServiceStubs {
             String credentials = clientId + ':' + clientSecret;
             String authToken = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
             return generateAccessToken(authToken, KeyManagerConstants.REFRESH_GRANT_TYPE, null,
-                    null, refreshToken, null, null, scopes, validityPeriod);
+                    null, refreshToken, null, null, scopes, validityPeriod, null);
+        }
+
+        /**
+         * Get an access token by JWT grant type (or custom grant type works as JWT grant type)
+         *
+         * @param assertion       JWT token or the custom token
+         * @param customGrantType JWT Grant Type (urn:ietf:params:oauth:grant-type:jwt-bearer) or the custom grant type
+         * @param scopes          Required scopes (space separated) for the access token
+         * @param validityPeriod  Validity period of the token
+         * @param clientId        Consumer Key of the application
+         * @param clientSecret    Consumer Secret of the application
+         * @return Feign Response Object
+         */
+        public default Response generateJWTGrantAccessToken(String assertion, String customGrantType, String scopes,
+                                                            long validityPeriod,
+                                                            String clientId, String clientSecret) {
+            String credentials = clientId + ':' + clientSecret;
+            String authToken = Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
+            return generateAccessToken(authToken, customGrantType, null, null, null,
+                    null, null, scopes, validityPeriod, assertion);
         }
     }
 
