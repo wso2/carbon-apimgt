@@ -63,16 +63,13 @@ class APiTableRow extends React.Component {
         }
         return (
             <TableRow hover>
-                <TableCell>{name}</TableCell>
-                <TableCell numeric>{version}</TableCell>
+                <TableCell><Link to={details_link}>{name}</Link></TableCell>
+                <TableCell>{version}</TableCell>
                 <TableCell>{context}</TableCell>
                 <TableCell style={{ whiteSpace: "normal", wordWrap: "break-word"}}>
                     <Typography>
                         {description}
                     </Typography>
-                </TableCell>
-                <TableCell>
-                    <Link to={details_link}>More...</Link>
                 </TableCell>
             </TableRow>
         );

@@ -82,47 +82,51 @@ class Listing extends React.Component {
 
 
         return (
-            <div style={{padding: "20px"}}>
-                <BottomNavigation value={value} onChange={this.handleChange} style={{float: "right"}}>
-                    <BottomNavigationButton label="List" icon={<ListIcon/>}/>
-                    <BottomNavigationButton label="Grid" icon={<GridOnIcon/>}/>
-                </BottomNavigation>
-                {
-                    this.state.apis ?
-                        this.state.listType === "grid" ?
-
-                            <Grid container>
-                                {this.state.apis.list.map(api => {
-                                    return <ApiThumb api={api} key={api.id}/>
-                                })}
-                            </Grid>
-                            :
-
-                            <Grid container>
-                                <Grid item xs>
-                                    <Paper>
-                                        <Table>
-                                            <TableHead>
-                                                <TableRow>
-                                                    <TableCell>Name</TableCell>
-                                                    <TableCell>Version</TableCell>
-                                                    <TableCell>Context</TableCell>
-                                                    <TableCell>Description</TableCell>
-                                                    <TableCell></TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {this.state.apis.list.map(api => {
-                                                    return <APiTableRow api={api} key={api.id}/>
-                                                })}
-                                            </TableBody>
-                                        </Table>
-                                    </Paper>
-                                </Grid>
-                            </Grid>
-                        :
-                        <Loading/>
-                }
+            <div>
+                <Grid container justify="center" alignItems="center" className="full-width">
+                    <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
+                        <Typography type="display1" gutterBottom className="api-list-title">
+                            All APIs
+                        </Typography>
+                        <BottomNavigation value={value} onChange={this.handleChange} style={{float: "right"}}>
+                            <BottomNavigationButton icon={<ListIcon/>}/>
+                            <BottomNavigationButton icon={<GridOnIcon/>}/>
+                        </BottomNavigation>
+                        {
+                            this.state.apis ?
+                                this.state.listType === "grid" ?
+                                    <Grid container >
+                                        {this.state.apis.list.map(api => {
+                                            return <ApiThumb api={api} key={api.id}/>
+                                        })}
+                                    </Grid>
+                                    :
+                                    <Grid container>
+                                        <Grid item xs>
+                                            <Paper>
+                                                <Table>
+                                                    <TableHead>
+                                                        <TableRow>
+                                                            <TableCell>Name</TableCell>
+                                                            <TableCell>Version</TableCell>
+                                                            <TableCell>Context</TableCell>
+                                                            <TableCell>Description</TableCell>
+                                                        </TableRow>
+                                                    </TableHead>
+                                                    <TableBody>
+                                                        {this.state.apis.list.map(api => {
+                                                            return <APiTableRow api={api} key={api.id}/>
+                                                        })}
+                                                    </TableBody>
+                                                </Table>
+                                            </Paper>
+                                        </Grid>
+                                    </Grid>
+                                :
+                                <Loading/>
+                        }
+                    </Grid>
+                </Grid>
             </div>
         );
     }
