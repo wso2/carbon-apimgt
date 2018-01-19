@@ -54,7 +54,6 @@ class Overview extends Component {
         };
         this.api_uuid = this.props.match.params.api_uuid;
         this.handleTabChange = this.handleTabChange.bind(this);
-        this.handleGetAllComments = this.handleGetAllComments.bind(this);
     }
 
     componentDidMount() {
@@ -137,8 +136,6 @@ class Overview extends Component {
                 }
             }
         );
-
-        this.handleGetAllComments();
     }
 
     handleClick() {
@@ -148,21 +145,6 @@ class Overview extends Component {
     handleTabChange = (event, tabValue) => {
         this.setState({tabValue: tabValue});
     };
-
-    handleGetAllComments() {
-        var api = new Api();
-        let promise_get = api.getAllComments(this.api_uuid);
-        promise_get.then(
-            response => {
-                var index = 0;
-                var comments = [];
-                this.setState({commentList: response.obj.list});
-            }).catch(
-            error => {
-                message.error("Error occurred while retrieving comments!");
-            }
-        );
-    }
 
     render() {
         const formItemLayout = {
@@ -185,10 +167,10 @@ class Overview extends Component {
                     <Grid container className="tab-grid" spacing={0}>
                         <Grid item xs={12} sm={12} md={6} lg={6} xl={4}>
                             { api.endpoint &&
-                                api.endpoint.map(ep => <div>
-                                    <span>{ep.type}</span>
-                                    <span>{ep.inline ? ep.inline.endpointConfig.serviceUrl : ''}</span>
-                                </div>)
+                            api.endpoint.map(ep => <div>
+                                <span>{ep.type}</span>
+                                <span>{ep.inline ? ep.inline.endpointConfig.serviceUrl : ''}</span>
+                            </div>)
                             }
                         </Grid>
                     </Grid>
