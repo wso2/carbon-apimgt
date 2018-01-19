@@ -55,7 +55,7 @@ header.MuiAppBar-colorPrimary-6{
     float: right;
 }
 .home span,.home span:active,.home span:visited{
-    font-weight: 200;
+    font-weight: 300;
     text-decoration: none;
 }
 .tab-content{
@@ -68,4 +68,30 @@ header.MuiAppBar-colorPrimary-6{
     padding-bottom:10px;
     font-size:15px;
     font-weight: 200;
+}
+.parent-container {
+    padding: 82px 0;
+}
+.add-item-left-padding{
+    padding-left: 30px;
+}
+.add-item-right-padding{
+    padding-right: 30px;
+}
+.tab-grid{
+    width: 100%;
+    padding: 4%;
+}
+.full-width{
+    width: 100%;
+}
+.add-form-padding{
+    padding: 0 4% 4% 4%;
+}
+.form-buttons {
+    margin-top: 3%;
+}
+.header-avatar img{
+    width: 30px;
+    height: 30px;
 }

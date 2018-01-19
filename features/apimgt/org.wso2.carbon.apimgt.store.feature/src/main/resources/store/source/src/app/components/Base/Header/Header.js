@@ -171,7 +171,7 @@ class Header extends React.Component {
                         <Typography type="title" color="inherit" style={{flex: 1}}>
                             <Link to="/" className="home">
                                 <img className="brand" src="/store/public/app/images/logo-inverse.svg" alt="wso2-logo"/>
-                                <span color="contrast" style={{fontSize: "15px", color: "#fff"}}>APIM Store</span>
+                                <span color="contrast">APIM Store</span>
                             </Link>
                         </Typography>
                         {user ?
@@ -205,8 +205,8 @@ class Header extends React.Component {
                                 {/* User menu */}
                                 <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClickUserMenu}
                                         color="contrast">
-                                    <Avatar alt="{user.name}" src="/store/public/app/images/users/user.png"></Avatar>
-                                    <span>{user.name}</span>
+                                    <Avatar alt="{user.name}" src="/store/public/app/images/users/user.png" className="header-avatar"></Avatar>
+                                    {user.name}
                                 </Button>
                                 <Menu
                                     id="simple-menu"

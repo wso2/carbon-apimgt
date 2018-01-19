@@ -49,7 +49,6 @@ h2{
 }
 h2 span{
     color:#ccc;
-    font-size: 11px;
     display: block;
 }
 .api-type-selector{
@@ -96,7 +95,7 @@ h2 span{
 
 /*need a better solution*/
 .default-thumb{
-    height: 200px!important;
+    height: 250px!important;
     border-radius: 0!important;
     width: 100%!important;
     font-weight: 200!important;
@@ -112,25 +111,10 @@ h2 span{
         font-size: 7em!important;
     }
 }
-.parent-container {
-    padding: 82px 0 !important;
+.api-list-tile {
+    list-style: none;
 }
-.add-item-left-padding{
-    padding-left:30px;
-}
-.add-item-right-padding{
-    padding-right:30px;
-}
-.tab-grid{
-    width: 100%;
-    padding:4%;
-}
-.full-width{
-    width: 100%;
-}
-.add-form-padding{
-    padding: 0 4% 4% 4%;
-}
-.form-buttons {
-   margin-top: 3%;
+.api-list-title {
+    display: inline;
+    float: left;
 }
