@@ -55,6 +55,7 @@ class Login extends Component {
             message: '',
             environments: [],
             environmentId: 0,
+            loginStatusEnvironments: [],
             authConfigs: [],
             redirectToIS: false
         };
@@ -74,6 +75,9 @@ class Login extends Component {
             // Update environment to discard default environment configuration
             const environment = environments[environmentId];
             Utils.setEnvironment(environment);
+
+            // Set authentication status of environments
+            this.setLoginStatusOfEnvironments(environments);
 
             //Fetch SSO data and render
             this.fetch_ssoData(environments);
@@ -95,6 +99,12 @@ class Login extends Component {
             user.scopes = params.scopes.split(" ");
             AuthManager.setUser(user);
         }
+    }
+
+    setLoginStatusOfEnvironments(environments) {
+        this.state.loginStatusEnvironments = environments.map(
+            environment => AuthManager.getUser(environment.label) !== null
+        );
     }
 
     fetch_ssoData(environments) {
@@ -175,7 +185,11 @@ class Login extends Component {
     handleEnvironmentChange = (event) => {
         const environmentId = event.target.value;
         let environment = this.state.environments[environmentId];
-        this.setState({environmentId});
+        let isLogin = this.state.loginStatusEnvironments[environmentId];
+        if (isLogin) {
+            Utils.setEnvironment(environment);
+        }
+        this.setState({environmentId, isLogin});
     };
 
     handleRequestClose = () => {
