@@ -135,14 +135,9 @@ class Utils {
         //Store environment.
         Utils._environment = environment;
         localStorage.setItem(Utils.CONST.LOCALSTORAGE_ENVIRONMENT, JSON.stringify(environment));
-
-        //Read the user of stored environment.
-        let user = AuthManager.getUser(true);
-        //If user is null store only in memory.
-        AuthManager.setUser(user);
     }
 
-    static getPromised_ssoData(environment){
+    static getPromised_ssoData(environment) {
         return Axios.get(Utils.getAppSSORequestURL(environment));
     }
 

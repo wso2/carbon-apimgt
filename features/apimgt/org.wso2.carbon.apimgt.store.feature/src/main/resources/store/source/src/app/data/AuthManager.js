@@ -105,22 +105,15 @@ class AuthManager {
      * This may give a partial indication(passive check not actually check the token validity via an API) of whether the user has logged in or not, The actual API call may get denied
      * if the cookie stored access token is invalid/expired
      * @returns {User | null} Is any user has logged in or not
-     * @param {boolean} readFromLocalStorage: read from local-storage
      */
-    static getUser(readFromLocalStorage) {
-        if (!readFromLocalStorage && AuthManager._user) {
-            return AuthManager._user;
-        }
-
+    static getUser() {
         const userData = localStorage.getItem(`${User.CONST.LOCALSTORAGE_USER}_${Utils.getEnvironment().label}`);
         const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1);
         if (!(userData && partialToken)) {
             return null;
         }
 
-        //Update user in memory.
-        AuthManager._user = User.fromJson(JSON.parse(userData));
-        return AuthManager._user;
+        return User.fromJson(JSON.parse(userData));
     }
 
     /**
@@ -136,7 +129,6 @@ class AuthManager {
         if (user) {
             localStorage.setItem(`${User.CONST.LOCALSTORAGE_USER}_${Utils.getEnvironment().label}`, JSON.stringify(user.toJson()));
         }
-        AuthManager._user = user;
     }
 
     /**
@@ -190,7 +182,7 @@ class AuthManager {
     logout() {
         let authHeader = "Bearer " + AuthManager.getUser().getPartialToken();
         //TODO Will have to change the logout end point url to contain the app context(i.e. publisher/store, etc.)
-        let url = Utils.getAppLogoutURL()
+        let url = Utils.getAppLogoutURL();
         let headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -224,10 +216,4 @@ class AuthManager {
 
 }
 
-/**
- * Current User
- * @type {object} User Object
- * @private
- */
-AuthManager._user = undefined;
 export default AuthManager;
