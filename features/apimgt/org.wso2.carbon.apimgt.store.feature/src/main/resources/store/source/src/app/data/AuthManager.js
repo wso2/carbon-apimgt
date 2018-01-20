@@ -104,11 +104,13 @@ class AuthManager {
      * An user object is return in present of user logged in user info in browser local storage, at the same time checks for partialToken in the cookie as well.
      * This may give a partial indication(passive check not actually check the token validity via an API) of whether the user has logged in or not, The actual API call may get denied
      * if the cookie stored access token is invalid/expired
+     * @param {string} environmentName: label of the environment, the user to be retrieved from
      * @returns {User | null} Is any user has logged in or not
      */
-    static getUser() {
-        const userData = localStorage.getItem(`${User.CONST.LOCALSTORAGE_USER}_${Utils.getEnvironment().label}`);
-        const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1);
+    static getUser(environmentName) {
+        environmentName = environmentName || Utils.getEnvironment().label;
+        const userData = localStorage.getItem(`${User.CONST.LOCALSTORAGE_USER}_${environmentName}`);
+        const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1, environmentName);
         if (!(userData && partialToken)) {
             return null;
         }
@@ -120,14 +122,16 @@ class AuthManager {
      * Persist an user in browser local storage and in-memory, Since only one use can be logged into the application at a time,
      * This method will override any previously persist user data.
      * @param {User} user : An instance of the {User} class
+     * @param {string} environmentName: label of the environment to be set the user
      */
-    static setUser(user) {
+    static setUser(user, environmentName) {
+        environmentName = environmentName || Utils.getEnvironment().label;
         if (!user instanceof User) {
             throw new Error("Invalid user object");
         }
 
         if (user) {
-            localStorage.setItem(`${User.CONST.LOCALSTORAGE_USER}_${Utils.getEnvironment().label}`, JSON.stringify(user.toJson()));
+            localStorage.setItem(`${User.CONST.LOCALSTORAGE_USER}_${environmentName}`, JSON.stringify(user.toJson()));
         }
     }
 
