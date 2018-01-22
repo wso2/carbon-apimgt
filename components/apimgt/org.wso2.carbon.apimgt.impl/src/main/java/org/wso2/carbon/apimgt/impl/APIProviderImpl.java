@@ -184,8 +184,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private static final Log log = LogFactory.getLog(APIProviderImpl.class);
 
     private final String userNameWithoutChange;
-    /*// Property to indicate whether access control restriction feature is enabled.
-    boolean isAccessControlRestrictionEnabled = false;*/
 
     public APIProviderImpl(String username) throws APIManagementException {
         super(username);

@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import org.apache.axis2.AxisFault;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -576,7 +575,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
         int totalLength=0;
         boolean isMore = false;
-        String criteria = "lcState=";
+        String criteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY;
         
         try {
             Registry userRegistry;
@@ -1209,7 +1208,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         		add(APIConstants.PUBLISHED);
         	}});
             listMap.put(APIConstants.STORE_VIEW_ROLES, getUserRoleList());
-            String searchCriteria = "lcState= (" + APIConstants.PUBLISHED + ")";
+            String searchCriteria = APIConstants.LCSTATE_SEARCH_KEY + "= (" + APIConstants.PUBLISHED + ")";
 
         	//Find UUID
         	GenericArtifactManager artifactManager = APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY);

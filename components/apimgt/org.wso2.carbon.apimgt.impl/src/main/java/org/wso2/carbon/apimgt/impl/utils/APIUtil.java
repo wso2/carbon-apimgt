@@ -2835,6 +2835,15 @@ public final class APIUtil {
         }
     }
 
+    /**
+     * This function is to set resource permissions based on its visibility
+     *
+     * @param username     Username
+     * @param visibility   API visibility
+     * @param roles        Authorized roles
+     * @param artifactPath API resource path
+     * @throws APIManagementException Throwing exception
+     */
     public static void setResourcePermissions(String username, String visibility, String[] roles, String
             artifactPath) throws APIManagementException {
         setResourcePermissions(username, visibility, roles, artifactPath, null);
@@ -2846,6 +2855,7 @@ public final class APIUtil {
      * @param visibility   API visibility
      * @param roles        Authorized roles
      * @param artifactPath API resource path
+     * @param registry     Registry
      * @throws APIManagementException Throwing exception
      */
     public static void setResourcePermissions(String username, String visibility, String[] roles, String

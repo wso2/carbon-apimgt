@@ -69,6 +69,7 @@ public class CustomAPIIndexer extends RXTIndexer {
                 storeVisibility = api.getVisibility();
                 storeVisibleRoles = api.getVisibleRoles();
             } catch (APIManagementException e) {
+                // We need to continue default indexing process although access control extension faces an error, so not throwing an exception here.
                 log.error("Error while retrieving API", e);
             }
 
@@ -88,9 +89,9 @@ public class CustomAPIIndexer extends RXTIndexer {
                     log.debug("API at " + resourcePath + "did not have property : " + APIConstants.STORE_VIEW_ROLES
                             + ", hence adding the values for that API resource.");
                 }
-                if (storeVisibility.equals("public")) {
+                if (storeVisibility.equals(APIConstants.PUBLIC_STORE_VISIBILITY)) {
                     resource.setProperty(APIConstants.STORE_VIEW_ROLES, "null");
-                } else if (storeVisibility.equals("restricted")){
+                } else if (storeVisibility.equals(APIConstants.RESTRICTED_STORE_VISIBILITY)){
                     resource.setProperty(APIConstants.STORE_VIEW_ROLES, storeVisibleRoles + "," + publisherAccessControl);
                 }
                 resource.setProperty(CUSTOM_API_INDEXER_PROPERTY, "true");
