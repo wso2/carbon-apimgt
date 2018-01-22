@@ -32,6 +32,24 @@ function getSwaggerError(errorsList) {
     return errorMsg;
 }
 
+var parseSwaggerDefinition = function(swagger){
+    var swaggerJson = {};
+    try{
+        swaggerJson = JSON.parse(swagger);
+    } catch(e){
+        //fail-over to validate yaml based definitions
+        try {
+            var DeserializationUtils = Packages.io.swagger.parser.util.DeserializationUtils;
+            var swaggerJsonNode = DeserializationUtils.readYamlTree(swagger).toString();
+            swaggerJson = JSON.parse(swaggerJsonNode);
+        } catch(e){
+            print({error: true, message: source + " contains an invalid Swagger Definition"});
+            return;
+        }
+    }
+    return swaggerJson;
+}
+
 if(jagg.isCSRFTokenValid())
 (function () {
     response.contentType = "text/plain; charset=UTF-8";
@@ -55,6 +73,7 @@ if(jagg.isCSRFTokenValid())
             var swagger = null;
             var wsdl = null;
             var supportedSwaggerVersion = "2.0";
+            var supportedOpenAPIVersion = "3.0.0";
             var parser = new SwaggerParser();
             var apiDefinitionVersion = request.getParameter("apiDefinitionVersion");
 
@@ -68,23 +87,45 @@ if(jagg.isCSRFTokenValid())
                     try {
                         var content = get(url, data);
                         swagger = content.data;
-                        var swaggerDeserializationResult = parser.readWithInfo(swagger);
-                        var swaggerObj = swaggerDeserializationResult.getSwagger();
-                        var swaggerErrors = swaggerDeserializationResult.getMessages();
+                        //Manually parsing api definition for json/yaml, since SwaggerParser 3.x has not been
+                        //released yet.
+                        var apiDefinition = parseSwaggerDefinition(swagger);
+                        if (apiDefinition.openapi) {
+                            if(apiDefinition.openapi != supportedOpenAPIVersion){
+                                print({
+                                    error: true,
+                                    message: "Unsupported OpenAPI version provided. Please re-import with OpenAPI " +
+                                    supportedOpenAPIVersion
+                                });
+                                return;
+                            }
 
-                        //Supported swagger version check
-                        if (swaggerObj.swagger != supportedSwaggerVersion) {
-                            print({
-                                error: true,
-                                message: "Unsupported swagger version provided. Please re-import with swagger " + supportedSwaggerVersion
-                            });
-                            return;
-                        }
-                        //Validate swagger definition with mandatory swagger elements
-                        if (swaggerErrors.size() > 0) {
-                            errorMsg = getSwaggerError(swaggerErrors);
-                            print({error: true, message: "<div><div>" + url + " contains invalid swagger definition" + "</div>" + errorMsg});
-                            return;
+                            if(apiDefinition.info == null || apiDefinition.paths == null){
+                                print({error: true, message: url + " is not a valid Swagger Definition url"});
+                                return;
+                            }
+                        } else if (apiDefinition.swagger) {
+                            var swaggerDeserializationResult = parser.readWithInfo(swagger);
+                            var swaggerObj = swaggerDeserializationResult.getSwagger();
+                            var swaggerErrors = swaggerDeserializationResult.getMessages();
+
+                            //Supported swagger version check
+                            if (swaggerObj.swagger != supportedSwaggerVersion) {
+                                print({
+                                    error: true,
+                                    message: "Unsupported swagger version provided. Please re-import with swagger " + supportedSwaggerVersion
+                                });
+                                return;
+                            }
+                            //Validate swagger definition with mandatory swagger elements
+                            if (swaggerErrors.size() > 0) {
+                                errorMsg = getSwaggerError(swaggerErrors);
+                                print({
+                                    error: true,
+                                    message: "<div><div>" + url + " contains invalid swagger definition" + "</div>" + errorMsg
+                                });
+                                return;
+                            }
                         }
 
                     } catch (e) {
@@ -97,25 +138,46 @@ if(jagg.isCSRFTokenValid())
                         file.open("r");
                         swagger = file.readAll();
                         file.close();
-                        var swaggerDeserializationResult = parser.readWithInfo(swagger);
-                        var swaggerObj = swaggerDeserializationResult.getSwagger();
-                        var swaggerErrors = swaggerDeserializationResult.getMessages();
+                        var apiDefinition = parseSwaggerDefinition(swagger);
+                        if (apiDefinition.openapi) {
+                            //Supported Open API Version check
+                            if(apiDefinition.openapi != supportedOpenAPIVersion){
+                                print({
+                                    error: true,
+                                    message: "Unsupported OpenAPI version provided. Please re-import with OpenAPI " +
+                                    supportedOpenAPIVersion
+                                });
+                                return;
+                            }
 
-                        //Supported swagger version check
-                        if (swaggerObj.swagger != supportedSwaggerVersion) {
-                            print({
-                                error: true,
-                                message: "Unsupported swagger version provided. Please re-import with swagger " + supportedSwaggerVersion
-                            });
-                            return;
-                        }
-                        //Validate swagger definition with mandatory swagger elements
-                        if (swaggerErrors.size() > 0) {
-                            errorMsg = getSwaggerError(swaggerErrors);
-                            print({error: true, message: "<div><div>" + file.getName() + " contains invalid swagger definition" + "</div>" + errorMsg});
-                            return;
-                        }
+                            if(apiDefinition.info == null || apiDefinition.paths == null){
+                                print({error: true, message: file.getName() + " is not a valid Swagger Definition url"});
+                                return;
+                            }
+                        } else if (apiDefinition.swagger) {
 
+                            var swaggerDeserializationResult = parser.readWithInfo(swagger);
+                            var swaggerObj = swaggerDeserializationResult.getSwagger();
+                            var swaggerErrors = swaggerDeserializationResult.getMessages();
+
+                            //Supported swagger version check
+                            if (swaggerObj.swagger != supportedSwaggerVersion) {
+                                print({
+                                    error: true,
+                                    message: "Unsupported swagger version provided. Please re-import with swagger " + supportedSwaggerVersion
+                                });
+                                return;
+                            }
+                            //Validate swagger definition with mandatory swagger elements
+                            if (swaggerErrors.size() > 0) {
+                                errorMsg = getSwaggerError(swaggerErrors);
+                                print({
+                                    error: true,
+                                    message: "<div><div>" + file.getName() + " contains invalid swagger definition" + "</div>" + errorMsg
+                                });
+                                return;
+                            }
+                        }
                     } catch (e) {
                         print({error: true, message: file.getName() + " contains invalid swagger definition"});
                         return;
