@@ -38,6 +38,7 @@ import BasicInfo from './BasicInfo'
 import PersonPinIcon from 'material-ui-icons/PersonPin';
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
+import Paper from 'material-ui/Paper';
 
 
 export default class Details extends Component {
@@ -87,23 +88,23 @@ export default class Details extends Component {
         return (
             <Grid container spacing={0} justify="center">
                 <Grid item xs={12} sm={6} md={8} lg={8} xl={10} >
-                    <Typography type="display1" gutterBottom>
+                    <Typography type="title" gutterBottom className="page-title">
                         {this.state.application.name}
                     </Typography>
-                    <AppBar position="static">
+                    <Paper>
                         <Tabs
                             value={this.state.value}
                             onChange={this.handleChange}
                             fullWidth
-                            indicatorColor="accent"
-                            textColor="accent"
+                            indicatorColor="primary"
+                            textColor="primary"
                         >
                             <Tab value="overview" icon={<ComputerIcon />} label="Overview"/>
                             <Tab value="productionkeys" icon={<KeysIcon />} label="Production Keys"/>
                             <Tab value="sandBoxkeys" icon={<KeysIcon />} label="SandBox Keys"/>
                             <Tab value="subscriptions" icon={<SubscriptionsIcon />} label="Subscriptions"/>
                         </Tabs>
-                    </AppBar>
+                    </Paper>    
                     <Switch>
                         <Redirect exact from="/applications/:applicationId" to={redirect_url}/>
                         <Route path="/applications/:applicationId/overview" component={Overview}/>

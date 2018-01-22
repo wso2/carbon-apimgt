@@ -110,7 +110,7 @@ class ApplicationCreate extends Component {
         return (
             <Grid container justify="center" alignItems="center" className="full-width">
                 <Grid item xs={12} sm={12} md={8} lg={8} xl={8} >
-                    <Typography type="display1" gutterBottom>
+                    <Typography type="title" gutterBottom className="page-title"> 
                         <Link to={"/applications"}>
                             <IconButton aria-label="Back">
                                 <BackIcon/>
@@ -132,6 +132,7 @@ class ApplicationCreate extends Component {
                                 value={this.state.quota}
                                 onChange={this.handlePolicyChange('quota')}
                                 input={<Input name="quota" id="quota-helper" />}
+                                className="form-select"
                             >
                                 {this.state.tiers.map((tier) => <MenuItem key={tier} value={tier}>{tier}</MenuItem>)}
                             </Select>

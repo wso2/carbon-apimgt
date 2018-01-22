@@ -316,7 +316,6 @@ class Login extends Component {
 
                         </Grid>
                     </Grid>
-                    <Footer/>
                 </div>
 
             );
