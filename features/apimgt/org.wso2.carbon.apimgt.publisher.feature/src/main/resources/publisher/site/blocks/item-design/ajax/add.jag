@@ -91,7 +91,7 @@ if(jagg.isCSRFTokenValid())
                         //released yet.
                         var apiDefinition = parseSwaggerDefinition(swagger);
                         if (apiDefinition.openapi) {
-                            if(apiDefinition.openapi != supportedOpenAPIVersion){
+                            if (apiDefinition.openapi != supportedOpenAPIVersion) {
                                 print({
                                     error: true,
                                     message: "Unsupported OpenAPI version provided. Please re-import with OpenAPI " +
@@ -100,7 +100,7 @@ if(jagg.isCSRFTokenValid())
                                 return;
                             }
 
-                            if(apiDefinition.info == null || apiDefinition.paths == null){
+                            if (apiDefinition.info == null || apiDefinition.paths == null) {
                                 print({error: true, message: url + " is not a valid Swagger Definition url"});
                                 return;
                             }
@@ -141,7 +141,7 @@ if(jagg.isCSRFTokenValid())
                         var apiDefinition = parseSwaggerDefinition(swagger);
                         if (apiDefinition.openapi) {
                             //Supported Open API Version check
-                            if(apiDefinition.openapi != supportedOpenAPIVersion){
+                            if (apiDefinition.openapi != supportedOpenAPIVersion) {
                                 print({
                                     error: true,
                                     message: "Unsupported OpenAPI version provided. Please re-import with OpenAPI " +
@@ -150,8 +150,11 @@ if(jagg.isCSRFTokenValid())
                                 return;
                             }
 
-                            if(apiDefinition.info == null || apiDefinition.paths == null){
-                                print({error: true, message: file.getName() + " is not a valid Swagger Definition url"});
+                            if (apiDefinition.info == null || apiDefinition.paths == null) {
+                                print({
+                                    error: true,
+                                    message: file.getName() + " is not a valid Swagger Definition file"
+                                });
                                 return;
                             }
                         } else if (apiDefinition.swagger) {
