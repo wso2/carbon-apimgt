@@ -1,6 +1,10 @@
 body{
     background: #f2f2f2;
 }
+a {
+    text-decoration: none;
+    color: #1E88E5;
+}
 .selected-item{
     width: 250px;
     color: #fff;
