@@ -67,10 +67,7 @@ class Login extends Component {
         ConfigManager.getConfigs().environments.then(response => {
             const environments = response.data.environments;
             const environmentId = Utils.getEnvironmentID(environments);
-
-            // Do not need to render before fetch sso data
-            this.state.environments = environments;
-            this.state.environmentId = environmentId;
+            this.setState({environments, environmentId});
 
             // Update environment to discard default environment configuration
             const environment = environments[environmentId];
@@ -102,9 +99,10 @@ class Login extends Component {
     }
 
     setLoginStatusOfEnvironments(environments) {
-        this.state.loginStatusEnvironments = environments.map(
+        let loginStatusEnvironments = environments.map(
             environment => AuthManager.getUser(environment.label) !== null
         );
+        this.setState({loginStatusEnvironments});
     }
 
     fetch_ssoData(environments) {
@@ -133,7 +131,7 @@ class Login extends Component {
     };
 
     handleSsoLogin = (e) => {
-        if(e){
+        if (e) {
             e.preventDefault();
         }
         const authConfigs = this.state.authConfigs[this.state.environmentId];

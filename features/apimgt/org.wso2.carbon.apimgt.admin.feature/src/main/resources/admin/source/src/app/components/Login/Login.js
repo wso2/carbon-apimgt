@@ -77,9 +77,10 @@ class Login extends Component {
     }
 
     setLoginStatusOfEnvironments(environments) {
-        this.state.loginStatusEnvironments = environments.map(
+        let loginStatusEnvironments = environments.map(
             environment => AuthManager.getUser(environment.label) !== null
         );
+        this.setState({loginStatusEnvironments});
     }
 
     handleSubmit = (e) => {
