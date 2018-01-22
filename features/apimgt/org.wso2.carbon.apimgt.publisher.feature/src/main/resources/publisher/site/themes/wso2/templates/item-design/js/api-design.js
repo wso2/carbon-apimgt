@@ -258,6 +258,7 @@ function APIDesigner(){
                                             }
                                         }
                                     },
+                                    "required": true,
                                     "description": "Request Body"
                                 };
                             resource[method].requestBody = requestBody;
@@ -425,8 +426,14 @@ APIDesigner.prototype.update_elements = function(resource, newValue){
     if (API_DESIGNER.is_openapi3()) {
         if (i != "body" && i != "formData" && i != "consumes" && i != "produces") {
             if (i == "type") {
-                obj.schema = {"type": newValue};
-            } else {
+                if(obj.schema == undefined) obj.schema = {};
+                obj.schema[i] = newValue;
+            } else if(i == "content-type"){
+                var key = $(this).attr('data-index');
+                obj[newValue] = obj[key];
+                delete obj[key];
+            }
+            else {
                 obj[i] = newValue;
             }
         }
@@ -556,6 +563,32 @@ APIDesigner.prototype.init_controllers = function(){
         API_DESIGNER.render_resource(resource_body);
     });
 
+    this.container.delegate(".add_request_body_content", "click", function (event) {
+        if (!API_DESIGNER.is_openapi3()) return false;
+        var content_type = $(this).parent().find('.request_body_content').val();
+        if (content_type == "") return false;
+        var resource_body = $(this).parent().parent();
+        var resource = API_DESIGNER.query(resource_body.attr('data-path'));
+        var resource = resource[0]
+        if (resource.requestBody == undefined) resource.requestBody = {};
+        if (resource.requestBody.content == undefined) resource.requestBody.content = {};
+
+        resource.requestBody.content[content_type] = {
+            schema: {
+                type: "object",
+                properties: {
+                    payload: {
+                        type: "string"
+                    }
+                }
+            }
+        };
+        API_DESIGNER.load_swagger_editor_content();
+        API_DESIGNER.render_resource(resource_body);
+
+    });
+
+
     this.container.delegate(".delete_parameter", "click", function (event) {
         //var elementToDelete =  $(this).parent().parent();
         var deleteData = $(this).attr("data-path");
@@ -574,6 +607,39 @@ APIDesigner.prototype.init_controllers = function(){
                 API_DESIGNER.api_doc.paths[operations][operation]['parameters'].splice(i,1);
                 API_DESIGNER.render_resources();
             }});
+    });
+
+    this.container.delegate(".delete_request_body_content", "click", function (event) {
+
+        if (!API_DESIGNER.is_openapi3()) return false;
+
+        var deleteData = $(this).attr("data-path");
+        var i = $(this).attr("data-key");
+        var deleteDataArray = deleteData.split(".");
+        var operations = deleteDataArray[2].replace(/]|[[]|'/g, '');
+        var operation = deleteDataArray[3];
+        var contentTypeKey = API_DESIGNER.api_doc.paths[operations][operation]['requestBody']['content'][i];
+
+        // @todo: param_string
+        jagg.message({content: 'Do you want to delete request body with content type <strong>' + i + '</strong> ?',
+            type: 'confirm', title: i18n.t("Delete Request Body"),
+            okCallback: function () {
+                API_DESIGNER = APIDesigner();
+                delete API_DESIGNER.api_doc.paths[operations][operation]['requestBody']['content'][i];
+                if(isEmpty(API_DESIGNER.api_doc.paths[operations][operation]['requestBody']['content'])){
+                    delete API_DESIGNER.api_doc.paths[operations][operation]['requestBody']['content'];
+                }
+                API_DESIGNER.render_resources();
+            }});
+
+        function isEmpty(obj) {
+            for(var prop in obj) {
+                if(obj.hasOwnProperty(prop))
+                    return false;
+            }
+
+            return true;
+        }
     });
 
     this.container.delegate(".delete_scope","click", function(){
@@ -966,6 +1032,8 @@ APIDesigner.prototype.render_resource = function(container){
     var isBodyRequired = false;
     var operation = this.query(container.attr('data-path'));
     var context = jQuery.extend(true, {}, operation[0]);
+    debugger;
+    context.isOpenAPI3 = this.is_openapi3();
     context.resource_path = container.attr('data-path');
     if (context.resource_path.match(/post/i) || context.resource_path.match(/put/i)) {
         isBodyRequired = true;
@@ -1011,21 +1079,75 @@ APIDesigner.prototype.render_resource = function(container){
         mode: 'popup'
     });
     if(isBodyRequired){
-        container.find('.param_paramType').editable({
-            emptytext: '+ Set Param Type',
-            source: [ { value:"body", text:"body" },{ value:"query", text:"query" },{ value:"header", text:"header" }, { value:"formData", text:"formData"} ],
-            success : this.update_elements,
-            mode: 'popup'
-        });
+        if(this.is_openapi3()){
+
+            container.find('.param_paramType').editable({
+                emptytext: '+ Set Param Type',
+                source: [{ value:"query", text:"query" },{ value:"header", text:"header" }],
+                success : this.update_elements,
+                mode: 'popup'
+            });
+        } else {
+            container.find('.param_paramType').editable({
+                emptytext: '+ Set Param Type',
+                source: [ { value:"body", text:"body" },{ value:"query", text:"query" },{ value:"header", text:"header" }, { value:"formData", text:"formData"} ],
+                success : this.update_elements,
+                mode: 'popup'
+            });
+        }
     } else {
-        container.find('.param_paramType').editable({
-            emptytext: '+ Set Param Type',
-            source: [{ value:"query", text:"query" },{ value:"header", text:"header" }, { value:"formData", text:"formData"} ],
-            success : this.update_elements,
-            mode: 'popup'
-        });
+        if(this.is_openapi3()){
+            container.find('.param_paramType').editable({
+                emptytext: '+ Set Param Type',
+                source: [{ value:"query", text:"query" },{ value:"header", text:"header" }],
+                success : this.update_elements,
+                mode: 'popup'
+            });
+        } else {
+            container.find('.param_paramType').editable({
+                emptytext: '+ Set Param Type',
+                source: [{value: "query", text: "query"}, {value: "header", text: "header"}, {
+                    value: "formData",
+                    text: "formData"
+                }],
+                success: this.update_elements,
+                mode: 'popup'
+            });
+        }
     }
 
+    if(this.is_openapi3()){
+        container.find('.request_body_content_type').editable({
+            emptytext: '+ Set Content Type',
+            source: content_types,
+            success : this.update_elements,
+            mode: 'popup'
+        });
+        container.find('.request_body_data_type').editable({
+            emptytext: '+ Set Request Body Data Type',
+            success : this.update_elements,
+            mode: 'popup'
+        });
+        container.find('.request_body_desc').editable({
+            emptytext: '+ Empty',
+            success : this.update_elements,
+            mode: 'popup'
+        });
+        container.find('.request_body_required').editable({
+            emptytext: '+ Empty',
+            autotext: "always",
+            display: function(value, sourceData){
+                if(value == true || value == "true")
+                    $(this).text("True");
+                if(value == false || value == "false")
+                    $(this).text("False");
+            },
+            source: [ { value:true, text:"True" },{ value:false, text:"False"} ],
+            success : this.update_elements_boolean,
+            mode: 'popup'
+        });
+
+    }
     container.find('.param_type').editable({
         emptytext: '+ Empty',
         success : this.update_elements,

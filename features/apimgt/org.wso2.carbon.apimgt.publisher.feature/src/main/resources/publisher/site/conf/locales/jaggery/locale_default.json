@@ -347,7 +347,15 @@
     "Parameter Name": "Parameter Name",
     "Parameter Type": "Parameter Type",
     "Parameters": "Parameters",
+<<<<<<< HEAD
     "Pass Through": "Pass Through",
+=======
+    "Request Body": "Request Body",
+    "Request Body Content Type": "Request Body Content Type",
+    "Schema": "Schema",
+    "Add Request Body Content": "Add Request Body Content",
+    "Delete Request Body": "Delete Request Body",
+>>>>>>> Add Request Body content add/delete/edit functionlaity for OpenAPI3 specific APIs
     "Password": "Password",
     "Please select at least one subscription tier.": "Please select at least one subscription tier.",
     "Please select at least one transport.": "Please select at least one transport.",
