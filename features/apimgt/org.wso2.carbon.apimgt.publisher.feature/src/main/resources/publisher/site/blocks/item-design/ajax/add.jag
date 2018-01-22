@@ -32,17 +32,17 @@ function getSwaggerError(errorsList) {
     return errorMsg;
 }
 
-var parseSwaggerDefinition = function(swagger){
+var parseSwaggerDefinition = function (swagger) {
     var swaggerJson = {};
-    try{
+    try {
         swaggerJson = JSON.parse(swagger);
-    } catch(e){
+    } catch (e) {
         //fail-over to validate yaml based definitions
         try {
             var DeserializationUtils = Packages.io.swagger.parser.util.DeserializationUtils;
             var swaggerJsonNode = DeserializationUtils.readYamlTree(swagger).toString();
             swaggerJson = JSON.parse(swaggerJsonNode);
-        } catch(e){
+        } catch (e) {
             print({error: true, message: source + " contains an invalid Swagger Definition"});
             return;
         }
