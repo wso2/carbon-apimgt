@@ -60,6 +60,8 @@ public class APIGatewayManager {
 
     private final String ENDPOINT_SANDBOX = "_SANDBOX_";
 
+    private String endpointConfig;
+
 	private APIGatewayManager() {
 		APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
 		                                                       .getAPIManagerConfigurationService()
@@ -138,7 +140,7 @@ public class APIGatewayManager {
                         client.updateApiForInlineScript(builder, tenantDomain, api.getId());
                     }else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)){
                         client.updateApi(builder, tenantDomain, api.getId());
-                        endpointClient.saveEndpoint(builder);
+//                        endpointClient.saveEndpoint(builder);
                     }
 
                     if(api.isDefaultVersion() || api.isPublishedDefaultVersion()){//api.isPublishedDefaultVersion() check is used to detect and update when context etc. is changed in the api which is not the default version but has a published default api
@@ -179,6 +181,7 @@ public class APIGatewayManager {
                             client.addPrototypeApiScriptImpl(builder, tenantDomain, api.getId());
                         } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT
                                 .equalsIgnoreCase(api.getImplementation())) {
+                            endpointConfig = api.getEndpointConfig();
                             client.addApi(builder, tenantDomain, api.getId());
                             endpointClient.addEndpoint(api, builder);
                         }
@@ -256,8 +259,8 @@ public class APIGatewayManager {
                                 log.debug("Removing API " + api.getId().getApiName() + " From environment " +
                                         environment.getName());
                             }
+                            endpointClient.deleteEndpoint(api, endpointConfig);
                             client.deleteApi(tenantDomain, api.getId());
-                            endpointClient.deleteEndpoint(api.getId().getApiName() + "--" + api.getId().getVersion());
                             undeployCustomSequences(api, tenantDomain, environment);
                         }
                     } else {

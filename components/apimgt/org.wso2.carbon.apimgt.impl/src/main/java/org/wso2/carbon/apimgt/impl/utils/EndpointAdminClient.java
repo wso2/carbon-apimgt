@@ -33,28 +33,33 @@ public class EndpointAdminClient {
 
     public void addEndpoint(API api, APITemplateBuilder builder) throws AxisFault {
         try {
-            ArrayList<String> arrayList = getEndpointType(api);
+            String endpointConfig = api.getEndpointConfig();
+            ArrayList<String> arrayList = getEndpointType(endpointConfig);
             for (String type : arrayList) {
-                String endpointConfig = builder.getConfigStringForEndpointTemplate(type);
-                endpointAdminStub.addEndpoint(endpointConfig);
+                String endpointConfigContext = builder.getConfigStringForEndpointTemplate(type);
+                endpointAdminStub.addEndpoint(endpointConfigContext);
             }
         } catch (Exception e) {
             throw new AxisFault("Error while generating Endpoint file in Gateway " + e.getMessage(), e);
         }
     }
 
-    public void deleteEndpoint(String endpointName) throws AxisFault {
+    public void deleteEndpoint(API api, String endpointConfig) throws AxisFault {
         try {
-            endpointAdminStub.deleteEndpoint(endpointName);
+            String endpointName = api.getId().getApiName() + "--" + api.getId().getVersion();
+            ArrayList<String> arrayList = getEndpointType(endpointConfig);
+            for (String type : arrayList) {
+                String t = type.replace("_endpoints", "");
+                endpointAdminStub.deleteEndpoint(endpointName + "_API" + t + "Endpoint");
+            }
         } catch (Exception e) {
             throw new AxisFault("Error while deleting Endpoint from the gateway. " + e.getMessage(), e);
         }
     }
 
-    private ArrayList<String> getEndpointType(API api) throws ParseException {
-        String endpoint_config = api.getEndpointConfig();
+    private ArrayList<String> getEndpointType(String endpointConfig) throws ParseException {
         JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(endpoint_config);
+        JSONObject jsonObject = (JSONObject) jsonParser.parse(endpointConfig);
         ArrayList<String> arrayList = new ArrayList<>();
         if (jsonObject.containsKey(APIConstants.API_DATA_PRODUCTION_ENDPOINTS) && !jsonObject.containsKey(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
             arrayList.add(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);
@@ -67,12 +72,12 @@ public class EndpointAdminClient {
         return arrayList;
     }
 
-    public void saveEndpoint(APITemplateBuilder builder) throws AxisFault {
-        try {
-            String endpointConfig = builder.getConfigStringForEndpointTemplate(environment);
-            endpointAdminStub.saveEndpoint(endpointConfig);
-        } catch (Exception e) {
-            throw new AxisFault("Error updating Endpoint file" + e.getMessage(), e);
-        }
-    }
+//    public void saveEndpoint(APITemplateBuilder builder) throws AxisFault {
+//        try {
+//            String endpointConfig = builder.getConfigStringForEndpointTemplate(environment);
+//            endpointAdminStub.saveEndpoint(endpointConfig);
+//        } catch (Exception e) {
+//            throw new AxisFault("Error updating Endpoint file" + e.getMessage(), e);
+//        }
+//    }
 }
