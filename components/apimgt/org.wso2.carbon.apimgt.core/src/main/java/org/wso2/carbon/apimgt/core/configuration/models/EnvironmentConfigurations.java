@@ -28,7 +28,8 @@ import java.util.List;
 /**
  * Class to hold Environment configurations
  */
-@Configuration(description = "Environment Configurations")
+@Configuration(namespace = "wso2.carbon.apimgt.environment",
+        description = "APIM Environment Configuration Parameters")
 public class EnvironmentConfigurations {
     //Unique name for environment to set cookies by backend
     @Element(description = "current environment's label from the list of environments")

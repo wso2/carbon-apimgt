@@ -132,7 +132,7 @@ public class AuthUtil {
         }
 
         //Append unique environment name in deployment.yaml
-        String environmentName = APIMConfigurationService.getInstance().getApimConfigurations()
+        String environmentName = APIMConfigurationService.getInstance()
                 .getEnvironmentConfigurations().getEnvironmentLabel();
         String cookie = request.getHeader(AuthenticatorConstants.COOKIE_HEADER);
         if (cookie != null) {
@@ -176,7 +176,7 @@ public class AuthUtil {
         }
 
         //Append unique environment name in deployment.yaml
-        String environmentName = APIMConfigurationService.getInstance().getApimConfigurations()
+        String environmentName = APIMConfigurationService.getInstance()
                 .getEnvironmentConfigurations().getEnvironmentLabel();
         return new NewCookie(name + "_" + environmentName, stringBuilder.toString());
     }

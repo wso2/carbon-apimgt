@@ -86,7 +86,7 @@ public class AuthenticatorService {
             throws APIManagementException {
         JsonObject oAuthData = new JsonObject();
         // Authentication details for Multi-Environment Overview
-        MultiEnvironmentOverview envOverviewConfigs = APIMConfigurationService.getInstance().getApimConfigurations()
+        MultiEnvironmentOverview envOverviewConfigs = APIMConfigurationService.getInstance()
                 .getEnvironmentConfigurations().getMultiEnvironmentOverview();
         boolean isMultiEnvironmentOverviewEnabled = envOverviewConfigs.isEnabled();
         List<String> grantTypes = new ArrayList<>();
@@ -151,7 +151,7 @@ public class AuthenticatorService {
         AccessTokenRequest accessTokenRequest = new AccessTokenRequest();
 
         // Authentication details for Multi-Environment Overview
-        MultiEnvironmentOverview envOverviewConfigs = APIMConfigurationService.getInstance().getApimConfigurations()
+        MultiEnvironmentOverview envOverviewConfigs = APIMConfigurationService.getInstance()
                 .getEnvironmentConfigurations().getMultiEnvironmentOverview();
         boolean isMultiEnvironmentOverviewEnabled = envOverviewConfigs.isEnabled();
         String customGrantType = envOverviewConfigs.getAuthenticationGrantType();

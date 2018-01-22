@@ -331,8 +331,8 @@ public class AuthenticatorAPI implements Microservice {
                 // Redirect to the store/apis page (redirect URL)
                 String uiServiceUrl;
                 //The first host in the list "allowedHosts" is the host of UI-Service
-                String uiServiceHost = APIMConfigurationService.getInstance().getApimConfigurations()
-                        .getEnvironmentConfigurations().getAllowedHosts().get(0);
+                String uiServiceHost = APIMConfigurationService.getInstance().getEnvironmentConfigurations()
+                        .getAllowedHosts().get(0);
                 if (StringUtils.isEmpty(uiServiceHost)) {
                     if (log.isDebugEnabled()) {
                         log.debug("The first string in the list " +

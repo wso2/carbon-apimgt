@@ -58,7 +58,7 @@ public class AuthenticatorServiceTestCase {
         oAuthData.addProperty(KeyManagerConstants.AUTHORIZATION_ENDPOINT, "https://localhost:9443/oauth2/authorize");
         oAuthData.addProperty(AuthenticatorConstants.SSO_ENABLED, ServiceReferenceHolder.getInstance()
                 .getAPIMAppConfiguration().isSsoEnabled());
-        oAuthData.addProperty(AuthenticatorConstants.AUTO_LOGIN_ENABLED, APIMConfigurationService.getInstance().getApimConfigurations()
+        oAuthData.addProperty(AuthenticatorConstants.AUTO_LOGIN_ENABLED, APIMConfigurationService.getInstance()
                 .getEnvironmentConfigurations().getMultiEnvironmentOverview().isEnabled());
 
         KeyManager keyManager = Mockito.mock(KeyManager.class);
