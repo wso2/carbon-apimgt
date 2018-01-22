@@ -37,7 +37,6 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.api.RESTAPIAuthenticator;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
-import org.wso2.carbon.messaging.Headers;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.Response;
 import org.wso2.msf4j.ServiceMethodInfo;
@@ -47,6 +46,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import javax.ws.rs.core.HttpHeaders;
 
 /**
  * OAuth2 implementation class
@@ -76,14 +76,25 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
             throws APIMgtSecurityException {
         ErrorHandler errorHandler = null;
         boolean isTokenValid = false;
-        Headers headers = request.getHeaders();
-        if (headers != null && headers.contains(RestApiConstants.COOKIE_HEADER) && isCookieExists(headers,
+        HttpHeaders headers = request.getHeaders();
+        boolean isCookieHeaderPresent = false;
+        boolean isAuthorizationHeaderPresent = false;
+
+        if (request.getHeader(RestApiConstants.COOKIE_HEADER) != null) {
+            isCookieHeaderPresent = true;
+        }
+
+        if (request.getHeader(RestApiConstants.AUTHORIZATION_HTTP_HEADER) != null) {
+            isAuthorizationHeaderPresent = true;
+        }
+
+        if (headers != null && isCookieHeaderPresent && isCookieExists(request,
                 APIConstants.AccessTokenConstants.AM_TOKEN_MSF4J)) {
             String accessToken = null;
-            String cookies = headers.get(RestApiConstants.COOKIE_HEADER);
+            String cookies = request.getHeader(RestApiConstants.COOKIE_HEADER);
             String partialTokenFromCookie = extractPartialAccessTokenFromCookie(cookies);
-            if (partialTokenFromCookie != null && headers.contains(RestApiConstants.AUTHORIZATION_HTTP_HEADER)) {
-                String authHeader = headers.get(RestApiConstants.AUTHORIZATION_HTTP_HEADER);
+            if (partialTokenFromCookie != null && isAuthorizationHeaderPresent) {
+                String authHeader = request.getHeader(RestApiConstants.AUTHORIZATION_HTTP_HEADER);
                 String partialTokenFromHeader = extractAccessToken(authHeader);
                 accessToken = (partialTokenFromHeader != null) ?
                         partialTokenFromHeader + partialTokenFromCookie :
@@ -91,8 +102,8 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
             }
             isTokenValid = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
             request.setProperty(LOGGED_IN_USER, getEndUserName(accessToken));
-        } else if (headers != null && headers.contains(RestApiConstants.AUTHORIZATION_HTTP_HEADER)) {
-            String authHeader = headers.get(RestApiConstants.AUTHORIZATION_HTTP_HEADER);
+        } else if (headers != null && isAuthorizationHeaderPresent) {
+            String authHeader = request.getHeader(RestApiConstants.AUTHORIZATION_HTTP_HEADER);
             String accessToken = extractAccessToken(authHeader);
             if (accessToken != null) {
                 isTokenValid = validateTokenAndScopes(request, serviceMethodInfo, accessToken);
@@ -184,8 +195,8 @@ public class OAuth2Authenticator implements RESTAPIAuthenticator {
         return null;
     }
 
-    private boolean isCookieExists(Headers headers, String cookieName) {
-        String cookie = headers.get(RestApiConstants.COOKIE_HEADER);
+    private boolean isCookieExists(Request request, String cookieName) {
+        String cookie = request.getHeader(RestApiConstants.COOKIE_HEADER);
         String token2 = null;
 
         //Append unique environment name in deployment.yaml

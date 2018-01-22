@@ -1269,8 +1269,8 @@ public class SampleTestObjectCreator {
                         + " appId " + "string, apiName string, propertiesMap string);\n" +
 
                         "@sink(type='jms', @map(type='text'),\n"
-                        + "factory.initial='org.apache.activemq.jndi.ActiveMQInitialContextFactory',"
-                        + " provider.url='tcp://localhost:61616', destination='TEST.FOO', connection.factory."
+                        + "factory.initial='org.wso2.andes.jndi.PropertiesFileInitialContextFactory',"
+                        + " provider.url='tcp://localhost:5672', destination='TEST.FOO', connection.factory."
                         + "type='topic',\n" + "connection.factory.jndi.name='TopicConnectionFactory')\n"
                         + "define stream GlobalThrottleStream (throttleKey string, isThrottled bool"
                         + ", expiryTimeStamp long);\n" +
@@ -1305,8 +1305,8 @@ public class SampleTestObjectCreator {
                 + "appId string, apiName string, propertiesMap string);\n" +
 
                 "\n@sink(type='jms', @map(type='text'),\n"
-                + "factory.initial='org.apache.activemq.jndi.ActiveMQInitialContextFactory',"
-                + " provider.url='tcp://localhost:61616', destination='TEST.FOO', connection.factory."
+                + "factory.initial='org.wso2.andes.jndi.PropertiesFileInitialContextFactory',"
+                + " provider.url='tcp://localhost:5672', destination='TEST.FOO', connection.factory."
                 + "type='topic',\n" + "connection.factory.jndi.name='TopicConnectionFactory')\n"
                 + "define stream GlobalThrottleStream (throttleKey string, isThrottled bool"
                 + ", expiryTimeStamp long);\n" +
@@ -1320,7 +1320,7 @@ public class SampleTestObjectCreator {
                 + "INSERT ALL EVENTS into ResultStream;\n" +
 
                 "\nfrom ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled)" + " select * "
-                + "insert into GlobalThrottleStream;";
+                + "insert into GlobalThrottleStream;\n";
         return siddhiApp;
     }
 
@@ -1338,8 +1338,8 @@ public class SampleTestObjectCreator {
                         + "propertiesMap string);\n" +
 
                         "\n@sink(type='jms', @map(type='text'),\n"
-                        + "factory.initial='org.apache.activemq.jndi.ActiveMQInitialContextFactory',"
-                        + " provider.url='tcp://localhost:61616', destination='TEST.FOO',"
+                        + "factory.initial='org.wso2.andes.jndi.PropertiesFileInitialContextFactory',"
+                        + " provider.url='tcp://localhost:5672', destination='TEST.FOO',"
                         + " connection.factory.type='topic',\n"
                         + "connection.factory.jndi.name='TopicConnectionFactory')\n"
                         + "define stream GlobalThrottleStream (throttleKey string, isThrottled bool, "
@@ -1349,7 +1349,7 @@ public class SampleTestObjectCreator {
                         "\n" + policy.getSiddhiQuery() + "\n" +
 
                         "\nfrom ResultStream#throttler:emitOnStateChange(throttleKey, isThrottled)" + "\nselect *\n"
-                        + "insert into GlobalThrottleStream;";
+                        + "insert into GlobalThrottleStream;\n";
 
         return siddhiApp;
     }
@@ -1368,8 +1368,8 @@ public class SampleTestObjectCreator {
                 + "string, appId string, apiName string, propertiesMap string);\n"
 
                 + "\n@sink(type='jms', @map(type='text'),"
-                + "\nfactory.initial='org.apache.activemq.jndi.ActiveMQInitialContextFactory',"
-                + " provider.url='tcp://localhost:61616', "
+                + "\nfactory.initial='org.wso2.andes.jndi.PropertiesFileInitialContextFactory',"
+                + " provider.url='tcp://localhost:5672', "
                 + "destination='TEST.FOO', connection.factory.type='topic',"
                 + "\nconnection.factory.jndi.name='TopicConnectionFactory')"
                 + "\ndefine stream GlobalThrottleStream (throttleKey string, isThrottled bool,"
@@ -1409,8 +1409,8 @@ public class SampleTestObjectCreator {
                 + " appId string, apiName string, propertiesMap string);\n"
 
                 + "\n@sink(type='jms', @map(type='text'),"
-                + "\nfactory.initial='org.apache.activemq.jndi.ActiveMQInitialContextFactory',"
-                + " provider.url='tcp://localhost:61616',"
+                + "\nfactory.initial='org.wso2.andes.jndi.PropertiesFileInitialContextFactory',"
+                + " provider.url='tcp://localhost:5672',"
                 + " destination='TEST.FOO', connection.factory.type='topic',"
                 + "\nconnection.factory.jndi.name='TopicConnectionFactory')"
                 + "\ndefine stream GlobalThrottleStream (throttleKey string, isThrottled bool,"

@@ -36,9 +36,8 @@ import org.wso2.carbon.apimgt.core.impl.APIPublisherImpl;
 import org.wso2.carbon.apimgt.core.models.Endpoint;
 import org.wso2.carbon.apimgt.rest.api.publisher.common.SampleTestObjectCreator;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
-import org.wso2.carbon.messaging.CarbonMessage;
-import org.wso2.carbon.transport.http.netty.message.HTTPCarbonMessage;
 import org.wso2.msf4j.Request;
+import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -91,8 +90,8 @@ public class ExternalResourcesApiServiceImplTestCase {
 
     // Sample request to be used by tests
     private Request getRequest() throws Exception {
-        CarbonMessage carbonMessage = new HTTPCarbonMessage();
-        carbonMessage.setProperty("LOGGED_IN_USER", USER);
+        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
+        Mockito.when(carbonMessage.getProperty("LOGGED_IN_USER")).thenReturn(USER);
         Request request = new Request(carbonMessage);
         return request;
     }

@@ -104,7 +104,7 @@ public class AuthenticatorAPI implements Microservice {
             String refToken = null;
             if (AuthenticatorConstants.REFRESH_GRANT.equals(grantType)) {
                 refToken = AuthUtil
-                        .extractTokenFromHeaders(request.getHeaders(), AuthenticatorConstants.REFRESH_TOKEN_2);
+                        .extractTokenFromHeaders(request, AuthenticatorConstants.REFRESH_TOKEN_2);
                 if (refToken == null) {
                     ErrorDTO errorDTO = new ErrorDTO();
                     errorDTO.setCode(ExceptionCodes.INVALID_AUTHORIZATION_HEADER.getErrorCode());
@@ -195,7 +195,7 @@ public class AuthenticatorAPI implements Microservice {
             restAPIContext = AuthenticatorConstants.REST_CONTEXT + appContext;
         }
         String accessToken = AuthUtil
-                .extractTokenFromHeaders(request.getHeaders(), AuthenticatorConstants.ACCESS_TOKEN_2);
+                .extractTokenFromHeaders(request, AuthenticatorConstants.ACCESS_TOKEN_2);
         if (accessToken != null) {
             try {
                 KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();

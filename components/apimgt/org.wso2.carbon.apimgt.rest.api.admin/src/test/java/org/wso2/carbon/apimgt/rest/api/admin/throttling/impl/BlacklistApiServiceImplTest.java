@@ -21,6 +21,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.throttling.impl;
 
+import org.junit.Assert;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
@@ -28,8 +30,6 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.junit.Assert;
-import org.junit.Test;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.impl.APIMgtAdminServiceImpl;
 import org.wso2.carbon.apimgt.core.models.BlockConditions;
@@ -39,8 +39,8 @@ import org.wso2.carbon.apimgt.rest.api.admin.impl.BlacklistApiServiceImpl;
 import org.wso2.carbon.apimgt.rest.api.admin.mappings.BlockingConditionMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
-import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.msf4j.Request;
+import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -162,7 +162,7 @@ public class BlacklistApiServiceImplTest {
 
 
     private Request getRequest() throws APIMgtSecurityException {
-        CarbonMessage carbonMessage = Mockito.mock(CarbonMessage.class);
+        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
         Request request = new Request(carbonMessage);
 
         try {

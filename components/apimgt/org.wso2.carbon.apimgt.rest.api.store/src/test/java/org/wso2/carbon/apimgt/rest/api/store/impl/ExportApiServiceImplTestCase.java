@@ -35,7 +35,7 @@ import org.wso2.carbon.apimgt.core.models.policy.Policy;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.store.utils.FileBasedApplicationImportExportManager;
 import org.wso2.carbon.messaging.CarbonMessage;
-import org.wso2.carbon.transport.http.netty.message.HTTPCarbonMessage;
+import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 import org.wso2.msf4j.Request;
 
 import java.time.LocalDateTime;
@@ -97,8 +97,8 @@ public class ExportApiServiceImplTestCase {
     }
     // Sample request to be used by tests
     private Request getRequest() throws Exception {
-        CarbonMessage carbonMessage = new HTTPCarbonMessage();
-        carbonMessage.setProperty("LOGGED_IN_USER", USER);
+        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
+        Mockito.when(carbonMessage.getProperty("LOGGED_IN_USER")).thenReturn(USER);
         Request request = new Request(carbonMessage);
         return request;
     }

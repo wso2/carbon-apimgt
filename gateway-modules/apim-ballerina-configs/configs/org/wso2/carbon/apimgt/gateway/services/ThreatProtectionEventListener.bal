@@ -11,11 +11,11 @@ import org.wso2.carbon.apimgt.gateway.utils;
 import org.wso2.carbon.apimgt.ballerina.threatprotection;
 
 @jms:config {
-    initialContextFactory:"org.apache.activemq.jndi.ActiveMQInitialContextFactory",
-    providerUrl:"tcp://localhost:61616",
+    initialContextFactory:"org.wso2.andes.jndi.PropertiesFileInitialContextFactory",
     connectionFactoryType:"topic",
     connectionFactoryName:"TopicConnectionFactory",
-    destination:"ThreatProtectionTopic"
+    destination:"ThreatProtectionTopic",
+    properties: ["connectionfactory.TopicConnectionFactory=amqp://admin:admin@clientID/carbon?brokerlist='tcp://localhost:5672'"]
 }
 
 service<jms> ThreatProtectionJmsService {

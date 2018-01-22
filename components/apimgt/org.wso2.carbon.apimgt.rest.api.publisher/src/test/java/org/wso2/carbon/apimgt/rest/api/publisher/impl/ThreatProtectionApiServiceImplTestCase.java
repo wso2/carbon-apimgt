@@ -34,18 +34,18 @@ import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.ThreatProtectionPolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
-import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.msf4j.Request;
+import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({RestAPIPublisherUtil.class, RestApiUtil.class, API.class})
 public class ThreatProtectionApiServiceImplTestCase {
+    private static final String USER = "admin";
+
     @Test
     public void threatProtectionPoliciesGetTestCase() throws Exception {
         PowerMockito.mockStatic(RestApiUtil.class);
@@ -127,9 +127,9 @@ public class ThreatProtectionApiServiceImplTestCase {
     }
 
     private Request getRequest() throws Exception {
-        CarbonMessage carbonMessage = Mockito.mock(CarbonMessage.class);
+        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
+        Mockito.when(carbonMessage.getProperty("LOGGED_IN_USER")).thenReturn(USER);
         Request request = new Request(carbonMessage);
-        PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(request);
         return request;
     }
 }

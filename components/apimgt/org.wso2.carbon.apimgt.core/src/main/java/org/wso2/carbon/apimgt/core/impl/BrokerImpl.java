@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -40,9 +40,9 @@ import javax.jms.TopicConnectionFactory;
  */
 public class BrokerImpl implements Broker {
 
-    private BrokerConfigurations config;
     private TopicConnectionFactory connFactory = null;
     private static final Logger log = LoggerFactory.getLogger(BrokerUtil.class);
+    private BrokerConfigurations config;
 
     public BrokerImpl() {
         config = ServiceReferenceHolder.getInstance().getAPIMConfiguration().getBrokerConfigurations();
@@ -51,14 +51,18 @@ public class BrokerImpl implements Broker {
         Constructor<?> construct = null;
         Object clientInst = null;
         try {
-            clientClass = Class.forName("org.apache.activemq.ActiveMQConnectionFactory");
+            clientClass = Class.forName("org.wso2.andes.client.AMQConnectionFactory");
             construct = clientClass.getConstructor(String.class);
-            clientInst = construct.newInstance(jmsConnectionConfiguration.getTopicConnectionFactoryURL());
+            String username = jmsConnectionConfiguration.getUsername();
+            String password = jmsConnectionConfiguration.getPassword();
+            String url = jmsConnectionConfiguration.getTopicConnectionFactoryURL();
+            String connectionUrl = getBrokerConnectionString(username, password, url);
+            clientInst = construct.newInstance(connectionUrl);
             connFactory = (TopicConnectionFactory) clientInst;
         } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException
                 | InvocationTargetException e) {
             String error = "Could not create a JMS client connection from the class";
-            log.error(error);
+            log.error(error, e);
         }
     }
 
@@ -73,6 +77,15 @@ public class BrokerImpl implements Broker {
             throw new BrokerException(error, ExceptionCodes.BROKER_EXCEPTION);
         }
         return connFactory.createTopicConnection();
+    }
+
+    /**
+     * Get full broker url
+     * @return
+     */
+    private String getBrokerConnectionString(String username, String password, String brokerUrl) {
+        return "amqp://" + username + ":" + password + "@clientID/carbon?brokerlist='" +
+                brokerUrl + "'";
     }
 }
 

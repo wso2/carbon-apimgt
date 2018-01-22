@@ -30,8 +30,8 @@ import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.impl.APIMgtAdminServiceImpl;
 import org.wso2.carbon.apimgt.core.models.PolicyValidationData;
 import org.wso2.carbon.apimgt.rest.api.core.dto.PolicyListDTO;
-import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.msf4j.Request;
+import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import javax.ws.rs.core.Response;
 import java.util.LinkedHashSet;
@@ -80,7 +80,7 @@ public class PoliciesApiServiceImplTestCase {
     }
 
     private Request getRequest() throws Exception {
-        CarbonMessage carbonMessage = Mockito.mock(CarbonMessage.class);
+        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
         Request request = new Request(carbonMessage);
         PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(request);
         return request;
