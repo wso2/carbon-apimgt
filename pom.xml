@@ -1009,7 +1009,7 @@
         <io.swagger.models.version>1.5.16</io.swagger.models.version>
         <atlassian.commonmark.version>0.9.0</atlassian.commonmark.version> <!-- *BSD2*: used as a plugin dependency--> 
         <joda.time.version>2.9.9</joda.time.version>
-        <broker.version>4.0.14</broker.version>
+        <broker.version>4.0.15</broker.version>
         <broker.package.import.version.range>[4.0.0, 5.0.0)</broker.package.import.version.range>
     </properties>
 </project>
