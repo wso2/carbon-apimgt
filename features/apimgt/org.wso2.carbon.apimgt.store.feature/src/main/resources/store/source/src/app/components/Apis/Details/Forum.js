@@ -4,7 +4,9 @@ import Grid from 'material-ui/Grid';
 import Button from 'material-ui/Button';
 import Card from 'material-ui/Card';
 import TextField from 'material-ui/TextField';
+import Typography from 'material-ui/Typography'
 import Api from '../../../data/api'
+import {CircularProgress} from "material-ui/Progress";
 // TODO: need to add alert library to store as well
 // import Alert from '../../Shared/alert'
 
@@ -12,42 +14,42 @@ class Forum extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            commentList: [],
+            commentList: null,
             comment: '',
+            api: {}
         };
         this.api_uuid = this.props.match.params.api_uuid;
         this.updateCommentString = this.updateCommentString.bind(this);
         this.handleAddComment = this.handleAddComment.bind(this);
-
+        this.getAllComments();
     }
 
-    handleGetAllComments() {
-        var api = new Api();
+    getAllComments() {
+        let api = new Api();
         let promise_get = api.getAllComments(this.api_uuid);
         promise_get.then(
             response => {
-                var index = 0;
-                var comments = [];
                 this.setState({commentList: response.obj.list});
             }).catch(
             error => {
-                message.error("Error occurred while retrieving comments!");
+                console.error(error);
+                /* TODO: Uncomment below line when Alert library is added to store */
+                // Alert.error("Error occurred while retrieving comments!");
             }
         );
     }
-
 
     updateCommentString(event) {
         this.setState({comment: event.target.value});
     }
 
     handleAddComment() {
-        var api = new Api();
+        let api = new Api();
         let commentInfo = {"commentText": this.state.comment};
         let promise = api.addComment(this.api_uuid, commentInfo);
         promise.then(
             response => {
-                this.handleGetAllComments();
+                this.getAllComments();
                 this.setState({comment: ''});
                 // TODO: uncomment below once the alert library is added to store
                 // Alert.success("Comment added successfully");
@@ -60,43 +62,44 @@ class Forum extends React.Component {
     }
 
     render() {
-        const {commentList, comment} = this.state;
+        const {commentList, comment, api} = this.state;
         return (
             <Paper>
-                <Grid container className="tab-grid" spacing={0}>
+                <Grid container spacing={0}>
                     <Grid item xs={12}>
                         <div>
-                            <p>Comments</p>
-                            <Grid item>
-                                <TextField
-                                    id="multiline-static"
-                                    label="With placeholder multiline"
-                                    placeholder="Placeholder"
-                                    multiline
-                                    rows="4"
-                                    defaultValue="Default Value"
-                                    helperText="Some important text"
-                                    margin="normal"
-                                    value={comment}
-                                    onChange={this.updateCommentString}
-                                />
+                            <Typography type="title" gutterBottom>
+                                Comments
+                            </Typography>
+                            <Grid container justify="center" spacing={0}>
+                                <Grid item xs={10}>
+                                    <TextField
+                                        fullWidth
+                                        label="Type your comments here"
+                                        placeholder="Type your comments here"
+                                        multiline
+                                        rows="4"
+                                        helperText="Please proved your comments on this API"
+                                        margin="normal"
+                                        value={comment}
+                                        onChange={this.updateCommentString}
+                                    />
+                                    <Button onClick={this.handleAddComment}>Add</Button>
+                                </Grid>
+                                <Grid item xs={10}>
+                                    {commentList ? commentList.map((comment) => (
+                                        <div>
+                                            <Grid item>
+                                                <Card bodyStyle={{padding: 5}} style={{background: "#e0d9d8"}}>
+                                                    <p>{comment.commentText}</p></Card>
+                                            </Grid>
+                                            <Grid item>
+                                                <p>Posted By {comment.createdBy} at {comment.createdTime}</p>
+                                            </Grid>
+                                        </div>))
+                                        : <CircularProgress/>}
+                                </Grid>
                             </Grid>
-                            <Grid item>
-                                <Button onClick={this.handleAddComment}>Add</Button>
-                            </Grid>
-                        </div>
-                        <div>
-                            {commentList && commentList.map((comment) => (
-                                    <div>
-                                        <Grid item>
-                                            <Card bodyStyle={{padding: 5}} style={{background: "#e0d9d8"}}>
-                                                <p>{comment.commentText}</p></Card>
-                                        </Grid>
-
-                                        <Grid item>
-                                            <p>Posted By {comment.createdBy} at {comment.createdTime}</p>
-                                        </Grid>
-                                    </div>))}
                         </div>
                     </Grid>
                 </Grid>
