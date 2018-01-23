@@ -18,10 +18,10 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import org.apache.axis2.AxisFault;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -146,6 +146,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private final Object tagCacheMutex = new Object();
     private final Object tagWithAPICacheMutex = new Object();
     protected APIMRegistryService apimRegistryService;
+    protected String userNameWithoutChange;
 
     public APIConsumerImpl() throws APIManagementException {
         super();
@@ -154,6 +155,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
 
     public APIConsumerImpl(String username, APIMRegistryService apimRegistryService) throws APIManagementException {
         super(username);
+        userNameWithoutChange = username;
         readTagCacheConfigs();
         this.apimRegistryService = apimRegistryService;
     }
@@ -333,7 +335,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         Set<API> apiSet = new TreeSet<API>(new APINameComparator());
         try {
             List<GovernanceArtifact> genericArtifacts =
-                    GovernanceUtils.findGovernanceArtifacts(APIConstants.TAG_SEARCH_TYPE_PREFIX2 + tag, registry,
+                    GovernanceUtils.findGovernanceArtifacts(getSearchQuery(APIConstants.TAG_SEARCH_TYPE_PREFIX2 + tag), registry,
                                                             APIConstants.API_RXT_MEDIA_TYPE);
             for (GovernanceArtifact genericArtifact : genericArtifacts) {
                 try {
@@ -573,7 +575,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         SortedSet<API> apiVersionsSortedSet = new TreeSet<API>(new APIVersionComparator());
         int totalLength=0;
         boolean isMore = false;
-        String criteria = "lcState=";
+        String criteria = APIConstants.LCSTATE_SEARCH_TYPE_KEY;
         
         try {
             Registry userRegistry;
@@ -629,8 +631,8 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             GenericArtifactManager artifactManager = APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY);
             if (artifactManager != null) {
                 if (apiStatus != null && apiStatus.length > 0) {
-                    List<GovernanceArtifact> genericArtifacts = GovernanceUtils.findGovernanceArtifacts(criteria, userRegistry,
-                            APIConstants.API_RXT_MEDIA_TYPE);
+                    List<GovernanceArtifact> genericArtifacts = GovernanceUtils.findGovernanceArtifacts
+                            (getSearchQuery(criteria), userRegistry, APIConstants.API_RXT_MEDIA_TYPE);
                     totalLength = PaginationContext.getInstance().getLength();
                     if (genericArtifacts == null || genericArtifacts.size() == 0) {
                         result.put("apis", apiSortedSet);
@@ -1205,11 +1207,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         	listMap.put(APIConstants.API_OVERVIEW_STATUS, new ArrayList<String>() {{
         		add(APIConstants.PUBLISHED);
         	}});
+            listMap.put(APIConstants.STORE_VIEW_ROLES, getUserRoleList());
+            String searchCriteria = APIConstants.LCSTATE_SEARCH_KEY + "= (" + APIConstants.PUBLISHED + ")";
 
         	//Find UUID
         	GenericArtifactManager artifactManager = APIUtil.getArtifactManager(userRegistry, APIConstants.API_KEY);
         	if (artifactManager != null) {
-        		GenericArtifact[] genericArtifacts = artifactManager.findGenericArtifacts(listMap);
+                GenericArtifact[] genericArtifacts = artifactManager.findGovernanceArtifacts(getSearchQuery(searchCriteria));
         		SortedSet<API> allAPIs = new TreeSet<API>(new APINameComparator());
         		for (GenericArtifact artifact : genericArtifacts) {
 
@@ -3502,6 +3506,65 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     protected APIManagerConfiguration getAPIManagerConfiguration() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
+    }
+
+    /**
+     * To get the query to retrieve user role list query based on current role list.
+     *
+     * @return the query with user role list.
+     * @throws APIManagementException API Management Exception.
+     */
+    private String getUserRoleListQuery() throws APIManagementException {
+        StringBuilder rolesQuery = new StringBuilder();
+        rolesQuery.append('(');
+        rolesQuery.append(APIConstants.NULL_USER_ROLE_LIST);
+        String[] userRoles = APIUtil.getListOfRoles(username, true);
+        if (userRoles != null) {
+            for (String userRole : userRoles) {
+                rolesQuery.append(" OR ");
+                rolesQuery.append(ClientUtils.escapeQueryChars(userRole.toLowerCase()));
+            }
+        }
+        rolesQuery.append(")");
+        return  APIConstants.STORE_VIEW_ROLES + "=" + rolesQuery.toString();
+    }
+
+    /**
+     * To get the current user's role list.
+     *
+     * @return user role list.
+     * @throws APIManagementException API Management Exception.
+     */
+    private List<String> getUserRoleList() throws APIManagementException {
+        List<String> userRoleList;
+        if (userNameWithoutChange == null) {
+            userRoleList = new ArrayList<String>() {{
+                add(APIConstants.NULL_USER_ROLE_LIST);
+            }};
+        } else {
+            userRoleList = new ArrayList<String>(Arrays.asList(APIUtil.getListOfRoles(username, true)));
+        }
+        return userRoleList;
+    }
+
+    @Override
+    protected String getSearchQuery(String searchQuery) throws APIManagementException {
+        if (userNameWithoutChange == null) {
+            String criteria = APIConstants.STORE_VIEW_ROLES + "= (" + APIConstants.NULL_USER_ROLE_LIST + ")";
+            if (!StringUtils.isEmpty(searchQuery)) {
+                criteria = criteria + "&" + searchQuery;
+            }
+            return criteria;
+        }
+        if (!isAccessControlRestrictionEnabled || APIUtil.hasPermission(userNameWithoutChange, APIConstants.Permissions
+                .APIM_ADMIN, true)) {
+            return searchQuery;
+        }
+        String criteria = getUserRoleListQuery();
+        if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+            criteria = criteria + "&" + searchQuery;
+        }
+        return criteria;
     }
 
 }
