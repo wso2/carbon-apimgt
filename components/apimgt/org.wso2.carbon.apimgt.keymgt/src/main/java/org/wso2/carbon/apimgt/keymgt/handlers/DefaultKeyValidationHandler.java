@@ -116,13 +116,13 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
     @Override
     public boolean validateScopes(TokenValidationContext validationContext) throws APIKeyMgtException {
 
-        if(validationContext.isCacheHit()){
+        if (validationContext.isCacheHit()) {
             return true;
         }
 
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = validationContext.getValidationInfoDTO();
 
-        if(apiKeyValidationInfoDTO == null){
+        if (apiKeyValidationInfoDTO == null) {
             throw new APIKeyMgtException("Key Validation information not set");
         }
 
@@ -167,16 +167,23 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 + ":" +
                 validationContext.getHttpVerb();
 
+        boolean isValid = false;
         try {
-            OAuth2ScopeValidator scopeValidator = OAuthServerConfiguration.getInstance().getoAuth2ScopeValidator();
-
-            if (scopeValidator != null) {
-                if (scopeValidator.validateScope(accessTokenDO, resource)) {
-                    return true;
-
-                } else {
-                    apiKeyValidationInfoDTO.setAuthorized(false);
-                    apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
+            Set<OAuth2ScopeValidator> oAuth2ScopeValidators = OAuthServerConfiguration.getInstance()
+                    .getOAuth2ScopeValidators();
+            //validate scope from all the validators
+            for (OAuth2ScopeValidator validator : oAuth2ScopeValidators) {
+                if (validator != null) {
+                    if (validator.validateScope(accessTokenDO, resource)) {
+                        isValid = true;
+                    } else {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Scope validation failed form "+ validator);
+                        }
+                        apiKeyValidationInfoDTO.setAuthorized(false);
+                        apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
+                        return false;
+                    }
                 }
             }
         } catch (IdentityOAuth2Exception e) {
@@ -185,8 +192,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
             apiKeyValidationInfoDTO.setValidationStatus(APIConstants.KeyValidationStatus.INVALID_SCOPE);
         }
 
-        return false;
-
+        return isValid;
     }
 
 }
