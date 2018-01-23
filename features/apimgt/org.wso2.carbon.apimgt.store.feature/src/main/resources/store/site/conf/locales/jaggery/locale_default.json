@@ -346,5 +346,6 @@
     "By Custom Meta Information [Syntax - {property name}:{property value}]" : "By Custom Meta Information [Syntax - {property name}:{property value}]",
     "Groups" : "Groups",
     "Type a group and enter" : "Type a group and enter",
-    "No groups assigned" : "No groups assigned"
+    "No groups assigned" : "No groups assigned",
+    "API Store walkthrough" : "API Store Walkthrough"
 }
