@@ -833,6 +833,19 @@ public class RestApiUtil {
         return paginatedURL;
     }
 
+    /** Returns the paginated url for admin  /Applications API
+     *
+     * @param offset starting index
+     * @param limit max number of objects returned
+     * @return constructed paginated url
+     */
+    public static String getApplicationPaginatedURL(Integer offset, Integer limit) {
+        String paginatedURL = RestApiConstants.APPLICATIONS_GET_PAGINATION_URL;
+        paginatedURL = paginatedURL.replace(RestApiConstants.LIMIT_PARAM, String.valueOf(limit));
+        paginatedURL = paginatedURL.replace(RestApiConstants.OFFSET_PARAM, String.valueOf(offset));
+        return paginatedURL;
+    }
+
     /** Returns the paginated url for subscriptions for a particular API identifier
      * 
      * @param offset starting index

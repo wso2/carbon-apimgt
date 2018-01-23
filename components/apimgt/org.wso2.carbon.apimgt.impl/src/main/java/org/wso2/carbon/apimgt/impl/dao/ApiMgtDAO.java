@@ -4188,6 +4188,91 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Returns all applications created by given user Id
+     * @param userId
+     * @return
+     * @throws APIManagementException
+     */
+    public Application[] getApplicationsByOwner(String userId) throws APIManagementException {
+
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        String appName = null;
+        Application[] applications = null;
+
+        String sqlQuery = SQLConstants.GET_APPLICATIONS_BY_OWNER;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            prepStmt = connection.prepareStatement(sqlQuery);
+            prepStmt.setString(1, userId);
+            rs = prepStmt.executeQuery();
+
+            ArrayList<Application> applicationsList = new ArrayList<Application>();
+            Application application;
+            while (rs.next()) {
+                application = new Application(rs.getString("UUID"));
+                application.setName(rs.getString("NAME"));
+                application.setOwner(rs.getString("CREATED_BY"));
+                application.setStatus(rs.getString("APPLICATION_STATUS"));
+                application.setGroupId(rs.getString("GROUP_ID"));
+
+                if (multiGroupAppSharingEnabled) {
+                    application.setGroupId(getGroupId(rs.getInt("APPLICATION_ID")));
+                }
+                applicationsList.add(application);
+            }
+            applications = applicationsList.toArray(new Application[applicationsList.size()]);
+        } catch (SQLException e) {
+            handleException("Error when getting the application name for id " + userId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return applications;
+    }
+
+    /**
+     * Returns all applications created by given user Id
+     *
+     * @param userName
+     * @return
+     * @throws APIManagementException
+     */
+    public boolean updateApplicationOwner(String userName, Application application) throws
+            APIManagementException {
+
+        boolean isAppUpdated = false;
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        String appName = null;
+
+        String sqlQuery = SQLConstants.UPDATE_APPLICATION_OWNER;
+
+        try {
+            Subscriber subscriber = getSubscriber(userName);
+            if (subscriber != null) {
+                int subscriberId = getSubscriber(userName).getId();
+                connection = APIMgtDBUtil.getConnection();
+                prepStmt = connection.prepareStatement(sqlQuery);
+                prepStmt.setString(1, userName);
+                prepStmt.setInt(2, subscriberId);
+                prepStmt.setString(3, application.getUUID());
+                prepStmt.executeUpdate();
+                isAppUpdated = true;
+            } else {
+                String errorMessage = "Error when retrieving subscriber details for user " + userName;
+                handleException(errorMessage, new APIManagementException(errorMessage));
+            }
+        } catch (SQLException e) {
+            handleException("Error when updating application owner for user " + userName, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+        return isAppUpdated;
+    }
+
+    /**
      * #TODO later we might need to use only this method.
      *
      * @param subscriber
@@ -10289,7 +10374,7 @@ public class ApiMgtDAO {
         policy.setDescription(resultSet.getString(ThrottlePolicyConstants.COLUMN_DESCRIPTION));
         policy.setDisplayName(resultSet.getString(ThrottlePolicyConstants.COLUMN_DISPLAY_NAME));
         policy.setPolicyId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_POLICY_ID));
-        policy.setTenantId(resultSet.getInt(ThrottlePolicyConstants.COLUMN_TENANT_ID));
+        policy.setTenantId(resultSet.getShort(ThrottlePolicyConstants.COLUMN_TENANT_ID));
         policy.setTenantDomain(IdentityTenantUtil.getTenantDomain(policy.getTenantId()));
         policy.setDefaultQuotaPolicy(quotaPolicy);
         policy.setDeployed(resultSet.getBoolean(ThrottlePolicyConstants.COLUMN_DEPLOYED));

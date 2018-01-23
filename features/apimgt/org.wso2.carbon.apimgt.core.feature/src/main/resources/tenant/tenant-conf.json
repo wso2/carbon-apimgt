@@ -55,6 +55,10 @@
       {
         "Name": "apim:api_workflow",
         "Roles": "admin"
+      },
+      {
+        "Name": "apim:app_owner_change",
+        "Roles": "admin"
       }
     ]
   },

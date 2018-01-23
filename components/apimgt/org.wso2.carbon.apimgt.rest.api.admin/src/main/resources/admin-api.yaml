@@ -77,6 +77,11 @@ x-wso2-security:
         roles: admin
         name: apim:mediation_policy_create
         key: apim:mediation_policy_create
+      - description: ""
+        roles: admin
+        name: apim:app_owner_change
+        key: apim:app_owner_change
+
 
 ######################################################
 # The "API Collection" resource APIs
@@ -1735,6 +1740,117 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
+# The "Application Collection" resource APIs
+######################################################
+  /applications:
+
+#-----------------------------------------------------
+# Retrieve a list of all applications of a certain subscriber
+#-----------------------------------------------------
+    get:
+      x-scope: apim:app_owner_change
+      x-wso2-request: |
+        GET https://localhost:9443/api/am/store/v0.11/applications
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" \"https://localhost:9443/api/am/store/v0.11/applications\""
+      x-wso2-response: "HTTP/1.1 200 OK\nContent-Type: application/json\n\n{\n   \"previous\": \"\",\n   \"list\":    [\n            {\n         \"groupId\": \"\",\n         \"owner\": \"admin\",\n           \"applicationId\": \"367a2361-8db5-4140-8133-c6c8dc7fa0c4\",\n         \"status\": \"APPROVED\",\n         \"name\": \"app1\"\n      },\n            {\n         \"groupId\": \"\",\n         \"owner\": \"admin\",\n             \"applicationId\": \"896658a0-b4ee-4535-bbfa-806c894a4015\",\n          \"status\": \"APPROVED\",\n         \"name\": \"DefaultApplication\"\n      }\n   ],\n   \"count\": 2,\n   \"next\": \"\"\n}"
+      summary: |
+        Retrieve/Search applications
+      description: |
+        This operation can be used to retrieve list of applications that is belonged to the given user, If no user
+        is provided then the application for the user associated with the provided access token will be returned.
+      parameters:
+        - $ref: '#/parameters/user'
+        - $ref: '#/parameters/limit'
+        - $ref: '#/parameters/offset'
+        - $ref: '#/parameters/Accept'
+        - $ref: '#/parameters/If-None-Match'
+      tags:
+        - Application (Collection)
+      responses:
+        200:
+          description: |
+            OK.
+            Application list returned.
+          schema:
+            $ref: '#/definitions/ApplicationList'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource (Will be supported in future).
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error.
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported.
+          schema:
+            $ref: '#/definitions/Error'
+
+
+
+######################################################
+# The "Change Owner" Function resource API
+######################################################
+  /applications/{applicationId}/change-owner:
+
+#-----------------------------------------------------
+# Change the owner of an Application
+#-----------------------------------------------------
+    post:
+      x-scope: apim:app_owner_change
+      x-wso2-curl: "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X POST \"https://localhost:9443/api/am/publisher/v0.11/applications/890a4f4d-09eb-4877-a323-57f6ce2ed79b/change-owner?owner=admin\""
+      x-wso2-request: |
+        POST https://localhost:9443/api/am/publisher/v0.11/apis/change-owner?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 200 OK"
+      summary: Change Application Owner
+      description: |
+        This operation is used to change the owner of an Application.
+        In order to change the owner of an application, we need to pass the new application owner as a query parameter
+      parameters:
+        - name: owner
+          in: query
+          type: string
+          required: true
+        - $ref: '#/parameters/applicationId'
+
+      tags:
+        - Application
+      responses:
+        200:
+          description: |
+            OK.
+            Application owner changed successfully.
+
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: |
+            Not Found.
+            Requested Application does not exist.
+          schema:
+            $ref: '#/definitions/Error'
+        412:
+          description: |
+            Precondition Failed.
+            The request has not been performed because one of the preconditions is not met.
+          schema:
+            $ref: '#/definitions/Error'
+######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
@@ -1756,6 +1872,16 @@ parameters:
     in: path
     description: |
       Custom rule UUID
+    type: string
+    required: true
+
+# Application Id
+# Specified as part of the path expression
+  applicationId:
+    name: applicationId
+    in: path
+    description: |
+      Application UUID
     type: string
     required: true
 
@@ -1856,6 +1982,16 @@ parameters:
       Mediation policy Id
     required: true
     type: string
+
+# Group Identifier of the application
+  user:
+    name: user
+    in: query
+    description: |
+      username of the application creator
+    required: false
+    type: string
+
 
 ######################################################
 # The resources used by some of the APIs above within the message body
@@ -2460,6 +2596,55 @@ definitions:
                       </log>
                   </sequence>'
 
+#-----------------------------------------------------
+# The Application List resource
+#-----------------------------------------------------
+  ApplicationList:
+    title: Application List
+    properties:
+      count:
+        type: integer
+        description: |
+          Number of applications returned.
+        example: 1
+      next:
+        type: string
+        description: |
+          Link to the next subset of resources qualified.
+          Empty if no more resources are to be returned.
+        example: "/applications?limit=1&offset=2&user="
+      previous:
+        type: string
+        description: |
+          Link to the previous subset of resources qualified.
+          Empty if current subset is the first subset returned.
+        example: "/applications?limit=1&offset=0&user="
+      list:
+        type: array
+        items:
+          $ref: '#/definitions/ApplicationInfo'
+
+#-----------------------------------------------------
+# The Application Info resource
+#-----------------------------------------------------
+  ApplicationInfo:
+    title: Application info object with basic application details
+    properties:
+      applicationId:
+        type: string
+        example: 01234567-0123-0123-0123-012345678901
+      name:
+        type: string
+        example: CalculatorApp
+      owner:
+        type: string
+        example: admin
+      status:
+        type: string
+        example: APPROVED
+      groupId:
+        type: string
+        example: ""
 #-----------------------------------------------------
 # END-OF-FILE
 #-----------------------------------------------------

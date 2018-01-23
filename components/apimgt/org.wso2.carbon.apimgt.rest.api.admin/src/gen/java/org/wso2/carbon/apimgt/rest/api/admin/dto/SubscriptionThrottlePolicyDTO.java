@@ -51,8 +51,9 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
 
   
   /**
+   * Burst control request count
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Burst control request count")
   @JsonProperty("rateLimitCount")
   public Integer getRateLimitCount() {
     return rateLimitCount;
@@ -63,8 +64,9 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
 
   
   /**
+   * Burst control time unit
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Burst control time unit")
   @JsonProperty("rateLimitTimeUnit")
   public String getRateLimitTimeUnit() {
     return rateLimitTimeUnit;
@@ -75,9 +77,9 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
 
   
   /**
-   * Custom attributes added to the Subscription Throttle policy\n
+   * Custom attributes added to the Subscription Throttling Policy\n
    **/
-  @ApiModelProperty(value = "Custom attributes added to the Subscription Throttle policy\n")
+  @ApiModelProperty(value = "Custom attributes added to the Subscription Throttling Policy\n")
   @JsonProperty("customAttributes")
   public List<CustomAttributeDTO> getCustomAttributes() {
     return customAttributes;
@@ -88,8 +90,9 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
 
   
   /**
+   * This indicates the action to be taken when a user goes beyond the allocated quota. If checked, the user's requests will be dropped. If unchecked, the requests will be allowed to pass through.\n
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "This indicates the action to be taken when a user goes beyond the allocated quota. If checked, the user's requests will be dropped. If unchecked, the requests will be allowed to pass through.\n")
   @JsonProperty("stopOnQuotaReach")
   public Boolean getStopOnQuotaReach() {
     return stopOnQuotaReach;
@@ -100,8 +103,9 @@ public class SubscriptionThrottlePolicyDTO extends ThrottlePolicyDTO {
 
   
   /**
+   * define whether this is Paid or a Free plan. Allowed values are FREE or COMMERCIAL.\n
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "define whether this is Paid or a Free plan. Allowed values are FREE or COMMERCIAL.\n")
   @JsonProperty("billingPlan")
   public String getBillingPlan() {
     return billingPlan;

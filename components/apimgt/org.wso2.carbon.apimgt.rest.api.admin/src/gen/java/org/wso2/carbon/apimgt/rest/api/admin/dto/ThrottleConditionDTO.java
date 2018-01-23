@@ -35,8 +35,9 @@ public class ThrottleConditionDTO  {
 
   
   /**
+   * Type of the thottling condition.\nAllowed values are HeaderCondition, IPCondition, JWTClaimsCondition, QueryParameterCondition\n
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "Type of the thottling condition.\nAllowed values are HeaderCondition, IPCondition, JWTClaimsCondition, QueryParameterCondition\n")
   @JsonProperty("type")
   public TypeEnum getType() {
     return type;
@@ -47,8 +48,9 @@ public class ThrottleConditionDTO  {
 
   
   /**
+   * Specifies whether inversion of the condition to be matched against the request
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Specifies whether inversion of the condition to be matched against the request")
   @JsonProperty("invertCondition")
   public Boolean getInvertCondition() {
     return invertCondition;

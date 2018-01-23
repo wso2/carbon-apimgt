@@ -23,8 +23,9 @@ public class QueryParameterConditionDTO extends ThrottleConditionDTO {
 
   
   /**
+   * Name of the query parameter
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Name of the query parameter")
   @JsonProperty("parameterName")
   public String getParameterName() {
     return parameterName;
@@ -35,8 +36,9 @@ public class QueryParameterConditionDTO extends ThrottleConditionDTO {
 
   
   /**
+   * Value of the query parameter to be matched
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Value of the query parameter to be matched")
   @JsonProperty("parameterValue")
   public String getParameterValue() {
     return parameterValue;

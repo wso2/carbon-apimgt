@@ -29,8 +29,9 @@ public class BlockingConditionDTO  {
 
   
   /**
+   * Id of the blocking condition
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "Id of the blocking condition")
   @JsonProperty("conditionId")
   public String getConditionId() {
     return conditionId;
@@ -41,8 +42,9 @@ public class BlockingConditionDTO  {
 
   
   /**
+   * Type of the blocking condition
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "Type of the blocking condition")
   @JsonProperty("conditionType")
   public String getConditionType() {
     return conditionType;
@@ -53,8 +55,9 @@ public class BlockingConditionDTO  {
 
   
   /**
+   * Value of the blocking condition
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "Value of the blocking condition")
   @JsonProperty("conditionValue")
   public String getConditionValue() {
     return conditionValue;

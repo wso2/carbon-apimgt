@@ -183,7 +183,7 @@ function login() {
 	var goto_url = $.cookie("goto_url");
     var url_prefix = window.location.origin + siteContext;
     // checking whether the redirection url starts with the hostname
-    if (goto_url.indexOf(url_prefix) != 0) {
+    if (goto_url != null && goto_url.indexOf(url_prefix) != 0) {
       goto_url = siteContext
     }
 
