@@ -1029,10 +1029,10 @@ APIDesigner.prototype.soap_to_rest_mapping = function () {
     };
 
 APIDesigner.prototype.render_resource = function(container){
+
     var isBodyRequired = false;
     var operation = this.query(container.attr('data-path'));
     var context = jQuery.extend(true, {}, operation[0]);
-    debugger;
     context.isOpenAPI3 = this.is_openapi3();
     context.resource_path = container.attr('data-path');
     if (context.resource_path.match(/post/i) || context.resource_path.match(/put/i)) {
@@ -1041,7 +1041,6 @@ APIDesigner.prototype.render_resource = function(container){
     var output = Handlebars.partials['designer-resource-template'](context);
     container.html(output);
     container.show();
-
 
     if(container.find('.editor').length){
         var textarea = container.find('.editor')[0];
