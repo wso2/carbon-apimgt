@@ -18,7 +18,6 @@ package org.wso2.carbon.apimgt.impl.internal;
 
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.event.output.adapter.core.OutputEventAdapterService;
-import org.wso2.carbon.identity.oauth2.OAuth2ScopeService;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
 import org.wso2.carbon.user.core.UserRealm;
@@ -35,7 +34,6 @@ public class ServiceReferenceHolder {
     private static UserRealm userRealm;
     private TenantIndexingLoader indexLoader;
     private OutputEventAdapterService outputEventAdapterService;
-    private OAuth2ScopeService oAuth2ScopeService;
 
     public static ConfigurationContextService getContextService() {
         return contextService;
@@ -98,13 +96,5 @@ public class ServiceReferenceHolder {
 
     public void setOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService) {
         this.outputEventAdapterService = outputEventAdapterService;
-    }
-
-    public OAuth2ScopeService getoAuth2ScopeService() {
-        return oAuth2ScopeService;
-    }
-
-    public void setoAuth2ScopeService(OAuth2ScopeService oAuth2ScopeService) {
-        this.oAuth2ScopeService = oAuth2ScopeService;
     }
 }

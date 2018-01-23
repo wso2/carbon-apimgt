@@ -1993,54 +1993,43 @@ public class SQLConstants {
             "   ES.API_ID = ? ";
 
     public static final String ADD_SCOPE_ENTRY_SQL =
-            " INSERT INTO IDN_OAUTH2_SCOPE (SCOPE_KEY, NAME , DESCRIPTION, TENANT_ID, ROLES) " +
-            " VALUES(?,?,?,?,?)";
+            " INSERT INTO IDN_OAUTH2_SCOPE (NAME, DISPLAY_NAME , DESCRIPTION, TENANT_ID) " +
+            " VALUES(?,?,?,?)";
 
     public static final String ADD_SCOPE_LINK_SQL =
-            " INSERT INTO AM_API_SCOPES (API_ID, SCOPE_ID) VALUES(?,?)";
+            " INSERT INTO AM_API_SCOPES (API_ID, SCOPE_ID) VALUES (?,?)";
 
     public static final String GET_API_SCOPES_SQL =
-            " SELECT " +
-            "   A.SCOPE_ID," +
-            "   A.SCOPE_KEY, " +
-            "   A.NAME, " +
-            "   A.DESCRIPTION, " +
-            "   A.ROLES " +
-            " FROM " +
-            "   IDN_OAUTH2_SCOPE AS A " +
-            " INNER JOIN " +
-            "   AM_API_SCOPES AS B " +
-            " ON " +
-            "   A.SCOPE_ID = B.SCOPE_ID WHERE B.API_ID = ?";
+            " SELECT A.SCOPE_ID, A.NAME, A.DISPLAY_NAME, A.DESCRIPTION, C.SCOPE_BINDING " +
+            " FROM  " +
+            " ((IDN_OAUTH2_SCOPE AS A  INNER JOIN  AM_API_SCOPES AS B ON A.SCOPE_ID = B.SCOPE_ID) " +
+            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING AS C ON B.SCOPE_ID = C.SCOPE_ID ) " +
+            " WHERE B.API_ID = ?";
+
+    public static final String INSERT_SCOPE_ROLE =
+            "INSERT INTO IDN_OAUTH2_SCOPE_BINDING (SCOPE_ID, SCOPE_BINDING) values (?,?)";
 
     public static final String GET_API_SCOPES_ORACLE_SQL =
             "SELECT " +
             "   A.SCOPE_ID, " +
-            "   A.SCOPE_KEY, " +
             "   A.NAME, " +
+            "   A.DISPLAY_NAME, " +
             "   A.DESCRIPTION, " +
-            "   A.ROLES " +
-            " FROM " +
-            "   IDN_OAUTH2_SCOPE A " +
-            " INNER JOIN " +
-            "   AM_API_SCOPES B " +
-            " ON " +
-            "   A.SCOPE_ID = B.SCOPE_ID " +
-            " WHERE " +
-            "   B.API_ID = ?";
+            "   C.SCOPE_BINDING " +
+            " FROM  " +
+            " ((IDN_OAUTH2_SCOPE AS A  INNER JOIN  AM_API_SCOPES AS B ON A.SCOPE_ID = B.SCOPE_ID) " +
+            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING AS C ON B.SCOPE_ID = C.SCOPE_ID ) " +
+            " WHERE B.API_ID = ?";
 
     public static final String GET_SCOPE_BY_SUBSCRIBED_API_PREFIX =
             "SELECT " +
-            "   DISTINCT A.SCOPE_KEY, " +
-            "   A.NAME," +
+            "   DISTINCT A.NAME, " +
+            "   A.DISPLAY_NAME," +
             "   A.DESCRIPTION," +
-            "   A.ROLES " +
-            " FROM " +
-            "   IDN_OAUTH2_SCOPE AS A " +
-            " INNER JOIN " +
-            "   AM_API_SCOPES AS B " +
-            " ON " +
-            "   A.SCOPE_ID = B.SCOPE_ID " +
+            "   C.SCOPE_BINDING " +
+            " FROM  " +
+            " ((IDN_OAUTH2_SCOPE AS A  INNER JOIN  AM_API_SCOPES AS B ON A.SCOPE_ID = B.SCOPE_ID) " +
+            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING AS C ON B.SCOPE_ID = C.SCOPE_ID ) " +
             " WHERE " +
             "   B.API_ID IN (";
 
@@ -2048,43 +2037,42 @@ public class SQLConstants {
 
     public static final String GET_SCOPE_BY_SUBSCRIBED_ID_ORACLE_SQL =
             " SELECT " +
-            "   DISTINCT A.SCOPE_KEY, " +
-            "   A.NAME, " +
+            "   DISTINCT A.NAME, " +
+            "   A.DISPLAY_NAME, " +
             "   A.DESCRIPTION, " +
-            "   A.ROLES " +
-            " FROM " +
-            "   IDN_OAUTH2_SCOPE A " +
-            " INNER JOIN " +
-            "   AM_API_SCOPES B " +
-            " ON " +
-            "   A.SCOPE_ID = B.SCOPE_ID " +
+            "   C.SCOPE_BINDING " +
+            " FROM  " +
+            " ((IDN_OAUTH2_SCOPE AS A  INNER JOIN  AM_API_SCOPES AS B ON A.SCOPE_ID = B.SCOPE_ID) " +
+            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING AS C ON B.SCOPE_ID = C.SCOPE_ID ) " +
             " WHERE B.API_ID IN (";
 
     public static final String GET_SCOPES_BY_SCOPE_KEY_SQL =
             "SELECT " +
             "   IAS.SCOPE_ID, " +
-            "   IAS.SCOPE_KEY, " +
             "   IAS.NAME, " +
+            "   IAS.DISPLAY_NAME, " +
             "   IAS.DESCRIPTION, " +
             "   IAS.TENANT_ID, " +
-            "   IAS.ROLES " +
+            "   B.SCOPE_BINDING " +
             " FROM " +
             "   IDN_OAUTH2_SCOPE IAS " +
+            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING AS B ON IAS.SCOPE_ID = B.SCOPE_ID  " +
             " WHERE" +
-            "   SCOPE_KEY = ? AND TENANT_ID = ?";
+            "   NAME = ? AND TENANT_ID = ?";
 
     public static final String GET_SCOPES_BY_SCOPE_KEYS_PREFIX =
             "SELECT " +
             "   IAS.SCOPE_ID, " +
-            "   IAS.SCOPE_KEY, " +
             "   IAS.NAME, " +
+            "   IAS.DISPLAY_NAME, " +
             "   IAS.DESCRIPTION, " +
             "   IAS.TENANT_ID, " +
-            "   IAS.ROLES " +
+            "   B.SCOPE_BINDING " +
             " FROM " +
             "   IDN_OAUTH2_SCOPE IAS " +
+            " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING AS B ON IAS.SCOPE_ID = B.SCOPE_ID  " +
             " WHERE" +
-            "   SCOPE_KEY IN (";
+            "   NAME IN (";
 
     public static final String GET_SCOPES_BY_SCOPE_KEYS_SUFFIX = ") AND TENANT_ID = ?";
 
@@ -2108,7 +2096,7 @@ public class SQLConstants {
     public static final String GET_RESOURCE_TO_SCOPE_MAPPING_SQL =
             "SELECT " +
             "   RS.RESOURCE_PATH, " +
-            "   S.SCOPE_KEY " +
+            "   S.NAME " +
             " FROM " +
             "   IDN_OAUTH2_RESOURCE_SCOPE RS " +
             " INNER JOIN " +
@@ -2124,17 +2112,19 @@ public class SQLConstants {
 
     public static final String GET_SCOPE_ROLES_OF_APPLICATION_SQL =
             "SELECT " +
-            "   IOS.SCOPE_KEY, " +
-            "   IOS.ROLES " +
+            "   IOS.NAME, " +
+            "   ISB.SCOPE_BINDING " +
             " FROM " +
             "   IDN_OAUTH2_SCOPE IOS, " +
             "   AM_APPLICATION_KEY_MAPPING AKM, " +
             "   AM_SUBSCRIPTION SUB, " +
-            "   AM_API_SCOPES SCOPE " +
+            "   AM_API_SCOPES SCOPE, " +
+            "   IDN_OAUTH2_SCOPE_BINDING ISB" +
             " WHERE" +
             "   AKM.CONSUMER_KEY = ? " +
             "   AND AKM.APPLICATION_ID = SUB.APPLICATION_ID " +
             "   AND SUB.API_ID = SCOPE.API_ID " +
+            "   AND IOS.SCOPE_ID = ISB.SCOPE_ID " +
             "   AND SCOPE.SCOPE_ID = IOS.SCOPE_ID";
 
     public static final String GET_USERS_FROM_OAUTH_TOKEN_SQL =
@@ -2182,7 +2172,7 @@ public class SQLConstants {
             "   AND IOAT.TOKEN_STATE = 'ACTIVE'";
 
     public static final String GET_SCOPE_KEY_SQL =
-            "SELECT COUNT(SCOPE_ID) AS SCOPE_COUNT FROM IDN_OAUTH2_SCOPE WHERE SCOPE_KEY = ? AND TENANT_ID" + " = ?";
+            "SELECT COUNT(SCOPE_ID) AS SCOPE_COUNT FROM IDN_OAUTH2_SCOPE WHERE NAME = ? AND TENANT_ID" + " = ?";
 
     public static final String GET_API_SCOPE_SQL =
             "SELECT " +
@@ -2196,7 +2186,7 @@ public class SQLConstants {
             " WHERE " +
             "   IDN.SCOPE_ID=AMS.SCOPE_ID " +
             "   AND AMS.API_ID=API.API_ID " +
-            "   AND IDN.SCOPE_KEY = ? " +
+            "   AND IDN.NAME = ? " +
             "   AND IDN.tenant_id = ?";
 
     public static final String GET_CONTEXT_TEMPLATE_COUNT_SQL =
