@@ -26,6 +26,7 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -69,9 +70,10 @@ public class CustomAPIIndexerTest {
      * This method checks the indexer's behaviour for migrated APIs which does not have the relevant properties.
      *
      * @throws RegistryException Registry Exception.
+     * @throws APIManagementException API Management Exception.
      */
     @Test
-    public void testIndexDocumentForMigratedAPI() throws Exception {
+    public void testIndexDocumentForMigratedAPI() throws RegistryException, APIManagementException {
         Resource resource = new ResourceImpl();
         PowerMockito.mockStatic(APIUtil.class);
         Mockito.doReturn(resource).when(userRegistry).get(Mockito.anyString());
@@ -95,9 +97,10 @@ public class CustomAPIIndexerTest {
      * This method checks the indexer's behaviour for new APIs which does not have the relevant properties.
      *
      * @throws RegistryException Registry Exception.
+     * @throws APIManagementException API Management Exception.
      */
     @Test
-    public void testIndexDocumentForNewAPI() throws Exception {
+    public void testIndexDocumentForNewAPI() throws APIManagementException, RegistryException {
         Resource resource = new ResourceImpl();
         PowerMockito.mockStatic(APIUtil.class);
         GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
