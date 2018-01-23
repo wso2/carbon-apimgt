@@ -101,24 +101,8 @@ var log = new Log();
         var store = jagg.module("manager").getAPIStoreObj();
         gatewayURL = store.getHTTPsGatewayEndpointURLs();
 
-        if(jsonObj["x-wso2-security"]!= undefined){
-            var scopeList = jsonObj["x-wso2-security"]["apim"]["x-wso2-scopes"];
-            for(var i =0; i < scopeList.length;i++){
-                default_implicit.scopes[scopeList[i].key]=scopeList[i].name;
-            }
-            for (var path in jsonObj.paths) {
-                for (var method in jsonObj.paths[path]) {
-                    if(jsonObj.paths[path][method]["x-scope"] != undefined) {
-                        jsonObj.paths[path][method]["security"] = [];
-                        var default_implicit_scope = { "default" : [] };
-                        default_implicit_scope["default"].push(jsonObj.paths[path][method]["x-scope"]);
-                        jsonObj.paths[path][method]["security"].push(default_implicit_scope);
-                    }
-                }
-            }
-        }
-        //end of security definition
 
+        //end of security definition  
         var basePathValue = jsonObj.basePath;
         var username=null;
         result = jagg.module("api").getAPIDescription({
@@ -211,6 +195,26 @@ var log = new Log();
                 }
             };
 
+            //Populate API scopes into security definition
+            if (jsonObj["x-wso2-security"] != undefined) {
+
+                var scopeList = jsonObj["x-wso2-security"]["apim"]["x-wso2-scopes"];
+                for (var i = 0; i < scopeList.length; i++) {
+                    default_implicit_openapi.flows.implicit.scopes[scopeList[i].key] = scopeList[i].name;
+                }
+                for (var path in jsonObj.paths) {
+                    for (var method in jsonObj.paths[path]) {
+                        if (jsonObj.paths[path][method]["x-scope"] != undefined) {
+                            jsonObj.paths[path][method]["security"] = [];
+                            var default_implicit_scope = {"default": []};
+                            default_implicit_scope["default"].push(jsonObj.paths[path][method]["x-scope"]);
+                            jsonObj.paths[path][method]["security"].push(default_implicit_scope);
+                        }
+                    }
+                }
+            }
+
+
             if (jsonObj.components == undefined) {
                 jsonObj.components = {};
             }
@@ -232,6 +236,24 @@ var log = new Log();
                 "flow": "implicit",
                 "scopes": {}
             };
+
+            if (jsonObj["x-wso2-security"] != undefined) {
+                var scopeList = jsonObj["x-wso2-security"]["apim"]["x-wso2-scopes"];
+                for (var i = 0; i < scopeList.length; i++) {
+                    default_implicit.scopes[scopeList[i].key] = scopeList[i].name;
+                }
+                for (var path in jsonObj.paths) {
+                    for (var method in jsonObj.paths[path]) {
+                        if (jsonObj.paths[path][method]["x-scope"] != undefined) {
+                            jsonObj.paths[path][method]["security"] = [];
+                            var default_implicit_scope = {"default": []};
+                            default_implicit_scope["default"].push(jsonObj.paths[path][method]["x-scope"]);
+                            jsonObj.paths[path][method]["security"].push(default_implicit_scope);
+                        }
+                    }
+                }
+            }
+
             if (jsonObj.securityDefinitions == undefined) {
                 jsonObj.securityDefinitions = {};
             }
