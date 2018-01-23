@@ -272,7 +272,7 @@ public class AuthenticatorAPI implements Microservice {
      * This is the API which IDP redirects the user after authentication.
      *
      * @param request Request to call /callback api
-     * @param appName Name of the applicatoin (publisher/store/admin)
+     * @param appName Name of the application (publisher/store/admin)
      * @param authorizationCode Authorization-Code
      * @return Response - Response with redirect URL
      */

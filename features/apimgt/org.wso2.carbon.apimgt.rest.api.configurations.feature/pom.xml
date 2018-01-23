@@ -115,6 +115,32 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.wso2.carbon.apimgt</groupId>
+                                    <artifactId>org.wso2.carbon.apimgt.rest.api.configurations</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>bundle</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/docs</outputDirectory>
+                                    <includes>config-docs/**</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

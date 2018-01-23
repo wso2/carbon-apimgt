@@ -20,11 +20,17 @@ package org.wso2.carbon.apimgt.rest.api.authenticator;
 
 import com.google.gson.JsonObject;
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
 import org.wso2.carbon.apimgt.core.configuration.APIMConfigurationService;
+import org.wso2.carbon.apimgt.core.configuration.models.EnvironmentConfigurations;
+import org.wso2.carbon.apimgt.core.configuration.models.MultiEnvironmentOverview;
 import org.wso2.carbon.apimgt.core.dao.SystemApplicationDao;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
@@ -38,8 +44,10 @@ import org.wso2.carbon.apimgt.rest.api.authenticator.utils.bean.AuthResponseBean
 /**
  * Test class for AuthenticatorService.
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(APIMConfigurationService.class)
 public class AuthenticatorServiceTestCase {
-    @Test(description = "Provide DCR application information to the SSO-IS login")
+    @Test
     public void testGetAuthenticationConfigurations() throws Exception {
         // Happy Path - 200
         //// Mocked response object from DCR api
@@ -84,7 +92,7 @@ public class AuthenticatorServiceTestCase {
         }
     }
 
-    @Test(description = "Provide DCR application information to the SSO-IS login")
+    @Test
     public void testGetAuthenticationConfigurationsForPublisher() throws Exception {
         // Happy Path - 200
         //// Mocked response object from DCR api
@@ -144,7 +152,7 @@ public class AuthenticatorServiceTestCase {
         tokenInfo.setAccessToken("xxx-access-token-xxx");
         tokenInfo.setScopes("apim:subscribe openid");
         tokenInfo.setRefreshToken("xxx-refresh-token-xxx");
-        tokenInfo.setIdToken("abcdefghijklmnopqrstuvwxyz");
+        tokenInfo.setIdToken("xxx-id-token-xxx");
         tokenInfo.setValidityPeriod(-2L);
 
         KeyManager keyManager = Mockito.mock(KeyManager.class);
@@ -187,6 +195,26 @@ public class AuthenticatorServiceTestCase {
         } catch (APIManagementException e) {
             Assert.assertEquals(e.getMessage(), "Error while receiving tokens for OAuth application : store");
         }
+
+        // Happy Path - 200 - JWT grant type
+        // Multi-Environment Overview configuration
+        MultiEnvironmentOverview multiEnvironmentOverview = new MultiEnvironmentOverview();
+        multiEnvironmentOverview.setEnabled(true);
+        multiEnvironmentOverview.setAuthenticationGrantType("urn:ietf:params:oauth:grant-type:jwt-bearer");
+
+        // APIMConfigurations
+        EnvironmentConfigurations environmentConfigurations = new EnvironmentConfigurations();
+        environmentConfigurations.setMultiEnvironmentOverview(multiEnvironmentOverview);
+
+        APIMConfigurationService apimConfigurationService = Mockito.mock(APIMConfigurationService.class);
+        Mockito.when(apimConfigurationService.getEnvironmentConfigurations()).thenReturn(environmentConfigurations);
+        PowerMockito.mockStatic(APIMConfigurationService.class);
+        PowerMockito.when(APIMConfigurationService.getInstance()).thenReturn(apimConfigurationService);
+
+        Mockito.when(keyManager.getNewAccessToken(Mockito.any())).thenReturn(tokenInfo);
+        AccessTokenInfo tokenInfoResponseForJWTGrant = authenticatorService.getTokens("store",
+                "urn:ietf:params:oauth:grant-type:jwt-bearer", null, null, null, 0, null, "xxx-assertion-xxx");
+        Assert.assertEquals(tokenInfoResponseForJWTGrant, tokenInfo);
     }
 
     @Test

@@ -100,7 +100,7 @@ public class RESTAPISecurityInterceptor implements Interceptor {
         }
 
         /* TODO: Following string contains check is done to avoid checking security headers in non API requests.
-         * Consider this as a tempory fix until MSF4J support context based interceptor registration */
+         * Consider this as a temporary fix until MSF4J support context based interceptor registration */
         String requestURI = request.getUri().toLowerCase(Locale.ENGLISH);
         if (!requestURI.contains("/api/am/")) {
             return true;
@@ -262,7 +262,7 @@ public class RESTAPISecurityInterceptor implements Interceptor {
      * @param responder    HttpResponder instance which is used send error messages back to the client
      */
     private void handleSecurityError(ErrorHandler errorHandler, Response responder) {
-        HashMap<String, String> paramList = new HashMap<String, String>();
+        HashMap<String, String> paramList = new HashMap<>();
         ErrorDTO errorDTO = RestApiUtil.getErrorDTO(errorHandler, paramList);
         responder.setStatus(errorHandler.getHttpStatusCode());
         responder.setHeader(javax.ws.rs.core.HttpHeaders.WWW_AUTHENTICATE, RestApiConstants.AUTH_TYPE_OAUTH2);

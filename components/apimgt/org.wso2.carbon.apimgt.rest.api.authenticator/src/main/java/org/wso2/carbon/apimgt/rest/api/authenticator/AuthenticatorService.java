@@ -298,7 +298,7 @@ public class AuthenticatorService {
      * @throws APIManagementException When retrieving scopes from swagger definition fails
      */
     private String getApplicationScopes(String appName) throws APIManagementException {
-        String scopes = "";
+        String scopes;
         String applicationRestAPI = null;
         if (AuthenticatorConstants.STORE_APPLICATION.equals(appName)) {
             applicationRestAPI = RestApiUtil.getStoreRestAPIResource();
@@ -341,7 +341,7 @@ public class AuthenticatorService {
      * @return OAUthApplicationInfo - An object with DCR Application information
      * @throws APIManagementException When creating DCR application fails
      */
-    private OAuthApplicationInfo createDCRApplication(String clientName, String callBackURL, List grantTypes)
+    private OAuthApplicationInfo createDCRApplication(String clientName, String callBackURL, List<String> grantTypes)
             throws APIManagementException {
         OAuthApplicationInfo oAuthApplicationInfo;
         try {
