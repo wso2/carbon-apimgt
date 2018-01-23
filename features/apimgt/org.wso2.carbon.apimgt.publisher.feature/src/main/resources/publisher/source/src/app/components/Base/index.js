@@ -76,7 +76,7 @@ class Layout extends React.Component {
     render() {
         return (
             <div style={{marginLeft: this.state.layoutLeftOffset}}>
-                <Grid container style={{height: '100vh'}} justify="space-between" spacing={0}>
+                <Grid container style={{height: '100vh','backgroundColor': '#eee'}} justify="space-between" spacing={0}>
                     <Grid item xs={12}>
                         <Header toggleDrawer={this.toggleDrawer} showLeftMenu={this.state.showLeftMenu}/>
                     </Grid>

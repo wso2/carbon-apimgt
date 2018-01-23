@@ -16,7 +16,7 @@
  * under the License.
  */
 import React, {Component} from 'react';
-import {Grid, RadioGroup, Radio, Button, Tooltip} from 'material-ui'
+import {Grid, RadioGroup, Radio, Button, Tooltip, Card} from 'material-ui'
 import {withStyles} from 'material-ui'
 import {FormControl, Input, InputLabel, FormHelperText, FormControlLabel} from 'material-ui'
 import Done from 'material-ui-icons/Done'
@@ -33,7 +33,7 @@ const styles = theme => ({
 class ProvideWSDL extends Component {
     constructor(props) {
         super(props);
-        this.state = {uploadMethod: 'file', file: {}, url: '', isValid: null};
+        this.state = {uploadMethod: 'file', file: null, url: '', isValid: null, errorMessage: ''};
         this.validateWSDL = this.validateWSDL.bind(this);
         this.updateURL = this.updateURL.bind(this);
     }
@@ -56,11 +56,17 @@ class ProvideWSDL extends Component {
      * @param updateWSDLValidity {Function} Call back function to trigger after pass/fail the validation
      */
     validateWSDL(updateWSDLValidity) {
+        // do not invoke callback in case of React SyntheticMouseEvent
+        updateWSDLValidity = updateWSDLValidity.constructor.name === 'SyntheticMouseEvent' ? false : updateWSDLValidity;
         const {uploadMethod, url, file} = this.state;
         let new_api = new API('');
         let promised_validation;
         let wsdlBean = {};
         if (uploadMethod === 'file') {
+            if (file === null) {
+                this.setState({isValid: false, errorMessage: 'WSDL file not provided!'});
+                return;
+            }
             wsdlBean.file = file;
             promised_validation = new_api.validateWSDLFile(file);
         } else {
@@ -73,10 +79,12 @@ class ProvideWSDL extends Component {
             this.setState({isValid: isValid});
             updateWSDLValidity && updateWSDLValidity(isValid, wsdlBean);
         }).catch(error => {
-            this.setState({isValid: false});
             updateWSDLValidity && updateWSDLValidity(false, wsdlBean);
+            const response = error.response && error.response.obj;
+            const message = "Error while validating WSDL!! " + response && "[" + response.message + "] " + response.description;
+            this.setState({isValid: false, errorMessage: message});
             console.error(error);
-            Alert.error("Error while validating WSDL!!")
+            Alert.error(message);
         });
 
     }
@@ -89,11 +97,10 @@ class ProvideWSDL extends Component {
     }
 
     render() {
-        const {uploadMethod, file, isValid, url} = this.state;
+        const {uploadMethod, file, isValid, url, errorMessage} = this.state;
         const {classes} = this.props;
-        const currentFile = Object.keys(file).length === 0 ? [] : [file];
-        const urlError = (isValid === false) && (uploadMethod === 'url'); // Because of null case, which means validation haven't done yet
-        const fileError = (isValid === false) && (uploadMethod === 'file');
+        const currentFile = file ? [file] : [];
+        const error = (isValid === false); // Because of null case, which means validation haven't done yet
         return (
             <div>
                 <Grid item xs={10}>
@@ -112,25 +119,31 @@ class ProvideWSDL extends Component {
                     <Grid container spacing={0} justify="center">
                         <Grid item style={{minHeight: '250px'}} xs={8}>
                             {uploadMethod === 'file' ? (
-                                <FileUpload error={fileError} currentFiles={currentFile}
+                                <FileUpload currentFiles={currentFile}
                                             onDropHandler={this.handleUploadFile}/>
                             ) : (
                                 <form>
                                     <FormControl fullWidth aria-describedby="url-text">
                                         <InputLabel htmlFor="url">WSDL URL</InputLabel>
                                         <Input id="url" value={url} onChange={this.updateURL}/>
-                                        {isValid !== null && !urlError && <Done/>}
                                         <FormHelperText id="url-text">WSDL will be validate upon submit</FormHelperText>
                                     </FormControl>
                                 </form>
                             )}
                         </Grid>
                         <Grid item xs={4}>
-                            <Tooltip title={"Validate WSDL " + uploadMethod} placement="bottom">
-                                <Button color="accent" onClick={this.validateWSDL}>
-                                    Validate
-                                </Button>
-                            </Tooltip>
+                            <Grid container>
+                                <Grid item xs={12}>
+                                    <Tooltip title={"Validate WSDL " + uploadMethod} placement="bottom">
+                                        <Button color={error ? "accent" : "primary"} onClick={this.validateWSDL}>
+                                            Validate {isValid && <Done/>}
+                                        </Button>
+                                    </Tooltip>
+                                </Grid>
+                                <Grid item xs={12}>
+                                    {error && (<span style={{color: 'red'}}>{errorMessage}</span>)}
+                                </Grid>
+                            </Grid>
                         </Grid>
                     </Grid>
                 </Grid>
