@@ -134,7 +134,6 @@ import java.util.regex.Pattern;
 /**
  * This class represent the ApiMgtDAO.
  */
-@SuppressWarnings("CheckStyle")
 public class ApiMgtDAO {
     private static final Log log = LogFactory.getLog(ApiMgtDAO.class);
     private static ApiMgtDAO INSTANCE = null;
@@ -7640,15 +7639,15 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
-        return populateScopeRoles(scopeHashMap);
+        return populateScopeSet(scopeHashMap);
     }
 
     /**
-     * Create comma separated list of roles
+     * Generate Set<Scope> from HashMap
      *
      * @return Set of Scopes populated with roles.
      */
-    private Set<Scope> populateScopeRoles(HashMap<?, Scope> scopeHashMap) {
+    private Set<Scope> populateScopeSet(HashMap<?, Scope> scopeHashMap) {
         Set<Scope> scopes = new LinkedHashSet<Scope>();
         for (Scope scope : scopeHashMap.values()) {
             scopes.add(scope);
@@ -7702,7 +7701,7 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
-        return populateScopeRoles(scopeHashMap);
+        return populateScopeSet(scopeHashMap);
     }
 
     public Set<Scope> getAPIScopesByScopeKey(String scopeKey, int tenantId) throws APIManagementException {
@@ -7740,7 +7739,7 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
-        return populateScopeRoles(scopeHashMap);
+        return populateScopeSet(scopeHashMap);
     }
 
     public Set<Scope> getScopesByScopeKeys(String scopeKeys, int tenantId) throws APIManagementException {
@@ -7790,7 +7789,7 @@ public class ApiMgtDAO {
         } finally {
             APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
         }
-        return populateScopeRoles(scopeHashMap);
+        return populateScopeSet(scopeHashMap);
     }
 
     /**

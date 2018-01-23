@@ -633,5 +633,4 @@ public class APIManagerComponent {
     protected void unsetOutputEventAdapterService(OutputEventAdapterService outputEventAdapterService){
         ServiceReferenceHolder.getInstance().setOutputEventAdapterService(null);
     }
-
 }
