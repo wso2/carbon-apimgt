@@ -66,7 +66,7 @@ class SampleAPI extends Component {
             context: "/v2",
             version: "1.0.0"
         };
-        const serviceUrl = "https://localhost:9292/publisher/public/app/petstore/pet/1.json";
+        const serviceUrl = "https://localhost:9443/publisher/public/app/petstore/pet/1.json";
         let production = {
             type: "production",
             inline: {
