@@ -50,6 +50,7 @@ public class APIMgtGatewayConstants {
 
     public static final String METHOD_NOT_FOUND_ERROR_MSG = "Method not allowed for given API resource";
     public static final String RESOURCE_NOT_FOUND_ERROR_MSG = "No matching resource found for given API Request";
+    public static final String CONTENT_TYPE_FAIL_MSG = "The request content type is not matched.";
 
     public static final String BACKEND_LATENCY = "backend_latency";
     public static final String SECURITY_LATENCY = "security_latency";
@@ -81,9 +82,12 @@ public class APIMgtGatewayConstants {
     public static final String THREAT_MSG = "THREAT_MSG";
     public static final String THREAT_DESC = "THREAT_DESC";
     public static final String BAD_REQUEST = "Bad Request";
-    public static final String THREAT_OCCURRED = "threat";
-    public static final String ERROR = "error";
     public static final String THREAT_TYPE = "threatType";
+    public static final String THREAT_FAULT = "_threat_fault_";
+    public static final String XML_VALIDATION = "xmlValidation";
+    public static final String SCHEMA_VALIDATION = "schemaValidation";
+    public static final String XSD_URL = "xsdURL";
+    public static final String XSD_FILEPATH = "xsdFilePath";
 
 }
 

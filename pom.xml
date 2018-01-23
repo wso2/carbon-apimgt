@@ -1263,6 +1263,16 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-pool2</artifactId>
+                <version>${apache.commons.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.woodstox</groupId>
+                <artifactId>woodstox-core</artifactId>
+                <version>${woodstox-core.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>com.github.tomakehurst</groupId>
                 <artifactId>wiremock-standalone</artifactId>
                 <version>${wiremock.version}</version>
@@ -1461,6 +1471,8 @@
         <powermock.version>1.7.3</powermock.version>
         <mockito.all.version>1.10.19</mockito.all.version>
         <reflection.version>0.9.11</reflection.version>
+        <woodstox-core.version>5.0.0</woodstox-core.version>
+        <apache.commons.version>2.4.2</apache.commons.version>
     </properties>
 </project>
 

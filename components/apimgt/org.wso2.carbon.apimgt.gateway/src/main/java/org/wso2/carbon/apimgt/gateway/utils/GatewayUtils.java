@@ -24,13 +24,18 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.Mediator;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
+import org.apache.synapse.transport.passthru.PassThroughConstants;
+import org.apache.synapse.transport.passthru.Pipe;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.mediation.registry.RegistryServiceHolder;
 import org.wso2.carbon.registry.core.Resource;
@@ -38,7 +43,7 @@ import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -282,7 +287,7 @@ public class GatewayUtils {
      * @param messageContext contains the message properties of the relevant API request which was
      *                       enabled the regexValidator message mediation in flow.
      * @param errorCode      It depends on status of the error message.
-     * @param desc           Description of the error message.It describes the vulnerable type and where it happens.
+     * @param desc           Description of the error mecssage.It describes the vulnerable type and where it happens.
      * @return here return true to continue the sequence. No need to return any value from this method.
      */
     public static boolean handleThreat(org.apache.synapse.MessageContext messageContext,
@@ -291,7 +296,79 @@ public class GatewayUtils {
         messageContext.setProperty(APIMgtGatewayConstants.THREAT_CODE, errorCode);
         messageContext.setProperty(APIMgtGatewayConstants.THREAT_MSG, APIMgtGatewayConstants.BAD_REQUEST);
         messageContext.setProperty(APIMgtGatewayConstants.THREAT_DESC, desc);
-        messageContext.setProperty(APIMgtGatewayConstants.THREAT_OCCURRED, APIMgtGatewayConstants.ERROR);
+        Mediator sequence = messageContext.getSequence(APIMgtGatewayConstants.THREAT_FAULT);
+        // Invoke the custom error handler specified by the user
+        if (sequence != null && !sequence.mediate(messageContext)) {
+            // If needed user should be able to prevent the rest of the fault handling
+            // logic from getting executed
+        }
         return true;
+    }
+
+    /**
+     * This method use to clone the InputStream from the the message context. Basically
+     * clone the request body.
+     * @param messageContext contains the message properties of the relevant API request which was
+     *                       enabled the regexValidator message mediation in flow.
+     * @return cloned InputStreams.
+     * @throws IOException this exception might occurred while cloning the inputStream.
+     */
+    public static Map<String,InputStream> cloneRequestMessage(org.apache.synapse.MessageContext messageContext)
+            throws IOException {
+        BufferedInputStream bufferedInputStream = null;
+        Map<String, InputStream> inputStreamMap = null;
+        InputStream inputStreamSchema;
+        InputStream inputStreamXml;
+        InputStream inputStreamSql;
+        InputStream inputStreamJSON;
+        InputStream inputStreamOriginal;
+        Pipe pipe;
+        org.apache.axis2.context.MessageContext axis2MC;
+
+        axis2MC = ((Axis2MessageContext) messageContext).
+                getAxis2MessageContext();
+        pipe = (Pipe) axis2MC.getProperty(PassThroughConstants.PASS_THROUGH_PIPE);
+        if (pipe != null) {
+            bufferedInputStream = new BufferedInputStream(pipe.getInputStream());
+        }
+        if (bufferedInputStream != null) {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int length;
+
+            while ((length = bufferedInputStream.read(buffer)) > -1) {
+                byteArrayOutputStream.write(buffer, 0, length);
+            }
+            byteArrayOutputStream.flush();
+            inputStreamMap = new HashMap<>();
+            inputStreamSchema = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+            inputStreamXml = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+            inputStreamSql = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+            inputStreamOriginal = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+            inputStreamJSON = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+            inputStreamMap.put(ThreatProtectorConstants.SCHEMA, inputStreamSchema);
+            inputStreamMap.put(ThreatProtectorConstants.XML, inputStreamXml);
+            inputStreamMap.put(ThreatProtectorConstants.SQL, inputStreamSql);
+            inputStreamMap.put(ThreatProtectorConstants.ORIGINAL, inputStreamOriginal);
+            inputStreamMap.put(ThreatProtectorConstants.JSON, inputStreamJSON);
+        }
+        return  inputStreamMap;
+    }
+
+    /**
+     *  This method use to set the originInputstream to the message Context
+     * @param inputStreams cloned InputStreams
+     * @param axis2MC axis2 message context
+     */
+    public static void setOriginalInputStream(Map <String, InputStream> inputStreams,
+                                              org.apache.axis2.context.MessageContext axis2MC) {
+        InputStream inputStreamOriginal;
+        if (inputStreams != null) {
+            inputStreamOriginal = inputStreams.get(ThreatProtectorConstants.ORIGINAL);
+            if (inputStreamOriginal != null) {
+                BufferedInputStream bufferedInputStreamOriginal = new BufferedInputStream(inputStreamOriginal);
+                axis2MC.setProperty(PassThroughConstants.BUFFERED_INPUT_STREAM, bufferedInputStreamOriginal);
+            }
+        }
     }
 }

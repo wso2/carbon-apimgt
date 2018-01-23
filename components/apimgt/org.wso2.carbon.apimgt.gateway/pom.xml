@@ -222,6 +222,14 @@
                 <artifactId>slf4j</artifactId>
             <version>1.5.10.wso2v1</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.woodstox</groupId>
+            <artifactId>woodstox-core</artifactId>
+        </dependency>
 
     </dependencies>
 
