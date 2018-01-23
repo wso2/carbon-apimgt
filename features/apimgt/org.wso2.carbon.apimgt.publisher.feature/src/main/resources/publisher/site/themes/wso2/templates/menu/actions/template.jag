@@ -59,12 +59,9 @@
         if (provider.indexOf("@") > -1) {
             provider = provider.replace("@", "%40");
         }
-        if (provider.indexOf("/") > -1) {
-            provider = provider.replace("/", "-DOM-");
-        }
 
         var swaggerAPI;
-        if (provider.contains("/")) {
+        if (provider.indexOf("/") > -1 || api.name.indexOf("/") > -1) {
             swaggerAPI = jagg.url("/api-docs" + "?provider=" + encodeURIComponent(provider) + "&name=" + encodeURIComponent(api.name) + "&version=" + encodeURIComponent(api.version));
         } else {
             swaggerAPI = jagg.url("/api-docs" + "/" + provider + "/" + api.name + "/" + api.version);
