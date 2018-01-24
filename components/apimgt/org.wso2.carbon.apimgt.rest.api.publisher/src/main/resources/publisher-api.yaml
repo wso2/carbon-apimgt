@@ -2977,6 +2977,7 @@ definitions:
         example: false
       type:
         type: string
+        description: The transport to be set. Accepted values are HTTP, WS
         enum:
           - HTTP
           - WS
@@ -3016,6 +3017,7 @@ definitions:
         example: "/apis/01234567-0123-0123-0123-012345678901/thumbnail"
       visibility:
         type: string
+        description: The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED OR CONTROLLED.
         enum:
           - PUBLIC
           - PRIVATE
@@ -3036,6 +3038,7 @@ definitions:
           type:
             type: string
             example: basic
+            description: Accepts one of the following, basic or digest.
             enum:
               - basic
               - digest
@@ -3057,6 +3060,7 @@ definitions:
         example: []
       subscriptionAvailability:
         type: string
+        description: The subscription availability. Accepts one of the following. current_tenant, all_tenants or specific_tenants.
         enum:
           - current_tenant
           - all_tenants
