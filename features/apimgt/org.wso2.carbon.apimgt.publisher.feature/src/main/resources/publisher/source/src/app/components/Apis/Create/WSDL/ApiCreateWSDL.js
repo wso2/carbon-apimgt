@@ -19,7 +19,7 @@ import React, {Component} from 'react';
 /* MUI Imports */
 import {withStyles} from 'material-ui'
 import {Grid, Button, Typography} from 'material-ui'
-import {FormControl, FormControlLabel, FormLabel} from 'material-ui'
+import {FormControl, FormControlLabel, FormLabel} from 'material-ui/Form'
 import Stepper, {Step, StepLabel, StepContent} from 'material-ui/Stepper';
 import Card, {CardContent} from 'material-ui/Card';
 import Radio, {RadioGroup} from 'material-ui/Radio';

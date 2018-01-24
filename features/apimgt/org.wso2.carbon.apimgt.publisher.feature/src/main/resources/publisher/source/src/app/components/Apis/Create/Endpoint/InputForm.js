@@ -18,7 +18,6 @@
 
 import React, {Component} from 'react'
 import PropTypes from 'prop-types'
-import 'react-toastify/dist/ReactToastify.min.css';
 import Policies from '../../Details/LifeCycle/Policies.js'
 import {ScopeValidation, resourceMethod, resourcePath} from '../../../../data/ScopeValidation';
 import TextField from 'material-ui/TextField';
@@ -36,8 +35,8 @@ export default class InputForm extends Component {
     }
 
     componentDidMount() {
-        let promised_tier = this.api.policies('api');
-        promised_tier.then(response => {
+        let promisedTier = this.api.policies('api');
+        promisedTier.then(response => {
             let tiers = response.obj;
             this.setState({policies: tiers});
         })
@@ -66,7 +65,9 @@ export default class InputForm extends Component {
                     onChange={handleInputChange}
                 />
                 <TextField
+                    // TODO: These lines were commented because they need to be there but currently REST API doesn't support API versioning.So when we implement the versioning support we could simply uncomment those 2 lines and allow the user to provide version numbers. ~tmkb
                     // InputLabelProps={inputLabelClass}
+                    // value={this.state.apiFields.apiVersion}
                     label={<div><span>Version </span><SuperScriptAsterisk/></div>}
                     id="apiVersion"
                     helperText="**Version input not support in this release"
@@ -75,7 +76,6 @@ export default class InputForm extends Component {
                     margin="normal"
                     style={{width: "100%"}}
                     disabled
-                    // value={this.state.apiFields.apiVersion}
                 />
                 <TextField
                     error={!apiFields.apiContext && validate}

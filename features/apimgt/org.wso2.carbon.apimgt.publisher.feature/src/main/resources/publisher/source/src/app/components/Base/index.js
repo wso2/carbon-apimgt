@@ -19,7 +19,15 @@ import React from 'react';
 import Header from './Header/Header';
 import Footer from './Footer/Footer';
 import Grid from 'material-ui/Grid';
+import withStyles from 'material-ui/styles/withStyles';
 const defaultOffset = "250px";
+
+const styles = theme => ({
+    rootContainer: {
+        height: '100vh',
+        backgroundColor: '#eee'
+    }
+});
 
 class Layout extends React.Component {
     constructor(props) {
@@ -74,9 +82,11 @@ class Layout extends React.Component {
     }
 
     render() {
+        const {classes} = this.props;
         return (
             <div style={{marginLeft: this.state.layoutLeftOffset}}>
-                <Grid container style={{height: '100vh','backgroundColor': '#eee'}} justify="space-between" spacing={0}>
+                <Grid container className={classes.rootContainer} justify="space-between"
+                      spacing={0}>
                     <Grid item xs={12}>
                         <Header toggleDrawer={this.toggleDrawer} showLeftMenu={this.state.showLeftMenu}/>
                     </Grid>
@@ -93,4 +103,4 @@ class Layout extends React.Component {
 
 }
 
-export default Layout;
+export default withStyles(styles)(Layout);
