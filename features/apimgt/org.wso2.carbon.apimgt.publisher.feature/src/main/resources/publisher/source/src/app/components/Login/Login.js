@@ -59,7 +59,7 @@ class Login extends Component {
             authConfigs: [],
             redirectToIS: false
         };
-        this.fetch_ssoData = this.fetch_ssoData.bind(this);
+        this.fetch_DCRappInfo = this.fetch_DCRappInfo.bind(this);
     }
 
     componentDidMount() {
@@ -80,7 +80,7 @@ class Login extends Component {
             this.setLoginStatusOfEnvironments(environments);
 
             //Fetch SSO data and render
-            this.fetch_ssoData(environments);
+            this.fetch_DCRappInfo(environments);
         });
 
         let queryString = this.props.location.search;
@@ -94,10 +94,15 @@ class Login extends Component {
             this.setState({isLogin: true});
             const validityPeriod = params.validity_period; // In seconds
             const WSO2_AM_TOKEN_1 = params.partial_token;
-            const user = new User(Utils.getEnvironment().label, params.user_name, params.id_token);
+            const user = new User(Utils.getEnvironment().label, params.user_name);
             user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/publisher");
             user.scopes = params.scopes.split(" ");
             AuthManager.setUser(user);
+            AuthManager.handleAutoLoginEnvironments(
+                params.id_token,
+                this.state.environments,
+                this.state.authConfigs
+            );
         }
     }
 
@@ -108,10 +113,10 @@ class Login extends Component {
         this.setState({loginStatusEnvironments});
     }
 
-    fetch_ssoData(environments) {
+    fetch_DCRappInfo(environments) {
         //Array of promises
         let promised_ssoData = environments.map(
-            environment => Utils.getPromised_ssoData(environment)
+            environment => Utils.getPromised_DCRappInfo(environment)
         );
 
         Promise.all(promised_ssoData).then(responses => {
@@ -164,6 +169,11 @@ class Login extends Component {
         let loginPromise = this.authManager.authenticateUser(username, password, environment);
         loginPromise.then((response) => {
             this.setState({isLogin: AuthManager.getUser(), loading: false});
+            AuthManager.handleAutoLoginEnvironments(
+                response.data.idToken,
+                this.state.environments,
+                this.state.authConfigs
+            );
         }).catch((error) => {
                 this.setState({messageOpen: true});
                 this.setState({message: error});

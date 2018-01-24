@@ -47,7 +47,7 @@ class AuthManager {
             AuthManager.setUser(user);
         });
         loginPromise.catch(
-            function(error) {
+            function (error) {
                 let error_data = JSON.parse(error.responseText);
                 let message = "Error while refreshing token You will be redirect to the login page ...";
                 console.error(message);
@@ -77,7 +77,7 @@ class AuthManager {
                 theme: 'relax',
                 maxVisible: 10,
                 callback: {
-                    afterClose: function() {
+                    afterClose: function () {
                         window.location = loginPageUri;
                     },
                 }
@@ -150,24 +150,15 @@ class AuthManager {
             scopes: AuthManager.CONST.USER_SCOPES,
             remember_me: true // By default always remember user session
         };
-        let promised_response = axios(Utils.getLoginTokenPath(environment), {
-            method: "POST",
-            data: qs.stringify(data),
-            headers: headers,
-            withCredentials: true
-        });
         //Set the environment that user tried to authenticate
         let previous_environment = Utils.getEnvironment();
         Utils.setEnvironment(environment);
 
-        promised_response.then(response => {
-            const user = AuthManager.loginUserMapper(response);
-            AuthManager.setUser(user);
-            this.setupAutoRefresh();
-        }).catch(error => {
-            console.error("Authentication Error:\n", error);
+        let promised_response = AuthManager.postAuthenticationRequest(headers, data, environment);
+        promised_response.catch(error => {
             Utils.setEnvironment(previous_environment);
         });
+
         return promised_response;
     }
 
@@ -180,7 +171,7 @@ class AuthManager {
         let data = response.data;
         const validityPeriod = data.validityPeriod; // In seconds
         const WSO2_AM_TOKEN_1 = data.partialToken;
-        const user = new User(Utils.getEnvironment().label, data.authUser, data.idToken);
+        const user = new User(Utils.getEnvironment().label, data.authUser);
         user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Utils.CONST.CONTEXT_PATH);
         user.setExpiryTime(validityPeriod);
         user.scopes = data.scopes.split(" ");
@@ -199,7 +190,7 @@ class AuthManager {
             'Content-Type': 'application/json',
             'Authorization': authHeader
         };
-        const promisedLogout = axios.post(url, null, { headers: headers });
+        const promisedLogout = axios.post(url, null, {headers: headers});
         return promisedLogout.then(response => {
             Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, Utils.CONST.CONTEXT_PATH);
             localStorage.removeItem(User.CONST.LOCALSTORAGE_USER);
@@ -234,14 +225,66 @@ class AuthManager {
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-Alt-Referer': referrer
         };
-        return axios.post(url, qs.stringify(params), { headers: headers });
+        return axios.post(url, qs.stringify(params), {headers: headers});
     }
 
+    /**
+     *
+     * @param {string} idToken
+     * @param {array} environments
+     * @param {array} configs
+     */
+    static handleAutoLoginEnvironments(idToken, environments, configs) {
+        const headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        };
+        const data = {
+            assertion: idToken,
+            validity_period: -1,
+            scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage '
+            + 'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover'
+        };
+        const currentEnvName = Utils.getEnvironment().label;
+
+        environments.forEach((environment, environmentID) => {
+            if (configs[environmentID].is_auto_login_enabled && environment.label !== currentEnvName) {
+                AuthManager.postAuthenticationRequest(headers, data, environment);
+            }
+        });
+
+    }
+
+    /**
+     * Send the POST request to the using Axios
+     * @param {Object} headers : Header object
+     * @param {Object} data : Data object with credentials
+     * @param {Object} environment : environment object
+     * @returns {AxiosPromise} : Promise object with the login request made
+     */
+    static postAuthenticationRequest(headers, data, environment) {
+        let promised_response = axios(Utils.getLoginTokenPath(environment), {
+            method: "POST",
+            data: qs.stringify(data),
+            headers: headers,
+            withCredentials: true
+        });
+
+        promised_response.then(response => {
+            const user = AuthManager.loginUserMapper(response);
+            AuthManager.setUser(user, environment.label);
+            this.setupAutoRefresh();
+        }).catch(error => {
+            console.error(`Authentication Error in '${environment.label}' environment :\n`, error);
+        });
+
+        return promised_response;
+    }
 }
 
 // TODO: derive this from swagger definitions ~tmkb
 AuthManager.CONST = {
     USER_SCOPES: "apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage " +
-        "apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover"
+    "apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover"
 };
 export default AuthManager;
