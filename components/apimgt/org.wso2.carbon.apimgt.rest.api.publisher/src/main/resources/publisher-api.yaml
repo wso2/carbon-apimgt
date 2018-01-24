@@ -172,7 +172,7 @@ paths:
             $ref: '#/definitions/Error'
 
 #-----------------------------------------------------
-# Create a new API
+# Create a new API -API (Individual)
 #-----------------------------------------------------
     post:
       x-scope: apim:api_create
@@ -194,7 +194,7 @@ paths:
             $ref: '#/definitions/API'
         - $ref: '#/parameters/Content-Type'
       tags:
-        - API (Collection)
+        - API (Individual)
       responses:
         201:
           description: |
