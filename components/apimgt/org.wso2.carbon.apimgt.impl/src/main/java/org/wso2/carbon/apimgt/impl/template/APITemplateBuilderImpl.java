@@ -24,11 +24,23 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.soaptorest.template.SOAPToRESTAPIConfigContext;
+import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPToRESTConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.registry.api.Resource;
+import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.ResourceImpl;
+import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -38,6 +50,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_APPLICATION_DATA_LOCATION;
 
 /**
  * Constructs API and resource configurations for the ESB/Synapse using a Apache velocity
@@ -78,6 +91,37 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             configcontext = new HandlerConfigContex(configcontext, handlers);
             configcontext = new EnvironmentConfigContext(configcontext, environment);
             configcontext = new TemplateUtilContext(configcontext);
+
+            if(api.getWsdlUrl() != null && !api.getWsdlUrl().isEmpty()) {
+                RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+                String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+                String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                        api.getId().getProviderName() + RegistryConstants.PATH_SEPARATOR + api.getId().getApiName()
+                        + RegistryConstants.PATH_SEPARATOR + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR
+                        + SOAPToRESTConstants.SEQUENCE_GEN.SOAP_TO_REST_IN_RESOURCE;
+                Resource regResource;
+
+                UserRegistry registry = registryService.getGovernanceSystemRegistry(tenantId);
+                if(registry.resourceExists(resourcePath)) {
+                    regResource = registry.get(resourcePath);
+                    String[] resources = ((Collection) regResource).getChildren();
+                    JSONObject pathObj = new JSONObject();
+                    for (String path : resources) {
+                        Resource resource = registry.get(path);
+                        String method = resource.getProperty("method");
+                        String resourceName = ((ResourceImpl) resource).getName();
+                        resourceName = resourceName.replaceAll("\\.xml", "");
+                        resourceName = resourceName.replaceAll("_" + method, "");
+                        resourceName = "/" + resourceName;
+                        String content = RegistryUtils.decodeBytes((byte[]) resource.getContent());
+                        JSONObject contentObj = new JSONObject();
+                        contentObj.put(method, content);
+                        pathObj.put(resourceName, contentObj);
+                    }
+                    configcontext = new SOAPToRESTAPIConfigContext(configcontext, pathObj);
+                }
+            }
 
             //@todo: this validation might be better to do when the builder is initialized.
             configcontext.validate();

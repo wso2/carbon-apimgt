@@ -100,7 +100,19 @@
 	                                   <input id="wsdl-url" name="wsdl-url" class="form-control input-small is_url_valid" type="text" placeholder="http://appserver/services/echo?wsdl"/>
 	                                   <label for="wsdl-url" class="error wsdlError" style="display:none"><%=i18n.localize("Please use a valid WSDL endpoint")%></label>
 	                               </div>
-	                        </div>
+	                    </div>
+	                    <div class="form-group">
+						    <div class="col-sm-12 toggleRadios">
+								<label class="radio sub-labels urlSelect-label">
+                                    <input type="radio" checked="checked" name="soap-options-pass-thru">
+                                    <span class="helper"><%=i18n.localize("Pass Through")%></span>
+								</label>
+								<label class="radio sub-labels urlSelect-label">
+                                     <input type="radio" name="soap-options-rest">
+                                     <span class="helper"><%=i18n.localize("Generate Rest Apis")%></span>
+								 </label>
+							</div>
+						</div>
 	                        <input name="action" value="start" type="hidden"/>
 	                        <input name="type" value="soap" type="hidden"/>
 	                        <div class="col-sm-12"></div>

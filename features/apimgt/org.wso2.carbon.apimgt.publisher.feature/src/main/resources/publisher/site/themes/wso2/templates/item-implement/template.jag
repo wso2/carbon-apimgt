@@ -695,6 +695,32 @@
 
 													</div>
 												<% }; %>
+												    <% if(api.wsdl){
+                                                        var apiData = {};
+                                                        apiData.apiName = api.name;
+                                                        apiData.version = api.version;
+                                                        apiData.provider = api.provider;
+                                                        var soapToRestUtils = Packages.org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils;
+                                                        var isSoapToRestApi = soapToRestUtils.isSOAPToRESTApi(apiData.apiName, apiData.version, apiData.provider);
+                                                        if(isSoapToRestApi) {
+                                                            var sequenceUtils = Packages.org.wso2.carbon.apimgt.impl.soaptorest.util.SequenceUtils;
+                                                            var sequenceObj = new Packages.java.lang.String(sequenceUtils.getRestToSoapConvertedSequence(api.name, api.version, api.provider, "in"));
+                                                            var sequenceOutObj = new Packages.java.lang.String(sequenceUtils.getRestToSoapConvertedSequence(api.name, api.version, api.provider,"out"));
+                                                            var jsonInSeq = JSON.parse(sequenceObj);
+                                                            var jsonInSeqStr = stringify(jsonInSeq);
+                                                            var jsonOutSeq = JSON.parse(sequenceOutObj);
+                                                            var jsonOutSeqStr = stringify(jsonOutSeq);
+
+                                                    %>
+													<br/><br/>
+													<div id="soapToRestSequenceMapping">
+													    <legend>SOAP to REST Mapping</legend>
+													    <div id="soapToRestMappingContent">
+                                                        </div>
+                                                        <input type="hidden" id="sequenceMapping" name="sequenceMapping" value='<%=encode.forHtml(jsonInSeqStr)%>' />
+                                                        <input type="hidden" id="sequenceOutMapping" name="sequenceOutMapping" value='<%=encode.forHtml(jsonOutSeqStr)%>' />
+													</div>
+													<%}}%>
 							                        <%}%>
 
 												<hr />
@@ -966,6 +992,73 @@
 </div>
 </script>
 
+<script id="designer-sequence-template" type="text/x-handlebars-template">
+<div class="resource_body_padding add-margin-bottom-2x">
+	<div class="add-margin-bottom-4x">
+    	<strong>Description : </strong><a class="notes" data-path="{{resource_path}}" data-attr="description" title="<%=i18n.localize("Description")%>">{{ description }}</a>
+	</div>
+	<div class="add-margin-bottom-4x">
+    	<strong>Response Content Type : </strong><a href="#" data-path="{{resource_path}}" data-attr="content_type" class="content_type" data-type="typeahead" data-pk="1" data-title="Responce Content Type" title="ResponseContent Type">{{ content_type }}</a></h5>
+    </div>
+    <div class="add-margin-bottom-4x">
+		<div class="add-margin-bottom-2x">
+			<strong>Parameters : </strong>
+		</div>
+		{{#if parameters}}
+		<table class="table table-condensed table-bordered">
+			<tr>
+				<th width="15%"><%=i18n.localize("Parameter Name")%></th>
+				<th width="40%"><%=i18n.localize("Description")%></th>
+				<th width="15%"><%=i18n.localize("Parameter Type")%></th>
+				<th width="15%"><%=i18n.localize("Data Type")%></th>
+				<th width="15%"><%=i18n.localize("Required")%></th>
+			</tr>
+		{{#each parameters}}
+			<tr>
+			<td>{{ name }}</td>
+			<td><a class="param_desc" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="description" title="<%=i18n.localize("Description")%>">{{ description }}</a></td>
+			<td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="in" title="in">{{ in }}</a></td>
+			<td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type" title="type">{{ type }}</a></td>
+			<td><a class="param_required" data-type="select" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}" title="required"></a></td>
+			</tr>
+		{{/each}}
+		{{/if}}
+		</table>
+  	</div>
+  	<div class="add-margin-bottom-4x">
+  		<div class="add-margin-bottom-2x">
+			<strong>Sequences : </strong>
+		</div>
+		<ul class="nav nav-tabs" id="myTab" role="tablist">
+          <li class="nav-item active">
+            <a class="nav-link active" id="{{seq_id}}_in-tab" data-toggle="tab" href="#{{seq_id}}_in" role="tab" aria-controls="{{seq_id}}_in" aria-selected="true">In Sequence</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="{{seq_id}}_out-tab" data-toggle="tab" href="#{{seq_id}}_out" role="tab" aria-controls="{{seq_id}}_out" aria-selected="false">Out Sequence</a>
+          </li>
+        </ul>
+        <div class="tab-content" id="seqContent">
+          <div class="tab-pane show active" id="{{seq_id}}_in" role="tabpanel" aria-labelledby="home-tab">
+          		<textarea class="editor" style="height:150px; width:100%;">{{#if x-mediation-script }}{{ x-mediation-script }}{{else}}/* mc.setProperty('CONTENT_TYPE', 'application/json');
+		{{#each parameters}}var {{ name }} = mc.getProperty('uri.var.{{ name }}');
+		{{/each}}
+		mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
+		/*Uncomment the above comment block to send a sample response.*/{{/if}}
+		</textarea>
+          </div>
+          <div class="tab-pane" id="{{seq_id}}_out" role="tabpanel" aria-labelledby="profile-tab">
+          		<textarea class="editor" style="height:150px; width:100%;">{{#if x-mediation-script }}{{ x-mediation-script }}{{else}}/* mc.setProperty('CONTENT_TYPE', 'application/json');
+		{{#each parameters}}var {{ name }} = mc.getProperty('uri.var.{{ name }}');
+		{{/each}}
+		mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
+		/*Uncomment the above comment block to send a sample response.*/{{/if}}
+		</textarea>
+          </div>
+        </div>
+	</div>
+</div>
+</script>
+
 <div  id="environmentsRetry-modal" class="modal fade">
    <div class="modal-dialog">
    <div class="modal-content">
@@ -1048,7 +1141,9 @@
             var data = jQuery.parseJSON(data);
             var designer = APIDesigner();
             designer.load_api_document(data);
+            designer.soap_to_rest_mapping();
             $("#swaggerUpload").modal('hide');
+            $("#soapToRestMappingContent").find('fieldset').removeClass("hide");
         });
 
         $('#go_to_manage').click(function(e){

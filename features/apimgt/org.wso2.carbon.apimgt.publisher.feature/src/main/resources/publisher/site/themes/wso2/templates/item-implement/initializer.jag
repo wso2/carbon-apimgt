@@ -13,6 +13,9 @@ jagg.initializer("item-implement", {
         jagg.addHeaderJS("codemirror5", "jagg", "libs/codemirror/addon/jshint.js");
         jagg.addHeaderJS("codemirror6", "jagg", "libs/codemirror/addon/lint/lint.js");
         jagg.addHeaderJS("codemirror7", "jagg", "libs/codemirror/addon/lint/javascript-lint.js");
+        jagg.addHeaderJS("codemirror8", "jagg", "libs/codemirror/mode/xml/xml.js");
+        jagg.addHeaderJS("codemirror9", "jagg", "libs/codemirror/addon/hint/xml-hint.js");
+        jagg.addHeaderJS("codemirror10", "jagg", "libs/codemirror/addon/lint/html-lint.js");
 
         jagg.addFooterJS("ace", "jagg", "libs/src-noconflict/ace.js");
         jagg.addFooterJS("ace-theme", "jagg", "libs/src-noconflict/theme-textmate.js");

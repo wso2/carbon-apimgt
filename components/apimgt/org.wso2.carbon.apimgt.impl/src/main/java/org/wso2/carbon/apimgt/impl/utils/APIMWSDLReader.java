@@ -152,6 +152,35 @@ public class APIMWSDLReader {
 
     }
 
+    public byte[] getWSDL() throws APIManagementException {
+        try {
+            Definition wsdlDefinition = readWSDLFile();
+            WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            writer.writeWSDL(wsdlDefinition, byteArrayOutputStream);
+            return byteArrayOutputStream.toByteArray();
+        } catch (Exception e) {
+            String msg = " Error occurs when change the addres URL of the WSDL";
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    public Definition getWSDLDefinitionFromByteContent(byte[] wsdl) throws APIManagementException {
+        try {
+            WSDLReader wsdlReader = getWsdlFactoryInstance().newWSDLReader();
+            // switch off the verbose mode
+            wsdlReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
+            wsdlReader.setFeature("javax.wsdl.importDocuments", false);
+
+            return wsdlReader.readWSDL(null, getSecuredParsedDocumentFromContent(wsdl));
+        } catch (Exception e) {
+            String msg = " Error occurs when updating WSDL ";
+            log.error(msg);
+            throw new APIManagementException(msg, e);
+        }
+    }
+
     /**
      * Validate the base URI of the WSDL reader
      *

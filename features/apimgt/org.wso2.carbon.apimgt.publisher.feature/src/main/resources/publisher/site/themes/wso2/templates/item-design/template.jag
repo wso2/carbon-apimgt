@@ -394,10 +394,13 @@
 											if(api && api.wsdl){
 												wsdl = api.wsdl;
 											}
-
+                                            var conversionObj = session.get("conversionObj");
+                                            var restPaths = session.get("paths");
+                                            var definitions = session.get("definitions");
 										%>
-										<div id="api_designer" class="col-sm-9">
+										<div id="api_designer" class="col-sm-12">
 											<div class="form-group form-inline api_wsdl">
+											<div id="wsdl-content">
 												<label class="col-sm-3 control-label" for="wsdl"><%=i18n.localize("WSDL")%>:
 														<a class="help_popup" help_data="wsdldesc_help" data-trigger="hover" title="wsdl_desc_help" data-placement="left">
 															<span class="icon fw-stack fw-lg" style="font-size:6px">
@@ -415,6 +418,17 @@
 														</div>
 													</div>
 												</div>
+											</div>
+											</div>
+											    <input type="hidden" id="conversion-obj" name="conversion-obj"  value='<%=conversionObj%>' />
+											    <input type="hidden" id="rest-paths" name="rest-paths" value='<%=restPaths%>' />
+											    <input type="hidden" id="definitions" name="rest-paths" value='<%=definitions%>' />
+
+											<div id="soap-swagger-editor" class="pull-right add-margin-right-3x" style="padding-bottom: 10px; display: none;">
+												<a href="#" id="swaggerEditor" class="btn btn-secondary"><i class="fw fw-edit"></i><%=i18n.localize("Edit Source")%></a>
+											</div>
+											    <div id="resource_details" style="display: none"></div>
+										   </div>
 										</div>
 
 										<% }else{ %>
@@ -649,6 +663,52 @@
 </div>  
 </script>
 
+<script id="designer-sequence-template" type="text/x-handlebars-template">
+<div class="resource_body_padding add-margin-bottom-2x">
+	<div class="add-margin-bottom-4x">
+    	<strong>Description : </strong><a class="notes" data-path="{{resource_path}}" data-attr="description" title="<%=i18n.localize("Description")%>">{{ description }}</a>
+	</div>
+	<div class="add-margin-bottom-4x">
+    	<strong>Response Content Type : </strong><a href="#" data-path="{{resource_path}}" data-attr="content_type" class="content_type" data-type="typeahead" data-pk="1" data-title="Responce Content Type" title="ResponseContent Type">{{ content_type }}</a></h5>
+    </div>
+    <div class="add-margin-bottom-4x">
+		<div class="add-margin-bottom-2x">
+			<strong>Parameters : </strong>
+		</div>
+		{{#if parameters}}
+		<table class="table table-condensed table-bordered">
+			<tr>
+				<th width="15%"><%=i18n.localize("Parameter Name")%></th>
+				<th width="40%"><%=i18n.localize("Description")%></th>
+				<th width="15%"><%=i18n.localize("Parameter Type")%></th>
+				<th width="15%"><%=i18n.localize("Data Type")%></th>
+				<th width="15%"><%=i18n.localize("Required")%></th>
+			</tr>
+		{{#each parameters}}
+			<tr>
+			<td>{{ name }}</td>
+			<td><a class="param_desc" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="description" title="<%=i18n.localize("Description")%>">{{ description }}</a></td>
+			<td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="in" title="in">{{ in }}</a></td>
+			<td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type" title="type">{{ type }}</a></td>
+			<td><a class="param_required" data-type="select" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}" title="required"></a></td>
+			</tr>
+		{{/each}}
+		{{/if}}
+		</table>
+  	</div>
+  	<div class="add-margin-bottom-4x">
+  		<div class="add-margin-bottom-2x">
+			<strong>Sequences : </strong>
+		</div>
+		<textarea class="editor" style="height:150px; width:100%;">{{#if x-mediation-script }}{{ x-mediation-script }}{{else}}/* mc.setProperty('CONTENT_TYPE', 'application/json');
+		{{#each parameters}}var {{ name }} = mc.getProperty('uri.var.{{ name }}');
+		{{/each}}
+		mc.setPayloadJSON('{ "data" : "sample JSON"}');*/
+		/*Uncomment the above comment block to send a sample response.*/{{/if}}
+		</textarea>
+	</div>
+</div>
+</script>
 
 <script id="designer-resources-template" type="text/x-handlebars-template">
     <div class="resource_create col-xs-12 col-sm-12 col-md-8 col-lg-8">
@@ -747,6 +807,14 @@
             var designer = APIDesigner();
             designer.load_api_document(data);
             $("#swaggerUpload").modal('hide');
+            var isSoapToRest = data.paths["/*"];
+            if(!isSoapToRest) {
+                $("#wsdl-content").hide();
+                $(".resource_create").hide();
+                $('#resource_details').show();
+                $('#soap-swagger-editor').show();
+                isSoapView = true;
+            }
         });
 <% }else{%>
         $("body").on("api_saved" , function(e){
@@ -801,6 +869,9 @@
 	                if(swag != ""){
 	                    var designer = APIDesigner();
 	                    designer.load_api_document(swag);
+	                    if($("#rest-paths").val() != "null") {
+	                        getSoapToRestPathMap();
+	                    }
 	                }
                 });
         <% } %>
