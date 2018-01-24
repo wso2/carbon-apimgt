@@ -17,21 +17,17 @@
  */
 import React, {Component} from 'react';
 /* MUI Imports */
-import Arrow from 'material-ui-icons/ArrowForward'
 import {withStyles} from 'material-ui'
-import {Grid, Paper, Button, Divider, Typography} from 'material-ui'
+import {Grid, Button, Typography} from 'material-ui'
+import {FormControl, FormControlLabel, FormLabel} from 'material-ui'
 import Stepper, {Step, StepLabel, StepContent} from 'material-ui/Stepper';
-import {FormControl, Input, InputLabel, FormHelperText, FormControlLabel} from 'material-ui'
-import InputForm from '../Endpoint/InputForm'
-import PropTypes from 'prop-types';
-import Alert from '../../../Shared/Alert'
-import ProvideWSDL from './Steps/ProvideWSDL'
-import WSDLFillAPIInfoStep from './Steps/WSDLFillAPIInfoStep'
-import API from '../../../../data/api.js'
-
-
-import Card, {CardActions, CardContent} from 'material-ui/Card';
+import Card, {CardContent} from 'material-ui/Card';
 import Radio, {RadioGroup} from 'material-ui/Radio';
+
+import InputForm from '../Endpoint/InputForm'
+import ProvideWSDL from './Steps/ProvideWSDL'
+import API from '../../../../data/api'
+import Alert from '../../../Shared/Alert'
 
 
 const styles = theme => ({
@@ -92,23 +88,28 @@ class ApiCreateWSDL extends Component {
         this.state = {
             validWSDL: false,
             doValidate: false,
-            wsdlBean: null,
+            wsdlBean: {},
             currentStep: 0,
             apiFields: {
                 apiVersion: "1.0.0"
             }
         };
-        this.submitWSDL = this.submitWSDL.bind(this);
         this.updateWSDLValidity = this.updateWSDLValidity.bind(this);
         this.updateApiInputs = this.updateApiInputs.bind(this);
         this.nextStep = this.nextStep.bind(this);
         this.stepBack = this.stepBack.bind(this);
+        this.createWSDLAPI = this.createWSDLAPI.bind(this);
     }
 
     nextStep() {
-        this.setState({
-            currentStep: this.state.currentStep + 1,
-        });
+        const {currentStep} = this.state;
+        if (currentStep === 0) {
+            this.setState({doValidate: true});
+        } else {
+            this.setState({
+                currentStep: this.state.currentStep + 1,
+            });
+        }
     }
 
     stepBack() {
@@ -117,14 +118,10 @@ class ApiCreateWSDL extends Component {
         });
     }
 
-    submitWSDL() {
-        this.setState({doValidate: true});
-    }
-
     updateWSDLValidity(validity, wsdlBean) {
         let currentStep = this.state.currentStep;
         if (validity) {
-            currentStep = 2;
+            currentStep = 1;
         }
         this.setState({validWSDL: validity, wsdlBean: wsdlBean, doValidate: false, currentStep: currentStep});
     }
@@ -141,38 +138,47 @@ class ApiCreateWSDL extends Component {
         this.setState({apiFields: apiFields});
     }
 
+    createWSDLAPI() {
+        let new_api = new API('');
+        const {wsdlBean, apiFields} = this.state;
+        const {apiName, apiVersion, apiContext, apiEndpoint, implementationType} = apiFields;
+        const uploadMethod = wsdlBean.url ? 'url' : 'file';
+        let apiAttributes = {
+            name: apiName,
+            version: apiVersion,
+            context: apiContext,
+            endpoint: API.getEndpoints(apiName, apiVersion, apiEndpoint)
+        };
+        let apiData = {
+            additionalProperties: JSON.stringify(apiAttributes),
+            implementationType: implementationType,
+            [uploadMethod]: wsdlBean[uploadMethod]
+        };
+
+        new_api.importWSDL(apiData).then(response => {
+            Alert.success("API Created Successfully. Now you can add/modify resources, define endpoints etc..");
+            let uuid = response.obj.id;
+            let redirect_url = "/apis/" + uuid + "/overview";
+            this.props.history.push(redirect_url);
+        }).catch(
+            function (error_response) {
+                console.error(error_response);
+                let error = error_response.response.obj;
+                let messageTxt = "Error[" + error.code + "]: " + error.description + " | " + error.message + ".";
+                Alert.error(messageTxt);
+            });
+    }
+
     render() {
         const {classes} = this.props;
         const {doValidate, currentStep, wsdlBean, apiFields} = this.state;
-
-        /*return (
-         <div>
-         <Grid container spacing={0} justify="center">
-         <Grid item xs={10}>
-         <Paper className={classes.paper}>
-         <Typography type="headline" gutterBottom>
-         Create API Using WSDL
-         </Typography>
-         <Divider />
-         {currentStep === 1 ? (
-         <ProvideWSDL updateWSDLValidity={this.updateWSDLValidity} validate={doValidate}/>
-         ) : (
-         <InputForm apiFields={apiFields} handleInputChange={this.updateApiInputs}/>
-         )}
-
-         <Divider />
-         <Grid container spacing={0} justify="flex-end">
-         <Button className={classes.button} onClick={this.submitWSDL} raised color="primary">
-         Next
-         <Arrow className={classes.rightIcon}>send</Arrow>
-         </Button>
-         </Grid>
-         </Paper>
-         </Grid>
-         </Grid>
-         </div>
-         );*/
-
+        const uploadMethod = wsdlBean.url ? 'url' : 'file';
+        const provideWSDLProps = {
+            uploadMethod: uploadMethod,
+            [uploadMethod]: wsdlBean[uploadMethod],
+            updateWSDLValidity: this.updateWSDLValidity,
+            validate: doValidate
+        };
         return (
             <Grid container spacing={0} justify="center">
                 <Grid item xs={8}>
@@ -190,8 +196,7 @@ class ApiCreateWSDL extends Component {
                                         </Typography>
                                     </StepLabel>
                                     <StepContent>
-                                        <ProvideWSDL updateWSDLValidity={this.updateWSDLValidity}
-                                                        validate={doValidate}/>
+                                        <ProvideWSDL {...provideWSDLProps}/>
                                         <div className={classes.optionAction}>
                                             <Button>
                                                 Cancel
@@ -215,11 +220,37 @@ class ApiCreateWSDL extends Component {
                                         </Typography>
                                         <InputForm apiFields={apiFields}
                                                    handleInputChange={this.updateApiInputs}/>
+                                        <Grid item xs={10}>
+                                            {
+                                                (wsdlBean.info &&
+                                                (wsdlBean.info.bindingInfo.hasHttpBinding ||
+                                                wsdlBean.info.bindingInfo.hasSoapBinding)) &&
+                                                (<FormControl component="fieldset">
+                                                    <FormLabel component="legend">Implementation Type</FormLabel>
+                                                    <RadioGroup aria-label="Implementation-Type"
+                                                                name="implementationType"
+                                                                value={apiFields.implementationType}
+                                                                onChange={this.updateApiInputs}
+                                                    >
+                                                        <FormControlLabel
+                                                            disabled={!wsdlBean.info.bindingInfo.hasSoapBinding}
+                                                            value="soap" control={<Radio />}
+                                                            label="Pass-through SOAP API"
+                                                            className={classes.radioGroup}/>
+                                                        <FormControlLabel
+                                                            disabled={!wsdlBean.info.bindingInfo.hasHttpBinding}
+                                                            value="httpBinding" control={<Radio />}
+                                                            label="With HTTP binding operations"
+                                                            className={classes.radioGroup}/>
+                                                    </RadioGroup>
+                                                </FormControl>)
+                                            }
+                                        </Grid>
                                         <div className={classes.optionAction}>
                                             <Button color="primary" onClick={this.stepBack}>
                                                 Back
                                             </Button>
-                                            <Button raised color="primary" onClick={this.nextStep}>
+                                            <Button raised color="primary" onClick={this.createWSDLAPI}>
                                                 Create
                                             </Button>
                                         </div>

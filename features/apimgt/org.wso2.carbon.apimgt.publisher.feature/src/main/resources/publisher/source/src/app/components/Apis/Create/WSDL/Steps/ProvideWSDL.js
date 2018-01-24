@@ -19,7 +19,7 @@ import React, {Component} from 'react';
 import {Grid, RadioGroup, Radio, Button, Tooltip, Card} from 'material-ui'
 import {withStyles} from 'material-ui'
 import {FormControl, Input, InputLabel, FormHelperText, FormControlLabel} from 'material-ui'
-import Done from 'material-ui-icons/Done'
+import {Done, ErrorOutline} from 'material-ui-icons'
 import FileUpload from './FileUpload'
 import Alert from '../../../../Shared/Alert'
 import API from '../../../../../data/api'
@@ -33,7 +33,8 @@ const styles = theme => ({
 class ProvideWSDL extends Component {
     constructor(props) {
         super(props);
-        this.state = {uploadMethod: 'file', file: null, url: '', isValid: null, errorMessage: ''};
+        const {uploadMethod, file, url} = props;
+        this.state = {uploadMethod: uploadMethod, file: file, url: url, isValid: null, errorMessage: ''};
         this.validateWSDL = this.validateWSDL.bind(this);
         this.updateURL = this.updateURL.bind(this);
     }
@@ -63,13 +64,17 @@ class ProvideWSDL extends Component {
         let promised_validation;
         let wsdlBean = {};
         if (uploadMethod === 'file') {
-            if (file === null) {
+            if (!file) {
                 this.setState({isValid: false, errorMessage: 'WSDL file not provided!'});
                 return;
             }
             wsdlBean.file = file;
             promised_validation = new_api.validateWSDLFile(file);
         } else {
+            if (!url) {
+                this.setState({isValid: false, errorMessage: 'WSDL url not provided!'});
+                return;
+            }
             wsdlBean.url = url;
             promised_validation = new_api.validateWSDLUrl(url);
         }
@@ -97,7 +102,7 @@ class ProvideWSDL extends Component {
     }
 
     render() {
-        const {uploadMethod, file, isValid, url, errorMessage} = this.state;
+        const {isValid, errorMessage, uploadMethod, file, url} = this.state;
         const {classes} = this.props;
         const currentFile = file ? [file] : [];
         const error = (isValid === false); // Because of null case, which means validation haven't done yet
@@ -141,7 +146,7 @@ class ProvideWSDL extends Component {
                                     </Tooltip>
                                 </Grid>
                                 <Grid item xs={12}>
-                                    {error && (<span style={{color: 'red'}}>{errorMessage}</span>)}
+                                    {error && (<span style={{color: 'red'}}><ErrorOutline/> {errorMessage}</span>)}
                                 </Grid>
                             </Grid>
                         </Grid>
@@ -152,4 +157,7 @@ class ProvideWSDL extends Component {
     }
 }
 
+ProvideWSDL.defaultProps = {
+    uploadMethod: 'file'
+}
 export default withStyles(styles)(ProvideWSDL)
