@@ -193,6 +193,7 @@ paths:
           schema:
             $ref: '#/definitions/API'
         - $ref: '#/parameters/Content-Type'
+        - $ref: '#/parameters/Authorization'
       tags:
         - API (Individual)
       responses:
@@ -212,6 +213,10 @@ paths:
               description: |
                 The content type of the body.
               type: string
+            Authorization:
+              description: |
+                The brearer token.
+              type: string 
             ETag:
               description: |
                 Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
@@ -2764,6 +2769,15 @@ parameters:
     description: |
       Media type of the entity in the body. Default is application/json.
     default: application/json
+    required: true
+    type : string
+
+# The HTTP Authorization header
+  Authorization:
+    name: Authorization
+    in: header
+    description: |
+      Holds the bearer token for apis that require authentication.
     required: true
     type : string
 
