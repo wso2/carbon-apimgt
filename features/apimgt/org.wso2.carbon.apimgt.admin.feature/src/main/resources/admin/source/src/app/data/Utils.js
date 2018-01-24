@@ -26,12 +26,12 @@ class Utils {
 
     /**
      * Get JavaScript accessible cookies saved in browser, by giving the cooke name.
-     * @param {String} name : Name of the cookie which need to be retrived
+     * @param {String} cookieName : Name of the cookie which need to be retrived
+     * @param {String} environmentName : label of the environment of the cookie
      * @returns {String|null} : If found a cookie with given name , return its value,Else null value is returned
      */
-    static getCookie(name) {
-        //Append environment name to cookie
-        let environmentName = "_" + Utils.getEnvironment().label;
+    static getCookie(cookieName, environmentName) {
+        environmentName = environmentName || Utils.getEnvironment().label;
 
         let pairs = document.cookie.split(";");
         let cookie = null;
@@ -39,7 +39,7 @@ class Utils {
             pair = pair.split("=");
             let cookie_name = pair[0].trim();
             let value = encodeURIComponent(pair[1]);
-            if (cookie_name === name + environmentName) {
+            if (cookie_name === `${cookieName}_${environmentName}`) {
                 cookie = value;
                 break;
             }
@@ -51,10 +51,11 @@ class Utils {
      * Delete a browser cookie given its name
      * @param {String} name : Name of the cookie which need to be deleted
      * @param {String} path : Path of the cookie which need to be deleted
+     * @param {String} environmentName: label of the environment of the cookie
      */
-    static delete_cookie(name, path) {
-        //Environment name is appended to the cookie name
-        document.cookie = `${name}_${Utils.getEnvironment().label}=; path=${path}; expires=Thu, 01 Jan 1970 00:00:01 GMT`;
+    static delete_cookie(name, path, environmentName) {
+        environmentName = environmentName || Utils.getEnvironment().label;
+        document.cookie = `${name}_${environmentName}=; path=${path}; expires=Thu, 01 Jan 1970 00:00:01 GMT`;
     }
 
     /**
@@ -66,7 +67,8 @@ class Utils {
      * @param {String} path : Path which needs to set the given cookie
      * @param {boolean} secured : secured parameter is set
      */
-    static setCookie(name, value, validityPeriod, path = "/", secured = true) {
+    static setCookie(name, value, validityPeriod, path = "/", environmentName, secured = true) {
+        environmentName = environmentName || Utils.getEnvironment().label;
         let expiresDirective = "";
         const securedDirective = secured ? "; Secure" : "";
         if (validityPeriod) {
@@ -75,7 +77,7 @@ class Utils {
             expiresDirective = "; expires=" + date.toUTCString();
         }
 
-        document.cookie = `${name}_${Utils.getEnvironment().label}=${value}; path=${path}${expiresDirective}${securedDirective}`;
+        document.cookie = `${name}_${environmentName}=${value}; path=${path}${expiresDirective}${securedDirective}`;
     }
 
     /**
@@ -135,11 +137,6 @@ class Utils {
         //Store environment.
         Utils._environment = environment;
         localStorage.setItem(Utils.CONST.LOCALSTORAGE_ENVIRONMENT, JSON.stringify(environment));
-
-        //Read the user of stored environment.
-        let user = AuthManager.getUser(true);
-        //If user is null store only in memory.
-        AuthManager.setUser(user);
     }
 
     static getPromised_ssoData(environment) {
