@@ -28,7 +28,6 @@ import Axios from 'axios';
 import LoadingAnimation from './app/components/Base/Loading/Loading.js';
 import {getAsyncComponent} from 'async-react-component';
 import 'antd/dist/antd.css'
-import {message} from 'antd'
 import './App.css'
 import Utils from "./app/data/Utils";
 
@@ -51,8 +50,6 @@ class Protected extends Component {
             showLeftMenu: false,
             authConfigs: null
         };
-        message.config({top: '48px'}); // .custom-header height + some offset
-        /* TODO: need to fix the header to avoid conflicting with messages ~tmkb*/
     }
 
     handleResponse = (response) => {
