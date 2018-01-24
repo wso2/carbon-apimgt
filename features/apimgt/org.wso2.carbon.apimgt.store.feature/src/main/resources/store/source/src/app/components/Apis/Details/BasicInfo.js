@@ -321,10 +321,10 @@ class BasicInfo extends Component {
                                            title="API icon"
                                 />
                                 <CardContent>
-                                    <Typography type="headline" component="h2">
+                                    <Typography type="subheading" component="h2">
                                         {api.name}
                                     </Typography>
-                                    <Typography type="subheading" color="secondary">
+                                    <Typography type="body 2" color="secondary">
                                         {api.version} by {api.provider}
                                     </Typography>
                                     <StarRatingBar apiIdProp={this.api_uuid}></StarRatingBar>

@@ -1,11 +1,9 @@
-.MuiDrawer-docked-101 .MuiDrawer-paper-96{
-    background: rgb(236,239,241);
+body{
+    background: #f2f2f2;
 }
-#react-root{
-    background: #fff;
-}
-header.MuiAppBar-colorPrimary-6{
-    background-color: rgb(9, 117, 239);
+a {
+    text-decoration: none;
+    color: #1E88E5;
 }
 .selected-item{
     width: 250px;
@@ -21,13 +19,6 @@ header.MuiAppBar-colorPrimary-6{
     height:40px;
     line-height:50px;
     font-weight: 300
-}
-.page-title{
-    font-weight: 300 ;
-    padding: 10px 0 0 30px;
-    margin: 0;
-    position: relative;
-    flex: 1;
 }
 .page-title-actions{
     align-self: flex-end;
@@ -54,9 +45,13 @@ header.MuiAppBar-colorPrimary-6{
     width:80px;
     float: right;
 }
-.home span,.home span:active,.home span:visited{
-    font-weight: 300;
+.home:hover, .home:active, .home:visited, .home:focus {
     text-decoration: none;
+    color: inherit;
+}
+.store-brand {
+    height: 30px;
+    padding-right: 10px;
 }
 .tab-content{
     padding-left:40px;
@@ -94,4 +89,19 @@ header.MuiAppBar-colorPrimary-6{
 .header-avatar img{
     width: 30px;
     height: 30px;
+}
+.form-select {
+    max-width: 30%;
+}
+.footer {
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+    background: #e8e8e8;
+    padding: 8px;
+    text-align: center;
+    z-index: 10
+}
+.page-title {
+    padding-bottom: 0.35em;
 }

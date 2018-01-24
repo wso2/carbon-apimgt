@@ -157,7 +157,7 @@ class Sdk extends React.Component {
                                                 </CardMedia>
                                                 <CardActions>
                                                     <Grid container justify="center">
-                                                        <Button raised color="primary" onClick={event => this.handleClick(event,language)}>
+                                                        <Button color="secondary" onClick={event => this.handleClick(event,language)}>
                                                             <FileDownload/> Download
                                                         </Button>
                                                     </Grid>

@@ -36,6 +36,7 @@ import LibraryBooksIcon from 'material-ui-icons/LibraryBooks';
 import ForumIcon from 'material-ui-icons/Forum';
 import GavelIcon from 'material-ui-icons/Gavel';
 import Typography from 'material-ui/Typography';
+import Paper from 'material-ui/Paper';
 
 export default class Details extends Component {
     constructor(props){
@@ -62,16 +63,16 @@ export default class Details extends Component {
         return (
             <Grid container spacing={0} justify="center">
                 <Grid item xs={12} sm={6} md={8} lg={8} xl={10} >
-                    <Typography type="display1" gutterBottom>
+                    <Typography type="title" gutterBottom className="page-title">
                         {api && api.name}  <span style={{fontSize: "50%"}}>{api && api.version} </span>
                     </Typography>
-                    <AppBar position="static">
+                    <Paper>
                         <Tabs
                             value={this.state.value}
                             onChange={this.handleChange}
                             fullWidth
-                            indicatorColor="accent"
-                            textColor="accent"
+                            indicatorColor="primary"
+                            textColor="primary"
                         >
                             <Tab value="overview" icon={<ComputerIcon />} label="Overview" />
                             <Tab value="console" icon={<ChromeReaderModeIcon />} label="API Console" />
@@ -79,7 +80,7 @@ export default class Details extends Component {
                             <Tab value="forum" icon={<ForumIcon />} label="Forum" />
                             <Tab value="sdk" icon={<GavelIcon />} label="SDKs" />
                         </Tabs>
-                    </AppBar>
+                    </Paper>
                     <Switch>
                         <Redirect exact from="/apis/:api_uuid" to={redirect_url}/>
                         <Route path="/apis/:api_uuid/overview" render={props => <Overview {...props} setDetailsAPI={this.setDetailsAPI}/>}/>

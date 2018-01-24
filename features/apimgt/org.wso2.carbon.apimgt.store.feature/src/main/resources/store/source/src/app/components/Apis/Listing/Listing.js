@@ -30,7 +30,7 @@ import Grid from 'material-ui/Grid';
 import Card, {CardActions, CardContent, CardMedia} from 'material-ui/Card';
 import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
-import BottomNavigation, { BottomNavigationAction } from 'material-ui/BottomNavigation';
+import BottomNavigation, {BottomNavigationAction} from 'material-ui/BottomNavigation';
 import ListIcon from 'material-ui-icons/List';
 import GridOnIcon from 'material-ui-icons/GridOn';
 
@@ -85,11 +85,11 @@ class Listing extends React.Component {
             <div>
                 <Grid container justify="center" alignItems="center" className="full-width">
                     <Grid item xs={12} sm={12} md={8} lg={8} xl={8}>
-                        <Typography type="display1" gutterBottom className="api-list-title">
+                        <Typography type="title" gutterBottom className="api-list-title">
                             All APIs
                         </Typography>
                         <BottomNavigation value={value} onChange={this.handleChange} style={{float: "right"}}>
-                            <BottomNavigationAction icon={<ListIcon/>}/>
+                            <BottomNavigationAction icon={<ListIcon/>} />
                             <BottomNavigationAction icon={<GridOnIcon/>}/>
                         </BottomNavigation>
                         {

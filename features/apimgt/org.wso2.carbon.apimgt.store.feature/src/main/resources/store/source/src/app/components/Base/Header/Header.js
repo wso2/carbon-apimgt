@@ -128,7 +128,7 @@ class Header extends React.Component {
             input && input.focus();
         };
         return (
-            <AppBar position="fixed">
+            <AppBar position="fixed" color="default">
                 {this.state.searchVisible ?
                     <Toolbar>
                         <IconButton aria-label="Search" color="contrast">
@@ -168,11 +168,9 @@ class Header extends React.Component {
                             <IconButton color="contrast" aria-label="Menu">
                                 <MenuIcon color="contrast" onClick={this.props.toggleDrawer}/>
                             </IconButton> : <span></span>}
-                        <Typography type="title" color="inherit" style={{flex: 1}}>
-                            <Link to="/" className="home">
-                                <img className="brand" src="/store/public/app/images/logo-inverse.svg" alt="wso2-logo"/>
-                                <span color="contrast">APIM Store</span>
-                            </Link>
+                        <img className="store-brand" src="/store/public/app/images/logo-inverse.svg" alt="logo"/>
+                        <Typography type="title" color="inherit" style={{flex: 1}} component={Link} to ="/" className="home">
+                            APIM Store
                         </Typography>
                         {user ?
                             <div style={{display: "flex"}}>

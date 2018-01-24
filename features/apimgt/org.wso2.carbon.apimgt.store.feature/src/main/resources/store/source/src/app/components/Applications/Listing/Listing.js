@@ -39,7 +39,7 @@ const styles = theme => ({
         position:'fixed',
         float: 'right',
         right: theme.spacing.unit * 3,
-        bottom: theme.spacing.unit * 3,
+        bottom: theme.spacing.unit * 6,
     },
 });
 
@@ -158,11 +158,11 @@ class Listing extends Component {
                 {alertMessage && <Alert message={alertMessage}/>}
                 <Grid className="full-width" container justify="center" alignItems="center">
                     <Grid item xs={12} sm={12} md={8} lg={8} xl={8} >
-                        <Typography type="display1" gutterBottom className="heading-margin">
+                        <Typography type="title" gutterBottom className="page-title">
                             Applications
                         </Typography>
 
-                        <Typography type="caption"  paragraph={true}>
+                        <Typography type="caption" gutterBottom className="page-title">
                             An application is a logical collection of APIs. Applications allow you to use a
                             single
                             access
@@ -190,7 +190,7 @@ class Listing extends Component {
                         </Paper>
                         <Link to={"/application/create"}>
                             <Tooltip title="Create Application" placement="bottom" aria-label="Create Application">
-                                <Button fab color="accent" className={classes.fab} aria-label="add" >
+                                <Button fab color="primary" className={classes.fab} aria-label="add" >
                                     <AddIcon />
                                 </Button>
                             </Tooltip>
