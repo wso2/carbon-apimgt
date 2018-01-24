@@ -44,7 +44,7 @@ if (blackListedTenantDomains_forTutorial.indexOf(tenantDomain)>0) {
 	   		    <%var tenantUrl = jagg.urlTenanted('/site/pages/index.jag');
                 var interactiveTutorialState;
                 %>
-                <%if (tenantUrl.indexOf("tenant")==-1) {
+                <%if (tenantUrl.indexOf("tenant") == -1) {
                     interactiveTutorialState = "?storeInteractiveTutorial=true";
                 } else {
                     interactiveTutorialState = "&storeInteractiveTutorial=true";
