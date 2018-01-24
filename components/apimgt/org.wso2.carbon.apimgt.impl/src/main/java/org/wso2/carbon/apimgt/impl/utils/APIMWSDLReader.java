@@ -152,6 +152,12 @@ public class APIMWSDLReader {
 
     }
 
+    /**
+     * Gets WSDL definition as a byte array
+     *
+     * @return converted WSDL definition as byte array
+     * @throws APIManagementException
+     */
     public byte[] getWSDL() throws APIManagementException {
         try {
             Definition wsdlDefinition = readWSDLFile();
@@ -160,12 +166,18 @@ public class APIMWSDLReader {
             writer.writeWSDL(wsdlDefinition, byteArrayOutputStream);
             return byteArrayOutputStream.toByteArray();
         } catch (Exception e) {
-            String msg = " Error occurs when change the addres URL of the WSDL";
-            log.error(msg);
+            String msg = "Error occurs when change the address URL of the WSDL";
             throw new APIManagementException(msg, e);
         }
     }
 
+    /**
+     * Returns WSDL definition from a byte content of the WSDL
+     *
+     * @param wsdl byte content of the WSDL document
+     * @return {@link Definition} - WSDL4j definition constructed form the wsdl
+     * @throws APIManagementException
+     */
     public Definition getWSDLDefinitionFromByteContent(byte[] wsdl) throws APIManagementException {
         try {
             WSDLReader wsdlReader = getWsdlFactoryInstance().newWSDLReader();
@@ -176,7 +188,6 @@ public class APIMWSDLReader {
             return wsdlReader.readWSDL(null, getSecuredParsedDocumentFromContent(wsdl));
         } catch (Exception e) {
             String msg = " Error occurs when updating WSDL ";
-            log.error(msg);
             throw new APIManagementException(msg, e);
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -17,7 +17,6 @@
  */
 package org.wso2.carbon.apimgt.impl.soaptorest;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -57,12 +56,12 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * class that reads wsdl soap operations and maps with the types
+ * Class that reads wsdl soap operations and maps with the types.
  */
 public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor {
     private static final Logger log = LoggerFactory.getLogger(WSDL11SOAPOperationExtractor.class);
 
-    private String[] primitiveTypes = {"string", "byte", "short", "int", "long", "float","double","boolean"};
+    private String[] primitiveTypes = { "string", "byte", "short", "int", "long", "float", "double", "boolean" };
     private List primitiveTypeList = Arrays.asList(primitiveTypes);
 
     private final String WSDL_ELEMENT_NODE = "element";
@@ -80,8 +79,7 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
         WSDL11SOAPOperationExtractor.wsdlReader = wsdlReader;
     }
 
-    @Override
-    public boolean init(byte[] wsdlContent) throws APIMgtWSDLException {
+    @Override public boolean init(byte[] wsdlContent) throws APIMgtWSDLException {
         boolean canProcess;
         try {
             wsdlDefinition = wsdlReader.getWSDLDefinitionFromByteContent(wsdlContent);
@@ -90,9 +88,9 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
             Types types = wsdlDefinition.getTypes();
             typeList = types.getExtensibilityElements();
 
-            for(Object ext : typeList) {
-                if(ext instanceof Schema) {
-                    Schema schema = (Schema)ext;
+            for (Object ext : typeList) {
+                if (ext instanceof Schema) {
+                    Schema schema = (Schema) ext;
                     Element schemaElement = schema.getElement();
                     String nodeName = schemaElement.getNodeName();
                     String nodeNS = nodeName.split(SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_SEPARATOR)[0];
@@ -113,14 +111,13 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
         return canProcess;
     }
 
-    @Override
-    public WSDLInfo getWsdlInfo() throws APIMgtWSDLException {
+    @Override public WSDLInfo getWsdlInfo() throws APIMgtWSDLException {
         WSDLInfo wsdlInfo = new WSDLInfo();
         if (wsdlDefinition != null) {
             Set<WSDLSOAPOperation> soapOperations = getSoapBindingOperations(wsdlDefinition);
             wsdlInfo.setVersion(WSDL_VERSION_11);
 
-            if(!soapOperations.isEmpty()) {
+            if (!soapOperations.isEmpty()) {
                 wsdlInfo.setHasSoapBindingOperations(true);
                 wsdlInfo.setSoapBindingOperations(soapOperations);
             } else {
@@ -139,7 +136,7 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
      * @param definition WSDL Definition
      * @return a set of {@link WSDLOperation} defined in the provided WSDL definition
      */
-    private Set<WSDLSOAPOperation> getSoapBindingOperations(Definition definition) throws APIMgtWSDLException{
+    private Set<WSDLSOAPOperation> getSoapBindingOperations(Definition definition) throws APIMgtWSDLException {
         Set<WSDLSOAPOperation> allOperations = new HashSet<>();
         for (Object bindingObj : definition.getAllBindings().values()) {
             if (bindingObj instanceof Binding) {
@@ -151,7 +148,6 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
         return allOperations;
     }
 
-
     /**
      * Retrieves all the operations defined in the provided Binding.
      *
@@ -162,10 +158,10 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
         Set<WSDLSOAPOperation> allBindingOperations = new HashSet<>();
         if (binding.getExtensibilityElements() != null && binding.getExtensibilityElements().size() > 0) {
             if (binding.getExtensibilityElements().get(0) instanceof SOAPBinding) {
-                for(Object opObj : binding.getBindingOperations()) {
+                for (Object opObj : binding.getBindingOperations()) {
                     BindingOperation bindingOperation = (BindingOperation) opObj;
                     WSDLSOAPOperation wsdlSoapOperation = getSOAPOperation(bindingOperation);
-                    if(wsdlSoapOperation != null) {
+                    if (wsdlSoapOperation != null) {
                         allBindingOperations.add(wsdlSoapOperation);
                     }
                 }
@@ -185,20 +181,18 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
     private WSDLSOAPOperation getSOAPOperation(BindingOperation bindingOperation) throws APIMgtWSDLException {
         WSDLSOAPOperation wsdlOperation = null;
         for (Object boExtElement : bindingOperation.getExtensibilityElements()) {
-            if(boExtElement instanceof SOAPOperation) {
+            if (boExtElement instanceof SOAPOperation) {
                 SOAPOperation soapOperation = (SOAPOperation) boExtElement;
-                if(!StringUtils.isBlank(soapOperation.getSoapActionURI())) {
-                    wsdlOperation = new WSDLSOAPOperation();
-                    wsdlOperation.setName(bindingOperation.getName());
-                    wsdlOperation.setSoapAction(soapOperation.getSoapActionURI());
-                    wsdlOperation.setTargetNamespace(targetNamespace);
-                    wsdlOperation.setStyle(soapOperation.getStyle());
+                wsdlOperation = new WSDLSOAPOperation();
+                wsdlOperation.setName(bindingOperation.getName());
+                wsdlOperation.setSoapAction(soapOperation.getSoapActionURI());
+                wsdlOperation.setTargetNamespace(targetNamespace);
+                wsdlOperation.setStyle(soapOperation.getStyle());
 
-                    List<WSDLOperationParam> inputParameters = getSoapInputParameters(bindingOperation);
-                    wsdlOperation.setParameters(inputParameters);
-                    List<WSDLOperationParam> outputParameters = getSoapOutputParameters(bindingOperation);
-                    wsdlOperation.setOutputParams(outputParameters);
-                }
+                List<WSDLOperationParam> inputParameters = getSoapInputParameters(bindingOperation);
+                wsdlOperation.setParameters(inputParameters);
+                List<WSDLOperationParam> outputParameters = getSoapOutputParameters(bindingOperation);
+                wsdlOperation.setOutputParams(outputParameters);
             }
         }
         return wsdlOperation;
@@ -267,11 +261,11 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
      * Gets parameters definitions for the given input/output soap operation
      *
      * @param partElement parameter element name without namespace
-     * @param params reference parameter list to populate from the parameter nodes
+     * @param params      reference parameter list to populate from the parameter nodes
      * @throws APIMgtWSDLException
      */
     private void getParameters(String partElement, List<WSDLOperationParam> params) throws APIMgtWSDLException {
-        if(typeList != null) {
+        if (typeList != null) {
             Map<String, WSDLComplexType> typeMap = this.getComplexTypeMap(elemList);
 
             for (Node anElemList : elemList) {
@@ -288,8 +282,8 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                             String dataType = attributes.getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE).getNodeValue()
                                     .split(SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_SEPARATOR)[1];
                             Node maxOccursNode = attributes.getNamedItem(SOAPToRESTConstants.MAX_OCCURS_ATTRIBUTE);
-                            if (maxOccursNode != null && (maxOccursNode.getNodeValue().equals(SOAPToRESTConstants.UNBOUNDED)
-                                    || !maxOccursNode.getNodeValue().equals("1"))) {
+                            if (maxOccursNode != null && (maxOccursNode.getNodeValue().equals(
+                                    SOAPToRESTConstants.UNBOUNDED) || !maxOccursNode.getNodeValue().equals("1"))) {
                                 param.setArray(true);
                             }
                             if (!primitiveTypeList.contains(dataType)) {
@@ -299,7 +293,8 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                                 }
                                 param.setComplexType(true);
                             }
-                            param.setDataType(attributes.getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE).getNodeValue());
+                            param.setDataType(attributes.getNamedItem(
+                                    SOAPToRESTConstants.TYPE_ATTRIBUTE).getNodeValue());
                             params.add(param);
                         }
                     }
@@ -319,20 +314,24 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
     private Map<String, WSDLComplexType> getComplexTypeMap(List<Node> elemList) {
         Map<String, WSDLComplexType> typeMap = new HashMap<>();
 
-        if (elemList.get(0).getAttributes() != null && elemList.get(0).getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
+        if (elemList.get(0).getAttributes() != null
+                && elemList.get(0).getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
             for (Node element : elemList) {
-                if (element.getAttributes() != null && element.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
-                    List<Node> childNodes = SOAPOperationBindingUtils.list(element.getChildNodes().item(1).getChildNodes());
+                if (element.getAttributes() != null
+                        && element.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
+                    List<Node> childNodes = SOAPOperationBindingUtils
+                            .list(element.getChildNodes().item(1).getChildNodes());
                     WSDLComplexType complexType = new WSDLComplexType();
                     for (Node childNode : childNodes) {
                         if (childNode.getLocalName() != null && WSDL_ELEMENT_NODE.equals(childNode.getLocalName())) {
                             WSDLOperationParam param = new WSDLOperationParam();
                             NamedNodeMap attributes = childNode.getAttributes();
                             param.setName(attributes.getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue());
-                            String dataType = attributes.getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE).getNodeValue().split(":")[1];
+                            String dataType = attributes.getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE).getNodeValue()
+                                    .split(SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_SEPARATOR)[1];
                             Node maxOccursNode = attributes.getNamedItem(SOAPToRESTConstants.MAX_OCCURS_ATTRIBUTE);
-                            if (maxOccursNode != null && (maxOccursNode.getNodeValue().equals(SOAPToRESTConstants.UNBOUNDED)
-                                    || !maxOccursNode.getNodeValue().equals("1"))) {
+                            if (maxOccursNode != null && (maxOccursNode.getNodeValue().equals(
+                                    SOAPToRESTConstants.UNBOUNDED) || !maxOccursNode.getNodeValue().equals("1"))) {
                                 param.setArray(true);
                             }
                             if (primitiveTypeList.contains(dataType)) {
@@ -344,7 +343,8 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                             complexType.getParamList().add(param);
                         }
                     }
-                    typeMap.put(element.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue(), complexType);
+                    typeMap.put(element.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue(),
+                            complexType);
                 }
             }
         }
@@ -363,13 +363,15 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
         List<String> addedTypes = new ArrayList<>();
         List<Node> namedElements = new ArrayList<>();
         for (Node element : elemList) {
-            if (element.getAttributes() != null && element.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
+            if (element.getAttributes() != null
+                    && element.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE) != null) {
                 List<Node> childNodes = SOAPOperationBindingUtils.list(element.getChildNodes().item(1).getChildNodes());
                 boolean isPrimitive = false;
                 boolean isComplex = false;
                 for (Node childNode : childNodes) {
                     if (childNode.getLocalName() != null && WSDL_ELEMENT_NODE.equals(childNode.getLocalName())) {
-                        String dataType = childNode.getAttributes().getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE).getNodeValue().split(":")[1];
+                        String dataType = childNode.getAttributes().getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE)
+                                .getNodeValue().split(SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_SEPARATOR)[1];
                         if (primitiveTypeList.contains(dataType)) {
                             isPrimitive = true;
                         } else {

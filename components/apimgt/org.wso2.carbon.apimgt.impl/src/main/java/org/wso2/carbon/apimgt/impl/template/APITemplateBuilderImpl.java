@@ -92,10 +92,12 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             configcontext = new EnvironmentConfigContext(configcontext, environment);
             configcontext = new TemplateUtilContext(configcontext);
 
-            if(api.getWsdlUrl() != null && !api.getWsdlUrl().isEmpty()) {
+            if (api.getWsdlUrl() != null && !api.getWsdlUrl().isEmpty()) {
                 RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-                String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+                String tenantDomain = MultitenantUtils.getTenantDomain(
+                        APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
                 String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                         api.getId().getProviderName() + RegistryConstants.PATH_SEPARATOR + api.getId().getApiName()
                         + RegistryConstants.PATH_SEPARATOR + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR
@@ -103,7 +105,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                 Resource regResource;
 
                 UserRegistry registry = registryService.getGovernanceSystemRegistry(tenantId);
-                if(registry.resourceExists(resourcePath)) {
+                if (registry.resourceExists(resourcePath)) {
                     regResource = registry.get(resourcePath);
                     String[] resources = ((Collection) regResource).getChildren();
                     JSONObject pathObj = new JSONObject();

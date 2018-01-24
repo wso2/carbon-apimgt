@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -27,6 +27,7 @@ import org.json.simple.JSONArray;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.impl.template.ConfigContext;
 
 import java.io.File;
@@ -34,7 +35,7 @@ import java.io.StringWriter;
 import java.util.Map;
 
 /**
- *  velocity template to generate in sequences and out sequences
+ * Velocity template to generate in sequences and out sequences.
  */
 public class RESTToSOAPMsgTemplate {
 
@@ -43,17 +44,20 @@ public class RESTToSOAPMsgTemplate {
     private String velocityLogPath = null;
     private static final String IN_SEQ_TEMPLATE_FILE = "soap_to_rest_in_seq_template";
     private static final String OUT_SEQ_TEMPLATE_FILE = "soap_to_rest_out_seq_template";
+    private static final String VELOCITY_RUNTIME_LOG_CLASS = "org.apache.velocity.runtime.log.Log4JLogChute";
+    private static final String VELOCITY_RUNTIME_LOG_PROPERTY = "runtime.log.logsystem.log4j.logger";
 
     /**
      * gets in sequence for the soap operation
      *
-     * @param mapping soap to rest mapping json
-     * @param method http method for the resource
+     * @param mapping    soap to rest mapping json
+     * @param method     http method for the resource
      * @param soapAction soap action for the operation
-     * @param namespace soap namespace for the sequence
+     * @param namespace  soap namespace for the sequence
      * @return in sequence string
      */
-    public String getMappingInSequence( Map<String, String> mapping, String method, String soapAction, String namespace, JSONArray array) {
+    public String getMappingInSequence(Map<String, String> mapping, String method, String soapAction, String namespace,
+            JSONArray array) {
 
         ConfigContext configcontext = new SOAPToRESTConfigContext(mapping, method, soapAction, namespace, array);
         StringWriter writer = new StringWriter();
@@ -62,10 +66,9 @@ public class RESTToSOAPMsgTemplate {
             context.internalGetKeys();
 
             VelocityEngine velocityengine = new VelocityEngine();
-            if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
-                velocityengine.setProperty( RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
-                        "org.apache.velocity.runtime.log.Log4JLogChute" );
-                velocityengine.setProperty( "runtime.log.logsystem.log4j.logger", getVelocityLogger());
+            if (!SOAPToRESTConstants.TEMPLATE.NOT_DEFINED.equalsIgnoreCase(getVelocityLogger())) {
+                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, VELOCITY_RUNTIME_LOG_CLASS);
+                velocityengine.setProperty(VELOCITY_RUNTIME_LOG_PROPERTY, getVelocityLogger());
             }
 
             velocityengine.init();
@@ -92,16 +95,15 @@ public class RESTToSOAPMsgTemplate {
             context.internalGetKeys();
 
             VelocityEngine velocityengine = new VelocityEngine();
-            if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
-                velocityengine.setProperty( RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,
-                        "org.apache.velocity.runtime.log.Log4JLogChute" );
-                velocityengine.setProperty( "runtime.log.logsystem.log4j.logger", getVelocityLogger());
+            if (!SOAPToRESTConstants.TEMPLATE.NOT_DEFINED.equalsIgnoreCase(getVelocityLogger())) {
+                velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, VELOCITY_RUNTIME_LOG_CLASS);
+                velocityengine.setProperty(VELOCITY_RUNTIME_LOG_PROPERTY, getVelocityLogger());
             }
 
             velocityengine.init();
-            Template t = velocityengine.getTemplate(this.getOutSeqTemplatePath());
+            Template template = velocityengine.getTemplate(this.getOutSeqTemplatePath());
 
-            t.merge(context, writer);
+            template.merge(context, writer);
         } catch (Exception e) {
             log.error("Velocity Error", e);
         }
@@ -109,23 +111,26 @@ public class RESTToSOAPMsgTemplate {
     }
 
     private String getInSeqTemplatePath() {
-        return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator + IN_SEQ_TEMPLATE_FILE + ".xml";
+        return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator
+                + IN_SEQ_TEMPLATE_FILE + ".xml";
     }
 
     private String getOutSeqTemplatePath() {
-        return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator + OUT_SEQ_TEMPLATE_FILE + ".xml";
+        return "repository" + File.separator + "resources" + File.separator + "api_templates" + File.separator
+                + OUT_SEQ_TEMPLATE_FILE + ".xml";
     }
 
     private String getVelocityLogger() {
         if (this.velocityLogPath != null) {
             return this.velocityLogPath;
         } else {
-            APIManagerConfigurationService config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+            APIManagerConfigurationService config = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService();
             String velocityLogPath = config.getAPIManagerConfiguration().getFirstProperty(APIConstants.VELOCITY_LOGGER);
             if (velocityLogPath != null && velocityLogPath.length() > 1) {
                 this.velocityLogPath = velocityLogPath;
             } else {
-                this.velocityLogPath = "not-defined";
+                this.velocityLogPath = SOAPToRESTConstants.TEMPLATE.NOT_DEFINED;
             }
             return this.velocityLogPath;
         }

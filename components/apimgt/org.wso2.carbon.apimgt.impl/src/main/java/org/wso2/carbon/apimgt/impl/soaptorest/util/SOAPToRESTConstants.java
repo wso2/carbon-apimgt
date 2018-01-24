@@ -18,7 +18,7 @@
 package org.wso2.carbon.apimgt.impl.soaptorest.util;
 
 /**
- *  Constants used for wsdl processing in soap to rest mapping
+ * Constants used for wsdl processing in soap to rest mapping.
  */
 public class SOAPToRESTConstants {
 
@@ -32,6 +32,7 @@ public class SOAPToRESTConstants {
     public static final String METHOD = "method";
     public static final String PARAM_TYPE = "type";
     public static final String CONTENT = "content";
+    public static final String EMPTY_STRING = "";
 
     public final class SWAGGER {
         public static final String DEFINITIONS = "definitions";
@@ -66,7 +67,7 @@ public class SOAPToRESTConstants {
         public static final String NEW_LINE_CHAR = "\n";
         public static final String NAMESPACE_SEPARATOR = ":";
         public static final String COMMA = ",";
-        public static final String X_PATH_SEPARATOR = "/";
+        public static final String PATH_SEPARATOR = "/";
 
         public static final String NAMESPACE_PREFIX = "web";
         public static final String PROPERTY_NAME = "propertyName";
@@ -93,5 +94,6 @@ public class SOAPToRESTConstants {
         public static final String ARRAY_ELEMENTS = "arrayElements";
         public static final String IS_SOAP_TO_REST_MODE = "isSoapToRestMode";
         public static final String SEQUENCES = "sequences";
+        public static final String NOT_DEFINED = "not-defined";
     }
 }

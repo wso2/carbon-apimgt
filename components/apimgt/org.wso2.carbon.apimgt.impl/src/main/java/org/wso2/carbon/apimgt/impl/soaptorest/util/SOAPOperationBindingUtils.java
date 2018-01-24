@@ -49,13 +49,13 @@ import java.util.Set;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 /**
- * util class used for soap operation binding related
+ * Util class used for soap operation binding related.
  */
 public class SOAPOperationBindingUtils {
 
     /**
      * Gets soap operations to rest resources mapping
-     *
+     * <p>
      * Note: This method directly called from the jaggery layer
      *
      * @param url WSDL URL
@@ -78,7 +78,7 @@ public class SOAPOperationBindingUtils {
 
     /**
      * Checks the api is a soap to rest converted one or a soap pass through
-     *
+     * <p>
      * Note: This method directly called from the jaggery layer
      *
      * @param name     api name
@@ -145,8 +145,8 @@ public class SOAPOperationBindingUtils {
                 resourcePath = operationName;
                 op.setHttpVerb(HTTPConstants.HTTP_METHOD_POST);
             }
-            resourcePath = resourcePath.substring(0, 1).toLowerCase() +
-                    resourcePath.substring(1, resourcePath.length());
+            resourcePath =
+                    resourcePath.substring(0, 1).toLowerCase() + resourcePath.substring(1, resourcePath.length());
             op.setName(resourcePath);
 
             List<WSDLOperationParam> params = op.getParameters();
@@ -163,11 +163,20 @@ public class SOAPOperationBindingUtils {
         }
     }
 
-    public static WSDLSOAPOperationExtractor getWSDLProcessor(byte[] content, APIMWSDLReader wsdlReader) throws APIManagementException {
+    /**
+     * Gets WSDL processor used to extract the soap binding operations
+     *
+     * @param content    WSDL content
+     * @param wsdlReader WSDL reader used to parse the wsdl{@link APIMWSDLReader}
+     * @return {@link WSDLSOAPOperationExtractor}
+     * @throws APIManagementException
+     */
+    public static WSDLSOAPOperationExtractor getWSDLProcessor(byte[] content, APIMWSDLReader wsdlReader)
+            throws APIManagementException {
         WSDLSOAPOperationExtractor processor = new WSDL11SOAPOperationExtractor(wsdlReader);
         try {
             boolean canProcess = processor.init(content);
-            if(canProcess) {
+            if (canProcess) {
                 return processor;
             }
         } catch (APIMgtWSDLException e) {
@@ -182,7 +191,7 @@ public class SOAPOperationBindingUtils {
      * converts a dom NodeList into a list of nodes
      *
      * @param list dom NodeList element
-     * @return list of nodes
+     * @return list of dom nodes
      */
     public static List<Node> list(final NodeList list) {
         return new AbstractList<Node>() {

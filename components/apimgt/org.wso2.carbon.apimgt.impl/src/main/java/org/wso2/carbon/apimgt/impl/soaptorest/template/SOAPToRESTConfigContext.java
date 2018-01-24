@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -27,7 +27,7 @@ import org.wso2.carbon.apimgt.impl.template.ConfigContext;
 import java.util.Map;
 
 /**
- * velocity config context for the soap to rest mapping
+ * Velocity config context for the soap to rest mapping.
  */
 class SOAPToRESTConfigContext extends ConfigContext {
 
@@ -38,6 +38,15 @@ class SOAPToRESTConfigContext extends ConfigContext {
     private Map<String, String> mappingObj;
     private JSONArray arrayElements;
 
+    /**
+     * Velocity config context used in generating api templates for in sequences
+     *
+     * @param mapping api resource method to sequence string mapping
+     * @param method api resource method
+     * @param soapAction soap action for the soap binding operation
+     * @param namespace namespace of the soap operation
+     * @param arrayElements array type parameters mapping, if exists
+     */
     SOAPToRESTConfigContext(Map<String, String> mapping, String method, String soapAction, String namespace,
             JSONArray arrayElements) {
         this.mappingObj = mapping;
@@ -48,6 +57,9 @@ class SOAPToRESTConfigContext extends ConfigContext {
         init();
     }
 
+    /**
+     * Velocity config context for output sequences
+     */
     SOAPToRESTConfigContext() {
 
     }
@@ -70,7 +82,8 @@ class SOAPToRESTConfigContext extends ConfigContext {
     }
 
     private void init() {
-        resourcePath = soapAction.replaceAll(namespace, "");
-        resourcePath = resourcePath.replaceAll("/", "");
+        resourcePath = soapAction.replaceAll(namespace, SOAPToRESTConstants.EMPTY_STRING);
+        resourcePath = resourcePath.replaceAll(SOAPToRESTConstants.SEQUENCE_GEN.PATH_SEPARATOR,
+                SOAPToRESTConstants.EMPTY_STRING);
     }
 }

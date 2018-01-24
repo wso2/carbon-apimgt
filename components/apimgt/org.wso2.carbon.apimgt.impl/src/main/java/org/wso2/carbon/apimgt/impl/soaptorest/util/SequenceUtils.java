@@ -50,16 +50,16 @@ import java.util.Map;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 /**
- * Util class used for sequence generation of the soap to rest converted operations
+ * Util class used for sequence generation of the soap to rest converted operations.
  */
 public class SequenceUtils {
 
     /**
      * Saves the converted api sequence in the registry for the given resource path
      *
-     * @param registry user registry reference
-     * @param sequence sequence to be saved
-     * @param method http method of the operation
+     * @param registry     user registry reference
+     * @param sequence     sequence to be saved
+     * @param method       http method of the operation
      * @param resourcePath registry resource path
      * @throws APIManagementException throws errors on if the resource persistence gets unsuccessful
      */
@@ -85,18 +85,18 @@ public class SequenceUtils {
 
     /**
      * Updates the api sequences where user will be able to edits the generated sequences
-     *
+     * <p>
      * Note: this method is directly invoked from the jaggery layer
      *
-     * @param name api name
-     * @param version api version
+     * @param name     api name
+     * @param version  api version
      * @param provider api provider
-     * @param seqType to identify the sequence is whether in/out sequence
-     * @param content sequence content
+     * @param seqType  to identify the sequence is whether in/out sequence
+     * @param content  sequence content
      * @throws APIManagementException throws exceptions on unsuccessful persistence in registry or json parsing of the content
      */
-    public static void updateRestToSoapConvertedSequences(String name, String version, String provider,
-            String seqType, String content) throws APIManagementException {
+    public static void updateRestToSoapConvertedSequences(String name, String version, String provider, String seqType,
+            String content) throws APIManagementException {
         provider = (provider != null ? provider.trim() : null);
         name = (name != null ? name.trim() : null);
         version = (version != null ? version.trim() : null);
@@ -120,11 +120,12 @@ public class SequenceUtils {
 
             JSONObject sequences = (JSONObject) jsonParser.parse(content);
             for (Object sequence : sequences.keySet()) {
-                String sequenceContent = (String) ((JSONObject)sequences.get(sequence)).get("content");
+                String sequenceContent = (String) ((JSONObject) sequences.get(sequence)).get("content");
                 String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                         provider + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version
-                        + RegistryConstants.PATH_SEPARATOR + SOAPToRESTConstants.SOAP_TO_REST_RESOURCE + RegistryConstants.PATH_SEPARATOR
-                        + seqType + RegistryConstants.PATH_SEPARATOR + sequence + ".xml";
+                        + RegistryConstants.PATH_SEPARATOR + SOAPToRESTConstants.SOAP_TO_REST_RESOURCE
+                        + RegistryConstants.PATH_SEPARATOR + seqType + RegistryConstants.PATH_SEPARATOR + sequence
+                        + ".xml";
 
                 Resource regResource;
                 if (registry.resourceExists(resourcePath)) {
@@ -151,18 +152,18 @@ public class SequenceUtils {
 
     /**
      * Gets soap to rest converted sequence from the registry
-     *
+     * <p>
      * Note: this method is directly invoked from the jaggery layer
      *
-     * @param name api name
-     * @param version api version
+     * @param name     api name
+     * @param version  api version
      * @param provider api provider
-     * @param seqType to identify the sequence is whether in/out sequence
+     * @param seqType  to identify the sequence is whether in/out sequence
      * @return converted sequences string for a given operation
      * @throws APIManagementException throws exceptions on unsuccessful retrieval of resources in registry
      */
-    public static String getRestToSoapConvertedSequence(String name, String version, String provider,
-            String seqType) throws APIManagementException {
+    public static String getRestToSoapConvertedSequence(String name, String version, String provider, String seqType)
+            throws APIManagementException {
         JSONObject resultJson = new JSONObject();
 
         provider = (provider != null ? provider.trim() : null);
@@ -186,10 +187,10 @@ public class SequenceUtils {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                         .getTenantId(tenantDomain);
                 registry = registryService.getGovernanceSystemRegistry(tenantId);
-                String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
-                        provider + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version
-                        + RegistryConstants.PATH_SEPARATOR + SOAPToRESTConstants.SOAP_TO_REST_RESOURCE + RegistryConstants.PATH_SEPARATOR
-                        + seqType;
+                String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR + provider
+                        + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version
+                        + RegistryConstants.PATH_SEPARATOR + SOAPToRESTConstants.SOAP_TO_REST_RESOURCE
+                        + RegistryConstants.PATH_SEPARATOR + seqType;
 
                 Collection collection = registry.get(resourcePath, 0, Integer.MAX_VALUE);
                 String[] resources = collection.getChildren();
@@ -222,11 +223,11 @@ public class SequenceUtils {
     }
 
     /**
-     * generates parameter mapping between swagger parameters and soap operation parameters
-     *
+     * Generates parameter mapping between swagger parameters and soap operation parameters
+     * <p>
      * Note: this method is directly invoked from the jaggery layer
      *
-     * @param params soap operation parameters
+     * @param params      soap operation parameters
      * @param mappingList swagger parameters
      * @return mapping json
      */
@@ -265,7 +266,7 @@ public class SequenceUtils {
                     } else if (complexObjIterator.hasNext()) {
                         String complexParam = complexObjIterator.next().toString();
                         String jsonPath;
-                        if(complexTypeName != null) {
+                        if (complexTypeName != null) {
                             jsonPath = parameter + "." + complexTypeName + "." + operation.getName();
                         } else {
                             jsonPath = parameter + "." + operation.getName();
@@ -278,7 +279,8 @@ public class SequenceUtils {
                 complexTypeObj.put(SOAPToRESTConstants.PARAM_TYPE, SOAPToRESTConstants.PARAM_TYPES.OBJECT);
                 complexTypeObj.put(complexTypeName, complexTypeList);
             }
-            if (SOAPToRESTConstants.PARAM_TYPES.OBJECT.equals(complexTypeObj.get(SOAPToRESTConstants.PARAM_TYPE)) && dataType == null) {
+            if (SOAPToRESTConstants.PARAM_TYPES.OBJECT.equals(complexTypeObj.get(SOAPToRESTConstants.PARAM_TYPE))
+                    && dataType == null) {
                 soapToRestParamMapping.put(parameter, complexTypeObj);
             } else {
                 soapToRestParamMapping.put(parameter, paramObj);
@@ -292,8 +294,8 @@ public class SequenceUtils {
      * Gets parameter definitions from swagger
      *
      * @param swaggerObj swagger json
-     * @param resource rest resource object
-     * @param method http method
+     * @param resource   rest resource object
+     * @param method     http method
      * @return parameter mapping for a resource from the swagger definitions
      */
     public static List<JSONObject> getResourceParametersFromSwagger(JSONObject swaggerObj, JSONObject resource,
@@ -307,7 +309,8 @@ public class SequenceUtils {
                 JSONObject schema = (JSONObject) ((JSONObject) param).get(SOAPToRESTConstants.SWAGGER.SCHEMA);
                 String definitionPath = String.valueOf(schema.get(SOAPToRESTConstants.SWAGGER.REF));
                 String definition = definitionPath.replaceAll(SOAPToRESTConstants.SWAGGER.DEFINITIONS_ROOT, "");
-                JSONObject definitions = (JSONObject) ((JSONObject) swaggerObj.get(SOAPToRESTConstants.SWAGGER.DEFINITIONS)).get(definition);
+                JSONObject definitions = (JSONObject) ((JSONObject) swaggerObj.get(
+                        SOAPToRESTConstants.SWAGGER.DEFINITIONS)).get(definition);
                 JSONObject properties = (JSONObject) definitions.get(SOAPToRESTConstants.SWAGGER.PROPERTIES);
 
                 for (Object property : properties.entrySet()) {
@@ -318,11 +321,13 @@ public class SequenceUtils {
                     if (value.get(SOAPToRESTConstants.SWAGGER.REF) != null) {
                         String propDefinitionRef = String.valueOf(value.get(SOAPToRESTConstants.SWAGGER.REF)).replaceAll(
                                 SOAPToRESTConstants.SWAGGER.DEFINITIONS_ROOT, "");
-                        getNestedDefinitionsFromSwagger((JSONObject) swaggerObj.get(SOAPToRESTConstants.SWAGGER.DEFINITIONS), propDefinitionRef, propDefinitionRef, propArray);
+                        getNestedDefinitionsFromSwagger((JSONObject) swaggerObj.get(SOAPToRESTConstants.SWAGGER.DEFINITIONS),
+                                propDefinitionRef, propDefinitionRef, propArray);
                         JSONObject refObj = new JSONObject();
                         refObj.put(paramName, propArray);
                         mappingList.add(refObj);
-                    } else if (String.valueOf(value.get(SOAPToRESTConstants.SWAGGER.TYPE)).equals(SOAPToRESTConstants.PARAM_TYPES.ARRAY)) {
+                    } else if (String.valueOf(value.get(SOAPToRESTConstants.SWAGGER.TYPE)).equals(
+                            SOAPToRESTConstants.PARAM_TYPES.ARRAY)) {
                         JSONObject arrObj = new JSONObject();
                         arrObj.put(((Map.Entry) property).getKey(), ((Map.Entry) property).getValue());
                         mappingList.add(arrObj);
@@ -341,21 +346,23 @@ public class SequenceUtils {
      * Gets nested swagger definitions for the complex types
      *
      * @param definitions swagger definition json
-     * @param definition parent definition
-     * @param jsonPath json path to be construct
-     * @param propArray properties for the nested definition
+     * @param definition  parent definition
+     * @param jsonPath    json path to be construct
+     * @param propArray   properties for the nested definition
      */
-    private static void getNestedDefinitionsFromSwagger(JSONObject definitions, String definition, String jsonPath, JSONArray propArray) {
+    private static void getNestedDefinitionsFromSwagger(JSONObject definitions, String definition, String jsonPath,
+            JSONArray propArray) {
         JSONObject propDefinitions = (JSONObject) (definitions).get(definition);
         JSONObject props;
-        if(SOAPToRESTConstants.PARAM_TYPES.ARRAY.equals(propDefinitions.get(SOAPToRESTConstants.TYPE_ATTRIBUTE))) {
+        if (SOAPToRESTConstants.PARAM_TYPES.ARRAY.equals(propDefinitions.get(SOAPToRESTConstants.TYPE_ATTRIBUTE))) {
             props = (JSONObject) propDefinitions.get(SOAPToRESTConstants.SWAGGER.ITEMS);
-            if(props.get(SOAPToRESTConstants.SWAGGER.REF) == null) {
+            if (props.get(SOAPToRESTConstants.SWAGGER.REF) == null) {
                 JSONObject arrayProperty = new JSONObject();
                 String key = jsonPath + "." + props.get(SOAPToRESTConstants.TYPE_ATTRIBUTE);
                 arrayProperty.put(key, props.get(SOAPToRESTConstants.TYPE_ATTRIBUTE));
                 arrayProperty.put(SOAPToRESTConstants.TYPE_ATTRIBUTE, SOAPToRESTConstants.PARAM_TYPES.ARRAY);
-                arrayProperty.put(SOAPToRESTConstants.SEQUENCE_GEN.PARAMETER_NAME, props.get(SOAPToRESTConstants.TYPE_ATTRIBUTE));
+                arrayProperty.put(SOAPToRESTConstants.SEQUENCE_GEN.PARAMETER_NAME,
+                        props.get(SOAPToRESTConstants.TYPE_ATTRIBUTE));
                 arrayProperty.put(SOAPToRESTConstants.SEQUENCE_GEN.XPATH, jsonPath);
                 propArray.add(arrayProperty);
                 return;
@@ -368,14 +375,14 @@ public class SequenceUtils {
             String paramName = String.valueOf(entry.getKey());
             JSONObject value = (JSONObject) entry.getValue();
             if (value.get(SOAPToRESTConstants.SWAGGER.REF) != null) {
-                String propDefinitionRef = String.valueOf(value.get(SOAPToRESTConstants.SWAGGER.REF)).replaceAll(
-                        SOAPToRESTConstants.SWAGGER.DEFINITIONS_ROOT, "");
+                String propDefinitionRef = String.valueOf(value.get(SOAPToRESTConstants.SWAGGER.REF))
+                        .replaceAll(SOAPToRESTConstants.SWAGGER.DEFINITIONS_ROOT, "");
                 jsonPath = definition + "." + propDefinitionRef;
                 getNestedDefinitionsFromSwagger(definitions, propDefinitionRef, jsonPath, propArray);
             } else {
                 JSONObject nestedProp = new JSONObject();
                 String key;
-                if(jsonPath.endsWith(definition)) {
+                if (jsonPath.endsWith(definition)) {
                     key = jsonPath + "." + paramName;
                 } else {
                     key = definition + "." + paramName;

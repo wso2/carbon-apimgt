@@ -26,6 +26,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.wso2.carbon.apimgt.api.APIDefinition;
@@ -68,18 +70,19 @@ import java.util.Set;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 /**
- * Class uses to generate api sequences for soap to rest conversion
+ * Class uses to generate api sequences for soap to rest conversion.
  */
 public class SequenceGenerator {
+    private static final Logger log = LoggerFactory.getLogger(SequenceGenerator.class);
 
     private static APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
 
     /**
      * generates api in/out sequences from the swagger to soap definitions
-     *
+     * <p>
      * Note: this method is directly invoked from the jaggery layer
      *
-     * @param apiDataStr api object as a string
+     * @param apiDataStr           api object as a string
      * @param soapOperationMapping soap operation mapping from the wsdl
      * @throws APIManagementException throws if error occurred in registry access/ parsing definitions
      */
@@ -113,14 +116,14 @@ public class SequenceGenerator {
             int tenantId;
             UserRegistry registry;
             try {
-                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                        .getTenantId(tenantDomain);
+                tenantId = ServiceReferenceHolder.getInstance().getRealmService().
+                        getTenantManager().getTenantId(tenantDomain);
                 registry = registryService.getGovernanceSystemRegistry(tenantId);
 
                 apiJSON = (JSONObject) parser.parse(definitionFromSwagger20.getAPIDefinition(apiId, registry));
 
-                ObjectMapper mapper = new ObjectMapper()
-                        .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+                ObjectMapper mapper = new ObjectMapper().setVisibility(
+                        PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 TypeFactory typeFactory = mapper.getTypeFactory();
                 List<WSDLSOAPOperation> soapOperations = mapper.readValue(soapOperationMapping,
@@ -137,8 +140,8 @@ public class SequenceGenerator {
                         for (Object key1 : methods) {
                             String method = (String) key1;
 
-                            List<JSONObject> mappingList = SequenceUtils
-                                    .getResourceParametersFromSwagger(apiJSON, resource, method);
+                            List<JSONObject> mappingList = SequenceUtils.getResourceParametersFromSwagger(
+                                    apiJSON, resource, method);
                             String inSequence = generateApiInSequence(mappingList, soapOperations, resourcePath,
                                     method);
                             String outSequence = generateApiOutSequence();
@@ -155,8 +158,8 @@ public class SequenceGenerator {
                                     + SOAPToRESTConstants.SEQUENCE_GEN.RESOURCE_METHOD_SEPERATOR + method
                                     + SOAPToRESTConstants.SEQUENCE_GEN.XML_FILE_EXTENSION;
                             SequenceUtils.saveRestToSoapConvertedSequence(registry, inSequence, method, resourceInPath);
-                            SequenceUtils
-                                    .saveRestToSoapConvertedSequence(registry, outSequence, method, resourceOutPath);
+                            SequenceUtils.saveRestToSoapConvertedSequence(
+                                    registry, outSequence, method, resourceOutPath);
                         }
                     }
                 }
@@ -165,9 +168,9 @@ public class SequenceGenerator {
             } catch (UserStoreException e) {
                 handleException("Error while reading tenant information ", e);
             } catch (ParseException e) {
-                handleException("Error while parsing json content", e);
+                handleException("Error while parsing soap operations json content", e);
             } catch (IOException e) {
-                handleException("Error occurred when parsing json string ", e);
+                handleException("Error occurred when parsing soap operations json string ", e);
             }
         } catch (ParseException e) {
             handleException("Error occurred when parsing api json string ", e);
@@ -180,11 +183,12 @@ public class SequenceGenerator {
 
     /**
      * Generates api in sequence for api resource that needs to added to synapse api configs
-     * @param mappingList swagger resource mapping
+     *
+     * @param mappingList    swagger resource mapping
      * @param soapOperations soap operations taken from the wsdl
-     * @param resourcePath resource path of the http method
-     * @param method resource method
-     * @return  generated api in sequence
+     * @param resourcePath   resource path of the http method
+     * @param method         resource method
+     * @return generated api in sequence
      * @throws APIManagementException
      */
     private static String generateApiInSequence(List<JSONObject> mappingList, List<WSDLSOAPOperation> soapOperations,
@@ -195,8 +199,8 @@ public class SequenceGenerator {
         String namespace = "";
         String opName = "";
         for (WSDLSOAPOperation operationParam : soapOperations) {
-            if (operationParam.getName().equals(resourcePath.substring(1)) && operationParam.getHttpVerb()
-                    .equalsIgnoreCase(method)) {
+            if (operationParam.getName().equals(resourcePath.substring(1)) &&
+                    operationParam.getHttpVerb().equalsIgnoreCase(method)) {
                 opName = operationParam.getSoapBindingOpName();
                 soapAction = operationParam.getSoapAction();
                 namespace = operationParam.getTargetNamespace();
@@ -222,9 +226,9 @@ public class SequenceGenerator {
      * Creates xml string needed to inject into the velocity templates.
      *
      * @param mappingList swagger definition mapping with the soap operations
-     * @param opName soap operation name
-     * @param namespace soap namespace of the operation
-     * @param array parameter array used to generate sequence for array type
+     * @param opName      soap operation name
+     * @param namespace   soap namespace of the operation
+     * @param array       parameter array used to generate sequence for array type
      * @return xml string that needs to injected to the api sequence
      * @throws APIManagementException throws in xml to string transformation
      */
@@ -259,7 +263,8 @@ public class SequenceGenerator {
                             String paramElements = createParameterElements(paramName, SOAPToRESTConstants.SWAGGER.BODY);
                             String[] params = paramElements.split(SOAPToRESTConstants.SEQUENCE_GEN.COMMA);
                             argStr += params[1] + SOAPToRESTConstants.SEQUENCE_GEN.NEW_LINE_CHAR;
-                            if (SOAPToRESTConstants.PARAM_TYPES.ARRAY.equals(param.get(SOAPToRESTConstants.SWAGGER.TYPE))) {
+                            if (SOAPToRESTConstants.PARAM_TYPES.ARRAY
+                                    .equals(param.get(SOAPToRESTConstants.SWAGGER.TYPE))) {
                                 xPath = (String) param.get(SOAPToRESTConstants.SEQUENCE_GEN.XPATH);
                                 JSONObject arrayObj = new JSONObject();
                                 arrayObj.put(SOAPToRESTConstants.SEQUENCE_GEN.PROPERTY_NAME, params[0]);
@@ -271,7 +276,7 @@ public class SequenceGenerator {
                                 JSONObject entry = (JSONObject) ((JSONObject) paramObj).get(paramName);
                                 xPath = (String) entry.get(SOAPToRESTConstants.SEQUENCE_GEN.XPATH);
                             }
-                            String[] xPathElements = xPath.split(SOAPToRESTConstants.SEQUENCE_GEN.X_PATH_SEPARATOR);
+                            String[] xPathElements = xPath.split(SOAPToRESTConstants.SEQUENCE_GEN.PATH_SEPARATOR);
                             Element prevElement = rootElement;
                             int elemPos = 0;
                             for (String xPathElement : xPathElements) {
@@ -290,15 +295,22 @@ public class SequenceGenerator {
                                     prevElement = element;
                                 }
                                 elemPos++;
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Current x path element  " + element.getNodeValue()
+                                            + " at position: " + elemPos);
+                                }
                             }
                         }
                     } else if (jsonObject.get(obj) instanceof JSONObject) {
                         JSONObject param = (JSONObject) jsonObject.get(obj);
-                        Element element = doc.createElementNS(namespace, SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_PREFIX
-                                        + SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_SEPARATOR + param.get(SOAPToRESTConstants.SWAGGER.NAME).toString());
+                        Element element = doc.createElementNS(namespace,
+                                SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_PREFIX
+                                        + SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_SEPARATOR + param
+                                        .get(SOAPToRESTConstants.SWAGGER.NAME).toString());
                         element.setTextContent(SOAPToRESTConstants.SEQUENCE_GEN.PROPERTY_ACCESSOR + count);
                         rootElement.appendChild(element);
-                        String paramElements = createParameterElements(param.get(SOAPToRESTConstants.SWAGGER.NAME).toString(),
+                        String paramElements = createParameterElements(
+                                param.get(SOAPToRESTConstants.SWAGGER.NAME).toString(),
                                 SOAPToRESTConstants.PARAM_TYPES.QUERY);
                         String[] params = paramElements.split(SOAPToRESTConstants.SEQUENCE_GEN.COMMA);
                         argStr += params[1] + SOAPToRESTConstants.SEQUENCE_GEN.NEW_LINE_CHAR;
@@ -329,7 +341,7 @@ public class SequenceGenerator {
      * Creates property and argument elements needed to inject to the sequence.
      *
      * @param jsonPathElement json path of a parameter
-     * @param type type of the parameter (i.e query, body, path)
+     * @param type            type of the parameter (i.e query, body, path)
      * @return string of property and argument elements for a given parameter
      * @throws APIManagementException throws in xml to string transformation
      */
