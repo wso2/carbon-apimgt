@@ -60,8 +60,6 @@ public class APIGatewayManager {
 
     private final String ENDPOINT_SANDBOX = "_SANDBOX_";
 
-    private String endpointConfig;
-
 	private APIGatewayManager() {
 		APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
 		                                                       .getAPIManagerConfigurationService()
@@ -181,7 +179,6 @@ public class APIGatewayManager {
                             client.addPrototypeApiScriptImpl(builder, tenantDomain, api.getId());
                         } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT
                                 .equalsIgnoreCase(api.getImplementation())) {
-                            endpointConfig = api.getEndpointConfig();
                             client.addApi(builder, tenantDomain, api.getId());
                             endpointClient.addEndpoint(api, builder);
                         }
@@ -259,7 +256,7 @@ public class APIGatewayManager {
                                 log.debug("Removing API " + api.getId().getApiName() + " From environment " +
                                         environment.getName());
                             }
-                            endpointClient.deleteEndpoint(api, endpointConfig);
+                            endpointClient.deleteEndpoint(api);
                             client.deleteApi(tenantDomain, api.getId());
                             undeployCustomSequences(api, tenantDomain, environment);
                         }

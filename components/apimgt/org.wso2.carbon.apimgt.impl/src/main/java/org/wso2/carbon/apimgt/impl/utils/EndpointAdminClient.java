@@ -1,8 +1,6 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.axis2.AxisFault;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +31,7 @@ public class EndpointAdminClient {
 
     public void addEndpoint(API api, APITemplateBuilder builder) throws AxisFault {
         try {
-            String endpointConfig = api.getEndpointConfig();
-            ArrayList<String> arrayList = getEndpointType(endpointConfig);
+            ArrayList<String> arrayList = getEndpointType(api);
             for (String type : arrayList) {
                 String endpointConfigContext = builder.getConfigStringForEndpointTemplate(type);
                 endpointAdminStub.addEndpoint(endpointConfigContext);
@@ -44,10 +41,10 @@ public class EndpointAdminClient {
         }
     }
 
-    public void deleteEndpoint(API api, String endpointConfig) throws AxisFault {
+    public void deleteEndpoint(API api) throws AxisFault {
         try {
             String endpointName = api.getId().getApiName() + "--" + api.getId().getVersion();
-            ArrayList<String> arrayList = getEndpointType(endpointConfig);
+            ArrayList<String> arrayList = getEndpointType(api);
             for (String type : arrayList) {
                 String t = type.replace("_endpoints", "");
                 endpointAdminStub.deleteEndpoint(endpointName + "_API" + t + "Endpoint");
@@ -57,13 +54,11 @@ public class EndpointAdminClient {
         }
     }
 
-    private ArrayList<String> getEndpointType(String endpointConfig) throws ParseException {
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(endpointConfig);
+    private ArrayList<String> getEndpointType(API api) throws ParseException {
         ArrayList<String> arrayList = new ArrayList<>();
-        if (jsonObject.containsKey(APIConstants.API_DATA_PRODUCTION_ENDPOINTS) && !jsonObject.containsKey(APIConstants.API_DATA_SANDBOX_ENDPOINTS)) {
+        if (APIUtil.isProductionEndpointsExists(api) && !APIUtil.isSandboxEndpointsExists(api)) {
             arrayList.add(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);
-        } else if (jsonObject.containsKey(APIConstants.API_DATA_SANDBOX_ENDPOINTS) && !jsonObject.containsKey(APIConstants.API_DATA_PRODUCTION_ENDPOINTS)) {
+        } else if (APIUtil.isSandboxEndpointsExists(api) && !APIUtil.isProductionEndpointsExists(api)) {
             arrayList.add(APIConstants.API_DATA_SANDBOX_ENDPOINTS);
         } else {
             arrayList.add(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);
