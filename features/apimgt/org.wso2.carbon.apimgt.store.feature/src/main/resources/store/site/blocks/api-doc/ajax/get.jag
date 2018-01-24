@@ -240,7 +240,7 @@ var log = new Log();
             if (jsonObj["x-wso2-security"] != undefined) {
                 var scopeList = jsonObj["x-wso2-security"]["apim"]["x-wso2-scopes"];
                 for (var i = 0; i < scopeList.length; i++) {
-                    default_implicit.scopes[scopeList[i].key] = scopeList[i].name;
+                    default_implicit_swagger.scopes[scopeList[i].key] = scopeList[i].name;
                 }
                 for (var path in jsonObj.paths) {
                     for (var method in jsonObj.paths[path]) {
