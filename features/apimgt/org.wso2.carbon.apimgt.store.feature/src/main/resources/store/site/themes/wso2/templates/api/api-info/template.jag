@@ -357,12 +357,11 @@ $(window).load(function(){
         if (!$(event.target).closest('.dropdown-menu').length) {
             if ($('#enjoyhint_label').length != 0) {
                var hintText = $('#enjoyhint_label').text();
-               if(hintText.indexOf("from drop-down list..") != -1 || hintText.indexOf("from the drop-down list.") != -1) {
+               if (hintText.indexOf("from drop-down list..") != -1 || hintText.indexOf("from the drop-down list.") != -1) {
                    if (<%=subscribedToDefault%>) {
                        localStorage.setItem("isApplicationSubscribed", true);
                        runEnjoyHintScript(null, api_store_subscribe_to_default_application);
-                   }
-                   else {
+                   } else {
                        localStorage.setItem("isNewApplicationClicked",true);
                        runEnjoyHintScript(null, api_store_subscribe_to_new_application);
                    }
