@@ -7,9 +7,9 @@ var Configurations = {
         secondary: {
             main: '#1565C0'
         },
-        text: {
+        /*text: { // TODO: till we migrate to MUI version(v1.0.0-beta.30 or above) with this fix https://github.com/mui-org/material-ui/issues/9750 ~tmkasun
             primary: '#31375a'
-        },
+        },*/
         background : {
             appBar: '#31375a'
         }
