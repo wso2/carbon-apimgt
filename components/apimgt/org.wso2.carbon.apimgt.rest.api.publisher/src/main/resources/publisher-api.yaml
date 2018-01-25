@@ -3070,7 +3070,7 @@ definitions:
         type: array
         items:
           type: string
-        example: []
+        example: ["tenant1", "tenant2"]
       additionalProperties:
         type: object
         description : Map of custom properties of API
