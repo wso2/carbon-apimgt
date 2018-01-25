@@ -27,6 +27,7 @@ import {withStyles} from 'material-ui/styles';
 import green from 'material-ui/colors/green';
 import {CircularProgress} from 'material-ui/Progress';
 import InputForm from "./InputForm";
+import Alert from '../../../Shared/Alert'
 
 const styles = theme => ({
         root: {
@@ -70,7 +71,7 @@ class ApiCreateEndpoint extends Component {
     inputChange(e) {
         let field = 'selectedPolicies';
         let value = e;
-        if (e.constructor.name === 'SyntheticEvent') {
+        if (!Array.isArray(e)) {
             field = e.target.name;
             value = e.target.value;
         }
@@ -95,7 +96,7 @@ class ApiCreateEndpoint extends Component {
         const values = this.state.apiFields;
         //Check for form errors manually
         if (!values.apiName || !values.apiVersion || !values.apiContext) {
-            this.setState({message: 'Please fill all required fields', messageOpen: true, validate: true});
+            Alert.warning('Please fill all required fields');
             return;
         }
         this.setState({loading: true});

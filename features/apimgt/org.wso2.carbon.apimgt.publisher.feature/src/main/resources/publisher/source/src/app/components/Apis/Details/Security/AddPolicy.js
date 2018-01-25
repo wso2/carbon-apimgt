@@ -34,7 +34,7 @@ import Select from 'material-ui/Select';
 import { MenuItem } from 'material-ui/Menu';
 
 import API from '../../../../data/api'
-import Message from '../../../Shared/Message'
+import Alert from '../../../Shared/Alert'
 
 class AddPolicy extends Component {
     state = {
@@ -62,7 +62,7 @@ class AddPolicy extends Component {
     handlePolicyAdd() {
         let policy = this.state.selectedPolicy;
         if (policy.uuid === '' || policy.name === '') {
-            this.msg.error("Please select a policy");
+            Alert.error("Please select a policy");
             return;
         }
 
@@ -72,9 +72,9 @@ class AddPolicy extends Component {
             let promisedPolicyAdd = api.addThreatProtectionPolicyToApi(currentApi.id, this.state.selectedPolicy.uuid);
             promisedPolicyAdd.then(response => {
                 if (response.status === 200) {
-                    this.msg.info("Threat protection policy added successfully.");
+                    Alert.info("Threat protection policy added successfully.");
                 } else {
-                    this.msg.error("Failed to add threat protection policy.");
+                    Alert.error("Failed to add threat protection policy.");
                 }
             });
         }
@@ -102,7 +102,6 @@ class AddPolicy extends Component {
                         </Link>
                     </Toolbar>
                 </AppBar>
-                <Message ref={a => this.msg = a}/>
                 <Paper>
                     <Grid container className="root" direction="column">
                         <Grid item xs={12} className="grid-item">

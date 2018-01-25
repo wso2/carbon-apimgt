@@ -11,6 +11,7 @@ const config = {
         publicPath: 'public/app/dist/'
     },
     watch: false,
+    devtool: "source-map",
     module: {
         rules: [
             {
@@ -51,10 +52,6 @@ const config = {
 
 if (process.env.NODE_ENV === "development") {
     config.watch = true;
-    config.devtool = "source-map";
-}
-if (process.env.NODE_ENV === 'production') {
-
 }
 
 module.exports = function (env) {
