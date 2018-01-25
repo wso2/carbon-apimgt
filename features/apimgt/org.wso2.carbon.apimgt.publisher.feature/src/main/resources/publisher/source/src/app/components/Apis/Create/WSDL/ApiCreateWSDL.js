@@ -129,7 +129,7 @@ class ApiCreateWSDL extends Component {
     updateApiInputs(event) {
         let field = 'selectedPolicies';
         let value = event;
-        if (event.constructor.name === 'SyntheticEvent') {
+        if (!Array.isArray(e)) {
             field = event.target.name;
             value = event.target.value;
         }
