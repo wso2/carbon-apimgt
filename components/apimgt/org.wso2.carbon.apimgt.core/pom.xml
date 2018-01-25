@@ -585,7 +585,7 @@
                         <configuration>
                             <images>
                                 <image>
-                                    <name>tharindu1st/mssql-server-linux</name>
+                                    <name>tharindu1st/mssql-server-linux:v2</name>
                                     <alias>apim-mssql</alias>
                                     <run>
                                         <namingStrategy>alias</namingStrategy>
