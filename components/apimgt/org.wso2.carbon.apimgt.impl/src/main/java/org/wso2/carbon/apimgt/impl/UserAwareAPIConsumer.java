@@ -17,10 +17,8 @@
 package org.wso2.carbon.apimgt.impl;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
+import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 /**
@@ -39,11 +37,19 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
 
     UserAwareAPIConsumer() throws APIManagementException {
         super();
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        isAccessControlRestrictionEnabled = Boolean
+                .parseBoolean(config.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_ACCESS_CONTROL_LEVELS));
     }
 
     UserAwareAPIConsumer(String username, APIMRegistryService registryService) throws APIManagementException {
         super(username, registryService);
         this.username = username;
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        isAccessControlRestrictionEnabled = Boolean
+                .parseBoolean(config.getFirstProperty(APIConstants.API_PUBLISHER_ENABLE_ACCESS_CONTROL_LEVELS));
     }
 
     @Override
@@ -95,6 +101,12 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     public void addComment(APIIdentifier identifier, String s, String user) throws APIManagementException {
         checkSubscribePermission();
         super.addComment(identifier, s, user);
+    }
+
+    @Override
+    public API getAPI(APIIdentifier identifier) throws APIManagementException {
+        checkAccessControlPermission(identifier);
+        return super.getAPI(identifier);
     }
 
     public void checkSubscribePermission() throws APIManagementException {

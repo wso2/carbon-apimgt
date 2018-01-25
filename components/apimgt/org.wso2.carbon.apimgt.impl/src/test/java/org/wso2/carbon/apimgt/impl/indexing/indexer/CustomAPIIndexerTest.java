@@ -26,7 +26,12 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
+import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
@@ -40,7 +45,7 @@ import org.wso2.carbon.registry.indexing.IndexingManager;
  * This is the test case related with {@link CustomAPIIndexer}.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ GovernanceUtils.class, IndexingManager.class})
+@PrepareForTest({ GovernanceUtils.class, IndexingManager.class, APIUtil.class})
 public class CustomAPIIndexerTest {
     private CustomAPIIndexer indexer;
     private AsyncIndexer.File2Index file2Index;
@@ -65,11 +70,20 @@ public class CustomAPIIndexerTest {
      * This method checks the indexer's behaviour for migrated APIs which does not have the relevant properties.
      *
      * @throws RegistryException Registry Exception.
+     * @throws APIManagementException API Management Exception.
      */
     @Test
-    public void testIndexDocumentForMigratedAPI() throws RegistryException {
+    public void testIndexDocumentForMigratedAPI() throws RegistryException, APIManagementException {
         Resource resource = new ResourceImpl();
+        PowerMockito.mockStatic(APIUtil.class);
         Mockito.doReturn(resource).when(userRegistry).get(Mockito.anyString());
+        GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
+        GenericArtifact genericArtifact = Mockito.mock(GenericArtifact.class);
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+                thenReturn(artifactManager);
+        Mockito.when(artifactManager.getGenericArtifact(Mockito.anyString())).thenReturn(genericArtifact);
+        PowerMockito.when(APIUtil.getAPI(genericArtifact, userRegistry))
+                .thenReturn(Mockito.mock(API.class));
         indexer.getIndexedDocument(file2Index);
         Assert.assertNotNull(APIConstants.PUBLISHER_ROLES + " property was not set for the API",
                 resource.getProperty(APIConstants.PUBLISHER_ROLES));
@@ -83,10 +97,19 @@ public class CustomAPIIndexerTest {
      * This method checks the indexer's behaviour for new APIs which does not have the relevant properties.
      *
      * @throws RegistryException Registry Exception.
+     * @throws APIManagementException API Management Exception.
      */
     @Test
-    public void testIndexDocumentForNewAPI() throws RegistryException {
+    public void testIndexDocumentForNewAPI() throws APIManagementException, RegistryException {
         Resource resource = new ResourceImpl();
+        PowerMockito.mockStatic(APIUtil.class);
+        GenericArtifactManager artifactManager = Mockito.mock(GenericArtifactManager.class);
+        PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
+                thenReturn(artifactManager);
+        GenericArtifact genericArtifact = Mockito.mock(GenericArtifact.class);
+        Mockito.when(artifactManager.getGenericArtifact(Mockito.anyString())).thenReturn(genericArtifact);
+        PowerMockito.when(APIUtil.getAPI(genericArtifact, userRegistry))
+                .thenReturn(Mockito.mock(API.class));
         resource.setProperty(APIConstants.ACCESS_CONTROL, APIConstants.NO_ACCESS_CONTROL);
         resource.setProperty(APIConstants.PUBLISHER_ROLES, APIConstants.NULL_USER_ROLE_LIST);
         Mockito.doReturn(resource).when(userRegistry).get(Mockito.anyString());

@@ -466,6 +466,7 @@ public class APIConsumerImplTest {
         Mockito.when(cache.get(Mockito.anyObject())).thenReturn(recentlyAddedAPI);
         Resource resource = new ResourceImpl();
         resource.setProperty("overview_status", "overview_status");
+        resource.setProperty("store_view_roles", "store_view_roles");
         String path = "testPath";
         Mockito.when(APIUtil.getAPIPath((APIIdentifier) Mockito.anyObject())).thenReturn(path);
         Mockito.when(userRegistry1.get(Mockito.anyString())).thenReturn(resource);
@@ -486,7 +487,7 @@ public class APIConsumerImplTest {
                 thenReturn(artifactManager);
         GenericArtifact artifact = Mockito.mock(GenericArtifact.class);
         GenericArtifact[] genericArtifacts = new GenericArtifact[]{artifact};
-        Mockito.when(artifactManager.findGenericArtifacts(Mockito.anyMap())).thenReturn(genericArtifacts);
+        Mockito.when(artifactManager.findGovernanceArtifacts(Mockito.anyString())).thenReturn(genericArtifacts);
 
         APIIdentifier apiId1 = new APIIdentifier("admin", "API1", "1.0.0");
         API api1 = new API(apiId1);
@@ -1023,6 +1024,12 @@ public class APIConsumerImplTest {
     @Test
     public void testIsTierDenied() throws APIManagementException, org.wso2.carbon.user.core.UserStoreException {
         UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito.
+                mock(APIManagerConfigurationService.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(Mockito.anyString())).thenReturn("true", "false");
         APIConsumerImpl apiConsumer = new UserAwareAPIConsumerWrapper(userRegistry, apiMgtDAO);
         Mockito.when(userRegistry.getUserRealm()).thenReturn(userRealm);
         Mockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
@@ -1048,6 +1055,12 @@ public class APIConsumerImplTest {
     @Test
     public void testGetDeniedTiers() throws APIManagementException, org.wso2.carbon.user.core.UserStoreException {
         UserRegistry userRegistry = Mockito.mock(UserRegistry.class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito.
+                mock(APIManagerConfigurationService.class);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(Mockito.anyString())).thenReturn("true", "false");
         APIConsumerImpl apiConsumer = new UserAwareAPIConsumerWrapper(userRegistry, apiMgtDAO);
         Mockito.when(userRegistry.getUserRealm()).thenReturn(userRealm);
         Mockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
