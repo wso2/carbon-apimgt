@@ -20,21 +20,14 @@ package org.wso2.carbon.apimgt.impl.soaptorest;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.soaptorest.model.WSDLSOAPOperation;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUtils.getWSDLProcessor;
@@ -42,35 +35,8 @@ import static org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUt
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceReferenceHolder.class})
 public class WSDLSOAPOperationExtractorImplTestCase {
-    private static ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
-    private static APIManagerConfigurationService apimConfigService = Mockito
-            .mock(APIManagerConfigurationService.class);
-    private static APIManagerConfiguration apimConfig = Mockito.mock(APIManagerConfiguration.class);
-
-    public static void doMockStatics() {
-        Map<String, Environment> gatewayEnvironments = new HashMap<String, Environment>();
-        Environment env1 = new Environment();
-        env1.setType("hybrid");
-        env1.setApiGatewayEndpoint("http://localhost:8280,https://localhost:8243");
-        gatewayEnvironments.put("e1", env1);
-
-        PowerMockito.mockStatic(ServiceReferenceHolder.class);
-        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
-        PowerMockito.when(ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService()).thenReturn(apimConfigService);
-        PowerMockito.when(ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration()).thenReturn(apimConfig);
-
-        PowerMockito.when(ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration()
-                .getApiGatewayEnvironments()).thenReturn(gatewayEnvironments);
-    }
-
     @Test
     public void testGetWsdlDefinition() throws Exception {
-        doMockStatics();
         String url  = "http://ws.cdyne.com/phoneverify/phoneverify.asmx?wsdl";
         APIMWSDLReader wsdlReader = new APIMWSDLReader(url);
         byte[] wsdlContent = wsdlReader.getWSDL();
@@ -80,7 +46,6 @@ public class WSDLSOAPOperationExtractorImplTestCase {
 
     @Test
     public void testReadSoapBindingOperations() throws Exception {
-        doMockStatics();
         String url  = "http://ws.cdyne.com/phoneverify/phoneverify.asmx?wsdl";
         APIMWSDLReader wsdlReader = new APIMWSDLReader(url);
         byte[] wsdlContent = wsdlReader.getWSDL();
@@ -92,7 +57,6 @@ public class WSDLSOAPOperationExtractorImplTestCase {
 
     @Test
     public void testParseOperationInputParameters() throws Exception {
-        doMockStatics();
         String url  = "http://ws.cdyne.com/phoneverify/phoneverify.asmx?wsdl";
         APIMWSDLReader wsdlReader = new APIMWSDLReader(url);
         byte[] wsdlContent = wsdlReader.getWSDL();
@@ -104,7 +68,6 @@ public class WSDLSOAPOperationExtractorImplTestCase {
 
     @Test
     public void testParseOperationOutputParameters() throws Exception {
-        doMockStatics();
         String url  = "http://ws.cdyne.com/phoneverify/phoneverify.asmx?wsdl";
         APIMWSDLReader wsdlReader = new APIMWSDLReader(url);
         byte[] wsdlContent = wsdlReader.getWSDL();
