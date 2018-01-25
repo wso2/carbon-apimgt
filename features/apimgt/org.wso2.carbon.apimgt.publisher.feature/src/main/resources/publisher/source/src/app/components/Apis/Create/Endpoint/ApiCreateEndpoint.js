@@ -100,16 +100,16 @@ class ApiCreateEndpoint extends Component {
         }
         this.setState({loading: true});
 
-        let api_data = {
+        let apiData = {
             name: values.apiName,
             context: values.apiContext,
             version: values.apiVersion
         };
         if (values.apiEndpoint) {
-            api_data['endpoint'] = API.getEndpoints(...values);
+            apiData['endpoint'] = API.getEndpoints(apiData.name, apiData.version, values.apiEndpoint);
         }
         let new_api = new API();
-        let promised_create = new_api.create(api_data);
+        let promised_create = new_api.create(apiData);
         promised_create
             .then(response => {
                 let uuid = JSON.parse(response.data).id;
@@ -137,7 +137,7 @@ class ApiCreateEndpoint extends Component {
                 }
             });
 
-        console.log('Send this in a POST request:', api_data);
+        console.log('Send this in a POST request:', apiData);
     };
 
     render() {
