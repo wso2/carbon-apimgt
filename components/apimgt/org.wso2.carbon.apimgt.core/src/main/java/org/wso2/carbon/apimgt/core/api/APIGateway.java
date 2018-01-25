@@ -18,6 +18,7 @@
 */
 package org.wso2.carbon.apimgt.core.api;
 
+import org.wso2.carbon.apimgt.core.exception.ContainerBasedGatewayException;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.models.API;
 import org.wso2.carbon.apimgt.core.models.Application;
@@ -38,56 +39,56 @@ public interface APIGateway {
     /**
      * Add API in gateway
      *
-     * @param api   API artifact
-     * @throws GatewayException     If there is a failure while adding API to gateway
+     * @param api API artifact
+     * @throws GatewayException If there is a failure while adding API to gateway
      */
     void addAPI(API api) throws GatewayException;
 
     /**
      * Add CompositeAPI in gateway
      *
-     * @param api   CompositeAPI artifact
-     * @throws GatewayException     If there is a failure while adding CompositeAPI to gateway
+     * @param api CompositeAPI artifact
+     * @throws GatewayException If there is a failure while adding CompositeAPI to gateway
      */
     void addCompositeAPI(CompositeAPI api) throws GatewayException;
 
     /**
      * Update API in gateway
      *
-     * @param api   API artifact
-     * @throws GatewayException     If there is a failure to update API in gateway
+     * @param api API artifact
+     * @throws GatewayException If there is a failure to update API in gateway
      */
     void updateAPI(API api) throws GatewayException;
 
     /**
      * Delete API in gateway
      *
-     * @param api   API artifact
-     * @throws GatewayException     If there is a failure to delete API in gateway
+     * @param api API artifact
+     * @throws GatewayException If there is a failure to delete API in gateway
      */
     void deleteAPI(API api) throws GatewayException;
 
     /**
      * Delete CompositeAPI in gateway
      *
-     * @param api   API artifact
-     * @throws GatewayException     If there is a failure to delete API in gateway
+     * @param api API artifact
+     * @throws GatewayException If there is a failure to delete API in gateway
      */
     void deleteCompositeAPI(CompositeAPI api) throws GatewayException;
 
     /**
      * Add API subscription to gateway
      *
-     * @param subscriptionValidationDataList  Subscription validation details
-     * @throws GatewayException     If there is a failure to update subscription
+     * @param subscriptionValidationDataList Subscription validation details
+     * @throws GatewayException If there is a failure to update subscription
      */
     void addAPISubscription(List<SubscriptionValidationData> subscriptionValidationDataList) throws GatewayException;
 
     /**
      * Update API subscription status in gateway
      *
-     * @param subscriptionValidationDataList  Subscription validation details
-     * @throws GatewayException     If there is a failure to update subscription status
+     * @param subscriptionValidationDataList Subscription validation details
+     * @throws GatewayException If there is a failure to update subscription status
      */
     void updateAPISubscriptionStatus(List<SubscriptionValidationData> subscriptionValidationDataList) throws
             GatewayException;
@@ -95,8 +96,8 @@ public interface APIGateway {
     /**
      * Delete API subscription from gateway
      *
-     * @param subscriptionValidationDataList  Subscription validation details
-     * @throws GatewayException     If there is a failure to update subscription
+     * @param subscriptionValidationDataList Subscription validation details
+     * @throws GatewayException If there is a failure to update subscription
      */
     void deleteAPISubscription(List<SubscriptionValidationData> subscriptionValidationDataList) throws GatewayException;
 
@@ -104,30 +105,30 @@ public interface APIGateway {
      * Add endpoint to gateway
      *
      * @param endpoint Endpoint artifact
-     * @throws GatewayException     If there is a failure to add endpoint to gateways
+     * @throws GatewayException If there is a failure to add endpoint to gateways
      */
     void addEndpoint(Endpoint endpoint) throws GatewayException;
 
     /**
      * Update endpoint in gateways
      *
-     * @param endpoint  Endpoint artifact
-     * @throws GatewayException     If there is a failure to update endpoint in gateway
+     * @param endpoint Endpoint artifact
+     * @throws GatewayException If there is a failure to update endpoint in gateway
      */
     void updateEndpoint(Endpoint endpoint) throws GatewayException;
 
     /**
      * Delete endpoint in gateway
      *
-     * @param endpoint  Endpoint artifact
-     * @throws GatewayException     If there is a failure to delete endpoint in gateway
+     * @param endpoint Endpoint artifact
+     * @throws GatewayException If there is a failure to delete endpoint in gateway
      */
     void deleteEndpoint(Endpoint endpoint) throws GatewayException;
 
     /**
      * Publish the lifecycle state change of an API to gateway
      *
-     * @param api API artifact
+     * @param api    API artifact
      * @param status Target lifecycle status to be changed
      * @throws GatewayException If there is a failure to notify state change to gateway
      */
@@ -167,14 +168,15 @@ public interface APIGateway {
     void addPolicy(PolicyValidationData policyValidationData) throws GatewayException;
 
     /**
-     *Publish policy update event to gateway
+     * Publish policy update event to gateway
      *
      * @param policyValidationData policy Data
      * @throws GatewayException If there is a failure in notifying update policy to gateway
      */
     void updatePolicy(PolicyValidationData policyValidationData) throws GatewayException;
+
     /**
-     *Publish policy delete event to gateway
+     * Publish policy delete event to gateway
      *
      * @param policyValidationData policy Data
      * @throws GatewayException If there is a failure in notifying delete policy to gateway
@@ -183,6 +185,7 @@ public interface APIGateway {
 
     /**
      * Publish Block condition Add event to Gateway
+     *
      * @param blockConditions block condition data
      * @throws GatewayException If there is a failure in notifying add block condition to gateway
      */
@@ -190,6 +193,7 @@ public interface APIGateway {
 
     /**
      * Publish Block condition Update event to Gateway
+     *
      * @param blockConditions block condition data
      * @throws GatewayException If there is a failure in notifying update block condition to gateway
      */
@@ -197,6 +201,7 @@ public interface APIGateway {
 
     /**
      * Publish Block condition Delete event to Gateway
+     *
      * @param blockConditions block condition data
      * @throws GatewayException If there is a failure in notifying update block condition to gateway
      */
@@ -204,6 +209,7 @@ public interface APIGateway {
 
     /**
      * Publish Threat Protection Policy add event to gateway
+     *
      * @param policy ThreatProtectionPolicy, see {@link ThreatProtectionPolicy}
      * @throws GatewayException if there is a failure in notifying event to gateway
      */
@@ -211,6 +217,7 @@ public interface APIGateway {
 
     /**
      * Publish Threat Protection Policy delete event to gateway
+     *
      * @param policy ThreatProtectionPolicy, see {@link ThreatProtectionPolicy}
      * @throws GatewayException if there is a failure in notifying event to gateway
      */
@@ -218,6 +225,7 @@ public interface APIGateway {
 
     /**
      * Publish Threat Protection Policy update event to gateway
+     *
      * @param policy ThreatProtectionPolicy, see {@link ThreatProtectionPolicy}
      * @throws GatewayException if there is a failure in notifying event to gateway
      */
@@ -226,28 +234,26 @@ public interface APIGateway {
     /**
      * Startup a new Gateway in Container Management System
      *
-     * @param id UUID of the API
      * @param label Auto-generated label of the API
-     * @throws GatewayException If there is a failure in notifying update block condition to gateway
+     * @throws ContainerBasedGatewayException If there is a failure in creating the container based gateway
      */
-     void createContainerBasedGateway(String id, String label) throws GatewayException;
+    void createContainerBasedGateway(String label) throws ContainerBasedGatewayException;
 
     /**
      * Remove existing Gateway from the container Management System
      *
      * @param label auto-generated label of the original API
-     * @param apiId UUID of the API
-     * @throws GatewayException If there is a failure in notifying update block condition to gateway
-    */
-    void removeContainerBasedGateway(String label, String apiId) throws GatewayException;
+     * @throws ContainerBasedGatewayException If there is a failure in removing the container based gateway
+     */
+    void removeContainerBasedGateway(String label) throws ContainerBasedGatewayException;
 
     /**
      * Create or Remove the dedicated Gateway in Container Management System
      *
-     * @param api API object
+     * @param api       API object
      * @param labelName labelName of the API
-     * @throws GatewayException If there is a failure in notifying update block condition to gateway
+     * @throws ContainerBasedGatewayException If there is a failure in notifying update the container based gateway
      */
     void updateDedicatedGateway(API api, String labelName, boolean isDedicatedGatewayEnabled)
-            throws GatewayException;
+            throws ContainerBasedGatewayException;
 }

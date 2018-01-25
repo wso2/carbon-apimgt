@@ -30,9 +30,11 @@ import org.wso2.carbon.apimgt.core.api.APIStore;
 import org.wso2.carbon.apimgt.core.api.Analyzer;
 import org.wso2.carbon.apimgt.core.api.IdentityProvider;
 import org.wso2.carbon.apimgt.core.api.KeyManager;
+import org.wso2.carbon.apimgt.core.configuration.models.ContainerBasedGatewayConfiguration;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
+import org.wso2.carbon.apimgt.core.exception.ContainerBasedGatewayException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.IdentityProviderException;
 import org.wso2.carbon.apimgt.core.exception.KeyManagementException;
@@ -58,6 +60,7 @@ public class APIManagerFactory {
     private KeyManager keyManager;
     private APIGateway apiGateway;
     private APILifecycleManager apiLifecycleManager;
+    private ContainerBasedGatewayGenerator containerBasedGatewayGenerator;
 
     private static final int MAX_PROVIDERS = 50;
     private static final int MAX_CONSUMERS = 500;
@@ -66,15 +69,15 @@ public class APIManagerFactory {
     // Thread safe Cache for API Providers
     private static Map<String, APIPublisher> providers =
             Collections.synchronizedMap(new LinkedHashMap<String, APIPublisher>
-                                        (MAX_PROVIDERS + 1, 1.0F, false) {
+                    (MAX_PROVIDERS + 1, 1.0F, false) {
                 private static final long serialVersionUID = -1801608393369727885L;
 
                 // This method is called just after a new entry has been added
-        @Override
-        public boolean removeEldestEntry(Map.Entry eldest) {
-            return size() > MAX_PROVIDERS;
-        }
-    });
+                @Override
+                public boolean removeEldestEntry(Map.Entry eldest) {
+                    return size() > MAX_PROVIDERS;
+                }
+            });
 
     // Thread safe Cache for API Consumers
     private static Map<String, APIStore> consumers = Collections.synchronizedMap(new LinkedHashMap<String, APIStore>
@@ -337,5 +340,30 @@ public class APIManagerFactory {
             apiLifecycleManager = new APILifeCycleManagerImpl();
         }
         return apiLifecycleManager;
+    }
+
+    /**
+     * Get Container Based Gateway Generator
+     *
+     * @return containerBasedGatewayGenerator
+     * @throws ContainerBasedGatewayException if error occurred while initializing container based gateway generator
+     */
+    public ContainerBasedGatewayGenerator getContainerBasedGatewayGenerator() throws ContainerBasedGatewayException {
+        if (containerBasedGatewayGenerator == null) {
+            try {
+                ContainerBasedGatewayConfiguration containerBasedGatewayConfiguration =
+                        ContainerBasedGatewayConfigBuilder.getContainerBasedGatewayConfiguration();
+
+                String implClassName = containerBasedGatewayConfiguration.getImplClass();
+                Map<String, String> implParameters = containerBasedGatewayConfiguration.getImplParameters();
+                containerBasedGatewayGenerator = (ContainerBasedGatewayGenerator) Class.forName(implClassName)
+                        .newInstance();
+                containerBasedGatewayGenerator.init(implParameters);
+            } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+                throw new ContainerBasedGatewayException("Error occurred while initializing container based gateway " +
+                        "generator", e, ExceptionCodes.ERROR_INITIALIZING_CONTAINER_BASED_GATEWAY);
+            }
+        }
+        return containerBasedGatewayGenerator;
     }
 }

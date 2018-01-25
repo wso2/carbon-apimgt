@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+* Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
 *
 * WSO2 Inc. licenses this file to you under the Apache License,
 * Version 2.0 (the "License"); you may not use this file except
@@ -18,9 +18,8 @@
 */
 package org.wso2.carbon.apimgt.core.impl;
 
-import org.wso2.carbon.apimgt.core.exception.GatewayException;
+import org.wso2.carbon.apimgt.core.exception.ContainerBasedGatewayException;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -29,68 +28,38 @@ import java.util.Map;
 public abstract class ContainerBasedGatewayGenerator {
 
     /**
+     * Initializing implementation parameters
+     *
+     * @param implParameters implementation parameters
+     * @throws ContainerBasedGatewayException if an error occurs while setting the implParameters
+     */
+    public void init(Map<String, String> implParameters) throws ContainerBasedGatewayException {
+        initImpl(implParameters);
+    }
+
+    /**
      * Initialization method for the implementation class
      *
      * @param implParameters implementation parameters
-     * @throws GatewayException if an error occurs while initializing
+     * @throws ContainerBasedGatewayException if an error occurs while initializing
      */
-    abstract void initImpl(Map<String, String> implParameters) throws GatewayException;
-
-    /**
-     * Create a Service in the Container Management System
-     *
-     * @param gatewayServiceTemplate Definition of the Service as a String
-     * @param serviceName            Name of the Service
-     * @param apiId                  UUID of the API
-     * @param namespace              namespace of the service
-     * @param label                  label of the service
-     * @throws GatewayException If there is a failure to update API in gateway
-     */
-    public abstract void createContainerBasedService(String gatewayServiceTemplate, String apiId, String serviceName,
-                                                     String namespace, String label)
-            throws GatewayException, IOException;
-
-    /**
-     * Create the gateway deployment in Container Management System
-     *
-     * @param deploymentTemplate Definition of the Deployment as a String
-     * @param apiId              UUID of the API
-     * @param deploymentName     Name of the deployment
-     * @param namespace          Namespace of the deployment
-     * @param label              gatewayLabel of the deployment
-     * @throws GatewayException If there is a failure to update API in gateway
-     */
-    public abstract void createContainerBasedDeployment(String deploymentTemplate, String apiId, String deploymentName,
-                                                        String namespace, String label) throws GatewayException;
+    abstract void initImpl(Map<String, String> implParameters) throws ContainerBasedGatewayException;
 
     /**
      * Remove the existing gateway and Broker from Container Management System
      *
-     * @param label     auto-generated label of gateway
-     * @param apiId     UUID of the API
-     * @param namespace Namespace of the Gateway Configuration
-     * @throws GatewayException If there is a failure to update API in gateway
+     * @param label auto-generated label of gateway
+     * @throws ContainerBasedGatewayException If there is a failure to update API in gateway
      */
-    public abstract void removeContainerBasedGateway(String label, String apiId, String namespace)
-            throws GatewayException;
+    public abstract void removeContainerBasedGateway(String label) throws ContainerBasedGatewayException;
 
 
     /**
      * Startup a new Gateway in Container Management System
      *
-     * @param apiId UUID of the API
      * @param label Auto-generated label of the API
-     * @throws GatewayException
+     * @throws ContainerBasedGatewayException
      */
-    public abstract void createContainerGateway(String apiId, String label) throws GatewayException;
-
-
-    /**
-     * Get Access Token of the Service Account reading from a File
-     *
-     * @return Access Token of Service Account as A String
-     * @throws GatewayException If there is a failure to get the Access Token of the Service Account
-     */
-    public abstract String getServiceAccountAccessToken() throws GatewayException;
+    public abstract void createContainerGateway(String label) throws ContainerBasedGatewayException;
 
 }

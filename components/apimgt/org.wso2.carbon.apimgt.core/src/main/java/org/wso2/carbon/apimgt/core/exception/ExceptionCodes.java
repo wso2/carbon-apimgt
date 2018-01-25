@@ -240,7 +240,11 @@ public enum ExceptionCodes implements ErrorHandler {
             "retrieving Container based Gateway Configuration."),
     FILE_READING_EXCEPTION(900988, "Error reading token file", 500, " Error reading token file to String"),
     DEDICATED_GATEWAY_DETAILS_NOT_FOUND(900999, "Dedicated Gateway Details not found.", 404, " Dedicated Gateway " +
-            "Details not found.");
+            "Details not found."),
+    ERROR_INITIALIZING_CONTAINER_BASED_GATEWAY(901000, "Error initializing container based gateway", 500,
+                                                       "Error initializing container based gateway"),
+    CONTAINER_GATEWAY_CREATION_FAILED(901001, "Error while creating Container Based Gateway", 500, "Error while " +
+            "creating Container Based Gateway");
 
     private final long errorCode;
     private final String errorMessage;

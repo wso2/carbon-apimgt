@@ -21,251 +21,294 @@ package org.wso2.carbon.apimgt.core.impl;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Deployment;
-import io.fabric8.kubernetes.client.Config;
+import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.client.ConfigBuilder;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClientException;
 
+import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.openshift.client.DefaultOpenShiftClient;
+import io.fabric8.openshift.client.OpenShiftClient;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+import org.wso2.carbon.apimgt.core.exception.ContainerBasedGatewayException;
 import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
-import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.template.ContainerBasedGatewayTemplateBuilder;
 import org.wso2.carbon.apimgt.core.util.ContainerBasedGatewayConstants;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * This is responsible to handle the gateways created in Kubernetes
+ * This is responsible to handle the gateways created in Kubernetes and Openshift
  */
 public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
 
     private static final Logger log = LoggerFactory.getLogger(KubernetesGatewayImpl.class);
-
+    private static final String TRY_KUBE_CONFIG = "kubernetes.auth.tryKubeConfig";
+    private static final String TRY_SERVICE_ACCOUNT = "kubernetes.auth.tryServiceAccount";
+    private String cmsType;
     private String masterURL;
-    private String certFile;
     private String namespace;
-    private String image;
     private String apiCoreUrl;
     private String brokerHost;
     private String saTokenFile;
+    private OpenShiftClient client;
 
+    /**
+     * @see ContainerBasedGatewayGenerator#initImpl(Map)
+     */
     @Override
-    void initImpl(Map<String, String> implParameters) throws GatewayException {
+    void initImpl(Map<String, String> implParameters) throws ContainerBasedGatewayException {
         masterURL = implParameters.get(ContainerBasedGatewayConstants.MASTER_URL);
-        certFile = implParameters.get(ContainerBasedGatewayConstants.CERT_FILE_LOCATION);
         saTokenFile = implParameters.get(ContainerBasedGatewayConstants.SA_TOKEN_FILE);
         namespace = implParameters.get(ContainerBasedGatewayConstants.NAMESPACE);
-        image = implParameters.get(ContainerBasedGatewayConstants.IMAGE);
         apiCoreUrl = implParameters.get(ContainerBasedGatewayConstants.API_CORE_URL);
         brokerHost = implParameters.get(ContainerBasedGatewayConstants.BROKER_HOST);
+        cmsType = implParameters.get(ContainerBasedGatewayConstants.CMS_TYPE);
+
+        configureClient();
     }
 
     /**
-     * @see ContainerBasedGatewayGenerator#createContainerBasedService(String gatewayServiceTemplate, String apiId,
-     * String serviceName, String namespace, String label)
+     * @see ContainerBasedGatewayGenerator#removeContainerBasedGateway(String)
      */
     @Override
-    public void createContainerBasedService(String serviceTemplate, String apiId, String serviceName, String namespace,
-                                            String label) throws GatewayException {
+    public void removeContainerBasedGateway(String label) throws ContainerBasedGatewayException {
 
-        if (masterURL != null) {
-            List<HasMetadata> resources;
+        try {
+            client.services().inNamespace(namespace).withLabel(ContainerBasedGatewayConstants.GATEWAY, label).delete();
+            client.extensions().deployments().inNamespace(namespace).withLabel(ContainerBasedGatewayConstants.GATEWAY,
+                    label).delete();
+            client.extensions().ingresses().inNamespace(namespace).withLabel(ContainerBasedGatewayConstants.GATEWAY,
+                    label).delete();
 
-            System.setProperty("kubernetes.auth.tryKubeConfig", "false");
-            System.setProperty("kubernetes.auth.tryServiceAccount", "true");
-
-            /*Though it is in the cluster or outside by reading access token from an accessible file can get the access
-            token. so, handled It in a single place.*/
-            Config config = new ConfigBuilder().withMasterUrl(masterURL)
-                    .withClientCertFile(certFile).withOauthToken(getServiceAccountAccessToken()).build();
-
-            KubernetesClient client = new DefaultKubernetesClient(config);
-
-            try (InputStream inputStream = IOUtils.toInputStream(serviceTemplate)) {
-
-                // todo : check whether this is working. If not use a fileInputStream
-                resources = client.load(inputStream).get();
-                if (resources.get(0) == null) {
-                    throw new GatewayException("No resources loaded from service definition provided : ",
-                            ExceptionCodes.NO_RESOURCE_LOADED_FROM_DEFINITION);
-                }
-                HasMetadata resource = resources.get(0);
-
-                if (resource instanceof Service) {
-                    // check whether there are existing service already
-                    if (client.services().inNamespace(namespace).withLabel(label) != null) {
-                        Service result = client.services().inNamespace(namespace).load(inputStream).create();
-                        if (log.isDebugEnabled()) {
-                            log.debug("The Kubernetes Service Definition : " + serviceTemplate);
-                        }
-                        log.info("Created Service : " + result.getMetadata().getName());
-                    } else {
-                        log.info("There exist a kubernetes service with the same name." + serviceName);
-                    }
-                    //todo : return gateway Https and https URLs form here as an array.
-                } else {
-                    throw new GatewayException("Loaded Resource is not a Kubernetes Service ! " + resource,
-                            ExceptionCodes.LOADED_RESOURCE_IS_NOT_VALID);
-                }
-            } catch (IOException e) {
-                throw new GatewayException("Client cannot load the service :  " + serviceName + "as an " +
-                        "InputStream", e, ExceptionCodes.TEMPLATE_LOAD_EXCEPTION);
-            }
+            log.info("Completed Deleting the Gateway deployment, service and ingress resources in " + cmsType);
+        } catch (KubernetesClientException e) {
+            throw new ContainerBasedGatewayException("Error while removing container based gateway", e,
+                    ExceptionCodes.CONTAINER_GATEWAY_REMOVAL_FAILED);
         }
+
     }
 
     /**
-     * @see ContainerBasedGatewayGenerator#createContainerBasedDeployment(String deploymentTemplate, String apiId,
-     * String deploymentName, String namespace, String label)
+     * @see ContainerBasedGatewayGenerator#createContainerGateway(String)
      */
     @Override
-    public void createContainerBasedDeployment(String deploymentTemplate, String apiId, String deploymentName,
-                                               String namespace, String label) throws GatewayException {
+    public void createContainerGateway(String label) throws ContainerBasedGatewayException {
 
-        if (masterURL != null) {
-            System.setProperty("kubernetes.auth.tryKubeConfig", "false");
-            System.setProperty("kubernetes.auth.tryServiceAccount", "true");
-
-            Config config = new ConfigBuilder().withMasterUrl(masterURL)
-                    .withClientCertFile(certFile).withOauthToken(getServiceAccountAccessToken()).build();
-            KubernetesClient client = new DefaultKubernetesClient(config);
-            List<HasMetadata> resources;
-
-            try (InputStream inputStream = IOUtils.toInputStream(deploymentTemplate)) {
-
-                resources = client.load(inputStream).get();
-
-                if (resources.get(0) == null) {
-                    client.close();
-                    throw new GatewayException("No resources loaded from deployment definition provided : ",
-                            ExceptionCodes.NO_RESOURCE_LOADED_FROM_DEFINITION);
-                }
-                HasMetadata resource = resources.get(0);
-                if (resource instanceof Deployment) {
-
-                    // check whether there are existing service already
-                    if (client.extensions().deployments().inNamespace(namespace).withLabel(label) != null) {
-                        Deployment result =
-                                client.extensions().deployments().inNamespace(namespace).load(inputStream).create();
-                        if (log.isDebugEnabled()) {
-                            log.debug("The Kubernetes Deployment Definition : " + deploymentTemplate);
-                        }
-                        log.info("Created deployment : ", result.getMetadata().getName());
-                    } else {
-                        log.info("There exist a kubernetes deployment with the same name." + deploymentName);
-                    }
-
-                } else {
-                    throw new GatewayException("Loaded Resource is not a Kubernetes Deployment ! " + resource,
-                            ExceptionCodes.LOADED_RESOURCE_IS_NOT_VALID);
-                }
-
-            } catch (KubernetesClientException | IOException e) {
-                throw new GatewayException("Client cannot load the deployment " + deploymentName + "as an " +
-                        "InputStream", e, ExceptionCodes.TEMPLATE_LOAD_EXCEPTION);
-            }
-        }
-    }
-
-    /**
-     * @see ContainerBasedGatewayGenerator#removeContainerBasedGateway(String label, String apiId, String namespace)
-     */
-    @Override
-    public void removeContainerBasedGateway(String label, String apiId, String namespace) throws GatewayException {
-
-        if (masterURL != null) {
-            System.setProperty("kubernetes.auth.tryKubeConfig", "false");
-            System.setProperty("kubernetes.auth.tryServiceAccount", "true");
-
-            Config config = new ConfigBuilder().withMasterUrl(masterURL)
-                    .withClientCertFile(certFile).withOauthToken(getServiceAccountAccessToken()).build();
-            KubernetesClient client = new DefaultKubernetesClient(config);
-            try {
-                client.services().inNamespace(namespace).withName(label +
-                        ContainerBasedGatewayConstants.CMS_SERVICE_SUFFIX).delete();
-                client.extensions().deployments().inNamespace(namespace).withName(label +
-                        ContainerBasedGatewayConstants.CMS_DEPLOYMENT_SUFFIX).delete();
-                //remove the configuration files from the product as well
-                //ContainerBasedGatewayUtils.deleteKubeConfig(new File(directory));
-                log.info("Completed Deleting the Gateway deployment and service from Container");
-            } catch (KubernetesClientException e) {
-                throw new GatewayException("Error in Removing the Container based Gateway Resources",
-                        ExceptionCodes.CONTAINER_GATEWAY_REMOVAL_FAILED);
-
-            }
-        }
-    }
-
-    /**
-     * @see ContainerBasedGatewayGenerator#createContainerGateway(String, String)
-     */
-    @Override
-    public void createContainerGateway(String apiId, String label) throws GatewayException {
         Map<String, String> templateValues = new HashMap<>();
+        String serviceName = label + ContainerBasedGatewayConstants.CMS_SERVICE_SUFFIX;
+        String deploymentName = label + ContainerBasedGatewayConstants.CMS_DEPLOYMENT_SUFFIX;
+        String ingressName = label + ContainerBasedGatewayConstants.CMS_INGRESS_SUFFIX;
 
         templateValues.put(ContainerBasedGatewayConstants.NAMESPACE, namespace);
         templateValues.put(ContainerBasedGatewayConstants.GATEWAY_LABEL, label);
-        templateValues.put(ContainerBasedGatewayConstants.SERVICE_NAME, label +
-                ContainerBasedGatewayConstants.CMS_SERVICE_SUFFIX);
-        templateValues.put(ContainerBasedGatewayConstants.DEPLOYMENT_NAME, label + "-deployment");
-        templateValues.put(ContainerBasedGatewayConstants.CONTAINER_NAME, label + "-container");
-        templateValues.put(ContainerBasedGatewayConstants.IMAGE, image);
+        templateValues.put(ContainerBasedGatewayConstants.SERVICE_NAME, serviceName);
+        templateValues.put(ContainerBasedGatewayConstants.DEPLOYMENT_NAME, deploymentName);
+        templateValues.put(ContainerBasedGatewayConstants.INGRESS_NAME, ingressName);
+        templateValues.put(ContainerBasedGatewayConstants.CONTAINER_NAME, label
+                + ContainerBasedGatewayConstants.CMS_CONTAINER_SUFFIX);
         templateValues.put(ContainerBasedGatewayConstants.API_CORE_URL, apiCoreUrl);
         templateValues.put(ContainerBasedGatewayConstants.BROKER_HOST, brokerHost);
-        templateValues.put(ContainerBasedGatewayConstants.SERVICE_ACCOUNT_TOKEN_FILE, saTokenFile);
-        templateValues.put(ContainerBasedGatewayConstants.CERT_FILE_LOCATION, certFile);
 
         ContainerBasedGatewayTemplateBuilder builder = new ContainerBasedGatewayTemplateBuilder();
-        //Create gateway Service
-        createContainerBasedService(builder.getGatewayServiceTemplate(templateValues), apiId,
-                templateValues.get(ContainerBasedGatewayConstants.SERVICE_NAME),
-                templateValues.get(ContainerBasedGatewayConstants.NAMESPACE), label);
 
-        // Create gateway deployment
-        createContainerBasedDeployment(builder.getGatewayDeploymentTemplate(templateValues),
-                apiId, templateValues.get(ContainerBasedGatewayConstants.DEPLOYMENT_NAME),
-                templateValues.get(ContainerBasedGatewayConstants.NAMESPACE), label);
+        // Create gateway service resource
+        createServiceResource(builder.generateTemplate(templateValues,
+                ContainerBasedGatewayConstants.GATEWAY_SERVICE_TEMPLATE), serviceName);
 
+        // Create gateway deployment resource
+        createDeploymentResource(builder.generateTemplate(templateValues,
+                ContainerBasedGatewayConstants.GATEWAY_DEPLOYMENT_TEMPLATE), deploymentName);
+
+        // Create gateway ingress resource
+        createIngressResource(builder.generateTemplate(templateValues,
+                ContainerBasedGatewayConstants.GATEWAY_INGRESS_TEMPLATE), ingressName);
         // todo : need to update the labels as well with the access URLs
         // todo : after configuring load balancer type for K8 and openshift service
     }
 
     /**
-     * @see ContainerBasedGatewayGenerator#getServiceAccountAccessToken()
+     * Configure Openshift client
+     *
+     * @throws ContainerBasedGatewayException if failed to configure Openshift client
      */
-    @Override
-    public String getServiceAccountAccessToken() throws GatewayException {
-        //todo : get this read from the kube secret
-        String token;
-        File tokenFile = new File(saTokenFile);
-        try (InputStream inputStream = new FileInputStream(tokenFile);
-             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-             BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+    private void configureClient() throws ContainerBasedGatewayException {
 
-            token = bufferedReader.readLine();
+        System.setProperty(TRY_KUBE_CONFIG, "false");
+        System.setProperty(TRY_SERVICE_ACCOUNT, "true");
 
-        } catch (FileNotFoundException e) {
-            throw new GatewayException("Service Account Access Token file is not found in the given location", e,
-                    ExceptionCodes.FILE_NOT_FOUND_IN_LOCATION);
-        } catch (IOException e) {
-            throw new GatewayException("Error in Reading Access Token File. " + saTokenFile, e,
-                    ExceptionCodes.FILE_READING_EXCEPTION);
+        ConfigBuilder configBuilder = new ConfigBuilder().withMasterUrl(masterURL);
+
+        if (!StringUtils.isEmpty(saTokenFile)) {
+            configBuilder.withOauthToken(resolveToken("encrypted" + saTokenFile));
         }
-        return token;
+
+        client = new DefaultOpenShiftClient(configBuilder.build());
     }
 
+    /**
+     * Get resources from template
+     *
+     * @param template Template as a String
+     * @return HasMetadata
+     * @throws ContainerBasedGatewayException if failed to load resource from the template
+     */
+    private HasMetadata getResourcesFromTemplate(String template) throws ContainerBasedGatewayException {
 
+        List<HasMetadata> resources;
+
+        try (InputStream inputStream = IOUtils.toInputStream(template)) {
+
+            resources = client.load(inputStream).get();
+            if (resources.get(0) == null) {
+                throw new ContainerBasedGatewayException("No resources loaded from the definition provided : ",
+                        ExceptionCodes.NO_RESOURCE_LOADED_FROM_DEFINITION);
+            }
+            return resources.get(0);
+
+        } catch (IOException e) {
+            throw new ContainerBasedGatewayException("Client cannot load any resource from the template :  "
+                    + template, e, ExceptionCodes.TEMPLATE_LOAD_EXCEPTION);
+        }
+    }
+
+    /**
+     * Create a service in cms
+     *
+     * @param serviceTemplate Service template as a String
+     * @param serviceName     Name of the service
+     * @throws ContainerBasedGatewayException if failed to create a service
+     */
+    private void createServiceResource(String serviceTemplate, String serviceName)
+            throws ContainerBasedGatewayException {
+
+        HasMetadata resource = getResourcesFromTemplate(serviceTemplate);
+
+        try {
+            if (resource instanceof Service) {
+                // check whether there are existing service already
+                if (client.services().inNamespace(namespace).withName(serviceName).get() == null) {
+                    Service service = (Service) resource;
+                    Service result = client.services().inNamespace(namespace).create(service);
+                    if (log.isDebugEnabled()) {
+                        log.debug("CMS Type: " + cmsType + ". The Service Definition : " + serviceTemplate);
+                    }
+                    log.info("Created Service : " + result.getMetadata().getName() + " in " + cmsType);
+                } else {
+                    log.info("There exist a service with the same name in " + cmsType + ". Service name : "
+                            + serviceName);
+                }
+                //todo : return gateway Https and https URLs form here as an array.
+            } else {
+                throw new ContainerBasedGatewayException("Loaded Resource is not a Service in " + cmsType + "! " +
+                        resource, ExceptionCodes.LOADED_RESOURCE_IS_NOT_VALID);
+            }
+        } catch (KubernetesClientException e) {
+            throw new ContainerBasedGatewayException("Error while creating container based gateway service in "
+                    + cmsType + "!", e, ExceptionCodes.CONTAINER_GATEWAY_CREATION_FAILED);
+        }
+
+    }
+
+    /**
+     * Create a deployment in cms
+     *
+     * @param deploymentTemplate Deployment template as a String
+     * @param deploymentName     Name of the deployment
+     * @throws ContainerBasedGatewayException if failed to create a deployment
+     */
+    private void createDeploymentResource(String deploymentTemplate, String deploymentName)
+            throws ContainerBasedGatewayException {
+
+        HasMetadata resource = getResourcesFromTemplate(deploymentTemplate);
+
+        try {
+            if (resource instanceof Deployment) {
+                // check whether there are existing service already
+                if (client.extensions().deployments().inNamespace(namespace).withName(deploymentName).get() == null) {
+                    Deployment deployment = (Deployment) resource;
+                    Deployment result = client.extensions().deployments().inNamespace(namespace).create(deployment);
+                    if (log.isDebugEnabled()) {
+                        log.debug("CMS Type: " + cmsType + ". The Deployment Definition : " + deploymentTemplate);
+                    }
+                    log.info("Created Deployment : " + result.getMetadata().getName() + " in " + cmsType);
+                } else {
+                    log.info("There exist a deployment with the same name in " + cmsType + ". Deployment name : "
+                            + deploymentName);
+                }
+
+            } else {
+                throw new ContainerBasedGatewayException("Loaded Resource is not a Deployment in " + cmsType + "! " +
+                        resource, ExceptionCodes.LOADED_RESOURCE_IS_NOT_VALID);
+            }
+        } catch (KubernetesClientException e) {
+            throw new ContainerBasedGatewayException("Error while creating container based gateway deployment in "
+                    + cmsType + "!", e, ExceptionCodes.CONTAINER_GATEWAY_CREATION_FAILED);
+        }
+    }
+
+    /**
+     * Create an Ingress resource in cms
+     *
+     * @param ingressTemplate Ingress template as a String
+     * @param ingressName     Name of the ingress
+     * @throws ContainerBasedGatewayException if failed to create a service
+     */
+    private void createIngressResource(String ingressTemplate, String ingressName)
+            throws ContainerBasedGatewayException {
+
+        HasMetadata resource = getResourcesFromTemplate(ingressTemplate);
+
+        try {
+            if (resource instanceof Ingress) {
+                // check whether there are existing service already
+                if (client.extensions().ingresses().inNamespace(namespace).withName(ingressName).get() == null) {
+                    Ingress ingress = (Ingress) resource;
+                    Ingress result = client.extensions().ingresses().inNamespace(namespace).create(ingress);
+                    if (log.isDebugEnabled()) {
+                        log.debug("CMS Type: " + cmsType + ". The Ingress Definition : " + ingressTemplate);
+                    }
+                    log.info("Created Ingress : " + result.getMetadata().getName() + " in " + cmsType);
+                } else {
+                    log.info("There exist an ingress with the same name in " + cmsType + ". Ingress name : "
+                            + ingressName);
+                }
+                //todo : return gateway Https and https URLs form here as an array.
+            } else {
+                throw new ContainerBasedGatewayException("Loaded Resource is not a Service in " + cmsType + "! " +
+                        resource, ExceptionCodes.LOADED_RESOURCE_IS_NOT_VALID);
+            }
+        } catch (KubernetesClientException e) {
+            throw new ContainerBasedGatewayException("Error while creating container based gateway ingress in "
+                    + cmsType + "!", e, ExceptionCodes.CONTAINER_GATEWAY_CREATION_FAILED);
+        }
+
+    }
+
+    /**
+     * Get the token after decrypting using {@link FileEncryptionUtility#readFromEncryptedFile(java.lang.String)}
+     *
+     * @return service account token
+     * @throws ContainerBasedGatewayException if an error occurs while resolving the token
+     */
+    private String resolveToken(String encryptedTokenFileName) throws ContainerBasedGatewayException {
+
+        String token;
+        try {
+            String externalSATokenFilePath = System.getProperty(FileEncryptionUtility.CARBON_HOME)
+                    + FileEncryptionUtility.SECURITY_DIR + File.separator + encryptedTokenFileName;
+            token = FileEncryptionUtility.getInstance().readFromEncryptedFile(externalSATokenFilePath);
+        } catch (APIManagementException e) {
+            String msg = "Error occurred while resolving externally stored token";
+            throw new ContainerBasedGatewayException(msg, e, ExceptionCodes.ERROR_INITIALIZING_CONTAINER_BASED_GATEWAY);
+        }
+        return StringUtils.replace(token, "\n", "");
+    }
 }

@@ -20,18 +20,14 @@ metadata:
     gateway: ${gatewayLabel}  # should have the auto-generated label as the value
     tier: prod
 spec:
-  type: NodePort
   ports:
     # ports that this service should serve on
     - name: 'pass-through-http'
       port: 9090
-      targetPort: 9090
-      nodePort: 32001
-
+      protocol: TCP
     - name: 'pass-through-https'
       port: 9092
-      targetPort: 9092
-      nodePort: 32002
+      protocol: TCP
 
   # label keys and values that must match in order to receive traffic for this service
   selector:

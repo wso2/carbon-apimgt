@@ -32,8 +32,6 @@ spec:
       -
         name: ${containerName}
         image: wso2apim-gateway:v3.0.0
-        #imagePullPolicy: AlwaysAPIStateChangeWorkflow.java
-
         env:
         -
           name: apiCoreUrl

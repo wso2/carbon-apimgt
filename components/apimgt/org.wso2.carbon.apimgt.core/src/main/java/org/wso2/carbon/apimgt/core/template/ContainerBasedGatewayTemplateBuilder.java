@@ -25,7 +25,8 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.log.CommonsLogLogChute;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
-import org.wso2.carbon.apimgt.core.exception.GatewayException;
+import org.wso2.carbon.apimgt.core.exception.ContainerBasedGatewayException;
+import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.ContainerBasedGatewayConstants;
 
 import java.io.File;
@@ -37,9 +38,8 @@ import java.util.Map;
  */
 public class ContainerBasedGatewayTemplateBuilder {
 
-    protected String cmsTemplateLocation =
-            "resources" + File.separator + "template" + File.separator + "container_gateway_templates" +
-                    File.separator;
+    protected String cmsTemplateLocation = APIMgtConstants.RESOURCES + File.separator + APIMgtConstants.TEMPLATES +
+            File.separator + ContainerBasedGatewayConstants.CONTAINER_GATEWAY_TEMPLATES + File.separator;
     public static final String CLASS_PATH = "classpath";
     public static final String CLASS_PATH_RESOURCE_LOADER = "classpath.resource.loader.class";
 
@@ -49,41 +49,13 @@ public class ContainerBasedGatewayTemplateBuilder {
      * @param templateValues VelocityContext template values Map
      * @return Velocity Context Object
      */
-    public VelocityContext setGatewayServiceContextValues(Map<String, String> templateValues) {
+    private VelocityContext setVelocityContextValues(Map<String, String> templateValues) {
 
         VelocityContext context = new VelocityContext();
-        context.put(ContainerBasedGatewayConstants.SERVICE_NAME,
-                templateValues.get(ContainerBasedGatewayConstants.SERVICE_NAME));
-        context.put(ContainerBasedGatewayConstants.NAMESPACE,
-                templateValues.get(ContainerBasedGatewayConstants.NAMESPACE));
-        context.put(ContainerBasedGatewayConstants.GATEWAY_LABEL,
-                templateValues.get(ContainerBasedGatewayConstants.GATEWAY_LABEL));
-        return context;
-    }
 
-    /**
-     * Set velocity context  for Gateway Deployment.
-     *
-     * @param templateValues VelocityContext template values Map
-     * @return Velocity Context Object
-     */
-    public VelocityContext setGatewayDeploymentContextValues(Map<String, String> templateValues) {
-
-        VelocityContext context = new VelocityContext();
-        context.put(ContainerBasedGatewayConstants.DEPLOYMENT_NAME,
-                templateValues.get(ContainerBasedGatewayConstants.DEPLOYMENT_NAME));
-        context.put(ContainerBasedGatewayConstants.NAMESPACE,
-                templateValues.get(ContainerBasedGatewayConstants.NAMESPACE));
-        context.put(ContainerBasedGatewayConstants.GATEWAY_LABEL,
-                templateValues.get(ContainerBasedGatewayConstants.GATEWAY_LABEL));
-        context.put(ContainerBasedGatewayConstants.CONTAINER_NAME,
-                templateValues.get(ContainerBasedGatewayConstants.CONTAINER_NAME));
-        context.put(ContainerBasedGatewayConstants.IMAGE,
-                templateValues.get(ContainerBasedGatewayConstants.IMAGE));
-        context.put(ContainerBasedGatewayConstants.API_CORE_URL,
-                templateValues.get(ContainerBasedGatewayConstants.API_CORE_URL));
-        context.put(ContainerBasedGatewayConstants.BROKER_HOST,
-                templateValues.get(ContainerBasedGatewayConstants.BROKER_HOST));
+        for (Map.Entry<String, String> entry : templateValues.entrySet()) {
+            context.put(entry.getKey(), entry.getValue());
+        }
         return context;
     }
 
@@ -92,7 +64,7 @@ public class ContainerBasedGatewayTemplateBuilder {
      *
      * @return Velocity engine for service template
      */
-    public VelocityEngine initVelocityEngine() {
+    private VelocityEngine initVelocityEngine() {
         VelocityEngine velocityengine = new VelocityEngine();
         velocityengine.setProperty(RuntimeConstants.RESOURCE_LOADER, CLASS_PATH);
         velocityengine.setProperty(CLASS_PATH_RESOURCE_LOADER, ClasspathResourceLoader.class.getName());
@@ -102,37 +74,23 @@ public class ContainerBasedGatewayTemplateBuilder {
     }
 
     /**
-     * Return Gateway service template for policy level.
+     * Generate template for given template values
      *
-     * @param serviceTemplateValues service template values map
-     * @return Service Template as a String
-     * @throws GatewayException If an error occurred when getting the Service template
+     * @param templateValues Template values
+     * @param template       Template
+     * @return template as a String
+     * @throws ContainerBasedGatewayException if failed to generate the template
      */
-    public String getGatewayServiceTemplate(Map<String, String> serviceTemplateValues) throws GatewayException {
+    public String generateTemplate(Map<String, String> templateValues, String template)
+            throws ContainerBasedGatewayException {
 
         StringWriter writer = new StringWriter();
         VelocityEngine velocityengine = initVelocityEngine();
-        Template template = velocityengine.getTemplate(cmsTemplateLocation +
-                ContainerBasedGatewayConstants.GATEWAY_SERVICE_TEMPLATE);
-        VelocityContext context = setGatewayServiceContextValues(serviceTemplateValues);
-        template.merge(context, writer);
+        String templateLocation = cmsTemplateLocation + template;
+        Template generateTemplate = velocityengine.getTemplate(templateLocation);
+        VelocityContext context = setVelocityContextValues(templateValues);
+        generateTemplate.merge(context, writer);
         return writer.toString();
     }
 
-    /**
-     * Return Gateway deployment template for policy level.
-     *
-     * @param deploymentTemplateValues service template values map
-     * @return Deployment Template as a String
-     */
-    public String getGatewayDeploymentTemplate(Map<String, String> deploymentTemplateValues) {
-
-        StringWriter writer = new StringWriter();
-        VelocityEngine velocityengine = initVelocityEngine();
-        Template template = velocityengine.getTemplate(cmsTemplateLocation +
-                ContainerBasedGatewayConstants.GATEWAY_DEPLOYMENT_TEMPLATE);
-        VelocityContext context = setGatewayDeploymentContextValues(deploymentTemplateValues);
-        template.merge(context, writer);
-        return writer.toString();
-    }
 }

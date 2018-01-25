@@ -148,7 +148,6 @@ public class APIStateChangeWorkflow extends Workflow {
 
             boolean hasOwnGateway =
                     Boolean.valueOf(getAttribute(APIMgtConstants.WorkflowConstants.ATTRIBUTE_HAS_OWN_GATEWAY));
-            String apiId = getAttribute(APIMgtConstants.WorkflowConstants.ATTRIBUTE_API_NAME);
             String label = getAttribute(APIMgtConstants.WorkflowConstants.ATTRIBUTE_API_AUTOGEN_LABEL);
 
             if (hasOwnGateway) {
@@ -162,7 +161,7 @@ public class APIStateChangeWorkflow extends Workflow {
 
                     // No need to auto-generate the label again As hasOwnGateway is true.
                     //create the gateway
-                    apiGateway.createContainerBasedGateway(apiId, label);
+                    apiGateway.createContainerBasedGateway(label);
 
                     //If false
                     // No need to handle as this is not an APi Update.
@@ -184,7 +183,7 @@ public class APIStateChangeWorkflow extends Workflow {
                         targetState.equalsIgnoreCase(APIStatus.RETIRED.getStatus())) {
 
                     // remove gateway
-                    apiGateway.removeContainerBasedGateway(label, apiId);
+                    apiGateway.removeContainerBasedGateway(label);
                 }
             }
 

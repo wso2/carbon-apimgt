@@ -22,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.api.APIGateway;
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
+import org.wso2.carbon.apimgt.core.exception.ContainerBasedGatewayException;
+import org.wso2.carbon.apimgt.core.exception.ExceptionCodes;
 import org.wso2.carbon.apimgt.core.exception.GatewayException;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.core.models.API;
@@ -124,7 +126,12 @@ public class APIGatewayPublisherImpl implements APIGateway {
         }
         if (api.hasOwnGateway()) {
             // Delete the Gateway - check how we can assume that we complete the deletion
-            removeContainerBasedGateway(api.getLabels().toArray()[0].toString(), api.getId());
+            try {
+                removeContainerBasedGateway(api.getLabels().toArray()[0].toString());
+            } catch (ContainerBasedGatewayException e) {
+                String msg = "Error while removing the container based gateway";
+                throw new GatewayException(msg, e, ExceptionCodes.CONTAINER_GATEWAY_REMOVAL_FAILED);
+            }
         }
     }
 
@@ -434,43 +441,30 @@ public class APIGatewayPublisherImpl implements APIGateway {
             }
         }
     }
+
     /**
-     * @see APIGateway#createContainerBasedGateway(String, String)
+     * @see APIGateway#createContainerBasedGateway(String)
      */
     @Override
-    public void createContainerBasedGateway(String apiId, String label) throws GatewayException {
+    public void createContainerBasedGateway(String label) throws ContainerBasedGatewayException {
 
-//        if (ContainerBasedGatewayConstants.K8.equalsIgnoreCase(config.getContainerGatewayConfigs().getCmsType())) {
-//            KubernetesGatewayImpl kubernetesGateway = new KubernetesGatewayImpl();
-//            kubernetesGateway.createContainerGateway(apiId, label);
-//
-//        } else if (ContainerBasedGatewayConstants.OPENSHIFT.equalsIgnoreCase(config.getContainerGatewayConfigs()
-// .getCmsType())) {
-//            OpenShiftGatewayImpl openShiftGateway = new OpenShiftGatewayImpl();
-//            openShiftGateway.createContainerGateway(apiId, label);
-//        }
-        // todo : Add other cmsTypes
+        APIManagerFactory apiManagerFactory = APIManagerFactory.getInstance();
+        ContainerBasedGatewayGenerator containerBasedGatewayGenerator =
+                apiManagerFactory.getContainerBasedGatewayGenerator();
+        containerBasedGatewayGenerator.createContainerGateway(label);
 
     }
 
     /**
-     * @see APIGateway#removeContainerBasedGateway(String, String)
+     * @see APIGateway#removeContainerBasedGateway(String)
      */
     @Override
-    public void removeContainerBasedGateway(String label, String apiId) throws GatewayException {
+    public void removeContainerBasedGateway(String label) throws ContainerBasedGatewayException {
 
-//        if (ContainerBasedGatewayConstants.K8.equalsIgnoreCase(config.getContainerGatewayConfigs().getCmsType())) {
-//            KubernetesGatewayImpl kubernetesGateway = new KubernetesGatewayImpl();
-//            kubernetesGateway.removeContainerBasedGateway(label, apiId, config.getContainerGatewayConfigs()
-//                    .getKubernetesGatewayConfigurations().getNamespace());
-//
-//        } else if (ContainerBasedGatewayConstants.OPENSHIFT.equalsIgnoreCase(config.getContainerGatewayConfigs()
-// .getCmsType())) {
-//            OpenShiftGatewayImpl openShiftGateway = new OpenShiftGatewayImpl();
-//            openShiftGateway.removeContainerBasedGateway(label, apiId, config.getContainerGatewayConfigs()
-//                    .getOpenshiftGatewayConfigurations().getNamespace());
-//        }
-        // todo : Add other cmsTypes
+        APIManagerFactory apiManagerFactory = APIManagerFactory.getInstance();
+        ContainerBasedGatewayGenerator containerBasedGatewayGenerator =
+                apiManagerFactory.getContainerBasedGatewayGenerator();
+        containerBasedGatewayGenerator.removeContainerBasedGateway(label);
     }
 
     /**
@@ -478,7 +472,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
      */
     @Override
     public void updateDedicatedGateway(API api, String labelName, boolean isDedicatedGatewayEnabled)
-            throws GatewayException {
+            throws ContainerBasedGatewayException {
 
         // If API is a published,prototyped or a deprecated
         if (api.getLifeCycleStatus().equalsIgnoreCase(APIStatus.PUBLISHED.getStatus()) ||
@@ -487,10 +481,10 @@ public class APIGatewayPublisherImpl implements APIGateway {
 
             if (isDedicatedGatewayEnabled) {
                 // label is created beforehand.
-                createContainerBasedGateway(api.getId(), labelName);
+                createContainerBasedGateway(labelName);
             } else {
                 //label is deleted beforehand.
-                removeContainerBasedGateway(labelName, api.getId());
+                removeContainerBasedGateway(labelName);
             }
         }
     }
@@ -530,6 +524,7 @@ public class APIGatewayPublisherImpl implements APIGateway {
 
     /**
      * Publish an event to threatprotection topic
+     *
      * @param gatewayDTO {@link GatewayEvent}
      * @throws GatewayException if failed to publish to the topic
      */

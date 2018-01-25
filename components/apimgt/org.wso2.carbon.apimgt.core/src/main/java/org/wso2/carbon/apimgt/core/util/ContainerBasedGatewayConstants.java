@@ -27,29 +27,29 @@ public final class ContainerBasedGatewayConstants {
     public static final String PER_API_GATEWAY_PREFIX = "perapigw-";
     public static final String CMS_SERVICE_SUFFIX = "-service";
     public static final String CMS_DEPLOYMENT_SUFFIX = "-deployemnt";
+    public static final String CMS_INGRESS_SUFFIX = "-ingress";
+    public static final String CMS_CONTAINER_SUFFIX = "-container";
     public static final String GATEWAY_SERVICE_TEMPLATE = "container_service_template.yaml";
     public static final String GATEWAY_DEPLOYMENT_TEMPLATE = "container_deployment_template.yaml";
+    public static final String GATEWAY_INGRESS_TEMPLATE = "container_ingress_template.yaml";
     public static final String NAMESPACE = "namespace";
     public static final String GATEWAY_LABEL = "gatewayLabel";
+    public static final String GATEWAY = "gateway";
     public static final String SERVICE_NAME = "serviceName";
     public static final String DEPLOYMENT_NAME = "deploymentName";
     public static final String CONTAINER_NAME = "containerName";
-    public static final String IMAGE = "image";
+    public static final String INGRESS_NAME = "ingressName";
     public static final String API_CORE_URL = "apiCoreURL";
     public static final String BROKER_HOST = "brokerHost";
     public static final String CMS_TYPE = "cmsType";
-    public static final String SERVICE_ACCOUNT_TOKEN_FILE = "saTokenFile";
-    public static final String K8 = "kubernetes";
-    public static final String OPENSHIFT = "openshift";
+    public static final String KUBERNETES = "Kubernetes";
+    public static final String OPENSHIFT = "Openshift";
     public static final String CERT_FILE_LOCATION = "certFile";
     public static final String IS_DEDICATED_GATEWAY_ENABLED = "HAS_OWN_GATEWAY";
-
-
-    public static final String PROPERTY_KUB_CONFIG_BASE64_ENCODED_DATA = "KubernetesClusterConfig.Base64EncodedData";
-    public static final String PROPERTY_KUB_TMP_CONFIG = "KubernetesClusterConfig.TempKubeConfigFile";
+    public static final String CONTAINER_GATEWAY_TEMPLATES = "container_gateway_templates";
+    public static final String GATEWAY_HOSTNAME = "gatewayHostname";
 
     public static final String KUBERNETES_IMPL_CLASS = "org.wso2.carbon.apimgt.core.impl.KubernetesGatewayImpl";
     public static final String MASTER_URL = "masterUrl";
-    public static final String SERVICE_ACCOUNT_SECRET = "serviceAccountSecret";
     public static final String SA_TOKEN_FILE = "saTokenFile";
 }

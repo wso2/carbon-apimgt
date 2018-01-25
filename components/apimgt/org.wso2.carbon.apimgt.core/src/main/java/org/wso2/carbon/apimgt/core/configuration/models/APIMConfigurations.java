@@ -64,9 +64,6 @@ public class APIMConfigurations {
     @Element(description = "Notification Configurations")
     private NotificationConfigurations notificationConfigurations = new NotificationConfigurations();
 
-    @Element(description = "Container Based Gateway Configurations")
-    private ContainerBasedGatewayConfiguration containerGatewayConfigs = new ContainerBasedGatewayConfiguration();
-
     @Element(description = "JWT Configurations")
     private JWTConfigurations jwtConfigurations = new JWTConfigurations();
 
@@ -284,14 +281,5 @@ public class APIMConfigurations {
 
     public void setEnvironmentConfigurations(EnvironmentConfigurations environmentConfigurations) {
         this.environmentConfigurations = environmentConfigurations;
-    }
-
-    public ContainerBasedGatewayConfiguration getContainerGatewayConfigs() {
-        return containerGatewayConfigs;
-
-    }
-
-    public void setContainerGatewayConfigs(ContainerBasedGatewayConfiguration containerGatewayConfigs) {
-        this.containerGatewayConfigs = containerGatewayConfigs;
     }
 }

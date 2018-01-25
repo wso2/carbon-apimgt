@@ -43,10 +43,8 @@ public class ContainerBasedGatewayConfiguration {
     public ContainerBasedGatewayConfiguration() {
         implParameters.put(ContainerBasedGatewayConstants.MASTER_URL, "");
         implParameters.put(ContainerBasedGatewayConstants.NAMESPACE, "default");
-        implParameters.put(ContainerBasedGatewayConstants.IMAGE, "default");
         implParameters.put(ContainerBasedGatewayConstants.API_CORE_URL, "default");
         implParameters.put(ContainerBasedGatewayConstants.BROKER_HOST, "default");
-        implParameters.put(ContainerBasedGatewayConstants.SERVICE_ACCOUNT_SECRET, "default");
         implParameters.put(ContainerBasedGatewayConstants.SA_TOKEN_FILE, "default");
         implParameters.put(ContainerBasedGatewayConstants.CERT_FILE_LOCATION,
                 "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt");
