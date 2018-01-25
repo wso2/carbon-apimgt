@@ -751,6 +751,9 @@ paths:
           description: |
             Not Found.
             API to copy does not exist.
+        401:
+          description: |
+            Unauthenticated request.
           schema:
             $ref: '#/definitions/Error'
 
