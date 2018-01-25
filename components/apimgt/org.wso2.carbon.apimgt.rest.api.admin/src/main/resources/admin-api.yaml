@@ -2101,6 +2101,8 @@ definitions:
             $ref: '#/definitions/ThrottleLimit'
           conditionalGroups:
             type: array
+            description: |
+              Group of conditions which allow adding different parameter conditions to the throttling limit.
             items:
               $ref: '#/definitions/ConditionalGroup'
 
