@@ -48,8 +48,8 @@ public class ThriftUtils {
 
             ServerConfiguration serverConfiguration = ServerConfiguration.getInstance();
             //read configuration
-            trustStorePath = serverConfiguration.getFirstProperty("Security.KeyStore.Location");
-            trustStorePassword = serverConfiguration.getFirstProperty("Security.KeyStore.Password");
+            trustStorePath = serverConfiguration.getFirstProperty("Security.TrustStore.Location");
+            trustStorePassword = serverConfiguration.getFirstProperty("Security.TrustStore.Password");
             String webContextRoot = serverConfiguration.getFirstProperty("WebContextRoot");
 
             APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
