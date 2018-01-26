@@ -61,6 +61,10 @@ startxref
             <h4 class="section-heading">Sample CURL</h4>
                 <div class="pre"><code class="bash">curl &quot;https://localhost:9443/api/am/store/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content&quot; &gt; sample.pdf</code></div>
 
+            <h4 class="section-heading">Sample CURL - for tenant</h4>
+            <div class="pre"><code class="bash">curl -k -H &quot;X-WSO2-Tenant:test.com&quot; &quot;https://localhost:9443/api/am/store/v0.11/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content&quot; &gt; sample.pdf</code></div>
+         
+
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
                 <colgroup>
@@ -364,6 +368,10 @@ Content-Type: application/json
 
             <h4 class="section-heading">Sample CURL</h4>
                 <div class="pre"><code class="bash">curl &quot;https://localhost:9443/api/am/store/v0.11/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c&quot;</code></div>
+
+            <h4 class="section-heading">Sample CURL - for tenant</h4>
+            <div class="pre"><code class="bash">curl -k -H &quot;X-WSO2-Tenant:test.com&quot; https://localhost:9443/api/am/store/v0.11/apis/c43a325c-260b-4302-81cb-768eafaa3aed/documents/850a4f34-db2c-4d23-9d85-3f95fbfb082c</code></div>
+         
 
             <h4 class="section-heading" id="scroll-to">Parameters</h4>
             <table class="table table-hover">
