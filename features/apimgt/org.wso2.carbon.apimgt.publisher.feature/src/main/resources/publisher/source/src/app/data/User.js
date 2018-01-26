@@ -40,7 +40,7 @@ export default class User {
         this.environment = environment;
         this._scopes = [];
         this._remember = remember;
-        this._environment = environment || Utils.getEnvironment().label;
+        this._environment = environment || Utils.getCurrentEnvironment().label;
         User._userMap.set(environment, this);
     }
 
@@ -63,13 +63,16 @@ export default class User {
     /**
      * User utility method to create an user from JSON object.
      * @param {JSON} userJson : Need to provide user information in JSON structure to create an user object
+     * @param {String} environmentName : Name of the environment to be assigned to the user
      * @returns {User} : An instance of User(this) class.
      */
-    static fromJson(userJson) {
+    static fromJson(userJson, environmentName) {
         if (!userJson.name) {
             throw "Need to provide user `name` key in the JSON object, to create an user";
         }
-        const _user = new User(Utils.getEnvironment().label, userJson.name);
+
+        environmentName = environmentName || Utils.getCurrentEnvironment().label;
+        const _user = new User(environmentName, userJson.name);
         _user.scopes = userJson.scopes;
         _user.rememberMe = userJson.remember;
         return _user;

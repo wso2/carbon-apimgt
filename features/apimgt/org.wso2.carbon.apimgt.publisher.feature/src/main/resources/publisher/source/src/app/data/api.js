@@ -15,7 +15,6 @@
  */
 
 "use strict";
-import AuthManager from './AuthManager'
 import APIClientFactory from "./APIClientFactory";
 import Utils from "./Utils";
 
@@ -25,10 +24,11 @@ import Utils from "./Utils";
 class API {
     /**
      * @constructor
-     * @param {string} access_key - Access key for invoking the backend REST API call.
+     * @param {Object} environment - Environment object - Default current environment.
      */
-    constructor() {
-        this.client = new APIClientFactory().getAPIClient(Utils.getEnvironment().label).client;
+    constructor(environment) {
+        this.environment = environment || Utils.getCurrentEnvironment();
+        this.client = new APIClientFactory().getAPIClient(this.environment).client;
     }
 
     /**
@@ -146,13 +146,14 @@ class API {
     /**
      * Get list of all the available APIs, If the call back is given (TODO: need to ask for fallback sequence as well tmkb)
      * It will be invoked upon receiving the response from REST service.Else will return a promise.
-     * @param callback {function} A callback function to invoke after receiving successful response.
+     * @param {Object} params - Parameters to filter APIs.
+     * @param {function} callback - A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getAll(callback = null) {
+    getAll(params, callback = null) {
         var promise_get_all = this.client.then(
             (client) => {
-                return client.apis["API (Collection)"].get_apis({}, this._requestMetaData());
+                return client.apis["API (Collection)"].get_apis(params, this._requestMetaData());
             }
         );
         if (callback) {
@@ -243,13 +244,14 @@ class API {
             return promise_get;
         }
     }
+
     /**
      * Get the detail of scope of an API
      * @param id {String} UUID of the API in which the scopes is needed
      * @param callback {function} Function which needs to be called upon success of the API deletion
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getScopeDetail(api_id,name,callback = null) {
+    getScopeDetail(api_id, name, callback = null) {
         var promise_get_Scope_detail = this.client.then(
             (client) => {
                 return client.apis["Scope (Individual)"].get_apis__apiId__scopes__name_({
@@ -281,6 +283,7 @@ class API {
         );
         return promised_updateScope;
     }
+
     addScope(api_id, body) {
         var promised_addScope = this.client.then(
             (client) => {
@@ -295,6 +298,7 @@ class API {
         );
         return promised_addScope;
     }
+
     deleteScope(api_id, scope_name) {
         var promise_deleteScope = this.client.then(
             (client) => {
@@ -307,6 +311,7 @@ class API {
         );
         return promise_deleteScope;
     }
+
     /**
      * Update an api via PUT HTTP method, Need to give the updated API object as the argument.
      * @param api {Object} Updated API object(JSON) which needs to be updated
@@ -833,8 +838,10 @@ class API {
     addThreatProtectionPolicyToApi(apiId, policyId) {
         let promisedPolicies = this.client.then(
             (client) => {
-                return client.apis["API (Individual)"].
-                    post_apis__apiId__threat_protection_policies({apiId: apiId, policyId: policyId});
+                return client.apis["API (Individual)"].post_apis__apiId__threat_protection_policies({
+                    apiId: apiId,
+                    policyId: policyId
+                });
             }
         );
         return promisedPolicies;
@@ -850,8 +857,10 @@ class API {
         let promisedDelete = this.client.then(
             (client) => {
                 console.log(client.apis);
-                return client.apis["API (Individual)"].
-                delete_apis__apiId__threat_protection_policies({apiId: apiId, policyId: policyId});
+                return client.apis["API (Individual)"].delete_apis__apiId__threat_protection_policies({
+                    apiId: apiId,
+                    policyId: policyId
+                });
             }
         );
         return promisedDelete;

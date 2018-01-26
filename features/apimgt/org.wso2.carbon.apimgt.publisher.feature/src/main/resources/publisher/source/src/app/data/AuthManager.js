@@ -17,12 +17,8 @@
  */
 "use strict";
 
-import axios from 'axios'
-import qs from 'qs'
 import Utils from './Utils'
 import User from './User'
-import APIClient from './APIClient'
-import APIClientFactory from "./APIClientFactory";
 
 class AuthManager {
     constructor() {
@@ -94,14 +90,15 @@ class AuthManager {
      * @param {string} environmentName: label of the environment, the user to be retrieved from
      * @returns {User | null} Is any user has logged in or not
      */
-    static getUser() {
-        const userData = localStorage.getItem(`${User.CONST.LOCALSTORAGE_USER}_${Utils.getEnvironment().label}`);
-        const environmentName = "_" + Utils.getEnvironment().label;
-        const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1 + environmentName);
+    static getUser(environmentName) {
+        environmentName = environmentName || Utils.getCurrentEnvironment().label;
+        const userData = localStorage.getItem(`${User.CONST.LOCALSTORAGE_USER}_${environmentName}`);
+        const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1, environmentName);
         if (!(userData && partialToken)) {
             return null;
         }
-        return User.fromJson(JSON.parse(userData));
+
+        return User.fromJson(JSON.parse(userData), environmentName);
     }
 
     /**
@@ -111,7 +108,7 @@ class AuthManager {
      * @param {string} environmentName: label of the environment to be set the user
      */
     static setUser(user, environmentName) {
-        environmentName = environmentName || Utils.getEnvironment().label;
+        environmentName = environmentName || Utils.getCurrentEnvironment().label;
         if (!user instanceof User) {
             throw new Error("Invalid user object");
         }
@@ -151,7 +148,7 @@ class AuthManager {
             remember_me: true // By default always remember user session
         };
         //Set the environment that user tried to authenticate
-        let previous_environment = Utils.getEnvironment();
+        let previous_environment = Utils.getCurrentEnvironment();
         Utils.setEnvironment(environment);
 
         let promised_response = AuthManager.postAuthenticationRequest(headers, data, environment);
@@ -194,7 +191,7 @@ class AuthManager {
         return promisedLogout.then(response => {
             Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, Utils.CONST.CONTEXT_PATH);
             localStorage.removeItem(User.CONST.LOCALSTORAGE_USER);
-            new APIClientFactory().destroyAPIClient(Utils.getEnvironment().label); // Single client should be re initialize after log out
+            new APIClientFactory().destroyAPIClient(Utils.getCurrentEnvironment().label); // Single client should be re initialize after log out
         });
     }
 
@@ -245,7 +242,7 @@ class AuthManager {
             scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage '
             + 'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover'
         };
-        const currentEnvName = Utils.getEnvironment().label;
+        const currentEnvName = Utils.getCurrentEnvironment().label;
 
         environments.forEach((environment, environmentID) => {
             if (configs[environmentID].is_auto_login_enabled && environment.label !== currentEnvName) {

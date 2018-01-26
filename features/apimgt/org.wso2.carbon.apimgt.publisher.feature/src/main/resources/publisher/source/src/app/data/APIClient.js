@@ -27,16 +27,16 @@ import Utils from "./Utils";
  */
 class APIClient {
     /**
-     * @param {String} host : Host of apis. Host for the swagger-client's spec property.
+     * @param {Object} environment : Environment to get host for the swagger-client's spec property.
      * @param {{}} args : Accept as an optional argument for APIClient constructor.Merge the given args with default args.
      * @returns {APIClient|*|null}
      */
-    constructor(host, args = {}) {
-        this.host = host || location.host;
+    constructor(environment, args = {}) {
+        this.environment = environment || Utils.getCurrentEnvironment();
 
         const authorizations = {
             OAuth2Security: {
-                token: { access_token: AuthManager.getUser().getPartialToken() }
+                token: {access_token: AuthManager.getUser(environment.label).getPartialToken()}
             }
         };
 
@@ -111,7 +111,7 @@ class APIClient {
      * @private
      */
     _fixSpec(spec) {
-        spec.host = this.host;
+        spec.host = this.environment.host;
         return spec;
     }
 

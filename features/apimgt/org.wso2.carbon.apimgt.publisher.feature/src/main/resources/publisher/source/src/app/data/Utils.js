@@ -29,7 +29,9 @@ class Utils {
      * @param {String} environmentName : label of the environment of the cookie
      * @returns {String|null} : If found a cookie with given name , return its value,Else null value is returned
      */
-    static getCookie(name) {
+    static getCookie(cookieName, environmentName) {
+        environmentName = environmentName || Utils.getCurrentEnvironment().label;
+
         let pairs = document.cookie.split(";");
         let cookie = null;
         for (let pair of pairs) {
@@ -51,7 +53,7 @@ class Utils {
      * @param {String} environmentName: label of the environment of the cookie
      */
     static delete_cookie(name, path, environmentName) {
-        environmentName = environmentName || Utils.getEnvironment().label;
+        environmentName = environmentName || Utils.getCurrentEnvironment().label;
         document.cookie = `${name}_${environmentName}=; path=${path}; expires=Thu, 01 Jan 1970 00:00:01 GMT`;
     }
 
@@ -65,7 +67,7 @@ class Utils {
      * @param {boolean} secured - secured parameter is set
      */
     static setCookie(name, value, validityPeriod, path = "/", environmentName, secured = true) {
-        environmentName = environmentName || Utils.getEnvironment().label;
+        environmentName = environmentName || Utils.getCurrentEnvironment().label;
         let expiresDirective = "";
         const securedDirective = secured ? "; Secure" : "";
         if (validityPeriod) {
@@ -90,7 +92,7 @@ class Utils {
      * Get the current environment from local-storage
      * @returns {Object} environment: {label, host, loginTokenPath}
      */
-    static getEnvironment() {
+    static getCurrentEnvironment() {
         if (Utils._environment) {
             return Utils._environment;
         }
@@ -109,7 +111,7 @@ class Utils {
      * @param {string} name: name of the environment [default]: current environment name
      * @returns {number}
      */
-    static getEnvironmentID(environments, name = Utils.getEnvironment().label) {
+    static getEnvironmentID(environments, name = Utils.getCurrentEnvironment().label) {
         if (!name) {
             return 0;
         }
@@ -143,20 +145,20 @@ class Utils {
         return Axios.get(Utils.getDCRappInfoRequestURL(environment));
     }
 
-    static getDCRappInfoRequestURL(environment = Utils.getEnvironment()) {
+    static getDCRappInfoRequestURL(environment = Utils.getCurrentEnvironment()) {
         return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.DCR_APP_INFO}${Utils.CONST.CONTEXT_PATH}`;
     }
 
     static getAppLogoutURL() {
-        return Utils.CONST.PROTOCOL + Utils.getEnvironment().host + Utils.CONST.LOGOUT + Utils.CONST.CONTEXT_PATH;
+        return Utils.CONST.PROTOCOL + Utils.getCurrentEnvironment().host + Utils.CONST.LOGOUT + Utils.CONST.CONTEXT_PATH;
     }
 
-    static getLoginTokenPath(environment = Utils.getEnvironment()) {
+    static getLoginTokenPath(environment = Utils.getCurrentEnvironment()) {
         return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.LOGIN_TOKEN_PATH}${Utils.CONST.CONTEXT_PATH}`;
     }
 
     static getSwaggerURL() {
-        return "https://" + Utils.getEnvironment().host + Utils.CONST.SWAGGER_YAML;
+        return "https://" + Utils.getCurrentEnvironment().host + Utils.CONST.SWAGGER_YAML;
     }
 
     /**
