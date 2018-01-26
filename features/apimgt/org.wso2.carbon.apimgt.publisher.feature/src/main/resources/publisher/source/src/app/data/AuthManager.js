@@ -17,8 +17,12 @@
  */
 "use strict";
 
+import axios from 'axios'
+import qs from 'qs'
 import Utils from './Utils'
 import User from './User'
+import APIClient from './APIClient'
+import APIClientFactory from "./APIClientFactory";
 
 class AuthManager {
     constructor() {
@@ -29,8 +33,9 @@ class AuthManager {
     /**
      * Refresh the access token and set new access token to the intercepted request
      * @param {Request} request
+     * @param {String} environmentName
      */
-    static refreshTokenOnExpire(request) {
+    static refreshTokenOnExpire(request, environmentName) {
         const refreshPeriod = 60;
         const user = AuthManager.getUser();
         let timeToExpire = Utils.timeDifference(user.getExpiryTime());
@@ -39,7 +44,7 @@ class AuthManager {
         }
         let loginPromise = AuthManager.refresh();
         loginPromise.then(response => {
-            const user = AuthManager.loginUserMapper(response);
+            const user = AuthManager.loginUserMapper(response, environmentName);
             AuthManager.setUser(user);
         });
         loginPromise.catch(
@@ -113,9 +118,18 @@ class AuthManager {
             throw new Error("Invalid user object");
         }
         if (user) {
-            localStorage.setItem(`${User.CONST.LOCALSTORAGE_USER}_${Utils.getEnvironment().label}`,
+            localStorage.setItem(`${User.CONST.LOCALSTORAGE_USER}_${environmentName}`,
                 JSON.stringify(user.toJson()));
         }
+    }
+
+    /**
+     *
+     * @param {String} environmentName - Name of the environment the user to be removed
+     */
+    static dismissUser(environmentName) {
+        localStorage.removeItem(`${User.CONST.LOCALSTORAGE_USER}_${environmentName}`);
+        User.destroyInMemoryUser(environmentName);
     }
 
     static hasScopes(resourcePath, resourceMethod) {
@@ -151,7 +165,7 @@ class AuthManager {
         let previous_environment = Utils.getCurrentEnvironment();
         Utils.setEnvironment(environment);
 
-        let promised_response = AuthManager.postAuthenticationRequest(headers, data, environment);
+        let promised_response = this.postAuthenticationRequest(headers, data, environment);
         promised_response.catch(error => {
             Utils.setEnvironment(previous_environment);
         });
@@ -162,13 +176,14 @@ class AuthManager {
     /**
      * Return an user object given the login request response object
      * @param {Object} response Response object received from either Axios or Fetch libraries
+     * @param {String} environmentName Name of the environment
      * @returns {User} Instance of an user who is currently logged in (for the selected environment)
      */
-    static loginUserMapper(response) {
+    static loginUserMapper(response, environmentName) {
         let data = response.data;
         const validityPeriod = data.validityPeriod; // In seconds
         const WSO2_AM_TOKEN_1 = data.partialToken;
-        const user = new User(Utils.getEnvironment().label, data.authUser);
+        const user = new User(environmentName, data.authUser);
         user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Utils.CONST.CONTEXT_PATH);
         user.setExpiryTime(validityPeriod);
         user.scopes = data.scopes.split(" ");
@@ -177,9 +192,11 @@ class AuthManager {
 
     /**
      * Revoke the issued OAuth access token for currently logged in user and clear both cookie and localstorage data.
+     * @param {String} environmentName : Name of the environment to be logged out. Default current environment.
      */
-    logout() {
-        let authHeader = "Bearer " + AuthManager.getUser().getPartialToken();
+    logout(environmentName) {
+        environmentName = environmentName || Utils.getCurrentEnvironment().label;
+        let authHeader = "Bearer " + AuthManager.getUser(environmentName).getPartialToken();
         //TODO Will have to change the logout end point url to contain the app context(i.e. publisher/store, etc.)
         let url = Utils.getAppLogoutURL();
         let headers = {
@@ -188,15 +205,39 @@ class AuthManager {
             'Authorization': authHeader
         };
         const promisedLogout = axios.post(url, null, {headers: headers});
-        return promisedLogout.then(response => {
-            Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, Utils.CONST.CONTEXT_PATH);
-            localStorage.removeItem(User.CONST.LOCALSTORAGE_USER);
-            new APIClientFactory().destroyAPIClient(Utils.getCurrentEnvironment().label); // Single client should be re initialize after log out
+        promisedLogout.then(response => {
+            Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, Utils.CONST.CONTEXT_PATH, environmentName);
+            AuthManager.dismissUser(environmentName);
+            new APIClientFactory().destroyAPIClient(environmentName); // Single client should be re initialize after log out
+            console.log(`Successfully logout from enviornment: ${environmentName}`);
+        }).catch(error => {
+            console.error(`Failed to logout from enviornment: ${environmentName}`, error);
         });
+
+        return promisedLogout;
     }
 
-    setupAutoRefresh() {
-        const user = AuthManager.getUser();
+    /**
+     * Logout current user from all specified environments
+     * @param {array} environments - Array of environments
+     * @returns {Promise} Promised Logout object of current environment
+     */
+    logoutFromEnvironments(environments) {
+        const currentEnvironmentName = Utils.getCurrentEnvironment().label;
+        const currentUser = AuthManager.getUser(currentEnvironmentName).name;
+
+        environments.forEach(environment => {
+            let user = AuthManager.getUser(environment.label);
+            if (user && currentUser === user.name && currentEnvironmentName !== environment.label) {
+                this.logout(environment.label);
+            }
+        });
+
+        return this.logout(currentEnvironmentName);
+    }
+
+    setupAutoRefresh(environmentName) {
+        const user = AuthManager.getUser(environmentName);
         const bufferTime = 1000 * 10; // Give 10 sec buffer time before token expire, considering the network delays and ect.
         let triggerIn = Utils.timeDifference(user.getExpiryTime() - bufferTime);
         if (user) {
@@ -226,12 +267,12 @@ class AuthManager {
     }
 
     /**
-     *
-     * @param {string} idToken
-     * @param {array} environments
-     * @param {array} configs
+     * Login to environments specified using the JWT token
+     * @param {string} idToken : JWT token
+     * @param {array} environments : Array of environments
+     * @param {array} configs : Array of configurations of each environments to validate the feature is enabled
      */
-    static handleAutoLoginEnvironments(idToken, environments, configs) {
+    handleAutoLoginEnvironments(idToken, environments, configs) {
         const headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -245,8 +286,12 @@ class AuthManager {
         const currentEnvName = Utils.getCurrentEnvironment().label;
 
         environments.forEach((environment, environmentID) => {
-            if (configs[environmentID].is_auto_login_enabled && environment.label !== currentEnvName) {
-                AuthManager.postAuthenticationRequest(headers, data, environment);
+            const isAutoLoginEnabled = configs[environmentID].is_auto_login_enabled;
+            const isAlreadyLoggedIn = AuthManager.getUser(environment.label); //Already logged in by any user
+            const isCurrentEnvironment = environment.label === currentEnvName;
+
+            if (isAutoLoginEnabled && !isAlreadyLoggedIn && !isCurrentEnvironment) {
+                this.postAuthenticationRequest(headers, data, environment);
             }
         });
 
@@ -259,7 +304,7 @@ class AuthManager {
      * @param {Object} environment : environment object
      * @returns {AxiosPromise} : Promise object with the login request made
      */
-    static postAuthenticationRequest(headers, data, environment) {
+    postAuthenticationRequest(headers, data, environment) {
         let promised_response = axios(Utils.getLoginTokenPath(environment), {
             method: "POST",
             data: qs.stringify(data),
@@ -268,9 +313,10 @@ class AuthManager {
         });
 
         promised_response.then(response => {
-            const user = AuthManager.loginUserMapper(response);
+            const user = AuthManager.loginUserMapper(response, environment.label);
             AuthManager.setUser(user, environment.label);
-            this.setupAutoRefresh();
+            this.setupAutoRefresh(environment.label);
+            console.log(`Authentication Success in '${environment.label}' environment.`);
         }).catch(error => {
             console.error(`Authentication Error in '${environment.label}' environment :\n`, error);
         });

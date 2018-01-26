@@ -126,7 +126,7 @@ class APIClient {
 
     _getRequestInterceptor() {
         return (request) => {
-            AuthManager.refreshTokenOnExpire(request);
+            AuthManager.refreshTokenOnExpire(request, this.environment);
             if (APIClient.getETag(request.url) && (request.method === "PUT" || request.method === "DELETE" || request.method === "POST")) {
                 request.headers["If-Match"] = APIClient.getETag(request.url);
             }

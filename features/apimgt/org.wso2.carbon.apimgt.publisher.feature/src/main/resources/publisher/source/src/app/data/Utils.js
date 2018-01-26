@@ -25,12 +25,13 @@ class Utils {
 
     /**
      * Get JavaScript accessible cookies saved in browser, by giving the cooke name.
-     * @param {String} cookieName : Name of the cookie which need to be retrived
+     * @param {String} name : Name of the cookie which need to be retrived
      * @param {String} environmentName : label of the environment of the cookie
      * @returns {String|null} : If found a cookie with given name , return its value,Else null value is returned
      */
-    static getCookie(cookieName, environmentName) {
+    static getCookie(name, environmentName) {
         environmentName = environmentName || Utils.getCurrentEnvironment().label;
+        name = `${name}_${environmentName}`;
 
         let pairs = document.cookie.split(";");
         let cookie = null;
@@ -48,9 +49,9 @@ class Utils {
 
     /**
      * Delete a browser cookie given its name
-     * @param {String} name : Name of the cookie which need to be deleted
-     * @param {String} path : Path of the cookie which need to be deleted
-     * @param {String} environmentName: label of the environment of the cookie
+     * @param {String} name - Name of the cookie which need to be deleted
+     * @param {String} path - Path of the cookie which need to be deleted
+     * @param {String} environmentName - label of the environment of the cookie
      */
     static delete_cookie(name, path, environmentName) {
         environmentName = environmentName || Utils.getCurrentEnvironment().label;
@@ -64,6 +65,7 @@ class Utils {
      * @param {String} value - Value of the cookie, expect it to be URLEncoded
      * @param {number} validityPeriod -  (Optional) Validity period of the cookie in seconds
      * @param {String} path - Path which needs to set the given cookie
+     * @param {String} environmentName - Name of the environment to be appended to cookie name
      * @param {boolean} secured - secured parameter is set
      */
     static setCookie(name, value, validityPeriod, path = "/", environmentName, secured = true) {
@@ -76,7 +78,7 @@ class Utils {
             expiresDirective = "; expires=" + date.toUTCString();
         }
 
-        document.cookie = `${name}=${value}; path=${path}${expiresDirective}${securedDirective}`;
+        document.cookie = `${name}_${environmentName}=${value}; path=${path}${expiresDirective}${securedDirective}`;
     }
 
     /**

@@ -26,8 +26,8 @@ import Utils from './Utils'
 export default class User {
     /**
      * Create a user for the given environment
-     * @param {string} environment : name of the environment
-     * @param {string} name : name of the cookie
+     * @param {string} environment - name of the environment
+     * @param {string} name - name of the cookie
      * @param {boolean} remember
      * @returns {User|null} user object
      */
@@ -79,6 +79,14 @@ export default class User {
     }
 
     /**
+     * Remove the user from static in-memory user map
+     * @param {String} environmentName - Name of the environment the user to be removed
+     */
+    static destroyInMemoryUser(environmentName){
+        User._userMap.delete(environmentName);
+    }
+
+    /**
      * Get the JS accessible access token fragment from cookie storage.
      * @returns {String|null}
      */
@@ -96,9 +104,9 @@ export default class User {
 
     /**
      * Store the JavaScript accessible access token segment in cookie storage
-     * @param {String} newToken : Part of the access token which needs when accessing REST API
-     * @param {Number} validityPeriod : Validity period of the cookie in seconds
-     * @param path Path which need to be set to cookie
+     * @param {String} newToken - Part of the access token which needs when accessing REST API
+     * @param {Number} validityPeriod - Validity period of the cookie in seconds
+     * @param {String} path - Path which need to be set to cookie
      */
     setPartialToken(newToken, validityPeriod, path) {
         Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, path, this._environment);
