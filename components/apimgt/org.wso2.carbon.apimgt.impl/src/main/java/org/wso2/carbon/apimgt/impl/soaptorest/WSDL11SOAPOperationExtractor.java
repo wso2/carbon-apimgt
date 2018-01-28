@@ -268,11 +268,14 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
         if (typeList != null) {
             Map<String, WSDLComplexType> typeMap = this.getComplexTypeMap(elemList);
 
-            for (Node anElemList : elemList) {
-                Node parentElement = anElemList.getParentNode();
-                if (WSDL_ELEMENT_NODE.equals(parentElement.getLocalName()) && parentElement.getAttributes()
-                        .getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue().equals(partElement)) {
-                    NodeList childNodes = anElemList.getChildNodes().item(1).getChildNodes();
+            for (Node element : elemList) {
+                Node parentElement = element.getParentNode();
+                if(!WSDL_ELEMENT_NODE.equals(parentElement.getLocalName())) {
+                   parentElement = element;
+                }
+                if (parentElement.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE)
+                        .getNodeValue().equals(partElement)) {
+                    NodeList childNodes = element.getChildNodes().item(1).getChildNodes();
                     for (int j = 0; j < childNodes.getLength(); j++) {
                         if (childNodes.item(j).getLocalName() != null && WSDL_ELEMENT_NODE
                                 .equals(childNodes.item(j).getLocalName())) {
