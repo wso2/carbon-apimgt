@@ -3741,8 +3741,8 @@ public class APIProviderHostObject extends ScriptableObject {
         if (args == null || args.length == 0) {
             handleException("Invalid number of parameters.");
         }
-        String providerName = (String) args[0];
-        providerName = APIUtil.replaceEmailDomain(providerName);
+        String fullyQualifiedProviderName = (String) args[0];
+        String providerName = APIUtil.replaceEmailDomain(fullyQualifiedProviderName);
         String searchValue = (String) args[1];
         String searchTerm;
         String searchType;
@@ -3759,7 +3759,7 @@ public class APIProviderHostObject extends ScriptableObject {
             searchTerm = searchValue;
             searchType = "default";
         }
-        String tenantDomain = MultitenantUtils.getTenantDomain(providerName);
+        String tenantDomain = MultitenantUtils.getTenantDomain(fullyQualifiedProviderName);
         boolean isTenantFlowStarted = false;
 
         try {
@@ -3894,8 +3894,6 @@ public class APIProviderHostObject extends ScriptableObject {
         String tenantDomain = args[0].toString();
         if (tenantDomain != null && !org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
             try {
-                PrivilegedCarbonContext.startTenantFlow();
-                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().
                         getTenantManager().getTenantId(tenantDomain);
                 APIUtil.loadTenantRegistry(tenantId);
