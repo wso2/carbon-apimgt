@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.impl.definitions;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -28,9 +29,10 @@ import java.util.Set;
 
 public class APIDefinitionFromOpenAPISpecTest {
     @Test
-    public void getURITemplates() throws Exception {
+    public void testGetURITemplatesOfOpenAPI20Spec() throws Exception {
+
         APIDefinitionFromOpenAPISpec apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
-        String swagger = "{\n" +
+        String openAPISpec20 = "{\n" +
                 "  \"paths\": {\n" +
                 "    \"/*\": {\n" +
                 "      \"get\": {\n" +
@@ -97,18 +99,149 @@ public class APIDefinitionFromOpenAPISpecTest {
                 "    \"version\": \"1.0.0\"\n" +
                 "  }\n" +
                 "}";
+
         Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
-        uriTemplates.add(getUriTemplate("POST","Application_User","/*"));
-        uriTemplates.add(getUriTemplate("GET","Application","/*"));
-        uriTemplates.add(getUriTemplate("PUT","None","/*"));
-        uriTemplates.add(getUriTemplate("DELETE","Any","/*"));
-        uriTemplates.add(getUriTemplate("GET","Any","/abc"));
-        API api = new API(new APIIdentifier("admin","PhoneVerification","1.0.0"));
-        Set<URITemplate> uriTemplateSet = apiDefinitionFromOpenAPISpec.getURITemplates(api,swagger);
+        uriTemplates.add(getUriTemplate("POST", "Application_User", "/*"));
+        uriTemplates.add(getUriTemplate("GET", "Application", "/*"));
+        uriTemplates.add(getUriTemplate("PUT", "None", "/*"));
+        uriTemplates.add(getUriTemplate("DELETE", "Any", "/*"));
+        uriTemplates.add(getUriTemplate("GET", "Any", "/abc"));
+        API api = new API(new APIIdentifier("admin", "PhoneVerification", "1.0.0"));
+        Set<URITemplate> uriTemplateSet = apiDefinitionFromOpenAPISpec.getURITemplates(api, openAPISpec20);
         Assert.assertEquals(uriTemplateSet, uriTemplates);
     }
 
-    protected URITemplate getUriTemplate(String httpVerb,String authType,String uriTemplateString) {
+    @Test
+    public void testGetURITemplatesOfOpenAPI300Spec() throws APIManagementException {
+        APIDefinitionFromOpenAPISpec apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+
+        String openAPISpec300 =
+               "{\n" +
+               "   \"openapi\":\"3.0.0\",\n" +
+               "   \"paths\":{\n" +
+               "      \"/*\":{\n" +
+               "         \"get\":{\n" +
+               "            \"responses\":{\n" +
+               "               \"200\":{\n" +
+               "                  \"description\":\"\"\n" +
+               "               }\n" +
+               "            },\n" +
+               "            \"x-auth-type\":\"Application\",\n" +
+               "            \"x-throttling-tier\":\"Unlimited\"\n" +
+               "         },\n" +
+               "         \"post\":{\n" +
+               "            \"requestBody\":{\n" +
+               "               \"content\":{\n" +
+               "                  \"application/json\":{\n" +
+               "                     \"schema\":{\n" +
+               "                        \"type\":\"object\",\n" +
+               "                        \"properties\":{\n" +
+               "                           \"payload\":{\n" +
+               "                              \"type\":\"string\"\n" +
+               "                           }\n" +
+               "                        }\n" +
+               "                     }\n" +
+               "                  }\n" +
+               "               },\n" +
+               "               \"required\":true,\n" +
+               "               \"description\":\"Request Body\"\n" +
+               "            },\n" +
+               "            \"responses\":{\n" +
+               "               \"200\":{\n" +
+               "                  \"description\":\"\"\n" +
+               "               }\n" +
+               "            },\n" +
+               "            \"x-auth-type\":\"Application User\",\n" +
+               "            \"x-throttling-tier\":\"Unlimited\"\n" +
+               "         },\n" +
+               "         \"put\":{\n" +
+               "            \"requestBody\":{\n" +
+               "               \"content\":{\n" +
+               "                  \"application/json\":{\n" +
+               "                     \"schema\":{\n" +
+               "                        \"type\":\"object\",\n" +
+               "                        \"properties\":{\n" +
+               "                           \"payload\":{\n" +
+               "                              \"type\":\"string\"\n" +
+               "                           }\n" +
+               "                        }\n" +
+               "                     }\n" +
+               "                  }\n" +
+               "               },\n" +
+               "               \"required\":true,\n" +
+               "               \"description\":\"Request Body\"\n" +
+               "            },\n" +
+               "            \"responses\":{\n" +
+               "               \"200\":{\n" +
+               "                  \"description\":\"\"\n" +
+               "               }\n" +
+               "            },\n" +
+               "            \"x-auth-type\":\"None\",\n" +
+               "            \"x-throttling-tier\":\"Unlimited\"\n" +
+               "         },\n" +
+               "         \"delete\":{\n" +
+               "            \"responses\":{\n" +
+               "               \"200\":{\n" +
+               "                  \"description\":\"\"\n" +
+               "               }\n" +
+               "            },\n" +
+               "            \"x-throttling-tier\":\"Unlimited\"\n" +
+               "         }\n" +
+               "      },\n" +
+               "      \"/abc\":{\n" +
+               "         \"get\":{\n" +
+               "            \"responses\":{\n" +
+               "               \"200\":{\n" +
+               "                  \"description\":\"\"\n" +
+               "               }\n" +
+               "            },\n" +
+               "            \"x-throttling-tier\":\"Unlimited\"\n" +
+               "         }\n" +
+               "      }\n" +
+               "   },\n" +
+               "   \"info\":{\n" +
+               "      \"title\":\"PhoneVerification\",\n" +
+               "      \"version\":\"1.0.0\"\n" +
+               "   },\n" +
+               "   \"servers\":[\n" +
+               "      {\n" +
+               "         \"url\":\"https://172.19.0.1:8243/phoneVerification/1.0.0\"\n" +
+               "      },\n" +
+               "      {\n" +
+               "         \"url\":\"http://172.19.0.1:8243/phoneVerification/1.0.0\"\n" +
+               "      }\n" +
+               "   ],\n" +
+               "   \"components\":{\n" +
+               "      \"securitySchemes\":{\n" +
+               "         \"default\":{\n" +
+               "            \"type\":\"oauth2\",\n" +
+               "            \"flows\":{\n" +
+               "               \"implicit\":{\n" +
+               "                  \"authorizationUrl\":\"https://172.19.0.1:8243/authorize\",\n" +
+               "                  \"scopes\":{\n" +
+               "\n" +
+               "                  }\n" +
+               "               }\n" +
+               "            }\n" +
+               "         }\n" +
+               "      }\n" +
+               "   }\n" +
+               "}";
+
+
+        Set<URITemplate> uriTemplates = new LinkedHashSet<URITemplate>();
+        uriTemplates.add(getUriTemplate("POST", "Application_User", "/*"));
+        uriTemplates.add(getUriTemplate("GET", "Application", "/*"));
+        uriTemplates.add(getUriTemplate("PUT", "None", "/*"));
+        uriTemplates.add(getUriTemplate("DELETE", "Any", "/*"));
+        uriTemplates.add(getUriTemplate("GET", "Any", "/abc"));
+        API api = new API(new APIIdentifier("admin", "PhoneVerification", "1.0.0"));
+        Set<URITemplate> uriTemplateSet = apiDefinitionFromOpenAPISpec.getURITemplates(api, openAPISpec300);
+        Assert.assertEquals(uriTemplateSet, uriTemplates);
+
+    }
+
+    protected URITemplate getUriTemplate(String httpVerb, String authType, String uriTemplateString) {
         URITemplate uriTemplate = new URITemplate();
         uriTemplate.setAuthTypes(authType);
         uriTemplate.setAuthType(authType);
