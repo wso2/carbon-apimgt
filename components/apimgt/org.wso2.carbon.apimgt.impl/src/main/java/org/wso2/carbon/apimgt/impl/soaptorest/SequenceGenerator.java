@@ -145,6 +145,10 @@ public class SequenceGenerator {
                             String inSequence = generateApiInSequence(mappingList, soapOperations, resourcePath,
                                     method);
                             String outSequence = generateApiOutSequence();
+                            if (log.isDebugEnabled()) {
+                                log.debug("Generated api in sequence for " + resource + " is: " + inSequence);
+                                log.debug("Generated api out sequence for " + resource + " is: " + outSequence);
+                            }
                             String resourceInPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                                     provider + RegistryConstants.PATH_SEPARATOR + name
                                     + RegistryConstants.PATH_SEPARATOR + version + RegistryConstants.PATH_SEPARATOR
@@ -204,6 +208,10 @@ public class SequenceGenerator {
                 opName = operationParam.getSoapBindingOpName();
                 soapAction = operationParam.getSoapAction();
                 namespace = operationParam.getTargetNamespace();
+                if (log.isDebugEnabled()) {
+                    log.debug("Soap operation name: " + opName + ", soap action: " + soapAction + ", namespace: "
+                            + namespace);
+                }
                 break;
             }
         }
@@ -256,6 +264,9 @@ public class SequenceGenerator {
                 for (Object obj : jsonObject.keySet()) {
                     if (jsonObject.get(obj) instanceof JSONArray) {
                         JSONArray paramArr = (JSONArray) jsonObject.get(obj);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Swagger parameter definition: " + paramArr.toJSONString());
+                        }
                         for (Object paramObj : paramArr) {
                             JSONObject param = (JSONObject) paramObj;
                             String paramName = (String) param.keySet().iterator().next();
@@ -381,6 +392,10 @@ public class SequenceGenerator {
             stringWriter = new StringWriter();
             transformer.transform(new DOMSource(argElement), new StreamResult(stringWriter));
             argument = stringWriter.toString();
+            if (log.isDebugEnabled()) {
+                log.debug("Argument element for request parameter: " + jsonPathElement + " and parameter type: " + type
+                        + " is: " + argument);
+            }
         } catch (ParserConfigurationException e) {
             handleException("Error occurred when building in arg elements ", e);
         } catch (TransformerConfigurationException e) {

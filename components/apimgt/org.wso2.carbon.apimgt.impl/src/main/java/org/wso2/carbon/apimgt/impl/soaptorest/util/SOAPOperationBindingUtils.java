@@ -19,6 +19,8 @@ package org.wso2.carbon.apimgt.impl.soaptorest.util;
 
 import com.google.gson.Gson;
 import org.apache.axis2.transport.http.HTTPConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -52,7 +54,7 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
  * Util class used for soap operation binding related.
  */
 public class SOAPOperationBindingUtils {
-
+    private static final Logger log = LoggerFactory.getLogger(SOAPOperationBindingUtils.class);
     /**
      * Gets soap operations to rest resources mapping
      * <p>
@@ -150,6 +152,9 @@ public class SOAPOperationBindingUtils {
             op.setName(resourcePath);
 
             List<WSDLOperationParam> params = op.getParameters();
+            if (log.isDebugEnabled()) {
+                log.debug("SOAP operation: " + operationName + " has " + params.size() + " parameters");
+            }
             for (WSDLOperationParam param : params) {
                 if (param.getDataType() != null) {
                     String dataTypeWithNS = param.getDataType();

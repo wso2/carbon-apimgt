@@ -21,6 +21,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -49,7 +51,7 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
  * Util class used for sequence generation of the soap to rest converted operations.
  */
 public class SequenceUtils {
-
+    private static final Logger log = LoggerFactory.getLogger(SequenceUtils.class);
     /**
      * Saves the converted api sequence in the registry for the given resource path
      *
@@ -127,6 +129,9 @@ public class SequenceUtils {
                 if (registry.resourceExists(resourcePath)) {
                     regResource = registry.get(resourcePath);
                     regResource.setContent(sequenceContent);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Api sequence content for " + resourcePath + " is: " + sequenceContent);
+                    }
                     regResource.setMediaType("text/xml");
                     registry.put(resourcePath, regResource);
                 }
@@ -191,6 +196,10 @@ public class SequenceUtils {
                 Collection collection = registry.get(resourcePath, 0, Integer.MAX_VALUE);
                 String[] resources = collection.getChildren();
 
+                if (log.isDebugEnabled()) {
+                    log.debug("Number of REST resources for " + resourcePath + " is:" + resources.length);
+                }
+
                 for (String path : resources) {
                     Resource resource = registry.get(path);
                     String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
@@ -214,6 +223,10 @@ public class SequenceUtils {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
             }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Saved sequence for type " + seqType + " for api:" + provider + "-" + name +
+                    "-" + version + " is: " + resultJson.toJSONString());
         }
         return resultJson.toJSONString();
     }
@@ -254,18 +267,29 @@ public class SequenceUtils {
                                 propDefinitionRef, propArray);
                         JSONObject refObj = new JSONObject();
                         refObj.put(paramName, propArray);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Properties for from resource parameter: " + paramName + " are: " + propArray
+                                    .toJSONString());
+                        }
                         mappingList.add(refObj);
                     } else if (String.valueOf(value.get(SOAPToRESTConstants.SWAGGER.TYPE))
                             .equals(SOAPToRESTConstants.PARAM_TYPES.ARRAY)) {
                         JSONObject arrObj = new JSONObject();
                         arrObj.put(((Map.Entry) property).getKey(), ((Map.Entry) property).getValue());
                         mappingList.add(arrObj);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Properties for from array type resource parameter: " + ((Map.Entry) property)
+                                    .getKey() + " are: " + arrObj.toJSONString());
+                        }
                     }
                 }
             } else {
                 JSONObject queryObj = new JSONObject();
                 queryObj.put(((JSONObject) param).get(SOAPToRESTConstants.SWAGGER.NAME), param);
                 mappingList.add(queryObj);
+                if (log.isDebugEnabled()) {
+                    log.debug("Properties for from query type resource parameter: " + queryObj.toJSONString());
+                }
             }
         }
         return mappingList;
@@ -318,6 +342,9 @@ public class SequenceUtils {
                 }
                 nestedProp.put(key, value);
                 propArray.add(nestedProp);
+            }
+            if (log.isDebugEnabled()) {
+                log.debug("json path for definition: " + definition + " is: " + jsonPath);
             }
         }
     }

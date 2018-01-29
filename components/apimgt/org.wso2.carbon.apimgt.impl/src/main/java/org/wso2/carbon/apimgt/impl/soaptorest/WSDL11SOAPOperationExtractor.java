@@ -267,11 +267,17 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
     private void getParameters(String partElement, List<WSDLOperationParam> params) throws APIMgtWSDLException {
         if (typeList != null) {
             Map<String, WSDLComplexType> typeMap = this.getComplexTypeMap(elemList);
-
+            if (log.isDebugEnabled()) {
+                log.debug("Number of complex types of the WSDL: " + typeMap.size());
+            }
             for (Node element : elemList) {
                 Node parentElement = element.getParentNode();
                 if (!WSDL_ELEMENT_NODE.equals(parentElement.getLocalName())) {
                     parentElement = element;
+                }
+                if (log.isDebugEnabled()) {
+                    log.debug("Parent element of the complex type element: " + element.getNodeName() + " is "
+                            + parentElement.getNodeName());
                 }
                 if (parentElement.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue()
                         .equals(partElement)) {
@@ -352,6 +358,9 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                             complexType);
                 }
             }
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Number of complex types of the WSDL: " + typeMap.size());
         }
         return typeMap;
     }
