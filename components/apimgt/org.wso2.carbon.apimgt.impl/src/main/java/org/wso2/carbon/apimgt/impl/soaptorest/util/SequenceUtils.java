@@ -24,8 +24,6 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.soaptorest.model.WSDLComplexType;
-import org.wso2.carbon.apimgt.impl.soaptorest.model.WSDLOperationParam;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.api.Resource;
@@ -42,8 +40,6 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -223,74 +219,6 @@ public class SequenceUtils {
     }
 
     /**
-     * Generates parameter mapping between swagger parameters and soap operation parameters
-     * <p>
-     * Note: this method is directly invoked from the jaggery layer
-     *
-     * @param params      soap operation parameters
-     * @param mappingList swagger parameters
-     * @return mapping json
-     */
-    public static JSONObject generateSoapToRestParameterMapping(List<WSDLOperationParam> params,
-            List<JSONObject> mappingList) {
-        JSONObject soapToRestParamMapping = new JSONObject();
-        int i = mappingList.size() - 1;
-
-        for (WSDLOperationParam param : params) {
-            JSONObject paramObj = new JSONObject();
-            String parameter = param.getName();
-            String dataType = param.getDataType();
-            if (dataType != null && !dataType.equals(SOAPToRESTConstants.PARAM_TYPES.ARRAY)) {
-                paramObj.put(SOAPToRESTConstants.PARAM_TYPE, SOAPToRESTConstants.PARAM_TYPES.QUERY);
-            }
-            JSONObject mappingObj = mappingList.get(i);
-            WSDLComplexType complexType = param.getWsdlComplexType();
-            Iterator paramKeyIterator = mappingObj.keySet().iterator();
-            String paramKey = "";
-            if (paramKeyIterator.hasNext()) {
-                paramKey = paramKeyIterator.next().toString();
-            }
-            JSONObject complexTypeObj = new JSONObject();
-            if (complexType != null) {
-                String complexTypeName = complexType.getName();
-                List<WSDLOperationParam> complexTypes = complexType.getParamList();
-                List<JSONObject> complexTypeList = new ArrayList<>();
-                Iterator complexObjIterator = ((JSONObject) mappingObj.get(paramKey)).keySet().iterator();
-                for (WSDLOperationParam operation : complexTypes) {
-                    JSONObject innerParam = new JSONObject();
-                    if (operation.isArray()) {
-                        Map paramMap = new LinkedHashMap();
-                        paramMap.put(SOAPToRESTConstants.PARAM_TYPE, SOAPToRESTConstants.PARAM_TYPES.ARRAY);
-                        paramMap.put(operation.getName(), parameter);
-                        paramObj.putAll(paramMap);
-                    } else if (complexObjIterator.hasNext()) {
-                        String complexParam = complexObjIterator.next().toString();
-                        String jsonPath;
-                        if (complexTypeName != null) {
-                            jsonPath = parameter + "." + complexTypeName + "." + operation.getName();
-                        } else {
-                            jsonPath = parameter + "." + operation.getName();
-                        }
-                        innerParam.put(complexParam, jsonPath);
-                        complexTypeList.add(innerParam);
-                    }
-                }
-                complexTypeObj.put(SOAPToRESTConstants.PARAM_TYPE, SOAPToRESTConstants.PARAM_TYPES.OBJECT);
-                complexTypeObj.put(SOAPToRESTConstants.PARAM_TYPE, SOAPToRESTConstants.PARAM_TYPES.OBJECT);
-                complexTypeObj.put(complexTypeName, complexTypeList);
-            }
-            if (SOAPToRESTConstants.PARAM_TYPES.OBJECT.equals(complexTypeObj.get(SOAPToRESTConstants.PARAM_TYPE))
-                    && dataType == null) {
-                soapToRestParamMapping.put(parameter, complexTypeObj);
-            } else {
-                soapToRestParamMapping.put(parameter, paramObj);
-            }
-            i--;
-        }
-        return soapToRestParamMapping;
-    }
-
-    /**
      * Gets parameter definitions from swagger
      *
      * @param swaggerObj swagger json
@@ -309,8 +237,8 @@ public class SequenceUtils {
                 JSONObject schema = (JSONObject) ((JSONObject) param).get(SOAPToRESTConstants.SWAGGER.SCHEMA);
                 String definitionPath = String.valueOf(schema.get(SOAPToRESTConstants.SWAGGER.REF));
                 String definition = definitionPath.replaceAll(SOAPToRESTConstants.SWAGGER.DEFINITIONS_ROOT, "");
-                JSONObject definitions = (JSONObject) ((JSONObject) swaggerObj.get(
-                        SOAPToRESTConstants.SWAGGER.DEFINITIONS)).get(definition);
+                JSONObject definitions = (JSONObject) ((JSONObject) swaggerObj
+                        .get(SOAPToRESTConstants.SWAGGER.DEFINITIONS)).get(definition);
                 JSONObject properties = (JSONObject) definitions.get(SOAPToRESTConstants.SWAGGER.PROPERTIES);
 
                 for (Object property : properties.entrySet()) {
@@ -319,15 +247,16 @@ public class SequenceUtils {
                     JSONObject value = (JSONObject) entry.getValue();
                     JSONArray propArray = new JSONArray();
                     if (value.get(SOAPToRESTConstants.SWAGGER.REF) != null) {
-                        String propDefinitionRef = String.valueOf(value.get(SOAPToRESTConstants.SWAGGER.REF)).replaceAll(
-                                SOAPToRESTConstants.SWAGGER.DEFINITIONS_ROOT, "");
-                        getNestedDefinitionsFromSwagger((JSONObject) swaggerObj.get(SOAPToRESTConstants.SWAGGER.DEFINITIONS),
-                                propDefinitionRef, propDefinitionRef, propArray);
+                        String propDefinitionRef = String.valueOf(value.get(SOAPToRESTConstants.SWAGGER.REF))
+                                .replaceAll(SOAPToRESTConstants.SWAGGER.DEFINITIONS_ROOT, "");
+                        getNestedDefinitionsFromSwagger(
+                                (JSONObject) swaggerObj.get(SOAPToRESTConstants.SWAGGER.DEFINITIONS), propDefinitionRef,
+                                propDefinitionRef, propArray);
                         JSONObject refObj = new JSONObject();
                         refObj.put(paramName, propArray);
                         mappingList.add(refObj);
-                    } else if (String.valueOf(value.get(SOAPToRESTConstants.SWAGGER.TYPE)).equals(
-                            SOAPToRESTConstants.PARAM_TYPES.ARRAY)) {
+                    } else if (String.valueOf(value.get(SOAPToRESTConstants.SWAGGER.TYPE))
+                            .equals(SOAPToRESTConstants.PARAM_TYPES.ARRAY)) {
                         JSONObject arrObj = new JSONObject();
                         arrObj.put(((Map.Entry) property).getKey(), ((Map.Entry) property).getValue());
                         mappingList.add(arrObj);

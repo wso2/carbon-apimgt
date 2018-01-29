@@ -270,11 +270,11 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
 
             for (Node element : elemList) {
                 Node parentElement = element.getParentNode();
-                if(!WSDL_ELEMENT_NODE.equals(parentElement.getLocalName())) {
-                   parentElement = element;
+                if (!WSDL_ELEMENT_NODE.equals(parentElement.getLocalName())) {
+                    parentElement = element;
                 }
-                if (parentElement.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE)
-                        .getNodeValue().equals(partElement)) {
+                if (parentElement.getAttributes().getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue()
+                        .equals(partElement)) {
                     NodeList childNodes = element.getChildNodes().item(1).getChildNodes();
                     for (int j = 0; j < childNodes.getLength(); j++) {
                         if (childNodes.item(j).getLocalName() != null && WSDL_ELEMENT_NODE
@@ -285,8 +285,9 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                             String dataType = attributes.getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE).getNodeValue()
                                     .split(SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_SEPARATOR)[1];
                             Node maxOccursNode = attributes.getNamedItem(SOAPToRESTConstants.MAX_OCCURS_ATTRIBUTE);
-                            if (maxOccursNode != null && (maxOccursNode.getNodeValue().equals(
-                                    SOAPToRESTConstants.UNBOUNDED) || !maxOccursNode.getNodeValue().equals("1"))) {
+                            if (maxOccursNode != null && (
+                                    maxOccursNode.getNodeValue().equals(SOAPToRESTConstants.UNBOUNDED) || !maxOccursNode
+                                            .getNodeValue().equals("1"))) {
                                 param.setArray(true);
                             }
                             if (!primitiveTypeList.contains(dataType)) {
@@ -296,8 +297,8 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                                 }
                                 param.setComplexType(true);
                             }
-                            param.setDataType(attributes.getNamedItem(
-                                    SOAPToRESTConstants.TYPE_ATTRIBUTE).getNodeValue());
+                            param.setDataType(
+                                    attributes.getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE).getNodeValue());
                             params.add(param);
                         }
                     }
@@ -333,8 +334,9 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                             String dataType = attributes.getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE).getNodeValue()
                                     .split(SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_SEPARATOR)[1];
                             Node maxOccursNode = attributes.getNamedItem(SOAPToRESTConstants.MAX_OCCURS_ATTRIBUTE);
-                            if (maxOccursNode != null && (maxOccursNode.getNodeValue().equals(
-                                    SOAPToRESTConstants.UNBOUNDED) || !maxOccursNode.getNodeValue().equals("1"))) {
+                            if (maxOccursNode != null && (
+                                    maxOccursNode.getNodeValue().equals(SOAPToRESTConstants.UNBOUNDED) || !maxOccursNode
+                                            .getNodeValue().equals("1"))) {
                                 param.setArray(true);
                             }
                             if (primitiveTypeList.contains(dataType)) {

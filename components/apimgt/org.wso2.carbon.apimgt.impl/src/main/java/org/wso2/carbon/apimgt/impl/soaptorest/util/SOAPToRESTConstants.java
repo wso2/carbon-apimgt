@@ -83,6 +83,8 @@ public class SOAPToRESTConstants {
         public static final String REQ_VARIABLE = "req.var.";
         public static final String URL_OPERATOR = "$url:";
         public static final String ROOT_OPERATOR = "$.";
+
+        public static final String XML_FILE = "xml";
     }
 
     public final class TEMPLATE {

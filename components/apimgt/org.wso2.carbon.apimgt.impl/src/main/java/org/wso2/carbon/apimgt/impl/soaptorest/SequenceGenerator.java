@@ -122,8 +122,8 @@ public class SequenceGenerator {
 
                 apiJSON = (JSONObject) parser.parse(definitionFromSwagger20.getAPIDefinition(apiId, registry));
 
-                ObjectMapper mapper = new ObjectMapper().setVisibility(
-                        PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+                ObjectMapper mapper = new ObjectMapper()
+                        .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 TypeFactory typeFactory = mapper.getTypeFactory();
                 List<WSDLSOAPOperation> soapOperations = mapper.readValue(soapOperationMapping,
@@ -140,8 +140,8 @@ public class SequenceGenerator {
                         for (Object key1 : methods) {
                             String method = (String) key1;
 
-                            List<JSONObject> mappingList = SequenceUtils.getResourceParametersFromSwagger(
-                                    apiJSON, resource, method);
+                            List<JSONObject> mappingList = SequenceUtils
+                                    .getResourceParametersFromSwagger(apiJSON, resource, method);
                             String inSequence = generateApiInSequence(mappingList, soapOperations, resourcePath,
                                     method);
                             String outSequence = generateApiOutSequence();
@@ -158,8 +158,8 @@ public class SequenceGenerator {
                                     + SOAPToRESTConstants.SEQUENCE_GEN.RESOURCE_METHOD_SEPERATOR + method
                                     + SOAPToRESTConstants.SEQUENCE_GEN.XML_FILE_EXTENSION;
                             SequenceUtils.saveRestToSoapConvertedSequence(registry, inSequence, method, resourceInPath);
-                            SequenceUtils.saveRestToSoapConvertedSequence(
-                                    registry, outSequence, method, resourceOutPath);
+                            SequenceUtils
+                                    .saveRestToSoapConvertedSequence(registry, outSequence, method, resourceOutPath);
                         }
                     }
                 }
@@ -199,8 +199,8 @@ public class SequenceGenerator {
         String namespace = "";
         String opName = "";
         for (WSDLSOAPOperation operationParam : soapOperations) {
-            if (operationParam.getName().equals(resourcePath.substring(1)) &&
-                    operationParam.getHttpVerb().equalsIgnoreCase(method)) {
+            if (operationParam.getName().equals(resourcePath.substring(1)) && operationParam.getHttpVerb()
+                    .equalsIgnoreCase(method)) {
                 opName = operationParam.getSoapBindingOpName();
                 soapAction = operationParam.getSoapAction();
                 namespace = operationParam.getTargetNamespace();
@@ -276,6 +276,9 @@ public class SequenceGenerator {
                                 JSONObject entry = (JSONObject) ((JSONObject) paramObj).get(paramName);
                                 xPath = (String) entry.get(SOAPToRESTConstants.SEQUENCE_GEN.XPATH);
                             }
+                            if (xPath == null) {
+                                throw new APIManagementException("Cannot map parameters without x-path property.");
+                            }
                             String[] xPathElements = xPath.split(SOAPToRESTConstants.SEQUENCE_GEN.PATH_SEPARATOR);
                             Element prevElement = rootElement;
                             int elemPos = 0;
@@ -287,8 +290,8 @@ public class SequenceGenerator {
                                     prevElement = (Element) doc.getElementsByTagName(element.getTagName()).item(0);
                                 } else {
                                     if (elemPos == xPathElements.length - 1) {
-                                        element.setTextContent(
-                                                SOAPToRESTConstants.SEQUENCE_GEN.PROPERTY_ACCESSOR + count);
+                                        element.setTextContent(SOAPToRESTConstants.SEQUENCE_GEN.PROPERTY_ACCESSOR +
+                                                count);
                                         count++;
                                     }
                                     prevElement.appendChild(element);
@@ -296,8 +299,8 @@ public class SequenceGenerator {
                                 }
                                 elemPos++;
                                 if (log.isDebugEnabled()) {
-                                    log.debug("Current x path element  " + element.getNodeValue()
-                                            + " at position: " + elemPos);
+                                    log.debug("Current x path element  " + element.getNodeValue() + " at position: "
+                                            + elemPos);
                                 }
                             }
                         }
@@ -358,7 +361,8 @@ public class SequenceGenerator {
             Document doc = docBuilder.newDocument();
             Element argElement = doc.createElement(SOAPToRESTConstants.SEQUENCE_GEN.ARG_ELEMENT);
             Element propertyElement = doc.createElement(SOAPToRESTConstants.SEQUENCE_GEN.PROPERTY_ELEMENT);
-            argElement.setAttribute(SOAPToRESTConstants.SEQUENCE_GEN.EVALUATOR_ATTR, "xml");
+            argElement.setAttribute(SOAPToRESTConstants.SEQUENCE_GEN.EVALUATOR_ATTR,
+                    SOAPToRESTConstants.SEQUENCE_GEN.XML_FILE);
             String expressionAttr = SOAPToRESTConstants.SEQUENCE_GEN.EXPRESSION_FUNC_DEF + jsonPathElement
                     + SOAPToRESTConstants.SEQUENCE_GEN.EXPRESSION_FUNC_DEF_CLOSING_TAG;
             argElement.setAttribute(SOAPToRESTConstants.SEQUENCE_GEN.EXPRESSION_ATTR, expressionAttr);
