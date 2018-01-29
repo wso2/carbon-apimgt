@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
@@ -133,9 +133,9 @@ public class APIClientGenerationManager {
                         requestedTenant + " tenant ID : " + tenantId, e);
             }
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(apiProvider);
-            APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
+            APIDefinition definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
             try {
-                swaggerAPIDefinition = definitionFromSwagger20.getAPIDefinition(apiIdentifier, requiredRegistry);
+                swaggerAPIDefinition = definitionFromOpenAPISpec.getAPIDefinition(apiIdentifier, requiredRegistry);
             } catch (APIManagementException e) {
                 handleSDKGenException("Error loading swagger file for API " + apiName + " from registry.", e);
             }

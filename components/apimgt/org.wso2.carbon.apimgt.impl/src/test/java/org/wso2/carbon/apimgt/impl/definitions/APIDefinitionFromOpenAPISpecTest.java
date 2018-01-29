@@ -21,16 +21,15 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-public class APIDefinitionFromSwagger20Test {
+public class APIDefinitionFromOpenAPISpecTest {
     @Test
     public void getURITemplates() throws Exception {
-        APIDefinitionFromSwagger20 apiDefinitionFromSwagger20 = new APIDefinitionFromSwagger20();
+        APIDefinitionFromOpenAPISpec apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
         String swagger = "{\n" +
                 "  \"paths\": {\n" +
                 "    \"/*\": {\n" +
@@ -105,8 +104,8 @@ public class APIDefinitionFromSwagger20Test {
         uriTemplates.add(getUriTemplate("DELETE","Any","/*"));
         uriTemplates.add(getUriTemplate("GET","Any","/abc"));
         API api = new API(new APIIdentifier("admin","PhoneVerification","1.0.0"));
-        Set<URITemplate> uriTemplateSet = apiDefinitionFromSwagger20.getURITemplates(api,swagger);
-        Assert.assertEquals(uriTemplateSet,uriTemplates);
+        Set<URITemplate> uriTemplateSet = apiDefinitionFromOpenAPISpec.getURITemplates(api,swagger);
+        Assert.assertEquals(uriTemplateSet, uriTemplates);
     }
 
     protected URITemplate getUriTemplate(String httpVerb,String authType,String uriTemplateString) {

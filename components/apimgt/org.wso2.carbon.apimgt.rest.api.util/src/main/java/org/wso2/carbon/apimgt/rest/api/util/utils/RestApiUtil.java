@@ -45,7 +45,7 @@ import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -966,10 +966,10 @@ public class RestApiUtil {
      */
     public static boolean registerResource(API api, String swagger) {
 
-        APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
+        APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
         Set<URITemplate> uriTemplates = null;
         try {
-            uriTemplates = definitionFromSwagger20.getURITemplates(api, swagger);
+            uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(api, swagger);
         } catch (APIManagementException e) {
             log.error("Error while parsing swagger content to get URI Templates", e);
         }
@@ -1048,9 +1048,9 @@ public class RestApiUtil {
 
             try {
                 String definition = IOUtils.toString(RestApiUtil.class.getResourceAsStream("/store-api.json"), "UTF-8");
-                APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
+                APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
                 //Get URL templates from swagger content we created
-                storeResourceMappings = definitionFromSwagger20.getURITemplates(api, definition);
+                storeResourceMappings = apiDefinitionFromOpenAPISpec.getURITemplates(api, definition);
             } catch (APIManagementException e) {
                 log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {
@@ -1081,9 +1081,9 @@ public class RestApiUtil {
             try {
                 String definition = IOUtils
                         .toString(RestApiUtil.class.getResourceAsStream("/publisher-api.json"), "UTF-8");
-                APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
+                APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
                 //Get URL templates from swagger content we created
-                publisherResourceMappings = definitionFromSwagger20.getURITemplates(api, definition);
+                publisherResourceMappings = apiDefinitionFromOpenAPISpec.getURITemplates(api, definition);
             } catch (APIManagementException e) {
                 log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {
@@ -1111,9 +1111,9 @@ public class RestApiUtil {
             try {
                 String definition = IOUtils
                         .toString(RestApiUtil.class.getResourceAsStream("/admin-api.json"), "UTF-8");
-                APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
+                APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
                 //Get URL templates from swagger content we created
-                adminAPIResourceMappings = definitionFromSwagger20.getURITemplates(api, definition);
+                adminAPIResourceMappings = apiDefinitionFromOpenAPISpec.getURITemplates(api, definition);
             } catch (APIManagementException e) {
                 log.error("Error while reading resource mappings for API: " + api.getId().getApiName(), e);
             } catch (IOException e) {

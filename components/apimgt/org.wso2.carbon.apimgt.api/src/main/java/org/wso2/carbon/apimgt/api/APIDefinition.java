@@ -83,5 +83,5 @@ public abstract class APIDefinition {
      * @return
      * @throws APIManagementException
      */
-    public abstract Map<String ,String> getAPISwaggerDefinitionTimeStamps(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException;
+    public abstract Map<String ,String> getAPIOpenAPIDefinitionTimeStamps(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException;
 }

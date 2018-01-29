@@ -401,7 +401,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, requestedTenantDomain);
 
-            String apiSwagger = apiConsumer.getSwagger20Definition(apiIdentifier);
+            String apiSwagger = apiConsumer.getOpenAPIDefinition(apiIdentifier);
             apiSwagger = RestAPIStoreUtils.removeXMediationScriptsFromSwagger(apiSwagger);
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {

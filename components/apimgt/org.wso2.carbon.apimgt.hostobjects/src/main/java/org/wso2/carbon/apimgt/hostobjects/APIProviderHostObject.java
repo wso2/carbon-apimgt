@@ -90,7 +90,7 @@ import org.wso2.carbon.apimgt.impl.UserAwareAPIProvider;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -157,7 +157,7 @@ public class APIProviderHostObject extends ScriptableObject {
     }
 
     // API definitions from swagger v2.0
-    static APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
+    static APIDefinition definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
 
     // The zero-argument constructor used for create instances for runtime
     public APIProviderHostObject() throws APIManagementException {
@@ -528,11 +528,11 @@ public class APIProviderHostObject extends ScriptableObject {
 
             //Read URI Templates from swagger resource and set to api object
             Set<URITemplate> uriTemplates =
-                    definitionFromSwagger20.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
+                    definitionFromOpenAPISpec.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
             api.setUriTemplates(uriTemplates);
 
             //scopes
-            Set<Scope> scopes = definitionFromSwagger20.getScopes(String.valueOf(apiData.get("swagger", apiData)));
+            Set<Scope> scopes = definitionFromOpenAPISpec.getScopes(String.valueOf(apiData.get("swagger", apiData)));
             api.setScopes(scopes);
 
             try {
@@ -677,11 +677,11 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if (!apiData.get("swagger", apiData).equals("null")) {
             //Read swagger from the registry todo: check why was this done
-            //String swaggerFromRegistry = apiProvider.getSwagger20Definition(api.getId());
+            //String swaggerFromRegistry = apiProvider.getOpenAPIDefinition(api.getId());
 
 
             //Read URI Templates from swagger resource and set to api object
-            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api,
+            Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(api,
                     (String) apiData.get("swagger", apiData));
             api.setUriTemplates(uriTemplates);
 
@@ -948,7 +948,7 @@ public class APIProviderHostObject extends ScriptableObject {
 
         if (apiData.get("swagger", apiData) != null) {
             // Read URI Templates from swagger resource and set it to api object
-            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api,
+            Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(api,
                     (String) apiData.get("swagger", apiData));
             api.setUriTemplates(uriTemplates);
 
@@ -1090,7 +1090,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
                 registry = registryService.getGovernanceSystemRegistry(tenantId);
 
-                apiJSON = definitionFromSwagger20.getAPIDefinition(apiId, registry); //apiProvider.getSwagger12Definition(apiId);
+                apiJSON = definitionFromOpenAPISpec.getAPIDefinition(apiId, registry); //apiProvider.getSwagger12Definition(apiId);
             } catch (RegistryException e) {
                 handleException("Error when create registry instance ", e);
             } catch (UserStoreException e) {
@@ -1658,11 +1658,11 @@ public class APIProviderHostObject extends ScriptableObject {
         if (apiData.get("swagger", apiData) != null) {
             // Read URI Templates from swagger resource and set to api object
             Set<URITemplate> uriTemplates =
-                    definitionFromSwagger20.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
+                    definitionFromOpenAPISpec.getURITemplates(api, String.valueOf(apiData.get("swagger", apiData)));
             api.setUriTemplates(uriTemplates);
 
             // scopes
-            Set<Scope> scopes = definitionFromSwagger20.getScopes(String.valueOf(apiData.get("swagger", apiData)));
+            Set<Scope> scopes = definitionFromOpenAPISpec.getScopes(String.valueOf(apiData.get("swagger", apiData)));
             api.setScopes(scopes);
 
             String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
@@ -1685,7 +1685,7 @@ public class APIProviderHostObject extends ScriptableObject {
             apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
             saveAPI(apiProvider, api, null, false);
         } else {
-            String apiDefinitionJSON = definitionFromSwagger20.generateAPIDefinition(api);
+            String apiDefinitionJSON = definitionFromOpenAPISpec.generateAPIDefinition(api);
             apiProvider.saveSwagger20Definition(api.getId(), apiDefinitionJSON);
         }
         return success;
@@ -2145,12 +2145,12 @@ public class APIProviderHostObject extends ScriptableObject {
 
             if (apiData.get("swagger", apiData) != null) {
                 // Read URI Templates from swagger resource and set to api object
-                Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api,
+                Set<URITemplate> uriTemplates = definitionFromOpenAPISpec.getURITemplates(api,
                         String.valueOf(apiData.get("swagger", apiData)));
                 api.setUriTemplates(uriTemplates);
 
                 // scopes
-                Set<Scope> scopes = definitionFromSwagger20.getScopes(String.valueOf(apiData.get("swagger", apiData)));
+                Set<Scope> scopes = definitionFromOpenAPISpec.getScopes(String.valueOf(apiData.get("swagger", apiData)));
                 api.setScopes(scopes);
 
                 try {
@@ -2172,7 +2172,7 @@ public class APIProviderHostObject extends ScriptableObject {
                 apiProvider.saveSwagger20Definition(api.getId(), (String) apiData.get("swagger", apiData));
                 saveAPI(apiProvider, api, null, false);
             } else {
-                String apiDefinitionJSON = definitionFromSwagger20.generateAPIDefinition(api);
+                String apiDefinitionJSON = definitionFromOpenAPISpec.generateAPIDefinition(api);
                 apiProvider.saveSwagger20Definition(api.getId(), apiDefinitionJSON);
                 apiProvider.updateAPI(api);
             }
