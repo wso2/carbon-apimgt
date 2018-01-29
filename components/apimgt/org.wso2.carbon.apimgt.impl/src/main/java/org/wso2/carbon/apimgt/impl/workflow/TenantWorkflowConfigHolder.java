@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.workflow;
 
 import org.apache.axiom.om.OMAbstractFactory;
+import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
@@ -186,10 +187,11 @@ public class TenantWorkflowConfigHolder implements Serializable {
 
         for (Iterator it = executorElem.getChildrenWithName(PROP_Q); it.hasNext(); ) {
             OMElement propertyElem = (OMElement) it.next();
-            String propName = propertyElem.getAttribute(ATT_NAME).getAttributeValue();
-            if (propName == null) {
+            OMAttribute attribute = propertyElem.getAttribute(ATT_NAME);
+            if (attribute == null) {
                 handleException("An Executor class property must specify the name attribute");
             } else {
+                String propName = attribute.getAttributeValue();
                 OMNode omElt = propertyElem.getFirstElement();
                 if (omElt != null) {
                     setInstanceProperty(propName, omElt, workflowClass);
