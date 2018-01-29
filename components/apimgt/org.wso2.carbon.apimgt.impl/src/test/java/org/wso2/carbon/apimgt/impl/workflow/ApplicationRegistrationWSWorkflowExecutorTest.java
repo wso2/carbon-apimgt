@@ -220,7 +220,7 @@ public class ApplicationRegistrationWSWorkflowExecutorTest {
         applicationRegistrationWSWorkflowExecutor.setPassword(adminPassword.toCharArray());
         workflowDTO.setStatus(WorkflowStatus.APPROVED);
         PowerMockito.doThrow(new APIManagementException("Error occurred when updating the status of the Application " +
-                "Registration process")).when(keyManager).getNewApplicationAccessToken((AccessTokenRequest) Mockito
+                "Registration process")).when(keyManager).createApplication((OAuthAppRequest) Mockito
                 .anyObject());
         try {
             applicationRegistrationWSWorkflowExecutor.complete(workflowDTO);

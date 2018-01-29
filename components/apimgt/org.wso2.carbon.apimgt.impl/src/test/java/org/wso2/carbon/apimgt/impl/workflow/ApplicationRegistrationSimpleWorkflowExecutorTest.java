@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
@@ -74,9 +75,11 @@ public class ApplicationRegistrationSimpleWorkflowExecutorTest {
     @Test
     public void testExecutingApplicationRegistrationWorkFlow() throws APIManagementException {
         PowerMockito.doNothing().when(apiMgtDAO).createApplicationRegistrationEntry(workflowDTO, false);
+        oAuthApplicationInfo.setJsonString("{\"client_credentials\":\"Client Credentials\"}");
         Mockito.when(keyManager.createApplication(oAuthAppRequest)).thenReturn(oAuthApplicationInfo);
+
         try {
-            Assert.assertNotNull(applicationRegistrationSimpleWorkflowExecutor.execute(workflowDTO));
+            applicationRegistrationSimpleWorkflowExecutor.execute(workflowDTO);
         } catch (WorkflowException e) {
             Assert.fail("Unexpected WorkflowException occurred while executing application registration simple " +
                     "workflow");
@@ -86,14 +89,14 @@ public class ApplicationRegistrationSimpleWorkflowExecutorTest {
     @Test
     public void testFailureWhileExecutingApplicationRegistrationWorkFlow() throws APIManagementException {
         PowerMockito.doNothing().when(apiMgtDAO).createApplicationRegistrationEntry(workflowDTO, false);
+        oAuthApplicationInfo.setJsonString("{\"client_credentials\":\"Client Credentials\"}");
         Mockito.when(keyManager.createApplication(oAuthAppRequest)).thenThrow(new APIManagementException(""));
         try {
             applicationRegistrationSimpleWorkflowExecutor.execute(workflowDTO);
             Assert.fail("Expected WorkflowException is not thrown while executing application registration simple " +
                     "workflow");
         } catch (WorkflowException e) {
-           Assert.assertTrue(e.getMessage().contains("Error occurred when updating the status of the Application " +
-                   "creation process"));
+           Assert.assertTrue(e.getMessage().contains("Error occurred while executing SubscriberKeyMgtClient."));
         }
     }
 
