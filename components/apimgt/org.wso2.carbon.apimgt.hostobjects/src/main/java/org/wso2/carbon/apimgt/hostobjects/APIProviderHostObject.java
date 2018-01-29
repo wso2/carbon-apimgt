@@ -1051,7 +1051,7 @@ public class APIProviderHostObject extends ScriptableObject {
      * @throws APIManagementException
      * @throws ScriptException
      */
-    public static NativeObject jsFunction_getSwagger12Resource(Context cx, Scriptable thisObj,
+    public static NativeObject jsFunction_getOpenAPIDefinitionResource(Context cx, Scriptable thisObj,
                                                                Object[] args, Function funObj) throws APIManagementException, ScriptException {
         if (args == null || args.length == 0) {
             handleException("Invalid number of input parameters.");

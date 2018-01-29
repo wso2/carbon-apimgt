@@ -128,9 +128,9 @@ jagg.module("api", {
     },
     updateAPIDesign:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").updateAPIDesign.apply(this, arguments);
-    },     
-    getSwagger12Resource:function () {
-        return jagg.require(jagg.getModulesDir() + "api/add.jag").getSwagger12Resource.apply(this, arguments);
+    },
+    getOpenAPIDefinitionResource:function () {
+        return jagg.require(jagg.getModulesDir() + "api/add.jag").getOpenAPIDefinitionResource.apply(this, arguments);
     },     
     updateAPIImplementation:function () {
         return jagg.require(jagg.getModulesDir() + "api/add.jag").updateAPIImplementation.apply(this, arguments);
