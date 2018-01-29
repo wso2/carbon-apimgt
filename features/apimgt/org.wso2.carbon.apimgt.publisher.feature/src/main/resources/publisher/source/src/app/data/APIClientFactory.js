@@ -17,9 +17,15 @@
  */
 "use strict";
 import APIClient from "./APIClient";
-import Utils from "./Utils";
 
+/**
+ * Class representing a Factory of APIClients
+ */
 class APIClientFactory {
+    /**
+     * Initialize a single instance of APIClientFactory
+     * @returns {APIClientFactory}
+     */
     constructor() {
         if (APIClientFactory._instance) {
             return APIClientFactory._instance;
@@ -53,8 +59,21 @@ class APIClientFactory {
     destroyAPIClient(environmentLabel) {
         this._APIClientMap.delete(environmentLabel);
     }
+
+    /**
+     * Get an instance of APIClientFactory
+     * @returns {APIClientFactory} An instance of APIClientFactory
+     */
+    static getInstance() {
+        return new APIClientFactory();
+    }
 }
 
+/**
+ * Single instance of APIClientFactory
+ * @type {APIClientFactory}
+ * @private
+ */
 APIClientFactory._instance = null;
 
 export default APIClientFactory;

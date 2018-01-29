@@ -27,9 +27,9 @@ import Utils from "./Utils";
  */
 class APIClient {
     /**
-     * @param {Object} environment : Environment to get host for the swagger-client's spec property.
-     * @param {{}} args : Accept as an optional argument for APIClient constructor.Merge the given args with default args.
-     * @returns {APIClient|*|null}
+     * @param {Object} environment - Environment to get host for the swagger-client's spec property.
+     * @param {{}} args - Accept as an optional argument for APIClient constructor.Merge the given args with default args.
+     * @returns {APIClient}
      */
     constructor(environment, args = {}) {
         this.environment = environment || Utils.getCurrentEnvironment();
@@ -68,8 +68,8 @@ class APIClient {
 
     /**
      * Get the ETag of a given resource key from the session storage
-     * @param key {string} key of resource.
-     * @returns {string} ETag value for the given key
+     * @param {String} key - key of resource.
+     * @returns {String} ETag value for the given key
      */
     static getETag(key) {
         return sessionStorage.getItem("etag_" + key);

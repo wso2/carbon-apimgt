@@ -21,7 +21,7 @@ import Utils from './Utils'
 
 /**
  * Represent an user logged in to the application, There will be allays one user per session and
- * this user details will be persist in browser localstorage.
+ * this user details will be persist in browser local-storage.
  */
 export default class User {
     /**
@@ -46,7 +46,7 @@ export default class User {
 
     /**
      * OAuth scopes which are available for use by this user
-     * @returns {Array} : An array of scopes
+     * @returns {Array} - An array of scopes
      */
     get scopes() {
         return this._scopes;
@@ -54,7 +54,7 @@ export default class User {
 
     /**
      * Set OAuth scopes available to be used by this user
-     * @param {Array} newScopes :  An array of scopes
+     * @param {Array} newScopes - An array of scopes
      */
     set scopes(newScopes) {
         Object.assign(this.scopes, newScopes);
@@ -62,9 +62,9 @@ export default class User {
 
     /**
      * User utility method to create an user from JSON object.
-     * @param {JSON} userJson : Need to provide user information in JSON structure to create an user object
-     * @param {String} environmentName : Name of the environment to be assigned to the user
-     * @returns {User} : An instance of User(this) class.
+     * @param {JSON} userJson - Need to provide user information in JSON structure to create an user object
+     * @param {String} environmentName - Name of the environment to be assigned to the user
+     * @returns {User} - An instance of User(this) class.
      */
     static fromJson(userJson, environmentName) {
         if (!userJson.name) {
@@ -144,7 +144,7 @@ export default class User {
 
     /**
      * Provide user data in JSON structure.
-     * @returns {JSON} : JSON representation of the user object
+     * @returns {JSON} - JSON representation of the user object
      */
     toJson() {
         return {
@@ -161,7 +161,7 @@ User.CONST = {
     WSO2_AM_TOKEN_MSF4J: "WSO2_AM_TOKEN_MSF4J",
     WSO2_AM_TOKEN_1: "WSO2_AM_TOKEN_1",
     WSO2_AM_REFRESH_TOKEN_1: "WSO2_AM_REFRESH_TOKEN_1",
-    LOCALSTORAGE_USER: "wso2_user_publisher",
+    LOCAL_STORAGE_USER: "wso2_user_publisher",
     USER_EXPIRY_TIME: "user_expiry_time"
 };
 /**

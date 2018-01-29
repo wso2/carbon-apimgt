@@ -98,7 +98,7 @@ class Login extends Component {
             user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, "/publisher");
             user.scopes = params.scopes.split(" ");
             AuthManager.setUser(user);
-            AuthManager.handleAutoLoginEnvironments(
+            this.authManager.handleAutoLoginEnvironments(
                 params.id_token,
                 this.state.environments,
                 this.state.authConfigs
@@ -116,7 +116,7 @@ class Login extends Component {
     fetch_DCRappInfo(environments) {
         //Array of promises
         let promised_ssoData = environments.map(
-            environment => Utils.getPromised_DCRappInfo(environment)
+            environment => Utils.getPromised_DCRAppInfo(environment)
         );
 
         Promise.all(promised_ssoData).then(responses => {
@@ -169,7 +169,7 @@ class Login extends Component {
         let loginPromise = this.authManager.authenticateUser(username, password, environment);
         loginPromise.then((response) => {
             this.setState({isLogin: AuthManager.getUser(), loading: false});
-            AuthManager.handleAutoLoginEnvironments(
+            this.authManager.handleAutoLoginEnvironments(
                 response.data.idToken,
                 this.state.environments,
                 this.state.authConfigs

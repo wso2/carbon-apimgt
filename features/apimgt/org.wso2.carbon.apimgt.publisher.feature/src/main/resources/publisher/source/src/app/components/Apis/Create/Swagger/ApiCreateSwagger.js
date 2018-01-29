@@ -78,7 +78,7 @@ class ApiCreateSwagger extends React.Component {
             let data = {};
             data.url = url;
             data.type = 'swagger-url';
-            let new_api = new API('');
+            let new_api = new API();
             new_api.create(data)
                 .then(this.createAPICallback)
                 .catch(
@@ -97,7 +97,7 @@ class ApiCreateSwagger extends React.Component {
                 return;
             }
             let swagger = this.state.files[0];
-            let new_api = new API('');
+            let new_api = new API();
             new_api.create(swagger)
                 .then(this.createAPICallback)
                 .catch(

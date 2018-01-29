@@ -25,9 +25,9 @@ class Utils {
 
     /**
      * Get JavaScript accessible cookies saved in browser, by giving the cooke name.
-     * @param {String} name : Name of the cookie which need to be retrived
-     * @param {String} environmentName : label of the environment of the cookie
-     * @returns {String|null} : If found a cookie with given name , return its value,Else null value is returned
+     * @param {String} name - Name of the cookie which need to be retrieved
+     * @param {String} environmentName - label of the environment of the cookie
+     * @returns {String|null} - If found a cookie with given name , return its value,Else null value is returned
      */
     static getCookie(name, environmentName) {
         environmentName = environmentName || Utils.getCurrentEnvironment().label;
@@ -83,7 +83,7 @@ class Utils {
 
     /**
      * Given an object returns whether the object is empty or not
-     * @param {Object} object : Any JSON object
+     * @param {Object} object - Any JSON object
      * @returns {boolean}
      */
     static isEmptyObject(object) {
@@ -92,14 +92,14 @@ class Utils {
 
     /**
      * Get the current environment from local-storage
-     * @returns {Object} environment: {label, host, loginTokenPath}
+     * @returns {Object}
      */
     static getCurrentEnvironment() {
         if (Utils._environment) {
             return Utils._environment;
         }
 
-        let environmentData = localStorage.getItem(Utils.CONST.LOCALSTORAGE_ENVIRONMENT);
+        let environmentData = localStorage.getItem(Utils.CONST.LOCAL_STORAGE_ENVIRONMENT);
         if (!environmentData) {
             return Utils._getDefaultEnvironment();
         }
@@ -109,8 +109,8 @@ class Utils {
 
     /**
      * Get current environment's index from the given environment array
-     * @param {Array} environments
-     * @param {string} name: name of the environment [default]: current environment name
+     * @param {Array} environments - Array of environments
+     * @param {string} name - name of the environment
      * @returns {number}
      */
     static getEnvironmentID(environments, name = Utils.getCurrentEnvironment().label) {
@@ -140,14 +140,14 @@ class Utils {
         }
         //Store environment.
         Utils._environment = environment;
-        localStorage.setItem(Utils.CONST.LOCALSTORAGE_ENVIRONMENT, JSON.stringify(environment));
+        localStorage.setItem(Utils.CONST.LOCAL_STORAGE_ENVIRONMENT, JSON.stringify(environment));
     }
 
-    static getPromised_DCRappInfo(environment) {
-        return Axios.get(Utils.getDCRappInfoRequestURL(environment));
+    static getPromised_DCRAppInfo(environment) {
+        return Axios.get(Utils.getDCRAppInfoRequestURL(environment));
     }
 
-    static getDCRappInfoRequestURL(environment = Utils.getCurrentEnvironment()) {
+    static getDCRAppInfoRequestURL(environment = Utils.getCurrentEnvironment()) {
         return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.DCR_APP_INFO}${Utils.CONST.CONTEXT_PATH}`;
     }
 
@@ -179,12 +179,12 @@ class Utils {
      * @private
      */
     static _getDefaultEnvironment() {
-        return { label: 'Default', host: window.location.host, loginTokenPath: '/login/token' };
+        return {label: 'Default', host: window.location.host, loginTokenPath: '/login/token'};
     }
 }
 
 Utils.CONST = {
-    LOCALSTORAGE_ENVIRONMENT: 'environment_publisher',
+    LOCAL_STORAGE_ENVIRONMENT: 'environment_publisher',
     DCR_APP_INFO: '/login/login',
     LOGOUT: '/login/logout',
     LOGIN_TOKEN_PATH: '/login/token',

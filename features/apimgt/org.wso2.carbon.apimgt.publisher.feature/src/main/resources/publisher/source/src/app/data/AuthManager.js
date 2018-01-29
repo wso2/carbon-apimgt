@@ -24,6 +24,9 @@ import User from './User'
 import APIClient from './APIClient'
 import APIClientFactory from "./APIClientFactory";
 
+/**
+ * Class managing authentication
+ */
 class AuthManager {
     constructor() {
         this.isLogged = false;
@@ -92,12 +95,11 @@ class AuthManager {
      * An user object is return in present of user logged in user info in browser local storage, at the same time checks for partialToken in the cookie as well.
      * This may give a partial indication(passive check not actually check the token validity via an API) of whether the user has logged in or not, The actual API call may get denied
      * if the cookie stored access token is invalid/expired
-     * @param {string} environmentName: label of the environment, the user to be retrieved from
+     * @param {string} environmentName - label of the environment, the user to be retrieved from
      * @returns {User | null} Is any user has logged in or not
      */
-    static getUser(environmentName) {
-        environmentName = environmentName || Utils.getCurrentEnvironment().label;
-        const userData = localStorage.getItem(`${User.CONST.LOCALSTORAGE_USER}_${environmentName}`);
+    static getUser(environmentName = Utils.getCurrentEnvironment().label) {
+        const userData = localStorage.getItem(`${User.CONST.LOCAL_STORAGE_USER}_${environmentName}`);
         const partialToken = Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1, environmentName);
         if (!(userData && partialToken)) {
             return null;
@@ -109,8 +111,8 @@ class AuthManager {
     /**
      * Persist an user in browser local storage and in-memory, Since only one use can be logged into the application at a time,
      * This method will override any previously persist user data.
-     * @param {User} user : An instance of the {User} class
-     * @param {string} environmentName: label of the environment to be set the user
+     * @param {User} user - An instance of the {User} class
+     * @param {string} environmentName - label of the environment to be set the user
      */
     static setUser(user, environmentName) {
         environmentName = environmentName || Utils.getCurrentEnvironment().label;
@@ -118,7 +120,7 @@ class AuthManager {
             throw new Error("Invalid user object");
         }
         if (user) {
-            localStorage.setItem(`${User.CONST.LOCALSTORAGE_USER}_${environmentName}`,
+            localStorage.setItem(`${User.CONST.LOCAL_STORAGE_USER}_${environmentName}`,
                 JSON.stringify(user.toJson()));
         }
     }
@@ -128,12 +130,12 @@ class AuthManager {
      * @param {String} environmentName - Name of the environment the user to be removed
      */
     static dismissUser(environmentName) {
-        localStorage.removeItem(`${User.CONST.LOCALSTORAGE_USER}_${environmentName}`);
+        localStorage.removeItem(`${User.CONST.LOCAL_STORAGE_USER}_${environmentName}`);
         User.destroyInMemoryUser(environmentName);
     }
 
     static hasScopes(resourcePath, resourceMethod) {
-        let userscopes = this.getUser().scopes;
+        let userscopes = AuthManager.getUser().scopes;
         let validScope = APIClient.getScopeForResource(resourcePath, resourceMethod);
         return validScope.then(scope => {
             return userscopes.includes(scope)
@@ -143,10 +145,10 @@ class AuthManager {
     /**
      * By given username and password Authenticate the user, Since this REST API has no swagger definition,
      * Can't use swaggerjs to generate client.Hence using Axios to make AJAX calls
-     * @param {String} username : Username of the user
-     * @param {String} password : Plain text password
-     * @param {Object} environment : environment object
-     * @returns {AxiosPromise} : Promise object with the login request made
+     * @param {String} username - Username of the user
+     * @param {String} password - Plain text password
+     * @param {Object} environment - environment object
+     * @returns {AxiosPromise} - Promise object with the login request made
      */
     authenticateUser(username, password, environment) {
         const headers = {
@@ -166,7 +168,7 @@ class AuthManager {
         Utils.setEnvironment(environment);
 
         let promised_response = this.postAuthenticationRequest(headers, data, environment);
-        promised_response.catch(error => {
+        promised_response.catch(() => {
             Utils.setEnvironment(previous_environment);
         });
 
@@ -175,8 +177,8 @@ class AuthManager {
 
     /**
      * Return an user object given the login request response object
-     * @param {Object} response Response object received from either Axios or Fetch libraries
-     * @param {String} environmentName Name of the environment
+     * @param {Object} response - Response object received from either Axios or Fetch libraries
+     * @param {String} environmentName - Name of the environment
      * @returns {User} Instance of an user who is currently logged in (for the selected environment)
      */
     static loginUserMapper(response, environmentName) {
@@ -191,8 +193,9 @@ class AuthManager {
     }
 
     /**
-     * Revoke the issued OAuth access token for currently logged in user and clear both cookie and localstorage data.
-     * @param {String} environmentName : Name of the environment to be logged out. Default current environment.
+     * Revoke the issued OAuth access token for currently logged in user and clear both cookie and local-storage data.
+     * @param {String} environmentName - Name of the environment to be logged out. Default current environment.
+     * @returns {AxiosPromise}
      */
     logout(environmentName) {
         environmentName = environmentName || Utils.getCurrentEnvironment().label;
@@ -205,13 +208,13 @@ class AuthManager {
             'Authorization': authHeader
         };
         const promisedLogout = axios.post(url, null, {headers: headers});
-        promisedLogout.then(response => {
+        promisedLogout.then(() => {
             Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, Utils.CONST.CONTEXT_PATH, environmentName);
             AuthManager.dismissUser(environmentName);
-            new APIClientFactory().destroyAPIClient(environmentName); // Single client should be re initialize after log out
-            console.log(`Successfully logout from enviornment: ${environmentName}`);
+            APIClientFactory.getInstance().destroyAPIClient(environmentName); // Single client should be re initialize after log out
+            console.log(`Successfully logout from environment: ${environmentName}`);
         }).catch(error => {
-            console.error(`Failed to logout from enviornment: ${environmentName}`, error);
+            console.error(`Failed to logout from environment: ${environmentName}`, error);
         });
 
         return promisedLogout;
@@ -268,11 +271,14 @@ class AuthManager {
 
     /**
      * Login to environments specified using the JWT token
-     * @param {string} idToken : JWT token
-     * @param {array} environments : Array of environments
-     * @param {array} configs : Array of configurations of each environments to validate the feature is enabled
+     * @param {string} idToken - JWT token
+     * @param {array} environments - Array of environments
+     * @param {array} configs - Array of configurations of each environments to validate the feature is enabled
+     * @returns {Array} Array of Promise objects of each request
      */
     handleAutoLoginEnvironments(idToken, environments, configs) {
+        let promiseArray = [];
+
         const headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -291,18 +297,18 @@ class AuthManager {
             const isCurrentEnvironment = environment.label === currentEnvName;
 
             if (isAutoLoginEnabled && !isAlreadyLoggedIn && !isCurrentEnvironment) {
-                this.postAuthenticationRequest(headers, data, environment);
+                promiseArray.push(this.postAuthenticationRequest(headers, data, environment));
             }
         });
-
+        return promiseArray;
     }
 
     /**
      * Send the POST request to the using Axios
-     * @param {Object} headers : Header object
-     * @param {Object} data : Data object with credentials
-     * @param {Object} environment : environment object
-     * @returns {AxiosPromise} : Promise object with the login request made
+     * @param {Object} headers - Header object
+     * @param {Object} data - Data object with credentials
+     * @param {Object} environment - environment object
+     * @returns {Promise} Axios Promise object with the login request made
      */
     postAuthenticationRequest(headers, data, environment) {
         let promised_response = axios(Utils.getLoginTokenPath(environment), {

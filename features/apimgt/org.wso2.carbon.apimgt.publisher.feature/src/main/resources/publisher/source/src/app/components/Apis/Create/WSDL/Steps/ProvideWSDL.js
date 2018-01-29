@@ -60,7 +60,7 @@ class ProvideWSDL extends Component {
         // do not invoke callback in case of React SyntheticMouseEvent
         updateWSDLValidity = updateWSDLValidity.constructor.name === 'SyntheticMouseEvent' ? false : updateWSDLValidity;
         const {uploadMethod, url, file} = this.state;
-        let new_api = new API('');
+        let new_api = new API();
         let promised_validation;
         let wsdlBean = {};
         if (uploadMethod === 'file') {
