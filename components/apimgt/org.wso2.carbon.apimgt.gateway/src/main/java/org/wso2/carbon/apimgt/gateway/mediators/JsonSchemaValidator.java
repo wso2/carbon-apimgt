@@ -45,7 +45,7 @@ import java.util.Map;
  */
 public class JsonSchemaValidator extends AbstractMediator {
     /**
-     * This mediate method performs JSONAnalyzer configurations and validating the message body.
+     * This mediate method validate the message body.
      *
      * @param messageContext This message context contains the request message properties of the relevant API which was
      *                       enabled the JSON_Validator message mediation in flow.
@@ -107,10 +107,10 @@ public class JsonSchemaValidator extends AbstractMediator {
     }
 
     /**
-     * This configureSchemaProperties method bind the json_validator sequence properties for the JsonConfig object.
+     * This method binds the properties of the json validator sequence with the JsonConfig object.
      *
-     * @param messageContext This message context contains the request message properties of the relevant API which was
-     *                       enabled the JSON_Validator message mediation in flow.
+     * @param messageContext This message context contains the request message properties of the relevant
+     *                       API which was enabled the JSON_Validator message mediation in flow.
      * @return JSONConfig contains the json schema properties need to be validated.
      */
     public JSONConfig configureSchemaProperties(MessageContext messageContext) {
@@ -141,7 +141,7 @@ public class JsonSchemaValidator extends AbstractMediator {
         if (messageProperty != null) {
             arrayElementCount = Integer.parseInt(messageProperty.toString());
         } else {
-            String errorMessage = "Json schema max array element count is missing.";
+            String errorMessage = "Json schema max array element count is missing";
             ThreatExceptionHandler.handleException(messageContext, errorMessage);
         }
 
@@ -149,7 +149,7 @@ public class JsonSchemaValidator extends AbstractMediator {
         if (messageProperty != null) {
             keyLength = Integer.parseInt(messageProperty.toString());
         } else {
-            String errorMessage = "Json schema maximum key length is missing.";
+            String errorMessage = "Json schema maximum key length is missing";
             ThreatExceptionHandler.handleException(messageContext, errorMessage);
         }
 
@@ -176,12 +176,9 @@ public class JsonSchemaValidator extends AbstractMediator {
     }
 
     /**
-     * This method checks the status of the {enabledCheckBody} property which comes from the custom sequence.
-     * If a client ask to check the message body,Method returns true else It will return false.
      * If the {isContentAware} method returns false, The request message payload wont be build.
-     * Building a payload will directly affect to the performance.
      *
-     * @return If enabledCheckBody is true,The method returns true else it returns false
+     * @return this method always returns false to avoid building the message.
      */
     @Override
     public boolean isContentAware() {

@@ -235,12 +235,9 @@ public class XMLSchemaValidator extends AbstractMediator {
     }
 
     /**
-     * This method checks the status of the {enabledCheckBody} property which comes from the custom sequence.
-     * If a client ask to check the message body,Method returns true else It will return false.
      * If the {isContentAware} method returns false, The request message payload wont be build.
-     * Building a payload will directly affect to the performance.
      *
-     * @return If enabledCheckBody is true,The method returns true else it returns false
+     * @return isContentAware method always returns false to avoid build the message.
      */
     @Override
     public boolean isContentAware() {

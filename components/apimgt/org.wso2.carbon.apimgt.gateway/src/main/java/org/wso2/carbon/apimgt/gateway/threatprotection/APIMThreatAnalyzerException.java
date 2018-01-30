@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.gateway.threatprotection;
 
 /**
- * Exception thrown by APIMThreatAnalyzer method
+ * Exception thrown by APIMThreatAnalyzer method.
  */
 
 public class APIMThreatAnalyzerException extends Exception {
