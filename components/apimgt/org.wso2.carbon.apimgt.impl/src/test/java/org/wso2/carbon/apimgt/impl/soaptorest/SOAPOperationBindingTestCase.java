@@ -32,15 +32,15 @@ public class SOAPOperationBindingTestCase {
 
     @Test
     public void testGetSoapOperationMapping() throws Exception {
-        String url  = "http://ws.cdyne.com/phoneverify/phoneverify.asmx?wsdl";
-        String mapping = SOAPOperationBindingUtils.getSoapOperationMapping(url);
+        String mapping = SOAPOperationBindingUtils.getSoapOperationMapping(Thread.currentThread().getContextClassLoader()
+                .getResource("wsdls/phoneverify.wsdl").toExternalForm());
         Assert.assertTrue("Failed getting soap operation mapping from the WSDL", !mapping.isEmpty());
     }
 
     @Test
     public void testGetWSDLProcessor() throws Exception {
-        String url  = "http://ws.cdyne.com/phoneverify/phoneverify.asmx?wsdl";
-        APIMWSDLReader wsdlReader = new APIMWSDLReader(url);
+        APIMWSDLReader wsdlReader = new APIMWSDLReader(Thread.currentThread().getContextClassLoader()
+                .getResource("wsdls/phoneverify.wsdl").toExternalForm());
         byte[] wsdlContent = wsdlReader.getWSDL();
         WSDLSOAPOperationExtractor processor = SOAPOperationBindingUtils.getWSDLProcessor(wsdlContent, wsdlReader);
         Assert.assertNotNull(processor);

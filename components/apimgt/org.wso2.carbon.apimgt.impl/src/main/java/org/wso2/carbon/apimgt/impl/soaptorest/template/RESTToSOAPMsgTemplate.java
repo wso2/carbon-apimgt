@@ -19,7 +19,6 @@ package org.wso2.carbon.apimgt.impl.soaptorest.template;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
@@ -66,13 +65,13 @@ public class RESTToSOAPMsgTemplate {
             context.internalGetKeys();
 
             VelocityEngine velocityengine = new VelocityEngine();
-            if (!SOAPToRESTConstants.TEMPLATE.NOT_DEFINED.equalsIgnoreCase(getVelocityLogger())) {
+            if (!SOAPToRESTConstants.Template.NOT_DEFINED.equalsIgnoreCase(getVelocityLogger())) {
                 velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, VELOCITY_RUNTIME_LOG_CLASS);
                 velocityengine.setProperty(VELOCITY_RUNTIME_LOG_PROPERTY, getVelocityLogger());
             }
 
             velocityengine.init();
-            Template t = velocityengine.getTemplate(this.getInSeqTemplatePath());
+            org.apache.velocity.Template t = velocityengine.getTemplate(this.getInSeqTemplatePath());
 
             t.merge(context, writer);
         } catch (Exception e) {
@@ -95,13 +94,13 @@ public class RESTToSOAPMsgTemplate {
             context.internalGetKeys();
 
             VelocityEngine velocityengine = new VelocityEngine();
-            if (!SOAPToRESTConstants.TEMPLATE.NOT_DEFINED.equalsIgnoreCase(getVelocityLogger())) {
+            if (!SOAPToRESTConstants.Template.NOT_DEFINED.equalsIgnoreCase(getVelocityLogger())) {
                 velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, VELOCITY_RUNTIME_LOG_CLASS);
                 velocityengine.setProperty(VELOCITY_RUNTIME_LOG_PROPERTY, getVelocityLogger());
             }
 
             velocityengine.init();
-            Template template = velocityengine.getTemplate(this.getOutSeqTemplatePath());
+            org.apache.velocity.Template template = velocityengine.getTemplate(this.getOutSeqTemplatePath());
 
             template.merge(context, writer);
         } catch (Exception e) {
@@ -130,7 +129,7 @@ public class RESTToSOAPMsgTemplate {
             if (velocityLogPath != null && velocityLogPath.length() > 1) {
                 this.velocityLogPath = velocityLogPath;
             } else {
-                this.velocityLogPath = SOAPToRESTConstants.TEMPLATE.NOT_DEFINED;
+                this.velocityLogPath = SOAPToRESTConstants.Template.NOT_DEFINED;
             }
             return this.velocityLogPath;
         }

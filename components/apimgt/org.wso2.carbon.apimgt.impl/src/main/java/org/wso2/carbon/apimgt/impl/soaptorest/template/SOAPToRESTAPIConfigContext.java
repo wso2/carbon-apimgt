@@ -38,8 +38,8 @@ public class SOAPToRESTAPIConfigContext extends ConfigContextDecorator {
     public VelocityContext getContext() {
         VelocityContext context = super.getContext();
 
-        context.put(SOAPToRESTConstants.TEMPLATE.IS_SOAP_TO_REST_MODE, true);
-        context.put(SOAPToRESTConstants.TEMPLATE.SEQUENCES, sequences);
+        context.put(SOAPToRESTConstants.Template.IS_SOAP_TO_REST_MODE, true);
+        context.put(SOAPToRESTConstants.Template.SEQUENCES, sequences);
 
         return context;
     }

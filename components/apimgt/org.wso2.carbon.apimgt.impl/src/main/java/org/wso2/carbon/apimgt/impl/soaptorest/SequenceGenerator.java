@@ -130,7 +130,7 @@ public class SequenceGenerator {
                         typeFactory.constructCollectionType(List.class, WSDLSOAPOperation.class));
 
                 if (apiJSON != null) {
-                    Map pathMap = (HashMap) apiJSON.get(SOAPToRESTConstants.SWAGGER.PATHS);
+                    Map pathMap = (HashMap) apiJSON.get(SOAPToRESTConstants.Swagger.PATHS);
                     for (Object resourceObj : pathMap.entrySet()) {
                         Map.Entry entry = (Map.Entry) resourceObj;
                         String resourcePath = (String) entry.getKey();
@@ -152,15 +152,15 @@ public class SequenceGenerator {
                             String resourceInPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                                     provider + RegistryConstants.PATH_SEPARATOR + name
                                     + RegistryConstants.PATH_SEPARATOR + version + RegistryConstants.PATH_SEPARATOR
-                                    + SOAPToRESTConstants.SEQUENCE_GEN.SOAP_TO_REST_IN_RESOURCE + resourcePath
-                                    + SOAPToRESTConstants.SEQUENCE_GEN.RESOURCE_METHOD_SEPERATOR + method
-                                    + SOAPToRESTConstants.SEQUENCE_GEN.XML_FILE_EXTENSION;
+                                    + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_IN_RESOURCE + resourcePath
+                                    + SOAPToRESTConstants.SequenceGen.RESOURCE_METHOD_SEPERATOR + method
+                                    + SOAPToRESTConstants.SequenceGen.XML_FILE_EXTENSION;
                             String resourceOutPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                                     provider + RegistryConstants.PATH_SEPARATOR + name
                                     + RegistryConstants.PATH_SEPARATOR + version + RegistryConstants.PATH_SEPARATOR
-                                    + SOAPToRESTConstants.SEQUENCE_GEN.SOAP_TO_REST_OUT_RESOURCE + resourcePath
-                                    + SOAPToRESTConstants.SEQUENCE_GEN.RESOURCE_METHOD_SEPERATOR + method
-                                    + SOAPToRESTConstants.SEQUENCE_GEN.XML_FILE_EXTENSION;
+                                    + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_OUT_RESOURCE + resourcePath
+                                    + SOAPToRESTConstants.SequenceGen.RESOURCE_METHOD_SEPERATOR + method
+                                    + SOAPToRESTConstants.SequenceGen.XML_FILE_EXTENSION;
                             SequenceUtils.saveRestToSoapConvertedSequence(registry, inSequence, method, resourceInPath);
                             SequenceUtils
                                     .saveRestToSoapConvertedSequence(registry, outSequence, method, resourceOutPath);
@@ -253,11 +253,11 @@ public class SequenceGenerator {
         try {
             docBuilder = docFactory.newDocumentBuilder();
             Document doc = docBuilder.newDocument();
-            doc.createElementNS(namespace, SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_PREFIX
-                    + SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_SEPARATOR + opName);
+            doc.createElementNS(namespace, SOAPToRESTConstants.SequenceGen.NAMESPACE_PREFIX
+                    + SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR + opName);
             Transformer transformer = transformerFactory.newTransformer();
-            Element rootElement = doc.createElementNS(namespace, SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_PREFIX
-                    + SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_SEPARATOR + opName);
+            Element rootElement = doc.createElementNS(namespace, SOAPToRESTConstants.SequenceGen.NAMESPACE_PREFIX
+                    + SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR + opName);
             doc.appendChild(rootElement);
             int count = 1;
             for (JSONObject jsonObject : mappingList) {
@@ -271,37 +271,37 @@ public class SequenceGenerator {
                             JSONObject param = (JSONObject) paramObj;
                             String paramName = (String) param.keySet().iterator().next();
                             String xPath;
-                            String paramElements = createParameterElements(paramName, SOAPToRESTConstants.SWAGGER.BODY);
-                            String[] params = paramElements.split(SOAPToRESTConstants.SEQUENCE_GEN.COMMA);
-                            argStr += params[1] + SOAPToRESTConstants.SEQUENCE_GEN.NEW_LINE_CHAR;
-                            if (SOAPToRESTConstants.PARAM_TYPES.ARRAY
-                                    .equals(param.get(SOAPToRESTConstants.SWAGGER.TYPE))) {
-                                xPath = (String) param.get(SOAPToRESTConstants.SEQUENCE_GEN.XPATH);
+                            String paramElements = createParameterElements(paramName, SOAPToRESTConstants.Swagger.BODY);
+                            String[] params = paramElements.split(SOAPToRESTConstants.SequenceGen.COMMA);
+                            argStr += params[1] + SOAPToRESTConstants.SequenceGen.NEW_LINE_CHAR;
+                            if (SOAPToRESTConstants.ParamTypes.ARRAY
+                                    .equals(param.get(SOAPToRESTConstants.Swagger.TYPE))) {
+                                xPath = (String) param.get(SOAPToRESTConstants.SequenceGen.XPATH);
                                 JSONObject arrayObj = new JSONObject();
-                                arrayObj.put(SOAPToRESTConstants.SEQUENCE_GEN.PROPERTY_NAME, params[0]);
-                                arrayObj.put(SOAPToRESTConstants.SEQUENCE_GEN.PARAMETER_NAME,
-                                        param.get(SOAPToRESTConstants.SEQUENCE_GEN.PARAMETER_NAME));
+                                arrayObj.put(SOAPToRESTConstants.SequenceGen.PROPERTY_NAME, params[0]);
+                                arrayObj.put(SOAPToRESTConstants.SequenceGen.PARAMETER_NAME,
+                                        param.get(SOAPToRESTConstants.SequenceGen.PARAMETER_NAME));
                                 array.add(arrayObj);
                             } else {
-                                propertyStr += params[0] + SOAPToRESTConstants.SEQUENCE_GEN.NEW_LINE_CHAR;
+                                propertyStr += params[0] + SOAPToRESTConstants.SequenceGen.NEW_LINE_CHAR;
                                 JSONObject entry = (JSONObject) ((JSONObject) paramObj).get(paramName);
-                                xPath = (String) entry.get(SOAPToRESTConstants.SEQUENCE_GEN.XPATH);
+                                xPath = (String) entry.get(SOAPToRESTConstants.SequenceGen.XPATH);
                             }
                             if (xPath == null) {
                                 throw new APIManagementException("Cannot map parameters without x-path property.");
                             }
-                            String[] xPathElements = xPath.split(SOAPToRESTConstants.SEQUENCE_GEN.PATH_SEPARATOR);
+                            String[] xPathElements = xPath.split(SOAPToRESTConstants.SequenceGen.PATH_SEPARATOR);
                             Element prevElement = rootElement;
                             int elemPos = 0;
                             for (String xPathElement : xPathElements) {
                                 Element element = doc.createElementNS(namespace,
-                                        SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_PREFIX
-                                                + SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_SEPARATOR + xPathElement);
+                                        SOAPToRESTConstants.SequenceGen.NAMESPACE_PREFIX
+                                                + SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR + xPathElement);
                                 if (doc.getElementsByTagName(element.getTagName()).getLength() > 0) {
                                     prevElement = (Element) doc.getElementsByTagName(element.getTagName()).item(0);
                                 } else {
                                     if (elemPos == xPathElements.length - 1) {
-                                        element.setTextContent(SOAPToRESTConstants.SEQUENCE_GEN.PROPERTY_ACCESSOR +
+                                        element.setTextContent(SOAPToRESTConstants.SequenceGen.PROPERTY_ACCESSOR +
                                                 count);
                                         count++;
                                     }
@@ -318,24 +318,24 @@ public class SequenceGenerator {
                     } else if (jsonObject.get(obj) instanceof JSONObject) {
                         JSONObject param = (JSONObject) jsonObject.get(obj);
                         Element element = doc.createElementNS(namespace,
-                                SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_PREFIX
-                                        + SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_SEPARATOR + param
-                                        .get(SOAPToRESTConstants.SWAGGER.NAME).toString());
-                        element.setTextContent(SOAPToRESTConstants.SEQUENCE_GEN.PROPERTY_ACCESSOR + count);
+                                SOAPToRESTConstants.SequenceGen.NAMESPACE_PREFIX
+                                        + SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR + param
+                                        .get(SOAPToRESTConstants.Swagger.NAME).toString());
+                        element.setTextContent(SOAPToRESTConstants.SequenceGen.PROPERTY_ACCESSOR + count);
                         rootElement.appendChild(element);
                         String paramElements = createParameterElements(
-                                param.get(SOAPToRESTConstants.SWAGGER.NAME).toString(),
-                                SOAPToRESTConstants.PARAM_TYPES.QUERY);
-                        String[] params = paramElements.split(SOAPToRESTConstants.SEQUENCE_GEN.COMMA);
-                        argStr += params[1] + SOAPToRESTConstants.SEQUENCE_GEN.NEW_LINE_CHAR;
-                        propertyStr += params[0] + SOAPToRESTConstants.SEQUENCE_GEN.NEW_LINE_CHAR;
+                                param.get(SOAPToRESTConstants.Swagger.NAME).toString(),
+                                SOAPToRESTConstants.ParamTypes.QUERY);
+                        String[] params = paramElements.split(SOAPToRESTConstants.SequenceGen.COMMA);
+                        argStr += params[1] + SOAPToRESTConstants.SequenceGen.NEW_LINE_CHAR;
+                        propertyStr += params[0] + SOAPToRESTConstants.SequenceGen.NEW_LINE_CHAR;
                         count++;
                     }
                 }
             }
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty(SOAPToRESTConstants.SEQUENCE_GEN.INDENT_PROPERTY,
-                    SOAPToRESTConstants.SEQUENCE_GEN.INDENT_VALUE);
+            transformer.setOutputProperty(SOAPToRESTConstants.SequenceGen.INDENT_PROPERTY,
+                    SOAPToRESTConstants.SequenceGen.INDENT_VALUE);
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             transformer.transform(new DOMSource(doc), new StreamResult(stringWriter));
         } catch (ParserConfigurationException e) {
@@ -370,21 +370,21 @@ public class SequenceGenerator {
             Transformer transformer = transformerFactory.newTransformer();
             docBuilder = docFactory.newDocumentBuilder();
             Document doc = docBuilder.newDocument();
-            Element argElement = doc.createElement(SOAPToRESTConstants.SEQUENCE_GEN.ARG_ELEMENT);
-            Element propertyElement = doc.createElement(SOAPToRESTConstants.SEQUENCE_GEN.PROPERTY_ELEMENT);
-            argElement.setAttribute(SOAPToRESTConstants.SEQUENCE_GEN.EVALUATOR_ATTR,
-                    SOAPToRESTConstants.SEQUENCE_GEN.XML_FILE);
-            String expressionAttr = SOAPToRESTConstants.SEQUENCE_GEN.EXPRESSION_FUNC_DEF + jsonPathElement
-                    + SOAPToRESTConstants.SEQUENCE_GEN.EXPRESSION_FUNC_DEF_CLOSING_TAG;
-            argElement.setAttribute(SOAPToRESTConstants.SEQUENCE_GEN.EXPRESSION_ATTR, expressionAttr);
+            Element argElement = doc.createElement(SOAPToRESTConstants.SequenceGen.ARG_ELEMENT);
+            Element propertyElement = doc.createElement(SOAPToRESTConstants.SequenceGen.PROPERTY_ELEMENT);
+            argElement.setAttribute(SOAPToRESTConstants.SequenceGen.EVALUATOR_ATTR,
+                    SOAPToRESTConstants.SequenceGen.XML_FILE);
+            String expressionAttr = SOAPToRESTConstants.SequenceGen.EXPRESSION_FUNC_DEF + jsonPathElement
+                    + SOAPToRESTConstants.SequenceGen.EXPRESSION_FUNC_DEF_CLOSING_TAG;
+            argElement.setAttribute(SOAPToRESTConstants.SequenceGen.EXPRESSION_ATTR, expressionAttr);
             propertyElement.setAttribute(SOAPToRESTConstants.NAME_ATTRIBUTE,
-                    SOAPToRESTConstants.SEQUENCE_GEN.REQ_VARIABLE + jsonPathElement);
-            if (type.equals(SOAPToRESTConstants.PARAM_TYPES.QUERY)) {
-                propertyElement.setAttribute(SOAPToRESTConstants.SEQUENCE_GEN.EXPRESSION_ATTR,
-                        SOAPToRESTConstants.SEQUENCE_GEN.URL_OPERATOR + jsonPathElement);
+                    SOAPToRESTConstants.SequenceGen.REQ_VARIABLE + jsonPathElement);
+            if (type.equals(SOAPToRESTConstants.ParamTypes.QUERY)) {
+                propertyElement.setAttribute(SOAPToRESTConstants.SequenceGen.EXPRESSION_ATTR,
+                        SOAPToRESTConstants.SequenceGen.URL_OPERATOR + jsonPathElement);
             } else {
-                propertyElement.setAttribute(SOAPToRESTConstants.SEQUENCE_GEN.EXPRESSION_ATTR,
-                        SOAPToRESTConstants.SEQUENCE_GEN.ROOT_OPERATOR + jsonPathElement);
+                propertyElement.setAttribute(SOAPToRESTConstants.SequenceGen.EXPRESSION_ATTR,
+                        SOAPToRESTConstants.SequenceGen.ROOT_OPERATOR + jsonPathElement);
             }
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             transformer.transform(new DOMSource(propertyElement), new StreamResult(stringWriter));
@@ -403,6 +403,6 @@ public class SequenceGenerator {
         } catch (TransformerException e) {
             handleException("Error occurred when transforming in sequence xml ", e);
         }
-        return property + SOAPToRESTConstants.SEQUENCE_GEN.COMMA + argument;
+        return property + SOAPToRESTConstants.SequenceGen.COMMA + argument;
     }
 }

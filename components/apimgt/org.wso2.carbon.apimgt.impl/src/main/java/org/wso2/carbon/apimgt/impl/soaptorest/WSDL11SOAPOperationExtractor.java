@@ -93,7 +93,7 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                     Schema schema = (Schema) ext;
                     Element schemaElement = schema.getElement();
                     String nodeName = schemaElement.getNodeName();
-                    String nodeNS = nodeName.split(SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_SEPARATOR)[0];
+                    String nodeNS = nodeName.split(SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR)[0];
                     String complexTypeElement = nodeNS + SOAPToRESTConstants.COMPLEX_TYPE_NODE_NAME;
                     NodeList nodeList = schemaElement.getElementsByTagName(complexTypeElement);
                     elemList.addAll(SOAPOperationBindingUtils.list(nodeList));
@@ -289,7 +289,7 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                             NamedNodeMap attributes = childNodes.item(j).getAttributes();
                             param.setName(attributes.getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue());
                             String dataType = attributes.getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE).getNodeValue()
-                                    .split(SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_SEPARATOR)[1];
+                                    .split(SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR)[1];
                             Node maxOccursNode = attributes.getNamedItem(SOAPToRESTConstants.MAX_OCCURS_ATTRIBUTE);
                             if (maxOccursNode != null && (
                                     maxOccursNode.getNodeValue().equals(SOAPToRESTConstants.UNBOUNDED) || !maxOccursNode
@@ -338,7 +338,7 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                             NamedNodeMap attributes = childNode.getAttributes();
                             param.setName(attributes.getNamedItem(SOAPToRESTConstants.NAME_ATTRIBUTE).getNodeValue());
                             String dataType = attributes.getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE).getNodeValue()
-                                    .split(SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_SEPARATOR)[1];
+                                    .split(SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR)[1];
                             Node maxOccursNode = attributes.getNamedItem(SOAPToRESTConstants.MAX_OCCURS_ATTRIBUTE);
                             if (maxOccursNode != null && (
                                     maxOccursNode.getNodeValue().equals(SOAPToRESTConstants.UNBOUNDED) || !maxOccursNode
@@ -385,7 +385,7 @@ public class WSDL11SOAPOperationExtractor implements WSDLSOAPOperationExtractor 
                 for (Node childNode : childNodes) {
                     if (childNode.getLocalName() != null && WSDL_ELEMENT_NODE.equals(childNode.getLocalName())) {
                         String dataType = childNode.getAttributes().getNamedItem(SOAPToRESTConstants.TYPE_ATTRIBUTE)
-                                .getNodeValue().split(SOAPToRESTConstants.SEQUENCE_GEN.NAMESPACE_SEPARATOR)[1];
+                                .getNodeValue().split(SOAPToRESTConstants.SequenceGen.NAMESPACE_SEPARATOR)[1];
                         if (primitiveTypeList.contains(dataType)) {
                             isPrimitive = true;
                         } else {

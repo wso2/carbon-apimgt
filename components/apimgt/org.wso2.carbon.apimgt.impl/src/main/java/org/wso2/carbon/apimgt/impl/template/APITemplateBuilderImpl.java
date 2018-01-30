@@ -50,8 +50,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.wso2.carbon.apimgt.impl.APIConstants.API_APPLICATION_DATA_LOCATION;
-
 /**
  * Constructs API and resource configurations for the ESB/Synapse using a Apache velocity
  * templates.
@@ -101,7 +99,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                 String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                         api.getId().getProviderName() + RegistryConstants.PATH_SEPARATOR + api.getId().getApiName()
                         + RegistryConstants.PATH_SEPARATOR + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR
-                        + SOAPToRESTConstants.SEQUENCE_GEN.SOAP_TO_REST_IN_RESOURCE;
+                        + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_IN_RESOURCE;
                 Resource regResource;
 
                 UserRegistry registry = registryService.getGovernanceSystemRegistry(tenantId);
@@ -109,17 +107,19 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                     regResource = registry.get(resourcePath);
                     String[] resources = ((Collection) regResource).getChildren();
                     JSONObject pathObj = new JSONObject();
-                    for (String path : resources) {
-                        Resource resource = registry.get(path);
-                        String method = resource.getProperty("method");
-                        String resourceName = ((ResourceImpl) resource).getName();
-                        resourceName = resourceName.replaceAll("\\.xml", "");
-                        resourceName = resourceName.replaceAll("_" + method, "");
-                        resourceName = "/" + resourceName;
-                        String content = RegistryUtils.decodeBytes((byte[]) resource.getContent());
-                        JSONObject contentObj = new JSONObject();
-                        contentObj.put(method, content);
-                        pathObj.put(resourceName, contentObj);
+                    if(resources != null) {
+                        for (String path : resources) {
+                            Resource resource = registry.get(path);
+                            String method = resource.getProperty("method");
+                            String resourceName = ((ResourceImpl) resource).getName();
+                            resourceName = resourceName.replaceAll("\\.xml", "");
+                            resourceName = resourceName.replaceAll("_" + method, "");
+                            resourceName = "/" + resourceName;
+                            String content = RegistryUtils.decodeBytes((byte[]) resource.getContent());
+                            JSONObject contentObj = new JSONObject();
+                            contentObj.put(method, content);
+                            pathObj.put(resourceName, contentObj);
+                        }
                     }
                     configcontext = new SOAPToRESTAPIConfigContext(configcontext, pathObj);
                 }

@@ -37,8 +37,8 @@ import static org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPOperationBindingUt
 public class WSDLSOAPOperationExtractorImplTestCase {
     @Test
     public void testGetWsdlDefinition() throws Exception {
-        String url  = "http://ws.cdyne.com/phoneverify/phoneverify.asmx?wsdl";
-        APIMWSDLReader wsdlReader = new APIMWSDLReader(url);
+        APIMWSDLReader wsdlReader = new APIMWSDLReader(Thread.currentThread().getContextClassLoader()
+                .getResource("wsdls/phoneverify.wsdl").toExternalForm());
         byte[] wsdlContent = wsdlReader.getWSDL();
         WSDLSOAPOperationExtractor processor = new WSDL11SOAPOperationExtractor(wsdlReader);
         Assert.assertTrue("WSDL definition parsing failed", processor.init(wsdlContent));
@@ -46,8 +46,8 @@ public class WSDLSOAPOperationExtractorImplTestCase {
 
     @Test
     public void testReadSoapBindingOperations() throws Exception {
-        String url  = "http://ws.cdyne.com/phoneverify/phoneverify.asmx?wsdl";
-        APIMWSDLReader wsdlReader = new APIMWSDLReader(url);
+        APIMWSDLReader wsdlReader = new APIMWSDLReader(Thread.currentThread().getContextClassLoader()
+                .getResource("wsdls/phoneverify.wsdl").toExternalForm());
         byte[] wsdlContent = wsdlReader.getWSDL();
         WSDLSOAPOperationExtractor processor = getWSDLProcessor(wsdlContent, wsdlReader);
         Set<WSDLSOAPOperation> operations = processor.getWsdlInfo().getSoapBindingOperations();
@@ -57,8 +57,8 @@ public class WSDLSOAPOperationExtractorImplTestCase {
 
     @Test
     public void testParseOperationInputParameters() throws Exception {
-        String url  = "http://ws.cdyne.com/phoneverify/phoneverify.asmx?wsdl";
-        APIMWSDLReader wsdlReader = new APIMWSDLReader(url);
+        APIMWSDLReader wsdlReader = new APIMWSDLReader(Thread.currentThread().getContextClassLoader()
+                .getResource("wsdls/phoneverify.wsdl").toExternalForm());
         byte[] wsdlContent = wsdlReader.getWSDL();
         WSDLSOAPOperationExtractor processor = getWSDLProcessor(wsdlContent, wsdlReader);
         Set<WSDLSOAPOperation> operations = processor.getWsdlInfo().getSoapBindingOperations();
@@ -68,8 +68,8 @@ public class WSDLSOAPOperationExtractorImplTestCase {
 
     @Test
     public void testParseOperationOutputParameters() throws Exception {
-        String url  = "http://ws.cdyne.com/phoneverify/phoneverify.asmx?wsdl";
-        APIMWSDLReader wsdlReader = new APIMWSDLReader(url);
+        APIMWSDLReader wsdlReader = new APIMWSDLReader(Thread.currentThread().getContextClassLoader()
+                .getResource("wsdls/phoneverify.wsdl").toExternalForm());
         byte[] wsdlContent = wsdlReader.getWSDL();
         WSDLSOAPOperationExtractor processor = getWSDLProcessor(wsdlContent, wsdlReader);
         Set<WSDLSOAPOperation> operations = processor.getWsdlInfo().getSoapBindingOperations();

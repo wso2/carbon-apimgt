@@ -64,6 +64,7 @@ class SOAPToRESTConfigContext extends ConfigContext {
 
     }
 
+    // not implemented since parameters are different for in/out sequences
     @Override
     public void validate() throws APITemplateException, APIManagementException {
 
@@ -72,18 +73,18 @@ class SOAPToRESTConfigContext extends ConfigContext {
     @Override
     public VelocityContext getContext() {
         VelocityContext context = new VelocityContext();
-        context.put(SOAPToRESTConstants.TEMPLATE.HTTP_METHOD, method);
-        context.put(SOAPToRESTConstants.TEMPLATE.SOAP_ACTION, soapAction);
-        context.put(SOAPToRESTConstants.TEMPLATE.NAMESPACE, namespace);
-        context.put(SOAPToRESTConstants.TEMPLATE.RESOURCE_PATH, resourcePath);
-        context.put(SOAPToRESTConstants.TEMPLATE.MAPPING, mappingObj);
-        context.put(SOAPToRESTConstants.TEMPLATE.ARRAY_ELEMENTS, arrayElements);
+        context.put(SOAPToRESTConstants.Template.HTTP_METHOD, method);
+        context.put(SOAPToRESTConstants.Template.SOAP_ACTION, soapAction);
+        context.put(SOAPToRESTConstants.Template.NAMESPACE, namespace);
+        context.put(SOAPToRESTConstants.Template.RESOURCE_PATH, resourcePath);
+        context.put(SOAPToRESTConstants.Template.MAPPING, mappingObj);
+        context.put(SOAPToRESTConstants.Template.ARRAY_ELEMENTS, arrayElements);
         return context;
     }
 
     private void init() {
         resourcePath = soapAction.replaceAll(namespace, SOAPToRESTConstants.EMPTY_STRING);
-        resourcePath = resourcePath.replaceAll(SOAPToRESTConstants.SEQUENCE_GEN.PATH_SEPARATOR,
+        resourcePath = resourcePath.replaceAll(SOAPToRESTConstants.SequenceGen.PATH_SEPARATOR,
                 SOAPToRESTConstants.EMPTY_STRING);
     }
 }

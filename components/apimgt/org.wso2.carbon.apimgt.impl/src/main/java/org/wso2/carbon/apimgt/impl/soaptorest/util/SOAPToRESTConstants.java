@@ -34,7 +34,7 @@ public class SOAPToRESTConstants {
     public static final String CONTENT = "content";
     public static final String EMPTY_STRING = "";
 
-    public final class SWAGGER {
+    public final class Swagger {
         public static final String DEFINITIONS = "definitions";
         public static final String DEFINITIONS_ROOT = "#/definitions/";
         public static final String SCHEMA = "schema";
@@ -49,13 +49,13 @@ public class SOAPToRESTConstants {
         public static final String ITEMS = "items";
     }
 
-    public final class PARAM_TYPES {
+    public final class ParamTypes {
         public static final String QUERY = "query";
         public static final String OBJECT = "object";
         public static final String ARRAY = "array";
     }
 
-    public final class SEQUENCE_GEN {
+    public final class SequenceGen {
         public static final String XPATH = "x-path";
         public static final String INDENT_PROPERTY = "{http://xml.apache.org/xslt}indent-amount";
         public static final String INDENT_VALUE = "2";
@@ -87,7 +87,7 @@ public class SOAPToRESTConstants {
         public static final String XML_FILE = "xml";
     }
 
-    public final class TEMPLATE {
+    public final class Template {
         public static final String HTTP_METHOD = "method";
         public static final String SOAP_ACTION = "soapAction";
         public static final String NAMESPACE = "namespace";

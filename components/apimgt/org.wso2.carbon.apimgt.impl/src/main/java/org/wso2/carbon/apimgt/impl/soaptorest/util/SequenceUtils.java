@@ -242,28 +242,28 @@ public class SequenceUtils {
     public static List<JSONObject> getResourceParametersFromSwagger(JSONObject swaggerObj, JSONObject resource,
             String method) {
         Map content = (HashMap) resource.get(method);
-        JSONArray parameters = (JSONArray) content.get(SOAPToRESTConstants.SWAGGER.PARAMETERS);
+        JSONArray parameters = (JSONArray) content.get(SOAPToRESTConstants.Swagger.PARAMETERS);
         List<JSONObject> mappingList = new ArrayList<>();
         for (Object param : parameters) {
-            String inputType = String.valueOf(((JSONObject) param).get(SOAPToRESTConstants.SWAGGER.IN));
-            if (inputType.equals(SOAPToRESTConstants.SWAGGER.BODY)) {
-                JSONObject schema = (JSONObject) ((JSONObject) param).get(SOAPToRESTConstants.SWAGGER.SCHEMA);
-                String definitionPath = String.valueOf(schema.get(SOAPToRESTConstants.SWAGGER.REF));
-                String definition = definitionPath.replaceAll(SOAPToRESTConstants.SWAGGER.DEFINITIONS_ROOT, "");
+            String inputType = String.valueOf(((JSONObject) param).get(SOAPToRESTConstants.Swagger.IN));
+            if (inputType.equals(SOAPToRESTConstants.Swagger.BODY)) {
+                JSONObject schema = (JSONObject) ((JSONObject) param).get(SOAPToRESTConstants.Swagger.SCHEMA);
+                String definitionPath = String.valueOf(schema.get(SOAPToRESTConstants.Swagger.REF));
+                String definition = definitionPath.replaceAll(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT, "");
                 JSONObject definitions = (JSONObject) ((JSONObject) swaggerObj
-                        .get(SOAPToRESTConstants.SWAGGER.DEFINITIONS)).get(definition);
-                JSONObject properties = (JSONObject) definitions.get(SOAPToRESTConstants.SWAGGER.PROPERTIES);
+                        .get(SOAPToRESTConstants.Swagger.DEFINITIONS)).get(definition);
+                JSONObject properties = (JSONObject) definitions.get(SOAPToRESTConstants.Swagger.PROPERTIES);
 
                 for (Object property : properties.entrySet()) {
                     Map.Entry entry = (Map.Entry) property;
                     String paramName = String.valueOf(entry.getKey());
                     JSONObject value = (JSONObject) entry.getValue();
                     JSONArray propArray = new JSONArray();
-                    if (value.get(SOAPToRESTConstants.SWAGGER.REF) != null) {
-                        String propDefinitionRef = String.valueOf(value.get(SOAPToRESTConstants.SWAGGER.REF))
-                                .replaceAll(SOAPToRESTConstants.SWAGGER.DEFINITIONS_ROOT, "");
+                    if (value.get(SOAPToRESTConstants.Swagger.REF) != null) {
+                        String propDefinitionRef = String.valueOf(value.get(SOAPToRESTConstants.Swagger.REF))
+                                .replaceAll(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT, "");
                         getNestedDefinitionsFromSwagger(
-                                (JSONObject) swaggerObj.get(SOAPToRESTConstants.SWAGGER.DEFINITIONS), propDefinitionRef,
+                                (JSONObject) swaggerObj.get(SOAPToRESTConstants.Swagger.DEFINITIONS), propDefinitionRef,
                                 propDefinitionRef, propArray);
                         JSONObject refObj = new JSONObject();
                         refObj.put(paramName, propArray);
@@ -272,8 +272,8 @@ public class SequenceUtils {
                                     .toJSONString());
                         }
                         mappingList.add(refObj);
-                    } else if (String.valueOf(value.get(SOAPToRESTConstants.SWAGGER.TYPE))
-                            .equals(SOAPToRESTConstants.PARAM_TYPES.ARRAY)) {
+                    } else if (String.valueOf(value.get(SOAPToRESTConstants.Swagger.TYPE))
+                            .equals(SOAPToRESTConstants.ParamTypes.ARRAY)) {
                         JSONObject arrObj = new JSONObject();
                         arrObj.put(((Map.Entry) property).getKey(), ((Map.Entry) property).getValue());
                         mappingList.add(arrObj);
@@ -285,7 +285,7 @@ public class SequenceUtils {
                 }
             } else {
                 JSONObject queryObj = new JSONObject();
-                queryObj.put(((JSONObject) param).get(SOAPToRESTConstants.SWAGGER.NAME), param);
+                queryObj.put(((JSONObject) param).get(SOAPToRESTConstants.Swagger.NAME), param);
                 mappingList.add(queryObj);
                 if (log.isDebugEnabled()) {
                     log.debug("Properties for from query type resource parameter: " + queryObj.toJSONString());
@@ -307,29 +307,29 @@ public class SequenceUtils {
             JSONArray propArray) {
         JSONObject propDefinitions = (JSONObject) (definitions).get(definition);
         JSONObject props;
-        if (SOAPToRESTConstants.PARAM_TYPES.ARRAY.equals(propDefinitions.get(SOAPToRESTConstants.TYPE_ATTRIBUTE))) {
-            props = (JSONObject) propDefinitions.get(SOAPToRESTConstants.SWAGGER.ITEMS);
-            if (props.get(SOAPToRESTConstants.SWAGGER.REF) == null) {
+        if (SOAPToRESTConstants.ParamTypes.ARRAY.equals(propDefinitions.get(SOAPToRESTConstants.TYPE_ATTRIBUTE))) {
+            props = (JSONObject) propDefinitions.get(SOAPToRESTConstants.Swagger.ITEMS);
+            if (props.get(SOAPToRESTConstants.Swagger.REF) == null) {
                 JSONObject arrayProperty = new JSONObject();
                 String key = jsonPath + "." + props.get(SOAPToRESTConstants.TYPE_ATTRIBUTE);
                 arrayProperty.put(key, props.get(SOAPToRESTConstants.TYPE_ATTRIBUTE));
-                arrayProperty.put(SOAPToRESTConstants.TYPE_ATTRIBUTE, SOAPToRESTConstants.PARAM_TYPES.ARRAY);
-                arrayProperty.put(SOAPToRESTConstants.SEQUENCE_GEN.PARAMETER_NAME,
+                arrayProperty.put(SOAPToRESTConstants.TYPE_ATTRIBUTE, SOAPToRESTConstants.ParamTypes.ARRAY);
+                arrayProperty.put(SOAPToRESTConstants.SequenceGen.PARAMETER_NAME,
                         props.get(SOAPToRESTConstants.TYPE_ATTRIBUTE));
-                arrayProperty.put(SOAPToRESTConstants.SEQUENCE_GEN.XPATH, jsonPath);
+                arrayProperty.put(SOAPToRESTConstants.SequenceGen.XPATH, jsonPath);
                 propArray.add(arrayProperty);
                 return;
             }
         } else {
-            props = (JSONObject) propDefinitions.get(SOAPToRESTConstants.SWAGGER.PROPERTIES);
+            props = (JSONObject) propDefinitions.get(SOAPToRESTConstants.Swagger.PROPERTIES);
         }
         for (Object property : props.entrySet()) {
             Map.Entry entry = (Map.Entry) property;
             String paramName = String.valueOf(entry.getKey());
             JSONObject value = (JSONObject) entry.getValue();
-            if (value.get(SOAPToRESTConstants.SWAGGER.REF) != null) {
-                String propDefinitionRef = String.valueOf(value.get(SOAPToRESTConstants.SWAGGER.REF))
-                        .replaceAll(SOAPToRESTConstants.SWAGGER.DEFINITIONS_ROOT, "");
+            if (value.get(SOAPToRESTConstants.Swagger.REF) != null) {
+                String propDefinitionRef = String.valueOf(value.get(SOAPToRESTConstants.Swagger.REF))
+                        .replaceAll(SOAPToRESTConstants.Swagger.DEFINITIONS_ROOT, "");
                 jsonPath = definition + "." + propDefinitionRef;
                 getNestedDefinitionsFromSwagger(definitions, propDefinitionRef, jsonPath, propArray);
             } else {

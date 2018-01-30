@@ -136,35 +136,46 @@ public class SOAPOperationBindingUtils {
     private static void populateSoapOperationParameters(Set<WSDLSOAPOperation> soapOperations) {
         String[] primitiveTypes = { "string", "byte", "short", "int", "long", "float", "double", "boolean" };
         List primitiveTypeList = Arrays.asList(primitiveTypes);
-        for (WSDLSOAPOperation op : soapOperations) {
-            String resourcePath;
-            String operationName = op.getName();
-            op.setSoapBindingOpName(operationName);
-            if (operationName.toLowerCase().startsWith("get")) {
-                resourcePath = operationName.substring(3, operationName.length());
-                op.setHttpVerb(HTTPConstants.HTTP_METHOD_GET);
-            } else {
-                resourcePath = operationName;
-                op.setHttpVerb(HTTPConstants.HTTP_METHOD_POST);
-            }
-            resourcePath =
-                    resourcePath.substring(0, 1).toLowerCase() + resourcePath.substring(1, resourcePath.length());
-            op.setName(resourcePath);
+        if (soapOperations != null) {
+            for (WSDLSOAPOperation operation : soapOperations) {
+                String resourcePath;
+                String operationName = operation.getName();
+                operation.setSoapBindingOpName(operationName);
+                if (operationName.toLowerCase().startsWith("get")) {
+                    resourcePath = operationName.substring(3, operationName.length());
+                    operation.setHttpVerb(HTTPConstants.HTTP_METHOD_GET);
+                } else {
+                    resourcePath = operationName;
+                    operation.setHttpVerb(HTTPConstants.HTTP_METHOD_POST);
+                }
+                resourcePath =
+                        resourcePath.substring(0, 1).toLowerCase() + resourcePath.substring(1, resourcePath.length());
+                operation.setName(resourcePath);
+                if (log.isDebugEnabled()) {
+                    log.debug("REST resource path for SOAP operation: " + operationName + " is: " + resourcePath);
+                }
 
-            List<WSDLOperationParam> params = op.getParameters();
-            if (log.isDebugEnabled()) {
-                log.debug("SOAP operation: " + operationName + " has " + params.size() + " parameters");
-            }
-            for (WSDLOperationParam param : params) {
-                if (param.getDataType() != null) {
-                    String dataTypeWithNS = param.getDataType();
-                    String dataType = dataTypeWithNS.substring(dataTypeWithNS.indexOf(":") + 1);
-                    param.setDataType(dataType);
-                    if (!primitiveTypeList.contains(dataType)) {
-                        param.setComplexType(true);
+                List<WSDLOperationParam> params = operation.getParameters();
+                if (log.isDebugEnabled()) {
+                    log.debug("SOAP operation: " + operationName + " has " + params.size() + " parameters");
+                }
+                if(params != null) {
+                    for (WSDLOperationParam param : params) {
+                        if (param.getDataType() != null) {
+                            String dataTypeWithNS = param.getDataType();
+                            String dataType = dataTypeWithNS.substring(dataTypeWithNS.indexOf(":") + 1);
+                            param.setDataType(dataType);
+                            if (!primitiveTypeList.contains(dataType)) {
+                                param.setComplexType(true);
+                            }
+                        }
                     }
+                } else {
+                    log.info("No parameters found for SOAP operation: " + operationName);
                 }
             }
+        } else {
+            log.info("No SOAP operations found in the WSDL");
         }
     }
 
@@ -183,13 +194,12 @@ public class SOAPOperationBindingUtils {
             boolean canProcess = processor.init(content);
             if (canProcess) {
                 return processor;
+            } else {
+                throw new APIManagementException("No WSDL processor found to process WSDL content");
             }
         } catch (APIMgtWSDLException e) {
             throw new APIManagementException("Error while instantiating wsdl processor class", e);
         }
-
-        //no processors found if this line reaches
-        throw new APIManagementException("No WSDL processor found to process WSDL content");
     }
 
     /**
