@@ -104,7 +104,6 @@ public class XMLSchemaValidator extends AbstractMediator {
                             BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStreamSchema);
                             validateSchema(messageContext, bufferedInputStream);
                         }
-
                     }
                 }
             } catch (APIMThreatAnalyzerException e) {
@@ -130,7 +129,7 @@ public class XMLSchemaValidator extends AbstractMediator {
     }
 
     /**
-     * This configureSchemaProperties method bind the xml_validator sequence properties for the XMLConfig object.
+     * This method binds the properties of the json validator sequence with the XMLConfig object.
      *
      * @param messageContext This message context contains the request message properties of the relevant
      *                       API which was enabled the XML_Validator message mediation in flow.
@@ -227,7 +226,6 @@ public class XMLSchemaValidator extends AbstractMediator {
         xmlConfig.setMaxAttributeLength(attributeLength);
         xmlConfig.setEntityExpansionLimit(entityExpansionLimit);
         xmlConfig.setMaxChildrenPerElement(childrenPerElement);
-
         return xmlConfig;
     }
 
@@ -269,7 +267,6 @@ public class XMLSchemaValidator extends AbstractMediator {
                     validator.validate(xmlFile);
                 }
             }
-
         } catch (SAXException | IOException e) {
             throw new APIMThreatAnalyzerException("Error occurred while parsing XML payload : " + e);
         }

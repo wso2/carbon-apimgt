@@ -45,7 +45,7 @@ import java.util.Map;
  */
 public class JsonSchemaValidator extends AbstractMediator {
     /**
-     * This mediate method validate the message body.
+     * This mediate method validates the message body.
      *
      * @param messageContext This message context contains the request message properties of the relevant
      *                       API which was enabled the JSON_Validator message mediation in flow.
@@ -61,7 +61,6 @@ public class JsonSchemaValidator extends AbstractMediator {
         String contentType;
         String apiContext;
         String requestMethod;
-
         axis2MC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         contentType = axis2MC.getProperty(ThreatProtectorConstants.CONTENT_TYPE).toString();
         apiContext = messageContext.getProperty(ThreatProtectorConstants.API_CONTEXT).toString();
