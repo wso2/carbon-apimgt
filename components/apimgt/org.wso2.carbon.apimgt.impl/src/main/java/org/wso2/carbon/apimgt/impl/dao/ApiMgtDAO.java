@@ -7503,7 +7503,7 @@ public class ApiMgtDAO {
         ResultSet rs = null;
 
         String scopeEntry = SQLConstants.ADD_SCOPE_ENTRY_SQL;
-        String scopeRoleEntry = SQLConstants.INSERT_SCOPE_ROLE;
+        String scopeRoleEntry = SQLConstants.ADD_SCOPE_ROLE_SQL;
         String scopeLink = SQLConstants.ADD_SCOPE_LINK_SQL;
         try {
             conn = APIMgtDBUtil.getConnection();
@@ -7522,7 +7522,8 @@ public class ApiMgtDAO {
                     if (object instanceof URITemplate) {
                         URITemplate uriTemplate = (URITemplate) object;
 
-                        if (uriTemplate.getScope() == null) {
+                        if (uriTemplate.getScope() == null || isScopeExists(uriTemplate.getScope().getKey(),
+                                tenantID)) {
                             continue;
                         }
                         ps.setString(1, uriTemplate.getScope().getKey());
@@ -7595,6 +7596,39 @@ public class ApiMgtDAO {
             APIMgtDBUtil.closeAllConnections(ps, conn, rs);
             APIMgtDBUtil.closeAllConnections(ps2, null, null);
         }
+    }
+
+    /**
+     * Check a given scope key already exist for a tenant
+     * @param scopeKey Scope Key
+     * @param tenantId Tenant ID
+     * @return true if scope already exists
+     * @throws APIManagementException if an error occurs while executing db query
+     */
+    private boolean isScopeExists(String scopeKey, int tenantId) throws APIManagementException {
+        Connection conn = null;
+        ResultSet resultSet = null;
+        PreparedStatement ps = null;
+        try {
+            conn = APIMgtDBUtil.getConnection();
+
+            String sqlQuery = SQLConstants.GET_SCOPES_SQL;
+            ps = conn.prepareStatement(sqlQuery);
+            ps.setString(1, scopeKey);
+            ps.setInt(2, tenantId);
+            resultSet = ps.executeQuery();
+            if (resultSet.next()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Scope key " + scopeKey + " for tenant " + tenantId + " exists.");
+                }
+                return true;
+            }
+        } catch (SQLException e) {
+            handleException("Failed to check scope exists for scope " + scopeKey, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, conn, resultSet);
+        }
+        return false;
     }
 
     public Set<Scope> getAPIScopes(APIIdentifier identifier) throws APIManagementException {

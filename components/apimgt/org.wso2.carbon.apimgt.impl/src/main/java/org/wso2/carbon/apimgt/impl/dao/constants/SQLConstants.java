@@ -2006,7 +2006,13 @@ public class SQLConstants {
             " INNER JOIN  IDN_OAUTH2_SCOPE_BINDING AS C ON B.SCOPE_ID = C.SCOPE_ID ) " +
             " WHERE B.API_ID = ?";
 
-    public static final String INSERT_SCOPE_ROLE =
+    public static final String GET_SCOPES_SQL =
+            " SELECT SCOPE_ID  " +
+                    " FROM  IDN_OAUTH2_SCOPE  " +
+                    " WHERE NAME = ? " +
+                    " AND TENANT_ID = ?";
+
+    public static final String ADD_SCOPE_ROLE_SQL =
             "INSERT INTO IDN_OAUTH2_SCOPE_BINDING (SCOPE_ID, SCOPE_BINDING) values (?,?)";
 
     public static final String GET_API_SCOPES_ORACLE_SQL =
