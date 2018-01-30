@@ -40,10 +40,10 @@
     <p>
         Before invoking the API with the access token, obtain the consumer key/secret key pair by calling the
         dynamic client registration endpoint. You can request an access token with the preferred grant type. An
-        example is shown below,
+        example is shown below (In this example, the payload.json is saved in the same directory where the curl command is executed),
     </p>
 
-    <div class="pre"><code class="bash">curl -X POST -H "Authorization: Basic YWRtaW46YWRtaW4=" -H "Content-Type: application/json" -d @payload.json https://localhost:9443/client-registration/v0.11/register</code></div>
+    <div class="pre"><code class="bash">curl -k -X POST -H "Authorization: Basic YWRtaW46YWRtaW4=" -H "Content-Type: application/json" -d @payload.json https://localhost:9443/client-registration/v0.11/register</code></div>
     <br/>
 
     <p>
@@ -53,7 +53,6 @@
     <div class="pre"><code class="json">{
         "callbackUrl": "www.google.lk",
         "clientName": "rest_api_store",
-        "tokenScope": "Production",
         "owner": "admin",
         "grantType": "password refresh_token",
         "saasApp": true
@@ -70,7 +69,6 @@
         "{
         \"username\":\"admin\",
         \"redirect_uris\":\"www.google.lk\",
-        \"tokenScope\":[Ljava.lang.String;@3a73796a,
         \"client_name\":\"admin_rest_api_store\",
         \"grant_types\":\"authorization_code password refresh_token iwa:ntlm
         urn:ietf:params:oauth:grant-type:saml2-bearer client_credentialsimplicit\"

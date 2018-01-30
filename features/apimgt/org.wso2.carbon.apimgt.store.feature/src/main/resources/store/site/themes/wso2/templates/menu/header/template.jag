@@ -21,10 +21,10 @@ if (jagg.getUser() != null) {
 	var MultitenantUtils = Packages.org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 	tenantDomain = MultitenantUtils.getTenantDomain(jagg.getUser().username);
 }
-// used for the intractive tutorial
+// used for the interactive tutorial
 var tenantDomains_forTutorial = require("/site/conf/interactiveTutorial.json");
 var blackListedTenantDomains_forTutorial = stringify(tenantDomains_forTutorial.blackListedTenantDomains);
-var isEnabledTutorialForUsers = true;
+var isEnabledTutorialForUsers = tenantDomains_forTutorial.isEnabledTutorial;
 if (blackListedTenantDomains_forTutorial.indexOf(tenantDomain)>0) {
     isEnabledTutorialForUsers = false;
 }
@@ -41,19 +41,27 @@ if (blackListedTenantDomains_forTutorial.indexOf(tenantDomain)>0) {
        <% if(user){ %>
        <ul class="nav navbar-right float-remove-xs text-center-xs">
 	   		<%if (isEnabledTutorialForUsers) {%>
-					<li class="visible-inline-block">
-							<!--Links to Access APIStore-->
-						<a title="<%=i18n.localize("API Store walkthrough")%>" id="register-link1" href="<%= jagg.urlTenanted('/site/pages/index.jag')%><%="?storeInteractiveTutorial=true"%>">
-							<span class="icon fw-stack fw-lg">
-							<i class="fw fw-circle fw-stack-2x" title="walkthrough"></i>
-							<i class="fw fw-deploy fw-stack-1x fw-inverse" title="walkthrough"></i>
-							</span>
+	   		    <%var tenantUrl = jagg.urlTenanted('/site/pages/index.jag');
+                var interactiveTutorialState;
+                %>
+                <%if (tenantUrl.indexOf("tenant") == -1) {
+                    interactiveTutorialState = "?storeInteractiveTutorial=true";
+                } else {
+                    interactiveTutorialState = "&storeInteractiveTutorial=true";
+                }%>
+                <li class="visible-inline-block">
+                        <!--Links to Access APIStore-->
+                    <a title="<%=i18n.localize("API Store walkthrough")%>" id="register-link1" href="<%= jagg.urlTenanted('/site/pages/index.jag')%><%=interactiveTutorialState%>">
+                        <span class="icon fw-stack fw-lg">
+                        <i class="fw fw-circle fw-stack-2x" title="walkthrough"></i>
+                        <i class="fw fw-deploy fw-stack-1x fw-inverse" title="walkthrough"></i>
+                        </span>
 
-							<span class="hidden-xs">
-								API Store walkthrough
-							</span>
-						</a>
-					</li>
+                        <span class="hidden-xs">
+                            API Store walkthrough
+                        </span>
+                    </a>
+                </li>
 			<%}%>
        		<%if (tenant == null && isSuperTenant != null && !isSuperTenant && site.showPublicStoreURL) {%>
 						<li class="visible-inline-block">

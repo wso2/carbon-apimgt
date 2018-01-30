@@ -25,11 +25,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
-import org.wso2.carbon.apimgt.api.model.policy.Limit;
-import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
-import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
-import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
+import org.wso2.carbon.apimgt.api.model.policy.*;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
@@ -165,7 +161,7 @@ public class TestUtils {
         Mockito.doNothing().when(cache).removeAll();
     }
 
-    public static ApiMgtDAO getApiMgtDAO() {
+    public static ApiMgtDAO getApiMgtDAO(){
         PowerMockito.mockStatic(ApiMgtDAO.class);
         ApiMgtDAO apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
         PowerMockito.when(ApiMgtDAO.getInstance()).thenReturn(apiMgtDAO);

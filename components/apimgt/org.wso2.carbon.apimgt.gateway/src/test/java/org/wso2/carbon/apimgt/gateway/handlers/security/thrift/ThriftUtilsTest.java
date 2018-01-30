@@ -50,8 +50,8 @@ public class ThriftUtilsTest {
     private String connectionTimeout = "3600";
     private String keyValidatorUsername = "admin";
     private String keyValidatorPassword = "admin";
-    private String keyStoreLocation = "repository/resources/security/wso2carbon.jks";
-    private String keyStorePassword = "wso2carbon";
+    private String trustStoreLocation = "repository/resources/security/client-truststore.jks";
+    private String trustStorePassword = "wso2carbon";
     private ThriftAuthClient thriftAuthClient;
 
 
@@ -79,8 +79,8 @@ public class ThriftUtilsTest {
                 (thriftServerHost);
         Mockito.when(config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME)).thenReturn(keyValidatorUsername);
         Mockito.when(config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD)).thenReturn(keyValidatorPassword);
-        Mockito.when(serverConfiguration.getFirstProperty("Security.KeyStore.Location")).thenReturn(keyStoreLocation);
-        Mockito.when(serverConfiguration.getFirstProperty("Security.KeyStore.Password")).thenReturn(keyStorePassword);
+        Mockito.when(serverConfiguration.getFirstProperty("Security.TrustStore.Location")).thenReturn(trustStoreLocation);
+        Mockito.when(serverConfiguration.getFirstProperty("Security.TrustStore.Password")).thenReturn(trustStorePassword);
         Mockito.when(serverConfiguration.getFirstProperty("WebContextRoot")).thenReturn("/");
         PowerMockito.whenNew(ThriftAuthClient.class).withAnyArguments().thenReturn(thriftAuthClient);
         Mockito.when(thriftAuthClient.getSessionId(Mockito.anyString(), Mockito.anyString())).thenReturn("12345");
@@ -92,8 +92,8 @@ public class ThriftUtilsTest {
         Assert.assertEquals(thriftUtils.getSessionId(), "12345");
         Assert.assertEquals(thriftUtils.reLogin(), "12345");
         Assert.assertEquals(thriftUtils.getThriftClientConnectionTimeOut(), Integer.parseInt(connectionTimeout));
-        Assert.assertEquals(thriftUtils.getTrustStorePath(), keyStoreLocation);
-        Assert.assertEquals(thriftUtils.getTrustStorePassword(), keyStorePassword);
+        Assert.assertEquals(thriftUtils.getTrustStorePath(), trustStoreLocation);
+        Assert.assertEquals(thriftUtils.getTrustStorePassword(), trustStorePassword);
         Assert.assertNotNull(thriftUtils.getThriftAuthClient());
     }
 
@@ -106,11 +106,11 @@ public class ThriftUtilsTest {
         Mockito.when(config.getFirstProperty(APIConstants.API_KEY_MANAGER_THRIFT_SERVER_HOST)).thenReturn(null);
         Mockito.when(config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME)).thenReturn(keyValidatorUsername);
         Mockito.when(config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD)).thenReturn(keyValidatorPassword);
-        Mockito.when(serverConfiguration.getFirstProperty("Security.KeyStore.Location")).thenReturn(keyStoreLocation);
-        Mockito.when(serverConfiguration.getFirstProperty("Security.KeyStore.Password")).thenReturn(keyStorePassword);
+        Mockito.when(serverConfiguration.getFirstProperty("Security.TrustStore.Location")).thenReturn(trustStoreLocation);
+        Mockito.when(serverConfiguration.getFirstProperty("Security.TrustStore.Password")).thenReturn(trustStorePassword);
         Mockito.when(serverConfiguration.getFirstProperty("WebContextRoot")).thenReturn("/");
         PowerMockito.whenNew(ThriftAuthClient.class).withAnyArguments().thenReturn(thriftAuthClient);
-        Mockito.when(thriftAuthClient.getSessionId(keyValidatorUsername, keyStorePassword)).thenReturn("12345");
+        Mockito.when(thriftAuthClient.getSessionId(keyValidatorUsername, trustStorePassword)).thenReturn("12345");
         ThriftUtils.getInstance();
     }
 
@@ -123,11 +123,11 @@ public class ThriftUtilsTest {
         Mockito.when(config.getFirstProperty(APIConstants.API_KEY_MANAGER_THRIFT_SERVER_HOST)).thenReturn(null);
         Mockito.when(config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME)).thenReturn(null);
         Mockito.when(config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD)).thenReturn(keyValidatorPassword);
-        Mockito.when(serverConfiguration.getFirstProperty("Security.KeyStore.Location")).thenReturn(keyStoreLocation);
-        Mockito.when(serverConfiguration.getFirstProperty("Security.KeyStore.Password")).thenReturn(keyStorePassword);
+        Mockito.when(serverConfiguration.getFirstProperty("Security.TrustStore.Location")).thenReturn(trustStoreLocation);
+        Mockito.when(serverConfiguration.getFirstProperty("Security.TrustStore.Password")).thenReturn(trustStorePassword);
         Mockito.when(serverConfiguration.getFirstProperty("WebContextRoot")).thenReturn("/");
         PowerMockito.whenNew(ThriftAuthClient.class).withAnyArguments().thenReturn(thriftAuthClient);
-        Mockito.when(thriftAuthClient.getSessionId(keyValidatorUsername, keyStorePassword)).thenReturn("12345");
+        Mockito.when(thriftAuthClient.getSessionId(keyValidatorUsername, trustStorePassword)).thenReturn("12345");
         try {
             ThriftUtils.getInstance();
             Assert.fail("Expected APISecurityException not thrown when connection credentials are not found");
@@ -146,11 +146,11 @@ public class ThriftUtilsTest {
         Mockito.when(config.getFirstProperty(APIConstants.API_KEY_MANAGER_THRIFT_SERVER_HOST)).thenReturn(null);
         Mockito.when(config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME)).thenReturn(keyValidatorUsername);
         Mockito.when(config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD)).thenReturn(null);
-        Mockito.when(serverConfiguration.getFirstProperty("Security.KeyStore.Location")).thenReturn(keyStoreLocation);
-        Mockito.when(serverConfiguration.getFirstProperty("Security.KeyStore.Password")).thenReturn(keyStorePassword);
+        Mockito.when(serverConfiguration.getFirstProperty("Security.TrustStore.Location")).thenReturn(trustStoreLocation);
+        Mockito.when(serverConfiguration.getFirstProperty("Security.TrustStore.Password")).thenReturn(trustStorePassword);
         Mockito.when(serverConfiguration.getFirstProperty("WebContextRoot")).thenReturn("/");
         PowerMockito.whenNew(ThriftAuthClient.class).withAnyArguments().thenReturn(thriftAuthClient);
-        Mockito.when(thriftAuthClient.getSessionId(keyValidatorUsername, keyStorePassword)).thenReturn("12345");
+        Mockito.when(thriftAuthClient.getSessionId(keyValidatorUsername, trustStorePassword)).thenReturn("12345");
         try {
             ThriftUtils.getInstance();
             Assert.fail("Expected APISecurityException not thrown when connection credentials are not found");
@@ -169,8 +169,8 @@ public class ThriftUtilsTest {
         Mockito.when(config.getFirstProperty(APIConstants.API_KEY_MANAGER_THRIFT_SERVER_HOST)).thenReturn(null);
         Mockito.when(config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_USERNAME)).thenReturn(keyValidatorUsername);
         Mockito.when(config.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD)).thenReturn(keyValidatorPassword);
-        Mockito.when(serverConfiguration.getFirstProperty("Security.KeyStore.Location")).thenReturn(keyStoreLocation);
-        Mockito.when(serverConfiguration.getFirstProperty("Security.KeyStore.Password")).thenReturn(keyStorePassword);
+        Mockito.when(serverConfiguration.getFirstProperty("Security.TrustStore.Location")).thenReturn(trustStoreLocation);
+        Mockito.when(serverConfiguration.getFirstProperty("Security.TrustStore.Password")).thenReturn(trustStorePassword);
         Mockito.when(serverConfiguration.getFirstProperty("WebContextRoot")).thenReturn("/");
         PowerMockito.whenNew(ThriftAuthClient.class).withAnyArguments().thenReturn(thriftAuthClient);
         Mockito.doThrow(AuthenticationException.class).when(thriftAuthClient).getSessionId(Mockito.anyString(),

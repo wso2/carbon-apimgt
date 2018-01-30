@@ -2388,13 +2388,16 @@ definitions:
     properties:
       subscriptionId:
         type: string
-        example: 01234567-0123-0123-0123-012345678901
+        description: The UUID of the subscription
+        example: faae5fcc-cbae-40c4-bf43-89931630d313
       applicationId:
         type: string
-        example: 01234567-0123-0123-0123-012345678901
+        description: The UUID of the application
+        example: b3ade481-30b0-4b38-9a67-498a40873a6d
       apiIdentifier:
         type: string
-        example: 01234567-0123-0123-0123-012345678901
+        description: The unique identifier of the API.
+        example: admin-PizzaShackAPI-1.0.0
       tier:
         type: string
         example: Unlimited
@@ -2407,6 +2410,7 @@ definitions:
           - ON_HOLD
           - REJECTED
         example: UNBLOCKED
+
 
 #-----------------------------------------------------
 # The Tag resource

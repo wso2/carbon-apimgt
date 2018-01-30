@@ -75,11 +75,6 @@ public class WorkflowExecutorFactory {
         return null;
     }
 
-    private static void handleException(String msg) throws WorkflowException {
-        log.error(msg);
-        throw new WorkflowException(msg);
-    }
-
     private static void handleException(String msg, Exception e) throws WorkflowException {
         log.error(msg, e);
         throw new WorkflowException(msg, e);
