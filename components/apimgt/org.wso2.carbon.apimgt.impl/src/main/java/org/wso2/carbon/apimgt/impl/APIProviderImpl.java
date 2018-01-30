@@ -2163,7 +2163,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String resourcePath = APIUtil.getOpenAPIDefinitionFilePath(api.getId().getApiName(),
                     api.getId().getVersion(),
                     api.getId().getProviderName());
-            if (registry.resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME)) {
+            if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
                 JSONObject swaggerObject = (JSONObject) new JSONParser()
                         .parse(definitionFromOpenAPISpec.getAPIDefinition(api.getId(), registry));
                 JSONObject infoObject = (JSONObject) swaggerObject.get("info");

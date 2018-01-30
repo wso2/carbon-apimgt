@@ -161,7 +161,7 @@ public final class APIConstants {
     public static final String API_DOC_RESOURCE_NAME = "api-doc.json";
 
     public static final String API_DOC_1_2_RESOURCE_NAME = "/api-doc";
-    public static final String API_DOC_2_0_RESOURCE_NAME = "swagger.json";
+    public static final String API_OAS_DEFINITION_RESOURCE_NAME = "swagger.json";
 
     public static final String API_ICON_IMAGE = "icon";
 
@@ -1031,6 +1031,8 @@ public final class APIConstants {
     public static final String SWAGGER_V2 = "2.0";
     public static final String SWAGGER_INFO = "info";
     public static final String SWAGGER_RESPONSE_200 = "200";
+    public static final String OPEN_API_V3 = "3.0.0";
+    public static final String OPEN_API = "openapi";
 
     //swagger v1.2 constants
     public static final String SWAGGER_RESOURCES = "resources";

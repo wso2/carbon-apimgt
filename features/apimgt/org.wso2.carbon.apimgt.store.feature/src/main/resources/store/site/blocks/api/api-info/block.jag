@@ -32,6 +32,7 @@ jagg.block("api/api-info", {
                 selectedAPI = null,
                 user = jagg.getUser();
         var showConsole = true;
+        var showSDKGeneration = true;
         var isAdvertiseOnly;
         var isGlobalCEPEnabled;
         var mod = jagg.module("manager");
@@ -64,6 +65,9 @@ jagg.block("api/api-info", {
         }
         if (swaggerString == "noPermissions") {
             showConsole = false;
+        }
+        if(api && api.isOpenAPI3APIDefinition) {
+            showSDKGeneration = false;
         }
 
         result = jagg.module("rating").isRatingActivated();
@@ -153,7 +157,7 @@ jagg.block("api/api-info", {
                             }
                         };
 
-                        if(supportedLangs.langs != null) {
+                        if(supportedLangs.langs != null && showSDKGeneration) {
                             result.tabs.tabs.push(
                                 {
                                     "title": i18n.localize("SDKs"),
@@ -338,7 +342,7 @@ jagg.block("api/api-info", {
                                 ]
                             }
                         };
-                        if(supportedLangs.langs != null) {
+                        if(supportedLangs.langs != null && showSDKGeneration) {
                             result.tabs.tabs.push(
                                 {
                                     "title": i18n.localize("SDKs"),

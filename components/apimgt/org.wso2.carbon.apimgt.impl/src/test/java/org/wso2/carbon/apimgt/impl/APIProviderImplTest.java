@@ -1736,7 +1736,7 @@ public class APIProviderImplTest {
         String resourcePath = APIUtil.getOpenAPIDefinitionFilePath(api.getId().getApiName(),
                 api.getId().getVersion(),
                 api.getId().getProviderName());
-        Mockito.when(apiProvider.registry.resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME)).
+        Mockito.when(apiProvider.registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)).
                 thenReturn(true);
         APIDefinitionFromOpenAPISpec apiDefinitionFromOpenAPISpec = Mockito.mock(APIDefinitionFromOpenAPISpec.class);
         setFinalStatic(AbstractAPIManager.class.getDeclaredField("definitionFromOpenAPISpec"),
@@ -1900,7 +1900,7 @@ public class APIProviderImplTest {
                 api.getId().getVersion(),
                 api.getId().getProviderName());
 
-        Mockito.when(apiProvider.registry.resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME)).
+        Mockito.when(apiProvider.registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)).
                 thenReturn(false);
 
         //Mock Config system registry

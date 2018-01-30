@@ -28,6 +28,16 @@ $( document ).ready(function() {
         });
     });
 
+    $("#apiDefinitionVersion").change(function () {
+        if($('#apiDefinitionVersion').find(":selected").val() == "3.0") {
+            jagg.message({
+                content: i18n.t('Client Side SDK generation feature is currently not available for APIs with OpenAPI 3.0.0 specification'),
+                type: 'warning'
+            });
+        }
+
+    })
+
     $("#designNewWSAPI").click(function(){
         var btn = $(this);
         $('#designNewWSAPI-form').ajaxSubmit({
@@ -50,7 +60,7 @@ $( document ).ready(function() {
                     } else {
                         jagg.message({content:responseText.message,type:"error"});
                     }
-                }                
+                }
             }, dataType: 'json'
         });
     });
@@ -105,7 +115,17 @@ $( document ).ready(function() {
             success:function(responseText, statusText, xhr, $form){
                 $(btn).buttonLoader('stop');
                 if (!responseText.error) {
-                    window.location = jagg.site.context + "/design"
+                    if (responseText.isOpenAPI3) {
+                        jagg.message({
+                            content: i18n.t('Client Side SDK generation feature is currently not available for APIs with OpenAPI 3.0.0 specification'),
+                            type: 'warning',
+                            cbk: function () {
+                                window.location = jagg.site.context + "/design"
+                            }
+                        });
+                    } else {
+                        window.location = jagg.site.context + "/design"
+                    }
                 }else {
                     if (responseText.message == "timeout") {
                         if (ssoEnabled) {

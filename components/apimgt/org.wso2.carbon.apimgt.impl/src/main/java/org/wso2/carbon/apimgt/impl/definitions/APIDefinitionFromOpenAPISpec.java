@@ -51,7 +51,6 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 public class APIDefinitionFromOpenAPISpec extends APIDefinition {
 
     private static final Log log = LogFactory.getLog(APIDefinitionFromOpenAPISpec.class);
-    private static final String OPEN_API_DEFINITION_FILE_NAME = "openapi.json";
 
     /**
      * This method returns URI templates according to the given swagger file
@@ -190,7 +189,7 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
 
         try {
             String resourcePath = APIUtil.getOpenAPIDefinitionFilePath(apiName, apiVersion, apiProviderName);
-            resourcePath = resourcePath + OPEN_API_DEFINITION_FILE_NAME;
+            resourcePath = resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
             Resource resource;
             if (!registry.resourceExists(resourcePath)) {
                 resource = registry.newResource();
@@ -226,13 +225,13 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
         JSONParser parser = new JSONParser();
         String apiDocContent = null;
         try {
-            if (registry.resourceExists(resourcePath + OPEN_API_DEFINITION_FILE_NAME)) {
-                Resource apiDocResource = registry.get(resourcePath + OPEN_API_DEFINITION_FILE_NAME);
+            if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
+                Resource apiDocResource = registry.get(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
                 apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
                 parser.parse(apiDocContent);
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("Resource " + OPEN_API_DEFINITION_FILE_NAME + " not found at " + resourcePath);
+                    log.debug("Resource " + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME + " not found at " + resourcePath);
                 }
             }
         } catch (RegistryException e) {
@@ -402,8 +401,8 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
         String resourcePath = APIUtil.getOpenAPIDefinitionFilePath(apiIdentifier.getApiName(),
                 apiIdentifier.getVersion(), apiIdentifier.getProviderName());
         try {
-            if (registry.resourceExists(resourcePath + OPEN_API_DEFINITION_FILE_NAME)) {
-                Resource apiDocResource = registry.get(resourcePath + OPEN_API_DEFINITION_FILE_NAME);
+            if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
+                Resource apiDocResource = registry.get(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
                 Date lastModified = apiDocResource.getLastModified();
                 Date createdTime = apiDocResource.getCreatedTime();
                 if (lastModified != null) {
@@ -413,7 +412,7 @@ public class APIDefinitionFromOpenAPISpec extends APIDefinition {
                 }
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("Resource " + OPEN_API_DEFINITION_FILE_NAME + " not found at " + resourcePath);
+                    log.debug("Resource " + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME + " not found at " + resourcePath);
                 }
             }
         } catch (RegistryException e) {
