@@ -755,3 +755,14 @@ var removeTopicStars = function (newRating) {
     });
 
 };
+
+var validateCancel = function (tenantSuffix) {
+    jagg.message({
+        content: i18n.t('Are you sure you want to cancel creating the Topic ?'),
+        type: "confirm",
+        title: "Cancel Creating Topic",
+        okCallback: function() {
+            document.location.href=jagg.site.context+"/forum?" + tenantSuffix;
+        }
+    });
+};
