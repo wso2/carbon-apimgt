@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -40,10 +40,9 @@ import java.io.Reader;
  */
 public class XMLAnalyzer implements APIMThreatAnalyzer {
 
+    private Logger log = LoggerFactory.getLogger(XMLAnalyzer.class);
     private static final String XML_THREAT_PROTECTION_MSG_PREFIX = "Threat Protection-XML: ";
     private XMLInputFactory factory;
-    private Logger log = LoggerFactory.getLogger(XMLAnalyzer.class);
-
     private boolean enabled = true;
 
     public XMLAnalyzer() {
@@ -54,16 +53,14 @@ public class XMLAnalyzer implements APIMThreatAnalyzer {
      * Create a XMLAnalyzer using default configuration values
      */
     public void configure(XMLConfig config) {
-        //configure
         boolean dtdEnabled = config.isDtdEnabled();
         boolean externalEntitiesEnabled = config.isExternalEntitiesEnabled();
-        int maxDepth = config.getMaxDepth();
-        int maxElementCount = config.getMaxElementCount();
-        int maxAttributeCount = config.getMaxAttributeCount();
-        int maxAttributeLength = config.getMaxAttributeLength();
-        int entityExpansionLimit = config.getEntityExpansionLimit();
-        int maxChildrenPerElement = config.getMaxChildrenPerElement();
-
+        Integer maxDepth = config.getMaxDepth();
+        Integer maxElementCount = config.getMaxElementCount();
+        Integer maxAttributeCount = config.getMaxAttributeCount();
+        Integer maxAttributeLength = config.getMaxAttributeLength();
+        Integer entityExpansionLimit = config.getEntityExpansionLimit();
+        Integer maxChildrenPerElement = config.getMaxChildrenPerElement();
         factory.setProperty(XMLInputFactory.SUPPORT_DTD, dtdEnabled);
         factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, externalEntitiesEnabled);
         factory.setProperty(ThreatProtectorConstants.P_MAX_ATTRIBUTE_SIZE, maxAttributeLength);

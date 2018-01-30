@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.gateway.mediators;
 
-import org.apache.commons.io.input.CloseShieldInputStream;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
@@ -43,7 +42,6 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -79,9 +77,9 @@ public class XMLSchemaValidator extends AbstractMediator {
         contentType = axis2MC.getProperty(ThreatProtectorConstants.CONTENT_TYPE).toString();
         apiContext = messageContext.getProperty(ThreatProtectorConstants.API_CONTEXT).toString();
 
-        if (!APIConstants.SupportedHTTPVerbs.GET.name().equalsIgnoreCase(requestMethod)
-                && (ThreatProtectorConstants.APPLICATION_XML.equals(contentType) ||
-                ThreatProtectorConstants.TEXT_XML.equals(contentType))) {
+        if (!APIConstants.SupportedHTTPVerbs.GET.name().equalsIgnoreCase(requestMethod) &&
+                (ThreatProtectorConstants.APPLICATION_XML.equals(contentType) ||
+                        ThreatProtectorConstants.TEXT_XML.equals(contentType))) {
             try {
                 inputStreams = GatewayUtils.cloneRequestMessage(messageContext);
                 if (inputStreams != null) {
@@ -89,9 +87,9 @@ public class XMLSchemaValidator extends AbstractMediator {
                     if (messageProperty != null) {
                         xmlValidationStatus = Boolean.valueOf(messageProperty.toString());
                         if (xmlValidationStatus.equals(true)) {
-                            apimThreatAnalyzer = AnalyzerHolder.getAnalyzer(contentType);
                             XMLConfig xmlConfig = configureSchemaProperties(messageContext);
                             ConfigurationHolder.addXmlConfig(xmlConfig);
+                            apimThreatAnalyzer = AnalyzerHolder.getAnalyzer(contentType);
                             inputStreamXml = inputStreams.get(ThreatProtectorConstants.XML);
                             apimThreatAnalyzer.analyze(inputStreamXml, apiContext);
                         }
@@ -215,14 +213,10 @@ public class XMLSchemaValidator extends AbstractMediator {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug(("DTD enable:" + dtdEnabled) + ", " +
-                    "External entities: " + externalEntitiesEnabled + ", " +
-                    "Element Count:" + elementCount + ", " +
-                    "Max AttributeLength:" + attributeLength + ", " +
-                    "Max xml Depth:" + maxXMLDepth + ", " +
-                    "Attribute count:" + attributeCount + ", " +
-                    "Entity Expansion Limit" + attributeCount + ". " +
-                    "childrenElement:" + attributeCount);
+            log.debug(("DTD enable:" + dtdEnabled) + ", " + "External entities: " + externalEntitiesEnabled
+                    + ", " + "Element Count:" + elementCount + ", " + "Max AttributeLength:" + attributeLength
+                    + ", " + "Max xml Depth:" + maxXMLDepth + ", " + "Attribute count:" + attributeCount + ", "
+                    + "Entity Expansion Limit" + attributeCount + ". " + "childrenElement:" + attributeCount);
         }
         XMLConfig xmlConfig = new XMLConfig();
         xmlConfig.setDtdEnabled(dtdEnabled);
@@ -245,6 +239,7 @@ public class XMLSchemaValidator extends AbstractMediator {
      *
      * @return If enabledCheckBody is true,The method returns true else it returns false
      */
+    @Override
     public boolean isContentAware() {
         return false;
     }
@@ -259,43 +254,25 @@ public class XMLSchemaValidator extends AbstractMediator {
     private boolean validateSchema(MessageContext messageContext, BufferedInputStream bufferedInputStream)
             throws APIMThreatAnalyzerException {
         String xsdURL;
-        String xsdFilePath;
         Schema schema;
-        InputStream inputStream;
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         try {
-            Object messageProperty = messageContext.getProperty(APIMgtGatewayConstants.XSD_FILEPATH);
+            Object messageProperty = messageContext.getProperty(APIMgtGatewayConstants.XSD_URL);
             if (messageProperty == null) {
-                messageProperty = messageContext.getProperty(APIMgtGatewayConstants.XSD_URL);
-                if (messageProperty == null) {
-                    return true;
-                } else {
-                    if (String.valueOf(messageProperty).isEmpty()) {
-                        return true;
-                    } else {
-                        xsdURL = String.valueOf(messageProperty);
-                        URL schemaFile = new URL(xsdURL);
-                        schema = schemaFactory.newSchema(schemaFile);
-                        Source xmlFile = new StreamSource(bufferedInputStream);
-                        Validator validator = schema.newValidator();
-                        validator.validate(xmlFile);
-                    }
-                }
+                return true;
             } else {
-
                 if (String.valueOf(messageProperty).isEmpty()) {
                     return true;
                 } else {
-                    xsdFilePath = String.valueOf(messageProperty);
-                    inputStream = new FileInputStream(xsdFilePath);
-                    Source streamSource = new StreamSource(inputStream);
-                    schema = schemaFactory.newSchema(streamSource);
-                    CloseShieldInputStream closeShieldInputStream = new CloseShieldInputStream(bufferedInputStream);
-                    Source xmlFile = new StreamSource(closeShieldInputStream);
+                    xsdURL = String.valueOf(messageProperty);
+                    URL schemaFile = new URL(xsdURL);
+                    schema = schemaFactory.newSchema(schemaFile);
+                    Source xmlFile = new StreamSource(bufferedInputStream);
                     Validator validator = schema.newValidator();
                     validator.validate(xmlFile);
                 }
             }
+
         } catch (SAXException | IOException e) {
             throw new APIMThreatAnalyzerException("Error occurred while parsing XML payload : " + e);
         }

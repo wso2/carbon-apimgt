@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -51,7 +51,7 @@ public class JsonSchemaValidator extends AbstractMediator {
      * @return a boolean true if the message content is passed the json schema criteria.
      */
     public boolean mediate(MessageContext messageContext) {
-        Map<String, InputStream> inputStreams = null;
+        Map<String, InputStream> inputStreams;
         org.apache.axis2.context.MessageContext axis2MC;
         Boolean validRequest = true;
         if (log.isDebugEnabled()) {

@@ -323,17 +323,23 @@ public class GatewayUtils {
         InputStream inputStreamJSON;
         InputStream inputStreamOriginal;
         Pipe pipe;
+        int requestBufferSize = 1024;
         org.apache.axis2.context.MessageContext axis2MC;
 
         axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
+        Object bufferSize = messageContext.getProperty(ThreatProtectorConstants.REQUEST_BUFFER_SIZE);
+        if (bufferSize != null) {
+            requestBufferSize = Integer.parseInt(bufferSize.toString());
+        }
+
         pipe = (Pipe) axis2MC.getProperty(PassThroughConstants.PASS_THROUGH_PIPE);
         if (pipe != null) {
             bufferedInputStream = new BufferedInputStream(pipe.getInputStream());
         }
         if (bufferedInputStream != null) {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[requestBufferSize];
             int length;
 
             while ((length = bufferedInputStream.read(buffer)) > -1) {
