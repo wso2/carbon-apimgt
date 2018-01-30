@@ -55,13 +55,11 @@ public class AnalyzerHolder {
     }
 
     private AnalyzerHolder() {
-
     }
 
     public static AnalyzerHolder getInstance() {
         return instance;
     }
-
 
     /**
      * Borrows an object from pools (xml or json) for threat analysis

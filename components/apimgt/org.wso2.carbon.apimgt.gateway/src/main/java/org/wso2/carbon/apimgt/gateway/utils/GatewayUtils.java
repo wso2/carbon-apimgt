@@ -319,12 +319,11 @@ public class GatewayUtils {
         Map<String, InputStream> inputStreamMap = null;
         InputStream inputStreamSchema;
         InputStream inputStreamXml;
-        InputStream inputStreamSql;
         InputStream inputStreamJSON;
         InputStream inputStreamOriginal;
-        Pipe pipe;
         int requestBufferSize = 1024;
         org.apache.axis2.context.MessageContext axis2MC;
+        Pipe pipe;
 
         axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
@@ -332,7 +331,6 @@ public class GatewayUtils {
         if (bufferSize != null) {
             requestBufferSize = Integer.parseInt(bufferSize.toString());
         }
-
         pipe = (Pipe) axis2MC.getProperty(PassThroughConstants.PASS_THROUGH_PIPE);
         if (pipe != null) {
             bufferedInputStream = new BufferedInputStream(pipe.getInputStream());
@@ -341,7 +339,6 @@ public class GatewayUtils {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             byte[] buffer = new byte[requestBufferSize];
             int length;
-
             while ((length = bufferedInputStream.read(buffer)) > -1) {
                 byteArrayOutputStream.write(buffer, 0, length);
             }
@@ -349,12 +346,10 @@ public class GatewayUtils {
             inputStreamMap = new HashMap<>();
             inputStreamSchema = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
             inputStreamXml = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-            inputStreamSql = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
             inputStreamOriginal = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
             inputStreamJSON = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
             inputStreamMap.put(ThreatProtectorConstants.SCHEMA, inputStreamSchema);
             inputStreamMap.put(ThreatProtectorConstants.XML, inputStreamXml);
-            inputStreamMap.put(ThreatProtectorConstants.SQL, inputStreamSql);
             inputStreamMap.put(ThreatProtectorConstants.ORIGINAL, inputStreamOriginal);
             inputStreamMap.put(ThreatProtectorConstants.JSON, inputStreamJSON);
         }
@@ -362,7 +357,7 @@ public class GatewayUtils {
     }
 
     /**
-     *  This method use to set the originInputstream to the message Context
+     *  This method use to set the originInput stream to the message Context
      * @param inputStreams cloned InputStreams
      * @param axis2MC axis2 message context
      */

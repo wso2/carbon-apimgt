@@ -50,7 +50,8 @@ public class APIMgtGatewayConstants {
 
     public static final String METHOD_NOT_FOUND_ERROR_MSG = "Method not allowed for given API resource";
     public static final String RESOURCE_NOT_FOUND_ERROR_MSG = "No matching resource found for given API Request";
-    public static final String CONTENT_TYPE_FAIL_MSG = "The request content type is not matched.";
+    public static final String REQUEST_TYPE_FAIL_MSG = "The request content type and method is not matched.";
+
 
     public static final String BACKEND_LATENCY = "backend_latency";
     public static final String SECURITY_LATENCY = "security_latency";
@@ -87,7 +88,6 @@ public class APIMgtGatewayConstants {
     public static final String XML_VALIDATION = "xmlValidation";
     public static final String SCHEMA_VALIDATION = "schemaValidation";
     public static final String XSD_URL = "xsdURL";
-    public static final String XSD_FILEPATH = "xsdFilePath";
 
 }
 

@@ -60,6 +60,9 @@ public class XMLSchemaValidator extends AbstractMediator {
      * @return A boolean value.True if successful and false if not.
      */
     public boolean mediate(MessageContext messageContext) {
+        if (log.isDebugEnabled()) {
+            log.debug("XML validation mediator is activated...");
+        }
         InputStream inputStreamSchema;
         InputStream inputStreamXml;
         Map<String, InputStream> inputStreams = null;
@@ -69,7 +72,7 @@ public class XMLSchemaValidator extends AbstractMediator {
         String apiContext;
         String requestMethod;
         String contentType;
-        boolean validInput = true;
+        boolean validRequest = true;
 
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
@@ -107,7 +110,7 @@ public class XMLSchemaValidator extends AbstractMediator {
                 }
 
             } catch (APIMThreatAnalyzerException e) {
-                validInput = false;
+                validRequest = false;
                 GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE, e.getMessage());
 
             } catch (IOException e) {
@@ -118,10 +121,10 @@ public class XMLSchemaValidator extends AbstractMediator {
             AnalyzerHolder.returnObject(apimThreatAnalyzer);
         } else {
             GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
-                    APIMgtGatewayConstants.CONTENT_TYPE_FAIL_MSG);
+                    APIMgtGatewayConstants.REQUEST_TYPE_FAIL_MSG);
         }
         GatewayUtils.setOriginalInputStream(inputStreams, axis2MC);
-        if (validInput) try {
+        if (validRequest) try {
             RelayUtils.buildMessage(axis2MC);
         } catch (IOException | XMLStreamException e) {
             GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE, e.getMessage());

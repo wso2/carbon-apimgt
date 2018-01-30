@@ -41,14 +41,17 @@ public class ThreatProtectorConstants {
     public static final String ERROR_MESSAGE = "ERROR_MESSAGE";
     public static final String HTTP_HEADER_THREAT_CODE = "400-002";
     public static final String HTTP_SC_CODE = "400";
-
     public static final String P_MAX_ATTRIBUTES_PER_ELEMENT = "com.ctc.wstx.maxAttributesPerElement";
     public static final String P_MAX_ATTRIBUTE_SIZE = "com.ctc.wstx.maxAttributeSize";
     public static final String P_MAX_CHILDREN_PER_ELEMENT = "com.ctc.wstx.maxChildrenPerElement";
     public static final String P_MAX_ELEMENT_COUNT = "com.ctc.wstx.maxElementCount";
     public static final String P_MAX_ELEMENT_DEPTH = "com.ctc.wstx.maxElementDepth";
     public static final String P_MAX_ENTITY_COUNT = "com.ctc.wstx.maxEntityCount";
-
+    public static final String REQUEST_BUFFER_SIZE = "RequestMessageBufferSize";
+    public static final String XML = "XML";
+    public static final String ORIGINAL = "Original";
+    public static final String SCHEMA = "Schema";
+    public static final String JSON = "JSON";
 
     /**
      * Constants for JSON protector
@@ -70,10 +73,5 @@ public class ThreatProtectorConstants {
     public static final String MAX_ATTRIBUTE_LENGTH = "maxAttributeLength";
     public static final String ENTITY_EXPANSION_LIMIT = "entityExpansionLimit";
     public static final String CHILDREN_PER_ELEMENT = "maxChildrenPerElement";
-    public static final String SQL = "SQL";
-    public static final String XML = "XML";
-    public static final String ORIGINAL = "Original";
-    public static final String SCHEMA = "Schema";
-    public static final String JSON = "JSON";
-    public static final String REQUEST_BUFFER_SIZE = "RequestMessageBufferSize";
+
 }

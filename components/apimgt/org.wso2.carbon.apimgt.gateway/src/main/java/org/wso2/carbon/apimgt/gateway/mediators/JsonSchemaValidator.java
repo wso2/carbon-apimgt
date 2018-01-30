@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.gateway.threatprotection.configuration.JSONConfig;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatExceptionHandler;
 import org.wso2.carbon.apimgt.gateway.threatprotection.utils.ThreatProtectorConstants;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.BufferedInputStream;
@@ -51,40 +52,52 @@ public class JsonSchemaValidator extends AbstractMediator {
      * @return a boolean true if the message content is passed the json schema criteria.
      */
     public boolean mediate(MessageContext messageContext) {
-        Map<String, InputStream> inputStreams;
-        org.apache.axis2.context.MessageContext axis2MC;
-        Boolean validRequest = true;
         if (log.isDebugEnabled()) {
             log.debug("JSON schema validation mediator is activated...");
         }
-        axis2MC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        String contentType = axis2MC.getProperty(ThreatProtectorConstants.CONTENT_TYPE).toString();
-        String apiContext = messageContext.getProperty(ThreatProtectorConstants.API_CONTEXT).toString();
-        JSONConfig jsonConfig = configureSchemaProperties(messageContext);
-        ConfigurationHolder.addJsonConfig(jsonConfig);
-        APIMThreatAnalyzer apimThreatAnalyzer = AnalyzerHolder.getAnalyzer(contentType);
-        try {
-            inputStreams = GatewayUtils.cloneRequestMessage(messageContext);
-            GatewayUtils.setOriginalInputStream(inputStreams, axis2MC);
-            if (inputStreams != null) {
-                InputStream inputStreamJson = inputStreams.get(ThreatProtectorConstants.JSON);
-                BufferedInputStream input = new BufferedInputStream(inputStreamJson);
-                apimThreatAnalyzer.analyze(input, apiContext);
-            }
+        Map<String, InputStream> inputStreams = null;
+        org.apache.axis2.context.MessageContext axis2MC;
+        Boolean validRequest = true;
+        String contentType;
+        String apiContext;
+        String requestMethod;
 
-        } catch (APIMThreatAnalyzerException e) {
-            validRequest = false;
-            String message = "Request is failed due to JSON schema validation failure: ";
-            GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE, message
-                    + e.getMessage());
-        } catch (IOException e) {
-            String message = "Error occurred while building the request: ";
-            GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE, message
-                    + e.getMessage());
-        } finally {
-            // return analyzer to the pool
-            AnalyzerHolder.returnObject(apimThreatAnalyzer);
+        axis2MC = ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        contentType = axis2MC.getProperty(ThreatProtectorConstants.CONTENT_TYPE).toString();
+        apiContext = messageContext.getProperty(ThreatProtectorConstants.API_CONTEXT).toString();
+        requestMethod = axis2MC.getProperty(ThreatProtectorConstants.HTTP_REQUEST_METHOD).toString();
+
+        if (!APIConstants.SupportedHTTPVerbs.GET.name().equalsIgnoreCase(requestMethod) &&
+                (ThreatProtectorConstants.APPLICATION_JSON.equals(contentType) ||
+                        ThreatProtectorConstants.TEXT_JSON.equals(contentType))) {
+            JSONConfig jsonConfig = configureSchemaProperties(messageContext);
+            ConfigurationHolder.addJsonConfig(jsonConfig);
+            APIMThreatAnalyzer apimThreatAnalyzer = AnalyzerHolder.getAnalyzer(contentType);
+            try {
+                inputStreams = GatewayUtils.cloneRequestMessage(messageContext);
+                if (inputStreams != null) {
+                    InputStream inputStreamJson = inputStreams.get(ThreatProtectorConstants.JSON);
+                    BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStreamJson);
+                    apimThreatAnalyzer.analyze(bufferedInputStream, apiContext);
+                }
+            } catch (APIMThreatAnalyzerException e) {
+                validRequest = false;
+                String message = "Request is failed due to JSON schema validation failure: ";
+                GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE,
+                        message + e.getMessage());
+            } catch (IOException e) {
+                String message = "Error occurred while building the request: ";
+                GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE,
+                        message + e.getMessage());
+            } finally {
+                // return analyzer to the pool
+                AnalyzerHolder.returnObject(apimThreatAnalyzer);
+            }
+        } else {
+            GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
+                    APIMgtGatewayConstants.REQUEST_TYPE_FAIL_MSG);
         }
+        GatewayUtils.setOriginalInputStream(inputStreams, axis2MC);
         if (validRequest) try {
             RelayUtils.buildMessage(axis2MC);
         } catch (IOException | XMLStreamException e) {
@@ -100,7 +113,7 @@ public class JsonSchemaValidator extends AbstractMediator {
      *                       enabled the JSON_Validator message mediation in flow.
      * @return JSONConfig contains the json schema properties need to be validated.
      */
-    private JSONConfig configureSchemaProperties(MessageContext messageContext) {
+    public JSONConfig configureSchemaProperties(MessageContext messageContext) {
         Object messageProperty;
         int propertyCount = 0;
         int stringLength = 0;
@@ -148,11 +161,10 @@ public class JsonSchemaValidator extends AbstractMediator {
             ThreatExceptionHandler.handleException(messageContext, errorMessage);
         }
         if (log.isDebugEnabled()) {
-            log.debug(("Max Priority count is:" + propertyCount) + ", " +
-                    "Max String length is: " + stringLength + ", " +
-                    "Max Array element count: " + arrayElementCount + ", " +
-                    "Max Key Length: " + keyLength + ", " +
-                    "Max JSON depth is:" + maxJSONDepth + ", ");
+            log.debug(("Max Priority count is:" + propertyCount) + ", " + "Max String length is: "
+                    + stringLength + ", " + "Max Array element count: " + arrayElementCount + ", "
+                    + "Max Key Length: " + keyLength + ", " + "Max JSON depth is:" + maxJSONDepth
+                    + ", ");
         }
         JSONConfig jsonConfig = new JSONConfig();
         jsonConfig.setMaxPropertyCount(propertyCount);
@@ -171,6 +183,7 @@ public class JsonSchemaValidator extends AbstractMediator {
      *
      * @return If enabledCheckBody is true,The method returns true else it returns false
      */
+    @Override
     public boolean isContentAware() {
         return false;
     }
