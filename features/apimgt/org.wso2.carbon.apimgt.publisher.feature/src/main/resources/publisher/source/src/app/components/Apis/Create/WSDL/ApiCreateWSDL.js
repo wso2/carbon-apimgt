@@ -129,7 +129,7 @@ class ApiCreateWSDL extends Component {
     updateApiInputs(event) {
         let field = 'selectedPolicies';
         let value = event;
-        if (!Array.isArray(e)) {
+        if (!Array.isArray(event)) {
             field = event.target.name;
             value = event.target.value;
         }
