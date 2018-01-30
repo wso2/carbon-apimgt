@@ -175,7 +175,7 @@ public class JsonSchemaValidator extends AbstractMediator {
     }
 
     /**
-     * If the {isContentAware} method returns false, The request message payload wont be build.
+     * If the isContentAware method returns false, The request message payload wont be build.
      *
      * @return this method always returns false to avoid building the message.
      */

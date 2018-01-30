@@ -230,7 +230,7 @@ public class XMLSchemaValidator extends AbstractMediator {
     }
 
     /**
-     * If the {isContentAware} method returns false, The request message payload wont be build.
+     * If the isContentAware method returns false, The request message payload wont be build.
      *
      * @return isContentAware method always returns false to avoid build the message.
      */
