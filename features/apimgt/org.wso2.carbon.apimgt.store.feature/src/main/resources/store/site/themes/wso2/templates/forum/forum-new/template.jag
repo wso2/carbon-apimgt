@@ -25,7 +25,7 @@ var urlSuffix = jagg.getTenantURLPrefix();
             <a title="<%=i18n.localize('Create')%>" class="btn btn-primary" id="add-forum-topic" onclick="jagg.sessionAwareJS({redirect:'/site/pages/forum.jag'})">
                 <%=i18n.localize( 'Create')%>
             </a>
-            <a title="<%=i18n.localize( 'Cancel')%>" class="btn btn-secondary" href="<%=siteConf.context%>/forum?<%=urlSuffix%>">
+            <a title="<%=i18n.localize( 'Cancel')%>" class="btn btn-secondary" onclick="validateCancel('<%=urlSuffix%>')">
                 <%=i18n.localize( 'Cancel')%>
 
             </a>
