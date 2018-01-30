@@ -47,8 +47,8 @@ public class JsonSchemaValidator extends AbstractMediator {
     /**
      * This mediate method validate the message body.
      *
-     * @param messageContext This message context contains the request message properties of the relevant API which was
-     *                       enabled the JSON_Validator message mediation in flow.
+     * @param messageContext This message context contains the request message properties of the relevant
+     *                       API which was enabled the JSON_Validator message mediation in flow.
      * @return a boolean true if the message content is passed the json schema criteria.
      */
     public boolean mediate(MessageContext messageContext) {

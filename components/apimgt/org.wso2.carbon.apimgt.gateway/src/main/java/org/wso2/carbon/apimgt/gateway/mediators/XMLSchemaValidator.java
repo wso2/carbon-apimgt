@@ -53,10 +53,10 @@ import java.util.Map;
  */
 public class XMLSchemaValidator extends AbstractMediator {
     /**
-     * This mediate method validate the xml schema.
+     * This mediate method validates the xml request message.
      *
-     * @param messageContext This message context contains the request message properties of the relevant API which was
-     *                       enabled the XML_Validator message mediation in flow.
+     * @param messageContext This message context contains the request message properties of the relevant
+     *                       API which was enabled the XML_Validator message mediation in flow.
      * @return A boolean value.True if successful and false if not.
      */
     public boolean mediate(MessageContext messageContext) {
@@ -73,7 +73,6 @@ public class XMLSchemaValidator extends AbstractMediator {
         String requestMethod;
         String contentType;
         boolean validRequest = true;
-
         org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) messageContext).
                 getAxis2MessageContext();
         requestMethod = axis2MC.getProperty(ThreatProtectorConstants.HTTP_REQUEST_METHOD).toString();
@@ -108,7 +107,6 @@ public class XMLSchemaValidator extends AbstractMediator {
 
                     }
                 }
-
             } catch (APIMThreatAnalyzerException e) {
                 validRequest = false;
                 GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE, e.getMessage());
@@ -116,7 +114,6 @@ public class XMLSchemaValidator extends AbstractMediator {
             } catch (IOException e) {
                 GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE, e.getMessage());
             }
-
             //return analyzer to the pool
             AnalyzerHolder.returnObject(apimThreatAnalyzer);
         } else {
@@ -135,8 +132,8 @@ public class XMLSchemaValidator extends AbstractMediator {
     /**
      * This configureSchemaProperties method bind the xml_validator sequence properties for the XMLConfig object.
      *
-     * @param messageContext This message context contains the request message properties of the relevant API which was
-     *                       enabled the XML_Validator message mediation in flow.
+     * @param messageContext This message context contains the request message properties of the relevant
+     *                       API which was enabled the XML_Validator message mediation in flow.
      * @return XMLConfig contains the xml schema properties need to be validated.
      */
     XMLConfig configureSchemaProperties(MessageContext messageContext) {
@@ -247,8 +244,8 @@ public class XMLSchemaValidator extends AbstractMediator {
     /**
      * This method validates the request payload xml with the relevant xsd.
      *
-     * @param messageContext This message context contains the request message properties of the relevant API which was
-     *                       enabled the XML_Validator message mediation in flow.
+     * @param messageContext This message context contains the request message properties of the relevant
+     *                       API which was enabled the XML_Validator message mediation in flow.
      * @return This method returns the success or not (true/false) status of the schema validation.
      */
     private boolean validateSchema(MessageContext messageContext, BufferedInputStream bufferedInputStream)
