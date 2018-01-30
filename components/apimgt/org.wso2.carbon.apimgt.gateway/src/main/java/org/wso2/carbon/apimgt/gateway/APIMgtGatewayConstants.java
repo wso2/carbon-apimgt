@@ -52,8 +52,7 @@ public class APIMgtGatewayConstants {
     public static final String RESOURCE_NOT_FOUND_ERROR_MSG = "No matching resource found for given API Request";
     public static final String REQUEST_TYPE_FAIL_MSG = "Neither request method nor content type is matched with" +
             " the validator.";
-
-
+    
     public static final String BACKEND_LATENCY = "backend_latency";
     public static final String SECURITY_LATENCY = "security_latency";
     public static final String THROTTLING_LATENCY = "throttling_latency";

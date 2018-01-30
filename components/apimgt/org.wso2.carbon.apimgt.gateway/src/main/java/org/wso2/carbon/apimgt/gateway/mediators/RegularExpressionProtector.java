@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
  * special key words in the request headers, query/path parameters and body.
  */
 public class RegularExpressionProtector extends AbstractMediator {
+
     private Boolean enabledCheckBody = true;
     private String threatType = null;
     private Pattern pattern = null;

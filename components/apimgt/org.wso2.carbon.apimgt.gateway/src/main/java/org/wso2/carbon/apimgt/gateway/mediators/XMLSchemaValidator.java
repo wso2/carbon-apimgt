@@ -52,6 +52,7 @@ import java.util.Map;
  * XML schema.
  */
 public class XMLSchemaValidator extends AbstractMediator {
+
     /**
      * This mediate method validates the xml request message.
      *

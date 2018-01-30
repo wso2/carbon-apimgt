@@ -27,7 +27,6 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
  *
  * @param <T> Type of the pooled object
  */
-
 public class AnalyzerPool<T> extends GenericObjectPool<T> {
 
     public AnalyzerPool(PooledObjectFactory<T> factory) {

@@ -23,7 +23,6 @@ import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.wso2.carbon.apimgt.gateway.threatprotection.analyzer.XMLAnalyzer;
 
-
 /**
  * XMLThreatAnalyzer factory class for used in {@link AnalyzerPool}
  */

@@ -94,17 +94,16 @@ public class JSONAnalyzer implements APIMThreatAnalyzer {
                     case FIELD_NAME:
                         currentFieldCount += 1;
                         String name = parser.getCurrentName();
-                        analyzeField(name, maxFieldCount, currentFieldCount, maxFieldLength, apiContext);
+                        analyzeField(name, maxFieldCount, currentFieldCount, maxFieldLength);
                         break;
 
                     case VALUE_STRING:
                         String value = parser.getText();
-                        analyzeString(value, maxStringLength, apiContext);
+                        analyzeString(value, maxStringLength);
                         break;
 
                     case START_ARRAY:
-                        analyzeArray(parser, maxArrayElementCount, maxStringLength, apiContext);
-                        break;
+                        analyzeArray(parser, maxArrayElementCount, maxStringLength);
                 }
             }
         }
@@ -135,11 +134,10 @@ public class JSONAnalyzer implements APIMThreatAnalyzer {
      * @param maxFieldCount     maximum number of fields allowed
      * @param currentFieldCount current field count
      * @param maxFieldLength    maximum field length allowed
-     * @param apiContext        current api context
      * @throws APIMThreatAnalyzerException if current values exceed maximum values
      */
-    private void analyzeField(String field, int maxFieldCount, int currentFieldCount, int maxFieldLength,
-                              String apiContext) throws APIMThreatAnalyzerException {
+    private void analyzeField(String field, int maxFieldCount, int currentFieldCount, int maxFieldLength)
+            throws APIMThreatAnalyzerException {
         if (field == null) {
             return;
         }
@@ -156,10 +154,9 @@ public class JSONAnalyzer implements APIMThreatAnalyzer {
      *
      * @param value      value of the string
      * @param maxLength  maximum string length allowed
-     * @param apiContext current api context
      * @throws APIMThreatAnalyzerException if string length is greater than maximum length provided
      */
-    private void analyzeString(String value, int maxLength, String apiContext) throws APIMThreatAnalyzerException {
+    private void analyzeString(String value, int maxLength) throws APIMThreatAnalyzerException {
         if (value == null) {
             return;
         }
@@ -174,10 +171,9 @@ public class JSONAnalyzer implements APIMThreatAnalyzer {
      * @param parser               JsonParser instance (Current token should be at JsonToken.START_ARRAY state)
      * @param maxArrayElementCount maximum array element count allowed
      * @param maxStringLength      maximum string length allowed
-     * @param apiContext           current api context
      * @throws APIMThreatAnalyzerException if array/string length is greater than maximum values provided
      */
-    private void analyzeArray(JsonParser parser, int maxArrayElementCount, int maxStringLength, String apiContext)
+    private void analyzeArray(JsonParser parser, int maxArrayElementCount, int maxStringLength)
             throws APIMThreatAnalyzerException {
         JsonToken token;
         try {
@@ -186,7 +182,7 @@ public class JSONAnalyzer implements APIMThreatAnalyzer {
                 //analyzing string values inside the array
                 if (token == JsonToken.VALUE_STRING) {
                     String value = parser.getText();
-                    analyzeString(value, maxStringLength, apiContext);
+                    analyzeString(value, maxStringLength);
                 }
                 arrayElementCount += 1;
                 if (arrayElementCount > maxArrayElementCount) {

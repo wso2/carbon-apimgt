@@ -44,6 +44,7 @@ import java.util.Map;
  * JSON schema.
  */
 public class JsonSchemaValidator extends AbstractMediator {
+
     /**
      * This mediate method validates the message body.
      *
