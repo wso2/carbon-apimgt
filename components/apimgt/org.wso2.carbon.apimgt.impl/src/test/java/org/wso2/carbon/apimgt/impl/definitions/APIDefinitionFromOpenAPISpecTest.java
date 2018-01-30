@@ -27,7 +27,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-public class APIDefinitionFromSwagger20Test {
+public class APIDefinitionFromOpenAPISpecTest {
     @Test
     public void testGetURITemplatesOfOpenAPI20Spec() throws Exception {
 
@@ -112,8 +112,8 @@ public class APIDefinitionFromSwagger20Test {
 
     @Test
     public void testGetURITemplatesOfOpenAPI300Spec() throws APIManagementException {
-        APIDefinitionFromOpenAPISpec apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
 
+        APIDefinitionFromOpenAPISpec apiDefinitionFromOpenAPI300 = new APIDefinitionFromOpenAPISpec();
         String openAPISpec300 =
                 "{\n" +
                         "   \"openapi\":\"3.0.0\",\n" +
@@ -234,7 +234,7 @@ public class APIDefinitionFromSwagger20Test {
         uriTemplates.add(getUriTemplate("DELETE", "Any", "/*"));
         uriTemplates.add(getUriTemplate("GET", "Any", "/abc"));
         API api = new API(new APIIdentifier("admin", "PhoneVerification", "1.0.0"));
-        Set<URITemplate> uriTemplateSet = apiDefinitionFromOpenAPISpec.getURITemplates(api, openAPISpec300);
+        Set<URITemplate> uriTemplateSet = apiDefinitionFromOpenAPI300.getURITemplates(api, openAPISpec300);
         Assert.assertEquals(uriTemplateSet, uriTemplates);
 
     }
