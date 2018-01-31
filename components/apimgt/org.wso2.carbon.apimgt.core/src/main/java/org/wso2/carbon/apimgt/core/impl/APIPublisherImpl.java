@@ -1271,6 +1271,17 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     }
                 }
                 getApiDAO().deleteAPI(identifier);
+
+                //Deleting API specific endpoints
+                if (api.getEndpoint() != null) {
+                    for (Map.Entry<String, Endpoint> entry : api.getEndpoint().entrySet()) {
+                        Endpoint endpoint = entry.getValue();
+                        if (APIMgtConstants.API_SPECIFIC_ENDPOINT.equals(endpoint.getApplicableLevel())) {
+                            deleteEndpoint(endpoint.getId());
+                        }
+                    }
+                }
+
                 getApiLifecycleManager().removeLifecycle(apiBuilder.getLifecycleInstanceId());
                 APIUtils.logDebug("API with id " + identifier + " was deleted successfully.", log);
 
