@@ -296,7 +296,7 @@ public class GatewayUtils {
      * @param messageContext contains the message properties of the relevant API request which was
      *                       enabled the regexValidator message mediation in flow.
      * @param errorCode      It depends on status of the error message.
-     * @param desc           Description of the error message. It describes the vulnerable type and where it happens.
+     * @param desc           Description of the error message.It describes the vulnerable type and where it happens.
      * @return here return true to continue the sequence. No need to return any value from this method.
      */
     public static boolean handleThreat(org.apache.synapse.MessageContext messageContext,

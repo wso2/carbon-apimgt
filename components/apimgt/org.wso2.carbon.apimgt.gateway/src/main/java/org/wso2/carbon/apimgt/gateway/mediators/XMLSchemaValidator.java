@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.gateway.mediators;
 
-import ca.uhn.hl7v2.util.StringUtil;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
@@ -110,9 +109,11 @@ public class XMLSchemaValidator extends AbstractMediator {
                 }
             } catch (APIMThreatAnalyzerException e) {
                 validRequest = false;
+                log.error(APIMgtGatewayConstants.BAD_REQUEST, e);
                 GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE, e.getMessage());
 
             } catch (IOException e) {
+                log.error(APIMgtGatewayConstants.BAD_REQUEST, e);
                 GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE, e.getMessage());
             }
             //return analyzer to the pool
@@ -122,10 +123,10 @@ public class XMLSchemaValidator extends AbstractMediator {
                     APIMgtGatewayConstants.REQUEST_TYPE_FAIL_MSG);
         }
         GatewayUtils.setOriginalInputStream(inputStreams, axis2MC);
-        if (validRequest)
-            try {
+        if (validRequest) try {
             RelayUtils.buildMessage(axis2MC);
         } catch (IOException | XMLStreamException e) {
+            log.error("Error occurred while parsing the payload.", e);
             GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE, e.getMessage());
         }
         return true;
@@ -215,10 +216,11 @@ public class XMLSchemaValidator extends AbstractMediator {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug(("DTD enable:" + dtdEnabled) + ", " + "External entities: " + externalEntitiesEnabled
-                    + ", " + "Element Count:" + elementCount + ", " + "Max AttributeLength:" + attributeLength
-                    + ", " + "Max xml Depth:" + maxXMLDepth + ", " + "Attribute count:" + attributeCount + ", "
-                    + "Entity Expansion Limit" + attributeCount + ". " + "childrenElement:" + attributeCount);
+            log.debug(("DTD enable:" + dtdEnabled) + ", " + "External entities: "
+                    + externalEntitiesEnabled + ", " + "Element Count:" + elementCount + ", " + "Max AttributeLength:"
+                    + attributeLength + ", " + "Max xml Depth:" + maxXMLDepth + ", " + "Attribute count:"
+                    + attributeCount + ", " + "Entity Expansion Limit" + attributeCount + ". " + "childrenElement:"
+                    + attributeCount);
         }
         XMLConfig xmlConfig = new XMLConfig();
         xmlConfig.setDtdEnabled(dtdEnabled);
@@ -244,8 +246,9 @@ public class XMLSchemaValidator extends AbstractMediator {
 
     /**
      * This method validates the request payload xml with the relevant xsd.
-     * @param messageContext This message context contains the request message properties of the relevant
-     *                       API which was enabled the XML_Validator message mediation in flow.
+     *
+     * @param messageContext      This message context contains the request message properties of the relevant
+     *                            API which was enabled the XML_Validator message mediation in flow.
      * @param bufferedInputStream Buffered input stream to be validated.
      * @throws APIMThreatAnalyzerException Exception might be occurred while parsing the xml payload.
      */
