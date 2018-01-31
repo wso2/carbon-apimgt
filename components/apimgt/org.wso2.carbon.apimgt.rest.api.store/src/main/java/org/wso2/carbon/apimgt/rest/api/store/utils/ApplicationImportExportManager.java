@@ -89,12 +89,16 @@ public class ApplicationImportExportManager {
                     if (i == 0) {
                         searchQuery = new StringBuilder(APIUtil.getSingleSearchCriteria(searchCriteria[i]));
                     } else {
-                        searchQuery.append(APIConstants.SEARCH_AND_TAG).append(APIUtil.getSingleSearchCriteria(searchCriteria[i]));
+                        searchQuery.append(APIConstants.SEARCH_AND_TAG)
+                                .append(APIUtil.getSingleSearchCriteria(searchCriteria[i]));
                     }
                 }
-                assert searchQuery != null;
-                Map matchedAPIs = apiConsumer.searchPaginatedAPIs(searchQuery.toString(), tenantDomain, 0, Integer.MAX_VALUE,
-                        false);
+                Map matchedAPIs = null;
+                if (searchQuery != null) {
+                    matchedAPIs = apiConsumer.searchPaginatedAPIs(searchQuery.toString(), tenantDomain, 0,
+                            Integer.MAX_VALUE,
+                            false);
+                }
                 Set<API> apiSet = (Set<API>) matchedAPIs.get("apis");
                 if (apiSet != null && !apiSet.isEmpty()) {
                     API api = apiSet.iterator().next();
@@ -104,10 +108,10 @@ public class ApplicationImportExportManager {
                         apiConsumer.addSubscription(apiId, userId, appId);
                     }
                 } else {
-                    log.info("API " + name + "-" + version + " is not available");
+                    log.error("API " + name + "-" + version + " is not available");
                 }
             } else {
-                log.info("Tenant domain: " + tenantDomain + " is not available");
+                log.error("Tenant domain: " + tenantDomain + " is not available");
             }
         }
     }

@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.rest.api.store.ExportApiService;
 import org.wso2.carbon.apimgt.rest.api.store.utils.FileBasedApplicationImportExportManager;
 import org.wso2.carbon.apimgt.rest.api.store.utils.RestAPIStoreUtils;
+import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.File;
@@ -50,7 +51,8 @@ public class ExportApiServiceImpl extends ExportApiService {
         String exportedFilePath, zippedFilePath = null;
         Application applicationDetails;
         String exportedAppDirName = "exported-application";
-        String pathToExportDir = System.getProperty("java.io.tmpdir") + File.separator + "exported-app-archives-" +
+        String pathToExportDir = System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator +
+                "exported-app-archives-" +
                 UUID.randomUUID().toString(); //creates a directory in default temporary-file directory
         String username = RestApiUtil.getLoggedInUsername();
         try {
@@ -71,8 +73,10 @@ public class ExportApiServiceImpl extends ExportApiService {
             RestApiUtil
                     .handleInternalServerError("Error while exporting Application" + username, e, log);
         }
-        assert zippedFilePath != null;
-        File exportedApplicationArchiveFile = new File(zippedFilePath);
+        File exportedApplicationArchiveFile = null;
+        if (zippedFilePath != null) {
+            exportedApplicationArchiveFile = new File(zippedFilePath);
+        }
         Response.ResponseBuilder responseBuilder = Response.status(Response.Status.OK)
                 .entity(exportedApplicationArchiveFile).type(MediaType.APPLICATION_OCTET_STREAM);
         responseBuilder

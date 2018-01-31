@@ -55,7 +55,8 @@ public class ImportApiServiceImpl extends ImportApiService {
                                            Boolean preserveOwner, Boolean addSubscriptions) {
         APIConsumer consumer;
         String username = RestApiUtil.getLoggedInUsername();
-        String tempDirPath = System.getProperty("java.io.tmpdir") + File.separator + "imported-app-archive-" +
+        String tempDirPath = System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator +
+                "imported-app-archive-" +
                 UUID.randomUUID().toString();
         try {
             consumer = RestApiUtil.getConsumer(username);

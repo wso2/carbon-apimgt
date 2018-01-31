@@ -155,7 +155,7 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
         String archiveExtractLocation;
         String archiveName;
         String extractedFilePath;
-        // create api import directory structure
+        // create import directory structure
         Files.createDirectories(Paths.get(extractLocation));
         // create archive
         createArchiveFromInputStream(uploadedAppArchiveInputStream, appArchiveLocation);
@@ -247,7 +247,7 @@ public class FileBasedApplicationImportExportManager extends ApplicationImportEx
         getAllFiles(directoryToZip, fileList);
         writeArchiveFile(directoryToZip, fileList, archiveLocation, archiveName);
         if (log.isDebugEnabled()) {
-            log.debug("Archived API generated successfully" + archiveName);
+            log.debug("Archive generated successfully " + archiveName);
         }
     }
 
