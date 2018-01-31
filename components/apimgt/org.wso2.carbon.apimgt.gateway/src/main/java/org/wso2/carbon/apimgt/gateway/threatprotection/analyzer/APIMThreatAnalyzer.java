@@ -58,7 +58,7 @@ public interface APIMThreatAnalyzer {
     /**
      * Check whether payload analyzing is enabled by configs
      *
-     * @return true if payload analyzing is enabled, flase otherwise
+     * @return true if payload analyzing is enabled, false otherwise
      */
     boolean isEnabled();
 }

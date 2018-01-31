@@ -98,7 +98,8 @@ public class JsonSchemaValidator extends AbstractMediator {
                     APIMgtGatewayConstants.REQUEST_TYPE_FAIL_MSG);
         }
         GatewayUtils.setOriginalInputStream(inputStreams, axis2MC);
-        if (validRequest) try {
+        if (validRequest)
+            try {
             RelayUtils.buildMessage(axis2MC);
         } catch (IOException | XMLStreamException e) {
             GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE, e.getMessage());

@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.gateway.mediators;
 
+import ca.uhn.hl7v2.util.StringUtil;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
@@ -121,7 +122,8 @@ public class XMLSchemaValidator extends AbstractMediator {
                     APIMgtGatewayConstants.REQUEST_TYPE_FAIL_MSG);
         }
         GatewayUtils.setOriginalInputStream(inputStreams, axis2MC);
-        if (validRequest) try {
+        if (validRequest)
+            try {
             RelayUtils.buildMessage(axis2MC);
         } catch (IOException | XMLStreamException e) {
             GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE, e.getMessage());
@@ -242,10 +244,10 @@ public class XMLSchemaValidator extends AbstractMediator {
 
     /**
      * This method validates the request payload xml with the relevant xsd.
-     *
      * @param messageContext This message context contains the request message properties of the relevant
      *                       API which was enabled the XML_Validator message mediation in flow.
-     * @return This method returns the success or not (true/false) status of the schema validation.
+     * @param bufferedInputStream Buffered input stream to be validated.
+     * @throws APIMThreatAnalyzerException Exception might be occurred while parsing the xml payload.
      */
     private boolean validateSchema(MessageContext messageContext, BufferedInputStream bufferedInputStream)
             throws APIMThreatAnalyzerException {
@@ -274,4 +276,3 @@ public class XMLSchemaValidator extends AbstractMediator {
         return true;
     }
 }
-
