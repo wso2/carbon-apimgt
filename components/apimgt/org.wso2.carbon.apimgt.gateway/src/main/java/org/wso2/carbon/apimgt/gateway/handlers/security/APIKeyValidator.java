@@ -410,23 +410,26 @@ public class APIKeyValidator {
     public VerbInfoDTO findMatchingVerb(MessageContext synCtx) throws ResourceNotFoundException, APISecurityException {
 
         VerbInfoDTO verb = null;
+        String resourceCacheKey = null;
 
         //This function is used by more than one handler. If on one execution of this function, it has found and placed
         //the matching verb in the cache, the same can be re-used from all handlers since all handlers share the same
         //MessageContext. The API_RESOURCE_CACHE_KEY property will be set in the MessageContext to indicate that the
         //verb has been put into the cache.
-        String resourceCacheKey = (String) synCtx.getProperty(APIConstants.API_RESOURCE_CACHE_KEY);
-        if (resourceCacheKey != null) {
-            verb = (VerbInfoDTO) getResourceCache().get(resourceCacheKey);
-            //Cache hit
-            if (verb != null) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Found resource in Cache for key: " + resourceCacheKey);
+        if (isGatewayAPIResourceValidationEnabled) {
+            resourceCacheKey = (String) synCtx.getProperty(APIConstants.API_RESOURCE_CACHE_KEY);
+            if (resourceCacheKey != null) {
+                verb = (VerbInfoDTO) getResourceCache().get(resourceCacheKey);
+                //Cache hit
+                if (verb != null) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Found resource in Cache for key: " + resourceCacheKey);
+                    }
+                    return verb;
                 }
-                return verb;
-            }
-            if (log.isDebugEnabled()) {
-                log.debug("Resource not found in cache for key: " + resourceCacheKey);
+                if (log.isDebugEnabled()) {
+                    log.debug("Resource not found in cache for key: " + resourceCacheKey);
+                }
             }
         }
         String resourceString = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
@@ -493,25 +496,31 @@ public class APIKeyValidator {
             //Set the elected resource
             synCtx.setProperty(APIConstants.API_ELECTED_RESOURCE, resourceString);
         }
-        verb = (VerbInfoDTO) getResourceCache().get(resourceCacheKey);
 
-        //Cache hit
-        if (verb != null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Got Resource from cache for key: " + resourceCacheKey);
+        if (isGatewayAPIResourceValidationEnabled) {
+            verb = (VerbInfoDTO) getResourceCache().get(resourceCacheKey);
+
+            //Cache hit
+            if (verb != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Got Resource from cache for key: " + resourceCacheKey);
+                }
+                //Set cache key in the message context so that it can be used by the subsequent handlers.
+                synCtx.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
+                return verb;
             }
-            //Set cache key in the message context so that it can be used by the subsequent handlers.
-            synCtx.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
-            return verb;
-        }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Cache miss for Resource for key: " + resourceCacheKey);
+            if (log.isDebugEnabled()) {
+                log.debug("Cache miss for Resource for key: " + resourceCacheKey);
+            }
         }
 
         String apiCacheKey = APIUtil.getAPIInfoDTOCacheKey(apiContext, apiVersion);
         APIInfoDTO apiInfoDTO = null;
-        apiInfoDTO = (APIInfoDTO) getResourceCache().get(apiCacheKey);
+
+        if (isGatewayAPIResourceValidationEnabled) {
+            apiInfoDTO = (APIInfoDTO) getResourceCache().get(apiCacheKey);
+        }
 
         //Cache miss
         if (apiInfoDTO == null) {
@@ -519,7 +528,10 @@ public class APIKeyValidator {
                 log.debug("Could not find API object in cache for key: " + apiCacheKey);
             }
             apiInfoDTO = doGetAPIInfo(apiContext, apiVersion);
-            getResourceCache().put(apiCacheKey, apiInfoDTO);
+
+            if (isGatewayAPIResourceValidationEnabled) {
+                getResourceCache().put(apiCacheKey, apiInfoDTO);
+            }
         }
         if (apiInfoDTO.getResources() != null) {
             for (ResourceInfoDTO resourceInfoDTO : apiInfoDTO.getResources()) {
@@ -530,10 +542,13 @@ public class APIKeyValidator {
                                 log.debug("Putting resource object in cache with key: " + resourceCacheKey);
                             }
                             verbDTO.setRequestKey(resourceCacheKey);
-                            //Store verb in cache
-                            getResourceCache().put(resourceCacheKey, verbDTO);
-                            //Set cache key in the message context so that it can be used by the subsequent handlers.
-                            synCtx.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
+
+                            if (isGatewayAPIResourceValidationEnabled) {
+                                //Store verb in cache
+                                getResourceCache().put(resourceCacheKey, verbDTO);
+                                //Set cache key in the message context so that it can be used by the subsequent handlers.
+                                synCtx.setProperty(APIConstants.API_RESOURCE_CACHE_KEY, resourceCacheKey);
+                            }
                             return verbDTO;
                         }
                     }
@@ -632,7 +647,9 @@ public class APIKeyValidator {
         }
         if (apiInfoDTO == null) {
             apiInfoDTO = doGetAPIInfo(context, apiVersion);
-            getResourceCache().put(cacheKey, apiInfoDTO);
+            if (isGatewayAPIResourceValidationEnabled) {
+                getResourceCache().put(cacheKey, apiInfoDTO);
+            }
         }
 
         //Match the case where the direct api context is matched
@@ -658,7 +675,9 @@ public class APIKeyValidator {
                             for (VerbInfoDTO verbDTO : resourceInfoDTO.getHttpVerbs()) {
                                 if (verbDTO.getHttpVerb().equals(httpMethod)) {
                                     //Store verb in cache
-                                    getResourceCache().put(requestCacheKey, verbDTO);
+                                    if (isGatewayAPIResourceValidationEnabled) {
+                                        getResourceCache().put(requestCacheKey, verbDTO);
+                                    }
                                     verbDTO.setRequestKey(requestCacheKey);
                                     return verbDTO;
                                 }
@@ -703,7 +722,9 @@ public class APIKeyValidator {
                         for (VerbInfoDTO verbDTO : resourceInfoDTO.getHttpVerbs()) {
                             if (verbDTO.getHttpVerb().equals(httpMethod)) {
                                 //Store verb in cache
-                                getResourceCache().put(requestCacheKey, verbDTO);
+                                if (isGatewayAPIResourceValidationEnabled) {
+                                    getResourceCache().put(requestCacheKey, verbDTO);
+                                }
                                 verbDTO.setRequestKey(requestCacheKey);
                                 return verbDTO;
                             }
