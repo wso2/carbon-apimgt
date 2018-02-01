@@ -30,34 +30,27 @@ class AuthManager {
         this.username = null;
     }
 
-    static refreshTokenOnExpire() {
+    /**
+     * Refresh the access token and set new access token to the intercepted request
+     * @param {Request} request
+     */
+    static refreshTokenOnExpire(request) {
+        const refreshPeriod = 60;
+        const user = AuthManager.getUser();
+        let timeToExpire = Utils.timeDifference(user.getExpiryTime());
+        if (timeToExpire >= refreshPeriod) {
+            return request;
+        }
         let loginPromise = AuthManager.refresh();
-        loginPromise.then(data => {
-            authManager.setUser(true);
-            let expiresIn = data.validityPeriod + Math.floor(Date.now() / 1000);
-            window.localStorage.setItem("expiresIn", expiresIn);
+        loginPromise.then(response => {
+            const user = AuthManager.loginUserMapper(response);
+            AuthManager.setUser(user);
         });
         loginPromise.catch(
             function(error) {
                 let error_data = JSON.parse(error.responseText);
-                let message = "Error while refreshing token" + "<br/> You will be redirect to the login page ...";
-                noty({
-                    text: message,
-                    type: 'error',
-                    dismissQueue: true,
-                    modal: true,
-                    progressBar: true,
-                    timeout: 5000,
-                    layout: 'top',
-                    theme: 'relax',
-                    maxVisible: 10,
-                    callback: {
-                        afterClose: function() {
-                            window.location = loginPageUri;
-                        },
-                    }
-                });
-
+                let message = "Error while refreshing token You will be redirect to the login page ...";
+                console.error(message);
             }
         );
     }
@@ -168,12 +161,7 @@ class AuthManager {
         Utils.setEnvironment(environment);
 
         promised_response.then(response => {
-            const validityPeriod = response.data.validityPeriod; // In seconds
-            const WSO2_AM_TOKEN_1 = response.data.partialToken;
-            const user = new User(Utils.getEnvironment().label, response.data.authUser, response.data.idToken);
-            user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Utils.CONST.CONTEXT_PATH);
-            user.setExpiryTime(validityPeriod);
-            user.scopes = response.data.scopes.split(" ");
+            const user = AuthManager.loginUserMapper(response);
             AuthManager.setUser(user);
             this.setupAutoRefresh();
         }).catch(error => {
@@ -181,6 +169,22 @@ class AuthManager {
             Utils.setEnvironment(previous_environment);
         });
         return promised_response;
+    }
+
+    /**
+     * Return an user object given the login request response object
+     * @param {Object} response Response object received from either Axios or Fetch libraries
+     * @returns {User} Instance of an user who is currently logged in (for the selected environment)
+     */
+    static loginUserMapper(response) {
+        let data = response.data;
+        const validityPeriod = data.validityPeriod; // In seconds
+        const WSO2_AM_TOKEN_1 = data.partialToken;
+        const user = new User(Utils.getEnvironment().label, data.authUser, data.idToken);
+        user.setPartialToken(WSO2_AM_TOKEN_1, validityPeriod, Utils.CONST.CONTEXT_PATH);
+        user.setExpiryTime(validityPeriod);
+        user.scopes = data.scopes.split(" ");
+        return user;
     }
 
     /**
