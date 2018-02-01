@@ -131,7 +131,7 @@ class ProvideWSDL extends Component {
                                     <FormControl fullWidth aria-describedby="url-text">
                                         <InputLabel htmlFor="url">WSDL URL</InputLabel>
                                         <Input id="url" value={url} onChange={this.updateURL}/>
-                                        <FormHelperText id="url-text">WSDL will be validate upon submit</FormHelperText>
+                                        <FormHelperText id="url-text">The WSDL will be validated upon submission</FormHelperText>
                                     </FormControl>
                                 </form>
                             )}
@@ -139,7 +139,7 @@ class ProvideWSDL extends Component {
                         <Grid item xs={4}>
                             <Grid container>
                                 <Grid item xs={12}>
-                                    <Tooltip title={"Validate WSDL " + uploadMethod} placement="bottom">
+                                    <Tooltip title={"Validates WSDL " + uploadMethod} placement="bottom">
                                         <Button color={error ? "accent" : "primary"} onClick={this.validateWSDL}>
                                             Validate {isValid && <Done/>}
                                         </Button>

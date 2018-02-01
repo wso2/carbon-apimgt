@@ -183,7 +183,7 @@ class ApiCreateWSDL extends Component {
             <Grid container spacing={0} justify="center">
                 <Grid item xs={8}>
                     <Typography type="display1" className={classes.textWelcome}>
-                        Design new REST API using WSDL
+                        Design a new REST API using WSDL
                     </Typography>
                     <Card className={classes.apiCreate}>
                         <CardContent>
@@ -216,7 +216,7 @@ class ApiCreateWSDL extends Component {
                                     </StepLabel>
                                     <StepContent>
                                         <Typography type="caption" gutterBottom align="left">
-                                            You can configure the advance configurations later
+                                            You can configure the advanced configurations later
                                         </Typography>
                                         <InputForm apiFields={apiFields}
                                                    handleInputChange={this.updateApiInputs}/>

@@ -80,7 +80,7 @@ class ApiCreate extends Component {
                                                 <div className="ch-info">
                                                     <div className="ch-info-front ch-img-3">
                                                         <i className="fw fw-rest-api fw-4x"/>
-                                                        <span>Design New REST API</span>
+                                                        <span>Design a New REST API</span>
                                                     </div>
                                                     <div className="ch-info-back">
                                                         <p className="unselectable">Design and prototype a new REST

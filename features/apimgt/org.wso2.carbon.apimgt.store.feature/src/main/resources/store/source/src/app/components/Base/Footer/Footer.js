@@ -35,7 +35,7 @@ export const Footer = (props) => {
     return (
         <div className='footer'>
             <Typography type="caption" className='text-gutter text-welcome'>
-                WSO2 APIM Publisher v3.0.0 | © 2017 <span><a href="http://wso2.com/" target="_blank">
+                WSO2 APIM Publisher v3.0.0 | © 2018 <span><a href="http://wso2.com/" target="_blank">
                 WSO2 Inc</a></span></Typography>
         </div>
     );
