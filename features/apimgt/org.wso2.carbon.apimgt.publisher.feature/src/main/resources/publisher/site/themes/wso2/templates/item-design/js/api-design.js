@@ -762,6 +762,11 @@ APIDesigner.prototype.init_controllers = function(){
 
 APIDesigner.prototype.load_api_document = function(api_document){
     this.api_doc = api_document;
+    if(this.is_openapi3()){
+        $('#openAPISpec3Warning').show();
+    } else{
+        $('#openAPISpec3Warning').hide();
+    }
     this.load_swagger_editor_content();
     this.render_resources();
     this.render_scopes();

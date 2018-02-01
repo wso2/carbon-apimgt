@@ -55,6 +55,14 @@ $( document ).ready(function() {
         });
     });
 
+    $("#apiDefinitionVersion").change(function () {
+        if ($('#apiDefinitionVersion').find(":selected").val() == "3.0") {
+          $('#openAPISpec3Warning').show('slow');
+        } else {
+            $('#openAPISpec3Warning').hide('slow');
+        }
+    })
+
     $('#swagger-file').change(function () {
         $('.swaggerFileError').hide();
         $('#swagger-file').removeClass('error');

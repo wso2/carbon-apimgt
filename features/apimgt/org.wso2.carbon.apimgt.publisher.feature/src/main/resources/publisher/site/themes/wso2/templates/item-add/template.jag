@@ -37,10 +37,6 @@
 			<div id="accordion1-collapse1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
 				<div class="panel-body">
 					 <form class="form-horizontal" id="startFromExistingAPI-form" enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>">
-					    <div class="message message-info">
-                            <h4><i class="icon fw fw-info"></i><%=i18n.localize("Info!")%></h4>
-                            <p><%=i18n.localize("Please note that client side SDK generation feature is currently not available for APIs with OpenAPI 3.0.0 specification")%></p>
-		                </div>
 						<div class="form-group">
 							<div class="col-sm-12 toggleRadios">
 								<label class="radio sub-labels"> <input type="radio"
@@ -151,9 +147,9 @@
 					        </div>
 					    </div>
 					    <div id="more-options-api-spec" style="display:none">
-					        <div class="message message-info">
+					        <div class="message message-info" id="openAPISpec3Warning" style="display: none">
                                 <h4><i class="icon fw fw-info"></i><%=i18n.localize("Info!")%></h4>
-                                <p><%=i18n.localize("Please note that client side SDK generation feature is currently not available for APIs with OpenAPI 3.0.0 specification")%></p>
+                                <p><%=i18n.localize("Client side SDK generation feature is currently not available for APIs in OpenAPI 3.0 specification")%></p>
 		                    </div>
 					        <div class="form-group">
 					            <label class="col-sm-2 control-label" style="text-align: left" for="apiDefVersion"><%=i18n.localize("Supported API Specification")%>:

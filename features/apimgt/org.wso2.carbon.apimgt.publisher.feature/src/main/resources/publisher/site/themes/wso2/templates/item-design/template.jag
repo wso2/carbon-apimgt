@@ -88,6 +88,10 @@
                 <p><%=i18n.localize("You are editing an API with active subscribers. Tier Availability changes will not be reflected on active subscriptions.")%></p>
 		</div>
   <% }%>
+        <div class="message message-info" id="openAPISpec3Warning" style="display: none">
+                <h4><i class="icon fw fw-info"></i><%=i18n.localize("Info!")%></h4>
+                <p><%=i18n.localize("Client side SDK generation feature is currently not available for this API since the API definition is in OpenAPI 3.0 specification")%></p>
+		</div>
 
 		<div id="apiSaved" class="alert alert-success" role="alert" style="display:none">
 			<i class="icon fw fw-success fade out"></i>
