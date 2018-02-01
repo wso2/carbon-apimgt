@@ -1048,6 +1048,35 @@
 </div>
 </script>
 
+<script id="designer-sequence-template" type="text/x-handlebars-template">
+<div class="resource_body_padding">
+    <h5><%=i18n.localize("Description")%> :</h5>
+    <a class="notes" data-path="{{resource_path}}" data-attr="description" title="<%=i18n.localize("Description")%>">{{ description }}</a><br />
+    <h5><%=i18n.localize("Response Content Type")%> : <a href="#" data-path="{{resource_path}}" data-attr="content_type" class="content_type" data-type="typeahead" data-pk="1" data-title="<%=i18n.localize("Response Content Type")%>" title="<%=i18n.localize("Response Content Type")%>">{{ content_type }}</a></h5>
+    <h5><%=i18n.localize("Parameters")%> :</h5>
+    {{#if parameters}}
+    <table class="table table-condensed table-hover table-bordered">
+        <tr>
+        <th width="200px"><%=i18n.localize("Parameter Name")%></th>
+        <th>Description</th>
+        <th width="100px"><%=i18n.localize("Parameter Type")%></th>
+        <th width="100px"><%=i18n.localize("Data Type")%></th>
+        <th width="100px"><%=i18n.localize("Required")%></th>
+        </tr>
+    {{#each parameters}}
+        <tr>
+        <td>{{ name }}</td>
+        <td>{{ description }}</td>
+        <td>{{ in }}</td>
+        <td>{{ type }}</td>
+        <td>{{toString required }}</td>
+        </tr>
+    {{/each}}
+    {{/if}}
+    </table>
+</div>
+</script>
+
 <script id="designer-resources-template" type="text/x-handlebars-template">
 <br />
 <table style="width:100%">

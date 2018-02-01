@@ -241,4 +241,5 @@ $( document ).ready(function() {
     });
     $('.toggleRadios input[type=radio]').first().click();
 
+    $('input[name=soap-options-pass-thru]').trigger("click");
 });

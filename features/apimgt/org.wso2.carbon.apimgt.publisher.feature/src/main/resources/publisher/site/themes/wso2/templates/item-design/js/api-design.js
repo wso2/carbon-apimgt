@@ -9,6 +9,8 @@ var api_doc =
     }
 };
 
+var isSoapView=false;
+
 var apiLevelPolicy = {
     isAPILevel : false
 };
@@ -85,6 +87,8 @@ function APIDesigner(){
     }
     source   = $("#designer-resources-template").html();
     Handlebars.partials['designer-resources-template'] = Handlebars.compile(source);
+    source2   = $("#designer-sequence-template").html();
+    Handlebars.partials['designer-sequence-template'] = Handlebars.compile(source2);
     source   = $("#designer-resource-template").html();
     Handlebars.partials['designer-resource-template'] = Handlebars.compile(source);
     if($('#scopes-template').length){
@@ -129,6 +133,26 @@ function APIDesigner(){
         if(this.resource_created == undefined){
             event.data.render_resource($(this).parent().next().find('.resource_body'));
             this.resource_created = true;
+            $(this).parent().next().find('.resource_body').show();
+        }
+        else{
+            $(this).parent().next().find('.resource_body').toggle();
+        }
+    });
+
+    $( "#soapToRestMappingContent" ).delegate( ".resource_expand", "click", this, function( event ) {
+        if(this.soap_resource_created == undefined){
+            var soapRestMapping = JSON.parse($('#sequenceMapping').val());
+            var soapRestOutMapping = JSON.parse($('#sequenceOutMapping').val());
+            var resourceDetails = $.trim($(this).parent().text().replace(/[\t\n]+/g,''));
+            resourceDetails = resourceDetails.replace(/\s/g,'');
+            var method = resourceDetails.substring(0, resourceDetails.indexOf("/"));
+            var path = resourceDetails.substring(resourceDetails.indexOf("/") + 1, resourceDetails.indexOf("+"));
+            var key = path + "_" + method;
+            var inSeqContent = soapRestMapping[key].content;
+            var outSeqContent = soapRestOutMapping[key].content;
+            event.data.render_soap_to_rest_resource($(this).parent().next().find('.resource_body'), inSeqContent, outSeqContent, key);
+            this.soap_resource_created = true;
             $(this).parent().next().find('.resource_body').show();
         }
         else{
@@ -818,6 +842,44 @@ APIDesigner.prototype.render_resources = function(){
 
 };
 
+APIDesigner.prototype.soap_to_rest_mapping = function () {
+        context = {
+            "doc": this.transform(this.api_doc),
+            "verbs": VERBS,
+            "has_resources": this.has_resources()
+        }
+        var output = Handlebars.partials['designer-resources-template'](context);
+        $('#soapToRestMappingContent').html(output);
+        $('#soapToRestMappingContent').find('.scope_select').editable({
+            emptytext: '+ Scope',
+            source: this.get_scopes(),
+            success: this.update_elements
+        });
+
+        if (typeof(AUTH_TYPES) !== 'undefined') {
+            $('#soapToRestMappingContent').find('.auth_type_select').editable({
+                emptytext: '+ Auth Type',
+                source: AUTH_TYPES,
+                autotext: "always",
+                display: this.display_element,
+                success: this.update_elements
+            });
+        }
+
+        $('#soapToRestMappingContent').find('.change_summary').editable({
+            emptytext: '+ Summary',
+            success: this.update_elements,
+            inputclass: 'resource_summary'
+        });
+        $.fn.editableform.buttons =
+            '<button type="submit" class="btn btn-primary btn-sm editable-submit">' +
+            '<i class="fw fw-check"></i>' +
+            '</button>' +
+            '<button type="button" class="btn btn-secondary btn-sm editable-cancel">' +
+            '<i class="fw fw-cancel"></i>' +
+            '</button>';
+    };
+
 APIDesigner.prototype.render_resource = function(container){
     var isBodyRequired = false;
     var operation = this.query(container.attr('data-path'));
@@ -902,6 +964,74 @@ APIDesigner.prototype.render_resource = function(container){
     });
     this.load_swagger_editor_content();
 };
+
+    APIDesigner.prototype.render_soap_to_rest_resource = function (container, inseq, outseq, key) {
+        var isBodyRequired = false;
+        var operation = this.query(container.attr('data-path'));
+        var context = jQuery.extend(true, {}, operation[0]);
+        context.resource_path = container.attr('data-path');
+        var pathPrefix = "$.paths./";
+        var resourcePath = container.attr('data-path').substring(pathPrefix.length).replace(".", "_");
+        context.seq_id = resourcePath;
+        if (context.resource_path.match(/post/i) || context.resource_path.match(/put/i)) {
+            isBodyRequired = true;
+        }
+        var output = Handlebars.partials['designer-sequence-template'](context);
+        container.html(output);
+        container.show();
+
+
+        if (container.find('.editor').length) {
+            var textareaIn = container.find('.editor')[0];
+            var inseq_editor = CodeMirror.fromTextArea(textareaIn, {
+                lineNumbers: true,
+                mode: "text/xml",
+                gutters: ["CodeMirror-lint-markers"],
+                lint: true
+            });
+
+            inseq_editor.setValue(inseq);
+            inseq_editor.on('change', function (editorContent) {
+                var soapRestMapping = JSON.parse($('#sequenceMapping').val());
+                soapRestMapping[key].content = editorContent.getValue();
+                $('#sequenceMapping').val(JSON.stringify(soapRestMapping));
+
+                var oParser = new DOMParser();
+                var xml = '<document>' + editorContent.getValue() + '</document>';
+                var oDOM = oParser.parseFromString(xml, "application/xml");
+            });
+
+            var textareaOut = container.find('.editor')[1];
+            var outseq_editor = CodeMirror.fromTextArea(textareaOut, {
+                lineNumbers: true,
+                mode: "text/xml",
+                gutters: ["CodeMirror-lint-markers"],
+                lint: true
+            });
+
+            outseq_editor.setValue(outseq);
+
+            outseq_editor.on('change', function (editorContent) {
+                var soapRestOutMapping = JSON.parse($('#sequenceOutMapping').val());
+                soapRestOutMapping[key].content = editorContent.getValue();
+                $('#sequenceOutMapping').val(JSON.stringify(soapRestOutMapping));
+
+                var oParser = new DOMParser();
+                var xml = '<document>' + editorContent.getValue() + '</document>';
+                var oDOM = oParser.parseFromString(xml, "application/xml");
+            });
+        }
+
+        container.find('.notes').editable({
+            type: 'textarea',
+            emptytext: '+ Add Implementation Notes',
+            success: this.update_elements,
+            rows: 1,
+            tpl: '<textarea cols="50"></textarea>',
+            mode: 'popup'
+        });
+        this.load_swagger_editor_content();
+    };
 
 APIDesigner.prototype.query = function(path){
     return JSONPath(path, this.api_doc);
@@ -1370,3 +1500,24 @@ var disableForm = function() {
     $('#swaggerEditor').unbind('click');
 }
 
+var getSoapToRestPathMap = function () {
+    if($('#rest-paths').val()) {
+        var pathObj = JSON.parse($('#rest-paths').val());
+        api_doc.paths = pathObj;
+        if($('#definitions').val()) {
+            var definitions = JSON.parse($('#definitions').val());
+            api_doc.definitions = definitions;
+        }
+        var designer = new APIDesigner();
+        designer.load_api_document(api_doc);
+        $("#wsdl-content").hide();
+        $(".resource_create").hide();
+        $('#resource_details').show();
+        $('#soap-swagger-editor').show();
+        isSoapView = true;
+    } else {
+        $("#resource_details").hide();
+        $('#wsdl-content').show();
+        $('#soap-swagger-editor').hide();
+    }
+};

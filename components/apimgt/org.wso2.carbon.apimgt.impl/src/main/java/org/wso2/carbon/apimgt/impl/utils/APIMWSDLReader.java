@@ -80,6 +80,7 @@ public class APIMWSDLReader {
 	private String baseURI; //WSDL Original URL
 
 	private static final String JAVAX_WSDL_VERBOSE_MODE = "javax.wsdl.verbose";
+    private static final String JAVAX_WSDL_IMPORT_DOCUMENTS = "javax.wsdl.importDocuments";
 
     private static final int ENTITY_EXPANSION_LIMIT = 0;
 
@@ -150,6 +151,46 @@ public class APIMWSDLReader {
             throw new APIManagementException(msg, e);
         }
 
+    }
+
+    /**
+     * Gets WSDL definition as a byte array
+     *
+     * @return converted WSDL definition as byte array
+     * @throws APIManagementException
+     */
+    public byte[] getWSDL() throws APIManagementException {
+        try {
+            Definition wsdlDefinition = readWSDLFile();
+            WSDLWriter writer = getWsdlFactoryInstance().newWSDLWriter();
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            writer.writeWSDL(wsdlDefinition, byteArrayOutputStream);
+            return byteArrayOutputStream.toByteArray();
+        } catch (Exception e) {
+            String msg = "Error occurs when change the address URL of the WSDL";
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    /**
+     * Returns WSDL definition from a byte content of the WSDL
+     *
+     * @param wsdl byte content of the WSDL document
+     * @return {@link Definition} - WSDL4j definition constructed form the wsdl
+     * @throws APIManagementException
+     */
+    public Definition getWSDLDefinitionFromByteContent(byte[] wsdl) throws APIManagementException {
+        try {
+            WSDLReader wsdlReader = getWsdlFactoryInstance().newWSDLReader();
+            // switch off the verbose mode
+            wsdlReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
+            wsdlReader.setFeature(JAVAX_WSDL_IMPORT_DOCUMENTS, false);
+
+            return wsdlReader.readWSDL(null, getSecuredParsedDocumentFromContent(wsdl));
+        } catch (Exception e) {
+            String msg = " Error occurs when updating WSDL ";
+            throw new APIManagementException(msg, e);
+        }
     }
 
     /**
@@ -250,7 +291,7 @@ public class APIMWSDLReader {
 			WSDLReader wsdlReader = getWsdlFactoryInstance().newWSDLReader();
 			// switch off the verbose mode
 			wsdlReader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
-			wsdlReader.setFeature("javax.wsdl.importDocuments", false);
+			wsdlReader.setFeature(JAVAX_WSDL_IMPORT_DOCUMENTS, false);
 
 			if (wsdlReader instanceof WSDLReaderImpl) {
 			    ((WSDLReaderImpl) wsdlReader).setIgnoreSchemaContent(true);
@@ -337,7 +378,7 @@ public class APIMWSDLReader {
     private org.apache.woden.wsdl20.Description readWSDL2File() throws APIManagementException, WSDLException {
         WSDLReader reader = getWsdlFactoryInstance().newWSDLReader();
         reader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
-        reader.setFeature("javax.wsdl.importDocuments", false);
+        reader.setFeature(JAVAX_WSDL_IMPORT_DOCUMENTS, false);
         try {
             org.apache.woden.WSDLFactory wFactory = org.apache.woden.WSDLFactory.newInstance();
             org.apache.woden.WSDLReader wReader = wFactory.newWSDLReader();
@@ -398,7 +439,7 @@ public class APIMWSDLReader {
 		WSDLReader reader = getWsdlFactoryInstance().newWSDLReader();
 		// switch off the verbose mode
 		reader.setFeature(JAVAX_WSDL_VERBOSE_MODE, false);
-		reader.setFeature("javax.wsdl.importDocuments", false);
+		reader.setFeature(JAVAX_WSDL_IMPORT_DOCUMENTS, false);
 
 		if (reader instanceof WSDLReaderImpl) {
 			((WSDLReaderImpl) reader).setIgnoreSchemaContent(true);

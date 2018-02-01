@@ -18,17 +18,31 @@ package org.wso2.carbon.apimgt.impl.template;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.soaptorest.template.SOAPToRESTAPIConfigContext;
+import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPToRESTConstants;
+import org.wso2.carbon.apimgt.impl.soaptorest.util.SequenceUtils;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.registry.api.Resource;
+import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.core.RegistryConstants;
+import org.wso2.carbon.registry.core.ResourceImpl;
+import org.wso2.carbon.registry.core.service.RegistryService;
+import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -37,7 +51,6 @@ import java.lang.String;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 
 /**
  * Constructs API and resource configurations for the ESB/Synapse using a Apache velocity
@@ -78,6 +91,27 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             configcontext = new HandlerConfigContex(configcontext, handlers);
             configcontext = new EnvironmentConfigContext(configcontext, environment);
             configcontext = new TemplateUtilContext(configcontext);
+
+            if (!StringUtils.isEmpty(api.getWsdlUrl())) {
+                RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+                String tenantDomain = MultitenantUtils
+                        .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+                int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
+                String resourceInPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                        api.getId().getProviderName() + RegistryConstants.PATH_SEPARATOR + api.getId().getApiName()
+                        + RegistryConstants.PATH_SEPARATOR + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR
+                        + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_IN_RESOURCE;
+                String resourceOutPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                        api.getId().getProviderName() + RegistryConstants.PATH_SEPARATOR + api.getId().getApiName()
+                        + RegistryConstants.PATH_SEPARATOR + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR
+                        + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_OUT_RESOURCE;
+                UserRegistry registry = registryService.getGovernanceSystemRegistry(tenantId);
+                configcontext = SequenceUtils.getSequenceTemplateConfigContext(registry, resourceInPath,
+                        SOAPToRESTConstants.Template.IN_SEQUENCES, configcontext);
+                configcontext = SequenceUtils.getSequenceTemplateConfigContext(registry, resourceOutPath,
+                        SOAPToRESTConstants.Template.OUT_SEQUENCES, configcontext);
+            }
 
             //@todo: this validation might be better to do when the builder is initialized.
             configcontext.validate();

@@ -325,6 +325,17 @@ $(document).ready(function(){
             $('#upload_sequence').buttonLoader('stop');
     });
 
+    $( "#soapToRestMappingContent" ).delegate( ".resource_expand", "click", this, function( event ) {
+        var soapRestMapping = JSON.parse($('#sequenceMapping').val());
+        var resourceDetails = $.trim($(this).parent().text().replace(/[\t\n]+/g,''));
+        resourceDetails = resourceDetails.replace(/\s/g,'');
+        var method = resourceDetails.substring(0, resourceDetails.indexOf("/"));
+        var path = resourceDetails.substring(resourceDetails.indexOf("/") + 1, resourceDetails.indexOf("+"));
+        $(this).parent().next().find('.editor');
+        var key = path + "_" + method;
+        var textArea = $(this).parent().next().find('.editor')[0];
+    });
+
 });
 
 var thisID='';
