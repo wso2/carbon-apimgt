@@ -13,6 +13,7 @@ import org.wso2.carbon.endpoint.stub.types.EndpointAdminStub;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class EndpointAdminClient {
     private static final Logger log = LoggerFactory.getLogger(EndpointAdminClient.class);
@@ -67,12 +68,29 @@ public class EndpointAdminClient {
         return arrayList;
     }
 
-//    public void saveEndpoint(APITemplateBuilder builder) throws AxisFault {
-//        try {
-//            String endpointConfig = builder.getConfigStringForEndpointTemplate(environment);
-//            endpointAdminStub.saveEndpoint(endpointConfig);
-//        } catch (Exception e) {
-//            throw new AxisFault("Error updating Endpoint file" + e.getMessage(), e);
-//        }
-//    }
+    public void saveEndpoint(API api, APITemplateBuilder builder) throws AxisFault {
+        try {
+            ArrayList<Integer> arrayList = new ArrayList<>();
+            String[] endpointNames = endpointAdminStub.getEndPointsNames();
+            Arrays.sort(endpointNames); //Sorting required for Binary Search
+            arrayList.add(Arrays.binarySearch(endpointNames, api.getId().getApiName() + "--" +
+                    api.getId().getVersion() + "_API" + APIConstants.GATEWAY_ENV_TYPE_PRODUCTION + "Endpoint"));
+            arrayList.add(Arrays.binarySearch(endpointNames, api.getId().getApiName() + "--" +
+                    api.getId().getVersion() + "_API" + APIConstants.GATEWAY_ENV_TYPE_SANDBOX + "Endpoint"));
+
+            for (int index : arrayList) {
+                if (index >= 0) { //If not found, don't delete
+                    endpointAdminStub.deleteEndpoint(endpointNames[index]);
+                }
+            }
+
+            ArrayList<String> arrayListToAdd = getEndpointType(api);
+            for (String type : arrayListToAdd) {
+                String endpointConfigContext = builder.getConfigStringForEndpointTemplate(type);
+                endpointAdminStub.addEndpoint(endpointConfigContext);
+            }
+        } catch (Exception e) {
+            throw new AxisFault("Error updating Endpoint file" + e.getMessage(), e);
+        }
+    }
 }
