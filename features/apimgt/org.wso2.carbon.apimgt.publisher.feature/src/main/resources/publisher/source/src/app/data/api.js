@@ -38,7 +38,6 @@ class API {
      * @private
      */
     _requestMetaData(data = {}) {
-        AuthManager.refreshTokenOnExpire(); /* TODO: This should be moved to an interceptor ~tmkb*/
         let metaData = {
             requestContentType: data['Content-Type'] || "application/json"
         };

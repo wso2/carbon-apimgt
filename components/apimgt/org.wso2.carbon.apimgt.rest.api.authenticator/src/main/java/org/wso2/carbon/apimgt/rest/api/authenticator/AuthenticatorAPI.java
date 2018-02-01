@@ -93,6 +93,8 @@ public class AuthenticatorAPI implements Microservice {
             String appContext = AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
             String logoutContext = AuthenticatorConstants.LOGOUT_SERVICE_CONTEXT +
                     AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
+            String loginContext = AuthenticatorConstants.LOGIN_SERVICE_CONTEXT +
+                    AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
             String restAPIContext;
             if (appContext.contains(AuthenticatorConstants.EDITOR_APPLICATION) ||
                     request.getUri().contains(AuthenticatorConstants.PUBLISHER_APPLICATION)) {
@@ -139,11 +141,18 @@ public class AuthenticatorAPI implements Microservice {
                     AuthenticatorConstants.PASSWORD_GRANT.equals(grantType) && isRememberMe))) {
                 String refTokenPart1 = refreshToken.substring(0, refreshToken.length() / 2);
                 String refTokenPart2 = refreshToken.substring(refreshToken.length() / 2);
+                /* Note:
+                Two parts of the Refresh Token should be stored in two cookies where JS accessible cookie
+                is stored with `/{appName}` (i:e /publisher) path, because JS will trigger a token refresh call
+                anywhere under `/publisher` context.Other part of the Refresh token cookie should set with the
+                path directive as `/login/token/{appName}` (i:e /login/token/publisher) because the token request call
+                will be send to `/login/token/{appName}` endpoint originated from `/{appName}`
+                * */
                 refreshTokenCookie = AuthUtil
                         .cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_1, refTokenPart1, appContext, true, false,
                                 "");
                 refreshTokenHttpOnlyCookie = AuthUtil
-                        .cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_2, refTokenPart2, appContext, true, true,
+                        .cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_2, refTokenPart2, loginContext, true, true,
                                 "");
                 return Response.ok(authResponseBean, MediaType.APPLICATION_JSON)
                         .cookie(logoutContextCookie, restAPIContextCookie,

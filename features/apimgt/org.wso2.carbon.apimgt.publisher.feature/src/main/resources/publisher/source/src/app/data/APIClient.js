@@ -36,21 +36,20 @@ class APIClient {
 
         const authorizations = {
             OAuth2Security: {
-                token: {access_token: AuthManager.getUser().getPartialToken()}
+                token: { access_token: AuthManager.getUser().getPartialToken() }
             }
         };
 
-        let promisedResolve = SwaggerClient.resolve({url: Utils.getSwaggerURL()});
+        let promisedResolve = SwaggerClient.resolve({ url: Utils.getSwaggerURL() });
         APIClient.spec = promisedResolve;
         this._client = promisedResolve.then(
             resolved => {
-                const argsv = Object.assign(args,
-                    {
-                        spec: this._fixSpec(resolved.spec),
-                        authorizations: authorizations,
-                        requestInterceptor: this._getRequestInterceptor(),
-                        responseInterceptor: this._getResponseInterceptor()
-                    });
+                const argsv = Object.assign(args, {
+                    spec: this._fixSpec(resolved.spec),
+                    authorizations: authorizations,
+                    requestInterceptor: this._getRequestInterceptor(),
+                    responseInterceptor: this._getResponseInterceptor()
+                });
                 let swaggerClient = new SwaggerClient(argsv);
                 swaggerClient.then(client => {
                     client.http.withCredentials = true
@@ -95,7 +94,7 @@ class APIClient {
      */
     static getScopeForResource(resourcePath, resourceMethod) {
         if (!APIClient.spec) {
-            APIClient.spec = SwaggerClient.resolve({url: Utils.getSwaggerURL()});
+            APIClient.spec = SwaggerClient.resolve({ url: Utils.getSwaggerURL() });
         }
         return APIClient.spec.then(
             resolved => {
@@ -127,11 +126,12 @@ class APIClient {
     }
 
     _getRequestInterceptor() {
-        return (data) => {
-            if (APIClient.getETag(data.url) && (data.method === "PUT" || data.method === "DELETE" || data.method === "POST")) {
-                data.headers["If-Match"] = APIClient.getETag(data.url);
+        return (request) => {
+            AuthManager.refreshTokenOnExpire(request);
+            if (APIClient.getETag(request.url) && (request.method === "PUT" || request.method === "DELETE" || request.method === "POST")) {
+                request.headers["If-Match"] = APIClient.getETag(request.url);
             }
-            return data;
+            return request;
         }
     }
 }

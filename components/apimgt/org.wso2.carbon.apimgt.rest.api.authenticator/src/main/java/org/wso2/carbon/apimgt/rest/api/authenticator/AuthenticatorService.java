@@ -175,6 +175,12 @@ public class AuthenticatorService {
                                 null, validityPeriod, scopes,
                                 consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
                 accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
+            } else if (KeyManagerConstants.REFRESH_GRANT_TYPE.equals(grantType)) {
+                accessTokenRequest = AuthUtil
+                        .createAccessTokenRequest(userName, password, grantType, refreshToken,
+                                null, validityPeriod, scopes,
+                                consumerKeySecretMap.get("CONSUMER_KEY"), consumerKeySecretMap.get("CONSUMER_SECRET"));
+                accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
             }
         } catch (KeyManagementException e) {
             String errorMsg = "Error while receiving tokens for OAuth application : " + appName;
