@@ -474,6 +474,7 @@ public class APIStoreImplTestCase {
         APIStore apiStore = getApiStoreImpl(apiDAO, applicationDAO, apiSubscriptionDAO, workflowDAO, apiGateway,
                 policyDAO);
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
+        apiBuilder.lifeCycleStatus(APIStatus.PUBLISHED.getStatus());
         API api = apiBuilder.build();
         String apiId = api.getId();
         Application application = new Application("TestApp", USER_ID);
@@ -1394,6 +1395,7 @@ public class APIStoreImplTestCase {
         Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, TIER))
                 .thenReturn(policy);
         API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
+        apiBuilder.lifeCycleStatus(APIStatus.PUBLISHED.getStatus());
         API api = apiBuilder.build();
         String apiId = api.getId();
         Application application = new Application("TestApp", USER_ID);
@@ -1417,6 +1419,76 @@ public class APIStoreImplTestCase {
 
         Mockito.verify(apiSubscriptionDAO, Mockito.times(1)).updateSubscriptionStatus(response.getSubscriptionUUID(),
                 SubscriptionStatus.REJECTED);
+    }
+
+    @Test(description = "Test get API with not allowed lifecycle states (Created, Maintenance, Retired)")
+    public void testGetAPIWithNotAllowedLifecycleStates() throws APIManagementException {
+
+        String exceptionShouldThrowError =
+                "Exception should be thrown when accessing an API in %s state";
+        String matchedErrorMessage = "Attempt to access an API which is in a restricted state";
+
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        Policy policy = new SubscriptionPolicy(UUID, TIER);
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, TIER))
+                .thenReturn(policy);
+        APIStore apiStore = getApiStoreImpl(apiDAO, Mockito.mock(ApplicationDAO.class),
+                Mockito.mock(APISubscriptionDAO.class), Mockito.mock(WorkflowDAO.class), Mockito.mock(APIGateway.class),
+                policyDAO);
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
+        String apiId = apiBuilder.getId();
+
+        List<String> notAllowedStates = new ArrayList<String>() {
+            {
+                add(APIStatus.CREATED.getStatus());
+                add(APIStatus.MAINTENANCE.getStatus());
+                add(APIStatus.RETIRED.getStatus());
+            }
+        };
+
+        for (String notAllowedState : notAllowedStates) {
+            apiBuilder.lifeCycleStatus(notAllowedState);
+            API api = apiBuilder.build();
+            Mockito.when(apiDAO.getAPI(apiId)).thenReturn(api);
+
+            try {
+                apiStore.getAPIbyUUID(apiId);
+                Assert.fail(exceptionShouldThrowError);
+            } catch (APIManagementException e) {
+                Assert.assertTrue(e.getMessage().contains(matchedErrorMessage));
+            }
+        }
+    }
+
+    @Test(description = "Test get API with allowed lifecycle states (Published, Prototyped, Deprecated)")
+    public void testGetAPIWithAllowedLifecycleState() throws APIManagementException {
+        ApiDAO apiDAO = Mockito.mock(ApiDAO.class);
+        PolicyDAO policyDAO = Mockito.mock(PolicyDAO.class);
+        Policy policy = new SubscriptionPolicy(UUID, TIER);
+        Mockito.when(policyDAO.getSimplifiedPolicyByLevelAndName(APIMgtAdminService.PolicyLevel.subscription, TIER))
+                .thenReturn(policy);
+        APIStore apiStore = getApiStoreImpl(apiDAO, Mockito.mock(ApplicationDAO.class),
+                Mockito.mock(APISubscriptionDAO.class), Mockito.mock(WorkflowDAO.class), Mockito.mock(APIGateway.class),
+                policyDAO);
+        API.APIBuilder apiBuilder = SampleTestObjectCreator.createDefaultAPI();
+        String apiId = apiBuilder.getId();
+
+        List<String> allowedStates = new ArrayList<String>() {
+            {
+                add(APIStatus.PROTOTYPED.getStatus());
+                add(APIStatus.PUBLISHED.getStatus());
+                add(APIStatus.DEPRECATED.getStatus());
+            }
+        };
+
+        for (String allowedState : allowedStates) {
+            apiBuilder.lifeCycleStatus(allowedState);
+            API api = apiBuilder.build();
+            Mockito.when(apiDAO.getAPI(apiId)).thenReturn(api);
+            API returnedAPI = apiStore.getAPIbyUUID(apiId);
+            Assert.assertEquals(returnedAPI.getLifeCycleStatus(), allowedState);
+        }
     }
 
     @Test(description = "Event Observers registration and removal")
