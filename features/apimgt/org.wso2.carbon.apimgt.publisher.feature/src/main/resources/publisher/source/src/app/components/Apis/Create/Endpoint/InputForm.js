@@ -70,7 +70,7 @@ export default class InputForm extends Component {
                     // value={this.state.apiFields.apiVersion}
                     label={<div><span>Version </span><SuperScriptAsterisk/></div>}
                     id="apiVersion"
-                    helperText="**Version input not support in this release"
+                    helperText="**Version input is not support in this release"
                     type="text"
                     name="apiVersion"
                     margin="normal"
