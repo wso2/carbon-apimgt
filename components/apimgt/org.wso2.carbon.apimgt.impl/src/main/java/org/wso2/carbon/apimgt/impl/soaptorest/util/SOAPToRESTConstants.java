@@ -63,6 +63,7 @@ public class SOAPToRESTConstants {
         public static final String SOAP_TO_REST_IN_RESOURCE = "/soap_to_rest/in";
         public static final String SOAP_TO_REST_OUT_RESOURCE = "/soap_to_rest/out";
         public static final String XML_FILE_EXTENSION = ".xml";
+        public static final String XML_FILE_RESOURCE_PREFIX = "\\.xml";
         public static final String RESOURCE_METHOD_SEPERATOR = "_";
         public static final String NEW_LINE_CHAR = "\n";
         public static final String NAMESPACE_SEPARATOR = ":";
@@ -83,6 +84,8 @@ public class SOAPToRESTConstants {
         public static final String REQ_VARIABLE = "req.var.";
         public static final String URL_OPERATOR = "$url:";
         public static final String ROOT_OPERATOR = "$.";
+        public static final String JSON_EVAL = "json-eval(";
+        public static final String CLOSING_PARANTHESIS = ")";
 
         public static final String XML_FILE = "xml";
     }
@@ -95,7 +98,8 @@ public class SOAPToRESTConstants {
         public static final String MAPPING = "mapping";
         public static final String ARRAY_ELEMENTS = "arrayElements";
         public static final String IS_SOAP_TO_REST_MODE = "isSoapToRestMode";
-        public static final String SEQUENCES = "sequences";
+        public static final String IN_SEQUENCES = "in_sequences";
+        public static final String OUT_SEQUENCES = "out_sequences";
         public static final String NOT_DEFINED = "not-defined";
     }
 }

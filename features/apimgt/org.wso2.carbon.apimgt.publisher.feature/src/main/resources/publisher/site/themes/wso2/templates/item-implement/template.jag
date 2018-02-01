@@ -695,7 +695,7 @@
 
 													</div>
 												<% }; %>
-												    <% if(api.wsdl){
+												<% if(api.wsdl) {
                                                         var apiData = {};
                                                         apiData.apiName = api.name;
                                                         apiData.version = api.version;
@@ -710,8 +710,7 @@
                                                             var jsonInSeqStr = stringify(jsonInSeq);
                                                             var jsonOutSeq = JSON.parse(sequenceOutObj);
                                                             var jsonOutSeqStr = stringify(jsonOutSeq);
-
-                                                    %>
+                                                            %>
 													<br/><br/>
 													<div id="soapToRestSequenceMapping">
 													    <legend>SOAP to REST Mapping</legend>
@@ -720,8 +719,8 @@
                                                         <input type="hidden" id="sequenceMapping" name="sequenceMapping" value='<%=encode.forHtml(jsonInSeqStr)%>' />
                                                         <input type="hidden" id="sequenceOutMapping" name="sequenceOutMapping" value='<%=encode.forHtml(jsonOutSeqStr)%>' />
 													</div>
-													<%}}%>
-							                        <%}%>
+												<%}}%>
+							                    <%}%>
 
 												<hr />
 							                    <input type="hidden" name="name" value="<%= encode.forHtml(api.name) %>" />
@@ -1027,14 +1026,14 @@
   	</div>
   	<div class="add-margin-bottom-4x">
   		<div class="add-margin-bottom-2x">
-			<strong>Sequences : </strong>
+			<strong><%=i18n.localize("Conversion Policies")%> : </strong>
 		</div>
 		<ul class="nav nav-tabs" id="myTab" role="tablist">
           <li class="nav-item active">
-            <a class="nav-link active" id="{{seq_id}}_in-tab" data-toggle="tab" href="#{{seq_id}}_in" role="tab" aria-controls="{{seq_id}}_in" aria-selected="true">In Sequence</a>
+            <a class="nav-link active" id="{{seq_id}}_in-tab" data-toggle="tab" href="#{{seq_id}}_in" role="tab" aria-controls="{{seq_id}}_in" aria-selected="true"><%=i18n.localize("In Flow")%></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" id="{{seq_id}}_out-tab" data-toggle="tab" href="#{{seq_id}}_out" role="tab" aria-controls="{{seq_id}}_out" aria-selected="false">Out Sequence</a>
+            <a class="nav-link" id="{{seq_id}}_out-tab" data-toggle="tab" href="#{{seq_id}}_out" role="tab" aria-controls="{{seq_id}}_out" aria-selected="false"><%=i18n.localize("Out Flow")%></a>
           </li>
         </ul>
         <div class="tab-content" id="seqContent">

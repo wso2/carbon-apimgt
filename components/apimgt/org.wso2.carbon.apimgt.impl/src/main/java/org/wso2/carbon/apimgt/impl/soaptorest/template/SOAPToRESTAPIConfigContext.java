@@ -28,19 +28,29 @@ import org.wso2.carbon.apimgt.impl.template.ConfigContextDecorator;
  */
 public class SOAPToRESTAPIConfigContext extends ConfigContextDecorator {
 
-    private JSONObject sequences;
+    private JSONObject inSequences;
+    private JSONObject outSequences;
+    private String seqType;
 
-    public SOAPToRESTAPIConfigContext(ConfigContext context, JSONObject sequences) {
+    public SOAPToRESTAPIConfigContext(ConfigContext context, JSONObject sequences, String seqType) {
         super(context);
-        this.sequences = sequences;
+        if (SOAPToRESTConstants.Template.IN_SEQUENCES.equals(seqType)) {
+            this.inSequences = sequences;
+        } else if (SOAPToRESTConstants.Template.OUT_SEQUENCES.equals(seqType)) {
+            this.outSequences = sequences;
+        }
+        this.seqType = seqType;
     }
 
     public VelocityContext getContext() {
         VelocityContext context = super.getContext();
 
         context.put(SOAPToRESTConstants.Template.IS_SOAP_TO_REST_MODE, true);
-        context.put(SOAPToRESTConstants.Template.SEQUENCES, sequences);
-
+        if (SOAPToRESTConstants.Template.IN_SEQUENCES.equals(seqType)) {
+            context.put(SOAPToRESTConstants.Template.IN_SEQUENCES, inSequences);
+        } else if (SOAPToRESTConstants.Template.OUT_SEQUENCES.equals(seqType)) {
+            context.put(SOAPToRESTConstants.Template.OUT_SEQUENCES, outSequences);
+        }
         return context;
     }
 }

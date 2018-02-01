@@ -26,6 +26,8 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.soaptorest.template.SOAPToRESTAPIConfigContext;
+import org.wso2.carbon.apimgt.impl.template.ConfigContext;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.registry.api.Resource;
@@ -35,6 +37,7 @@ import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -75,9 +78,9 @@ public class SequenceUtils {
             regResource.setMediaType("text/xml");
             registry.put(resourcePath, regResource);
         } catch (RegistryException e) {
-            handleException("Error occurred while accessing the registry to save api sequence ", e);
+            handleException("Error occurred while accessing the registry to save api sequence", e);
         } catch (org.wso2.carbon.registry.api.RegistryException e) {
-            handleException("Error occurred while saving api sequence ", e);
+            handleException("Error occurred while saving api sequence", e);
         }
     }
 
@@ -114,6 +117,7 @@ public class SequenceUtils {
             UserRegistry registry;
             tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
+            APIUtil.loadTenantRegistry(tenantId);
             registry = registryService.getGovernanceSystemRegistry(tenantId);
 
             JSONObject sequences = (JSONObject) jsonParser.parse(content);
@@ -137,11 +141,11 @@ public class SequenceUtils {
                 }
             }
         } catch (ParseException e) {
-            handleException("Error occurred while parsing the sequence json.", e);
+            handleException("Error occurred while parsing the sequence json", e);
         } catch (UserStoreException e) {
-            handleException("Error while reading tenant information ", e);
+            handleException("Error while reading tenant information", e);
         } catch (RegistryException e) {
-            handleException("Error when create registry instance ", e);
+            handleException("Error when create registry instance", e);
         } catch (org.wso2.carbon.registry.api.RegistryException e) {
             handleException("Error while creating registry resource", e);
         } finally {
@@ -187,6 +191,7 @@ public class SequenceUtils {
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                         .getTenantId(tenantDomain);
+                APIUtil.loadTenantRegistry(tenantId);
                 registry = registryService.getGovernanceSystemRegistry(tenantId);
                 String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR + provider
                         + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version
@@ -197,14 +202,15 @@ public class SequenceUtils {
                 String[] resources = collection.getChildren();
 
                 if (log.isDebugEnabled()) {
-                    log.debug("Number of REST resources for " + resourcePath + " is:" + resources.length);
+                    log.debug("Number of REST resources for " + resourcePath + " is: " + resources.length);
                 }
 
                 for (String path : resources) {
                     Resource resource = registry.get(path);
                     String content = new String((byte[]) resource.getContent(), Charset.defaultCharset());
                     String resourceName = ((ResourceImpl) resource).getName();
-                    resourceName = resourceName.replaceAll("\\.xml", "");
+                    resourceName = resourceName
+                            .replaceAll(SOAPToRESTConstants.SequenceGen.XML_FILE_RESOURCE_PREFIX, "");
                     String httpMethod = resource.getProperty(SOAPToRESTConstants.METHOD);
                     Map<String, String> resourceMap = new HashMap<>();
                     resourceMap.put(SOAPToRESTConstants.METHOD, httpMethod);
@@ -213,9 +219,9 @@ public class SequenceUtils {
                 }
 
             } catch (RegistryException e) {
-                handleException("Error when create registry instance ", e);
+                handleException("Error when create registry instance", e);
             } catch (UserStoreException e) {
-                handleException("Error while reading tenant information ", e);
+                handleException("Error while reading tenant information", e);
             } catch (org.wso2.carbon.registry.api.RegistryException e) {
                 handleException("Error while creating registry resource", e);
             }
@@ -229,6 +235,46 @@ public class SequenceUtils {
                     "-" + version + " is: " + resultJson.toJSONString());
         }
         return resultJson.toJSONString();
+    }
+
+    /**
+     * Gets the velocity template config context with sequence data populated
+     *
+     * @param registry      user registry reference
+     * @param resourcePath  registry resource path
+     * @param seqType       sequence type whether in or out sequence
+     * @param configContext velocity template config context
+     * @return {@link ConfigContext} sequences populated velocity template config context
+     * @throws org.wso2.carbon.registry.api.RegistryException throws when getting registry resource content
+     */
+    public static ConfigContext getSequenceTemplateConfigContext(UserRegistry registry, String resourcePath,
+            String seqType, ConfigContext configContext) throws org.wso2.carbon.registry.api.RegistryException {
+        Resource regResource;
+        if (registry.resourceExists(resourcePath)) {
+            regResource = registry.get(resourcePath);
+            String[] resources = ((Collection) regResource).getChildren();
+            JSONObject pathObj = new JSONObject();
+            if (resources != null) {
+                for (String path : resources) {
+                    Resource resource = registry.get(path);
+                    String method = resource.getProperty(SOAPToRESTConstants.METHOD);
+                    String resourceName = ((ResourceImpl) resource).getName();
+                    resourceName = resourceName
+                            .replaceAll(SOAPToRESTConstants.SequenceGen.XML_FILE_RESOURCE_PREFIX, "");
+                    resourceName = resourceName
+                            .replaceAll(SOAPToRESTConstants.SequenceGen.RESOURCE_METHOD_SEPERATOR + method, "");
+                    resourceName = SOAPToRESTConstants.SequenceGen.PATH_SEPARATOR + resourceName;
+                    String content = RegistryUtils.decodeBytes((byte[]) resource.getContent());
+                    JSONObject contentObj = new JSONObject();
+                    contentObj.put(method, content);
+                    pathObj.put(resourceName, contentObj);
+                }
+            } else {
+                log.error("No sequences were found on the resource path: " + resourcePath);
+            }
+            configContext = new SOAPToRESTAPIConfigContext(configContext, pathObj, seqType);
+        }
+        return configContext;
     }
 
     /**

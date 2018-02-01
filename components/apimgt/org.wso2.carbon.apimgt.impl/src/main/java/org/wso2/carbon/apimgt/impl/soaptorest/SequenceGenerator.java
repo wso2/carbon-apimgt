@@ -118,6 +118,7 @@ public class SequenceGenerator {
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().
                         getTenantManager().getTenantId(tenantDomain);
+                APIUtil.loadTenantRegistry(tenantId);
                 registry = registryService.getGovernanceSystemRegistry(tenantId);
 
                 apiJSON = (JSONObject) parser.parse(definitionFromSwagger20.getAPIDefinition(apiId, registry));
@@ -168,16 +169,16 @@ public class SequenceGenerator {
                     }
                 }
             } catch (RegistryException e) {
-                handleException("Error when create registry instance ", e);
+                handleException("Error when create registry instance", e);
             } catch (UserStoreException e) {
-                handleException("Error while reading tenant information ", e);
+                handleException("Error while reading tenant information", e);
             } catch (ParseException e) {
                 handleException("Error while parsing soap operations json content", e);
             } catch (IOException e) {
-                handleException("Error occurred when parsing soap operations json string ", e);
+                handleException("Error occurred when parsing soap operations json string", e);
             }
         } catch (ParseException e) {
-            handleException("Error occurred when parsing api json string ", e);
+            handleException("Error occurred when parsing api json string", e);
         } finally {
             if (isTenantFlowStarted) {
                 PrivilegedCarbonContext.endTenantFlow();
@@ -278,7 +279,7 @@ public class SequenceGenerator {
                                     .equals(param.get(SOAPToRESTConstants.Swagger.TYPE))) {
                                 xPath = (String) param.get(SOAPToRESTConstants.SequenceGen.XPATH);
                                 JSONObject arrayObj = new JSONObject();
-                                arrayObj.put(SOAPToRESTConstants.SequenceGen.PROPERTY_NAME, params[0]);
+                                arrayObj.put(SOAPToRESTConstants.SequenceGen.PROPERTY_NAME, paramName);
                                 arrayObj.put(SOAPToRESTConstants.SequenceGen.PARAMETER_NAME,
                                         param.get(SOAPToRESTConstants.SequenceGen.PARAMETER_NAME));
                                 array.add(arrayObj);
@@ -339,11 +340,11 @@ public class SequenceGenerator {
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             transformer.transform(new DOMSource(doc), new StreamResult(stringWriter));
         } catch (ParserConfigurationException e) {
-            handleException("Error occurred when building in sequence xml ", e);
+            handleException("Error occurred when building in sequence xml", e);
         } catch (TransformerConfigurationException e) {
-            handleException("Error in transport configuration ", e);
+            handleException("Error in transport configuration", e);
         } catch (TransformerException e) {
-            handleException("Error occurred when transforming in sequence xml ", e);
+            handleException("Error occurred when transforming in sequence xml", e);
         }
         map.put("properties", propertyStr);
         map.put("args", argStr);
@@ -379,12 +380,13 @@ public class SequenceGenerator {
             argElement.setAttribute(SOAPToRESTConstants.SequenceGen.EXPRESSION_ATTR, expressionAttr);
             propertyElement.setAttribute(SOAPToRESTConstants.NAME_ATTRIBUTE,
                     SOAPToRESTConstants.SequenceGen.REQ_VARIABLE + jsonPathElement);
-            if (type.equals(SOAPToRESTConstants.ParamTypes.QUERY)) {
+            if (SOAPToRESTConstants.ParamTypes.QUERY.equals(type)) {
                 propertyElement.setAttribute(SOAPToRESTConstants.SequenceGen.EXPRESSION_ATTR,
                         SOAPToRESTConstants.SequenceGen.URL_OPERATOR + jsonPathElement);
             } else {
                 propertyElement.setAttribute(SOAPToRESTConstants.SequenceGen.EXPRESSION_ATTR,
-                        SOAPToRESTConstants.SequenceGen.ROOT_OPERATOR + jsonPathElement);
+                        SOAPToRESTConstants.SequenceGen.JSON_EVAL + SOAPToRESTConstants.SequenceGen.ROOT_OPERATOR
+                                + jsonPathElement + SOAPToRESTConstants.SequenceGen.CLOSING_PARANTHESIS);
             }
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             transformer.transform(new DOMSource(propertyElement), new StreamResult(stringWriter));
@@ -397,11 +399,11 @@ public class SequenceGenerator {
                         + " is: " + argument);
             }
         } catch (ParserConfigurationException e) {
-            handleException("Error occurred when building in arg elements ", e);
+            handleException("Error occurred when building in arg elements", e);
         } catch (TransformerConfigurationException e) {
-            handleException("Error in transport configuration ", e);
+            handleException("Error in transport configuration", e);
         } catch (TransformerException e) {
-            handleException("Error occurred when transforming in sequence xml ", e);
+            handleException("Error occurred when transforming in sequence xml", e);
         }
         return property + SOAPToRESTConstants.SequenceGen.COMMA + argument;
     }

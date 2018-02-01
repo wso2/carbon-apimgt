@@ -69,13 +69,15 @@ public class SOAPOperationBindingUtils {
         byte[] wsdlContent = wsdlReader.getWSDL();
         WSDLSOAPOperationExtractor processor = getWSDLProcessor(wsdlContent, wsdlReader);
         Set<WSDLSOAPOperation> operations;
+        String operationMapping = "";
         try {
             operations = processor.getWsdlInfo().getSoapBindingOperations();
             populateSoapOperationParameters(operations);
-            return new Gson().toJson(operations);
+            operationMapping = new Gson().toJson(operations);
         } catch (APIMgtWSDLException e) {
-            throw new APIManagementException("Error in soap to rest conversion for wsdl url: " + url, e);
+            handleException("Error in soap to rest conversion for wsdl url: " + url, e);
         }
+        return operationMapping;
     }
 
     /**
@@ -110,15 +112,16 @@ public class SOAPOperationBindingUtils {
             try {
                 tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                         .getTenantId(tenantDomain);
+                APIUtil.loadTenantRegistry(tenantId);
                 registry = registryService.getGovernanceSystemRegistry(tenantId);
                 String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                         provider + RegistryConstants.PATH_SEPARATOR + name + RegistryConstants.PATH_SEPARATOR + version
                         + RegistryConstants.PATH_SEPARATOR + SOAPToRESTConstants.SOAP_TO_REST_RESOURCE;
                 return registry.resourceExists(resourcePath);
             } catch (RegistryException e) {
-                handleException("Error when create registry instance ", e);
+                handleException("Error when create registry instance", e);
             } catch (UserStoreException e) {
-                handleException("Error while reading tenant information ", e);
+                handleException("Error while reading tenant information", e);
             }
         } finally {
             if (isTenantFlowStarted) {

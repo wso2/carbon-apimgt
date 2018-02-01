@@ -698,7 +698,7 @@
   	</div>
   	<div class="add-margin-bottom-4x">
   		<div class="add-margin-bottom-2x">
-			<strong>Sequences : </strong>
+			<strong><%=i18n.localize("Conversion Policies")%> : </strong>
 		</div>
 		<textarea class="editor" style="height:150px; width:100%;">{{#if x-mediation-script }}{{ x-mediation-script }}{{else}}/* mc.setProperty('CONTENT_TYPE', 'application/json');
 		{{#each parameters}}var {{ name }} = mc.getProperty('uri.var.{{ name }}');

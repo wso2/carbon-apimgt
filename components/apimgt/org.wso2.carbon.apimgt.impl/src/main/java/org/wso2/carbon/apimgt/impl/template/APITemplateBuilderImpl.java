@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.impl.template;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.Template;
@@ -32,6 +33,7 @@ import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.soaptorest.template.SOAPToRESTAPIConfigContext;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPToRESTConstants;
+import org.wso2.carbon.apimgt.impl.soaptorest.util.SequenceUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Resource;
 import org.wso2.carbon.registry.core.Collection;
@@ -90,39 +92,25 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             configcontext = new EnvironmentConfigContext(configcontext, environment);
             configcontext = new TemplateUtilContext(configcontext);
 
-            if (api.getWsdlUrl() != null && !api.getWsdlUrl().isEmpty()) {
+            if (!StringUtils.isEmpty(api.getWsdlUrl())) {
                 RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
-                String tenantDomain = MultitenantUtils.getTenantDomain(
-                        APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+                String tenantDomain = MultitenantUtils
+                        .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
                 int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                         .getTenantId(tenantDomain);
-                String resourcePath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                String resourceInPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
                         api.getId().getProviderName() + RegistryConstants.PATH_SEPARATOR + api.getId().getApiName()
                         + RegistryConstants.PATH_SEPARATOR + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR
                         + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_IN_RESOURCE;
-                Resource regResource;
-
+                String resourceOutPath = APIConstants.API_LOCATION + RegistryConstants.PATH_SEPARATOR +
+                        api.getId().getProviderName() + RegistryConstants.PATH_SEPARATOR + api.getId().getApiName()
+                        + RegistryConstants.PATH_SEPARATOR + api.getId().getVersion() + RegistryConstants.PATH_SEPARATOR
+                        + SOAPToRESTConstants.SequenceGen.SOAP_TO_REST_OUT_RESOURCE;
                 UserRegistry registry = registryService.getGovernanceSystemRegistry(tenantId);
-                if (registry.resourceExists(resourcePath)) {
-                    regResource = registry.get(resourcePath);
-                    String[] resources = ((Collection) regResource).getChildren();
-                    JSONObject pathObj = new JSONObject();
-                    if(resources != null) {
-                        for (String path : resources) {
-                            Resource resource = registry.get(path);
-                            String method = resource.getProperty("method");
-                            String resourceName = ((ResourceImpl) resource).getName();
-                            resourceName = resourceName.replaceAll("\\.xml", "");
-                            resourceName = resourceName.replaceAll("_" + method, "");
-                            resourceName = "/" + resourceName;
-                            String content = RegistryUtils.decodeBytes((byte[]) resource.getContent());
-                            JSONObject contentObj = new JSONObject();
-                            contentObj.put(method, content);
-                            pathObj.put(resourceName, contentObj);
-                        }
-                    }
-                    configcontext = new SOAPToRESTAPIConfigContext(configcontext, pathObj);
-                }
+                configcontext = SequenceUtils.getSequenceTemplateConfigContext(registry, resourceInPath,
+                        SOAPToRESTConstants.Template.IN_SEQUENCES, configcontext);
+                configcontext = SequenceUtils.getSequenceTemplateConfigContext(registry, resourceOutPath,
+                        SOAPToRESTConstants.Template.OUT_SEQUENCES, configcontext);
             }
 
             //@todo: this validation might be better to do when the builder is initialized.

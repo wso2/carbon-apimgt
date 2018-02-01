@@ -23,6 +23,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -30,14 +31,18 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.soaptorest.template.SOAPToRESTAPIConfigContext;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SequenceUtils;
+import org.wso2.carbon.apimgt.impl.template.ConfigContext;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.core.Collection;
+import org.wso2.carbon.registry.core.CollectionImpl;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
+import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
@@ -45,10 +50,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.List;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ APIManagerComponent.class, ServiceReferenceHolder.class,
-        MultitenantUtils.class, APIUtil.class })
-public class SequenceUtilsTestCase {
+@RunWith(PowerMockRunner.class) @PrepareForTest({ APIManagerComponent.class, ServiceReferenceHolder.class,
+        MultitenantUtils.class, APIUtil.class, RegistryUtils.class }) public class SequenceUtilsTestCase {
 
     private UserRegistry userRegistry;
     private ServiceReferenceHolder serviceReferenceHolder;
@@ -57,6 +60,7 @@ public class SequenceUtilsTestCase {
     private TenantManager tenantManager;
 
     private static final String RESOURCE_PATH = "/apimgt/applicationdata/provider/admin/sample-api/1.0.0/soap_to_rest/in/test_get.xml";
+    private static final String INSEQUENCE_RESOURCES = "/apimgt/applicationdata/provider/admin/sample-api/1.0.0/soap_to_rest/in/";
     private static final String SEQUENCE = "";
     private static final String HTTP_METHOD = "post";
 
@@ -69,6 +73,7 @@ public class SequenceUtilsTestCase {
         PowerMockito.mockStatic(APIUtil.class);
         PowerMockito.mockStatic(ServiceReferenceHolder.class);
         PowerMockito.mockStatic(MultitenantUtils.class);
+        PowerMockito.mockStatic(RegistryUtils.class);
 
         PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
         Mockito.when(serviceReferenceHolder.getRegistryService()).thenReturn(registryService);
@@ -139,9 +144,32 @@ public class SequenceUtilsTestCase {
         }
     }
 
+    @Test public void testGetSequenceTemplateConfigContext() throws Exception {
+        String seqType = "in_sequences";
+        String content = "<header description=\"SOAPAction\" name=\"SOAPAction\" scope=\"transport\""
+                + " value=\"http://ws.cdyne.com/PhoneVerify/query/CheckPhoneNumber\"/>";
+        Collection collection = new CollectionImpl();
+        ResourceImpl resource = new ResourceImpl();
+        resource.setName("checkPhoneNumber_post.xml");
+        collection.setChildren(new String[] { INSEQUENCE_RESOURCES + "checkPhoneNumber_post.xml" });
+        Mockito.when(userRegistry.resourceExists(INSEQUENCE_RESOURCES)).thenReturn(true);
+        ConfigContext configContext = Mockito.mock(ConfigContext.class);
+        Mockito.when(userRegistry.get(INSEQUENCE_RESOURCES)).thenReturn(collection);
+        Mockito.when(userRegistry.get(INSEQUENCE_RESOURCES + "checkPhoneNumber_post.xml")).thenReturn(resource);
+        PowerMockito.when(RegistryUtils.decodeBytes(Mockito.any(byte[].class))).thenReturn(content);
+        try {
+            ConfigContext context = SequenceUtils
+                    .getSequenceTemplateConfigContext(userRegistry, INSEQUENCE_RESOURCES, seqType, configContext);
+            Assert.assertNotNull(context);
+        } catch (RegistryException e) {
+            Assert.fail("Failed to get the sequences from the registry");
+        }
+    }
+
     @Test public void testGetResourceParametersFromSwagger() throws Exception {
         JSONParser parser = new JSONParser();
-        String swagger = "{\"paths\":{\"\\/checkPhoneNumber\":{\"post\":{\"responses\":{\"200\":{\"description\":\"\"}},"
+        String swagger =
+                "{\"paths\":{\"\\/checkPhoneNumber\":{\"post\":{\"responses\":{\"200\":{\"description\":\"\"}},"
                         + "\"parameters\":[{\"in\":\"query\",\"name\":\"PhoneNumber\",\"description\":\"\",\"type\":\"string\"},"
                         + "{\"in\":\"query\",\"name\":\"LicenseKey\",\"description\":\"\",\"type\":\"string\"}],"
                         + "\"tags\":[\"checkPhoneNumber\"]}}}}";

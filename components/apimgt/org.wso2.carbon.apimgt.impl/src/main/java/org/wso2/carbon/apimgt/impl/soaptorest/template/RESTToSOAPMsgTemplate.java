@@ -69,10 +69,8 @@ public class RESTToSOAPMsgTemplate {
                 velocityengine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, VELOCITY_RUNTIME_LOG_CLASS);
                 velocityengine.setProperty(VELOCITY_RUNTIME_LOG_PROPERTY, getVelocityLogger());
             }
-
             velocityengine.init();
             org.apache.velocity.Template t = velocityengine.getTemplate(this.getInSeqTemplatePath());
-
             t.merge(context, writer);
         } catch (Exception e) {
             log.error("Velocity Error", e);

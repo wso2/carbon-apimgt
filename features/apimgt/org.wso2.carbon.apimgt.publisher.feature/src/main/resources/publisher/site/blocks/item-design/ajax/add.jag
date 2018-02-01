@@ -145,10 +145,10 @@ if(jagg.isCSRFTokenValid())
                             session.put("mappingJson", mappingJson);
                             var names={},parameters=[];
                             var definitions = {};
-                            for(var i=0; i < mappingJson.length; i++) {
+                            for(var i = 0; i < mappingJson.length; i++) {
                                 var responses = {},verb={},status={},description={},definition={};
                                 var httpverb = mappingJson[i].httpVerb.toLowerCase();
-                                var path = "/"+mappingJson[i].name;
+                                var path = "/" + mappingJson[i].name;
                                 description["description"] = "";
                                 status["200"] = description;
                                 responses.tags = [];
@@ -157,8 +157,8 @@ if(jagg.isCSRFTokenValid())
                                 responses.tags.push(mappingJson[i].name);
                                 var count = 0;
                                 var properties = {};
-                                for(var j=0; j < mappingJson[i].parameters.length; j++) {
-                                    var parameter={};
+                                for(var j = 0; j < mappingJson[i].parameters.length; j++) {
+                                    var parameter = {};
                                     parameter.description = "";
                                     var type = mappingJson[i].parameters[j].dataType;
                                     var isArray = mappingJson[i].parameters[j].isArray;
