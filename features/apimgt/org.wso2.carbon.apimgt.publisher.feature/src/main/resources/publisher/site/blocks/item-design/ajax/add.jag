@@ -74,7 +74,6 @@ if(jagg.isCSRFTokenValid())
             var wsdl = null;
             var supportedSwaggerVersion = "2.0";
             var supportedOpenAPIVersion = "3.0.0";
-            var isOpenAPI3 = false;
             var parser = new SwaggerParser();
             var apiDefinitionVersion = request.getParameter("apiDefinitionVersion");
 
@@ -92,8 +91,6 @@ if(jagg.isCSRFTokenValid())
                         //released yet.
                         var apiDefinition = parseSwaggerDefinition(swagger);
                         if (apiDefinition.openapi) {
-
-                            isOpenAPI3 = true;
                             if (apiDefinition.openapi != supportedOpenAPIVersion) {
                                 print({
                                     error: true,
@@ -150,7 +147,6 @@ if(jagg.isCSRFTokenValid())
                         var apiDefinition = parseSwaggerDefinition(swagger);
                         if (apiDefinition.openapi) {
 
-                            isOpenAPI3 = true;
                             //Supported Open API Version check
                             if (apiDefinition.openapi != supportedOpenAPIVersion) {
                                 print({
@@ -440,7 +436,6 @@ if(jagg.isCSRFTokenValid())
 
             print({
                 error: false,
-                isOpenAPI3: isOpenAPI3,
                 message: 'imported'
             });
 
