@@ -869,7 +869,7 @@
 	                if(swag != ""){
 	                    var designer = APIDesigner();
 	                    designer.load_api_document(swag);
-	                    if($("#rest-paths").val() != "null") {
+	                    if( typeof $("#rest-paths").val() != "undefined") {
 	                        getSoapToRestPathMap();
 	                    }
 	                }
