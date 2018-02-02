@@ -23,9 +23,7 @@ var log = new Log();
 
     if (uri != null) {
         // replacing @ signs for matcher to work with reverse proxies
-        if(callPath.indexOf("@") > -1){
-            callPath = callPath.replace("@","%40");
-        }
+
         var uriMatcher = new URIMatcher(callPath);
         var providerVal,apiNameVal,apiVersionVal;
         providerVal = apiNameVal = apiVersionVal = "";
@@ -142,7 +140,7 @@ var log = new Log();
             }
         }
     	else if (urlArr.length > 0 ) { //assign default value to host with first environment address
-    	    host = urlArr[0].trim().replace(accessProtocol+"//","");
+            host = urlArr[0].trim().replace(accessProtocol + "//", "");
     	}
 
         //handle schems IMPORTANT: order of https and http is important to make sure https is targeted first.
@@ -213,7 +211,6 @@ var log = new Log();
                     }
                 }
             }
-
 
             if (jsonObj.components == undefined) {
                 jsonObj.components = {};

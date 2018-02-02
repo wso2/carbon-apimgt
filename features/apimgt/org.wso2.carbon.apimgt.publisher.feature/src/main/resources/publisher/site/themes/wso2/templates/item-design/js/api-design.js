@@ -17,7 +17,7 @@ var openapi3_api_doc = {
 };
 
 var supportedSwaggerVersion = "2.0";
-var supportedOpenAPIVersion = "3.0.0";
+var supportedOpenAPI3Version = "3.0.0";
 
 var isSoapView=false;
 
@@ -224,7 +224,6 @@ function APIDesigner(){
                 parameters.push({
                     name: m[0].replace("{", "").replace("}", ""),
                     "in": "path",
-                    "allowMultiple": false,
                     "required": true,
                     "type": "string"
                 });
@@ -334,16 +333,16 @@ APIDesigner.prototype.check_if_resource_exist = function(path, method){
 }
 
 APIDesigner.prototype.load_api_base_document = function (api_doc_version) {
-    if (api_doc_version == supportedSwaggerVersion){
-        this.load_api_document(swagger2_api_doc);
-    } else{
+    if (api_doc_version == supportedOpenAPI3Version){
         this.load_api_document(openapi3_api_doc);
+    } else{
+        this.load_api_document(swagger2_api_doc);
     }
 }
 
 APIDesigner.prototype.is_openapi3 = function () {
     var isOpenAPI3 = false;
-    if (this.api_doc.openapi != undefined && this.api_doc.openapi == supportedOpenAPIVersion) {
+    if (this.api_doc.openapi != undefined && this.api_doc.openapi == supportedOpenAPI3Version) {
         isOpenAPI3 = true;
     }
     return isOpenAPI3;
@@ -479,11 +478,13 @@ APIDesigner.prototype.init_controllers = function(){
         APIDesigner().baseURLValue = "http://localhost:8280/"+$("#context").val().replace("/","")});
         API_DESIGNER.load_swagger_editor_content();
 
-    $("#context").change(function(e){
-        APIDesigner().baseURLValue = "http://localhost:8280/"+$(this).val().replace("/","");
-        API_DESIGNER.load_swagger_editor_content();
-
+    $("#context").change(function (e) {
+        if (APIDesigner().api_doc != null) {
+            APIDesigner().baseURLValue = "http://localhost:8280/" + $(this).val().replace("/", "");
+            API_DESIGNER.load_swagger_editor_content();
+        }
     });
+
     $("#name").change(function (e) {
         if (APIDesigner().api_doc != null) {
             APIDesigner().api_doc.info.title = $(this).val();
@@ -506,7 +507,7 @@ APIDesigner.prototype.init_controllers = function(){
         var op = $(this).attr('data-operation');
         jagg.message({
             // @todo: param_string
-        	content:'Do you want to remove "'+op+' : '+ Handlebars.Utils.escapeExpression(pn) +'" resource from list.',
+            content: 'Do you want to remove "' + op + ' : ' + Handlebars.Utils.escapeExpression(pn) + '" resource from list.',
         	type:'confirm',
         	title:"Remove Resource",
         	okCallback:function(){
@@ -573,6 +574,7 @@ APIDesigner.prototype.init_controllers = function(){
         if (resource.requestBody == undefined) resource.requestBody = {};
         if (resource.requestBody.content == undefined) resource.requestBody.content = {};
 
+        //Add default request body definition
         resource.requestBody.content[content_type] = {
             schema: {
                 type: "object",
@@ -583,9 +585,7 @@ APIDesigner.prototype.init_controllers = function(){
                 }
             }
         };
-        API_DESIGNER.load_swagger_editor_content();
         API_DESIGNER.render_resource(resource_body);
-
     });
 
 
@@ -620,8 +620,7 @@ APIDesigner.prototype.init_controllers = function(){
         var operation = deleteDataArray[3];
         var contentTypeKey = API_DESIGNER.api_doc.paths[operations][operation]['requestBody']['content'][i];
 
-        // @todo: param_string
-        jagg.message({content: 'Do you want to delete request body with content type <strong>' + i + '</strong> ?',
+        jagg.message({content: i18n.t("Do you want to delete request body with content type") + '<strong>' + i + '</strong> ?',
             type: 'confirm', title: i18n.t("Delete Request Body"),
             okCallback: function () {
                 API_DESIGNER = APIDesigner();

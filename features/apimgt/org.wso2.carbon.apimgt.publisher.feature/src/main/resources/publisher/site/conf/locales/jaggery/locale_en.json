@@ -349,6 +349,7 @@
     "Pass Through": "Pass Through",
     "Request Body": "Request Body",
     "Request Body Content Type": "Request Body Content Type",
+    "Do you want to delete request body with content type" : "Do you want to delete request body with content type",
     "Delete Request Body": "Delete Request Body",
     "Supported API Specification": "Supported API Specification",
     "To specify the supported Open API specification version of API" : "To specify the supported Open API specification version of the API",

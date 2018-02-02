@@ -672,7 +672,7 @@
     		<strong><%=i18n.localize("Request Body")%> :</strong>
 		</div>
 		{{#if requestBody.content}}
-		  <table class="table-fullwidth add-margin-bottom-4x">
+		<table class="table-fullwidth add-margin-bottom-4x">
             <tr>
                 <td width="40%"><%=i18n.localize("Description")%> : <a class="request_body_desc"  data-path="{{resource_path}}.requestBody" data-attr="description" title="description">{{requestBody.description}}</a></td>
                 <td><%=i18n.localize("Required")%> : <a class="request_body_required" data-type="select" data-path="{{resource_path}}.requestBody" data-attr="required" data-value="{{toString requestBody.required }}" title="required"></a></td>

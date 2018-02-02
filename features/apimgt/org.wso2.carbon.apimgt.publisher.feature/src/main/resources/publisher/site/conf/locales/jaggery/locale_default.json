@@ -353,6 +353,7 @@
     "Schema": "Schema",
     "Add Request Body Content": "Add Request Body Content",
     "Delete Request Body": "Delete Request Body",
+    "Do you want to delete request body with content type" : "Do you want to delete request body with content type",
     "Supported API Specification": "Supported API Specification",
     "To specify the supported Open API specification version of API" : "To specify the supported Open API specification version of the API",
     "OpenAPI 3" : "OpenAPI 3",
