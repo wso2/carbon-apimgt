@@ -87,7 +87,7 @@ public class CustomAPIIndexer extends RXTIndexer {
                 registry.put(resourcePath, resource);
             }
 
-            if (storeVisibility != null) {
+            /*if (storeVisibility != null) {
                 if (log.isDebugEnabled()) {
                     log.debug("API at " + resourcePath + "did not have property : " + APIConstants.STORE_VIEW_ROLES
                             + ", hence adding the values for that API resource.");
@@ -99,7 +99,7 @@ public class CustomAPIIndexer extends RXTIndexer {
                 }
                 resource.setProperty(CUSTOM_API_INDEXER_PROPERTY, "true");
                 registry.put(resourcePath, resource);
-            }
+            }*/
         }
 
         // Here we are adding properties as fields, so that we can search the properties as we do for attributes.
