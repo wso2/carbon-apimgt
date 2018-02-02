@@ -250,6 +250,7 @@ public class APIMappingUtil {
             tiersToReturn.add(tier.getName());
         }
         dto.setTiers(tiersToReturn);
+        dto.setApiLevelPolicy(model.getApiLevelPolicy());
         dto.setType(APIDTO.TypeEnum.valueOf(model.getType()));
 
         if (!model.getType().equals(APIConstants.APIType.WS)) {
@@ -461,6 +462,7 @@ public class APIMappingUtil {
             apiTiers.add(new Tier(tier));
         }
         model.addAvailableTiers(apiTiers);
+        model.setApiLevelPolicy(dto.getApiLevelPolicy());
 
         String transports = StringUtils.join(dto.getTransport(), ',');
         model.setTransports(transports);
