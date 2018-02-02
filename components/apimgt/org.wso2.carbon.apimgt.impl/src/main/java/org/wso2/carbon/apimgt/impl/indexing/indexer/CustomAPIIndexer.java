@@ -22,9 +22,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.common.SolrException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.registry.extensions.indexers.RXTIndexer;
 import org.wso2.carbon.registry.core.Registry;
@@ -35,11 +35,7 @@ import org.wso2.carbon.registry.indexing.AsyncIndexer;
 import org.wso2.carbon.registry.indexing.IndexingManager;
 import org.wso2.carbon.registry.indexing.solr.IndexDocument;
 
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.ArrayList;
+import java.util.*;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.CUSTOM_API_INDEXER_PROPERTY;
 import static org.wso2.carbon.apimgt.impl.APIConstants.OVERVIEW_PREFIX;
@@ -65,12 +61,13 @@ public class CustomAPIIndexer extends RXTIndexer {
         }
         if (resource != null) {
             String publisherAccessControl = resource.getProperty(APIConstants.PUBLISHER_ROLES);
+            API api = null;
             String storeVisibility = null;
             String storeVisibleRoles = null;
             try {
-                GenericArtifact artifact = APIUtil.getArtifactManager(registry, "api").getGenericArtifact(resource.getUUID());
-                storeVisibility = artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
-                storeVisibleRoles = artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
+                api = APIUtil.getAPI(APIUtil.getArtifactManager(registry, "api").getGenericArtifact(resource.getUUID()), registry);
+                storeVisibility = api.getVisibility();
+                storeVisibleRoles = api.getVisibleRoles();
             } catch (APIManagementException e) {
                 // We need to continue default indexing process although access control extension faces an error, so not throwing an exception here.
                 log.error("Error while retrieving API", e);
