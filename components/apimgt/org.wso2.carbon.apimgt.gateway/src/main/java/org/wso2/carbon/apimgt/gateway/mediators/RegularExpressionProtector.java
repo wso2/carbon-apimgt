@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.gateway.mediators;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.soap.SOAPBody;
 import org.apache.axiom.soap.SOAPEnvelope;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
@@ -37,6 +39,7 @@ import java.util.regex.Pattern;
  */
 public class RegularExpressionProtector extends AbstractMediator {
 
+    private static final Log logger = LogFactory.getLog(RegularExpressionProtector.class);
     private Boolean enabledCheckBody = true;
     private String threatType = null;
     private Pattern pattern = null;
@@ -51,8 +54,8 @@ public class RegularExpressionProtector extends AbstractMediator {
      * @return A boolean value.True if successful and false if not.
      */
     public boolean mediate(MessageContext messageContext) {
-        if (log.isDebugEnabled()) {
-            log.debug("RegularExpressionProtector mediator is activated...");
+        if (logger.isDebugEnabled()) {
+            logger.debug("RegularExpressionProtector mediator is activated...");
         }
         Object messageProperty = messageContext.getProperty(APIMgtGatewayConstants.REGEX_PATTERN);
         if (messageProperty != null) {
@@ -110,8 +113,8 @@ public class RegularExpressionProtector extends AbstractMediator {
             }
             String payload = omElement.toString();
             if (pattern != null && payload != null && pattern.matcher(payload).find()) {
-                if (log.isDebugEnabled()) {
-                    log.debug(String.format("Threat detected in request payload [ %s ] by regex [ %s ]))",
+                if (logger.isDebugEnabled()) {
+                    logger.debug(String.format("Threat detected in request payload [ %s ] by regex [ %s ]))",
                             payload, pattern));
                 }
                 GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
@@ -131,8 +134,8 @@ public class RegularExpressionProtector extends AbstractMediator {
         if (enabledCheckPathParam) {
             String queryParams = (String) axis2MC.getProperty(NhttpConstants.REST_URL_POSTFIX);
             if (pattern != null && queryParams != null && pattern.matcher(queryParams).find()) {
-                if (log.isDebugEnabled()) {
-                    log.debug(String.format("Threat detected in query parameters [ %s ] by regex [ %s ]",
+                if (logger.isDebugEnabled()) {
+                    logger.debug(String.format("Threat detected in query parameters [ %s ] by regex [ %s ]",
                             queryParams, pattern));
                 }
                 GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
@@ -153,8 +156,8 @@ public class RegularExpressionProtector extends AbstractMediator {
         if (enabledCheckHeaders) {
             Map transportHeaders = (Map) axis2MC.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
             if (pattern != null && transportHeaders != null && pattern.matcher(transportHeaders.toString()).find()) {
-                if (log.isDebugEnabled()) {
-                    log.debug(String.format("Threat detected in Transport headers [ %s ] by regex [ %s ]",
+                if (logger.isDebugEnabled()) {
+                    logger.debug(String.format("Threat detected in Transport headers [ %s ] by regex [ %s ]",
                             transportHeaders, pattern));
                 }
                 GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,

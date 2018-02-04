@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.gateway.mediators;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
@@ -52,7 +54,7 @@ import java.util.Map;
  * XML schema.
  */
 public class XMLSchemaValidator extends AbstractMediator {
-
+    private static final Log logger = LogFactory.getLog(XMLSchemaValidator.class);
     /**
      * This mediate method validates the xml request message.
      *
@@ -61,8 +63,8 @@ public class XMLSchemaValidator extends AbstractMediator {
      * @return A boolean value.True if successful and false if not.
      */
     public boolean mediate(MessageContext messageContext) {
-        if (log.isDebugEnabled()) {
-            log.debug("XML validation mediator is activated...");
+        if (logger.isDebugEnabled()) {
+            logger.debug("XML validation mediator is activated...");
         }
         InputStream inputStreamSchema;
         InputStream inputStreamXml;
@@ -109,11 +111,11 @@ public class XMLSchemaValidator extends AbstractMediator {
                 }
             } catch (APIMThreatAnalyzerException e) {
                 validRequest = false;
-                log.error(APIMgtGatewayConstants.BAD_REQUEST, e);
+                logger.error(APIMgtGatewayConstants.BAD_REQUEST, e);
                 GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE, e.getMessage());
 
             } catch (IOException e) {
-                log.error(APIMgtGatewayConstants.BAD_REQUEST, e);
+                logger.error(APIMgtGatewayConstants.BAD_REQUEST, e);
                 GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE, e.getMessage());
             }
             //return analyzer to the pool
@@ -123,10 +125,11 @@ public class XMLSchemaValidator extends AbstractMediator {
                     APIMgtGatewayConstants.REQUEST_TYPE_FAIL_MSG);
         }
         GatewayUtils.setOriginalInputStream(inputStreams, axis2MC);
-        if (validRequest) try {
+        if (validRequest)
+            try {
             RelayUtils.buildMessage(axis2MC);
         } catch (IOException | XMLStreamException e) {
-            log.error("Error occurred while parsing the payload.", e);
+            logger.error("Error occurred while parsing the payload.", e);
             GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE, e.getMessage());
         }
         return true;

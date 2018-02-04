@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.gateway.mediators;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
@@ -45,6 +47,7 @@ import java.util.Map;
  */
 public class JsonSchemaValidator extends AbstractMediator {
 
+    private static final Log logger = LogFactory.getLog(XMLSchemaValidator.class);
     /**
      * This mediate method validates the message body.
      *
@@ -53,8 +56,8 @@ public class JsonSchemaValidator extends AbstractMediator {
      * @return a boolean true if the message content is passed the json schema criteria.
      */
     public boolean mediate(MessageContext messageContext) {
-        if (log.isDebugEnabled()) {
-            log.debug("JSON schema validation mediator is activated...");
+        if (logger.isDebugEnabled()) {
+            logger.debug("JSON schema validation mediator is activated...");
         }
         Map<String, InputStream> inputStreams = null;
         org.apache.axis2.context.MessageContext axis2MC;
@@ -83,12 +86,12 @@ public class JsonSchemaValidator extends AbstractMediator {
             } catch (APIMThreatAnalyzerException e) {
                 validRequest = false;
                 String message = "Request is failed due to JSON schema validation failure: ";
-                log.error(message, e);
+                logger.error(message, e);
                 GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE,
                         message + e.getMessage());
             } catch (IOException e) {
                 String message = "Error occurred while building the request: ";
-                log.error(message, e);
+                logger.error(message, e);
                 GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE,
                         message + e.getMessage());
             } finally {
@@ -118,18 +121,18 @@ public class JsonSchemaValidator extends AbstractMediator {
      */
     public JSONConfig configureSchemaProperties(MessageContext messageContext) {
         Object messageProperty;
-        int propertyCount = 0;
-        int stringLength = 0;
-        int arrayElementCount = 0;
-        int keyLength = 0;
-        int maxJSONDepth = 0;
+        int propertyCount = 100;
+        int stringLength = 100;
+        int arrayElementCount = 100;
+        int keyLength = 100;
+        int maxJSONDepth = 100;
 
         messageProperty = messageContext.getProperty(ThreatProtectorConstants.MAX_PROPERTY_COUNT);
         if (messageProperty != null) {
             propertyCount = Integer.parseInt(messageProperty.toString());
         } else {
-            String errorEMessage = "Json schema maxProperty count is missing";
-            ThreatExceptionHandler.handleException(messageContext, errorEMessage);
+            String infoMessage = "Enabling the default Json schema maxProperty count is missing do enbleing the ";
+            logger.info("");
         }
 
         messageProperty = messageContext.getProperty(ThreatProtectorConstants.MAX_STRING_LENGTH);
@@ -163,8 +166,8 @@ public class JsonSchemaValidator extends AbstractMediator {
             String errorMessage = "Json schema maximum JSON depth is missing";
             ThreatExceptionHandler.handleException(messageContext, errorMessage);
         }
-        if (log.isDebugEnabled()) {
-            log.debug(("Max Priority count is:" + propertyCount) + ", " + "Max String length is: "
+        if (logger.isDebugEnabled()) {
+            logger.debug(("Max Priority count is:" + propertyCount) + ", " + "Max String length is: "
                     + stringLength + ", " + "Max Array element count: " + arrayElementCount + ", "
                     + "Max Key Length: " + keyLength + ", " + "Max JSON depth is:" + maxJSONDepth
                     + ", ");
