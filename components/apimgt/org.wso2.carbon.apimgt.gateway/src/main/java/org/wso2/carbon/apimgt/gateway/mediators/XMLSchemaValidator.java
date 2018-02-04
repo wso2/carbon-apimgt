@@ -55,6 +55,7 @@ import java.util.Map;
  */
 public class XMLSchemaValidator extends AbstractMediator {
     private static final Log logger = LogFactory.getLog(XMLSchemaValidator.class);
+
     /**
      * This mediate method validates the xml request message.
      *
@@ -125,12 +126,13 @@ public class XMLSchemaValidator extends AbstractMediator {
                     APIMgtGatewayConstants.REQUEST_TYPE_FAIL_MSG);
         }
         GatewayUtils.setOriginalInputStream(inputStreams, axis2MC);
-        if (validRequest)
+        if (validRequest) {
             try {
-            RelayUtils.buildMessage(axis2MC);
-        } catch (IOException | XMLStreamException e) {
-            logger.error("Error occurred while parsing the payload.", e);
-            GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE, e.getMessage());
+                RelayUtils.buildMessage(axis2MC);
+            } catch (IOException | XMLStreamException e) {
+                logger.error("Error occurred while parsing the payload.", e);
+                GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE, e.getMessage());
+            }
         }
         return true;
     }
@@ -219,11 +221,10 @@ public class XMLSchemaValidator extends AbstractMediator {
         }
 
         if (log.isDebugEnabled()) {
-            log.debug(("DTD enable:" + dtdEnabled) + ", " + "External entities: "
-                    + externalEntitiesEnabled + ", " + "Element Count:" + elementCount + ", " + "Max AttributeLength:"
-                    + attributeLength + ", " + "Max xml Depth:" + maxXMLDepth + ", " + "Attribute count:"
-                    + attributeCount + ", " + "Entity Expansion Limit" + attributeCount + ". " + "childrenElement:"
-                    + attributeCount);
+            log.debug(("DTD enable:" + dtdEnabled) + ", " + "External entities: " + externalEntitiesEnabled
+                    + ", " + "Element Count:" + elementCount + ", " + "Max AttributeLength:" + attributeLength
+                    + ", " + "Max xml Depth:" + maxXMLDepth + ", " + "Attribute count:" + attributeCount + ", "
+                    + "Entity Expansion Limit" + attributeCount + ". " + "childrenElement:" + attributeCount);
         }
         XMLConfig xmlConfig = new XMLConfig();
         xmlConfig.setDtdEnabled(dtdEnabled);
