@@ -2941,6 +2941,11 @@
                         "Unlimited"
                     ]
                 },
+                "apiLevelPolicy": {
+                    "description": "The policy selected for the particular API",
+                    "type": "string",
+                    "example": "Unlimited"
+                },
                 "maxTps": {
                     "properties": {
                         "production": {

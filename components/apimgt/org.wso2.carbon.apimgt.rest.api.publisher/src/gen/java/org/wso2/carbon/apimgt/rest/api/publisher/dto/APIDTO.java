@@ -79,6 +79,9 @@ public class APIDTO  {
   private List<String> tiers = new ArrayList<String>();
   
   
+  private String apiLevelPolicy = null;
+  
+  
   private APIMaxTpsDTO maxTps = null;
   
   
@@ -349,6 +352,19 @@ public class APIDTO  {
 
   
   /**
+   * The policy selected for the particular API
+   **/
+  @ApiModelProperty(value = "The policy selected for the particular API")
+  @JsonProperty("apiLevelPolicy")
+  public String getApiLevelPolicy() {
+    return apiLevelPolicy;
+  }
+  public void setApiLevelPolicy(String apiLevelPolicy) {
+    this.apiLevelPolicy = apiLevelPolicy;
+  }
+
+  
+  /**
    **/
   @ApiModelProperty(value = "")
   @JsonProperty("maxTps")
@@ -562,6 +578,7 @@ public class APIDTO  {
     sb.append("  transport: ").append(transport).append("\n");
     sb.append("  tags: ").append(tags).append("\n");
     sb.append("  tiers: ").append(tiers).append("\n");
+    sb.append("  apiLevelPolicy: ").append(apiLevelPolicy).append("\n");
     sb.append("  maxTps: ").append(maxTps).append("\n");
     sb.append("  thumbnailUri: ").append(thumbnailUri).append("\n");
     sb.append("  visibility: ").append(visibility).append("\n");

@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
@@ -248,6 +249,11 @@ public class ApisApiServiceImpl extends ApisApiService {
             if (invalidTiers.size() > 0) {
                 RestApiUtil.handleBadRequest(
                         "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid", log);
+            }
+            APIPolicy apiPolicy = apiProvider.getAPIPolicy(username, body.getApiLevelPolicy());
+            if (apiPolicy == null && body.getApiLevelPolicy() != null) {
+                RestApiUtil.handleBadRequest(
+                        "Specified policy " + body.getApiLevelPolicy() + " is invalid", log);
             }
             API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, provider);
             //Overriding some properties:

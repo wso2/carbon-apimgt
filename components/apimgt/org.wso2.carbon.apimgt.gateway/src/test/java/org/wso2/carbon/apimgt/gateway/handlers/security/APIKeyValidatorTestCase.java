@@ -124,13 +124,18 @@ public class APIKeyValidatorTestCase {
         Mockito.when(synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
         Mockito.when(synCtx.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("abc");
         org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext.class);
-        Mockito.when(axis2MsgCntxt.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("https");
+        Mockito.when(axis2MsgCntxt.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("GET");
         Mockito.when(((Axis2MessageContext) synCtx).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
         SynapseConfiguration synapseConfiguration = Mockito.mock(SynapseConfiguration.class);
         Mockito.when(synapseConfiguration.getAPI("abc")).thenReturn(new API("abc", "/"));
         Mockito.when(synCtx.getConfiguration()).thenReturn(synapseConfiguration);
-        Mockito.when(synCtx.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("https");
-        APIKeyValidator apiKeyValidator = createAPIKeyValidator(true);
+        Mockito.when(synCtx.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("GET");
+
+        VerbInfoDTO verbInfoDTO = getDefaultVerbInfoDTO();
+        APIKeyValidator apiKeyValidator = createAPIKeyValidator(true,
+                getDefaultURITemplates("/menu", "GET"), verbInfoDTO);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.GATEWAY_RESOURCE_CACHE_ENABLED)).
+                thenReturn("true");
 
         try {
             //Test for ResourceNotFoundexception
@@ -143,7 +148,8 @@ public class APIKeyValidatorTestCase {
             fail("APISecurityException is thrown " + e);
 
         }
-        APIKeyValidator apiKeyValidator1 = createAPIKeyValidator(false);
+        APIKeyValidator apiKeyValidator1 = createAPIKeyValidator(false,
+                getDefaultURITemplates("/menu", "GET"), verbInfoDTO);
 
         Resource resource = Mockito.mock(Resource.class);
         API api = new API("abc", "/");
@@ -153,8 +159,6 @@ public class APIKeyValidatorTestCase {
         Mockito.when(synapseConfiguration.getAPI("abc")).thenReturn((api));
 
         try {
-            VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
-            verbInfoDTO.setHttpVerb("get");
             //Test for matching verb is found path
             assertEquals("", verbInfoDTO, apiKeyValidator1.findMatchingVerb(synCtx));
         } catch (ResourceNotFoundException e) {
@@ -163,10 +167,35 @@ public class APIKeyValidatorTestCase {
             fail("APISecurityException is thrown " + e);
         }
 
+
+    }
+
+    @Test
+    public void testFindMatchingVerbFails() {
+        MessageContext synCtx = Mockito.mock(Axis2MessageContext.class);
+        Mockito.when(synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION_STRATEGY)).thenReturn(null);
+        Mockito.when(synCtx.getProperty(APIConstants.API_RESOURCE_CACHE_KEY)).thenReturn("xyz");
+        Mockito.when(synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH)).thenReturn("abc");
+        Mockito.when(synCtx.getProperty(RESTConstants.REST_API_CONTEXT)).thenReturn("");
+        Mockito.when(synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION)).thenReturn("1.0");
+        Mockito.when(synCtx.getProperty(RESTConstants.SYNAPSE_REST_API)).thenReturn("abc");
+        org.apache.axis2.context.MessageContext axis2MsgCntxt = Mockito.mock(org.apache.axis2.context.MessageContext.class);
+        Mockito.when(axis2MsgCntxt.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("GET");
+        Mockito.when(((Axis2MessageContext) synCtx).getAxis2MessageContext()).thenReturn(axis2MsgCntxt);
+        SynapseConfiguration synapseConfiguration = Mockito.mock(SynapseConfiguration.class);
+        Mockito.when(synapseConfiguration.getAPI("abc")).thenReturn(new API("abc", "/"));
+        Mockito.when(synCtx.getConfiguration()).thenReturn(synapseConfiguration);
+        Mockito.when(synCtx.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("GET");
+        Mockito.when(synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE)).thenReturn("/menu");
+
+        VerbInfoDTO verbInfoDTO = getDefaultVerbInfoDTO();
+        APIKeyValidator apiKeyValidator = createAPIKeyValidator(true,
+                getDefaultURITemplates("/wrong-resource", "GET"), verbInfoDTO);
+        Mockito.when(apiManagerConfiguration.getFirstProperty(APIConstants.GATEWAY_RESOURCE_CACHE_ENABLED)).
+                thenReturn("true");
+
         try {
             //Test for matching verb is Not found path
-            Mockito.when(synCtx.getProperty(APIConstants.API_RESOURCE_CACHE_KEY)).thenReturn("xyz");
-
             assertNull(apiKeyValidator.findMatchingVerb(synCtx));
         } catch (ResourceNotFoundException e) {
             fail("ResourceNotFoundException exception is thrown " + e);
@@ -174,7 +203,6 @@ public class APIKeyValidatorTestCase {
             fail("APISecurityException is thrown " + e);
         }
     }
-
     
   
     @Test
@@ -210,10 +238,11 @@ public class APIKeyValidatorTestCase {
         DispatcherHelper helper = Mockito.mock(DispatcherHelper.class);
         Mockito.when(resource1.getDispatcherHelper()).thenReturn(helper);
         Mockito.when(helper.getString()).thenReturn("/test");
-        
 
 
-        APIKeyValidator apiKeyValidator = createAPIKeyValidator(true);
+        VerbInfoDTO verbInfoDTO = getDefaultVerbInfoDTO();
+        APIKeyValidator apiKeyValidator = createAPIKeyValidator(true,
+                getDefaultURITemplates("/menu", "GET"), verbInfoDTO);
 
         try {
             //Test for ResourceNotFoundexception
@@ -226,7 +255,8 @@ public class APIKeyValidatorTestCase {
             fail("APISecurityException is thrown " + e);
 
         }
-        APIKeyValidator apiKeyValidator1 = createAPIKeyValidator(false);
+        APIKeyValidator apiKeyValidator1 = createAPIKeyValidator(false,
+                getDefaultURITemplates("/menu", "GET"), verbInfoDTO);
 
         
         API api = new API("abc", "/");
@@ -236,21 +266,8 @@ public class APIKeyValidatorTestCase {
         Mockito.when(synapseConfiguration.getAPI("abc")).thenReturn((api));
 
         try {
-            VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
-            verbInfoDTO.setHttpVerb("get");
             //Test for matching verb is found path
             assertEquals("", verbInfoDTO, apiKeyValidator1.findMatchingVerb(synCtx));
-        } catch (ResourceNotFoundException e) {
-            fail("ResourceNotFoundException exception is thrown " + e);
-        } catch (APISecurityException e) {
-            fail("APISecurityException is thrown " + e);
-        }
-
-        try {
-            //Test for matching verb is Not found path
-            Mockito.when(synCtx.getProperty(APIConstants.API_RESOURCE_CACHE_KEY)).thenReturn("xyz");
-
-            assertNull(apiKeyValidator.findMatchingVerb(synCtx));
         } catch (ResourceNotFoundException e) {
             fail("ResourceNotFoundException exception is thrown " + e);
         } catch (APISecurityException e) {
@@ -265,16 +282,17 @@ public class APIKeyValidatorTestCase {
     public void testGetVerbInfoDTOFromAPIData() throws Exception {
         String context = "/";
         String apiVersion = "1.0";
-        String requestPath = "/";
-        String httpMethod = "https";
+        String requestPath = "/menu";
+        String httpMethod = "GET";
 
-        VerbInfoDTO verbDTO = new VerbInfoDTO();
-        verbDTO.setHttpVerb("https");
+        VerbInfoDTO verbDTO = getDefaultVerbInfoDTO();
         verbDTO.setRequestKey("//1.0/:https");
-        APIKeyValidator apiKeyValidator = createAPIKeyValidator(true);
+        APIKeyValidator apiKeyValidator = createAPIKeyValidator(true,
+                getDefaultURITemplates("/menu", "GET"), verbDTO);
         //If isAPIResourceValidationEnabled==true
         apiKeyValidator.setGatewayAPIResourceValidationEnabled(true);
-        Assert.assertEquals("", verbDTO, apiKeyValidator.getVerbInfoDTOFromAPIData(context, apiVersion, requestPath, httpMethod));
+        VerbInfoDTO verbInfoDTOFromAPIData = apiKeyValidator.getVerbInfoDTOFromAPIData(context, apiVersion, requestPath, httpMethod);
+        Assert.assertEquals("", verbDTO, verbInfoDTOFromAPIData);
 
     }
     
@@ -282,13 +300,13 @@ public class APIKeyValidatorTestCase {
     public void testGetVerbInfoDTOFromAPIDataWithRequestPath() throws Exception {
         String context = "/";
         String apiVersion = "1.0";
-        String requestPath = "/test";
-        String httpMethod = "https";
+        String requestPath = "/menu";
+        String httpMethod = "GET";
 
-        VerbInfoDTO verbDTO = new VerbInfoDTO();
-        verbDTO.setHttpVerb("https");
+        VerbInfoDTO verbDTO = getDefaultVerbInfoDTO();
         verbDTO.setRequestKey("//1.0/:https");
-        APIKeyValidator apiKeyValidator = createAPIKeyValidator(true);
+        APIKeyValidator apiKeyValidator = createAPIKeyValidator(true,
+                getDefaultURITemplates("/menu", "GET"), verbDTO);
         // If isAPIResourceValidationEnabled==true
         apiKeyValidator.setGatewayAPIResourceValidationEnabled(true);
         Assert.assertEquals("", verbDTO,
@@ -302,7 +320,8 @@ public class APIKeyValidatorTestCase {
         String apiVersion = "1.0";
         String requestPath = "";
         String httpMethod = "https";
-        APIKeyValidator apiKeyValidator = createAPIKeyValidator(true);
+        APIKeyValidator apiKeyValidator = createAPIKeyValidator(true,
+                getDefaultURITemplates("/menu", "GET"), getDefaultVerbInfoDTO());
         // If isAPIResourceValidationEnabled==true
         apiKeyValidator.setGatewayAPIResourceValidationEnabled(true);
         Assert.assertEquals("", null,
@@ -327,7 +346,8 @@ public class APIKeyValidatorTestCase {
         Mockito.when(synapseConfiguration.getAPI("abc")).thenReturn(new API("abc", "/"));
         Mockito.when(synCtx.getConfiguration()).thenReturn(synapseConfiguration);
         Mockito.when(synCtx.getProperty(Constants.Configuration.HTTP_METHOD)).thenReturn("https");
-        APIKeyValidator apiKeyValidator = createAPIKeyValidator(true);
+        APIKeyValidator apiKeyValidator = createAPIKeyValidator(true,
+                getDefaultURITemplates("/menu", "GET"), getDefaultVerbInfoDTO());
         //test for ResourceNotFoundException path
         try {
             String result = apiKeyValidator.getResourceAuthenticationScheme(synCtx);
@@ -336,7 +356,8 @@ public class APIKeyValidatorTestCase {
             e.printStackTrace();
         }
 
-        APIKeyValidator apiKeyValidator1 = createAPIKeyValidator(false);
+        APIKeyValidator apiKeyValidator1 = createAPIKeyValidator(false,
+                getDefaultURITemplates("/menu", "GET"), getDefaultVerbInfoDTO());
 
         Resource resource = Mockito.mock(Resource.class);
         API api = new API("abc", "/");
@@ -359,7 +380,9 @@ public class APIKeyValidatorTestCase {
     /*
     * This method will create an instance of APIKeyValidator
     * */
-    private APIKeyValidator createAPIKeyValidator(final boolean isWithEmptyCache) {
+    private APIKeyValidator createAPIKeyValidator(final boolean isWithEmptyCache,
+                                                  final ArrayList<URITemplate> urlTemplates,
+                                                  final VerbInfoDTO verbInfoDTO) {
         AxisConfiguration axisConfig = Mockito.mock(AxisConfiguration.class);
         return new APIKeyValidator(axisConfig) {
             @Override
@@ -372,6 +395,8 @@ public class APIKeyValidatorTestCase {
                 APIManagerConfiguration configuration = Mockito.mock(APIManagerConfiguration.class);
                 Mockito.when(configuration.getFirstProperty(APIConstants.TOKEN_CACHE_EXPIRY)).thenReturn("900");
                 Mockito.when(configuration.getFirstProperty(APIConstants.GATEWAY_TOKEN_CACHE_ENABLED)).thenReturn("true");
+                Mockito.when(configuration.getFirstProperty(APIConstants.GATEWAY_RESOURCE_CACHE_ENABLED)).
+                        thenReturn("true");
                 return configuration;
             }
 
@@ -391,9 +416,6 @@ public class APIKeyValidatorTestCase {
                     return Mockito.mock(Cache.class);
                 } else {
                     Cache cache = Mockito.mock(Cache.class);
-                    VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
-                    verbInfoDTO.setHttpVerb("get");
-                    verbInfoDTO.setAuthType("None");
                     if (cacheName.equals("resourceCache")) {
                         Mockito.when(cache.get("abc")).thenReturn(verbInfoDTO);
                     } else if (cacheName.equals("GATEWAY_TOKEN_CACHE")) {
@@ -406,11 +428,6 @@ public class APIKeyValidatorTestCase {
 
             @Override
             protected ArrayList<URITemplate> getAllURITemplates(String context, String apiVersion) throws APISecurityException {
-                ArrayList<URITemplate> urlTemplates = new ArrayList<URITemplate>();
-                URITemplate template = new URITemplate();
-                template.setUriTemplate("/*");
-                template.setHTTPVerb("https");
-                urlTemplates.add(template);
                 return urlTemplates;
             }
 
@@ -437,7 +454,8 @@ public class APIKeyValidatorTestCase {
         String matchingResource = "/menu";
         String httpVerb = "get";
         boolean defaultVersionInvoked = true;
-        APIKeyValidator apiKeyValidator = createAPIKeyValidator(false);
+        APIKeyValidator apiKeyValidator = createAPIKeyValidator(false,
+                getDefaultURITemplates("/menu", "GET"), getDefaultVerbInfoDTO());
         APIKeyValidationInfoDTO apiKeyValidationInfoDTO = new APIKeyValidationInfoDTO();
         apiKeyValidationInfoDTO.setApiName(apiKey);
 
@@ -499,8 +517,9 @@ public class APIKeyValidatorTestCase {
     @Test
     public void testIsAPIResourceValidationEnabled() {
         // test for exception path
-        APIKeyValidator apiKeyValidator = createAPIKeyValidator(true);
-        Assert.assertFalse(apiKeyValidator.isAPIResourceValidationEnabled());
+        APIKeyValidator apiKeyValidator = createAPIKeyValidator(true,
+                getDefaultURITemplates("/menu", "GET"), getDefaultVerbInfoDTO());
+        Assert.assertTrue(apiKeyValidator.isAPIResourceValidationEnabled());
 
     }
 
@@ -556,5 +575,21 @@ public class APIKeyValidatorTestCase {
         //test cleanup for ThriftClient
         thriftKeyValidator.cleanup();
         Mockito.verify(thriftDataStore, Mockito.times(1)).cleanup();       
-	}        
+	}
+
+	private ArrayList<URITemplate> getDefaultURITemplates(String uriTemplate, String verb) {
+        ArrayList<URITemplate> urlTemplates = new ArrayList<>();
+        URITemplate template = new URITemplate();
+        template.setUriTemplate(uriTemplate);
+        template.setHTTPVerb(verb);
+        urlTemplates.add(template);
+        return urlTemplates;
+    }
+
+    private VerbInfoDTO getDefaultVerbInfoDTO() {
+        VerbInfoDTO verbInfoDTO = new VerbInfoDTO();
+        verbInfoDTO.setHttpVerb("GET");
+        verbInfoDTO.setAuthType("None");
+        return verbInfoDTO;
+    }
 }
