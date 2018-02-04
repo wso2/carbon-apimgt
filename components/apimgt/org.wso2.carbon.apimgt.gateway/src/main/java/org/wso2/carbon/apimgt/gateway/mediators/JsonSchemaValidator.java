@@ -47,7 +47,7 @@ import java.util.Map;
  */
 public class JsonSchemaValidator extends AbstractMediator {
 
-    private static final Log logger = LogFactory.getLog(XMLSchemaValidator.class);
+    private static final Log logger = LogFactory.getLog(JsonSchemaValidator.class);
     /**
      * This mediate method validates the message body.
      *
@@ -121,18 +121,18 @@ public class JsonSchemaValidator extends AbstractMediator {
      */
     public JSONConfig configureSchemaProperties(MessageContext messageContext) {
         Object messageProperty;
-        int propertyCount = 100;
-        int stringLength = 100;
-        int arrayElementCount = 100;
-        int keyLength = 100;
-        int maxJSONDepth = 100;
+        int propertyCount = 0;
+        int stringLength = 0;
+        int arrayElementCount = 0;
+        int keyLength = 0;
+        int maxJSONDepth = 0;
 
         messageProperty = messageContext.getProperty(ThreatProtectorConstants.MAX_PROPERTY_COUNT);
         if (messageProperty != null) {
             propertyCount = Integer.parseInt(messageProperty.toString());
         } else {
-            String infoMessage = "Enabling the default Json schema maxProperty count is missing do enbleing the ";
-            logger.info("");
+            String errorMessage = "Json schema maxProperty count is missing.";
+            ThreatExceptionHandler.handleException(messageContext, errorMessage);
         }
 
         messageProperty = messageContext.getProperty(ThreatProtectorConstants.MAX_STRING_LENGTH);
