@@ -71,7 +71,9 @@ public class JsonSchemaValidator extends AbstractMediator {
         apiContext = messageContext.getProperty(ThreatProtectorConstants.API_CONTEXT).toString();
         requestMethod = axis2MC.getProperty(ThreatProtectorConstants.HTTP_REQUEST_METHOD).toString();
 
-        if (!APIConstants.SupportedHTTPVerbs.GET.name().equalsIgnoreCase(requestMethod) && (ThreatProtectorConstants.APPLICATION_JSON.equals(contentType) || ThreatProtectorConstants.TEXT_JSON.equals(contentType))) {
+        if (!APIConstants.SupportedHTTPVerbs.GET.name().equalsIgnoreCase(requestMethod) &&
+                (ThreatProtectorConstants.APPLICATION_JSON.equals(contentType) ||
+                        ThreatProtectorConstants.TEXT_JSON.equals(contentType))) {
             JSONConfig jsonConfig = configureSchemaProperties(messageContext);
             ConfigurationHolder.addJsonConfig(jsonConfig);
             APIMThreatAnalyzer apimThreatAnalyzer = AnalyzerHolder.getAnalyzer(contentType);
@@ -86,17 +88,20 @@ public class JsonSchemaValidator extends AbstractMediator {
                 validRequest = false;
                 String message = "Request is failed due to JSON schema validation failure: ";
                 logger.error(message, e);
-                GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE, message + e.getMessage());
+                GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE,
+                        message + e.getMessage());
             } catch (IOException e) {
                 String message = "Error occurred while building the request: ";
                 logger.error(message, e);
-                GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE, message + e.getMessage());
+                GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE,
+                        message + e.getMessage());
             } finally {
                 // return analyzer to the pool
                 AnalyzerHolder.returnObject(apimThreatAnalyzer);
             }
         } else {
-            GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE, APIMgtGatewayConstants.REQUEST_TYPE_FAIL_MSG);
+            GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE,
+                    APIMgtGatewayConstants.REQUEST_TYPE_FAIL_MSG);
         }
         GatewayUtils.setOriginalInputStream(inputStreams, axis2MC);
         if (validRequest) {
@@ -164,7 +169,9 @@ public class JsonSchemaValidator extends AbstractMediator {
             ThreatExceptionHandler.handleException(messageContext, errorMessage);
         }
         if (logger.isDebugEnabled()) {
-            logger.debug(("Max Priority count is:" + propertyCount) + ", " + "Max String length is: " + stringLength + ", " + "Max Array element count: " + arrayElementCount + ", " + "Max Key Length: " + keyLength + ", " + "Max JSON depth is:" + maxJSONDepth + ", ");
+            logger.debug(("Max Priority count is:" + propertyCount) + ", " + "Max String length is: "
+                    + stringLength + ", " + "Max Array element count: " + arrayElementCount + ", "
+                    + "Max Key Length: " + keyLength + ", " + "Max JSON depth is:" + maxJSONDepth + ", ");
         }
         JSONConfig jsonConfig = new JSONConfig();
         jsonConfig.setMaxPropertyCount(propertyCount);
