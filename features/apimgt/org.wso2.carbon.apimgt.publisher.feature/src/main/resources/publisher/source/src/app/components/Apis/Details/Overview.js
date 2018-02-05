@@ -18,13 +18,11 @@
 
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
-import {Col, Popconfirm, Row, Form, Select, Dropdown, Tag, Menu, Badge, message} from 'antd';
-
-const FormItem = Form.Item;
+import {Form, message} from 'antd';
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import Api from '../../../data/api'
-import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation'
+import {resourceMethod, resourcePath, ScopeValidation} from '../../../data/ScopeValidation'
 import ApiPermissionValidation from '../../../data/ApiPermissionValidation'
 
 import Dialog, {DialogActions, DialogContent, DialogContentText, DialogTitle} from 'material-ui/Dialog';
@@ -35,9 +33,11 @@ import Button from 'material-ui/Button';
 import Card, {CardActions, CardContent, CardMedia} from 'material-ui/Card';
 import Table, {TableBody, TableCell, TableRow} from 'material-ui/Table';
 import blueGrey from 'material-ui/colors/blueGrey';
-import {Delete, Edit, CreateNewFolder, Description}from 'material-ui-icons';
+import {CreateNewFolder, Delete, Description, Edit} from 'material-ui-icons';
 import Slide from "material-ui/transitions/Slide";
 import Utils from "../../../data/Utils";
+
+const FormItem = Form.Item;
 
 class Overview extends Component {
     constructor(props) {
@@ -147,7 +147,7 @@ class Overview extends Component {
             return <Loading/>
         }
         return (
-            <Grid item>
+            <Grid container>
                 <Grid item xs={12}>
                     <Paper>
                         <Typography type="display2" gutterBottom>
@@ -223,6 +223,12 @@ class Overview extends Component {
                                     View in store
                                 </a>
                             </Button>
+
+                            <Link to={`/apis/${this.api_uuid}/environment view`}>
+                                <Button dense color="primary">
+                                    Multi-Environment Overview
+                                </Button>
+                            </Link>
                         </CardActions>
                     </Card>
                 </Grid>

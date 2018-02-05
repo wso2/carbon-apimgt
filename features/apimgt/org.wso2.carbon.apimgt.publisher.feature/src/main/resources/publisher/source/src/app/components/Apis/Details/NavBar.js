@@ -51,6 +51,7 @@ class NavBar extends Component {
     static get TABS() {
         return [
             {name: "overview", icon: <Description />},
+            {name: "environment view", icon: <Description />},
             {name: "lifecycle", icon: <DonutLarge />},
             {name: "endpoints", icon: <Games />},
             {name: "resources", icon: <FilterNone />},
