@@ -17,7 +17,7 @@
  */
 
 import React, {Component} from 'react'
-import {Route, Switch, Redirect} from 'react-router-dom'
+import {Redirect, Route, Switch} from 'react-router-dom'
 
 import Overview from './Overview'
 import LifeCycle from './LifeCycle/LifeCycle'
@@ -29,9 +29,10 @@ import Endpoints from './Endpoints'
 import Subscriptions from './Subscriptions/Subscriptions'
 import Scopes from './Scopes/Scopes'
 import Security from './Security'
-import NavBar from  './NavBar'
+import NavBar from './NavBar'
 import Grid from 'material-ui/Grid';
 import EnvironmentOverview from "./EnvironmentOverview/EnvironmentOverview";
+import Utils from "../../../data/Utils";
 
 /**
  * Base component for API specific Details page, This component will be mount for any request coming for /apis/:api_uuid
@@ -47,13 +48,17 @@ export default class Details extends Component {
         return (
             <Grid container spacing={0}>
                 <Grid item xs={2}>
-                    <NavBar />
+                    <NavBar/>
                 </Grid>
                 <Grid item xs={10}>
                     <Switch>
                         <Redirect exact from="/apis/:api_uuid" to={redirect_url}/>
                         <Route path="/apis/:api_uuid/overview" component={Overview}/>
-                        <Route path="/apis/:api_uuid/environment view" component={EnvironmentOverview}/>
+                        {Utils.isAutoLoginEnabled() ?
+                            <Route path="/apis/:api_uuid/environment view" component={EnvironmentOverview}/>
+                            :
+                            null
+                        }
                         <Route path="/apis/:api_uuid/lifecycle" component={LifeCycle}/>
                         <Route path="/apis/:api_uuid/resources" component={Resources}/>
                         <Route path="/apis/:api_uuid/permission" component={PermissionFormWrapper}/>

@@ -18,16 +18,24 @@
 
 import React, {Component} from 'react'
 import {Link, withRouter} from 'react-router-dom'
-import {ListItem, ListItemIcon, ListItemText} from 'material-ui/List';
+import List, {ListItem, ListItemIcon, ListItemText} from 'material-ui/List';
 import {
-    Description, DonutLarge, Games, FilterNone,
-    LockOutline, InsertDriveFile, Tune, Code, Subscriptions, ChromeReaderMode, VerifiedUser
+    ChromeReaderMode,
+    Code,
+    Description,
+    DonutLarge,
+    FilterNone,
+    Games,
+    InsertDriveFile,
+    LockOutline,
+    Subscriptions,
+    Tune,
+    VerifiedUser
 } from 'material-ui-icons';
 import Divider from 'material-ui/Divider';
-import Drawer from 'material-ui/Drawer';
 import {withStyles} from 'material-ui/styles';
-import List from 'material-ui/List';
 import blue from 'material-ui/colors/blue';
+import Utils from "../../../data/Utils";
 
 
 const styles = {
@@ -49,20 +57,24 @@ class NavBar extends Component {
     }
 
     static get TABS() {
-        return [
-            {name: "overview", icon: <Description />},
-            {name: "environment view", icon: <Description />},
-            {name: "lifecycle", icon: <DonutLarge />},
-            {name: "endpoints", icon: <Games />},
-            {name: "resources", icon: <FilterNone />},
-            {name: "scopes", icon: <FilterNone />},
-            {name: "documents", icon: <InsertDriveFile />},
-            {name: "permission", icon: <LockOutline />},
-            {name: "mediation", icon: <Tune />},
-            {name: "scripting", icon: <Code />},
-            {name: "subscriptions", icon: <Subscriptions />},
-            {name: "security", icon: <VerifiedUser />},
-        ]
+        let tabs = [
+            {name: "overview", icon: <Description/>},
+            {name: "lifecycle", icon: <DonutLarge/>},
+            {name: "endpoints", icon: <Games/>},
+            {name: "resources", icon: <FilterNone/>},
+            {name: "scopes", icon: <FilterNone/>},
+            {name: "documents", icon: <InsertDriveFile/>},
+            {name: "permission", icon: <LockOutline/>},
+            {name: "mediation", icon: <Tune/>},
+            {name: "scripting", icon: <Code/>},
+            {name: "subscriptions", icon: <Subscriptions/>},
+            {name: "security", icon: <VerifiedUser/>},
+        ];
+        if (Utils.isAutoLoginEnabled()) {
+            tabs.splice(1, 0, {name: "environment view", icon: <Description/>});
+        }
+
+        return tabs;
     }
 
     render() {
