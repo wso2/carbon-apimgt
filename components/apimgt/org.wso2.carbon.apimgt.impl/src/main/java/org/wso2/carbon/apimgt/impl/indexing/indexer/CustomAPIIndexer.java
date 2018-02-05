@@ -66,7 +66,6 @@ public class CustomAPIIndexer extends RXTIndexer {
         }
         if (resource != null) {
             String publisherAccessControl = resource.getProperty(APIConstants.PUBLISHER_ROLES);
-            String storeViewRoles = resource.getProperty(APIConstants.STORE_VIEW_ROLES);
 
             if (publisherAccessControl == null || publisherAccessControl.trim().isEmpty()) {
                 if (log.isDebugEnabled()) {
@@ -79,6 +78,9 @@ public class CustomAPIIndexer extends RXTIndexer {
                 resource.setProperty(CUSTOM_API_INDEXER_PROPERTY, "true");
                 registry.put(resourcePath, resource);
             }
+
+            resource = registry.get(resourcePath);
+            String storeViewRoles = resource.getProperty(APIConstants.STORE_VIEW_ROLES);
 
             if (storeViewRoles == null) {
                 if (log.isDebugEnabled()) {
