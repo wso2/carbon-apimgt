@@ -37,7 +37,7 @@
     "react-select": "^1.2.1",
     "react-tap-event-plugin": "^2.0.1",
     "react-toastify": "^1.7.0",
-    "swagger-client": "git://github.com/RenukaFernando/swagger-js.git#v-cors-patch",
+    "swagger-client": "3.4.8",
     "typeface-roboto": "0.0.35",
     "url-loader": "^0.5.9"
   },
