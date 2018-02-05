@@ -82,6 +82,7 @@ public class CustomAPIIndexerTest {
         PowerMockito.when(APIUtil.getArtifactManager((UserRegistry)(Mockito.anyObject()), Mockito.anyString())).
                 thenReturn(artifactManager);
         Mockito.when(artifactManager.getGenericArtifact(Mockito.anyString())).thenReturn(genericArtifact);
+        Mockito.when(genericArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY)).thenReturn("public");
         PowerMockito.when(APIUtil.getAPI(genericArtifact, userRegistry))
                 .thenReturn(Mockito.mock(API.class));
         indexer.getIndexedDocument(file2Index);
@@ -91,6 +92,8 @@ public class CustomAPIIndexerTest {
                 resource.getProperty(APIConstants.ACCESS_CONTROL));
         Assert.assertNotNull(APIConstants.CUSTOM_API_INDEXER_PROPERTY + " property was not set for the API",
                 resource.getProperty(APIConstants.CUSTOM_API_INDEXER_PROPERTY));
+        Assert.assertNotNull(APIConstants.STORE_VIEW_ROLES + " property was not set for the API",
+                resource.getProperty(APIConstants.STORE_VIEW_ROLES));
     }
 
     /**
@@ -108,10 +111,12 @@ public class CustomAPIIndexerTest {
                 thenReturn(artifactManager);
         GenericArtifact genericArtifact = Mockito.mock(GenericArtifact.class);
         Mockito.when(artifactManager.getGenericArtifact(Mockito.anyString())).thenReturn(genericArtifact);
+        Mockito.when(genericArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY)).thenReturn("public");
         PowerMockito.when(APIUtil.getAPI(genericArtifact, userRegistry))
                 .thenReturn(Mockito.mock(API.class));
         resource.setProperty(APIConstants.ACCESS_CONTROL, APIConstants.NO_ACCESS_CONTROL);
         resource.setProperty(APIConstants.PUBLISHER_ROLES, APIConstants.NULL_USER_ROLE_LIST);
+        resource.setProperty(APIConstants.STORE_VIEW_ROLES, APIConstants.NULL_USER_ROLE_LIST);
         Mockito.doReturn(resource).when(userRegistry).get(Mockito.anyString());
         indexer.getIndexedDocument(file2Index);
         Assert.assertNull(APIConstants.CUSTOM_API_INDEXER_PROPERTY + " property was set for the API which does not "
