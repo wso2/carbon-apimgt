@@ -171,6 +171,35 @@ class Utils {
     }
 
     /**
+     * Set Auto login info in local-storage according to environment
+     * @param {Array} environments - Array of Environment objects
+     * @param {Array} configs - Array of Auth Config objects
+     */
+    static setAutoLoginEnabledInfo(environments, configs) {
+        let autoLoginInfo = {};
+        if (!Array.isArray(environments) || !Array.isArray(configs)) {
+            console.error("Error while storing auto login configs in local-storage");
+        }
+
+        for (let i = 0; i < environments.length; i++) {
+            autoLoginInfo[environments[i].label] = configs[i].is_multi_environment_overview_enabled.value;
+        }
+
+        const data = JSON.stringify(autoLoginInfo);
+        localStorage.setItem(Utils.CONST.AUTO_LOGIN_ENABLED_INFO, data);
+    }
+
+    /**
+     * Get whether auto login is enabled in current environment or not
+     * @return {Boolean|undefined} auto login enabled
+     */
+    static isAutoLoginEnabled() {
+        const environmentName = Utils.getCurrentEnvironment().label;
+        const autoLoginInfo = JSON.parse(localStorage.getItem(Utils.CONST.AUTO_LOGIN_ENABLED_INFO));
+        return autoLoginInfo[environmentName];
+    }
+
+    /**
      * Get an environment object with default values.
      * @returns {Object} environment: {label: string, host: string, loginTokenPath: string}
      * @private
@@ -183,6 +212,7 @@ class Utils {
 Utils.CONST = {
     LOCAL_STORAGE_ENVIRONMENT: 'environment_publisher',
     DCR_APP_INFO: '/login/login',
+    AUTO_LOGIN_ENABLED_INFO: 'auto_login',
     LOGOUT: '/login/logout',
     LOGIN_TOKEN_PATH: '/login/token',
     SWAGGER_YAML: '/api/am/publisher/v1.0/apis/swagger.yaml',

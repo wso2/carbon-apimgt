@@ -102,6 +102,7 @@ class Login extends Component {
             const authConfigs = responses.map(response => response.data.members);
             this.setState({authConfigs});
             handleRedirectionFromIDP(environments, authConfigs);
+            Utils.setAutoLoginEnabledInfo(environments, authConfigs);
         });
     }
 
