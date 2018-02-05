@@ -59,7 +59,8 @@ class Login extends Component {
             authConfigs: [],
             redirectToIS: false
         };
-        this.fetch_DCRappInfo = this.fetch_DCRappInfo.bind(this);
+        this.fetch_DCRAppInfo = this.fetch_DCRAppInfo.bind(this);
+        this.handleRedirectionFromIDP = this.handleRedirectionFromIDP.bind(this);
     }
 
     componentDidMount() {
@@ -79,10 +80,32 @@ class Login extends Component {
             // Set authentication status of environments
             this.setLoginStatusOfEnvironments(environments);
 
-            //Fetch SSO data and render
-            this.fetch_DCRappInfo(environments);
+            //Fetch DCR App data and handle SSO login if redirected from IDP
+            this.fetch_DCRAppInfo(environments, this.handleRedirectionFromIDP);
         });
+    }
 
+    setLoginStatusOfEnvironments(environments) {
+        let loginStatusEnvironments = environments.map(
+            environment => AuthManager.getUser(environment.label) !== null
+        );
+        this.setState({loginStatusEnvironments});
+    }
+
+    fetch_DCRAppInfo(environments, handleRedirectionFromIDP) {
+        //Array of promises
+        let promised_ssoData = environments.map(
+            environment => Utils.getPromised_DCRAppInfo(environment)
+        );
+
+        Promise.all(promised_ssoData).then(responses => {
+            const authConfigs = responses.map(response => response.data.members);
+            this.setState({authConfigs});
+            handleRedirectionFromIDP(environments, authConfigs);
+        });
+    }
+
+    handleRedirectionFromIDP(environments, authConfigs) {
         let queryString = this.props.location.search;
         queryString = queryString.replace(/^\?/, '');
         /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
@@ -100,30 +123,10 @@ class Login extends Component {
             AuthManager.setUser(user);
             this.authManager.handleAutoLoginEnvironments(
                 params.id_token,
-                this.state.environments,
-                this.state.authConfigs
+                environments,
+                authConfigs
             );
         }
-    }
-
-    setLoginStatusOfEnvironments(environments) {
-        let loginStatusEnvironments = environments.map(
-            environment => AuthManager.getUser(environment.label) !== null
-        );
-        this.setState({loginStatusEnvironments});
-    }
-
-    fetch_DCRappInfo(environments) {
-        //Array of promises
-        let promised_ssoData = environments.map(
-            environment => Utils.getPromised_DCRAppInfo(environment)
-        );
-
-        Promise.all(promised_ssoData).then(responses => {
-            this.setState({
-                authConfigs: responses.map(response => response.data.members)
-            });
-        });
     }
 
     handleSubmit = (e) => {
