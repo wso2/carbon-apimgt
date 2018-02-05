@@ -72,7 +72,7 @@ public class CustomAPIIndexer extends RXTIndexer {
                     log.debug("API at " + resourcePath + "did not have property : " + APIConstants.PUBLISHER_ROLES
                             + ", hence adding the null value for that API resource.");
                 }
-                resource.setProperty(APIConstants.PUBLISHER_ROLES, "null");
+                resource.setProperty(APIConstants.PUBLISHER_ROLES, APIConstants.NULL_USER_ROLE_LIST);
                 resource.setProperty(APIConstants.ACCESS_CONTROL, APIConstants.NO_ACCESS_CONTROL);
                 setStoreViewRoles(registry, resource, publisherAccessControl);
                 resource.setProperty(CUSTOM_API_INDEXER_PROPERTY, "true");
@@ -128,7 +128,7 @@ public class CustomAPIIndexer extends RXTIndexer {
         String storeVisibility = null;
         String storeVisibleRoles = null;
         try {
-            GenericArtifact artifact = APIUtil.getArtifactManager(registry, "api").getGenericArtifact(resource.getUUID());
+            GenericArtifact artifact = APIUtil.getArtifactManager(registry, APIConstants.API_KEY).getGenericArtifact(resource.getUUID());
             storeVisibility = artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
             storeVisibleRoles = artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
         } catch (APIManagementException e) {
@@ -136,7 +136,7 @@ public class CustomAPIIndexer extends RXTIndexer {
             log.error("Error while retrieving API", e);
         }
         if (APIConstants.PUBLIC_STORE_VISIBILITY.equals(storeVisibility)) {
-            resource.setProperty(APIConstants.STORE_VIEW_ROLES, "null");
+            resource.setProperty(APIConstants.STORE_VIEW_ROLES, APIConstants.NULL_USER_ROLE_LIST);
         } else if (APIConstants.RESTRICTED_STORE_VISIBILITY.equals(storeVisibility)) {
             resource.setProperty(APIConstants.STORE_VIEW_ROLES, storeVisibleRoles + "," + publisherAccessControl);
         }
