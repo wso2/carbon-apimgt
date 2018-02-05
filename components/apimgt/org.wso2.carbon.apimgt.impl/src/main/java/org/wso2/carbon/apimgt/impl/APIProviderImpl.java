@@ -889,8 +889,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             boolean updatePermissions = false;
-            if(!oldApi.getAccessControl().equals(api.getAccessControl()) || (APIConstants.API_RESTRICTED_VISIBILITY.equals(oldApi.getAccessControl()) &&
-                    !api.getAccessControlRoles().equals(oldApi.getAccessControlRoles())) || !oldApi.getVisibility().equals(api.getVisibility()) ||
+            if (APIUtil.isAccessControlEnabled()) {
+                if (!oldApi.getAccessControl().equals(api.getAccessControl()) || (APIConstants.API_RESTRICTED_VISIBILITY.equals(oldApi.getAccessControl()) &&
+                        !api.getAccessControlRoles().equals(oldApi.getAccessControlRoles())) || !oldApi.getVisibility().equals(api.getVisibility()) ||
+                        (APIConstants.API_RESTRICTED_VISIBILITY.equals(oldApi.getVisibility()) &&
+                                !api.getVisibleRoles().equals(oldApi.getVisibleRoles()))) {
+                    updatePermissions = true;
+                }
+            } else if (!oldApi.getVisibility().equals(api.getVisibility()) ||
                     (APIConstants.API_RESTRICTED_VISIBILITY.equals(oldApi.getVisibility()) &&
                             !api.getVisibleRoles().equals(oldApi.getVisibleRoles()))) {
                 updatePermissions = true;
