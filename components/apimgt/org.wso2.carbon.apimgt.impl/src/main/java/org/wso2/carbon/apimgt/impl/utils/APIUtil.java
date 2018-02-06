@@ -6120,13 +6120,22 @@ public final class APIUtil {
 
     public static void addDefaultSuperTenantAdvancedThrottlePolicies() throws APIManagementException {
         int tenantId = MultitenantConstants.SUPER_TENANT_ID;
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+
+        /* Check if 'Unlimited' policy is available in AM_POLICY_APPLICATION table, to determine whether the default policies are loaded into the database at lease once.
+           If yes, default policies won't be added to database again.
+        */
+        if (apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_APP, tenantId, APIConstants.DEFAULT_APP_POLICY_UNLIMITED)) {
+            log.debug("Default Throttling Policies are not written into the database again, as they were added once at initial server startup");
+            return;
+        }
+
         long[] requestCount = new long[]{50, 20, 10, Integer.MAX_VALUE};
         //Adding application level throttle policies
         String[] appPolicies = new String[]{APIConstants.DEFAULT_APP_POLICY_FIFTY_REQ_PER_MIN, APIConstants.DEFAULT_APP_POLICY_TWENTY_REQ_PER_MIN,
                 APIConstants.DEFAULT_APP_POLICY_TEN_REQ_PER_MIN, APIConstants.DEFAULT_APP_POLICY_UNLIMITED};
         String[] appPolicyDecs = new String[]{APIConstants.DEFAULT_APP_POLICY_LARGE_DESC, APIConstants.DEFAULT_APP_POLICY_MEDIUM_DESC,
                 APIConstants.DEFAULT_APP_POLICY_SMALL_DESC, APIConstants.DEFAULT_APP_POLICY_UNLIMITED_DESC};
-        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         String policyName;
         //Add application level throttle policies
         for (int i = 0; i < appPolicies.length; i++) {
@@ -6206,6 +6215,16 @@ public final class APIUtil {
     }
 
     public static void addDefaultTenantAdvancedThrottlePolicies(String tenantDomain, int tenantId) throws APIManagementException {
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+
+        /* Check if 'Unlimited' policy is available in AM_POLICY_APPLICATION table, to determine whether the default policies are written into the database at lease once.
+           If yes, default policies won't be added to database again.
+        */
+        if (apiMgtDAO.isPolicyExist(PolicyConstants.POLICY_LEVEL_APP, tenantId, APIConstants.DEFAULT_APP_POLICY_UNLIMITED)) {
+            log.debug("Default Throttling Policies are not written into the database again, as they were added once, at initial tenant loading");
+            return;
+        }
+
         ThrottlePolicyDeploymentManager deploymentManager = ThrottlePolicyDeploymentManager.getInstance();
         ThrottlePolicyTemplateBuilder policyBuilder = new ThrottlePolicyTemplateBuilder();
         Map<String, Long> defualtLimits = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
@@ -6222,7 +6241,6 @@ public final class APIUtil {
                 APIConstants.DEFAULT_APP_POLICY_TEN_REQ_PER_MIN, APIConstants.DEFAULT_APP_POLICY_UNLIMITED};
         String[] appPolicyDecs = new String[]{APIConstants.DEFAULT_APP_POLICY_LARGE_DESC, APIConstants.DEFAULT_APP_POLICY_MEDIUM_DESC,
                 APIConstants.DEFAULT_APP_POLICY_SMALL_DESC, APIConstants.DEFAULT_APP_POLICY_UNLIMITED_DESC};
-        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         String policyName;
         //Add application level throttle policies
         for (int i = 0; i < appPolicies.length; i++) {
