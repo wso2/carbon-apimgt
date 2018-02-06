@@ -17,11 +17,69 @@
  */
 
 import React from 'react'
-import { Input, Icon, Checkbox, Button, Card, Tag, Form } from 'antd';
-import { Row, Col } from 'antd';
+import { Input, Icon, Form } from 'antd';
 import Select from 'material-ui/Select';
 import {MenuItem} from 'material-ui/Menu';
 const FormItem = Form.Item;
+import Chip from 'material-ui/Chip';
+import List, {
+    ListItem,
+    ListItemText,
+    ListItemSecondaryAction
+} from 'material-ui/List';
+import { withStyles } from 'material-ui/styles';
+import Paper from 'material-ui/Paper';
+import PropTypes from 'prop-types';
+import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table';
+import Delete from 'material-ui-icons/Delete';
+import Grid from 'material-ui/Grid';
+import Button from 'material-ui/Button';
+import { FormGroup, FormControlLabel } from 'material-ui/Form';
+import Checkbox from 'material-ui/Checkbox';
+import Collapse from 'material-ui/transitions/Collapse';
+
+const styles = theme => ({
+    root: {
+        flexGrow: 1,
+        marginTop: 10,
+    },
+    container: {
+        display: 'flex',
+        flexWrap: 'wrap',
+    },
+    textField: {
+        marginLeft: theme.spacing.unit,
+        marginRight: theme.spacing.unit,
+        width: 400,
+    },
+    mainTitle: {
+        paddingLeft: 20
+    },
+    scopes: {
+        width: 400
+    },
+    divider: {
+        marginTop: 20,
+        marginBottom: 20
+    },
+    chip: {
+        margin: theme.spacing.unit,
+        color: theme.palette.text.secondary,
+        minWidth: 100,
+    },
+    chipActive: {
+        margin: theme.spacing.unit,
+        color: theme.palette.text.secondary,
+        background: theme.palette.background.active,
+        minWidth: 100,
+    },
+    paper: {
+        padding:20
+    },
+    link: {
+        cursor: 'pointer'
+    }
+});
 
 function hasErrors(fieldsError) {
     return Object.keys(fieldsError).some(field => fieldsError[field]);
@@ -29,6 +87,7 @@ function hasErrors(fieldsError) {
 /*
  Property add form
  */
+
 class PropertyAddForm extends React.Component {
     componentDidMount() {
         // To disabled submit button at the beginning.
@@ -135,15 +194,21 @@ class Resource extends React.Component{
         this.state = {
             visible: false,
             method:this.props.methodData,
-            scopes:tempScopes
+            scopes:tempScopes,
+            deleteChecked: false
         };
-        console.info(this.props);
         this.propsSubmitHandler = this.propsSubmitHandler.bind(this);
         this.saveFieldCallback = this.saveFieldCallback.bind(this);
         this.toggleMethodData = this.toggleMethodData.bind(this);
         this.deleteResource = this.deleteResource.bind(this);
         this.handleScopeChange = this.handleScopeChange.bind(this);
 
+    }
+    componentDidMount() {
+        this.props.onRef(this);
+    }
+    componentWillUnmount() {
+        this.props.onRef(undefined);
     }
     handleScopeChange(e) {
         this.setState({scopes: e.target.value});
@@ -203,99 +268,143 @@ class Resource extends React.Component{
         /* We set null and call the update method of the Resources class */
         this.props.updatePath(this.props.path,this.props.method,null);
     }
+    toggleDeleteCheck (checkState) {
+        this.setState({deleteChecked:checkState});
+        this.forceUpdate();
+    }
+    handleDeleteCheck = (path,method) => event => {
+        this.setState({deleteChecked: event.target.checked});
+        this.props.addRemoveToDeleteList(path,method);
+    }
+
     render(){
+        const { classes } = this.props;
         return (
             <div>
-                <Row type="flex" justify="start" className="resource-head">
-                    <Col span={8}>
-                        <a onClick={this.toggleMethodData}> <Tag color="#2db7f5">{this.props.method}</Tag>{this.props.path}</a>
-                    </Col>
-                    <Col span={8}>Description</Col>
-                    <Col span={8} style={{textAlign:"right", cursor:"pointer"}} onClick={this.deleteResource}><Icon type="delete" /> </Col>
-                </Row>
-                {this.state.visible ?
-                <Row type="flex" justify="start" className="resource-body">
-                    <Col span={4}><strong>Description</strong></Col>
-                    <Col span={20}>
-                        <InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldValue={this.state.method.description} fieldName="description" />
-                    </Col>
+                <ListItem >
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={this.state.deleteChecked}
+                                onChange={this.handleDeleteCheck(this.props.path, this.props.method)}
+                                value=""
+                            />
+                        }
+                        label=""
+                    />
+                    <a onClick={this.toggleMethodData} className={classes.link}>
+                        <Chip label={this.props.method}
+                              className={classes.chipActive} />
+                    </a>
+                    <a onClick={this.toggleMethodData}>
+                    <ListItemText
+                        className="foo"
+                        primary={this.props.path}
+                        secondary="Description" />
+                    </a>
+                    <ListItemSecondaryAction>
+                        <a  onClick={this.deleteResource}>
+                            <Delete className={classes.rightIcon} />
+                        </a>
+                    </ListItemSecondaryAction>
 
-                    <Col span={4}><strong>Produces</strong></Col>
-                    <Col span={20}>
-                        <InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldValue={this.state.method.produces} fieldName="produces" />
-                    </Col>
-
-                    <Col span={4}><strong>Consumes</strong></Col>
-                    <Col span={20}>
-                        <InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldValue={this.state.method.consumes} fieldName="consumes" />
-                    </Col>
-                    <Col span={4}><strong>Scopes</strong></Col>
-                    <Col span={20}>
-                    <Select
-                        margin="none"
-                        multiple
-                        value={this.state.scopes}
-                        onChange={this.handleScopeChange}
-                        MenuProps={{
-                            PaperProps: {
-                                style: {
-                                    width: 200,
-                                },
-                            },
-                        }}>
-                        {this.props.apiScopes.list.map(tempScope => (
-                            <MenuItem
-                                key={tempScope.name}
-                                value={tempScope.name}
-                                style={{
-                                    fontWeight: this.state.scopes.indexOf(tempScope.name) !== -1 ? '500' : '400',
-                                }}
-                            >
-                                {tempScope.name}
-                            </MenuItem>
-                        ))}
-                    </Select>
-                    </Col>
-                    <Col span={24}>
-                        <h3>Parameters:</h3>
-                        <div className="parameter-add-wrapper">
-                            <WrappedPropertyAddForm propsSubmitHandler={this.propsSubmitHandler} />
-
-                        </div>
-                        {this.state.method.parameters.length > 0 ?
-                            <table className="parameter-table">
-                                <tbody><tr>
-                                    <th width="15%">Parameter Name</th>
-                                    <th width="35%">Description</th>
-                                    <th width="15%">Parameter Type</th>
-                                    <th width="15%">Data Type</th>
-                                    <th width="15%">Required</th>
-                                    <th width="5%">Delete</th>
-                                </tr>
-                                {this.state.method.parameters.map(function (param,i) {
-                                    return <tr>
-                                        <td><InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.name} fieldName="param.name" /></td>
-                                        <td><InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.description} fieldName="param.description" /></td>
-                                        <td></td><td></td>
-                                        {/*<td><InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.schema.type} fieldName="param.schema.type" /></td>*/}
-                                        {/*<td><InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.schema.properties.payload.type} fieldName="param.schema.properties.payload.type" /></td>*/}
-                                        <td><InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.required} fieldName="param.required" /></td>
-                                        <td>
-                                            <a><Icon type="delete" onClick={()=>this.deleteParam(i)} /></a>
-                                        </td>
-                                    </tr>;
-                                },this)}
+                </ListItem>
 
 
-                                </tbody>
-                            </table>
-                            : ''}
-                    </Col>
-                </Row> : null}
+                {this.state.visible &&
 
+
+
+                    <Paper className={classes.paper}>
+                        <Grid container spacing={24}>
+                            <Grid item xs={2}><strong>Description</strong></Grid>
+                            <Grid item xs={10}>
+                                <InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldValue={this.state.method.description} fieldName="description" />
+                            </Grid>
+
+                            <Grid item xs={2}><strong>Produces</strong></Grid>
+                            <Grid item xs={10}>
+                                <InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldValue={this.state.method.produces} fieldName="produces" />
+                            </Grid>
+
+                            <Grid item xs={2}><strong>Consumes</strong></Grid>
+                            <Grid item xs={10}>
+                                <InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldValue={this.state.method.consumes} fieldName="consumes" />
+                            </Grid>
+                            <Grid item xs={2}><strong>Scopes</strong></Grid>
+                            <Grid item xs={10}>
+                                <Select
+                                    margin="none"
+                                    multiple
+                                    value={this.state.scopes}
+                                    onChange={this.handleScopeChange}
+                                    MenuProps={{
+                                        PaperProps: {
+                                            style: {
+                                                width: 200,
+                                            },
+                                        },
+                                    }}>
+                                    {this.props.apiScopes.list.map(tempScope => (
+                                        <MenuItem
+                                            key={tempScope.name}
+                                            value={tempScope.name}
+                                            style={{
+                                                fontWeight: this.state.scopes.indexOf(tempScope.name) !== -1 ? '500' : '400',
+                                            }}
+                                        >
+                                            {tempScope.name}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <h3>Parameters:</h3>
+                                <div className="parameter-add-wrapper">
+                                    <WrappedPropertyAddForm propsSubmitHandler={this.propsSubmitHandler} />
+
+                                </div>
+                                { this.state.method.parameters.length > 0 &&
+                                <Table className="parameter-table">
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell>Parameter Name</TableCell>
+                                            <TableCell>Description</TableCell>
+                                            <TableCell>Parameter Type</TableCell>
+                                            <TableCell>Data Type</TableCell>
+                                            <TableCell>Required</TableCell>
+                                            <TableCell>Delete</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {this.state.method.parameters.map(function (param,i) {
+                                            return <TableRow>
+                                                <TableCell><InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.name} fieldName="param.name" /></TableCell>
+                                                <TableCell><InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.description} fieldName="param.description" /></TableCell>
+                                                <TableCell></TableCell><TableCell></TableCell>
+                                                {/*<td><InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.schema.type} fieldName="param.schema.type" /></td>*/}
+                                                {/*<td><InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.schema.properties.payload.type} fieldName="param.schema.properties.payload.type" /></td>*/}
+                                                <TableCell><InlineEditableField saveFieldCallback={this.saveFieldCallback} fieldIndex={i} fieldValue={param.required} fieldName="param.required" /></TableCell>
+                                                <TableCell>
+                                                    <a><Icon type="delete" onClick={()=>this.deleteParam(i)} /></a>
+                                                </TableCell>
+                                            </TableRow>;
+                                        },this)}
+
+
+                                    </TableBody>
+                                </Table>
+                                }
+                            </Grid>
+                        </Grid>
+                    </Paper>
+                }
             </div>
         )
     }
 }
+Resource.propTypes = {
+    classes: PropTypes.object.isRequired,
+};
 
-export default Resource;
+export default withStyles(styles)(Resource);
