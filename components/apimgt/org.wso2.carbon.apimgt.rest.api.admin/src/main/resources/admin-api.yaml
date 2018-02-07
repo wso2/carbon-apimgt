@@ -81,6 +81,10 @@ x-wso2-security:
         roles: admin
         name: apim:app_owner_change
         key: apim:app_owner_change
+      - description: ""
+        roles: admin
+        name: apim:app_import_export
+        key: apim:app_import_export
 
 
 ######################################################
