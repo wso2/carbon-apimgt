@@ -30,22 +30,11 @@ public class MultiEnvironmentOverview {
     @Element(description = "Multi-Environment Overview feature enabled or not")
     private boolean enabled = false;
 
-    @Element(description = "Authentication Grant Type to authenticate user to other environments")
-    private String authenticationGrantType = KeyManagerConstants.JWT_GRANT_TYPE;
-
     public boolean isEnabled() {
         return enabled;
     }
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-    }
-
-    public String getAuthenticationGrantType() {
-        return authenticationGrantType;
-    }
-
-    public void setAuthenticationGrantType(String authenticationGrantType) {
-        this.authenticationGrantType = authenticationGrantType;
     }
 }

@@ -94,7 +94,7 @@ public class AuthenticatorService {
         grantTypes.add(KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE);
         grantTypes.add(KeyManagerConstants.REFRESH_GRANT_TYPE);
         if (isMultiEnvironmentOverviewEnabled) {
-            grantTypes.add(envOverviewConfigs.getAuthenticationGrantType());
+            grantTypes.add(KeyManagerConstants.JWT_GRANT_TYPE);
         }
         APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance().getAPIMAppConfiguration();
         String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName;
@@ -156,7 +156,6 @@ public class AuthenticatorService {
         MultiEnvironmentOverview envOverviewConfigs = APIMConfigurationService.getInstance()
                 .getEnvironmentConfigurations().getMultiEnvironmentOverview();
         boolean isMultiEnvironmentOverviewEnabled = envOverviewConfigs.isEnabled();
-        String customGrantType = envOverviewConfigs.getAuthenticationGrantType();
 
         // Get scopes of the application
         String scopes = getApplicationScopes(appName);
@@ -207,7 +206,8 @@ public class AuthenticatorService {
                 accessTokenRequest.setClientId(consumerKeySecretMap.get("CONSUMER_KEY"));
                 accessTokenRequest.setClientSecret(consumerKeySecretMap.get("CONSUMER_SECRET"));
                 accessTokenRequest.setAssertion(assertion);
-                accessTokenRequest.setGrantType(customGrantType);
+                // Pass grant type to extend a custom grant instead of JWT grant in the future
+                accessTokenRequest.setGrantType(KeyManagerConstants.JWT_GRANT_TYPE);
                 accessTokenRequest.setScopes(scopes);
                 accessTokenRequest.setValidityPeriod(validityPeriod);
                 accessTokenInfo = getKeyManager().getNewAccessToken(accessTokenRequest);
@@ -217,7 +217,7 @@ public class AuthenticatorService {
                     APIManagerFactory.getInstance().getIdentityProvider().getIdOfUser(usernameFromJWT);
                 } catch (IdentityProviderException e) {
                     String errorMsg = "User " + usernameFromJWT + " dose not exists in this environment.";
-                    throw new KeyManagementException(errorMsg, e, ExceptionCodes.USER_DOES_NOT_EXIST);
+                    throw new APIManagementException(errorMsg, e, ExceptionCodes.USER_NOT_AUTHENTICATED);
                 }
             }
         } catch (KeyManagementException e) {
