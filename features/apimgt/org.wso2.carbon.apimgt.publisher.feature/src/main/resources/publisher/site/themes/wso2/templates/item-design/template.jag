@@ -88,10 +88,6 @@
                 <p><%=i18n.localize("You are editing an API with active subscribers. Tier Availability changes will not be reflected on active subscriptions.")%></p>
 		</div>
   <% }%>
-        <div class="message message-info" id="openAPISpec3Warning" style="display: none">
-                <h4><i class="icon fw fw-info"></i><%=i18n.localize("Info!")%></h4>
-                <p><%=i18n.localize("Client side SDK generation feature is currently not available for this API since the API definition is in OpenAPI 3.0 specification")%></p>
-		</div>
 
 		<div id="apiSaved" class="alert alert-success" role="alert" style="display:none">
 			<i class="icon fw fw-success fade out"></i>
@@ -445,8 +441,9 @@
 										</div>
 										<% } %>
 										</div>
-
-
+										 <div class="message message-info" id="openAPISpec3Warning" style="display: none">
+                                            <p><%=i18n.localize("Client side SDK generation feature is currently not available for APIs in OpenAPI 3.0 specification")%></p>
+		                                </div>
 										<hr/>
 										<%if(api!=null){%>
 											<input type = "hidden" name = "bizOwner" value = "<%=encode.forHtmlAttribute(api.bizOwner)%>" />
@@ -645,7 +642,11 @@
 				<td>{{ name }}</td>
 				<td><a class="param_desc" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="description" title="description">{{ description }}</a></td>
 				<td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="in" title="in">{{ in }}</a></td>
-				<td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type" title="type">{{ type }}</a></td>
+				{{#if ../isOpenAPI3}}
+				    <td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type" title="type">{{ schema.type }}</a></td>
+				{{else}}
+				    <td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type" title="type">{{ type }}</a></td>
+				{{/if}}
 				<td><a class="param_required" data-type="select" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}" title="required"></a></td>
 				<td align="center">
 					<a data-path-name="{{path}}" data-path="{{../resource_path}}.parameters[{{@index}}]" data-index="{{@index}}" class="delete_parameter" title="index">
@@ -681,13 +682,13 @@
         <table class="table table-condensed table-bordered" width="60%">
             <tr>
 				<th width="55%"><%=i18n.localize("Request Body Content Type")%></th>
-				<th width="40%"><%=i18n.localize("Data Type")%></th>
+				<th width="40%"><%=i18n.localize("Request Body Content")%></th>
 				<th width="5%"><%=i18n.localize("Delete")%></th>
 			</tr>
         		{{#each requestBody.content}}
 			<tr id="{{@key}}">
                 <td><a class="request_body_content_type" data-path="{{ ../resource_path}}.requestBody.content" data-index="{{@key}}" data-attr="content-type" title="Content Type">{{@key}}</a></td>
-                <td><a class="request_body_data_type" data-path="{{ ../resource_path}}.requestBody.content.{{@key}}" data-attr="type" title="Type">{{schema.type}}</a></td>
+                <td><a href="#" class="request_body_edit"></i><%=i18n.localize("Edit Source")%></a></td>
 				<td align="center">
 					<a data-path-name="{{path}}" data-path="{{../resource_path}}.requestBody.content" data-key="{{@key}}" class="delete_request_body_content" title="index">
 						<span class="fw-stack" style="font-size:10px">
@@ -843,7 +844,7 @@
         <tr><td colspan="4" class="resource_body" style="display:none" data-path="$.paths.['{{ path }}'].{{@key}}"></td></tr>
     {{/each}}
 {{/each}}
-</table>  
+</table>
 </div>                                       
 </script>
 

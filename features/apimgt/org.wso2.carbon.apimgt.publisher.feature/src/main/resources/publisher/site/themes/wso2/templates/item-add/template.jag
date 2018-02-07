@@ -147,10 +147,6 @@
 					        </div>
 					    </div>
 					    <div id="more-options-api-spec" style="display:none">
-					        <div class="message message-info" id="openAPISpec3Warning" style="display: none">
-                                <h4><i class="icon fw fw-info"></i><%=i18n.localize("Info!")%></h4>
-                                <p><%=i18n.localize("Client side SDK generation feature is currently not available for APIs in OpenAPI 3.0 specification")%></p>
-		                    </div>
 					        <div class="form-group">
 					            <label class="col-sm-2 control-label" style="text-align: left" for="apiDefVersion"><%=i18n.localize("Supported API Specification")%>:
 							        <a class="help_popup" help_data="api_spec_help" data-trigger="hover"  data-placement="bottom" title="api_spec_help">
@@ -164,7 +160,7 @@
 							    <div class="col-sm-2">
                                     <select class="select required form-control" id="apiDefinitionVersion" name="apiDefinitionVersion" >
                                         <option value="2.0" id="openapi2"><%=i18n.localize("OpenAPI 2")%></option>
-                                        <option value="3.0" id="openapi3"><%=i18n.localize("OpenAPI 3")%></option>
+                                        <option value="3.0.0" id="openapi3"><%=i18n.localize("OpenAPI 3")%></option>
                                     </select>
                                 </div>
                             </div>

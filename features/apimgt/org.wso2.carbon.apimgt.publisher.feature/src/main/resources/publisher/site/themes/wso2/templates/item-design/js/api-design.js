@@ -87,6 +87,7 @@ function APIDesigner(){
     this.api_doc = {};
     this.resources = [] ;
     this.apiLevelPolicy = {isAPILevel : false};
+    this.openAPIDefinition = {};
 
     this.container = $( "#api_designer" );
 
@@ -185,7 +186,7 @@ function APIDesigner(){
         var path = $("#resource_url_pattern").val();
         if(path.charAt(0) != "/")
             path = "/"+path;
-        
+
     	var resource_exist = false;
         $(".http_verb_select").each(function(){    //added this validation to fix https://wso2.org/jira/browse/APIMANAGER-2671
             if($(this).is(':checked')){
@@ -213,21 +214,8 @@ function APIDesigner(){
             if (m.index === re.lastIndex) {
                 re.lastIndex++;
             }
-            if (designer.is_openapi3()) {
-                parameters.push({
-                    name: m[0].replace("{", "").replace("}", ""),
-                    "in": "path",
-                    "required": true,
-                    "schema": {"type": "string"}
-                });
-            } else {
-                parameters.push({
-                    name: m[0].replace("{", "").replace("}", ""),
-                    "in": "path",
-                    "required": true,
-                    "type": "string"
-                });
-            }
+            var pathParamName = m[0].replace("{", "").replace("}", "");
+            parameters.push(designer.openAPIDefinition.get_parameter_definition(pathParamName, "path", true, "string"));
         }
 
         var vc=0;
@@ -243,40 +231,12 @@ function APIDesigner(){
                         resource[method] = {};
                     }
 
+                    if(tempPara.length > 0){
+                        resource[method].parameters = tempPara;
+                    }
+
                     if (method.toUpperCase() == "POST" || method.toUpperCase() == "PUT" || method.toUpperCase() == "PATCH") {
-                        if (designer.is_openapi3()) {
-                            var requestBody =
-                                {
-                                    "content": {
-                                        "application/json": {
-                                            "schema": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "payload": {"type": "string"}
-                                                }
-                                            }
-                                        }
-                                    },
-                                    "required": true,
-                                    "description": "Request Body"
-                                };
-                            resource[method].requestBody = requestBody;
-                        } else {
-                            tempPara.push({
-                                "name": "Payload",
-                                "description": "Request Body",
-                                "required": false,
-                                "in": "body",
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "payload": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            });
-                        }
+                        designer.openAPIDefinition.add_default_request_body(resource[method]);
                     }
                     resource[method].responses =
                         {
@@ -284,9 +244,6 @@ function APIDesigner(){
                                 "description": ""
                             }
                         };
-                    if(tempPara.length > 0){
-                       resource[method].parameters = tempPara;
-                    }
                     ic++
                 }
                 vc++;
@@ -421,35 +378,7 @@ APIDesigner.prototype.update_elements = function(resource, newValue){
     if ($(this).attr('data-attr-type') == "comma_seperated") {
         newValue = $.map(newValue.split(","), $.trim);
     }
-
-    if (API_DESIGNER.is_openapi3()) {
-        if (i != "body" && i != "formData" && i != "consumes" && i != "produces") {
-            if (i == "type") {
-                if(obj.schema == undefined) obj.schema = {};
-                obj.schema[i] = newValue;
-            } else if(i == "content-type"){
-                var key = $(this).attr('data-index');
-                obj[newValue] = obj[key];
-                delete obj[key];
-            }
-            else {
-                obj[i] = newValue;
-            }
-        }
-    } else {
-        obj[i] = newValue;
-        if (i == "in") {
-            //Add body parameter to the swagger
-            if (newValue == "body") {
-                delete obj.type;
-                obj['schema'] = swaggerSchema;
-            } else { //other parameters
-                delete obj.schema;
-                obj['type'] = "string";
-            }
-        }
-    }
-
+    API_DESIGNER.openAPIDefinition.update_element(this, obj, newValue);
     API_DESIGNER.load_swagger_editor_content();
 };
 
@@ -467,6 +396,7 @@ APIDesigner.prototype.update_elements_boolean = function(resource, newValue){
     }
     var i = $(this).attr('data-attr');
     obj[i] = newValue;
+    API_DESIGNER.load_swagger_editor_content();
 };
 
 APIDesigner.prototype.init_controllers = function(){
@@ -554,11 +484,9 @@ APIDesigner.prototype.init_controllers = function(){
         if(resource.parameters ==undefined){
             resource.parameters = [];
         }
-        if (API_DESIGNER.is_openapi3()) {
-            resource.parameters.push({ name : parameter , in : "query", required : false , schema :{type : "string"}});
-        } else {
-            resource.parameters.push({name: parameter, in: "query", required: false, type: "string"});
-        }
+
+        resource.parameters.push(API_DESIGNER.openAPIDefinition.get_parameter_definition(parameter, "query", true, "string"));
+
         //@todo need to checge parent.parent to stop code brak when template change.
         API_DESIGNER.load_swagger_editor_content();
         API_DESIGNER.render_resource(resource_body);
@@ -620,25 +548,18 @@ APIDesigner.prototype.init_controllers = function(){
         var operation = deleteDataArray[3];
         var contentTypeKey = API_DESIGNER.api_doc.paths[operations][operation]['requestBody']['content'][i];
 
-        jagg.message({content: i18n.t("Do you want to delete request body with content type") + '<strong>' + i + '</strong> ?',
+        jagg.message({content: i18n.t("Do you want to delete request body with content type ") + '<strong>' + i + '</strong> ?',
             type: 'confirm', title: i18n.t("Delete Request Body"),
             okCallback: function () {
                 API_DESIGNER = APIDesigner();
                 delete API_DESIGNER.api_doc.paths[operations][operation]['requestBody']['content'][i];
-                if(isEmpty(API_DESIGNER.api_doc.paths[operations][operation]['requestBody']['content'])){
-                    delete API_DESIGNER.api_doc.paths[operations][operation]['requestBody']['content'];
+                if($.isEmptyObject(API_DESIGNER.api_doc.paths[operations][operation]['requestBody']['content'])){
+                    delete API_DESIGNER.api_doc.paths[operations][operation]['requestBody'];
                 }
                 API_DESIGNER.render_resources();
             }});
 
-        function isEmpty(obj) {
-            for(var prop in obj) {
-                if(obj.hasOwnProperty(prop))
-                    return false;
-            }
 
-            return true;
-        }
     });
 
     this.container.delegate(".delete_scope","click", function(){
@@ -763,8 +684,10 @@ APIDesigner.prototype.load_api_document = function(api_document){
     this.api_doc = api_document;
     if(this.is_openapi3()){
         $('#openAPISpec3Warning').show();
+        this.openAPIDefinition = new OpenAPI3();
     } else{
         $('#openAPISpec3Warning').hide();
+        this.openAPIDefinition = new OpenAPI2();
     }
     this.load_swagger_editor_content();
     this.render_resources();
@@ -990,7 +913,7 @@ APIDesigner.prototype.render_resources = function(){
           '<button type="button" class="btn btn-secondary btn-sm editable-cancel">'+
             '<i class="fw fw-cancel"></i>'+
           '</button>';
-              this.load_swagger_editor_content();
+    this.load_swagger_editor_content();
 
 };
 
@@ -1081,43 +1004,13 @@ APIDesigner.prototype.render_resource = function(container){
         success : this.update_elements,
         mode: 'popup'
     });
-    if(isBodyRequired){
-        if(this.is_openapi3()){
 
-            container.find('.param_paramType').editable({
-                emptytext: '+ Set Param Type',
-                source: [{ value:"query", text:"query" },{ value:"header", text:"header" }],
-                success : this.update_elements,
-                mode: 'popup'
-            });
-        } else {
-            container.find('.param_paramType').editable({
-                emptytext: '+ Set Param Type',
-                source: [ { value:"body", text:"body" },{ value:"query", text:"query" },{ value:"header", text:"header" }, { value:"formData", text:"formData"} ],
-                success : this.update_elements,
-                mode: 'popup'
-            });
-        }
-    } else {
-        if(this.is_openapi3()){
-            container.find('.param_paramType').editable({
-                emptytext: '+ Set Param Type',
-                source: [{ value:"query", text:"query" },{ value:"header", text:"header" }],
-                success : this.update_elements,
-                mode: 'popup'
-            });
-        } else {
-            container.find('.param_paramType').editable({
-                emptytext: '+ Set Param Type',
-                source: [{value: "query", text: "query"}, {value: "header", text: "header"}, {
-                    value: "formData",
-                    text: "formData"
-                }],
-                success: this.update_elements,
-                mode: 'popup'
-            });
-        }
-    }
+    container.find('.param_paramType').editable({
+        emptytext: '+ Set Param Type',
+        source: this.openAPIDefinition.get_param_types(isBodyRequired),
+        success: this.update_elements,
+        mode: 'popup'
+    });
 
     if(this.is_openapi3()){
         container.find('.request_body_content_type').editable({
@@ -1126,11 +1019,9 @@ APIDesigner.prototype.render_resource = function(container){
             success : this.update_elements,
             mode: 'popup'
         });
-        container.find('.request_body_data_type').editable({
-            emptytext: '+ Set Request Body Data Type',
-            success : this.update_elements,
-            mode: 'popup'
-        });
+
+        $(".request_body_edit").click(this.edit_swagger);
+
         container.find('.request_body_desc').editable({
             emptytext: '+ Empty',
             success : this.update_elements,
@@ -1156,6 +1047,7 @@ APIDesigner.prototype.render_resource = function(container){
         success : this.update_elements,
         mode: 'popup'
     });
+
     container.find('.param_required').editable({
         emptytext: '+ Empty',
         autotext: "always",
