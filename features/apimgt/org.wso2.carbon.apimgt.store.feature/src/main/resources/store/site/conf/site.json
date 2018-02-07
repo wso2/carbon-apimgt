@@ -37,6 +37,8 @@
     "tokenEndpointURI" : "http://localhost:8080/openid-connect-server-webapp/token",
     "userInfoURI" : "http://localhost:8080/openid-connect-server-webapp/userinfo",
     "jwksURI" : "http://localhost:8080/openid-connect-server-webapp/jwk",
+    "logoutEndpointURI" : "http://localhost:8080/openid-connect-server-webapp/logout",
+    "authHttpMethod": "POST",
     "clientConfiguration" : {
       "clientId" : "client_am_store",
       "clientSecret" : "secret",
@@ -44,6 +46,7 @@
       "authorizationType" : "authorization_code",
       "scope" : "phone email address openid profile",
       "redirectURI" : "https://localhost:9443/store/jagg/jaggery_oidc_acs.jag",
+      "postLogoutRedirectURI" : "https://localhost:9443/store/",
       "clientAlgorithm" : "RS256"
     }
   },
