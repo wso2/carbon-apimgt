@@ -1909,6 +1909,69 @@ paths:
             $ref: '#/definitions/Error'
 
 ######################################################
+# Import Application Resource API
+######################################################
+  /import/applications:
+
+    post:
+      x-scope: apim:app_import_export
+      consumes:
+        - multipart/form-data
+      x-wso2-curl: "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/store/v0.11/import/applications"
+      x-wso2-request: |
+        POST https://localhost:9443/api/am/store/v0.11/import/applications
+        Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8
+      x-wso2-response: "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/store/v0.11/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\nContent-Type: application/json\n\n{\n   \"groupId\": null,\n   \"callbackUrl\": \"http://my.server.com/callback\",\n   \"subscriber\": \"admin\",\n   \"throttlingTier\": \"Unlimited\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"description\": \"sample app description\",\n   \"status\": \"APPROVED\",\n   \"name\": \"sampleapp\",\n   \"keys\": []\n}"
+      summary: Import an Application
+      description: |
+        This operation can be used to import an existing Application.
+      parameters:
+        - name: file
+          in: formData
+          description: |
+            Zip archive consisting of exported Application Configuration.
+          required: true
+          type: file
+        - name: preserveOwner
+          in: query
+          description: |
+            Preserve Original Creator of the Application
+          required: false
+          type: boolean
+        - name: skipSubscriptions
+          in: query
+          description: |
+            Skip importing Subscriptions of the Application
+          required: false
+          type: boolean
+      tags:
+        - Application (Individual)
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with the updated object as entity in the body.
+          schema:
+            $ref: '#/definitions/ApplicationInfo'
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              type: string
+        400:
+          description: |
+            Bad Request.
+            Invalid request or validation error
+          schema:
+            $ref: '#/definitions/Error'
+        406:
+          description: |
+            Not Acceptable.
+            The requested media type is not supported
+          schema:
+            $ref: '#/definitions/Error'
+
+######################################################
 # Parameters - required by some of the APIs above
 ######################################################
 parameters:
