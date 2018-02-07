@@ -34,7 +34,6 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.utils.APIGatewayAdminClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.EndpointAdminClient;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
@@ -96,10 +95,8 @@ public class APIGatewayManager {
                 continue;
             }
             APIGatewayAdminClient client;
-            EndpointAdminClient endpointClient;
             try {
                 client = new APIGatewayAdminClient(api.getId(), environment);
-                endpointClient = new EndpointAdminClient(api.getId(), environment);
 			String operation;
 			// If the API exists in the Gateway
 			if (client.getApi(tenantDomain, api.getId()) != null) {
@@ -138,7 +135,6 @@ public class APIGatewayManager {
                         client.updateApiForInlineScript(builder, tenantDomain, api.getId());
                     }else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)){
                         client.updateApi(builder, tenantDomain, api.getId());
-                        endpointClient.saveEndpoint(api, builder);
                     }
 
                     if(api.isDefaultVersion() || api.isPublishedDefaultVersion()){//api.isPublishedDefaultVersion() check is used to detect and update when context etc. is changed in the api which is not the default version but has a published default api
@@ -180,7 +176,6 @@ public class APIGatewayManager {
                         } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT
                                 .equalsIgnoreCase(api.getImplementation())) {
                             client.addApi(builder, tenantDomain, api.getId());
-                            endpointClient.addEndpoint(api, builder);
                         }
 
                         if (api.isDefaultVersion()) {
@@ -249,14 +244,12 @@ public class APIGatewayManager {
                     }
 
                     APIGatewayAdminClient client = new APIGatewayAdminClient(api.getId(), environment);
-                    EndpointAdminClient endpointClient = new EndpointAdminClient(api.getId(), environment);
                     if(!APIConstants.APIType.WS.toString().equals(api.getType())) {
                         if (client.getApi(tenantDomain, api.getId()) != null) {
                             if (debugEnabled) {
                                 log.debug("Removing API " + api.getId().getApiName() + " From environment " +
                                         environment.getName());
                             }
-                            endpointClient.deleteEndpoint(api);
                             client.deleteApi(tenantDomain, api.getId());
                             undeployCustomSequences(api, tenantDomain, environment);
                         }
