@@ -76,7 +76,12 @@ public class RestApiUtil {
      * @return The current logged in user's username or null if user is not logged in.
      */
     public static String getLoggedInUsername(Request request) {
-        return request.getProperty(LOGGED_IN_USER) != null ? request.getProperty(LOGGED_IN_USER).toString() : null;
+        //First retrieve real user name(display name) from message request.
+        //If we decided to change this to ID then still flow will work without issue.
+        String user =
+                request.getProperty(LOGGED_IN_USER) != null ? request.getProperty(LOGGED_IN_USER).toString() : null;
+        //Then get relevant pseudo name from local mapping.
+        return APIManagerFactory.getInstance().getUserNameMapper().getLoggedInPseudoNameFromUserID(user);
     }
 
     /**
