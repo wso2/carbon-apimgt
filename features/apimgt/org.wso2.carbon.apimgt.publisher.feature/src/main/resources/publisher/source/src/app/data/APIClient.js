@@ -40,6 +40,7 @@ class APIClient {
             }
         };
 
+        SwaggerClient.http.withCredentials = true;
         let promisedResolve = SwaggerClient.resolve({ url: Utils.getSwaggerURL() });
         APIClient.spec = promisedResolve;
         this._client = promisedResolve.then(
@@ -50,11 +51,8 @@ class APIClient {
                     requestInterceptor: this._getRequestInterceptor(),
                     responseInterceptor: this._getResponseInterceptor()
                 });
-                let swaggerClient = new SwaggerClient(argsv);
-                swaggerClient.then(client => {
-                    client.http.withCredentials = true
-                });
-                return swaggerClient;
+                SwaggerClient.http.withCredentials = true;
+                return new SwaggerClient(argsv);
             }
         );
         this._client.catch(AuthManager.unauthorizedErrorHandler);
@@ -94,6 +92,7 @@ class APIClient {
      */
     static getScopeForResource(resourcePath, resourceMethod) {
         if (!APIClient.spec) {
+            SwaggerClient.http.withCredentials = true;
             APIClient.spec = SwaggerClient.resolve({ url: Utils.getSwaggerURL() });
         }
         return APIClient.spec.then(

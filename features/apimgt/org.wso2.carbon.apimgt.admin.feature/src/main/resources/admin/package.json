@@ -33,7 +33,7 @@
     "react-router-dom": "^4.1.1",
     "react-tap-event-plugin": "^2.0.1",
     "react-toastify": "^1.7.0",
-    "swagger-client": "git://github.com/RenukaFernando/swagger-js.git"
+    "swagger-client": "3.4.8"
   },
   "devDependencies": {
     "babel-core": "^6.24.1",
