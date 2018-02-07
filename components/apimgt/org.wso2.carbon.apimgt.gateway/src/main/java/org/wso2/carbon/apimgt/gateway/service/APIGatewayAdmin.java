@@ -6,6 +6,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceClient;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -268,6 +269,29 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
     }
 
+    public boolean addEndpoint(String endpointData) throws AxisFault {
+        EndpointAdminServiceClient endpointAdminServiceClient = getEndpointAdminServiceClient();
+        return endpointAdminServiceClient.addEndpoint(endpointData);
+    }
+
+    public boolean addEndpointForTenant(String endpointData, String tenantDomain) throws AxisFault {
+        EndpointAdminServiceClient endpointAdminServiceClient = getEndpointAdminServiceClient();
+        return endpointAdminServiceClient.addEndpoint(endpointData, tenantDomain);
+    }
+
+    public boolean deleteEndpoint(String endpointName) throws AxisFault {
+        EndpointAdminServiceClient endpointAdminServiceClient = getEndpointAdminServiceClient();
+        return endpointAdminServiceClient.deleteEndpoint(endpointName);
+    }
+
+    public boolean deleteEndpointForTenant(String endpointName, String tenantDomain) throws AxisFault {
+        EndpointAdminServiceClient endpointAdminServiceClient = getEndpointAdminServiceClient();
+        return endpointAdminServiceClient.deleteEndpoint(endpointName, tenantDomain);
+    }
+
+    protected EndpointAdminServiceClient getEndpointAdminServiceClient() throws AxisFault {
+        return new EndpointAdminServiceClient();
+    }
 
     /**
      * Deploy the sequence to the gateway

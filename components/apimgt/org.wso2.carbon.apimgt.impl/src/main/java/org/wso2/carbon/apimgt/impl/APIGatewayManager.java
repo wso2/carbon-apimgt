@@ -176,6 +176,7 @@ public class APIGatewayManager {
                         } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT
                                 .equalsIgnoreCase(api.getImplementation())) {
                             client.addApi(builder, tenantDomain, api.getId());
+                            client.addEndpoint(api, builder, tenantDomain);
                         }
 
                         if (api.isDefaultVersion()) {
@@ -250,6 +251,7 @@ public class APIGatewayManager {
                                 log.debug("Removing API " + api.getId().getApiName() + " From environment " +
                                         environment.getName());
                             }
+                            client.deleteEndpoint(api, tenantDomain);
                             client.deleteApi(tenantDomain, api.getId());
                             undeployCustomSequences(api, tenantDomain, environment);
                         }

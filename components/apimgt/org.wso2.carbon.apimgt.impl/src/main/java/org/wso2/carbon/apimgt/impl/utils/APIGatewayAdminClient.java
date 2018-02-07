@@ -4,6 +4,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -26,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 
 public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
 
@@ -262,6 +264,54 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         } catch (Exception e) {
             throw new AxisFault("Error while deleting default API from the gateway. " + e.getMessage(), e);
         }
+    }
+
+    public void addEndpoint(API api, APITemplateBuilder builder, String tenantDomain) throws AxisFault {
+        try {
+            ArrayList<String> arrayList = getEndpointType(api);
+            for (String type : arrayList) {
+                String endpointConfigContext = builder.getConfigStringForEndpointTemplate(type);
+                if (tenantDomain != null && !("").equals(tenantDomain)
+                        && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    apiGatewayAdminStub.addEndpointForTenant(endpointConfigContext, tenantDomain);
+                } else {
+                    apiGatewayAdminStub.addEndpoint(endpointConfigContext);
+                }
+            }
+        } catch (Exception e) {
+            throw new AxisFault("Error while generating Endpoint file in Gateway " + e.getMessage(), e);
+        }
+    }
+
+    public void deleteEndpoint(API api, String tenantDomain) throws AxisFault {
+        try {
+            String endpointName = api.getId().getApiName() + "--" + api.getId().getVersion();
+            ArrayList<String> arrayList = getEndpointType(api);
+            for (String type : arrayList) {
+                String t = type.replace("_endpoints", "");
+                if (tenantDomain != null && !("").equals(tenantDomain)
+                        && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                    apiGatewayAdminStub.deleteEndpointForTenant(endpointName + "_API" + t + "Endpoint", tenantDomain);
+                } else {
+                    apiGatewayAdminStub.deleteEndpoint(endpointName + "_API" + t + "Endpoint");
+                }
+            }
+        } catch (Exception e) {
+            throw new AxisFault("Error while deleting Endpoint from the gateway. " + e.getMessage(), e);
+        }
+    }
+
+    private ArrayList<String> getEndpointType(API api) throws ParseException {
+        ArrayList<String> arrayList = new ArrayList<>();
+        if (APIUtil.isProductionEndpointsExists(api) && !APIUtil.isSandboxEndpointsExists(api)) {
+            arrayList.add(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);
+        } else if (APIUtil.isSandboxEndpointsExists(api) && !APIUtil.isProductionEndpointsExists(api)) {
+            arrayList.add(APIConstants.API_DATA_SANDBOX_ENDPOINTS);
+        } else {
+            arrayList.add(APIConstants.API_DATA_PRODUCTION_ENDPOINTS);
+            arrayList.add(APIConstants.API_DATA_SANDBOX_ENDPOINTS);
+        }
+        return arrayList;
     }
 
     /**
