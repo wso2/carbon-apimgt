@@ -34,7 +34,6 @@ import Checkbox from 'material-ui/Checkbox';
 import { withStyles } from 'material-ui/styles';
 import PropTypes from 'prop-types';
 import Divider from 'material-ui/Divider';
-import projectDate from './ProjectData';
 import { LinearProgress } from 'material-ui/Progress';
 import Chip from 'material-ui/Chip';
 import List, {
