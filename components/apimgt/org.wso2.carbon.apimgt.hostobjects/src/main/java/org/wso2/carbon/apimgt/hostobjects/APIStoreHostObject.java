@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jaggeryjs.scriptengine.exceptions.ScriptException;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
@@ -1864,6 +1865,18 @@ public class APIStoreHostObject extends ScriptableObject {
                 }
 
                 api = apiConsumer.getAPI(apiIdentifier);
+                String apiDefinition = apiConsumer.getOpenAPIDefinition(apiIdentifier);
+
+                boolean isOpenAPI3APIDefinition = false;
+                if (!apiDefinition.isEmpty()) {
+                    JSONParser parser = new JSONParser();
+                    JSONObject apiDefinitionJson = (JSONObject) parser.parse(apiDefinition);
+                    if (apiDefinitionJson.get(APIConstants.OPEN_API) != null && APIConstants.OPEN_API_V3
+                            .equals(apiDefinitionJson.get(APIConstants.OPEN_API).toString())) {
+                        isOpenAPI3APIDefinition = true;
+                    }
+                }
+
                 if (username != null) {
                     isSubscribed = apiConsumer.isSubscribed(apiIdentifier, username);
                 }
@@ -1887,6 +1900,7 @@ public class APIStoreHostObject extends ScriptableObject {
                         row.put("updatedDate", row, dateFormatted);
                         row.put("context", row, api.getContext());
                         row.put("status", row, api.getStatus().getStatus());
+                        row.put("isOpenAPI3APIDefinition", row, isOpenAPI3APIDefinition);
 
                         String user = getUsernameFromObject(thisObj);
                         if (user != null) {
@@ -2028,6 +2042,8 @@ public class APIStoreHostObject extends ScriptableObject {
             } catch (APIManagementException e) {
                 handleException("Error from Registry API while getting get API Information on " + apiName, e);
 
+            } catch (ParseException e) {
+                handleException("Error occurred while parsing the OpenAPI definition of " + apiName, e);
             } catch (Exception e) {
                 handleException(e.getMessage(), e);
             } finally {

@@ -54,7 +54,7 @@ import org.wso2.carbon.apimgt.api.model.Wsdl;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -110,7 +110,7 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.UN_AUTHORIZED_ERROR_MESSA
 public abstract class AbstractAPIManager implements APIManager {
 
     // API definitions from swagger v2.0
-    protected static final APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
+    protected static final APIDefinition definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
     protected Log log = LogFactory.getLog(getClass());
     protected Registry registry;
     protected UserRegistry configRegistry;
@@ -1086,7 +1086,7 @@ public abstract class AbstractAPIManager implements APIManager {
      * @throws APIManagementException
      */
     @Override
-    public String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException {
+    public String getOpenAPIDefinition(APIIdentifier apiId) throws APIManagementException {
         String apiTenantDomain = getTenantDomain(apiId);
         String swaggerDoc = null;
         try {
@@ -1100,7 +1100,7 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 registryType = registry;
             }
-            swaggerDoc = definitionFromSwagger20.getAPIDefinition(apiId, registryType);
+            swaggerDoc = definitionFromOpenAPISpec.getAPIDefinition(apiId, registryType);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             String msg = "Failed to get swagger documentation of API : " + apiId;
             log.error(msg, e);
@@ -2496,7 +2496,7 @@ public abstract class AbstractAPIManager implements APIManager {
             } else {
                 registryType = registry;
             }
-            return definitionFromSwagger20.getAPISwaggerDefinitionTimeStamps(apiIdentifier, registryType);
+            return definitionFromOpenAPISpec.getAPIOpenAPIDefinitionTimeStamps(apiIdentifier, registryType);
         } catch (org.wso2.carbon.user.api.UserStoreException e) {
             log.error("Error while getting the lastUpdated time due to " + e.getMessage(), e);
 

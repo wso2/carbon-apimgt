@@ -92,7 +92,7 @@ public class APIMappingUtil {
         //Get Swagger definition which has URL templates, scopes and resource details
         String apiSwaggerDefinition;
 
-        apiSwaggerDefinition = apiConsumer.getSwagger20Definition(model.getId());
+        apiSwaggerDefinition = apiConsumer.getOpenAPIDefinition(model.getId());
         apiSwaggerDefinition = RestAPIStoreUtils.removeXMediationScriptsFromSwagger(apiSwaggerDefinition);
         dto.setApiDefinition(apiSwaggerDefinition);
 

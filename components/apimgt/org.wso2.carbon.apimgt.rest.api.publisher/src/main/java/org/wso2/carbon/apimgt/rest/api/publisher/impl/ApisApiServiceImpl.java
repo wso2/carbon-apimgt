@@ -49,7 +49,7 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.ApisApiService;
@@ -1289,7 +1289,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromApiIdOrUUID(apiId, tenantDomain);
-            String apiSwagger = apiProvider.getSwagger20Definition(apiIdentifier);
+            String apiSwagger = apiProvider.getOpenAPIDefinition(apiIdentifier);
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
@@ -1381,14 +1381,14 @@ public class ApisApiServiceImpl extends ApisApiService {
 
             //Creating URI templates due to available uri templates in returned api object only kept single template
             //for multiple http methods
-            String apiSwaggerDefinition = apiProvider.getSwagger20Definition(api.getId());
+            String apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(api.getId());
             if (!StringUtils.isEmpty(apiSwaggerDefinition)) {
-                APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
-                Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(api, apiSwaggerDefinition);
+                APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
+                Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(api, apiSwaggerDefinition);
                 api.setUriTemplates(uriTemplates);
 
                 // scopes
-                Set<Scope> scopes = definitionFromSwagger20.getScopes(apiSwaggerDefinition);
+                Set<Scope> scopes = apiDefinitionFromOpenAPISpec.getScopes(apiSwaggerDefinition);
                 api.setScopes(scopes);
             }
 
@@ -1529,13 +1529,13 @@ public class ApisApiServiceImpl extends ApisApiService {
     public Response apisApiIdSwaggerPut(String apiId, String apiDefinition, String contentType, String ifMatch,
                                         String ifUnmodifiedSince) {
         try {
-            APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
+            APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
             APIProvider apiProvider = RestApiUtil.getLoggedInUserProvider();
             String tenantDomain = RestApiUtil.getLoggedInUserTenantDomain();
             //this will fail if user does not have access to the API or the API does not exist
             API existingAPI = APIMappingUtil.getAPIFromApiIdOrUUID(apiId, tenantDomain);
-            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(existingAPI, apiDefinition);
-            Set<Scope> scopes = definitionFromSwagger20.getScopes(apiDefinition);
+            Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(existingAPI, apiDefinition);
+            Set<Scope> scopes = apiDefinitionFromOpenAPISpec.getScopes(apiDefinition);
             existingAPI.setUriTemplates(uriTemplates);
             existingAPI.setScopes(scopes);
 
@@ -1543,7 +1543,7 @@ public class ApisApiServiceImpl extends ApisApiService {
             apiProvider.updateAPI(existingAPI);
             apiProvider.saveSwagger20Definition(existingAPI.getId(), apiDefinition);
             //retrieves the updated swagger definition
-            String apiSwagger = apiProvider.getSwagger20Definition(existingAPI.getId());
+            String apiSwagger = apiProvider.getOpenAPIDefinition(existingAPI.getId());
             return Response.ok().entity(apiSwagger).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need

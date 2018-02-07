@@ -26,12 +26,9 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
 
 import java.io.InputStream;
 import java.util.*;
-
-import static org.wso2.carbon.apimgt.impl.APIConstants.UN_AUTHORIZED_ERROR_MESSAGE;
 
 /**
  * User aware APIProvider implementation which ensures that the invoking user has the
@@ -205,9 +202,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public String getSwagger20Definition(APIIdentifier apiId) throws APIManagementException {
+    public String getOpenAPIDefinition(APIIdentifier apiId) throws APIManagementException {
         checkAccessControlPermission(apiId);
-        return super.getSwagger20Definition(apiId);
+        return super.getOpenAPIDefinition(apiId);
     }
 
     @Override

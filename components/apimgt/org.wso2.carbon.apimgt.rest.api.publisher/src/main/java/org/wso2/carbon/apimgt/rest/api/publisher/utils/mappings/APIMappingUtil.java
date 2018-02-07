@@ -33,7 +33,7 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.dto.APIBusinessInformationDTO;
@@ -235,7 +235,7 @@ public class APIMappingUtil {
         //Get Swagger definition which has URL templates, scopes and resource details
         String apiSwaggerDefinition;
 
-        apiSwaggerDefinition = apiProvider.getSwagger20Definition(model.getId());
+        apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getId());
 
         dto.setApiDefinition(apiSwaggerDefinition);
 
@@ -368,7 +368,7 @@ public class APIMappingUtil {
 
     public static API fromDTOtoAPI(APIDTO dto, String provider) throws APIManagementException {
 
-        APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
+        APIDefinition apiDefinitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
 
         String providerEmailDomainReplaced = APIUtil.replaceEmailDomain(provider);
 
@@ -442,11 +442,11 @@ public class APIMappingUtil {
         if (dto.getApiDefinition() != null) {
             String apiSwaggerDefinition = dto.getApiDefinition();
             //URI Templates
-            Set<URITemplate> uriTemplates = definitionFromSwagger20.getURITemplates(model, apiSwaggerDefinition);
+            Set<URITemplate> uriTemplates = apiDefinitionFromOpenAPISpec.getURITemplates(model, apiSwaggerDefinition);
             model.setUriTemplates(uriTemplates);
 
             // scopes
-            Set<Scope> scopes = definitionFromSwagger20.getScopes(apiSwaggerDefinition);
+            Set<Scope> scopes = apiDefinitionFromOpenAPISpec.getScopes(apiSwaggerDefinition);
             model.setScopes(scopes);
 
         }

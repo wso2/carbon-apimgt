@@ -34,7 +34,7 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.soaptorest.model.WSDLSOAPOperation;
 import org.wso2.carbon.apimgt.impl.soaptorest.template.RESTToSOAPMsgTemplate;
@@ -75,7 +75,7 @@ import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 public class SequenceGenerator {
     private static final Logger log = LoggerFactory.getLogger(SequenceGenerator.class);
 
-    private static APIDefinition definitionFromSwagger20 = new APIDefinitionFromSwagger20();
+    private static APIDefinition definitionFromOpenAPISpec = new APIDefinitionFromOpenAPISpec();
 
     /**
      * generates api in/out sequences from the swagger to soap definitions
@@ -121,7 +121,7 @@ public class SequenceGenerator {
                 APIUtil.loadTenantRegistry(tenantId);
                 registry = registryService.getGovernanceSystemRegistry(tenantId);
 
-                apiJSON = (JSONObject) parser.parse(definitionFromSwagger20.getAPIDefinition(apiId, registry));
+                apiJSON = (JSONObject) parser.parse(definitionFromOpenAPISpec.getAPIDefinition(apiId, registry));
 
                 ObjectMapper mapper = new ObjectMapper()
                         .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);

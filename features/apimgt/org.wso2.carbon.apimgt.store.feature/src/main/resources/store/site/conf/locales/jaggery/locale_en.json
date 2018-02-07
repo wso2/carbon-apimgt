@@ -337,5 +337,8 @@
     "subscription": "subscription",
     "subscriptionStatus": "subscriptionStatus",
     "tenants": "Visible to Tenants",
-    "timeWarn": "timeWarn"
+    "timeWarn": "timeWarn",
+    "Info!": "Info!",
+    "Client side SDK generation feature is currently not available for this API since the API definition is in OpenAPI 3.0 specification" : "Client side SDK generation feature is currently not available for this API since the API definition is in OpenAPI 3.0 specification",
+
 }
