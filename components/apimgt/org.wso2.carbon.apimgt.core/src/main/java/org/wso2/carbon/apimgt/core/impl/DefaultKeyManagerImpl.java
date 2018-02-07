@@ -102,8 +102,10 @@ public class DefaultKeyManagerImpl implements KeyManager {
             Map<String, Object> payload = new HashMap<>();
             payload.put(KeyManagerConstants.OAUTH_CLIENT_NAME, applicationName);
             payload.put("grant_types", dcrClientInfo.getGrantTypes());
-            String callbackURIs[] = { oauthAppRequest.getCallBackURL() };
-            payload.put("redirect_uris", callbackURIs);
+            if (!StringUtils.isBlank(oauthAppRequest.getCallBackURL())) {
+                String callbackURIs[] = { oauthAppRequest.getCallBackURL() };
+                payload.put("redirect_uris", callbackURIs);
+            }
             Gson gson = new Gson();
             String jsonPayload = gson.toJson(payload);
             httpResponse = restCallUtil
