@@ -34,6 +34,10 @@ import Checkbox from 'material-ui/Checkbox';
 import { withStyles } from 'material-ui/styles';
 import PropTypes from 'prop-types';
 import Divider from 'material-ui/Divider';
+<<<<<<< HEAD
+=======
+import projectDate from './ProjectData';
+>>>>>>> 6479ab26681e732f5125f7b85f58c96e8632053c
 import { LinearProgress } from 'material-ui/Progress';
 import Chip from 'material-ui/Chip';
 import List, {
@@ -583,4 +587,8 @@ Resources.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
+<<<<<<< HEAD
 export default withStyles(styles)(Resources);
+=======
+export default withStyles(styles)(Resources);
+>>>>>>> 6479ab26681e732f5125f7b85f58c96e8632053c
