@@ -16,8 +16,7 @@ var openapi3_api_doc = {
     }
 };
 
-var supportedSwaggerVersion = "2.0";
-var supportedOpenAPI3Version = "3.0.0";
+const supportedOpenAPI3Version = "3.0.0";
 
 var isSoapView=false;
 

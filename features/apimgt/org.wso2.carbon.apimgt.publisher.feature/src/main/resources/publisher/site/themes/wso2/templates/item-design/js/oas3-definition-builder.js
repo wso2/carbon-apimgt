@@ -39,9 +39,9 @@ OpenAPI3.prototype.update_element = function (element, obj, newValue) {
     var i = $(element).attr('data-attr');
     if (i != "body" && i != "formData" && i != "consumes" && i != "produces") {
         if (i == "type") {
-            if(obj.schema == undefined) obj.schema = {};
+            if (obj.schema == undefined) obj.schema = {};
             obj.schema[i] = newValue;
-        } else if(i == "content-type"){
+        } else if (i == "content-type") {
             var key = $(element).attr('data-index');
             obj[newValue] = obj[key];
             delete obj[key];

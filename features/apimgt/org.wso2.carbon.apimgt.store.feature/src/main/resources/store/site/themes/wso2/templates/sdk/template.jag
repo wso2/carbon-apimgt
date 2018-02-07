@@ -4,7 +4,7 @@
             <% var supportedLangs = jagg.module("sdk").getSupportedLanguages();
                 var langsArray = supportedLangs.langs.split(",");
                 var user = jagg.getUser();
-                if(inputs.api.isOpenAPI3APIDefinition){
+                if (inputs.api.isOpenAPI3APIDefinition) {
                     %>
                    <div class="message message-info">
                             <h4><i class="icon fw fw-info"></i><%=i18n.localize("Info!")%></h4>

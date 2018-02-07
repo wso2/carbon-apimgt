@@ -42,7 +42,7 @@ OpenAPI2.prototype.get_param_types = function (isBodyRequired) {
         return [
             {value: "query", text: "query"},
             {value: "header", text: "header"},
-            {value: "formData",text: "formData"}];
+            {value: "formData", text: "formData"}];
     }
 }
 

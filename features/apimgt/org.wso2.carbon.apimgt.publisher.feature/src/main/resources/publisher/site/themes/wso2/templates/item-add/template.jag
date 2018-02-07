@@ -159,8 +159,8 @@
 							    </label>
 							    <div class="col-sm-2">
                                     <select class="select required form-control" id="apiDefinitionVersion" name="apiDefinitionVersion" >
-                                        <option value="2.0" id="openapi2"><%=i18n.localize("OpenAPI 2")%></option>
-                                        <option value="3.0.0" id="openapi3"><%=i18n.localize("OpenAPI 3")%></option>
+                                        <option value="2.0" id="openapi2"><%=i18n.localize("OpenAPI 2.0")%></option>
+                                        <option value="3.0.0" id="openapi3"><%=i18n.localize("OpenAPI 3.0")%></option>
                                     </select>
                                 </div>
                             </div>

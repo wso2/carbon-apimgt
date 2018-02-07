@@ -926,9 +926,9 @@
                 });
         <% }
             var apiDefinitionVersion = session.get("apiDefinitionVersion");
-            if(apiDefinitionVersion){
+            if (apiDefinitionVersion) {
                 %>
-              $.get( jagg.site.context + "/site/blocks/item-design/ajax/add.jag", { "action" : "getAPIDefinitionVersion"} , function( data ) {
+              $.get(jagg.site.context + "/site/blocks/item-design/ajax/add.jag", { "action" : "getAPIDefinitionVersion"}, function( data ) {
                     if(data != null && data != ""){
                         var apiDefinitionVersion = data;
                         var designer = APIDesigner();

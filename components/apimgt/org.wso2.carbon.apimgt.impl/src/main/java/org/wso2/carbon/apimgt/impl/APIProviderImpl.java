@@ -2161,8 +2161,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             //Copy Swagger 2.0 resources for New version. 
             String resourcePath = APIUtil.getOpenAPIDefinitionFilePath(api.getId().getApiName(),
-                    api.getId().getVersion(),
-                    api.getId().getProviderName());
+                    api.getId().getVersion(), api.getId().getProviderName());
             if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
                 JSONObject swaggerObject = (JSONObject) new JSONParser()
                         .parse(definitionFromOpenAPISpec.getAPIDefinition(api.getId(), registry));
