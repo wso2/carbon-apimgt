@@ -37,6 +37,7 @@ import Table, {TableBody, TableCell, TableRow} from 'material-ui/Table';
 import blueGrey from 'material-ui/colors/blueGrey';
 import {Delete, Edit, CreateNewFolder, Description}from 'material-ui-icons';
 import Slide from "material-ui/transitions/Slide";
+import Utils from "../../../data/Utils";
 
 class Overview extends Component {
     constructor(props) {
@@ -217,8 +218,10 @@ class Overview extends Component {
                             {api.lifeCycleStatus}
 
                             <Button dense color="primary">
-                                <a href={"/store/apis/" + this.api_uuid} target="_blank" title="Store">View in
-                                    store</a>
+                                <a href={`/store/apis/${this.api_uuid}/overview?environment=${Utils.getEnvironment().label}`}
+                                   target="_blank" title="Store">
+                                    View in store
+                                </a>
                             </Button>
                         </CardActions>
                     </Card>

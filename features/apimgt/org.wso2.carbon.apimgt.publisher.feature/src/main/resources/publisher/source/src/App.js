@@ -25,11 +25,11 @@ import {PageNotFound} from './app/components/Base/Errors'
 import AuthManager from './app/data/AuthManager'
 import qs from 'qs'
 import Axios from 'axios';
-import LoadingAnimation from './app/components/Base/Loading/Loading.js';
 import {getAsyncComponent} from 'async-react-component';
 import 'antd/dist/antd.css'
 import './App.css'
 import Utils from "./app/data/Utils";
+import ConfigManager from "./app/data/ConfigManager";
 
 
 const Apis = () => import(/* webpackChunkName: "apis" */ './app/components/Apis/Apis');
@@ -48,25 +48,18 @@ class Protected extends Component {
         super(props);
         this.state = {
             showLeftMenu: false,
-            authConfigs: null
+            authConfigs: null,
+            environments: [],
         };
+        this.environmentName = "";
     }
 
-    handleResponse = (response) => {
-        this.setState({
-            authConfigs: response.data.members
+    componentDidMount() {
+        ConfigManager.getConfigs().environments.then(response => {
+            const environments = response.data.environments;
+            this.setState({environments});
         });
-    };
-
-    /**
-     * Handle invalid login url in localStorage - environment object
-     * @param reject
-     */
-    handleReject = reject => {
-        console.log("Error: Single Sign On:\n", reject);
-        Utils.setEnvironment(); //Set Default environment
-        Axios.get(Utils.getAppLoginURL()).then(this.handleResponse); //Try login
-    };
+    }
 
     /**
      * Change the visibility state of left side navigation menu bar
@@ -78,10 +71,39 @@ class Protected extends Component {
         });
     }
 
+    /**
+     * Change the environment with "environment" query parameter
+     */
+    handleEnvironmentQueryParam() {
+        let queryString = this.props.location.search;
+        queryString = queryString.replace(/^\?/, '');
+        /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
+        let queryParams = qs.parse(queryString);
+        const environmentName = queryParams.environment;
+
+        if (!environmentName || this.environmentName === environmentName) {
+            // no environment query param or the same environment
+            return;
+        }
+
+        let environmentId = Utils.getEnvironmentID(this.state.environments, environmentName);
+        if (environmentId === -1) {
+            console.error("Invalid environment name in environment query parameter.");
+            return;
+        }
+
+        let environment = this.state.environments[environmentId];
+        Utils.setEnvironment(environment);
+        this.environmentName = environmentName;
+    }
+
     render() {
+        this.handleEnvironmentQueryParam();
         // Note: AuthManager.getUser() method is a passive check, which simply check the user availability in browser storage,
         // Not actively check validity of access token from backend
-        if (AuthManager.getUser()) {
+        const {environment} = this.state;
+        let user = environment ? AuthManager.getUser(environment) : AuthManager.getUser();
+        if (user) {
             return (
                 <BaseLayout>
                     <Switch>

@@ -67,7 +67,10 @@ class Login extends Component {
         //Get Environments and SSO data
         ConfigManager.getConfigs().environments.then(response => {
             const environments = response.data.environments;
-            const environmentId = Utils.getEnvironmentID(environments);
+            let environmentId = Utils.getEnvironmentID(environments);
+            if (environmentId === -1) {
+                environmentId = 0;
+            }
             this.setState({environments, environmentId});
 
             // Update environment to discard default environment configuration

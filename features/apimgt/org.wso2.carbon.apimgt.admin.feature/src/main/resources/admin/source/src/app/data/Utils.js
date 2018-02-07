@@ -108,18 +108,21 @@ class Utils {
 
     /**
      * Get current environment's index from the given environment array
-     * @param {array} environments
+     * @param {Array} environments
+     * @param {string} name: name of the environment [default]: current environment name
      * @returns {number}
      */
-    static getEnvironmentID(environments) {
-        let environment = Utils.getEnvironment();
+    static getEnvironmentID(environments, name = Utils.getEnvironment().label) {
+        if (!name) {
+            return 0;
+        }
 
         for (let i = 0; i < environments.length; i++) {
-            if (environment.label === environments[i].label) {
+            if (name === environments[i].label) {
                 return i;
             }
         }
-        return 0;
+        return -1;
     }
 
     /**
