@@ -114,8 +114,7 @@ class AuthManager {
      * @param {User} user - An instance of the {User} class
      * @param {string} environmentName - label of the environment to be set the user
      */
-    static setUser(user, environmentName) {
-        environmentName = environmentName || Utils.getCurrentEnvironment().label;
+    static setUser(user, environmentName = Utils.getCurrentEnvironment().label) {
         if (!user instanceof User) {
             throw new Error("Invalid user object");
         }
@@ -197,8 +196,7 @@ class AuthManager {
      * @param {String} environmentName - Name of the environment to be logged out. Default current environment.
      * @returns {AxiosPromise}
      */
-    logout(environmentName) {
-        environmentName = environmentName || Utils.getCurrentEnvironment().label;
+    logout(environmentName = Utils.getCurrentEnvironment().label) {
         let authHeader = "Bearer " + AuthManager.getUser(environmentName).getPartialToken();
         //TODO Will have to change the logout end point url to contain the app context(i.e. publisher/store, etc.)
         let url = Utils.getAppLogoutURL();
@@ -286,8 +284,7 @@ class AuthManager {
         const data = {
             assertion: idToken,
             validity_period: -1,
-            scopes: 'apim:api_view apim:api_create apim:api_publish apim:tier_view apim:tier_manage '
-            + 'apim:subscription_view apim:subscription_block apim:subscribe apim:external_services_discover'
+            scopes: AuthManager.CONST.USER_SCOPES
         };
         const currentEnvName = Utils.getCurrentEnvironment().label;
 

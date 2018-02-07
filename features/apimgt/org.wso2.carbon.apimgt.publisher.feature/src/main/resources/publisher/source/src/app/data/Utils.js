@@ -29,8 +29,7 @@ class Utils {
      * @param {String} environmentName - label of the environment of the cookie
      * @returns {String|null} - If found a cookie with given name , return its value,Else null value is returned
      */
-    static getCookie(name, environmentName) {
-        environmentName = environmentName || Utils.getCurrentEnvironment().label;
+    static getCookie(name, environmentName = Utils.getCurrentEnvironment().label) {
         name = `${name}_${environmentName}`;
 
         let pairs = document.cookie.split(";");
@@ -53,8 +52,7 @@ class Utils {
      * @param {String} path - Path of the cookie which need to be deleted
      * @param {String} environmentName - label of the environment of the cookie
      */
-    static delete_cookie(name, path, environmentName) {
-        environmentName = environmentName || Utils.getCurrentEnvironment().label;
+    static delete_cookie(name, path, environmentName = Utils.getCurrentEnvironment().label) {
         document.cookie = `${name}_${environmentName}=; path=${path}; expires=Thu, 01 Jan 1970 00:00:01 GMT`;
     }
 
@@ -68,8 +66,7 @@ class Utils {
      * @param {String} environmentName - Name of the environment to be appended to cookie name
      * @param {boolean} secured - secured parameter is set
      */
-    static setCookie(name, value, validityPeriod, path = "/", environmentName, secured = true) {
-        environmentName = environmentName || Utils.getCurrentEnvironment().label;
+    static setCookie(name, value, validityPeriod, path = "/", environmentName = Utils.getCurrentEnvironment().label, secured = true) {
         let expiresDirective = "";
         const securedDirective = secured ? "; Secure" : "";
         if (validityPeriod) {

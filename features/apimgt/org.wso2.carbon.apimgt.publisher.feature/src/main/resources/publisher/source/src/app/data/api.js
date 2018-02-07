@@ -26,9 +26,8 @@ class API {
      * @constructor
      * @param {Object} environment - Environment object - Default current environment.
      */
-    constructor(environment) {
-        this.environment = environment || Utils.getCurrentEnvironment();
-        this.client = APIClientFactory.getInstance().getAPIClient(this.environment).client;
+    constructor(environment = Utils.getCurrentEnvironment()) {
+        this.client = APIClientFactory.getInstance().getAPIClient(environment).client;
     }
 
     /**

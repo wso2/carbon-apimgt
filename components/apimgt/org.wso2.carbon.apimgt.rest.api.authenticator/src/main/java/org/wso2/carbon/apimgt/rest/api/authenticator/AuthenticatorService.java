@@ -92,8 +92,10 @@ public class AuthenticatorService {
         List<String> grantTypes = new ArrayList<>();
         grantTypes.add(KeyManagerConstants.PASSWORD_GRANT_TYPE);
         grantTypes.add(KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE);
-        grantTypes.add(envOverviewConfigs.getAuthenticationGrantType());
         grantTypes.add(KeyManagerConstants.REFRESH_GRANT_TYPE);
+        if (isMultiEnvironmentOverviewEnabled) {
+            grantTypes.add(envOverviewConfigs.getAuthenticationGrantType());
+        }
         APIMAppConfigurations appConfigs = ServiceReferenceHolder.getInstance().getAPIMAppConfiguration();
         String callBackURL = appConfigs.getApimBaseUrl() + AuthenticatorConstants.AUTHORIZATION_CODE_CALLBACK_URL + appName;
 

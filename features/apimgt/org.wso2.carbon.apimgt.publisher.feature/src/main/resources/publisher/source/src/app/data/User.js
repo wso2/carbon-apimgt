@@ -26,22 +26,21 @@ import Utils from './Utils'
 export default class User {
     /**
      * Create a user for the given environment
-     * @param {string} environment - name of the environment
+     * @param {string} environmentName - name of the environment
      * @param {string} name - name of the cookie
      * @param {boolean} remember
      * @returns {User|null} user object
      */
-    constructor(environment, name, remember = false) {
-        const user = User._userMap.get(environment);
+    constructor(environmentName, name, remember = false) {
+        const user = User._userMap.get(environmentName);
         if (user) {
             return user;
         }
         this.name = name;
-        this.environment = environment;
         this._scopes = [];
         this._remember = remember;
-        this._environment = environment || Utils.getCurrentEnvironment().label;
-        User._userMap.set(environment, this);
+        this._environmentName = environmentName;
+        User._userMap.set(environmentName, this);
     }
 
     /**
@@ -66,12 +65,11 @@ export default class User {
      * @param {String} environmentName - Name of the environment to be assigned to the user
      * @returns {User} - An instance of User(this) class.
      */
-    static fromJson(userJson, environmentName) {
+    static fromJson(userJson, environmentName = Utils.getCurrentEnvironment().label) {
         if (!userJson.name) {
             throw "Need to provide user `name` key in the JSON object, to create an user";
         }
 
-        environmentName = environmentName || Utils.getCurrentEnvironment().label;
         const _user = new User(environmentName, userJson.name);
         _user.scopes = userJson.scopes;
         _user.rememberMe = userJson.remember;
@@ -91,7 +89,7 @@ export default class User {
      * @returns {String|null}
      */
     getPartialToken() {
-        return Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1, this._environment);
+        return Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1, this._environmentName);
     }
 
     /**
@@ -99,7 +97,7 @@ export default class User {
      * @returns {String|null}
      */
     getRefreshPartialToken() {
-        return Utils.getCookie(User.CONST.WSO2_AM_REFRESH_TOKEN_1, this._environment);
+        return Utils.getCookie(User.CONST.WSO2_AM_REFRESH_TOKEN_1, this._environmentName);
     }
 
     /**
@@ -109,8 +107,8 @@ export default class User {
      * @param {String} path - Path which need to be set to cookie
      */
     setPartialToken(newToken, validityPeriod, path) {
-        Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, path, this._environment);
-        Utils.setCookie(User.CONST.WSO2_AM_TOKEN_1, newToken, validityPeriod, path, this._environment);
+        Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, path, this._environmentName);
+        Utils.setCookie(User.CONST.WSO2_AM_TOKEN_1, newToken, validityPeriod, path, this._environmentName);
     }
 
     /**
@@ -151,8 +149,7 @@ export default class User {
             name: this.name,
             scopes: this._scopes,
             remember: this._remember,
-            expiryTime: this.getExpiryTime(),
-            environment: this.environment
+            expiryTime: this.getExpiryTime()
         };
     }
 }
