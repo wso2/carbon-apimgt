@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.core.configuration.models;
 
-import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 import org.wso2.carbon.config.annotation.Configuration;
 import org.wso2.carbon.config.annotation.Element;
 

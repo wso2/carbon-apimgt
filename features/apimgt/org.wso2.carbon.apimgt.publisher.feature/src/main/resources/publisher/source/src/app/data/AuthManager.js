@@ -289,7 +289,7 @@ class AuthManager {
         const currentEnvName = Utils.getCurrentEnvironment().label;
 
         environments.forEach((environment, environmentID) => {
-            const isAutoLoginEnabled = configs[environmentID].is_auto_login_enabled;
+            const isAutoLoginEnabled = configs[environmentID].is_multi_environment_overview_enabled;
             const isAlreadyLoggedIn = AuthManager.getUser(environment.label); //Already logged in by any user
             const isCurrentEnvironment = environment.label === currentEnvName;
 

@@ -119,7 +119,7 @@ public class AuthenticatorService {
                 oAuthData.addProperty(KeyManagerConstants.AUTHORIZATION_ENDPOINT,
                         appConfigs.getAuthorizationEndpoint());
                 oAuthData.addProperty(AuthenticatorConstants.SSO_ENABLED, appConfigs.isSsoEnabled());
-                oAuthData.addProperty(AuthenticatorConstants.AUTO_LOGIN_ENABLED, isMultiEnvironmentOverviewEnabled);
+                oAuthData.addProperty(AuthenticatorConstants.MULTI_ENVIRONMENT_OVERVIEW_ENABLED, isMultiEnvironmentOverviewEnabled);
             } else {
                 String errorMsg = "No information available in OAuth application.";
                 log.error(errorMsg, ExceptionCodes.OAUTH2_APP_CREATION_FAILED);

@@ -66,7 +66,7 @@ public class AuthenticatorServiceTestCase {
         oAuthData.addProperty(KeyManagerConstants.AUTHORIZATION_ENDPOINT, "https://localhost:9443/oauth2/authorize");
         oAuthData.addProperty(AuthenticatorConstants.SSO_ENABLED, ServiceReferenceHolder.getInstance()
                 .getAPIMAppConfiguration().isSsoEnabled());
-        oAuthData.addProperty(AuthenticatorConstants.AUTO_LOGIN_ENABLED, APIMConfigurationService.getInstance()
+        oAuthData.addProperty(AuthenticatorConstants.MULTI_ENVIRONMENT_OVERVIEW_ENABLED, APIMConfigurationService.getInstance()
                 .getEnvironmentConfigurations().getMultiEnvironmentOverview().isEnabled());
 
         KeyManager keyManager = Mockito.mock(KeyManager.class);
@@ -200,7 +200,6 @@ public class AuthenticatorServiceTestCase {
         // Multi-Environment Overview configuration
         MultiEnvironmentOverview multiEnvironmentOverview = new MultiEnvironmentOverview();
         multiEnvironmentOverview.setEnabled(true);
-        multiEnvironmentOverview.setAuthenticationGrantType("urn:ietf:params:oauth:grant-type:jwt-bearer");
 
         // APIMConfigurations
         EnvironmentConfigurations environmentConfigurations = new EnvironmentConfigurations();
