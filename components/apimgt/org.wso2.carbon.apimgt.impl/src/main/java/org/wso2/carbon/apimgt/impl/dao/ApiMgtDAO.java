@@ -11309,7 +11309,7 @@ public class ApiMgtDAO {
      * @return comma separated group Id String
      * @throws APIManagementException
      */
-    private String getGroupId(int applicationId) throws APIManagementException {
+    public String getGroupId(int applicationId) throws APIManagementException {
 
         String grpId = "";
         ArrayList<String> grpIdList = new ArrayList<String>();

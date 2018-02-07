@@ -617,6 +617,14 @@ public interface APIConsumer extends APIManager {
 	 */
 	Set<Scope> getScopesByScopeKeys(String scopeKeys, int tenantId) throws APIManagementException;
 
+    /**
+     *
+     * @param appId applicationId
+     * @return groupId of the application
+     * @throws APIManagementException If failed to fetch the groupId
+     */
+    String getGroupId (int appId) throws APIManagementException;
+
     String[] getGroupIds(String response) throws APIManagementException;
 
 	JSONObject resumeWorkflow(Object[] args);
