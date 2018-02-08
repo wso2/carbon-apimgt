@@ -857,8 +857,7 @@
             var designer = APIDesigner();
             designer.load_api_document(data);
             $("#swaggerUpload").modal('hide');
-            var isSoapToRest = data.paths["/*"];
-            if(!isSoapToRest) {
+            if(typeof $("#rest-paths").val() != "undefined" && $("#rest-paths").val() != "null") {
                 $("#wsdl-content").hide();
                 $(".resource_create").hide();
                 $('#resource_details').show();
@@ -919,7 +918,7 @@
 	                if(swag != ""){
 	                    var designer = APIDesigner();
 	                    designer.load_api_document(swag);
-	                    if( typeof $("#rest-paths").val() != "undefined") {
+	                    if( typeof $("#rest-paths").val() != "undefined" && $("#rest-paths").val() != "null") {
 	                        getSoapToRestPathMap();
 	                    }
 	                }
