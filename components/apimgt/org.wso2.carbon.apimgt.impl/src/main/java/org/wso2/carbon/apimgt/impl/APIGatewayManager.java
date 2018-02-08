@@ -135,6 +135,7 @@ public class APIGatewayManager {
                         client.updateApiForInlineScript(builder, tenantDomain, api.getId());
                     }else if (api.getImplementation().equalsIgnoreCase(APIConstants.IMPLEMENTATION_TYPE_ENDPOINT)){
                         client.updateApi(builder, tenantDomain, api.getId());
+                        client.saveEndpoint(api, builder, tenantDomain);
                     }
 
                     if(api.isDefaultVersion() || api.isPublishedDefaultVersion()){//api.isPublishedDefaultVersion() check is used to detect and update when context etc. is changed in the api which is not the default version but has a published default api

@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
 
@@ -271,12 +272,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
             ArrayList<String> arrayList = getEndpointType(api);
             for (String type : arrayList) {
                 String endpointConfigContext = builder.getConfigStringForEndpointTemplate(type);
-                if (tenantDomain != null && !("").equals(tenantDomain)
-                        && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                    apiGatewayAdminStub.addEndpointForTenant(endpointConfigContext, tenantDomain);
-                } else {
-                    apiGatewayAdminStub.addEndpoint(endpointConfigContext);
-                }
+                checkForTenantWhenAdding(apiGatewayAdminStub, endpointConfigContext, tenantDomain);
             }
         } catch (Exception e) {
             throw new AxisFault("Error while generating Endpoint file in Gateway " + e.getMessage(), e);
@@ -298,6 +294,56 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
             }
         } catch (Exception e) {
             throw new AxisFault("Error while deleting Endpoint from the gateway. " + e.getMessage(), e);
+        }
+    }
+
+    public void saveEndpoint(API api, APITemplateBuilder builder, String tenantDomain) throws AxisFault {
+        try {
+            ArrayList<Integer> arrayList = new ArrayList<>();
+            String[] endpointNames;
+            if (tenantDomain != null && !("").equals(tenantDomain)
+                    && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                endpointNames = apiGatewayAdminStub.getEndPointsNamesForTenant(tenantDomain);
+            } else {
+                endpointNames = apiGatewayAdminStub.getEndPointsNames();
+            }
+            Arrays.sort(endpointNames); //Sorting required for Binary Search
+            arrayList.add(Arrays.binarySearch(endpointNames, api.getId().getApiName() + "--" +
+                    api.getId().getVersion() + "_API" + APIConstants.GATEWAY_ENV_TYPE_PRODUCTION + "Endpoint"));
+            arrayList.add(Arrays.binarySearch(endpointNames, api.getId().getApiName() + "--" +
+                    api.getId().getVersion() + "_API" + APIConstants.GATEWAY_ENV_TYPE_SANDBOX + "Endpoint"));
+
+            for (int index : arrayList) {
+                if (index >= 0) { //If not found, don't delete
+                    if (tenantDomain != null && !("").equals(tenantDomain)
+                            && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                        apiGatewayAdminStub.deleteEndpointForTenant(endpointNames[index], tenantDomain);
+                    } else {
+                        apiGatewayAdminStub.deleteEndpoint(endpointNames[index]);
+                    }
+                } //No else as there should always be a file to delete
+            }
+
+            ArrayList<String> arrayListToAdd = getEndpointType(api);
+            for (String type : arrayListToAdd) {
+                String endpointConfigContext = builder.getConfigStringForEndpointTemplate(type);
+                checkForTenantWhenAdding(apiGatewayAdminStub, endpointConfigContext, tenantDomain);
+            }
+        } catch (Exception e) {
+            throw new AxisFault("Error updating Endpoint file" + e.getMessage(), e);
+        }
+    }
+
+    private void checkForTenantWhenAdding(APIGatewayAdminStub stub, String epContext, String tenantDomain) throws AxisFault {
+        try {
+            if (tenantDomain != null && !("").equals(tenantDomain)
+                    && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                stub.addEndpointForTenant(epContext, tenantDomain);
+            } else {
+                stub.addEndpoint(epContext);
+            }
+        } catch (Exception e) {
+            throw new AxisFault("Error while generating endpoint file in gateway" + e.getMessage(), e);
         }
     }
 

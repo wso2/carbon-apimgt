@@ -289,6 +289,16 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         return endpointAdminServiceClient.deleteEndpoint(endpointName, tenantDomain);
     }
 
+    public String[] getEndPointsNames() throws AxisFault {
+        EndpointAdminServiceClient endpointAdminServiceClient = getEndpointAdminServiceClient();
+        return endpointAdminServiceClient.getEndPointsNames();
+    }
+
+    public String[] getEndPointsNamesForTenant(String tenantDomain) throws AxisFault {
+        EndpointAdminServiceClient endpointAdminServiceClient = getEndpointAdminServiceClient();
+        return endpointAdminServiceClient.getEndPointsNames(tenantDomain);
+    }
+
     protected EndpointAdminServiceClient getEndpointAdminServiceClient() throws AxisFault {
         return new EndpointAdminServiceClient();
     }

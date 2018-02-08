@@ -5,9 +5,9 @@ import org.wso2.carbon.endpoint.stub.types.EndpointAdminStub;
 
 public class EndpointAdminServiceClient {
 
-    EndpointAdminStub endpointAdminStub;
+    private EndpointAdminStub endpointAdminStub;
 
-    static final String backEndURL = "local:///services/";
+    private static final String backEndURL = "local:///services/";
 
     public EndpointAdminServiceClient() throws AxisFault {
         endpointAdminStub = new EndpointAdminStub(null, backEndURL + "EndpointAdmin");
@@ -42,6 +42,22 @@ public class EndpointAdminServiceClient {
             return endpointAdminStub.deleteEndpointForTenant(endpointName, tenantDomain);
         } catch (Exception e) {
             throw new AxisFault("Error while deleting the endpoint file from tenant" + e.getMessage(), e);
+        }
+    }
+
+    public String[] getEndPointsNames() throws AxisFault {
+        try {
+            return endpointAdminStub.getEndPointsNames();
+        } catch (Exception e) {
+            throw new AxisFault("Error while obtaining the endpoint names" + e.getMessage(), e);
+        }
+    }
+
+    public String[] getEndPointsNames(String tenantDomain) throws AxisFault {
+        try {
+            return endpointAdminStub.getEndPointsNamesForTenant(tenantDomain);
+        } catch (Exception e) {
+            throw new AxisFault("Error while obtaining the endpoint names from tenant space" + e.getMessage(), e);
         }
     }
 }
