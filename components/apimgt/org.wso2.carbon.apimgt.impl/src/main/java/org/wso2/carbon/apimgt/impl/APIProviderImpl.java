@@ -889,8 +889,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             boolean updatePermissions = false;
-            if(!oldApi.getAccessControl().equals(api.getAccessControl()) || (APIConstants.API_RESTRICTED_VISIBILITY.equals(oldApi.getAccessControl()) &&
-                    !api.getAccessControlRoles().equals(oldApi.getAccessControlRoles())) || !oldApi.getVisibility().equals(api.getVisibility()) ||
+            if (APIUtil.isAccessControlEnabled()) {
+                if (!oldApi.getAccessControl().equals(api.getAccessControl()) || (APIConstants.API_RESTRICTED_VISIBILITY.equals(oldApi.getAccessControl()) &&
+                        !api.getAccessControlRoles().equals(oldApi.getAccessControlRoles())) || !oldApi.getVisibility().equals(api.getVisibility()) ||
+                        (APIConstants.API_RESTRICTED_VISIBILITY.equals(oldApi.getVisibility()) &&
+                                !api.getVisibleRoles().equals(oldApi.getVisibleRoles()))) {
+                    updatePermissions = true;
+                }
+            } else if (!oldApi.getVisibility().equals(api.getVisibility()) ||
                     (APIConstants.API_RESTRICTED_VISIBILITY.equals(oldApi.getVisibility()) &&
                             !api.getVisibleRoles().equals(oldApi.getVisibleRoles()))) {
                 updatePermissions = true;
@@ -2154,16 +2160,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             //Copy Swagger 2.0 resources for New version. 
-            String resourcePath = APIUtil.getSwagger20DefinitionFilePath(api.getId().getApiName(),
-                    api.getId().getVersion(),
-                    api.getId().getProviderName());
-            if (registry.resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME)) {
+            String resourcePath = APIUtil.getOpenAPIDefinitionFilePath(api.getId().getApiName(),
+                    api.getId().getVersion(), api.getId().getProviderName());
+            if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
                 JSONObject swaggerObject = (JSONObject) new JSONParser()
-                        .parse(definitionFromSwagger20.getAPIDefinition(api.getId(), registry));
+                        .parse(definitionFromOpenAPISpec.getAPIDefinition(api.getId(), registry));
                 JSONObject infoObject = (JSONObject) swaggerObject.get("info");
                 infoObject.remove("version");
                 infoObject.put("version", newAPI.getId().getVersion());
-                definitionFromSwagger20.saveAPIDefinition(newAPI, swaggerObject.toJSONString(), registry);
+                definitionFromOpenAPISpec.saveAPIDefinition(newAPI, swaggerObject.toJSONString(), registry);
             }
 
             // copy wsdl in case of a SOAP API
@@ -4008,7 +4013,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             PrivilegedCarbonContext.startTenantFlow();
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
-            definitionFromSwagger20.saveAPIDefinition(getAPI(apiId), jsonText, registry);
+            definitionFromOpenAPISpec.saveAPIDefinition(getAPI(apiId), jsonText, registry);
 
         } finally {
             PrivilegedCarbonContext.endTenantFlow();

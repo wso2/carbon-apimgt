@@ -75,7 +75,7 @@ import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.RequestCountLimit;
 import org.wso2.carbon.apimgt.api.model.policy.SubscriptionPolicy;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromSwagger20;
+import org.wso2.carbon.apimgt.impl.definitions.APIDefinitionFromOpenAPISpec;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
@@ -1733,15 +1733,15 @@ public class APIProviderImplTest {
         PowerMockito.when(APIUtil.getAPI(newArtifact, apiProvider.registry, api.getId(), "test")).thenReturn(newApi);
 
         //Swagger resource
-        String resourcePath = APIUtil.getSwagger20DefinitionFilePath(api.getId().getApiName(),
+        String resourcePath = APIUtil.getOpenAPIDefinitionFilePath(api.getId().getApiName(),
                 api.getId().getVersion(),
                 api.getId().getProviderName());
-        Mockito.when(apiProvider.registry.resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME)).
+        Mockito.when(apiProvider.registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)).
                 thenReturn(true);
-        APIDefinitionFromSwagger20 apiDefinitionFromSwagger20 = Mockito.mock(APIDefinitionFromSwagger20.class);
-        setFinalStatic(AbstractAPIManager.class.getDeclaredField("definitionFromSwagger20"),
-                apiDefinitionFromSwagger20);
-        Mockito.when(apiDefinitionFromSwagger20.getAPIDefinition(apiId, apiProvider.registry)).thenReturn(
+        APIDefinitionFromOpenAPISpec apiDefinitionFromOpenAPISpec = Mockito.mock(APIDefinitionFromOpenAPISpec.class);
+        setFinalStatic(AbstractAPIManager.class.getDeclaredField("definitionFromOpenAPISpec"),
+                apiDefinitionFromOpenAPISpec);
+        Mockito.when(apiDefinitionFromOpenAPISpec.getAPIDefinition(apiId, apiProvider.registry)).thenReturn(
                 "{\"info\": {\"swagger\":\"data\"}}");
         Mockito.doNothing().when(artifactManager).updateGenericArtifact(artifact);
 
@@ -1896,11 +1896,11 @@ public class APIProviderImplTest {
         Mockito.when(artifactManager.getGenericArtifact(newApiUUID)).thenReturn(newArtifact);
         PowerMockito.when(APIUtil.getAPI(newArtifact, apiProvider.registry, api.getId(), "test")).thenReturn(newApi);
 
-        String resourcePath = APIUtil.getSwagger20DefinitionFilePath(api.getId().getApiName(),
+        String resourcePath = APIUtil.getOpenAPIDefinitionFilePath(api.getId().getApiName(),
                 api.getId().getVersion(),
                 api.getId().getProviderName());
 
-        Mockito.when(apiProvider.registry.resourceExists(resourcePath + APIConstants.API_DOC_2_0_RESOURCE_NAME)).
+        Mockito.when(apiProvider.registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)).
                 thenReturn(false);
 
         //Mock Config system registry

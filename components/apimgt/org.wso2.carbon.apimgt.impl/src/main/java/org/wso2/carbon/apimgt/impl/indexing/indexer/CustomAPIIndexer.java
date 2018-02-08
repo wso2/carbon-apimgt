@@ -24,6 +24,7 @@ import org.apache.solr.common.SolrException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.governance.registry.extensions.indexers.RXTIndexer;
@@ -65,41 +66,31 @@ public class CustomAPIIndexer extends RXTIndexer {
         }
         if (resource != null) {
             String publisherAccessControl = resource.getProperty(APIConstants.PUBLISHER_ROLES);
-            String storeVisibility = null;
-            String storeVisibleRoles = null;
-            try {
-                GenericArtifact artifact = APIUtil.getArtifactManager(registry, "api").getGenericArtifact(resource.getUUID());
-                storeVisibility = artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
-                storeVisibleRoles = artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
-            } catch (APIManagementException e) {
-                // We need to continue default indexing process although access control extension faces an error, so not throwing an exception here.
-                log.error("Error while retrieving API", e);
-            }
 
             if (publisherAccessControl == null || publisherAccessControl.trim().isEmpty()) {
                 if (log.isDebugEnabled()) {
                     log.debug("API at " + resourcePath + "did not have property : " + APIConstants.PUBLISHER_ROLES
                             + ", hence adding the null value for that API resource.");
                 }
-                resource.setProperty(APIConstants.PUBLISHER_ROLES, "null");
+                resource.setProperty(APIConstants.PUBLISHER_ROLES, APIConstants.NULL_USER_ROLE_LIST);
                 resource.setProperty(APIConstants.ACCESS_CONTROL, APIConstants.NO_ACCESS_CONTROL);
+                setStoreViewRoles(registry, resource, publisherAccessControl);
                 resource.setProperty(CUSTOM_API_INDEXER_PROPERTY, "true");
                 registry.put(resourcePath, resource);
             }
 
-            /*if (storeVisibility != null) {
+            resource = registry.get(resourcePath);
+            String storeViewRoles = resource.getProperty(APIConstants.STORE_VIEW_ROLES);
+
+            if (storeViewRoles == null) {
                 if (log.isDebugEnabled()) {
                     log.debug("API at " + resourcePath + "did not have property : " + APIConstants.STORE_VIEW_ROLES
                             + ", hence adding the values for that API resource.");
                 }
-                if (storeVisibility.equals(APIConstants.PUBLIC_STORE_VISIBILITY)) {
-                    resource.setProperty(APIConstants.STORE_VIEW_ROLES, "null");
-                } else if (storeVisibility.equals(APIConstants.RESTRICTED_STORE_VISIBILITY)){
-                    resource.setProperty(APIConstants.STORE_VIEW_ROLES, storeVisibleRoles + "," + publisherAccessControl);
-                }
+                setStoreViewRoles(registry, resource, publisherAccessControl);
                 resource.setProperty(CUSTOM_API_INDEXER_PROPERTY, "true");
                 registry.put(resourcePath, resource);
-            }*/
+            }
         }
 
         // Here we are adding properties as fields, so that we can search the properties as we do for attributes.
@@ -123,6 +114,32 @@ public class CustomAPIIndexer extends RXTIndexer {
             indexDocument.setFields(fields);
         }
         return indexDocument;
+    }
+
+    /**
+     * To set the store_view_roles property
+     *
+     * @param registry Registry
+     * @param resource Resource
+     * @param publisherAccessControl Publisher access control roles
+     * @throws GovernanceException Throws when retrieving artifacts get failed
+     */
+    private void setStoreViewRoles(Registry registry, Resource resource, String publisherAccessControl) throws GovernanceException {
+        String storeVisibility = null;
+        String storeVisibleRoles = null;
+        try {
+            GenericArtifact artifact = APIUtil.getArtifactManager(registry, APIConstants.API_KEY).getGenericArtifact(resource.getUUID());
+            storeVisibility = artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBILITY);
+            storeVisibleRoles = artifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
+        } catch (APIManagementException e) {
+            // We need to continue default indexing process although access control extension faces an error, so not throwing an exception here.
+            log.error("Error while retrieving API", e);
+        }
+        if (APIConstants.PUBLIC_STORE_VISIBILITY.equals(storeVisibility)) {
+            resource.setProperty(APIConstants.STORE_VIEW_ROLES, APIConstants.NULL_USER_ROLE_LIST);
+        } else if (APIConstants.RESTRICTED_STORE_VISIBILITY.equals(storeVisibility)) {
+            resource.setProperty(APIConstants.STORE_VIEW_ROLES, storeVisibleRoles + "," + publisherAccessControl);
+        }
     }
 
     /**

@@ -23,9 +23,7 @@ var log = new Log();
 
     if (uri != null) {
         // replacing @ signs for matcher to work with reverse proxies
-        if(callPath.indexOf("@") > -1){
-            callPath = callPath.replace("@","%40");
-        }
+
         var uriMatcher = new URIMatcher(callPath);
         var providerVal,apiNameVal,apiVersionVal;
         providerVal = apiNameVal = apiVersionVal = "";
@@ -84,13 +82,10 @@ var log = new Log();
 
             var APIUtil = Packages.org.wso2.carbon.apimgt.impl.utils.APIUtil;
             var apiUtil = new APIUtil();
-            var swaggerPath = apiUtil.getSwagger20DefinitionFilePath(apiNameVal,apiVersionVal, providerVal);
+            var swaggerPath = apiUtil.getOpenAPIDefinitionFilePath(apiNameVal,apiVersionVal, providerVal);
     		var registry = carbon.server.osgiService('org.wso2.carbon.registry.core.service.RegistryService').getGovernanceUserRegistry("wso2.anonymous.user", tenantID);
 
     		url = swaggerPath + "swagger.json";
-
-
-
     		var data = registry.get(url);
     	}finally {
     		if (isTenantFlowStarted) {
@@ -105,38 +100,7 @@ var log = new Log();
         gatewayURL = store.getHTTPsGatewayEndpointURLs();
 
 
-
-        //populate the security definitions
-        var default_implicit = {
-            "type":"oauth2",
-            "authorizationUrl": gatewayURL[0]+"/authorize",
-            "flow": "implicit",
-            "scopes":{}
-        };
-        if(jsonObj["securityDefinitions"] == undefined){
-            jsonObj["securityDefinitions"] = {};
-        }
-        jsonObj["securityDefinitions"]["default"] = default_implicit;
-
-
-        if(jsonObj["x-wso2-security"]!= undefined){
-            var scopeList = jsonObj["x-wso2-security"]["apim"]["x-wso2-scopes"];
-            for(var i =0; i < scopeList.length;i++){
-                default_implicit.scopes[scopeList[i].key]=scopeList[i].name;
-            }
-            for (var path in jsonObj.paths) {
-                for (var method in jsonObj.paths[path]) {
-                    if(jsonObj.paths[path][method]["x-scope"] != undefined) {
-                        jsonObj.paths[path][method]["security"] = [];
-                        var default_implicit_scope = { "default" : [] };
-                        default_implicit_scope["default"].push(jsonObj.paths[path][method]["x-scope"]);
-                        jsonObj.paths[path][method]["security"].push(default_implicit_scope);
-                    }
-                }
-            }
-        }
-        //end of security definition
-
+        //end of security definition  
         var basePathValue = jsonObj.basePath;
         var username=null;
         result = jagg.module("api").getAPIDescription({
@@ -160,35 +124,33 @@ var log = new Log();
                     count++;
                     break;
                 }
-
             }
         }
 
-        jsonObj.basePath = api.context;
+        var basePath = api.context;
 
         var domains = jagg.module("domains").getDomainMappings(String(tenantDomain)).domains;
     	//populate custom url if exists
         if(domains != null){
             for (var key in domains) {
                 var re = /\/$/g
-                jsonObj.host = domains[key].replace(re, "");
+                host = domains[key].replace(re, "");
                 //remove tenant context
-                jsonObj.basePath = jsonObj.basePath.replace("/t/"+String(tenantDomain),"");
+                basePath = jsonObj.basePath.replace("/t/"+String(tenantDomain),"");
             }
         }
     	else if (urlArr.length > 0 ) { //assign default value to host with first environment address
-    	    jsonObj.host = urlArr[0].trim().replace(accessProtocol+"//","");
+            host = urlArr[0].trim().replace(accessProtocol + "//", "");
     	}
 
         //handle schems IMPORTANT: order of https and http is important to make sure https is targeted first.
-        jsonObj.schemes = []
+        var schemes = []
         if(api.transports.search("https") != -1){
-            jsonObj.schemes.push("https");
+            schemes.push("https");
         }
         if(api.transports.search("http") != -1){
-            jsonObj.schemes.push("http");
+            schemes.push("http");
         }
-
 
         var paths = {}; //fix for /*, {url-template}*
         for (var property in jsonObj.paths) {
@@ -209,6 +171,92 @@ var log = new Log();
                 paths[tempResource] = jsonObj.paths[property];
             }
         }
+
+        if (jsonObj.openapi) {
+            var servers = [];
+            for (var key in schemes) {
+                var server = {};
+                var scheme = schemes[key];
+                server.url = scheme + "://" + host + basePath;
+                servers.push(server);
+            }
+            jsonObj.servers = servers;
+
+            //populate the securitySchemes
+            var default_implicit_openapi = {
+                "type": "oauth2",
+                "flows": {
+                    "implicit": {
+                        "authorizationUrl": gatewayURL[0] + "/authorize",
+                        "scopes": {}
+                    }
+                }
+            };
+
+            //Populate API scopes into security definition
+            if (jsonObj["x-wso2-security"] != undefined) {
+
+                var scopeList = jsonObj["x-wso2-security"]["apim"]["x-wso2-scopes"];
+                for (var i = 0; i < scopeList.length; i++) {
+                    default_implicit_openapi.flows.implicit.scopes[scopeList[i].key] = scopeList[i].name;
+                }
+                for (var path in jsonObj.paths) {
+                    for (var method in jsonObj.paths[path]) {
+                        if (jsonObj.paths[path][method]["x-scope"] != undefined) {
+                            jsonObj.paths[path][method]["security"] = [];
+                            var default_implicit_scope = {"default": []};
+                            default_implicit_scope["default"].push(jsonObj.paths[path][method]["x-scope"]);
+                            jsonObj.paths[path][method]["security"].push(default_implicit_scope);
+                        }
+                    }
+                }
+            }
+
+            if (jsonObj.components == undefined) {
+                jsonObj.components = {};
+            }
+
+            if (jsonObj.components.securitySchemes == undefined) {
+                jsonObj.components.securitySchemes = {};
+            }
+            jsonObj.components.securitySchemes.default = default_implicit_openapi;
+
+        } else if (jsonObj.swagger) {
+            jsonObj.host = host;
+            jsonObj.basePath = basePath;
+            jsonObj.schemes = schemes;
+
+            //populate the security definitions
+            var default_implicit_swagger = {
+                "type": "oauth2",
+                "authorizationUrl": gatewayURL[0] + "/authorize",
+                "flow": "implicit",
+                "scopes": {}
+            };
+
+            if (jsonObj["x-wso2-security"] != undefined) {
+                var scopeList = jsonObj["x-wso2-security"]["apim"]["x-wso2-scopes"];
+                for (var i = 0; i < scopeList.length; i++) {
+                    default_implicit_swagger.scopes[scopeList[i].key] = scopeList[i].name;
+                }
+                for (var path in jsonObj.paths) {
+                    for (var method in jsonObj.paths[path]) {
+                        if (jsonObj.paths[path][method]["x-scope"] != undefined) {
+                            jsonObj.paths[path][method]["security"] = [];
+                            var default_implicit_scope = {"default": []};
+                            default_implicit_scope["default"].push(jsonObj.paths[path][method]["x-scope"]);
+                            jsonObj.paths[path][method]["security"].push(default_implicit_scope);
+                        }
+                    }
+                }
+            }
+
+            if (jsonObj.securityDefinitions == undefined) {
+                jsonObj.securityDefinitions = {};
+            }
+            jsonObj.securityDefinitions.default = default_implicit_swagger;
+        }
+
         jsonObj.paths = paths;
         print(JSON.stringify(jsonObj));
     }
@@ -239,7 +287,6 @@ function sendReceive (httpMethod,data,url){
         default :
             log.error("Error in the programme flow.");
     }
-    log.debug("---------------------:" + stringify(response));
     if(response.data.Error) {
         session.put("get-status", response.data.Error.errorMessage);
     } else {

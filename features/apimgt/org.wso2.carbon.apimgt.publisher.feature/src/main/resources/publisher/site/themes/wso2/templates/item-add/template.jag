@@ -141,9 +141,33 @@
 			<div id="accordion1-collapse3" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
 				<div class="panel-body">
 					<form class="form-horizontal" id="designNewAPI-form" enctype="multipart/form-data" action="<%= jagg.url("/site/blocks/item-design/ajax/add.jag") %>">
+					    <div class="form-group">
+					        <div class="col-sm-12">
+					            <a href="#" class="more-options but" ref="more-options-api-spec" title="<%=i18n.localize("Show More Options")%>" ><%=i18n.localize("Show More Options")%></a>
+					        </div>
+					    </div>
+					    <div id="more-options-api-spec" style="display:none">
+					        <div class="form-group">
+					            <label class="col-sm-2 control-label" style="text-align: left" for="apiDefVersion"><%=i18n.localize("Supported API Specification")%>:
+							        <a class="help_popup" help_data="api_spec_help" data-trigger="hover"  data-placement="bottom" title="api_spec_help">
+							                      				<span class="icon fw-stack fw-lg" style="font-size:6px">
+												                   <i class="fw fw-circle fw-stack-2x"></i>
+												                   <i class="fw fw-question fw-stack-1x fw-inverse" style="font-size:8px"></i>
+												                </span>
+							        </a>
+							        <p id="api_spec_help" class="hide"><%=i18n.localize("To specify the supported Open API specification version of API")%></p>
+							    </label>
+							    <div class="col-sm-2">
+                                    <select class="select required form-control" id="apiDefinitionVersion" name="apiDefinitionVersion" >
+                                        <option value="2.0" id="openapi2"><%=i18n.localize("OpenAPI 2.0")%></option>
+                                        <option value="3.0.0" id="openapi3"><%=i18n.localize("OpenAPI 3.0")%></option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
                         <input name="action" value="start" type="hidden"/>
                         <input name="type" value="new" type="hidden"/>
-	                        <button id="designNewAPI" class="btn btn-primary has-spinner" type="button"><%=i18n.localize("Start Creating")%></button>
+	                    <button id="designNewAPI" class="btn btn-primary has-spinner" type="button"><%=i18n.localize("Start Creating")%></button>
 					</form>
 				</div>
 			</div>

@@ -50,7 +50,7 @@ $( document ).ready(function() {
                     } else {
                         jagg.message({content:responseText.message,type:"error"});
                     }
-                }                
+                }
             }, dataType: 'json'
         });
     });
@@ -106,7 +106,7 @@ $( document ).ready(function() {
                 $(btn).buttonLoader('stop');
                 if (!responseText.error) {
                     window.location = jagg.site.context + "/design"
-                }else {
+                } else {
                     if (responseText.message == "timeout") {
                         if (ssoEnabled) {
                              var currentLoc = window.location.pathname;

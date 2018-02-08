@@ -4752,7 +4752,8 @@ public class ApiMgtDAO {
                 whereSubscriberUserID + "))";
 
         String whereClauseWithMultiGroupId = " AND  ( (APP.APPLICATION_ID IN (SELECT APPLICATION_ID  FROM " +
-                "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR  ( SUB.USER_ID = ? ))";
+                "AM_APPLICATION_GROUP_MAPPING WHERE GROUP_ID IN ($params) AND TENANT = ?))  OR  " +
+                whereSubscriberUserID + ")";
 
         String whereClause = " AND " + whereSubscriberUserID;
         try {

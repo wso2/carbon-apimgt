@@ -1,39 +1,20 @@
-<% jagg.template("oidc/logout", function(inputs, outputs, jagg) { %>
- 
+<% jagg.template("oidc/logout", function (inputs, outputs, jagg) { %>
+
 <%
 
-	var security =require("oidc");
-	var oidcRelyingParty = new security.OIDCRelyingParty(site.oidcConfiguration.issuer);
-	
-	if(site.ssoConfiguration.externalLogoutPage != null
-			&& site.ssoConfiguration.externalLogoutPage != ""){
+    var security = require("oidc");
+    var oidcRelyingParty = new security.OIDCRelyingParty(site.oidcConfiguration.issuer);
 
-	} else {
 
-        var sessionId = session.getId();
-        oidcRelyingParty.invalidateSessionBySessionId(sessionId);
+    var sessionId = session.getId();
+    oidcRelyingParty.invalidateSessionBySessionId(sessionId);
 
-		var idpURL = site.oidcConfiguration.identityProviderURI;
-        var logoutURL = idpURL + "logout" ;
+    var idpURL = site.oidcConfiguration.identityProviderURI;
+    var logoutURL = site.oidcConfiguration.logoutEndpointURI +
+        "?post_logout_redirect_uri=" + encode.forUriComponent(site.oidcConfiguration.clientConfiguration.postLogoutRedirectURI); // idpURL + "logout";
+    session.invalidate();
 
-%>
+    response.sendRedirect(logoutURL);
+    return;
 
-		<div>
-		   <p><%=i18n.localize("You are now redirected to Stratos Identity. If the redirection fails, please click the POST button.")%></p>
-
-			<form id="logoutForm" method="post" action="<%=logoutURL%>">
-			<p>
-				<button type="submit"><%=i18n.localize("POST")%></button>
-			</p>
-			</form>
-		</div>
-		<script type = "text/javascript" >
-					   document.forms[0].submit();
-
-		</script>
-<%
-	}
-%>
-       
-<% }); %>
-
+}); %>

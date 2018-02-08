@@ -441,8 +441,9 @@
 										</div>
 										<% } %>
 										</div>
-
-
+										 <div class="message message-info" id="openAPISpec3Warning" style="display: none">
+                                            <p><%=i18n.localize("Client side SDK generation feature is currently not available for APIs in OpenAPI 3.0 specification")%></p>
+		                                </div>
 										<hr/>
 										<%if(api!=null){%>
 											<input type = "hidden" name = "bizOwner" value = "<%=encode.forHtmlAttribute(api.bizOwner)%>" />
@@ -614,12 +615,14 @@
     <div class="add-margin-bottom-4x">
     	<strong><%=i18n.localize("Description")%> : </strong><a class="notes" data-path="{{resource_path}}" data-attr="description" title="description">{{ description }}</a>
     </div>
+    {{#unless isOpenAPI3}}
     <table class="table-fullwidth add-margin-bottom-4x">
 		<tr>
 			<td width="40%"><strong><%=i18n.localize("Produces")%> : </strong><a href="#" data-path="{{resource_path}}" data-attr="produces" data-attr-type="comma_seperated" class="content_type produces" data-type="text" data-pk="1" data-title="Produces" title="Produces">{{ produces }}</a></td>
 			<td><strong><%=i18n.localize("Consumes")%> : </strong><a href="#" data-path="{{resource_path}}" data-attr="consumes" data-attr-type="comma_seperated" class="content_type consumes" data-type="text" data-pk="1" data-title="Consumes" title="Consumes">{{ consumes }}</a></td>
 		</tr>
     </table>
+    {{/unless}}
     <div class="add-margin-bottom-4x">
     	<div class="add-margin-bottom-2x">
     		<strong><%=i18n.localize("Parameters")%> :</strong>
@@ -639,7 +642,11 @@
 				<td>{{ name }}</td>
 				<td><a class="param_desc" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="description" title="description">{{ description }}</a></td>
 				<td><a class="param_paramType" data-type="select" data-path="{{ ../resource_path}}.parameters[{{@index}}]" data-attr="in" title="in">{{ in }}</a></td>
-				<td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type" title="type">{{ type }}</a></td>
+				{{#if ../isOpenAPI3}}
+				    <td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type" title="type">{{ schema.type }}</a></td>
+				{{else}}
+				    <td><a class="param_type" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="type" title="type">{{ type }}</a></td>
+				{{/if}}
 				<td><a class="param_required" data-type="select" data-path="{{../resource_path}}.parameters[{{@index}}]" data-attr="required" data-value="{{toString required }}" title="required"></a></td>
 				<td align="center">
 					<a data-path-name="{{path}}" data-path="{{../resource_path}}.parameters[{{@index}}]" data-index="{{@index}}" class="delete_parameter" title="index">
@@ -660,6 +667,49 @@
 					<i class="fw fw-add fw-stack-1x"></i>
 					<i class="fw fw-circle-outline fw-stack-2x"></i>
 				</span>&nbsp;<%=i18n.localize("Add Parameter")%></a>
+  {{#if isOpenAPI3}}
+     <div class="add-margin-bottom-4x add-margin-top-4x">
+    	<div class="add-margin-bottom-2x">
+    		<strong><%=i18n.localize("Request Body")%> :</strong>
+		</div>
+		{{#if requestBody.content}}
+		<table class="table-fullwidth add-margin-bottom-4x">
+            <tr>
+                <td width="40%"><%=i18n.localize("Description")%> : <a class="request_body_desc"  data-path="{{resource_path}}.requestBody" data-attr="description" title="description">{{requestBody.description}}</a></td>
+                <td><%=i18n.localize("Required")%> : <a class="request_body_required" data-type="select" data-path="{{resource_path}}.requestBody" data-attr="required" data-value="{{toString requestBody.required }}" title="required"></a></td>
+            </tr>
+        </table>
+        <table class="table table-condensed table-bordered" width="60%">
+            <tr>
+				<th width="55%"><%=i18n.localize("Request Body Content Type")%></th>
+				<th width="40%"><%=i18n.localize("Request Body Content")%></th>
+				<th width="5%"><%=i18n.localize("Delete")%></th>
+			</tr>
+        		{{#each requestBody.content}}
+			<tr id="{{@key}}">
+                <td><a class="request_body_content_type" data-path="{{ ../resource_path}}.requestBody.content" data-index="{{@key}}" data-attr="content-type" title="Content Type">{{@key}}</a></td>
+                <td><a href="#" class="request_body_edit"></i><%=i18n.localize("Edit Source")%></a></td>
+				<td align="center">
+					<a data-path-name="{{path}}" data-path="{{../resource_path}}.requestBody.content" data-key="{{@key}}" class="delete_request_body_content" title="index">
+						<span class="fw-stack" style="font-size:10px">
+							<i class="fw fw-delete fw-stack-1x"></i>
+							<i class="fw fw-circle-outline fw-stack-2x"></i>
+						</span>
+					</a>
+				</td>
+			</tr>
+		{{/each}}
+		{{/if}}
+		</table>
+	</div>
+  <input type="text" style="width:200px;margin-right:5px;" class="request_body_content form-control input-sm pull-left" name="content_type" placeholder="Request Body Content Type"/>
+    <a class="btn btn-small btn-secondary add_request_body_content btn-sm" type="button" title="Add Request Body Content" >
+				<span class="icon fw-stack fw-lg" style="font-size:10px">
+					<i class="fw fw-add fw-stack-1x"></i>
+					<i class="fw fw-circle-outline fw-stack-2x"></i>
+				</span>&nbsp;<%=i18n.localize("Add Request Body Content")%>
+	</a>
+  {{/if}}
 </div>  
 </script>
 
@@ -794,7 +844,7 @@
         <tr><td colspan="4" class="resource_body" style="display:none" data-path="$.paths.['{{ path }}'].{{@key}}"></td></tr>
     {{/each}}
 {{/each}}
-</table>  
+</table>
 </div>                                       
 </script>
 
@@ -874,7 +924,20 @@
 	                    }
 	                }
                 });
-        <% } %>
-    });
-</script>    
+        <% }
+            var apiDefinitionVersion = session.get("apiDefinitionVersion");
+            if (apiDefinitionVersion) {
+                %>
+              $.get(jagg.site.context + "/site/blocks/item-design/ajax/add.jag", { "action" : "getAPIDefinitionVersion"}, function( data ) {
+                    if(data != null && data != ""){
+                        var apiDefinitionVersion = data;
+                        var designer = APIDesigner();
+	                    designer.load_api_base_document(apiDefinitionVersion);
+                    }
+                });
+                <%
+             }
+    %>
+});
+</script>
 <% }); %>

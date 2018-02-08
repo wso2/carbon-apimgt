@@ -1,20 +1,20 @@
 /*
-*  Copyright (c) 2005-2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
+ *  Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package org.wso2.carbon.apimgt.impl.definitions;
 
@@ -48,10 +48,9 @@ import java.util.Set;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
-public class APIDefinitionFromSwagger20 extends APIDefinition {
+public class APIDefinitionFromOpenAPISpec extends APIDefinition {
 
-    private static final Log log = LogFactory.getLog(APIDefinitionFromSwagger20.class);
-    private static final String SWAGGER_2_0_FILE_NAME = "swagger.json";
+    private static final Log log = LogFactory.getLog(APIDefinitionFromOpenAPISpec.class);
 
     /**
      * This method returns URI templates according to the given swagger file
@@ -82,7 +81,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                     // See field types supported by "Path Item Object" in swagger spec.
                     if (path.containsKey("$ref")) {
                         log.info("Reference " + uriTempVal + " path object was ignored when generating URL template " +
-                                 "for api \"" + api.getId().getApiName() + '\"');
+                                "for api \"" + api.getId().getApiName() + '\"');
                         continue;
                     }
                     for (Object o1 : path.keySet()) {
@@ -93,7 +92,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                             JSONObject operation = (JSONObject) path.get(httpVerb);
                             URITemplate template = new URITemplate();
                             Scope scope = APIUtil.findScopeByKey(scopes, (String) operation.get(APIConstants
-                                                                                                        .SWAGGER_X_SCOPE));
+                                    .SWAGGER_X_SCOPE));
                             String authType = (String) operation.get(APIConstants.SWAGGER_X_AUTH_TYPE);
                             if ("Application & Application User".equals(authType)) {
                                 authType = APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN;
@@ -109,7 +108,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                             template.setThrottlingTier((String) operation.get(APIConstants.SWAGGER_X_THROTTLING_TIER));
                             template.setThrottlingTiers((String) operation.get(APIConstants.SWAGGER_X_THROTTLING_TIER));
                             template.setMediationScript((String) operation.get(APIConstants
-                                                                                       .SWAGGER_X_MEDIATION_SCRIPT));
+                                    .SWAGGER_X_MEDIATION_SCRIPT));
                             template.setMediationScripts(httpVerb.toUpperCase(), (String) operation.get(
                                     APIConstants.SWAGGER_X_MEDIATION_SCRIPT));
                             template.setUriTemplate(uriTempVal);
@@ -189,8 +188,8 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
         String apiProviderName = api.getId().getProviderName();
 
         try {
-            String resourcePath = APIUtil.getSwagger20DefinitionFilePath(apiName, apiVersion, apiProviderName);
-            resourcePath = resourcePath + SWAGGER_2_0_FILE_NAME;
+            String resourcePath = APIUtil.getOpenAPIDefinitionFilePath(apiName, apiVersion, apiProviderName);
+            resourcePath = resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME;
             Resource resource;
             if (!registry.resourceExists(resourcePath)) {
                 resource = registry.newResource();
@@ -220,27 +219,29 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
      */
     @Override
     public String getAPIDefinition(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException {
-        String resourcePath = APIUtil.getSwagger20DefinitionFilePath(apiIdentifier.getApiName(),
+        String resourcePath = APIUtil.getOpenAPIDefinitionFilePath(apiIdentifier.getApiName(),
                 apiIdentifier.getVersion(), apiIdentifier.getProviderName());
 
         JSONParser parser = new JSONParser();
         String apiDocContent = null;
         try {
-            if (registry.resourceExists(resourcePath + SWAGGER_2_0_FILE_NAME)) {
-                Resource apiDocResource = registry.get(resourcePath + SWAGGER_2_0_FILE_NAME);
+            if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
+                Resource apiDocResource = registry.get(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
                 apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
                 parser.parse(apiDocContent);
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("Resource " + SWAGGER_2_0_FILE_NAME + " not found at " + resourcePath);
+                    log.debug("Resource " + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME + " not found at " + resourcePath);
                 }
             }
         } catch (RegistryException e) {
-            handleException("Error while retrieving Swagger v2.0 Definition for " + apiIdentifier.getApiName() + '-' +
-                    apiIdentifier.getVersion(), e);
+            handleException(
+                    "Error while retrieving OpenAPI v2.0 or v3.0.0 Definition for " + apiIdentifier.getApiName() + '-'
+                            + apiIdentifier.getVersion(), e);
         } catch (ParseException e) {
-            handleException("Error while parsing Swagger v2.0 Definition for " + apiIdentifier.getApiName() + '-' +
-                    apiIdentifier.getVersion() + " in " + resourcePath, e);
+            handleException(
+                    "Error while parsing OpenAPI v2.0 or v3.0.0 Definition for " + apiIdentifier.getApiName() + '-'
+                            + apiIdentifier.getVersion() + " in " + resourcePath, e);
         }
         return apiDocContent;
     }
@@ -257,7 +258,7 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
     public String generateAPIDefinition(API api) throws APIManagementException {
         APIIdentifier identifier = api.getId();
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-            getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
         Environment environment = (Environment) config.getApiGatewayEnvironments().values().toArray()[0];
         String endpoints = environment.getApiGatewayEndpoint();
@@ -395,13 +396,13 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
      * @throws APIManagementException
      */
     @Override
-    public Map<String, String> getAPISwaggerDefinitionTimeStamps(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException {
+    public Map<String, String> getAPIOpenAPIDefinitionTimeStamps(APIIdentifier apiIdentifier, Registry registry) throws APIManagementException {
         Map<String, String> timeStampMap = new HashMap<String, String>();
-        String resourcePath = APIUtil.getSwagger20DefinitionFilePath(apiIdentifier.getApiName(),
+        String resourcePath = APIUtil.getOpenAPIDefinitionFilePath(apiIdentifier.getApiName(),
                 apiIdentifier.getVersion(), apiIdentifier.getProviderName());
         try {
-            if (registry.resourceExists(resourcePath + SWAGGER_2_0_FILE_NAME)) {
-                Resource apiDocResource = registry.get(resourcePath + SWAGGER_2_0_FILE_NAME);
+            if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
+                Resource apiDocResource = registry.get(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
                 Date lastModified = apiDocResource.getLastModified();
                 Date createdTime = apiDocResource.getCreatedTime();
                 if (lastModified != null) {
@@ -411,11 +412,12 @@ public class APIDefinitionFromSwagger20 extends APIDefinition {
                 }
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("Resource " + SWAGGER_2_0_FILE_NAME + " not found at " + resourcePath);
+                    log.debug("Resource " + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME + " not found at " + resourcePath);
                 }
             }
         } catch (RegistryException e) {
-            handleException("Error while retrieving Swagger v2.0 updated time for " + apiIdentifier.getApiName() + '-' +
+            handleException("Error while retrieving OpenAPI v2.0 or v3.0.0 updated time for " + apiIdentifier.getApiName
+                    () + '-' +
                     apiIdentifier.getVersion(), e);
         }
         return timeStampMap;

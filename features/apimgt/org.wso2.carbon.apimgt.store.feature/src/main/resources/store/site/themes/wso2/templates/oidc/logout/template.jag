@@ -1,5 +1,5 @@
 <% jagg.template("oidc/logout", function (inputs, outputs, jagg) { %>
- 
+
 <%
 
     var security = require("oidc");
@@ -10,7 +10,8 @@
     oidcRelyingParty.invalidateSessionBySessionId(sessionId);
 
     var idpURL = site.oidcConfiguration.identityProviderURI;
-    var logoutURL = idpURL + "logout";
+    var logoutURL = site.oidcConfiguration.logoutEndpointURI +
+        "?post_logout_redirect_uri=" + encode.forUriComponent(site.oidcConfiguration.clientConfiguration.postLogoutRedirectURI); // idpURL + "logout";
     session.invalidate();
 
     response.sendRedirect(logoutURL);
