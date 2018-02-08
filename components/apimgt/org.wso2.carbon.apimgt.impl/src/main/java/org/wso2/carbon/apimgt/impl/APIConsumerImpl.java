@@ -115,6 +115,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.cache.Caching;
 
 /**
@@ -2441,6 +2443,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                                                             "cannot contain leading or trailing white spaces");
         }
 
+        String regex = "[~!#$;%^*+={}\\|\\\\<>\\\"\\'\\/,]";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(application.getName());
+        if (matcher.find()) {
+            handleApplicationNameContainsInvalidCharactersException("Application name contains invalid characters");
+        }
+
         if (APIUtil.isApplicationExist(userId, application.getName(), application.getGroupId())) {
             handleResourceAlreadyExistsException(
                     "A duplicate application already exists by the name - " + application.getName());
@@ -2528,6 +2537,13 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (application.getName() != null && (application.getName().length() != application.getName().trim().length())) {
             handleApplicationNameContainSpacesException("Application name " +
                     "cannot contain leading or trailing white spaces");
+        }
+
+        String regex = "[~!#$;%^*+={}\\|\\\\<>\\\"\\'\\/,]";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(application.getName());
+        if (matcher.find()) {
+            handleApplicationNameContainsInvalidCharactersException("Application name contains invalid characters");
         }
 
         apiMgtDAO.updateApplication(application);
