@@ -299,7 +299,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         return endpointAdminServiceClient.getEndPointsNames(tenantDomain);
     }
 
-    protected EndpointAdminServiceClient getEndpointAdminServiceClient() throws AxisFault {
+    private EndpointAdminServiceClient getEndpointAdminServiceClient() throws AxisFault {
         return new EndpointAdminServiceClient();
     }
 

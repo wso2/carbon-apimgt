@@ -57,7 +57,8 @@ public class EndpointAdminServiceClient {
         try {
             return endpointAdminStub.getEndPointsNamesForTenant(tenantDomain);
         } catch (Exception e) {
-            throw new AxisFault("Error while obtaining the endpoint names from tenant space" + e.getMessage(), e);
+            throw new AxisFault("Error while obtaining the endpoint names from tenant space"
+                    + e.getMessage(), e);
         }
     }
 }

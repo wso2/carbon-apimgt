@@ -1,7 +1,6 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.axis2.AxisFault;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.parser.ParseException;
@@ -11,20 +10,12 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.gateway.stub.APIGatewayAdminStub;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
-import org.wso2.carbon.registry.core.Resource;
-import org.wso2.carbon.registry.core.exceptions.RegistryException;
-import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.apimgt.gateway.dto.stub.APIData;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.apache.axiom.om.OMElement;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.StringWriter;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -287,7 +278,8 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
                 String t = type.replace("_endpoints", "");
                 if (tenantDomain != null && !("").equals(tenantDomain)
                         && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                    apiGatewayAdminStub.deleteEndpointForTenant(endpointName + "_API" + t + "Endpoint", tenantDomain);
+                    apiGatewayAdminStub.deleteEndpointForTenant(endpointName + "_API" + t + "Endpoint",
+                            tenantDomain);
                 } else {
                     apiGatewayAdminStub.deleteEndpoint(endpointName + "_API" + t + "Endpoint");
                 }
@@ -336,7 +328,8 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         }
     }
 
-    private void checkForTenantWhenAdding(APIGatewayAdminStub stub, String epContext, String tenantDomain) throws AxisFault {
+    private void checkForTenantWhenAdding(APIGatewayAdminStub stub, String epContext, String tenantDomain)
+            throws AxisFault {
         try {
             if (tenantDomain != null && !("").equals(tenantDomain)
                     && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
