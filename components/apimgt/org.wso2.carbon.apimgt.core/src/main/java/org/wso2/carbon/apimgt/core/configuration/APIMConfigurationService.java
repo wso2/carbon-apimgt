@@ -16,6 +16,7 @@
 package org.wso2.carbon.apimgt.core.configuration;
 
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
+import org.wso2.carbon.apimgt.core.configuration.models.EnvironmentConfigurations;
 import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 
 /**
@@ -24,9 +25,11 @@ import org.wso2.carbon.apimgt.core.internal.ServiceReferenceHolder;
 public class APIMConfigurationService {
     private static APIMConfigurationService apimConfigurationService = new APIMConfigurationService();
     private APIMConfigurations apimConfigurations;
+    private EnvironmentConfigurations environmentConfigurations;
 
     private APIMConfigurationService() {
         apimConfigurations = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
+        environmentConfigurations = ServiceReferenceHolder.getInstance().getEnvironmentConfigurations();
     }
 
     public static APIMConfigurationService getInstance() {
@@ -35,5 +38,9 @@ public class APIMConfigurationService {
 
     public APIMConfigurations getApimConfigurations() {
         return apimConfigurations;
+    }
+
+    public EnvironmentConfigurations getEnvironmentConfigurations() {
+        return environmentConfigurations;
     }
 }

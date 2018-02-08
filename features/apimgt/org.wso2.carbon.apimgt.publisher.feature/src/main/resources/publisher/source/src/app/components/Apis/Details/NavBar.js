@@ -80,7 +80,7 @@ class NavBar extends Component {
         }
 
         return (
-            <Drawer type="persistent" classes={{paper: classes.drawerPaper,}} anchor={anchor} open={open}>
+            // <Drawer type="persistent" classes={{paper: classes.drawerPaper,}} anchor={anchor} open={open}>
                 <List className={classes.list}>
                     <ListItem>
                         <ListItemIcon>
@@ -99,7 +99,7 @@ class NavBar extends Component {
                         </ListItem>)
                     )}
                 </List>
-            </Drawer>
+            // </Drawer>
         )
     }
 }

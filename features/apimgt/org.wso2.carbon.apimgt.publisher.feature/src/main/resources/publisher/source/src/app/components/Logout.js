@@ -20,6 +20,7 @@ import React, {Component} from 'react'
 import AuthManager from '../data/AuthManager'
 import {Redirect} from 'react-router-dom';
 import qs from 'qs'
+import ConfigManager from "../data/ConfigManager";
 
 class Logout extends Component {
     constructor(props) {
@@ -33,24 +34,27 @@ class Logout extends Component {
     }
 
     componentDidMount() {
-        const promisedLogout = this.authManager.logout();
-        promisedLogout.then(() => {
-            let newState = {logoutSuccess: true};
-            let queryString = this.props.location.search;
-            queryString = queryString.replace(/^\?/, '');
-            /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
-            let params = qs.parse(queryString);
-            if (params.referrer) {
-                newState['referrer'] = params.referrer;
-            }
-            this.setState(newState);
+        ConfigManager.getConfigs().environments.then(response => {
+            const environments = response.data.environments;
+            const promisedLogout = this.authManager.logoutFromEnvironments(environments);
+            promisedLogout.then(() => {
+                let newState = {logoutSuccess: true};
+                let queryString = this.props.location.search;
+                queryString = queryString.replace(/^\?/, '');
+                /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
+                let params = qs.parse(queryString);
+                if (params.referrer) {
+                    newState['referrer'] = params.referrer;
+                }
+                this.setState(newState);
 
-        }).catch((error) => {
-                let message = "Error while logging out";
-                console.log(message);
-                this.setState({logoutFail: error});
-            }
-        );
+            }).catch((error) => {
+                    let message = "Error while logging out";
+                    console.log(message);
+                    this.setState({logoutFail: error});
+                }
+            );
+        });
     }
 
     render() {

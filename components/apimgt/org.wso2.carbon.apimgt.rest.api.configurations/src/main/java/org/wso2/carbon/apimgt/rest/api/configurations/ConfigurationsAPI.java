@@ -33,7 +33,7 @@ import javax.ws.rs.core.Response;
  * This class provides configurations information for UI
  */
 @Component(
-        name = "org.wso2.carbon.apimgt.rest.api.configurations.ConfiguratoinsAPI",
+        name = "org.wso2.carbon.apimgt.rest.api.configurations.ConfigurationsAPI",
         service = Microservice.class,
         immediate = true
 )
@@ -41,7 +41,7 @@ import javax.ws.rs.core.Response;
 public class ConfigurationsAPI implements Microservice {
 
     /**
-     * Get environment configurations from deployement.yaml and returns the list of environments
+     * Get environment configurations from deployment.yaml and returns the list of environments
      *
      * @return Response List of environments: {"environments":[
      *     {"host":"localhost:9292","loginTokenPath":"/login/token","label":"Development"},

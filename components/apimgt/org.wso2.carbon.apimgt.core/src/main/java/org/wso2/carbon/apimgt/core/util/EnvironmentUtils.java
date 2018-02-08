@@ -20,8 +20,8 @@ public class EnvironmentUtils {
         }
 
         String host = origin.split(APIMgtConstants.WEB_PROTOCOL_SUFFIX)[1];
-        List<String> allowedOrigins = APIMConfigurationService.getInstance().getApimConfigurations()
-                .getEnvironmentConfigurations().getAllowedHosts();
+        List<String> allowedOrigins = APIMConfigurationService.getInstance().getEnvironmentConfigurations()
+                .getAllowedHosts();
         if (allowedOrigins.contains(APIMgtConstants.CORSAllowOriginConstants.ALLOW_ALL_ORIGINS) ||
                 allowedOrigins.contains(host)) {
             return origin;

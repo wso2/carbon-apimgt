@@ -17,9 +17,15 @@
  */
 "use strict";
 import APIClient from "./APIClient";
-import Utils from "./Utils";
 
+/**
+ * Class representing a Factory of APIClients
+ */
 class APIClientFactory {
+    /**
+     * Initialize a single instance of APIClientFactory
+     * @returns {APIClientFactory}
+     */
     constructor() {
         if (APIClientFactory._instance) {
             return APIClientFactory._instance;
@@ -29,23 +35,45 @@ class APIClientFactory {
         APIClientFactory._instance = this;
     }
 
-    getAPIClient(environmentLabel) {
-        let api_Client = this._APIClientMap.get(environmentLabel);
+    /**
+     *
+     * @param {Object} environment
+     * @returns {APIClient} APIClient object for the environment
+     */
+    getAPIClient(environment) {
+        let api_Client = this._APIClientMap.get(environment.label);
 
         if (api_Client) {
             return api_Client;
         }
 
-        api_Client = new APIClient(Utils.getEnvironment().host);
-        this._APIClientMap.set(environmentLabel, api_Client);
+        api_Client = new APIClient(environment);
+        this._APIClientMap.set(environment.label, api_Client);
         return api_Client;
     }
 
+    /**
+     * Remove an APIClient object from the environment
+     * @param {String} environmentLabel
+     */
     destroyAPIClient(environmentLabel) {
         this._APIClientMap.delete(environmentLabel);
     }
+
+    /**
+     * Get an instance of APIClientFactory
+     * @returns {APIClientFactory} An instance of APIClientFactory
+     */
+    static getInstance() {
+        return new APIClientFactory();
+    }
 }
 
+/**
+ * Single instance of APIClientFactory
+ * @type {APIClientFactory}
+ * @private
+ */
 APIClientFactory._instance = null;
 
 export default APIClientFactory;

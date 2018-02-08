@@ -21,33 +21,31 @@ import Utils from './Utils'
 
 /**
  * Represent an user logged in to the application, There will be allays one user per session and
- * this user details will be persist in browser localstorage.
+ * this user details will be persist in browser local-storage.
  */
 export default class User {
     /**
      * Create a user for the given environment
-     * @param {string} environment
-     * @param {string} name
-     * @param {string} id_token
+     * @param {string} environmentName - name of the environment
+     * @param {string} name - name of the cookie
      * @param {boolean} remember
      * @returns {User|null} user object
      */
-    constructor(environment, name, id_token, remember = false) {
-        const user = User._userMap.get(environment);
+    constructor(environmentName, name, remember = false) {
+        const user = User._userMap.get(environmentName);
         if (user) {
             return user;
         }
         this.name = name;
-        this.environment = environment;
         this._scopes = [];
-        this._idToken = id_token;
         this._remember = remember;
-        User._userMap.set(environment, this);
+        this._environmentName = environmentName;
+        User._userMap.set(environmentName, this);
     }
 
     /**
      * OAuth scopes which are available for use by this user
-     * @returns {Array} : An array of scopes
+     * @returns {Array} - An array of scopes
      */
     get scopes() {
         return this._scopes;
@@ -55,7 +53,7 @@ export default class User {
 
     /**
      * Set OAuth scopes available to be used by this user
-     * @param {Array} newScopes :  An array of scopes
+     * @param {Array} newScopes - An array of scopes
      */
     set scopes(newScopes) {
         Object.assign(this.scopes, newScopes);
@@ -63,18 +61,27 @@ export default class User {
 
     /**
      * User utility method to create an user from JSON object.
-     * @param {JSON} userJson : Need to provide user information in JSON structure to create an user object
-     * @returns {User} : An instance of User(this) class.
+     * @param {JSON} userJson - Need to provide user information in JSON structure to create an user object
+     * @param {String} environmentName - Name of the environment to be assigned to the user
+     * @returns {User} - An instance of User(this) class.
      */
-    static fromJson(userJson) {
+    static fromJson(userJson, environmentName = Utils.getCurrentEnvironment().label) {
         if (!userJson.name) {
             throw "Need to provide user `name` key in the JSON object, to create an user";
         }
-        const _user = new User(Utils.getEnvironment().label, userJson.name);
+
+        const _user = new User(environmentName, userJson.name);
         _user.scopes = userJson.scopes;
-        _user.idToken = userJson.idToken;
         _user.rememberMe = userJson.remember;
         return _user;
+    }
+
+    /**
+     * Remove the user from static in-memory user map
+     * @param {String} environmentName - Name of the environment the user to be removed
+     */
+    static destroyInMemoryUser(environmentName){
+        User._userMap.delete(environmentName);
     }
 
     /**
@@ -82,9 +89,7 @@ export default class User {
      * @returns {String|null}
      */
     getPartialToken() {
-        //Append environment name to cookie
-        const environmentName = "_" + Utils.getEnvironment().label;
-        return Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1 + environmentName);
+        return Utils.getCookie(User.CONST.WSO2_AM_TOKEN_1, this._environmentName);
     }
 
     /**
@@ -92,21 +97,18 @@ export default class User {
      * @returns {String|null}
      */
     getRefreshPartialToken() {
-        //Append environment name to cookie
-        const environmentName = "_" + Utils.getEnvironment().label;
-        return Utils.getCookie(User.CONST.WSO2_AM_REFRESH_TOKEN_1 + environmentName);
+        return Utils.getCookie(User.CONST.WSO2_AM_REFRESH_TOKEN_1, this._environmentName);
     }
 
     /**
      * Store the JavaScript accessible access token segment in cookie storage
-     * @param {String} newToken : Part of the access token which needs when accessing REST API
-     * @param {Number} validityPeriod : Validity period of the cookie in seconds
-     * @param path Path which need to be set to cookie
+     * @param {String} newToken - Part of the access token which needs when accessing REST API
+     * @param {Number} validityPeriod - Validity period of the cookie in seconds
+     * @param {String} path - Path which need to be set to cookie
      */
     setPartialToken(newToken, validityPeriod, path) {
-        Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, path);
-        const cookieName = `${User.CONST.WSO2_AM_TOKEN_1}_${Utils.getEnvironment().label}`;
-        Utils.setCookie(cookieName, newToken, validityPeriod, path);
+        Utils.delete_cookie(User.CONST.WSO2_AM_TOKEN_1, path, this._environmentName);
+        Utils.setCookie(User.CONST.WSO2_AM_TOKEN_1, newToken, validityPeriod, path, this._environmentName);
     }
 
     /**
@@ -140,16 +142,14 @@ export default class User {
 
     /**
      * Provide user data in JSON structure.
-     * @returns {JSON} : JSON representation of the user object
+     * @returns {JSON} - JSON representation of the user object
      */
     toJson() {
         return {
             name: this.name,
             scopes: this._scopes,
-            idToken: this._idToken,
             remember: this._remember,
-            expiryTime: this.getExpiryTime(),
-            environment: this.environment
+            expiryTime: this.getExpiryTime()
         };
     }
 }
@@ -158,7 +158,7 @@ User.CONST = {
     WSO2_AM_TOKEN_MSF4J: "WSO2_AM_TOKEN_MSF4J",
     WSO2_AM_TOKEN_1: "WSO2_AM_TOKEN_1",
     WSO2_AM_REFRESH_TOKEN_1: "WSO2_AM_REFRESH_TOKEN_1",
-    LOCALSTORAGE_USER: "wso2_user_publisher",
+    LOCAL_STORAGE_USER: "wso2_user_publisher",
     USER_EXPIRY_TIME: "user_expiry_time"
 };
 /**

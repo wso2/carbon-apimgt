@@ -231,7 +231,7 @@ class Header extends React.Component {
                                 </Menu>
                                 {/* Environment menu */}
                                 <EnvironmentMenu environments={this.state.environments}
-                                                 environmentLabel={Utils.getEnvironment().label}
+                                                 environmentLabel={Utils.getCurrentEnvironment().label}
                                                  handleEnvironmentChange={this.handleEnvironmentChange}/>
                                 {/* User menu */}
                                 <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClickUserMenu}

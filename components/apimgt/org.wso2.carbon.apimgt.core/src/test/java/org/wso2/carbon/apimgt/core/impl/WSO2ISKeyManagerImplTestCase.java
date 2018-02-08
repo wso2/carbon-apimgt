@@ -383,7 +383,7 @@ public class WSO2ISKeyManagerImplTestCase {
         ////request to key manager
         AccessTokenRequest tokenRequest = createKeyManagerTokenRequest(consumerKey, consumerSecret,
                 KeyManagerConstants.PASSWORD_GRANT_TYPE, "user1", "pass1", "xxx-old-token-xxx", 7200L,
-                null, null, null);
+                null, null, null, null);
 
         ////mocked response from /token service
         OAuth2TokenInfo oAuth2TokenInfo = createTokenServiceResponse(tokenRequest);
@@ -435,7 +435,8 @@ public class WSO2ISKeyManagerImplTestCase {
         //happy path - 200 - refresh grant type
         ////request to key manager
         AccessTokenRequest tokenRequest = createKeyManagerTokenRequest(consumerKey, consumerSecret,
-                KeyManagerConstants.REFRESH_GRANT_TYPE, null, null, null, -1L, null, null, "xxx-refresh-token-xxx");
+                KeyManagerConstants.REFRESH_GRANT_TYPE, null, null, null, -1L,
+                null, null, "xxx-refresh-token-xxx", null);
 
         ////mocked response from /token service
         OAuth2TokenInfo oAuth2TokenInfo = createTokenServiceResponse(tokenRequest);
@@ -474,7 +475,7 @@ public class WSO2ISKeyManagerImplTestCase {
         //happy path - 200 - client credentials grant type
         ////request to key manager
         AccessTokenRequest tokenRequest = createKeyManagerTokenRequest(consumerKey, consumerSecret,
-                KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE, null, null, null, -2L, null, null, null);
+                KeyManagerConstants.CLIENT_CREDENTIALS_GRANT_TYPE, null, null, null, -2L, null, null, null, null);
 
         ////mocked response from /token service
         OAuth2TokenInfo oAuth2TokenInfo = createTokenServiceResponse(tokenRequest);
@@ -514,7 +515,7 @@ public class WSO2ISKeyManagerImplTestCase {
         ////request to key manager
         AccessTokenRequest tokenRequest = createKeyManagerTokenRequest(consumerKey, consumerSecret,
                 KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE, null, null, null, -2L,
-                "xxx-auth-code-xxx", "http://test.callback/url", null);
+                "xxx-auth-code-xxx", "http://test.callback/url", null, null);
 
         ////mocked response from /token service
         OAuth2TokenInfo oAuth2TokenInfo = createTokenServiceResponse(tokenRequest);
@@ -531,6 +532,48 @@ public class WSO2ISKeyManagerImplTestCase {
         Mockito.when(oAuth2ServiceStub.getTokenServiceStub().generateAuthCodeGrantAccessToken(
                 tokenRequest.getAuthorizationCode(),
                 tokenRequest.getCallbackURI(), tokenRequest.getScopes(),
+                tokenRequest.getValidityPeriod(), tokenRequest.getClientId(),
+                tokenRequest.getClientSecret()))
+                .thenReturn(newTokenResponse);
+
+        try {
+            AccessTokenInfo newToken = kmImpl.getNewAccessToken(tokenRequest);
+            Assert.assertEquals(newToken, accessTokenInfo);
+        } catch (Exception ex) {
+            Assert.fail(ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testGetNewAccessTokenByJWTGrant() throws Exception {
+        DCRMServiceStub dcrmServiceStub = Mockito.mock(DCRMServiceStub.class);
+        OAuth2ServiceStubs oAuth2ServiceStub = Mockito.mock(OAuth2ServiceStubs.class);
+        OAuth2ServiceStubs.TokenServiceStub tokenStub = Mockito.mock(OAuth2ServiceStubs.TokenServiceStub.class);
+        ScopeRegistrationServiceStub scopeRegistrationServiceStub = Mockito.mock(ScopeRegistrationServiceStub.class);
+        WSO2ISKeyManagerImpl kmImpl = new WSO2ISKeyManagerImpl(dcrmServiceStub, oAuth2ServiceStub,
+                scopeRegistrationServiceStub);
+
+        //happy path - 200 - JWT grant type
+        ////request to key manager
+        AccessTokenRequest tokenRequest = createKeyManagerTokenRequest(consumerKey, consumerSecret,
+                KeyManagerConstants.JWT_GRANT_TYPE, null, null, null, -2L,
+                null, null, null, "xxx-assertion-xxx");
+
+        ////mocked response from /token service
+        OAuth2TokenInfo oAuth2TokenInfo = createTokenServiceResponse(tokenRequest);
+
+        ////expected response from key manager
+        AccessTokenInfo accessTokenInfo = createExpectedKeyManagerResponse(oAuth2TokenInfo);
+
+        Response newTokenResponse = Response.builder()
+                .status(200)
+                .headers(new HashMap<>())
+                .body(new Gson().toJson(oAuth2TokenInfo), Util.UTF_8)
+                .build();
+        Mockito.when(oAuth2ServiceStub.getTokenServiceStub()).thenReturn(tokenStub);
+        Mockito.when(oAuth2ServiceStub.getTokenServiceStub().generateJWTGrantAccessToken(
+                tokenRequest.getAssertion(),
+                tokenRequest.getGrantType(), tokenRequest.getScopes(),
                 tokenRequest.getValidityPeriod(), tokenRequest.getClientId(),
                 tokenRequest.getClientSecret()))
                 .thenReturn(newTokenResponse);
@@ -564,7 +607,7 @@ public class WSO2ISKeyManagerImplTestCase {
         //error case - invalid grant type
         final String invalidGrantType = "invalid_grant";
         AccessTokenRequest tokenRequest = createKeyManagerTokenRequest(consumerKey, consumerSecret,
-                invalidGrantType, null, null, null, -2L, null, null, null);
+                invalidGrantType, null, null, null, -2L, null, null, null, null);
         try {
             kmImpl.getNewAccessToken(tokenRequest);
             Assert.fail("Exception was expected, but wasn't thrown");
@@ -575,7 +618,8 @@ public class WSO2ISKeyManagerImplTestCase {
 
         //error case - response is null (mock condition (validity period) is different)
         tokenRequest = createKeyManagerTokenRequest(consumerKey, consumerSecret,
-                KeyManagerConstants.REFRESH_GRANT_TYPE, null, null, null, -1L, null, null, "xxx-refresh-token-xxx");
+                KeyManagerConstants.REFRESH_GRANT_TYPE, null, null, null, -1L,
+                null, null, "xxx-refresh-token-xxx", null);
 
         Mockito.when(oAuth2ServiceStub.getTokenServiceStub()).thenReturn(tokenStub);
         Mockito.when(oAuth2ServiceStub.getTokenServiceStub().generateRefreshGrantAccessToken(
@@ -593,7 +637,8 @@ public class WSO2ISKeyManagerImplTestCase {
         //error case - token response non-200
         ////request to key manager
         tokenRequest = createKeyManagerTokenRequest(consumerKey, consumerSecret,
-                KeyManagerConstants.REFRESH_GRANT_TYPE, null, null, null, 7200L, null, null, "xxx-refresh-token-xxx");
+                KeyManagerConstants.REFRESH_GRANT_TYPE, null, null, null, 7200L,
+                null, null, "xxx-refresh-token-xxx", null);
 
         final int errorCode = 500;
         Response errorResponse = Response.builder()
@@ -998,7 +1043,8 @@ public class WSO2ISKeyManagerImplTestCase {
     private AccessTokenRequest createKeyManagerTokenRequest(String consumerKey, String consumerSecret,
                                                             String grantType, String username, String password,
                                                             String revokeToken, long validityPeriod,
-                                                            String code, String callbackUrl, String refreshToken) {
+                                                            String code, String callbackUrl, String refreshToken,
+                                                            String assertion) {
         AccessTokenRequest tokenRequest = new AccessTokenRequest();
         tokenRequest.setClientId(consumerKey);
         tokenRequest.setClientSecret(consumerSecret);
@@ -1010,6 +1056,7 @@ public class WSO2ISKeyManagerImplTestCase {
         tokenRequest.setAuthorizationCode(code);
         tokenRequest.setCallbackURI(callbackUrl);
         tokenRequest.setRefreshToken(refreshToken);
+        tokenRequest.setAssertion(assertion);
         tokenRequest.setScopes("openid apim:view_api");
         return tokenRequest;
     }

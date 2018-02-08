@@ -139,7 +139,7 @@ class ApiCreateWSDL extends Component {
     }
 
     createWSDLAPI() {
-        let new_api = new API('');
+        let new_api = new API();
         const {wsdlBean, apiFields} = this.state;
         const {apiName, apiVersion, apiContext, apiEndpoint, implementationType} = apiFields;
         const uploadMethod = wsdlBean.url ? 'url' : 'file';

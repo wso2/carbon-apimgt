@@ -142,12 +142,12 @@ class Utils {
         localStorage.setItem(Utils.CONST.LOCALSTORAGE_ENVIRONMENT, JSON.stringify(environment));
     }
 
-    static getPromised_ssoData(environment) {
-        return Axios.get(Utils.getAppSSORequestURL(environment));
+    static getPromised_DCRappInfo(environment) {
+        return Axios.get(Utils.getDCRappInfoRequestURL(environment));
     }
 
-    static getAppSSORequestURL(environment = Utils.getEnvironment()) {
-        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.SSO_LOGIN}${Utils.CONST.CONTEXT_PATH}`;
+    static getDCRappInfoRequestURL(environment = Utils.getEnvironment()) {
+        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.DCR_APP_INFO}${Utils.CONST.CONTEXT_PATH}`;
     }
 
     static getAppLogoutURL() {
@@ -174,7 +174,7 @@ class Utils {
 
 Utils.CONST = {
     LOCALSTORAGE_ENVIRONMENT: 'environment_store',
-    SSO_LOGIN: '/login/login',
+    DCR_APP_INFO: '/login/login',
     LOGOUT: '/login/logout',
     LOGIN_TOKEN_PATH: '/login/token',
     SWAGGER_YAML: '/api/am/store/v1.0/apis/swagger.yaml',

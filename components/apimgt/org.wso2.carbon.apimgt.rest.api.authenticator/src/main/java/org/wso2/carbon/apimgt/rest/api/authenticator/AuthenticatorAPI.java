@@ -83,7 +83,8 @@ public class AuthenticatorAPI implements Microservice {
     @Consumes({MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA})
     public Response authenticate(@Context Request request, @PathParam("appName") String appName,
                                  @FormDataParam("username") String userName, @FormDataParam("password") String password,
-                                 @FormDataParam("grant_type") String grantType, @FormDataParam("validity_period") String validityPeriod,
+                                 @FormDataParam("assertion") String assertion, @FormDataParam("grant_type") String grantType,
+                                 @FormDataParam("validity_period") String validityPeriod,
                                  @FormDataParam("remember_me") boolean isRememberMe, @FormDataParam("scopes") String scopesList) {
         try {
             KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
@@ -115,7 +116,7 @@ public class AuthenticatorAPI implements Microservice {
                 }
             }
             AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appContext.substring(1),
-                    grantType, userName, password, refToken, Long.parseLong(validityPeriod), null);
+                    grantType, userName, password, refToken, Long.parseLong(validityPeriod), null, assertion);
             authenticatorService.setAccessTokenData(authResponseBean, accessTokenInfo);
             String accessToken = accessTokenInfo.getAccessToken();
             String refreshToken = accessTokenInfo.getRefreshToken();
@@ -271,7 +272,7 @@ public class AuthenticatorAPI implements Microservice {
      * This is the API which IDP redirects the user after authentication.
      *
      * @param request Request to call /callback api
-     * @param appName Name of the applicatoin (publisher/store/admin)
+     * @param appName Name of the application (publisher/store/admin)
      * @param authorizationCode Authorization-Code
      * @return Response - Response with redirect URL
      */
@@ -300,7 +301,7 @@ public class AuthenticatorAPI implements Microservice {
             SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
             AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
             AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appName, grantType,
-                    null, null, null, 0, authorizationCode);
+                    null, null, null, 0, authorizationCode, null);
             if (StringUtils.isEmpty(accessTokenInfo.toString())) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                         .entity("Access token generation failed!").build();
@@ -330,8 +331,8 @@ public class AuthenticatorAPI implements Microservice {
                 // Redirect to the store/apis page (redirect URL)
                 String uiServiceUrl;
                 //The first host in the list "allowedHosts" is the host of UI-Service
-                String uiServiceHost = APIMConfigurationService.getInstance().getApimConfigurations()
-                        .getEnvironmentConfigurations().getAllowedHosts().get(0);
+                String uiServiceHost = APIMConfigurationService.getInstance().getEnvironmentConfigurations()
+                        .getAllowedHosts().get(0);
                 if (StringUtils.isEmpty(uiServiceHost)) {
                     if (log.isDebugEnabled()) {
                         log.debug("The first string in the list " +

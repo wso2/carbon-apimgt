@@ -48,7 +48,6 @@ class Protected extends Component {
         super(props);
         this.state = {
             showLeftMenu: false,
-            authConfigs: null,
             environments: [],
         };
         this.environmentName = "";

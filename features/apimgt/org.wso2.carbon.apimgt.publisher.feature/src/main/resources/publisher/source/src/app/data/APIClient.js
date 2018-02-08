@@ -27,16 +27,16 @@ import Utils from "./Utils";
  */
 class APIClient {
     /**
-     * @param {String} host : Host of apis. Host for the swagger-client's spec property.
-     * @param {{}} args : Accept as an optional argument for APIClient constructor.Merge the given args with default args.
-     * @returns {APIClient|*|null}
+     * @param {Object} environment - Environment to get host for the swagger-client's spec property.
+     * @param {{}} args - Accept as an optional argument for APIClient constructor.Merge the given args with default args.
+     * @returns {APIClient}
      */
-    constructor(host, args = {}) {
-        this.host = host || location.host;
+    constructor(environment, args = {}) {
+        this.environment = environment || Utils.getCurrentEnvironment();
 
         const authorizations = {
             OAuth2Security: {
-                token: { access_token: AuthManager.getUser().getPartialToken() }
+                token: {access_token: AuthManager.getUser(environment.label).getPartialToken()}
             }
         };
 
@@ -68,8 +68,8 @@ class APIClient {
 
     /**
      * Get the ETag of a given resource key from the session storage
-     * @param key {string} key of resource.
-     * @returns {string} ETag value for the given key
+     * @param {String} key - key of resource.
+     * @returns {String} ETag value for the given key
      */
     static getETag(key) {
         return sessionStorage.getItem("etag_" + key);
@@ -111,7 +111,7 @@ class APIClient {
      * @private
      */
     _fixSpec(spec) {
-        spec.host = this.host;
+        spec.host = this.environment.host;
         return spec;
     }
 
@@ -126,7 +126,7 @@ class APIClient {
 
     _getRequestInterceptor() {
         return (request) => {
-            AuthManager.refreshTokenOnExpire(request);
+            AuthManager.refreshTokenOnExpire(request, this.environment);
             if (APIClient.getETag(request.url) && (request.method === "PUT" || request.method === "DELETE" || request.method === "POST")) {
                 request.headers["If-Match"] = APIClient.getETag(request.url);
             }
