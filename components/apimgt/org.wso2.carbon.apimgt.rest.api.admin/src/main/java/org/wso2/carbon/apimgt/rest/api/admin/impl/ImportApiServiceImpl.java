@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -32,6 +33,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.utils.mappings.ApplicationMappingUt
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
 import java.io.InputStream;
@@ -52,8 +54,9 @@ public class ImportApiServiceImpl extends ImportApiService {
      */
     @Override
     public Response importApplicationsPost(InputStream fileInputStream, Attachment fileDetail,
-                                           Boolean preserveOwner, Boolean skipSubscriptions) {
+                                           Boolean preserveOwner, Boolean skipSubscriptions, String appOwner) {
         APIConsumer consumer;
+        String ownerId;
         String username = RestApiUtil.getLoggedInUsername();
         String tempDirPath = System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator +
                 "imported-app-archive-" +
@@ -63,28 +66,47 @@ public class ImportApiServiceImpl extends ImportApiService {
             FileBasedApplicationImportExportManager importExportManager =
                     new FileBasedApplicationImportExportManager(consumer, tempDirPath);
             Application applicationDetails = importExportManager.importApplication(fileInputStream);
-            if (preserveOwner != null && preserveOwner) {
-                username = applicationDetails.getSubscriber().getName();
+            if (!StringUtils.isBlank(appOwner)) {
+                ownerId = appOwner;
+            } else if (preserveOwner != null && preserveOwner) {
+                ownerId = applicationDetails.getSubscriber().getName();
+            } else {
+                ownerId = username;
             }
-            int appId = consumer.addApplication(applicationDetails, username);
+            if (!MultitenantUtils.getTenantDomain(ownerId).equals
+                    (MultitenantUtils.getTenantDomain(username))) {
+                String errorMsg = "Cross Tenant Imports are not allowed";
+                log.error(errorMsg);
+                return Response.status(Response.Status.FORBIDDEN).entity(errorMsg).build();
+            }
+            importExportManager.validateOwner(ownerId, applicationDetails.getGroupId());
+            int appId = consumer.addApplication(applicationDetails, ownerId);
+            boolean isImportComplete = false;
             if (skipSubscriptions == null || !skipSubscriptions) {
-                importExportManager.importSubscriptions(applicationDetails, username, appId);
+                isImportComplete = importExportManager.importSubscriptions(applicationDetails, username, appId);
             }
             Application importedApplication = consumer.getApplicationById(appId);
-            ApplicationInfoDTO importedApplicationDTO = ApplicationMappingUtil.fromApplicationToInfoDTO(importedApplication);
+            ApplicationInfoDTO importedApplicationDTO = ApplicationMappingUtil
+                    .fromApplicationToInfoDTO(importedApplication);
             URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
                     importedApplicationDTO.getApplicationId());
-            return Response.created(location).entity(importedApplicationDTO).build();
+            if (isImportComplete) {
+                return Response.created(location).entity(importedApplicationDTO).build();
+            } else {
+                return Response.created(location).status(207)
+                        .entity(importedApplicationDTO).build();
+            }
         } catch (APIManagementException | URISyntaxException | UserStoreException e) {
             RestApiUtil
-                    .handleInternalServerError("Error while importing Application" + username, e, log);
+                    .handleInternalServerError("Error while importing Application", e, log);
         }
         return null;
     }
 
     @Override
     public String importApplicationsPostGetLastUpdatedTime(InputStream fileInputStream, Attachment fileDetail,
-                                                           Boolean preserveOwner, Boolean addSubscriptions) {
+                                                           Boolean preserveOwner, Boolean skipSubscriptions,
+                                                           String appOwner) {
         return null;
     }
 }

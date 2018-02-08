@@ -35,6 +35,8 @@ public class ImportApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSuccessful response with the updated object as entity in the body.\n"),
         
+        @io.swagger.annotations.ApiResponse(code = 206, message = "Partial Content.\nThe server has fulfilled the partial request for the resource.\n"),
+        
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error\n"),
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
@@ -42,14 +44,15 @@ public class ImportApi  {
     public Response importApplicationsPost(@ApiParam(value = "Zip archive consisting of exported Application Configuration.\n") @Multipart(value = "file") InputStream fileInputStream,
     @ApiParam(value = "Zip archive consisting of exported Application Configuration.\n : details") @Multipart(value = "file" ) Attachment fileDetail,
     @ApiParam(value = "Preserve Original Creator of the Application\n") @QueryParam("preserveOwner")  Boolean preserveOwner,
-    @ApiParam(value = "Skip importing Subscriptions of the Application\n") @QueryParam("skipSubscriptions")  Boolean skipSubscriptions)
+    @ApiParam(value = "Skip importing Subscriptions of the Application\n") @QueryParam("skipSubscriptions")  Boolean skipSubscriptions,
+    @ApiParam(value = "Expected Owner of the Application in the Import Environment\n") @QueryParam("appOwner")  String appOwner)
     {
-    return delegate.importApplicationsPost(fileInputStream,fileDetail,preserveOwner,skipSubscriptions);
+    return delegate.importApplicationsPost(fileInputStream,fileDetail,preserveOwner,skipSubscriptions,appOwner);
     }
 
-    public String importApplicationsPostGetLastUpdatedTime(InputStream fileInputStream,Attachment fileDetail,Boolean preserveOwner,Boolean skipSubscriptions)
+    public String importApplicationsPostGetLastUpdatedTime(InputStream fileInputStream,Attachment fileDetail,Boolean preserveOwner,Boolean skipSubscriptions,String appOwner)
     {
-        return delegate.importApplicationsPostGetLastUpdatedTime(fileInputStream,fileDetail,preserveOwner,skipSubscriptions);
+        return delegate.importApplicationsPostGetLastUpdatedTime(fileInputStream,fileDetail,preserveOwner,skipSubscriptions,appOwner);
     }
 }
 

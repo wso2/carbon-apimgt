@@ -15,8 +15,8 @@ import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import javax.ws.rs.core.Response;
 
 public abstract class ImportApiService {
-    public abstract Response importApplicationsPost(InputStream fileInputStream,Attachment fileDetail,Boolean preserveOwner,Boolean skipSubscriptions);
+    public abstract Response importApplicationsPost(InputStream fileInputStream,Attachment fileDetail,Boolean preserveOwner,Boolean skipSubscriptions,String appOwner);
 
-    public abstract String importApplicationsPostGetLastUpdatedTime(InputStream fileInputStream,Attachment fileDetail,Boolean preserveOwner,Boolean skipSubscriptions);
+    public abstract String importApplicationsPostGetLastUpdatedTime(InputStream fileInputStream,Attachment fileDetail,Boolean preserveOwner,Boolean skipSubscriptions,String appOwner);
 }
 

@@ -19,6 +19,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
@@ -57,23 +58,26 @@ public class ExportApiServiceImpl extends ExportApiService {
                 UUID.randomUUID().toString(); //creates a directory in default temporary-file directory
         String username = RestApiUtil.getLoggedInUsername();
         String exportedFileName = null;
+        if (StringUtils.isBlank(appName) || StringUtils.isBlank(appOwner)) {
+            RestApiUtil.handleBadRequest("Application name or owner should not be empty or null.", log);
+        }
         try {
             consumer = RestApiUtil.getConsumer(username);
             FileBasedApplicationImportExportManager importExportManager = new FileBasedApplicationImportExportManager
                     (consumer, pathToExportDir);
-            if (appOwner!=null && importExportManager.isValidOwner(appOwner)) {
+            if (importExportManager.isOwnerAvailable(appOwner)) {
                 applicationDetails = importExportManager.getApplicationDetails(appName, appOwner);
-                if (applicationDetails == null) {
-                    // 404
-                    String errorMsg = "No application found with name " + appName + "owned by " + appOwner;
-                    log.error(errorMsg);
-                    return Response.status(Response.Status.NOT_FOUND).entity(errorMsg).build();
-                } else if (!MultitenantUtils.getTenantDomain(applicationDetails.getSubscriber().getName()).equals
-                        (MultitenantUtils.getTenantDomain(username))) {
-                    String errorMsg = "Cross Tenant Exports are not allowed";
-                    log.error(errorMsg);
-                    return Response.status(Response.Status.UNAUTHORIZED).entity(errorMsg).build();
-                }
+            }
+            if (applicationDetails == null) {
+                // 404
+                String errorMsg = "No application found with name " + appName + " owned by " + appOwner;
+                log.error(errorMsg);
+                return Response.status(Response.Status.NOT_FOUND).entity(errorMsg).build();
+            } else if (!MultitenantUtils.getTenantDomain(applicationDetails.getSubscriber().getName()).equals
+                    (MultitenantUtils.getTenantDomain(username))) {
+                String errorMsg = "Cross Tenant Exports are not allowed";
+                log.error(errorMsg);
+                return Response.status(Response.Status.FORBIDDEN).entity(errorMsg).build();
             }
             exportedFilePath = importExportManager.exportApplication(applicationDetails, exportedAppDirName);
             String zippedFilePath = importExportManager.createArchiveFromExportedAppArtifacts(exportedFilePath,
@@ -92,7 +96,7 @@ public class ExportApiServiceImpl extends ExportApiService {
     }
 
     @Override
-    public String exportApplicationsGetGetLastUpdatedTime(String appName) {
+    public String exportApplicationsGetGetLastUpdatedTime(String appName, String appOwner) {
         return null;
     }
 }

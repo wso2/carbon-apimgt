@@ -34,19 +34,21 @@ public class ExportApi  {
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nExport Successful.\n"),
         
+        @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error\n"),
+        
         @io.swagger.annotations.ApiResponse(code = 404, message = "Not Found.\nRequested Application does not exist.\n"),
         
         @io.swagger.annotations.ApiResponse(code = 406, message = "Not Acceptable.\nThe requested media type is not supported\n") })
 
     public Response exportApplicationsGet(@ApiParam(value = "Application Name\n",required=true) @QueryParam("appName")  String appName,
-    @ApiParam(value = "Application Name\n",required=true) @QueryParam("appOwner")  String appOwner )
+    @ApiParam(value = "Owner of the Application\n",required=true) @QueryParam("appOwner")  String appOwner)
     {
-    return delegate.exportApplicationsGet(appName, appOwner);
+    return delegate.exportApplicationsGet(appName,appOwner);
     }
 
-    public String exportApplicationsGetGetLastUpdatedTime(String appName)
+    public String exportApplicationsGetGetLastUpdatedTime(String appName,String appOwner)
     {
-        return delegate.exportApplicationsGetGetLastUpdatedTime(appName);
+        return delegate.exportApplicationsGetGetLastUpdatedTime(appName,appOwner);
     }
 }
 

@@ -1888,8 +1888,8 @@
           "application/json",
           "application/zip"
         ],
-        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET https://localhost:9443/api/am/store/v0.11/export/applications?appName=sampleApp > exported-application.zip",
-        "x-wso2-request": "GET https://localhost:9443/api/am/store/v0.11/export/applications?appName=sampleApp\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
+        "x-wso2-curl": "curl -k -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" -X GET https://localhost:9443/api/am/admin/v0.11/export/applications?appName=sampleApp&appOwner=admin > admin_sampleApp.zip",
+        "x-wso2-request": "GET https://localhost:9443/api/am/store/v0.11/export/applications?appName=sampleApp&appOwner=admin\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
         "x-wso2-response": "HTTP/1.1 200 OK\n Connection: keep-alive\n  Content-Disposition: attachment; filename=\"exported-applications.zip\"\n  Content-Type: application/zip",
         "summary": "Export an Application",
         "description": "This operation can be used to export the details of a particular Application as a zip file.\n",
@@ -1898,6 +1898,13 @@
             "name": "appName",
             "in": "query",
             "description": "Application Name\n",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "appOwner",
+            "in": "query",
+            "description": "Owner of the Application\n",
             "required": true,
             "type": "string"
           }
@@ -1916,6 +1923,12 @@
             },
             "schema": {
               "type": "file"
+            }
+          },
+          "400": {
+            "description": "Bad Request.\nInvalid request or validation error\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
           "404": {
@@ -1939,9 +1952,9 @@
         "consumes": [
           "multipart/form-data"
         ],
-        "x-wso2-curl": "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/store/v0.11/import/applications",
+        "x-wso2-curl": "curl -k -F \"file=@exported.zip\" -X POST -H \"Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\" https://localhost:9443/api/am/admin/v0.11/import/applications",
         "x-wso2-request": "POST https://localhost:9443/api/am/store/v0.11/import/applications\nAuthorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8\n",
-        "x-wso2-response": "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/store/v0.11/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\nContent-Type: application/json\n\n{\n   \"groupId\": null,\n   \"callbackUrl\": \"http://my.server.com/callback\",\n   \"subscriber\": \"admin\",\n   \"throttlingTier\": \"Unlimited\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"description\": \"sample app description\",\n   \"status\": \"APPROVED\",\n   \"name\": \"sampleapp\",\n   \"keys\": []\n}",
+        "x-wso2-response": "HTTP/1.1 201 Created\nLocation: https://localhost:9443/api/am/admin/v0.11/applications/c30f3a6e-ffa4-4ae7-afce-224d1f820524\nContent-Type: application/json\n\n{\n   \"groupId\": null,\n   \"callbackUrl\": \"http://my.server.com/callback\",\n   \"owner\": \"admin\",\n   \"applicationId\": \"c30f3a6e-ffa4-4ae7-afce-224d1f820524\",\n   \"status\": \"APPROVED\",\n   \"name\": \"sampleapp\" \n}",
         "summary": "Import an Application",
         "description": "This operation can be used to import an existing Application.\n",
         "parameters": [
@@ -1965,6 +1978,12 @@
             "description": "Skip importing Subscriptions of the Application\n",
             "required": false,
             "type": "boolean"
+          },
+          {
+            "name": "appOwner",
+            "in": "query",
+            "description": "Expected Owner of the Application in the Import Environment\n",
+            "type": "string"
           }
         ],
         "tags": [
@@ -1981,6 +2000,12 @@
                 "description": "The content type of the body.\n",
                 "type": "string"
               }
+            }
+          },
+          "206": {
+            "description": "Partial Content.\nThe server has fulfilled the partial request for the resource.\n",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
           "400": {

@@ -57,38 +57,48 @@ public class ApplicationImportExportManager {
     public Application getApplicationDetails(String appName, String username) throws
             APIManagementException {
         Application application;
-        if (appName == null || appName.isEmpty()) {
-            return null;
-        } else {
-            int appId = APIUtil.getApplicationId(appName, username);
-            String groupId = apiConsumer.getGroupId(appId);
-            application = apiConsumer.getApplicationById(appId);
-            if (application != null) {
-                application.setGroupId(groupId);
-            }
+        int appId = APIUtil.getApplicationId(appName, username);
+        String groupId = apiConsumer.getGroupId(appId);
+        application = apiConsumer.getApplicationById(appId);
+        if (application != null) {
+            application.setGroupId(groupId);
         }
         return application;
+    }
+
+    /**
+     * Check whether a provided userId corresponds to a valid consumer of the store and subscribe if valid
+     *
+     * @param userId username of the Owner
+     * @throws APIManagementException if an error occurs while checking the validity of user
+     */
+    public void validateOwner(String userId, String groupId) throws APIManagementException {
+        Subscriber subscriber = apiConsumer.getSubscriber(userId);
+        try {
+            if (subscriber == null) {
+                APIUtil.checkPermission(userId, APIConstants.Permissions.API_SUBSCRIBE);
+                apiConsumer.addSubscriber(userId, groupId);
+            }
+        } catch (APIManagementException e) {
+            String errorMsg = "Provided Application Owner is Invalid";
+            log.error(errorMsg, e);
+            throw new APIManagementException(errorMsg, e);
+        }
     }
 
     /**
      * Check whether a provided userId corresponds to a valid Application Owner
      *
      * @param userId username of the Owner
-     * @return true, if valid Owner
-     * @throws APIManagementException if an error occurs while checking the validity of user
+     * @return true, if subscriber is available
+     * @throws APIManagementException if an error occurs while checking the availability of user
      */
-    public boolean isValidOwner(String userId) throws APIManagementException {
+    public boolean isOwnerAvailable(String userId) throws APIManagementException {
+        if (userId != null) {
             Subscriber subscriber = apiConsumer.getSubscriber(userId);
-            try {
-                if (subscriber == null) {
-                    APIUtil.checkPermission(userId, APIConstants.Permissions.API_SUBSCRIBE);
-                }
-            } catch (APIManagementException e) {
-                String errorMsg = "Provided Application Owner is Invalid";
-                log.error(errorMsg, e);
-                throw new APIManagementException(errorMsg, e);
-            }
-        return true;
+            return subscriber != null;
+        }
+        return false;
     }
 
     /**
@@ -97,11 +107,12 @@ public class ApplicationImportExportManager {
      * @param appDetails details of the imported application
      * @param userId     username of the subscriber
      * @param appId      application Id
+     * @return true, if all the subscriptions are imported successfully
      * @throws APIManagementException if an error occurs while importing and adding subscriptions
      */
-    //@SuppressWarnings("unchecked")
-    public void importSubscriptions(Application appDetails, String userId, int appId) throws APIManagementException,
+    public boolean importSubscriptions(Application appDetails, String userId, int appId) throws APIManagementException,
             UserStoreException {
+        boolean isImportComplete = true;
         Set<SubscribedAPI> subscribedAPIs = appDetails.getSubscribedAPIs();
         for (SubscribedAPI subscribedAPI : subscribedAPIs) {
             APIIdentifier apiIdentifier = subscribedAPI.getApiId();
@@ -138,11 +149,14 @@ public class ApplicationImportExportManager {
                         }
                     } else {
                         log.error("API " + name + "-" + version + " is not available");
+                        isImportComplete = false;
                     }
                 }
             } else {
                 log.error("Tenant domain: " + tenantDomain + " is not available");
+                isImportComplete = false;
             }
         }
+        return isImportComplete;
     }
 }
