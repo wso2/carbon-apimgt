@@ -124,7 +124,7 @@ public class JSONAnalyzer implements APIMThreatAnalyzer {
     public void analyzeDepth(int maxDepth, int currentDepth, String apiContext) throws APIMThreatAnalyzerException {
         if (currentDepth > maxDepth) {
             throw new APIMThreatAnalyzerException(JSON_THREAT_PROTECTION_MSG_PREFIX
-                    + apiContext + " - Depth Limit Reached");
+                    + apiContext + " - Depth Limit [" + maxDepth + "] Reached");
         }
     }
 
@@ -143,10 +143,10 @@ public class JSONAnalyzer implements APIMThreatAnalyzer {
             return;
         }
         if (field.length() > maxFieldLength) {
-            throw new APIMThreatAnalyzerException(" Max Key Length Reached");
+            throw new APIMThreatAnalyzerException(" Max Key Length [" + maxFieldLength + "] Reached");
         }
         if (currentFieldCount > maxFieldCount) {
-            throw new APIMThreatAnalyzerException("Max Property Count Reached");
+            throw new APIMThreatAnalyzerException("Max Property Count [" + maxFieldCount + "] Reached");
         }
     }
 
@@ -162,7 +162,7 @@ public class JSONAnalyzer implements APIMThreatAnalyzer {
             return;
         }
         if (value.length() > maxLength) {
-            throw new APIMThreatAnalyzerException("Max String Length Reached");
+            throw new APIMThreatAnalyzerException("Max String Length [" + maxLength + "] Reached");
         }
     }
 
@@ -187,7 +187,7 @@ public class JSONAnalyzer implements APIMThreatAnalyzer {
                 }
                 arrayElementCount += 1;
                 if (arrayElementCount > maxArrayElementCount) {
-                    throw new APIMThreatAnalyzerException(" Max Array Length Reached");
+                    throw new APIMThreatAnalyzerException(" Max Array Length [" + maxArrayElementCount + "] Reached");
                 }
             }
         } catch (IOException e) {
