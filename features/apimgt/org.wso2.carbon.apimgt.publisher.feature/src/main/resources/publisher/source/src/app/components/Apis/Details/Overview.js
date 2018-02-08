@@ -218,7 +218,7 @@ class Overview extends Component {
                             {api.lifeCycleStatus}
 
                             <Button dense color="primary">
-                                <a href={`/store/apis/${this.api_uuid}/overview?environment=${Utils.getEnvironment().label}`}
+                                <a href={`/store/apis/${this.api_uuid}/overview?environment=${Utils.getCurrentEnvironment().label}`}
                                    target="_blank" title="Store">
                                     View in store
                                 </a>
