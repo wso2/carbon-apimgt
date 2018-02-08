@@ -84,7 +84,8 @@ public interface APIStore extends APIManager {
      * @return {@code List<API>}
      * @throws APIManagementException   If failed to search apis.
      */
-    List<API> searchAPIs(String query, int offset, int limit) throws APIManagementException;
+    List<API> searchAPIsByStoreLabels(String query, int offset, int limit, List<String> labelIds) throws
+            APIManagementException;
 
     /**
      * Returns a paginated list of all Composite APIs which match the given search criteria.
@@ -561,4 +562,20 @@ public interface APIStore extends APIManager {
      * @throws APIManagementException if error occurred while registering the new user
      */
     void selfSignUp(User user) throws APIManagementException;
+
+    /**
+     * Returns the list of Labels.
+     *
+     * @return List of labels
+     * @throws LabelException if failed to get labels
+     */
+    List<Label> getAllLabels() throws LabelException;
+
+    /**
+     * Returns the list of Labels by label type.
+     *
+     * @return List of labels
+     * @throws LabelException if failed to get labels
+     */
+    List<Label> getLabelsByType(String type) throws LabelException;
 }

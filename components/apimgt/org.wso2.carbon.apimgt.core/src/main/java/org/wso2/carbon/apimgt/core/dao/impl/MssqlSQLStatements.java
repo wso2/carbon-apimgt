@@ -86,15 +86,18 @@ public class MssqlSQLStatements implements ApiDAOVendorSpecificStatements {
 
     /**
      * @see ApiDAOVendorSpecificStatements#setApiSearchStatement(PreparedStatement, Set, String, String, ApiType,
-     * int, int)
+     * int, int, List)
      */
     @Override
     @SuppressFBWarnings ({ "SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
             "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE" })
     public void setApiSearchStatement(PreparedStatement statement, Set<String> roles, String user,
                                       String searchString, ApiType apiType,
-                                      int offset, int limit) throws SQLException {
+                                      int offset, int limit, List<String> labels) throws SQLException {
         int index = 0;
+        for (String label : labels) {
+            statement.setString(++index, label);
+        }
         statement.setString(++index, "\"" + searchString.toLowerCase(Locale.ENGLISH) + "*\"");
         statement.setString(++index, apiType.toString());
 
@@ -169,13 +172,14 @@ public class MssqlSQLStatements implements ApiDAOVendorSpecificStatements {
     }
 
     /**
-     * @see ApiDAOVendorSpecificStatements#prepareAttributeSearchStatementForStore(Connection connection, List,
+     * @see ApiDAOVendorSpecificStatements#prepareAttributeSearchStatementForStore(Connection connection, List, List,
      * Map, int, int)
      */
     @Override
     @SuppressFBWarnings({"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
             "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
     public PreparedStatement prepareAttributeSearchStatementForStore(Connection connection, List<String> roles,
+                                                                     List<String> labels,
                                                                      Map<String, String> attributeMap, int offset,
                                                                      int limit) throws APIMgtDAOException {
 
@@ -208,6 +212,8 @@ public class MssqlSQLStatements implements ApiDAOVendorSpecificStatements {
         //get the corresponding implementation based on the attribute to be searched
         String query = searchMap.get(searchAttribute).
                 getStoreAttributeSearchQuery(roleListBuilder, searchQuery, offset, limit);
+        query = "Select * from ( " + query + " ) " + getStoreAPIsByLabelJoinQuery(labels) + " ORDER BY NAME OFFSET ? " +
+                "ROWS FETCH NEXT ? ROWS ONLY";
 
         try {
             int queryIndex = 1;
@@ -229,6 +235,12 @@ public class MssqlSQLStatements implements ApiDAOVendorSpecificStatements {
                         toLowerCase(Locale.ENGLISH) + '%');
                 queryIndex++;
             }
+
+            for (String label : labels) {
+                statement.setString(queryIndex, label);
+                queryIndex++;
+            }
+
             statement.setInt(queryIndex, limit);
             //setting 0 as the default offset based on store-api.yaml and MSSQL specifications
             statement.setInt(++queryIndex, (offset < 0) ? 0 : offset);

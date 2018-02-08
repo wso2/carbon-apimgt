@@ -143,7 +143,7 @@ public class SampleTestObjectCreator {
         CompositeAPI.Builder compositeAPIBuilder = new CompositeAPI.Builder();
         compositeAPIBuilder.id(UUID.randomUUID().toString()).name("CompisteAPI").apiDefinition("definition").
                 applicationId(UUID.randomUUID().toString()).context("testcontext").provider("provider")
-                .version("1.0.0").context("testcontext").description("testdesc").labels(new HashSet<>());
+                .version("1.0.0").context("testcontext").description("testdesc").labels(new ArrayList<>());
         return compositeAPIBuilder;
     }
 
@@ -193,7 +193,7 @@ public class SampleTestObjectCreator {
         Set<String> visibleRoles = new HashSet<>();
         visibleRoles.add("testRple");
 
-        Set<String> labels = new HashSet<>();
+        List<String> labels = new ArrayList<>();
         labels.add("testLabel");
 
         CorsConfiguration corsConfiguration = new CorsConfiguration();

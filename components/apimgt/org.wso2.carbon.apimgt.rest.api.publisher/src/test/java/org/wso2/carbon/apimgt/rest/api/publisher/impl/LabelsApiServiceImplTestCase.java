@@ -69,7 +69,7 @@ public class LabelsApiServiceImplTestCase {
         Mockito.doReturn(labels).doThrow(new IllegalArgumentException())
                 .when(apiPublisher).getAllLabels();
         Response response = labelsApiService.
-                labelsGet(null, null, getRequest());
+                labelsGet(null, null, null, null,getRequest());
         assertEquals(response.getStatus(), 200);
         assertTrue(response.getEntity().toString().contains("Label1"));
         assertTrue(response.getEntity().toString().contains("Label2"));
@@ -86,7 +86,7 @@ public class LabelsApiServiceImplTestCase {
         Mockito.doThrow(new LabelException("Error occurred", ExceptionCodes.LABEL_EXCEPTION))
                 .when(apiPublisher).getAllLabels();
         Response response = labelsApiService.
-                labelsGet(null, null, getRequest());
+                labelsGet(null, null, null, null, getRequest());
         assertEquals(response.getStatus(), 500);
         assertTrue(response.getEntity().toString().contains("Label Error"));
     }

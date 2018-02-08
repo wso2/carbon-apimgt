@@ -946,9 +946,9 @@ public class ApisApiServiceImplTestCase {
         List<API> apiList = new ArrayList<>();
         apiList.add(api);
 
-        Mockito.when(apiStore.searchAPIs("", 0, 1)).thenReturn(apiList);
+        Mockito.when(apiStore.searchAPIsByStoreLabels("", 0, 1, new ArrayList<>())).thenReturn(apiList);
 
-        Response response = apisApiService.apisGet(10, 0, "", null, request);
+        Response response = apisApiService.apisGet(10, 0, "", null, null, request);
 
         Assert.assertEquals(200, response.getStatus());
     }
@@ -967,9 +967,9 @@ public class ApisApiServiceImplTestCase {
         PowerMockito.when(RestApiUtil.getLoggedInUsername(request)).thenReturn(USER);
 
         Mockito.doThrow(new APIManagementException("Error Occurred", ExceptionCodes.API_NOT_FOUND))
-                .when(apiStore).searchAPIs("", 0, 10);
+                .when(apiStore).searchAPIsByStoreLabels("", 0, 10,  new ArrayList<>());
 
-        Response response = apisApiService.apisGet(10, 0, "", null, request);
+        Response response = apisApiService.apisGet(10, 0, null, "",  null, request);
 
         Assert.assertEquals(404, response.getStatus());
     }

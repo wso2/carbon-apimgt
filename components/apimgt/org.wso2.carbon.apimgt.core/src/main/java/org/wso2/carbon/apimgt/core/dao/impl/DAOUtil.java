@@ -37,7 +37,7 @@ import java.util.Locale;
  */
 public class DAOUtil {
     private static final Logger log = LoggerFactory.getLogger(DAOUtil.class);
-    private static final String DB_NAME_POSTGRESQL = "PostgreSQL";
+    protected static final String DB_NAME_POSTGRESQL = "PostgreSQL";
     private static DataSource dataSource;
     private static DataSource analyticsDataSource;
 

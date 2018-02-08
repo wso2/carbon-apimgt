@@ -283,11 +283,11 @@ public interface APIManager {
     /**
      * Retrieves Label information of the given label.
      * 
-     * @param labelName Label name of the gateway
+     * @param labelID Label ID of the gateway
      * @return {@code Label} Label information
      * @throws APIManagementException if API Manager core level exception occurred
      */
-    Label getLabelByName(String labelName) throws APIManagementException;
+    Label getLabelByID(String labelID) throws APIManagementException;
 
     /**
      * Checks whether an WSDL archive exists for an API.

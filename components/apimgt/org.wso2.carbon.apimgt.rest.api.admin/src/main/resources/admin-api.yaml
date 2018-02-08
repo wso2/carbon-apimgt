@@ -1416,7 +1416,7 @@ paths:
 ######################################################
 # The "Label collection" resource API
 ######################################################
-  '/labels/':
+  '/labels':
 
 #-----------------------------------------------------
 # Retrieve all labels
@@ -1424,13 +1424,10 @@ paths:
     get:
       security:
         - OAuth2Security:
-          - apim:label_view
+          - apim:label_manage
       summary: Get all registered Labels
       description: |
         Get all registered Labels
-      parameters:
-        - $ref: '#/parameters/If-None-Match'
-        - $ref: '#/parameters/If-Modified-Since'
       tags:
         - Label Collection
       responses:
@@ -1484,6 +1481,7 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Label'
+
       tags:
         - Label Collection
       responses:
@@ -1632,8 +1630,7 @@ paths:
           required: true
           schema:
             $ref: '#/definitions/Label'
-        - $ref: '#/parameters/If-Match'
-        - $ref: '#/parameters/If-Unmodified-Since'
+
       tags:
         - Label
       responses:
@@ -2504,6 +2501,8 @@ definitions:
       - name
       - type
     properties:
+      labelUUID:
+        type: string
       name:
         type: string
         example: "Public"
@@ -2512,10 +2511,13 @@ definitions:
         example: "Label to use for public APIs"
       type:
         type: string
-        example: "GATEWAY"
-      accessUrl:
-        type: string
-        example: "https://gateway.wso2.com"
+        description: |
+          the  type of the label
+          example: "Gateway"
+      accessUrls:
+        type: array
+        items:
+          type: string
 
 #-----------------------------------------------------
 # The Label List resource

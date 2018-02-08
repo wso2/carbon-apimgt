@@ -86,17 +86,22 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
 
     /**
      * @see ApiDAOVendorSpecificStatements#setApiSearchStatement(PreparedStatement, Set, String, String, ApiType,
-     * int, int)
+     * int, int, List)
      */
     @Override
     @SuppressFBWarnings({"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
             "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
     public void setApiSearchStatement(PreparedStatement statement, Set<String> roles, String user,
-                                        String searchString, ApiType apiType, int offset, int limit)
+                                        String searchString, ApiType apiType, int offset, int limit, List<String>
+                                                  labels)
                                         throws SQLException {
         int index = 0;
 
         // Replacing special characters and allowing only alphabetical letters, numbers and space
+
+        for (String label : labels) {
+            statement.setString(++index, label);
+        }
         statement.setString(++index, searchString.toLowerCase(Locale.ENGLISH).
                 replaceAll("[^a-zA-Z0-9\\s]", "") + '*');
         statement.setString(++index, apiType.toString());
@@ -171,14 +176,15 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
     }
 
     /**
-     * @see ApiDAOVendorSpecificStatements#prepareAttributeSearchStatementForStore(Connection connection, List,
+     * @see ApiDAOVendorSpecificStatements#prepareAttributeSearchStatementForStore(Connection connection, List, List,
      * Map, int, int)
      */
     @Override
     @SuppressFBWarnings({"SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING",
             "OBL_UNSATISFIED_OBLIGATION_EXCEPTION_EDGE"})
     public PreparedStatement prepareAttributeSearchStatementForStore(Connection connection, List<String> roles,
-                                                                     Map<String, String> attributeMap, int offset,
+                                                                     List<String> labels, Map<String,
+                                                                     String> attributeMap, int offset,
                                                                      int limit) throws APIMgtDAOException {
         StringBuilder roleListBuilder = new StringBuilder();
         roleListBuilder.append("?");
@@ -211,6 +217,7 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
         //get the corresponding implementation based on the attribute to be searched
         String query = searchMap.get(searchAttribute).
                 getStoreAttributeSearchQuery(roleListBuilder, searchQuery, offset, limit);
+        query = "Select * from ( " + query + " ) " + getStoreAPIsByLabelJoinQuery(labels) + " OFFSET ? LIMIT ?";
 
         try {
             int queryIndex = 1;
@@ -228,6 +235,11 @@ public class H2SQLStatements implements ApiDAOVendorSpecificStatements {
             //include the attribute in the query (for APIs with restricted visibility)
             for (Map.Entry<String, String> entry : attributeMap.entrySet()) {
                 statement.setString(queryIndex, '%' + entry.getValue().toLowerCase(Locale.ENGLISH) + '%');
+                queryIndex++;
+            }
+
+            for (String label : labels) {
+                statement.setString(queryIndex, label);
                 queryIndex++;
             }
             //setting 0 as the default offset based on store-api.yaml and H2 specifications

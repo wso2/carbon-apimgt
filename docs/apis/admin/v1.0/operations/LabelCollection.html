@@ -2,14 +2,14 @@
     <h1><a name="Label Collection"></a>Label Collection</h1>
 
             <hr/>
-            <h3 class="operation-heading"><a name="labelsGet"></a>Get all registered Labels <br><small>GET https://apis.wso2.com/api/am/admin/v1.0/labels/</small></h3>
+            <h3 class="operation-heading"><a name="labelsGet"></a>Get all registered Labels <br><small>GET https://apis.wso2.com/api/am/admin/v1.0/labels</small></h3>
             <p class="marked"></p>
 
             <p class="marked">Get all registered Labels
 </p>
 
             <h4 class="section-heading">OAuth 2.0 Scope</h4>
-                <code>apim:label_view</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:label_view' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
+                <code>apim:label_manage</code><span class="label label-primary" data-toggle="tooltip" title="This resource is secured with an OAuth 2.0 scope. You need to provide an access token which has 'apim:label_manage' scope using Authorization header. Please see 'Getting Started' section for more information." style="margin-left: 10px">i</span>
 
             <div class="pointer" data-toggle="collapse" data-target="#request-labelsGet">
                 <h4 class="section-heading">
@@ -17,7 +17,7 @@
                 </h4>
             </div>
 
-                <code class="bash">GET https://apis.wso2.com/api/am/admin/v1.0/labels/</code>
+                <code class="bash">GET https://apis.wso2.com/api/am/admin/v1.0/labels</code>
 
             <div class="pointer" data-toggle="collapse" data-target="#response-labelsGet">
                 <h4 class="section-heading">
@@ -47,64 +47,6 @@
                     <th>Default</th>
                 </tr>
                 </thead>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>If-None-Match</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Validator for conditional requests; based on the ETag of the formerly retrieved
-variant of the resourec.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="parameter">
-                            
-                            
-                            
-                            <span class="param-in">Header </span>
-                            
-                        </td>
-                        <td class="param-name">
-                            <p>If-Modified-Since</p>
-                            <p class="param-required">
-                                
-                                optional
-                            </p>
-                        </td>
-                        <td>
-                            <p class="param-description marked">Validator for conditional requests; based on Last Modified header of the
-formerly retrieved variant of the resource.
-</p>
-                        </td>
-                        <td>
-                            <span class="param-type">
-                                String
-                            </span>
-                        </td>
-                        <td>
-                            <p class="marked"></p>
-                        </td>
-                    </tr>
             </table>
 
             <h4 class="section-heading">Responses</h4>
@@ -153,7 +95,7 @@ formerly retrieved variant of the resource.
                 </tbody>
             </table>
             <hr/>
-            <h3 class="operation-heading"><a name="labelsPost"></a>Add a Label <br><small>POST https://apis.wso2.com/api/am/admin/v1.0/labels/</small></h3>
+            <h3 class="operation-heading"><a name="labelsPost"></a>Add a Label <br><small>POST https://apis.wso2.com/api/am/admin/v1.0/labels</small></h3>
             <p class="marked"></p>
 
             <p class="marked">Add a new gateway/store Label
@@ -168,7 +110,7 @@ formerly retrieved variant of the resource.
                 </h4>
             </div>
 
-                <code class="bash">POST https://apis.wso2.com/api/am/admin/v1.0/labels/</code>
+                <code class="bash">POST https://apis.wso2.com/api/am/admin/v1.0/labels</code>
 
             <div class="pointer" data-toggle="collapse" data-target="#response-labelsPost">
                 <h4 class="section-heading">
