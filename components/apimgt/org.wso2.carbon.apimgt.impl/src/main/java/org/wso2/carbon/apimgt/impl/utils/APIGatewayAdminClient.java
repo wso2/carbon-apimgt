@@ -329,6 +329,8 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
                 String endpointConfigContext = builder.getConfigStringForEndpointTemplate(type);
                 checkForTenantWhenAdding(apiGatewayAdminStub, endpointConfigContext, tenantDomain);
             }
+        } catch (RemoteException e) {
+            throw new AxisFault("Error invoking remote method" + e.getMessage(), e);
         } catch (Exception e) {
             throw new AxisFault("Error updating Endpoint file" + e.getMessage(), e);
         }
