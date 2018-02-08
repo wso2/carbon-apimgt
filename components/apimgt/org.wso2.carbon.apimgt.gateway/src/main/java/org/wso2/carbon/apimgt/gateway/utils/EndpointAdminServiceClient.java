@@ -15,6 +15,13 @@ public class EndpointAdminServiceClient {
         endpointAdminStub = new EndpointAdminStub(null, backEndURL + "EndpointAdmin");
     }
 
+    /**
+     * Add endpoint to the gateway
+     *
+     * @param endpointData Content of the endpoint file
+     * @return True if the endpoint file is added
+     * @throws AxisFault Thrown if an error occurred
+     */
     public boolean addEndpoint(String endpointData) throws AxisFault {
         try {
             return endpointAdminStub.addEndpoint(endpointData);
@@ -24,6 +31,14 @@ public class EndpointAdminServiceClient {
         }
     }
 
+    /**
+     * Add endpoint to the tenant
+     *
+     * @param endpointData Content of the endpoint file
+     * @param tenantDomain Domain of the logged tenant
+     * @return True if the endpoint file is added
+     * @throws AxisFault Thrown if an error occurred
+     */
     public boolean addEndpoint(String endpointData, String tenantDomain) throws AxisFault {
         try {
             return endpointAdminStub.addEndpointForTenant(endpointData, tenantDomain);
@@ -33,6 +48,13 @@ public class EndpointAdminServiceClient {
         }
     }
 
+    /**
+     * Delete endpoint from the gateway
+     *
+     * @param endpointName Name of the endpoint to be deleted
+     * @return True if the endpoint file is deleted
+     * @throws AxisFault Thrown if an error occurred
+     */
     public boolean deleteEndpoint(String endpointName) throws AxisFault {
         try {
             return endpointAdminStub.deleteEndpoint(endpointName);
@@ -42,6 +64,14 @@ public class EndpointAdminServiceClient {
         }
     }
 
+    /**
+     * Delete endpoint from the tenant
+     *
+     * @param endpointName Name of the endpoint to be deleted
+     * @param tenantDomain Domain of the logged tenant
+     * @return True if the endpoint file is deleted
+     * @throws AxisFault Thrown if an error occurred
+     */
     public boolean deleteEndpoint(String endpointName, String tenantDomain) throws AxisFault {
         try {
             return endpointAdminStub.deleteEndpointForTenant(endpointName, tenantDomain);
@@ -51,6 +81,12 @@ public class EndpointAdminServiceClient {
         }
     }
 
+    /**
+     * Obtain endpoint names from the gateway
+     *
+     * @return Array of endpoint names
+     * @throws AxisFault Thrown if an error occurred
+     */
     public String[] getEndPointsNames() throws AxisFault {
         try {
             return endpointAdminStub.getEndPointsNames();
@@ -60,6 +96,13 @@ public class EndpointAdminServiceClient {
         }
     }
 
+    /**
+     * Obtain endpoint names of the tenant
+     *
+     * @param tenantDomain Domain of the logged tenant
+     * @return Array of endpoint names
+     * @throws AxisFault Thrown if an error occurred
+     */
     public String[] getEndPointsNames(String tenantDomain) throws AxisFault {
         try {
             return endpointAdminStub.getEndPointsNamesForTenant(tenantDomain);

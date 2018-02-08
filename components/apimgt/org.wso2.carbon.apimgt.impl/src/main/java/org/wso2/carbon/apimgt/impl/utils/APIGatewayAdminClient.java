@@ -258,6 +258,14 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         }
     }
 
+    /**
+     * Add the endpoint file/s to the gateway
+     *
+     * @param api API that the endpoint/s belong
+     * @param builder The endpoint template builder instance
+     * @param tenantDomain Domain of the logged tenant
+     * @throws AxisFault Thrown if an error occurred
+     */
     public void addEndpoint(API api, APITemplateBuilder builder, String tenantDomain) throws AxisFault {
         try {
             ArrayList<String> arrayList = getEndpointType(api);
@@ -271,6 +279,13 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         }
     }
 
+    /**
+     * Delete the endpoint file/s from the gateway
+     *
+     * @param api API that the endpoint/s belong
+     * @param tenantDomain Domain of the logged tenant
+     * @throws AxisFault Thrown if an error occurred
+     */
     public void deleteEndpoint(API api, String tenantDomain) throws AxisFault {
         try {
             String endpointName = api.getId().getApiName() + "--" + api.getId().getVersion();
@@ -291,6 +306,14 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         }
     }
 
+    /**
+     * Update the endpoint file/s in the gateway
+     *
+     * @param api API that the endpoint/s belong
+     * @param builder The endpoint template builder instance
+     * @param tenantDomain Domain of the logged tenant
+     * @throws AxisFault Thrown if an error occurred
+     */
     public void saveEndpoint(API api, APITemplateBuilder builder, String tenantDomain) throws AxisFault {
         try {
             ArrayList<Integer> arrayList = new ArrayList<>();
@@ -332,6 +355,14 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         }
     }
 
+    /**
+     * Check if add the endpoint for tenant space or not
+     *
+     * @param stub Stub instance for adding the endpoint
+     * @param epContext The content of the endpoint file
+     * @param tenantDomain Domain of the logged tenant
+     * @throws AxisFault Thrown if an error occurred
+     */
     private void checkForTenantWhenAdding(APIGatewayAdminStub stub, String epContext, String tenantDomain)
             throws AxisFault {
         try {
@@ -347,6 +378,13 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
         }
     }
 
+    /**
+     * Returns the defined endpoint types of the in the publisher
+     *
+     * @param api API that the endpoint/s belong
+     * @return ArrayList containing defined endpoint types
+     * @throws ParseException Thrown if an error occurred
+     */
     private ArrayList<String> getEndpointType(API api) throws ParseException {
         ArrayList<String> arrayList = new ArrayList<>();
         if (APIUtil.isProductionEndpointsExists(api) && !APIUtil.isSandboxEndpointsExists(api)) {
