@@ -288,7 +288,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
      */
     public void deleteEndpoint(API api, String tenantDomain) throws AxisFault {
         try {
-            String endpointName = api.getId().getApiName() + "--" + api.getId().getVersion();
+            String endpointName = api.getId().getApiName() + "--v" + api.getId().getVersion();
             ArrayList<String> arrayList = getEndpointType(api);
             for (String type : arrayList) {
                 String t = type.replace("_endpoints", "");
@@ -325,9 +325,9 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
                 endpointNames = apiGatewayAdminStub.getEndPointsNames();
             }
             Arrays.sort(endpointNames); //Sorting required for Binary Search
-            arrayList.add(Arrays.binarySearch(endpointNames, api.getId().getApiName() + "--" +
+            arrayList.add(Arrays.binarySearch(endpointNames, api.getId().getApiName() + "--v" +
                     api.getId().getVersion() + "_API" + APIConstants.GATEWAY_ENV_TYPE_PRODUCTION + "Endpoint"));
-            arrayList.add(Arrays.binarySearch(endpointNames, api.getId().getApiName() + "--" +
+            arrayList.add(Arrays.binarySearch(endpointNames, api.getId().getApiName() + "--v" +
                     api.getId().getVersion() + "_API" + APIConstants.GATEWAY_ENV_TYPE_SANDBOX + "Endpoint"));
 
             for (int index : arrayList) {
