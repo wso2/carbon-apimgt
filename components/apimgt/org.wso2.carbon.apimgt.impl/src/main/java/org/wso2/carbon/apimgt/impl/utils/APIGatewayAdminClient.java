@@ -266,6 +266,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
                 checkForTenantWhenAdding(apiGatewayAdminStub, endpointConfigContext, tenantDomain);
             }
         } catch (Exception e) {
+            log.error("Error while adding endpoint to the gateway", e);
             throw new AxisFault("Error while generating Endpoint file in Gateway " + e.getMessage(), e);
         }
     }
@@ -285,6 +286,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
                 }
             }
         } catch (Exception e) {
+            log.error("Error while deleting endpoint from the gateway", e);
             throw new AxisFault("Error while deleting Endpoint from the gateway. " + e.getMessage(), e);
         }
     }
@@ -322,8 +324,10 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
                 checkForTenantWhenAdding(apiGatewayAdminStub, endpointConfigContext, tenantDomain);
             }
         } catch (RemoteException e) {
+            log.error("Error while invoking remote method", e);
             throw new AxisFault("Error invoking remote method" + e.getMessage(), e);
         } catch (Exception e) {
+            log.error("Error while updating endpoint file in the gateway", e);
             throw new AxisFault("Error updating Endpoint file" + e.getMessage(), e);
         }
     }
@@ -338,6 +342,7 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
                 stub.addEndpoint(epContext);
             }
         } catch (Exception e) {
+            log.error("Error while adding endpoint to the gateway", e);
             throw new AxisFault("Error while generating endpoint file in gateway" + e.getMessage(), e);
         }
     }
