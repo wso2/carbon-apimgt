@@ -27,5 +27,4 @@ public class ApplicationNameWithInvalidCharactersException extends APIManagement
         super(msg);
     }
 
-
 }
