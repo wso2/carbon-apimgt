@@ -61,7 +61,7 @@ public class UserNameMapperImpl implements org.wso2.carbon.apimgt.core.api.UserN
         //Else check mapping in database and load it to local map.
         //If mapping is not in database then add it to db and cache both.
         //then return name.
-        if (pseudoName != null && pseudoName.equalsIgnoreCase("adminx")) {
+        if (pseudoName != null && pseudoName.equalsIgnoreCase("admin")) {
             return pseudoName;
         } else {
             try {
@@ -87,7 +87,7 @@ public class UserNameMapperImpl implements org.wso2.carbon.apimgt.core.api.UserN
         //If userName in map then get from that
         //Else check mapping in database and load it to local map.
         //then return name.
-        if (userID != null && userID.equalsIgnoreCase("adminx")) {
+        if (userID != null && userID.equalsIgnoreCase("admin")) {
             return userID;
         } else {
             try {
