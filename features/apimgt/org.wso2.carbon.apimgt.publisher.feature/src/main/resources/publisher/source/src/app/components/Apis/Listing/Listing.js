@@ -24,9 +24,7 @@ import '../Apis.css'
 import API from '../../../data/api.js'
 import Loading from '../../Base/Loading/Loading'
 import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
-import {Link} from 'react-router-dom'
-import {Col, Menu, message, Row, Table} from 'antd';
-
+import Table, {TableBody, TableCell, TableRow, TableHead} from 'material-ui/Table';
 import Paper from 'material-ui/Paper';
 import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
@@ -35,19 +33,10 @@ import GridIcon from 'material-ui-icons/GridOn';
 import ListIcon from 'material-ui-icons/List';
 import SampleAPI from './SampleAPI';
 import NotificationSystem from 'react-notification-system';
-import {ScopeValidation ,resourceMethod, resourcePath} from "../../../data/ScopeValidation";
+import ApiTableRow from "./ApiTableRow";
 
-const menu = (
-    <Menu>
-        <Link to="/api/create/swagger">
-            <Menu.Item>Create new API with Swagger</Menu.Item>
-        </Link>
-        <Link to="/api/create/rest">
-            <Menu.Item>Create new API</Menu.Item>
-        </Link>
-    </Menu>
-);
 const ButtonGroup = Button.Group;
+
 class Listing extends React.Component {
     constructor(props) {
         super(props);
@@ -79,7 +68,7 @@ class Listing extends React.Component {
         this.setState({listType: value});
     }
 
-    updateApi(api_uuid){
+    updateApi(api_uuid) {
         let api = this.state.apis;
         for (let apiIndex in api.list) {
             if (api.list.hasOwnProperty(apiIndex) && api.list[apiIndex].id === api_uuid) {
@@ -91,7 +80,7 @@ class Listing extends React.Component {
     }
 
     handleApiDelete(api_uuid, name) {
-        this.refs.notificationSystem.addNotification( {
+        this.refs.notificationSystem.addNotification({
             message: 'Deleting the API ...', position: 'tc', level: 'success', autoDismiss: 1
         });
         const api = new API();
@@ -100,13 +89,13 @@ class Listing extends React.Component {
             response => {
                 if (response.status !== 200) {
                     console.log(response);
-                    this.refs.notificationSystem.addNotification( {
+                    this.refs.notificationSystem.addNotification({
                         message: 'Something went wrong while deleting the ' + name + ' API!', position: 'tc',
                         level: 'error'
                     });
                     return;
                 }
-                this.refs.notificationSystem.addNotification( {
+                this.refs.notificationSystem.addNotification({
                     message: name + ' API deleted Successfully', position: 'tc', level: 'success'
                 });
                 let api = this.state.apis;
@@ -126,30 +115,6 @@ class Listing extends React.Component {
         if (this.state.notFound) {
             return <ResourceNotFound/>
         }
-        const columns = [{
-            title: 'Name',
-            dataIndex: 'name',
-            key: 'name',
-            render: (text, record) => <Link to={"/apis/" + record.id}>{text}</Link>,
-        }, {
-            title: 'Context',
-            dataIndex: 'context',
-            key: 'context',
-        }, {
-
-            title: 'Version',
-            dataIndex: 'version',
-            key: 'version',
-        }, {
-            title: 'Action',
-            key: 'action',
-            render: (record) => <ScopeValidation resourcePath={resourcePath.SINGLE_API}
-                                                 resourceMethod={resourceMethod.DELETE}>
-                <Button style={{fontSize: 10, padding: "0px", margin: "0px"}} color="primary"
-                        onClick={() => this.handleApiDelete(record.id, record.name)}>
-                    Delete
-                </Button></ScopeValidation>
-        }];
         if (!apis) {
             return (<Loading/>);
         } else if (apis.count === 0) {
@@ -185,13 +150,22 @@ class Listing extends React.Component {
                     </Grid>
                     <Grid item xs={12}>
                         {this.state.listType === "list" ?
-                            <Row type="flex" justify="start">
-                                <Col span={24}>
-                                    <Table columns={columns} dataSource={this.state.apis.list} bordered
-                                           locale={{ emptyText:'There is no data to display' }}/>
-                                    <NotificationSystem ref="notificationSystem"/>
-                                </Col>
-                            </Row>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Name</TableCell>
+                                        <TableCell>Context</TableCell>
+                                        <TableCell>Version</TableCell>
+                                        <TableCell>Action</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody><NotificationSystem ref="notificationSystem"/>
+                                    {this.state.apis && this.state.apis.list.map(apis => {
+                                        return <ApiTableRow apis={apis} key={apis.id}
+                                                            handleApiDelete={this.handleApiDelete}
+                                        />
+                                    })}
+                                </TableBody></Table>
                             : <Grid container spacing={0}>
                                 {this.state.apis.list.map((api, i) => {
                                     return <ApiThumb key={api.id} listType={this.state.listType} api={api}
