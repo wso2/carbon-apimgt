@@ -70,8 +70,9 @@ public class JSONAnalyzer implements APIMThreatAnalyzer {
         throw new UnsupportedOperationException("This method is not supported on this instance");
     }
 
-    /**
-     * @param in payload
+    /** Analyze the JSON payload against limitations.
+     * @param in input stream of the request payload.
+     * @param apiContext request api context.
      * @throws APIMThreatAnalyzerException if defined limits for json payload exceeds
      */
     @Override
