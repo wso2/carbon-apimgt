@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.store.impl;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This is the service implementation class for Store tier related operations
@@ -80,6 +82,16 @@ public class TiersApiServiceImpl extends TiersApiService {
             if (TierDTO.TierLevelEnum.api.toString().equals(tierLevel)) {
                 Map<String, Tier> apiTierMap = APIUtil.getTiers(APIConstants.TIER_API_TYPE, requestedTenantDomain);
                 if (apiTierMap != null) {
+
+                    // Removing denied Tiers
+                    String username = RestApiUtil.getLoggedInUsername();
+                    APIConsumer apiConsumer = RestApiUtil.getConsumer(username);
+                    Set<String> deniedTiers = apiConsumer.getDeniedTiers();
+
+                    for (String key : deniedTiers) {
+                        apiTierMap.remove(key);
+                    }
+
                     tierList.addAll(apiTierMap.values());
                 }
             } else if (TierDTO.TierLevelEnum.application.toString().equals(tierLevel)) {

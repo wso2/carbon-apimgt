@@ -39,18 +39,7 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ApplicationNameWhiteSpaceValidationException;
 import org.wso2.carbon.apimgt.api.BlockConditionNotFoundException;
 import org.wso2.carbon.apimgt.api.PolicyNotFoundException;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DocumentationType;
-import org.wso2.carbon.apimgt.api.model.Mediation;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.Wsdl;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -2459,6 +2448,35 @@ public abstract class AbstractAPIManager implements APIManager {
                 tempLength++;
                 if (tempLength >= totalLength) {
                     break;
+                }
+            }
+
+            // Creating a apiids string
+            String apiIdsString = "";
+            int apiCount = apiList.size();
+            for (int i = 0; i < apiCount; i++) {
+                String apiId = apiList.get(i).getId().getApplicationId();
+
+                if (apiId != null && apiId != "") {
+                    if (apiIdsString == "") {
+                        apiIdsString = apiId;
+                    } else {
+                        apiIdsString = apiIdsString + "," + apiId;
+                    }
+                }
+            }
+
+            // setting scope
+            if (apiIdsString != "") {
+                Map<String, Set<Scope>> apiScopeSet = apiMgtDAO.getScopesForAPIS(apiIdsString);
+                if (apiScopeSet.size() > 0) {
+                    for (int i = 0; i < apiCount; i++) {
+                        String apiId = apiList.get(i).getId().getApplicationId();
+                        if (apiId != null && apiId != "") {
+                            Set<Scope> scopes = apiScopeSet.get(apiId);
+                            apiList.get(i).setScopes(scopes);
+                        }
+                    }
                 }
             }
 

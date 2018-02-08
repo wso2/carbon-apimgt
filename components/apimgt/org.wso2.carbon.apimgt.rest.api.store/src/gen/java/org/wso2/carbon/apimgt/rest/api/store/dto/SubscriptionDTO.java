@@ -61,8 +61,9 @@ public class SubscriptionDTO  {
 
   
   /**
+   * The UUID of the subscription
    **/
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(value = "The UUID of the subscription")
   @JsonProperty("subscriptionId")
   public String getSubscriptionId() {
     return subscriptionId;
@@ -73,8 +74,9 @@ public class SubscriptionDTO  {
 
   
   /**
+   * The UUID of the application
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "The UUID of the application")
   @JsonProperty("applicationId")
   public String getApplicationId() {
     return applicationId;
@@ -85,8 +87,9 @@ public class SubscriptionDTO  {
 
   
   /**
+   * The unique identifier of the API.
    **/
-  @ApiModelProperty(required = true, value = "")
+  @ApiModelProperty(required = true, value = "The unique identifier of the API.")
   @JsonProperty("apiIdentifier")
   public String getApiIdentifier() {
     return apiIdentifier;

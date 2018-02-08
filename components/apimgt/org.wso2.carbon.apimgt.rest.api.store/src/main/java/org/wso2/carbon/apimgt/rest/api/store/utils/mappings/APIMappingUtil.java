@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -246,6 +247,9 @@ public class APIMappingUtil {
         apiInfoDTO.setStatus(api.getStatus().toString());
         String providerName = api.getId().getProviderName();
         apiInfoDTO.setProvider(APIUtil.replaceEmailDomainBack(providerName));
+        if (api.getScopes() != null) {
+            apiInfoDTO.setScopes(getScopeInfoDTO(api.getScopes()));
+        }
         if (!StringUtils.isBlank(api.getThumbnailUrl())) {
             apiInfoDTO.setThumbnailUri(getThumbnailUri(api.getUUID()));
         }
@@ -299,5 +303,24 @@ public class APIMappingUtil {
 
     private static String getThumbnailUri (String uuid) {
         return RestApiConstants.RESOURCE_PATH_THUMBNAIL.replace(RestApiConstants.APIID_PARAM, uuid);
+    }
+
+    /**
+     * Creates a minimal scope DTO which will be a part of API Object
+     *
+     * @param scopes set
+     * @return Scope DTO
+     */
+    public static List<ScopeInfoDTO> getScopeInfoDTO(Set<Scope> scopes) {
+
+        List<ScopeInfoDTO> scopeDto = new ArrayList<ScopeInfoDTO>();
+        for (Scope scope : scopes) {
+            ScopeInfoDTO scopeInfoDTO = new ScopeInfoDTO();
+            scopeInfoDTO.setKey(scope.getKey());
+            scopeInfoDTO.setName(scope.getName());
+            scopeInfoDTO.setRoles(Arrays.asList(scope.getRoles().split(",")));
+            scopeDto.add(scopeInfoDTO);
+        }
+        return scopeDto;
     }
 }
