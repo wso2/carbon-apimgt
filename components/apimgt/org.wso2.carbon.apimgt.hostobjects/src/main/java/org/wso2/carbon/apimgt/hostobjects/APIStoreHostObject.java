@@ -1868,7 +1868,7 @@ public class APIStoreHostObject extends ScriptableObject {
                 String apiDefinition = apiConsumer.getOpenAPIDefinition(apiIdentifier);
 
                 boolean isOpenAPI3APIDefinition = false;
-                if (!apiDefinition.isEmpty()) {
+                if (!StringUtils.isEmpty(apiDefinition)) {
                     JSONParser parser = new JSONParser();
                     JSONObject apiDefinitionJson = (JSONObject) parser.parse(apiDefinition);
                     if (apiDefinitionJson.get(APIConstants.OPEN_API) != null && APIConstants.OPEN_API_V3
