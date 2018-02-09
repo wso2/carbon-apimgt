@@ -46,7 +46,7 @@ public class UserMappingDAOImpl implements UserMappingDAO {
      */
     @Override
     public String getUserIDByPseudoName(String pseudoName) throws APIMgtDAOException {
-        final String query = "SELECT USER_DOMAIN_NAME, USER_REAL_NAME FROM AM_USER_NAME_MAPPING WHERE " +
+        final String query = "SELECT USER_DOMAIN_NAME, USER_IDENTIFIER FROM AM_USER_NAME_MAPPING WHERE " +
                 "PSEUDO_NAME = ?";
         String realName = null;
         try (Connection connection = DAOUtil.getConnection();
@@ -54,7 +54,7 @@ public class UserMappingDAOImpl implements UserMappingDAO {
             statement.setString(1, pseudoName);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
-                    realName = rs.getString("USER_REAL_NAME");
+                    realName = rs.getString("USER_IDENTIFIER");
                 }
             }
         } catch (SQLException e) {
@@ -71,7 +71,7 @@ public class UserMappingDAOImpl implements UserMappingDAO {
      */
     @Override
     public String getPseudoNameByUserID(String userID) throws APIMgtDAOException {
-        final String query = "SELECT PSEUDO_NAME FROM AM_USER_NAME_MAPPING WHERE USER_REAL_NAME = ?";
+        final String query = "SELECT PSEUDO_NAME FROM AM_USER_NAME_MAPPING WHERE USER_IDENTIFIER = ?";
         String pseudoName = null;
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
@@ -98,7 +98,7 @@ public class UserMappingDAOImpl implements UserMappingDAO {
      */
     public String addUserMapping(String userName) throws APIMgtDAOException {
         String pseudoName = UUID.randomUUID().toString();
-        final String query = "INSERT INTO AM_USER_NAME_MAPPING (PSEUDO_NAME, USER_REAL_NAME) VALUES (?,?)";
+        final String query = "INSERT INTO AM_USER_NAME_MAPPING (PSEUDO_NAME, USER_IDENTIFIER) VALUES (?,?)";
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             try {
