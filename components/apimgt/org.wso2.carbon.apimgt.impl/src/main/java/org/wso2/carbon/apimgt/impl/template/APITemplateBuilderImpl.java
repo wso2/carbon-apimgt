@@ -25,23 +25,17 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
-import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.Environment;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.soaptorest.template.SOAPToRESTAPIConfigContext;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.impl.soaptorest.util.SequenceUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.registry.api.Resource;
-import org.wso2.carbon.registry.core.Collection;
 import org.wso2.carbon.registry.core.RegistryConstants;
-import org.wso2.carbon.registry.core.ResourceImpl;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.session.UserRegistry;
-import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import javax.xml.stream.XMLStreamException;
@@ -63,7 +57,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     public static final String TEMPLATE_TYPE_VELOCITY = "velocity_template";
     public static final String TEMPLATE_TYPE_PROTOTYPE = "prototype_template";
     public static final String TEMPLATE_DEFAULT_API = "default_api_template";
-    public static final String TEMPLATE_TYPE_ENDPOINT = "endpoint_template";
+    private static final String TEMPLATE_TYPE_ENDPOINT = "endpoint_template";
     private API api;
     private String velocityLogPath = null;
     private List<HandlerConfig> handlers = new ArrayList<HandlerConfig>();
@@ -233,25 +227,29 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         return writer.toString();
     }
 
+    /**
+     * Sets the necessary variables to velocity context
+     *
+     * @param endpointType Type of the endpoint : production or sandbox
+     * @return The string of endpoint file content
+     * @throws APITemplateException Thrown if an error occurred
+     */
     @Override
     public String getConfigStringForEndpointTemplate(String endpointType) throws APITemplateException {
         StringWriter writer = new StringWriter();
 
         try {
-
             ConfigContext configcontext = new APIConfigContext(this.api);
             configcontext = new EndpointBckConfigContext(configcontext, api);
             configcontext = new EndpointConfigContext(configcontext, api);
             configcontext = new TemplateUtilContext(configcontext);
 
-            //@todo: this validation might be better to do when the builder is initialized.
             configcontext.validate();
 
             VelocityContext context = configcontext.getContext();
 
             context.internalGetKeys();
 
-            /*  first, initialize velocity engine  */
             VelocityEngine velocityengine = new VelocityEngine();
             if (!"not-defined".equalsIgnoreCase(getVelocityLogger())) {
                 velocityengine.setProperty( RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS,

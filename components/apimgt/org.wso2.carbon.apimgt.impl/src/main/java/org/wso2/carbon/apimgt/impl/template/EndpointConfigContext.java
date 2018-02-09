@@ -63,7 +63,13 @@ public class EndpointConfigContext extends ConfigContextDecorator {
         return context;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public String getEndpointKey(API api) {
+    /**
+     * Get the endpoint key name
+     *
+     * @param api API that the endpoint belong
+     * @return String of endpoint key
+     */
+    private String getEndpointKey(API api) {
         return api.getId().getApiName() + "--v" + api.getId().getVersion();
     }
 }
