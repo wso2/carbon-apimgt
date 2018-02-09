@@ -17,10 +17,10 @@
  */
 
 import React from 'react'
-import {Link} from 'react-router-dom'
 import API from '../../../data/api'
 
 import Card, {CardActions, CardContent, CardMedia} from 'material-ui/Card';
+import {Redirect, Switch} from 'react-router-dom'
 import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
 import Dialog, {DialogActions, DialogContent, DialogContentText, DialogTitle,} from 'material-ui/Dialog';
@@ -29,13 +29,26 @@ import Grid from 'material-ui/Grid';
 import NotificationSystem from 'react-notification-system';
 import {resourceMethod, resourcePath, ScopeValidation} from "../../../data/ScopeValidation";
 import {LifeCycleStatus} from "../../../data/LifeCycle";
+import Utils from "../../../data/Utils";
+import Confirm from "../../Shared/Confirm";
 
 
 class ApiThumb extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {active: true, loading: false, open: false, openUserMenu: false};
+        this.state = {
+            active: true,
+            loading: false,
+            open: false,
+            openUserMenu: false,
+            overview_link: '',
+            isRedirect: false,
+            showRedirectConfirmDialog: false,
+            redirectConfirmDialogDetails: {},
+        };
         this.handleApiDelete = this.handleApiDelete.bind(this);
+        this.handleRedirectToAPIOverview = this.handleRedirectToAPIOverview.bind(this);
+        this.confirmDialogcallback = this.confirmDialogcallback.bind(this);
     }
 
     componentDidMount() {
@@ -78,13 +91,59 @@ class ApiThumb extends React.Component {
         );
     }
 
+    handleRedirectToAPIOverview() {
+        const {api, environmentName, rootAPIVersion} = this.props;
+        const currentEnvironmentName = Utils.getCurrentEnvironment().label;
+        // If environment name or version is not defined then consider as same environment or version.
+        const isSameEnvironment = !environmentName || environmentName === currentEnvironmentName;
+        const isSameVersion = !rootAPIVersion || rootAPIVersion.version === api.version;
+
+        if (isSameEnvironment && isSameVersion) {
+            this.setState({
+                overview_link: `/apis/${api.id}`,
+                isRedirect: true
+            });
+        } else { // Ask for confirmation to switch environment or version of the API
+            // Set details for the confirmation dialog
+            const title = `Switch to ${api.name} ${api.version}` +
+                `${isSameEnvironment ? '?' : ` in ${environmentName} Environment?`}`;
+            const message = 'We are going to switch the ' +
+                `${isSameEnvironment ? '' : `environment "${currentEnvironmentName}" to "${environmentName}"`}` +
+                `${!isSameEnvironment && !isSameVersion ? ' and ' : ''}` +
+                `${isSameVersion ? '' : `API version "${rootAPIVersion.version}" to "${api.version}"`}`;
+            const labelCancel = 'Cancel';
+            const labelOk = 'Switch';
+
+            this.setState({
+                overview_link: `/apis/${api.id}/overview?environment=${environmentName}`,
+                isRedirect: false,
+                showRedirectConfirmDialog: true,
+                redirectConfirmDialogDetails: {title, message, labelCancel, labelOk},
+            });
+        }
+    }
+
+    confirmDialogcallback(result) {
+        this.setState({
+            isRedirect: result,
+            showRedirectConfirmDialog: false
+        });
+    }
+
     render() {
-        const {api, environmentOverview, environmentName} = this.props;
+        const {api, environmentOverview} = this.props;
         let heading, content;
-        let details_link = `/apis/${api.id}${environmentName ? `/overview?environment=${environmentName}` : ''}`;
 
         if (!this.state.active) { // Controls the delete state, We set the state to inactive on delete success call
             return null;
+        }
+
+        if (this.state.isRedirect) {
+            return (
+                <Switch>
+                    <Redirect to={this.state.overview_link}/>
+                </Switch>
+            );
         }
 
         if (environmentOverview) { // API Thumb for "environment overview" page
@@ -128,11 +187,9 @@ class ApiThumb extends React.Component {
                         {content}
                     </CardContent>
                     <CardActions>
-                        <Link to={details_link}>
-                            <Button dense color="primary">
-                                More...
-                            </Button>
-                        </Link>
+                        <Button onClick={this.handleRedirectToAPIOverview} dense color="primary">
+                            More...
+                        </Button>
 
                         {/*Do not render for environment overview page*/}
                         {!environmentOverview ?
@@ -166,9 +223,20 @@ class ApiThumb extends React.Component {
                         }
                     </CardActions>
                 </Card>
+                <Confirm
+                    {...this.state.redirectConfirmDialogDetails}
+                    callback={this.confirmDialogcallback}
+                    open={this.state.showRedirectConfirmDialog}
+                />
             </Grid>
         );
     }
 }
+
+const SwitchEnvOrVersion = {
+    DO: 'do',
+    DO_NOT: 'do_not',
+    CONFIRM: 'confirm'
+};
 
 export default ApiThumb;

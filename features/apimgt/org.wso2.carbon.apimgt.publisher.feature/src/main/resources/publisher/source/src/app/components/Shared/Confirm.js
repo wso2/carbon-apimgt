@@ -1,46 +1,46 @@
 import React from 'react'
-import Dialog, {
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-} from 'material-ui/Dialog';
+import Dialog, {DialogActions, DialogContent, DialogContentText, DialogTitle,} from 'material-ui/Dialog';
+import Button from 'material-ui/Button';
 
-class Confirm extends React.Component{
-    constructor(props){
+class Confirm extends React.Component {
+    constructor(props) {
         super(props);
-        this.state(
-            {
-                open: false
-            }
-        )
     }
-    handleRequestClose(action){
-        this.setState({ open: false });
-        action === "ok" ? this.props.callback(true) : this.props.callback(false);
+
+    handleRequestClose(action) {
+        const {callback} = this.props;
+        action === Action.OK ? callback(true) : callback(false);
     }
-    render(props){
-        return(
-            <Dialog open={this.state.open} onClose={this.handleRequestClose}>
+
+    render(props) {
+        const {title, message, labelCancel, labelOk, open} = this.props;
+
+        return (
+            <Dialog open={open} onClose={this.handleRequestClose}>
                 <DialogTitle>
-                    { props.title ? props.title : 'Please Confirm' }
+                    {title || 'Please Confirm'}
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText>
-                        { props.message ? props.message : 'Are you sure?' }
+                        {message || 'Are you sure?'}
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => this.handleRequestClose("cancel")} color="primary">
-                        { props.labelCancel ? props.labelCancel : 'Cancel'}
+                    <Button onClick={() => this.handleRequestClose(Action.CANCEL)} color="primary">
+                        {labelCancel || 'Cancel'}
                     </Button>
-                    <Button onClick={() => this.handleRequestClose("ok")} color="primary">
-                        { props.labelOk ? props.labelOk : 'OK'}
+                    <Button onClick={() => this.handleRequestClose(Action.OK)} color="primary">
+                        {labelOk || 'OK'}
                     </Button>
                 </DialogActions>
             </Dialog>
         )
     }
 }
+
+const Action = {
+    OK: 'ok',
+    CANCEL: 'cancel'
+};
 
 export default Confirm;

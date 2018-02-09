@@ -84,7 +84,7 @@ class EnvironmentOverview extends Component {
                 </Grid>
                 <Grid item xs={12}>
                     {this.state.environments.map((environment, index) =>
-                        <EnvironmentPanel apiName={api.name} environment={environment} key={index}/>
+                        <EnvironmentPanel rootAPI={api} environment={environment} key={index}/>
                     )}
                 </Grid>
             </Grid>

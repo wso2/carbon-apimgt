@@ -41,7 +41,7 @@ class EnvironmentPanel extends Component {
     }
 
     componentDidMount() {
-        const {apiName, environment} = this.props;
+        const {rootAPI, environment} = this.props;
 
         let api;
         if (AuthManager.getUser(environment.label)) {
@@ -51,10 +51,10 @@ class EnvironmentPanel extends Component {
             return;
         }
 
-        let promised_apis = api.getAll({query: `name:${apiName}`});
+        let promised_apis = api.getAll({query: `name:${rootAPI.name}`});
         promised_apis.then((response) => {
             // Filter more since getAll({query: name:apiName}) is not filtering with exact name
-            const allApis = response.obj.list.filter(api => api.name === apiName);
+            const allApis = response.obj.list.filter(api => api.name === rootAPI.name);
             this.setState({
                 allApis,
                 apis: allApis
@@ -127,6 +127,7 @@ class EnvironmentPanel extends Component {
                                                 return <ApiThumb key={api.id} listType={this.state.listType}
                                                                  api={api}
                                                                  environmentName={environment.label}
+                                                                 rootAPIVersion={api}
                                                                  environmentOverview/>
                                             })}
                                         </Grid>
