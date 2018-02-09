@@ -40,9 +40,9 @@ public class UserMappingDAOImpl implements UserMappingDAO {
 
     /**
      *
-     * @param pseudoName
-     * @return
-     * @throws APIMgtDAOException
+     * @param pseudoName pseudo name parameter of the user
+     * @return String user id
+     * @throws APIMgtDAOException when error in data retrieving
      */
     @Override
     public String getUserIDByPseudoName(String pseudoName) throws APIMgtDAOException {
@@ -65,9 +65,9 @@ public class UserMappingDAOImpl implements UserMappingDAO {
 
     /**
      *
-     * @param userID
-     * @return
-     * @throws APIMgtDAOException
+     * @param userID user identifier 
+     * @return String pseudo name parameter of the user
+     * @throws APIMgtDAOException when error in data retrieving
      */
     @Override
     public String getPseudoNameByUserID(String userID) throws APIMgtDAOException {
@@ -94,9 +94,9 @@ public class UserMappingDAOImpl implements UserMappingDAO {
      *
      * @param userName
      * @return
-     * @throws APIMgtDAOException
+     * @throws APIMgtDAOException when error while inserting data
      */
-    public String addUserMapping(String userName) throws APIMgtDAOException {
+    private String addUserMapping(String userName) throws APIMgtDAOException {
         String pseudoName = UUID.randomUUID().toString();
         final String query = "INSERT INTO AM_USER_NAME_MAPPING (PSEUDO_NAME, USER_IDENTIFIER) VALUES (?,?)";
         try (Connection connection = DAOUtil.getConnection();
