@@ -25,15 +25,10 @@ import org.testng.annotations.Test;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.impl.BasicAuthAuthenticator;
-import org.wso2.carbon.messaging.CarbonMessage;
-import org.wso2.carbon.messaging.Header;
-import org.wso2.carbon.messaging.Headers;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.Response;
 import org.wso2.msf4j.ServiceMethodInfo;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import static org.mockito.Mockito.when;
 
@@ -44,9 +39,9 @@ public class BasicAuthAuthenticatorTestCase {
     public void testAuthenticate() throws Exception {
 
         final String authorizationHttpHeader = "Basic YWRtaW46YWRtaW4=";
-        final String authType = "Basic ";
+        final String authorizationHttpHeader1 = "DummyHeader YWRtaW46YWRtaW4=";
 
-        CarbonMessage carbonMessage = Mockito.mock(CarbonMessage.class);
+        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
         Request requestObj = new Request(carbonMessage);
 
         try {
@@ -62,20 +57,8 @@ public class BasicAuthAuthenticatorTestCase {
             Assert.assertEquals(e.getMessage(), "Missing Authorization header in the request.`");
         }
 
-        Header authHeader = Mockito.mock(Header.class);
-        authHeader.setName(RestApiConstants.AUTHORIZATION_HTTP_HEADER);
-        authHeader.setValue(authorizationHttpHeader);
 
-        List<Header> headersList = new ArrayList<Header>(1);
-        headersList.add(authHeader);
-
-        Headers headers = Mockito.mock(Headers.class);
-        headers.set(headersList);
-        when(requestObj.getHeaders()).thenReturn(headers);
-        requestObj.getHeaders().set(headersList);
-
-        String authHeaderString2 = authType;
-        when(requestObj.getHeader(RestApiConstants.AUTHORIZATION_HTTP_HEADER)).thenReturn(authHeaderString2);
+        when(requestObj.getHeader(RestApiConstants.AUTHORIZATION_HTTP_HEADER)).thenReturn(authorizationHttpHeader1);
 
         Response responseObj = Mockito.mock(Response.class);
         ServiceMethodInfo serviceMethodInfoObj = Mockito.mock(ServiceMethodInfo.class);
@@ -86,20 +69,7 @@ public class BasicAuthAuthenticatorTestCase {
             Assert.assertEquals(e.getMessage(), "Missing 'Authorization : Basic' header in the request.`");
         }
 
-        Header authHeader2 = Mockito.mock(Header.class);
-        authHeader2.setName(RestApiConstants.AUTHORIZATION_HTTP_HEADER);
-        authHeader2.setValue(authorizationHttpHeader);
-
-        List<Header> headersList2 = new ArrayList<Header>(1);
-        headersList2.add(authHeader2);
-
-        Headers headers2 = Mockito.mock(Headers.class);
-        headers2.set(headersList2);
-        when(requestObj.getHeaders()).thenReturn(headers2);
-        requestObj.getHeaders().set(headersList2);
-
-        String authHeaderString3 = authorizationHttpHeader;
-        when(requestObj.getHeader(RestApiConstants.AUTHORIZATION_HTTP_HEADER)).thenReturn(authHeaderString3);
+        when(requestObj.getHeader(RestApiConstants.AUTHORIZATION_HTTP_HEADER)).thenReturn(authorizationHttpHeader);
 
         BasicAuthAuthenticator basicAuthAuthenticator = new BasicAuthAuthenticator();
         boolean isAuthenticated = basicAuthAuthenticator.authenticate(requestObj, responseObj, serviceMethodInfoObj);

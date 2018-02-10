@@ -32,7 +32,7 @@ class Layout extends React.Component {
         return (
             <div>
                 <Header />
-                <Grid container spacing={0}>
+                <Grid container spacing={0} className="parent-container">
                     <Grid item xs={12}>
                         {this.props.children}
                     </Grid>

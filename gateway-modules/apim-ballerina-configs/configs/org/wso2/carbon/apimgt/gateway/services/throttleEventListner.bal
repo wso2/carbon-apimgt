@@ -11,11 +11,11 @@ import org.wso2.carbon.apimgt.gateway.holders as throttle;
 import org.wso2.carbon.apimgt.gateway.utils as util;
 
 @jms:config {
-    initialContextFactory:"org.apache.activemq.jndi.ActiveMQInitialContextFactory",
-    providerUrl:"tcp://localhost:61616",
+    initialContextFactory:"org.wso2.andes.jndi.PropertiesFileInitialContextFactory",
     connectionFactoryType:"topic",
     connectionFactoryName:"TopicConnectionFactory",
-    destination:"TEST.FOO"
+    destination:"TEST.FOO",
+    properties: ["connectionfactory.TopicConnectionFactory=amqp://admin:admin@clientID/carbon?brokerlist='tcp://localhost:5672'"]
 }
 service<jms> ThrottleJmsService {
 

@@ -43,7 +43,6 @@ class SampleAPI extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            message: '',
             published: false,
             api: null,
             deploying: false
@@ -67,7 +66,7 @@ class SampleAPI extends Component {
             context: "/v2",
             version: "1.0.0"
         };
-        const serviceUrl = "https://localhost:9292/publisher/public/app/petstore/pet/1.json";
+        const serviceUrl = "https://localhost:9443/publisher/public/app/petstore/pet/1.json";
         let production = {
             type: "production",
             inline: {
@@ -81,16 +80,16 @@ class SampleAPI extends Component {
         sandbox.type = "sandbox";
         sandbox.inline.name += "_sandbox";
         data['endpoint'] = [production, sandbox];
-        this.setState({message: "Creating sample Pet-Store API . . ."});
+        Alert.info('Creating sample Pet-Store API . . .');
         return this.sampleApi.create(data)
             .then(response => response.obj)
             .catch(error => {
                 console.error(error);
                 this.setState({deploying: false});
-                this.setState({message: error});
+                Alert.error(error);
                 let error_data = JSON.parse(error.data);
                 let messageTxt = "Error[" + error_data.code + "]: " + error_data.description + " | " + error_data.message + ".";
-                this.setState({message: messageTxt});
+                Alert.info(messageTxt);
             });
     }
 
@@ -102,9 +101,10 @@ class SampleAPI extends Component {
     _updatePolicies(api) {
         let uuid = api.id;
         let promisedApi = this.sampleApi.get(uuid);
-        this.setState({message: 'API Created with UUID :' + uuid, api: api});
+        this.setState({api: api});
+        Alert.info('API Created with UUID :' + uuid);
         return promisedApi.then(response => {
-            this.setState({message: 'Updating API policies with Bronze, Unlimited & Gold. . .'});
+            Alert.info('Updating API policies with Bronze, Unlimited & Gold. . .');
             let api = response.obj;
             api.policies = ["Bronze", "Unlimited", "Gold"];
             api.securityScheme = ["Oauth"];
@@ -112,7 +112,7 @@ class SampleAPI extends Component {
             console.info("Adding policies to the api", api.policies);
             let promised_update = this.sampleApi.update(api);
             return promised_update.then(response => {
-                this.setState({message: 'Policies updated successfully!'});
+                Alert.info('Policies updated successfully!');
                 return response.obj;
             })
         });
@@ -125,11 +125,12 @@ class SampleAPI extends Component {
         promisedUpdate = this.sampleApi.updateLcState(apiUUID, newState);
         promisedUpdate.then((response) => {
             const message = "Pet-Store API Published successfully";
-            this.setState({message: message, published: true});
+            this.setState({published: true});
+            Alert.info(message)
         }).catch(error => {
             console.error(error);
             this.setState({deploying: false});
-            this.setState({message: error});
+            Alert.error(error);
         });
     }
 
@@ -144,7 +145,6 @@ class SampleAPI extends Component {
         return (
             <Grid container spacing={16} justify="center">
                 <Grid item xs={6} style={{textAlign: "center"}}>
-                    <Alert message={message}/>
                     <Paper elevation={0}>
                         <Typography align="center" type="headline" gutterBottom>
                             Welcome to WSO2 API Manager
@@ -155,7 +155,7 @@ class SampleAPI extends Component {
                         </Typography>
                         <Grid container spacing={24} justify="center">
                             <Grid item xs={3}>
-                                <Link to="/api/create/rest">
+                                <Link to="/api/create/home">
                                     <Button raised>
                                         <Create style={{fontSize: 50}}/>
                                         Create New API

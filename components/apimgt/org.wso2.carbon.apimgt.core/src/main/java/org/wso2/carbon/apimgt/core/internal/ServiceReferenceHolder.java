@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.core.internal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.core.configuration.models.APIMConfigurations;
+import org.wso2.carbon.apimgt.core.configuration.models.EnvironmentConfigurations;
 import org.wso2.carbon.config.ConfigurationException;
 import org.wso2.carbon.config.provider.ConfigProvider;
 import org.wso2.carbon.secvault.SecureVault;
@@ -33,7 +34,8 @@ public class ServiceReferenceHolder {
     private static final Logger log = LoggerFactory.getLogger(ServiceReferenceHolder.class);
     private static ServiceReferenceHolder instance = new ServiceReferenceHolder();
     private ConfigProvider configProvider;
-    private APIMConfigurations config;
+    private APIMConfigurations apimConfigurations;
+    private EnvironmentConfigurations environmentConfigurations;
     private SecureVault secureVault;
 
     private ServiceReferenceHolder() {}
@@ -59,7 +61,7 @@ public class ServiceReferenceHolder {
     public APIMConfigurations getAPIMConfiguration() {
         try {
             if (configProvider != null) {
-                config = configProvider.getConfigurationObject(APIMConfigurations.class);
+                apimConfigurations = configProvider.getConfigurationObject(APIMConfigurations.class);
             } else {
                 log.error("Configuration provider is null");
             }
@@ -67,12 +69,35 @@ public class ServiceReferenceHolder {
             log.error("error getting config : org.wso2.carbon.apimgt.core.internal.APIMConfiguration", e);
         }
 
-        if (config == null) {
-            config = new APIMConfigurations();
-            log.info("Setting default configurations...");
+        if (apimConfigurations == null) {
+            apimConfigurations = new APIMConfigurations();
+            log.info("APIMConfiguration: Setting default configurations...");
         }
 
-        return config;
+        return apimConfigurations;
+    }
+
+    /**
+     * Gives the EnvironmentConfigurations explicitly set in the deployment yaml or the default configurations
+     *
+     * @return EnvironmentConfigurations
+     */
+    public EnvironmentConfigurations getEnvironmentConfigurations() {
+        try {
+            if (configProvider != null) {
+                environmentConfigurations = configProvider.getConfigurationObject(EnvironmentConfigurations.class);
+            } else {
+                log.error("Configuration provider is null");
+            }
+        } catch (ConfigurationException e) {
+            log.error("error getting config : org.wso2.carbon.apimgt.core.internal.EnvironmentConfigurations", e);
+        }
+
+        if (environmentConfigurations == null) {
+            environmentConfigurations = new EnvironmentConfigurations();
+            log.info("EnvironmentConfigurations: Setting default configurations...");
+        }
+        return environmentConfigurations;
     }
 
     /**

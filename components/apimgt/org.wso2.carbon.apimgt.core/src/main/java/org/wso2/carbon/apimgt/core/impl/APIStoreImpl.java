@@ -187,6 +187,19 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
     }
 
     @Override
+    public API getAPIbyUUID(String uuid) throws APIManagementException {
+        API api = super.getAPIbyUUID(uuid);
+        if (APIStatus.CREATED.getStatus().equals(api.getLifeCycleStatus()) || APIStatus.MAINTENANCE.getStatus()
+                .equals(api.getLifeCycleStatus()) || APIStatus.RETIRED.getStatus().equals(api.getLifeCycleStatus())) {
+            //API_NOT_FOUND is as the ExceptionCode as we don't need to expose the availability to this API via Store.
+            throw new APIManagementException(
+                    "Attempt to access an API which is in a restricted state: " + api.getLifeCycleStatus()
+                            + ", API uuid : " + uuid, ExceptionCodes.API_NOT_FOUND);
+        }
+        return api;
+    }
+
+    @Override
     public Application getApplicationByName(String applicationName, String ownerId)
             throws APIManagementException {
         Application application = null;

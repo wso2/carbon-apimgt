@@ -28,6 +28,8 @@ import 'antd/dist/antd.css'
 import {message} from 'antd'
 import './App.css'
 import 'typeface-roboto'
+import Utils from "./app/data/Utils";
+import ConfigManager from "./app/data/ConfigManager";
 
 // import './materialize.css'
 
@@ -37,17 +39,50 @@ import 'typeface-roboto'
 class Protected extends Component {
     constructor(props) {
         super(props);
-        this.state = {showLeftMenu: false};
+        this.state = {
+            showLeftMenu: false,
+            environments: [],
+        };
+        this.environmentName = "";
         message.config({top: '48px'}); // .custom-header height + some offset
         /* TODO: need to fix the header to avoid conflicting with messages ~tmkb*/
     }
 
+    componentDidMount() {
+        ConfigManager.getConfigs().environments.then(response => {
+            const environments = response.data.environments;
+            this.setState({environments});
+        });
+    }
+
     /**
-     * Change the visibility state of left side navigation menu bar
-     * @param {boolean} status : Whether or not to show or hide left side navigation menu
+     * Change the environment with "environment" query parameter
      */
+    handleEnvironmentQueryParam() {
+        let queryString = this.props.location.search;
+        queryString = queryString.replace(/^\?/, '');
+        /* With QS version up we can directly use {ignoreQueryPrefix: true} option */
+        let queryParams = qs.parse(queryString);
+        const environmentName = queryParams.environment;
+
+        if (!environmentName || this.environmentName === environmentName) {
+            // no environment query param or the same environment
+            return;
+        }
+
+        let environmentId = Utils.getEnvironmentID(this.state.environments, environmentName);
+        if (environmentId === -1) {
+            console.error("Invalid environment name in environment query parameter.");
+            return;
+        }
+
+        let environment = this.state.environments[environmentId];
+        Utils.setEnvironment(environment);
+        this.environmentName = environmentName;
+    }
 
     render() {
+        this.handleEnvironmentQueryParam();
         // Note: AuthManager.getUser() method is a passive check, which simply check the user availability in browser storage,
         // Not actively check validity of access token from backend
         if (AuthManager.getUser()) {
@@ -79,7 +114,7 @@ const Store = (props) => {
     return (
         <Router basename="/store">
             <Switch>
-                <Route path={"/login"} render={() => <Login appName={"store"} appLabel={"STORE"} />}/>
+                <Route path={"/login"} render={() => <Login appName={"store"} appLabel={"STORE"}/>}/>
                 <Route path={"/logout"} component={Logout}/>
                 <Route component={Protected}/>
             </Switch>

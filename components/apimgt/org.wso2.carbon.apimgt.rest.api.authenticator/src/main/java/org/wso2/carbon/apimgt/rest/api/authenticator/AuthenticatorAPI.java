@@ -83,7 +83,8 @@ public class AuthenticatorAPI implements Microservice {
     @Consumes({MediaType.APPLICATION_FORM_URLENCODED, MediaType.MULTIPART_FORM_DATA})
     public Response authenticate(@Context Request request, @PathParam("appName") String appName,
                                  @FormDataParam("username") String userName, @FormDataParam("password") String password,
-                                 @FormDataParam("grant_type") String grantType, @FormDataParam("validity_period") String validityPeriod,
+                                 @FormDataParam("assertion") String assertion, @FormDataParam("grant_type") String grantType,
+                                 @FormDataParam("validity_period") String validityPeriod,
                                  @FormDataParam("remember_me") boolean isRememberMe, @FormDataParam("scopes") String scopesList) {
         try {
             KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
@@ -92,6 +93,8 @@ public class AuthenticatorAPI implements Microservice {
             AuthResponseBean authResponseBean = new AuthResponseBean();
             String appContext = AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
             String logoutContext = AuthenticatorConstants.LOGOUT_SERVICE_CONTEXT +
+                    AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
+            String loginContext = AuthenticatorConstants.LOGIN_SERVICE_CONTEXT +
                     AuthenticatorConstants.URL_PATH_SEPERATOR + appName;
             String restAPIContext;
             if (appContext.contains(AuthenticatorConstants.EDITOR_APPLICATION) ||
@@ -104,7 +107,7 @@ public class AuthenticatorAPI implements Microservice {
             String refToken = null;
             if (AuthenticatorConstants.REFRESH_GRANT.equals(grantType)) {
                 refToken = AuthUtil
-                        .extractTokenFromHeaders(request.getHeaders(), AuthenticatorConstants.REFRESH_TOKEN_2);
+                        .extractTokenFromHeaders(request, AuthenticatorConstants.REFRESH_TOKEN_2);
                 if (refToken == null) {
                     ErrorDTO errorDTO = new ErrorDTO();
                     errorDTO.setCode(ExceptionCodes.INVALID_AUTHORIZATION_HEADER.getErrorCode());
@@ -113,7 +116,7 @@ public class AuthenticatorAPI implements Microservice {
                 }
             }
             AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appContext.substring(1),
-                    grantType, userName, password, refToken, Long.parseLong(validityPeriod), null);
+                    grantType, userName, password, refToken, Long.parseLong(validityPeriod), null, assertion);
             authenticatorService.setAccessTokenData(authResponseBean, accessTokenInfo);
             String accessToken = accessTokenInfo.getAccessToken();
             String refreshToken = accessTokenInfo.getRefreshToken();
@@ -127,7 +130,7 @@ public class AuthenticatorAPI implements Microservice {
             authResponseBean.setPartialToken(accessTokenPart1);
             // Cookie should be set to the log out context in order to revoke the token when log out happens.
 
-            NewCookie httpOnlyCookieWithLogInContext = AuthUtil
+            NewCookie logoutContextCookie = AuthUtil
                     .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, accessTokenPart2, logoutContext,
                             true, true, "");
             NewCookie restAPIContextCookie = AuthUtil
@@ -139,14 +142,21 @@ public class AuthenticatorAPI implements Microservice {
                     AuthenticatorConstants.PASSWORD_GRANT.equals(grantType) && isRememberMe))) {
                 String refTokenPart1 = refreshToken.substring(0, refreshToken.length() / 2);
                 String refTokenPart2 = refreshToken.substring(refreshToken.length() / 2);
+                /* Note:
+                Two parts of the Refresh Token should be stored in two cookies where JS accessible cookie
+                is stored with `/{appName}` (i:e /publisher) path, because JS will trigger a token refresh call
+                anywhere under `/publisher` context.Other part of the Refresh token cookie should set with the
+                path directive as `/login/token/{appName}` (i:e /login/token/publisher) because the token request call
+                will be send to `/login/token/{appName}` endpoint originated from `/{appName}`
+                * */
                 refreshTokenCookie = AuthUtil
                         .cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_1, refTokenPart1, appContext, true, false,
                                 "");
                 refreshTokenHttpOnlyCookie = AuthUtil
-                        .cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_2, refTokenPart2, appContext, true, true,
+                        .cookieBuilder(AuthenticatorConstants.REFRESH_TOKEN_2, refTokenPart2, loginContext, true, true,
                                 "");
                 return Response.ok(authResponseBean, MediaType.APPLICATION_JSON)
-                        .cookie(httpOnlyCookieWithLogInContext, restAPIContextCookie,
+                        .cookie(logoutContextCookie, restAPIContextCookie,
                                 refreshTokenCookie, refreshTokenHttpOnlyCookie).header(AuthenticatorConstants.
                                         REFERER_HEADER,
                                 (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
@@ -159,7 +169,7 @@ public class AuthenticatorAPI implements Microservice {
                         .build();
             } else {
                 return Response.ok(authResponseBean, MediaType.APPLICATION_JSON)
-                        .cookie(httpOnlyCookieWithLogInContext, restAPIContextCookie)
+                        .cookie(logoutContextCookie, restAPIContextCookie)
                         .header(AuthenticatorConstants.
                                         REFERER_HEADER,
                                 (request.getHeader(AuthenticatorConstants.X_ALT_REFERER_HEADER) != null && request
@@ -195,7 +205,7 @@ public class AuthenticatorAPI implements Microservice {
             restAPIContext = AuthenticatorConstants.REST_CONTEXT + appContext;
         }
         String accessToken = AuthUtil
-                .extractTokenFromHeaders(request.getHeaders(), AuthenticatorConstants.ACCESS_TOKEN_2);
+                .extractTokenFromHeaders(request, AuthenticatorConstants.ACCESS_TOKEN_2);
         if (accessToken != null) {
             try {
                 KeyManager keyManager = APIManagerFactory.getInstance().getKeyManager();
@@ -262,7 +272,7 @@ public class AuthenticatorAPI implements Microservice {
      * This is the API which IDP redirects the user after authentication.
      *
      * @param request Request to call /callback api
-     * @param appName Name of the applicatoin (publisher/store/admin)
+     * @param appName Name of the application (publisher/store/admin)
      * @param authorizationCode Authorization-Code
      * @return Response - Response with redirect URL
      */
@@ -291,7 +301,7 @@ public class AuthenticatorAPI implements Microservice {
             SystemApplicationDao systemApplicationDao = DAOFactory.getSystemApplicationDao();
             AuthenticatorService authenticatorService = new AuthenticatorService(keyManager, systemApplicationDao);
             AccessTokenInfo accessTokenInfo = authenticatorService.getTokens(appName, grantType,
-                    null, null, null, 0, authorizationCode);
+                    null, null, null, 0, authorizationCode, null);
             if (StringUtils.isEmpty(accessTokenInfo.toString())) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                         .entity("Access token generation failed!").build();
@@ -306,7 +316,7 @@ public class AuthenticatorAPI implements Microservice {
                 String accessTokenPart2 = accessToken.substring(accessToken.length() / 2);
 
                 authResponseBean.setPartialToken(accessTokenPart1);
-                NewCookie httpOnlyCookieWithLogoutContext = AuthUtil
+                NewCookie logoutContextCookie = AuthUtil
                         .cookieBuilder(AuthenticatorConstants.ACCESS_TOKEN_2, accessTokenPart2, logoutContext,
                                 true, true, "");
                 NewCookie restAPIContextCookie = AuthUtil
@@ -321,8 +331,8 @@ public class AuthenticatorAPI implements Microservice {
                 // Redirect to the store/apis page (redirect URL)
                 String uiServiceUrl;
                 //The first host in the list "allowedHosts" is the host of UI-Service
-                String uiServiceHost = APIMConfigurationService.getInstance().getApimConfigurations()
-                        .getEnvironmentConfigurations().getAllowedHosts().get(0);
+                String uiServiceHost = APIMConfigurationService.getInstance().getEnvironmentConfigurations()
+                        .getAllowedHosts().get(0);
                 if (StringUtils.isEmpty(uiServiceHost)) {
                     if (log.isDebugEnabled()) {
                         log.debug("The first string in the list " +
@@ -352,12 +362,12 @@ public class AuthenticatorAPI implements Microservice {
                             .replaceAll("\\+", "%20").replaceAll("%26", "&").replaceAll("%3D", "="));
                     return Response.status(Response.Status.FOUND)
                             .header(HttpHeaders.LOCATION, redirectURI)
-                            .cookie(httpOnlyCookieWithLogoutContext, restAPIContextCookie)
+                            .cookie(logoutContextCookie, restAPIContextCookie)
                             .build();
                 } else {
                     return Response.status(Response.Status.FOUND)
                             .header(HttpHeaders.LOCATION, targetURIForRedirection).entity(authResponseBean)
-                            .cookie(httpOnlyCookieWithLogoutContext, restAPIContextCookie, authUserCookie)
+                            .cookie(logoutContextCookie, restAPIContextCookie, authUserCookie)
                             .build();
                 }
             }

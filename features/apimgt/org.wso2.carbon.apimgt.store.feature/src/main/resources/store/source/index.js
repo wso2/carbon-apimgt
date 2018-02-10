@@ -22,5 +22,11 @@ import Store from "./src/App.js"
 import 'typeface-roboto'
 import 'material-design-icons'
 import 'material-ui-icons'
+import {MuiThemeProvider, createMuiTheme} from 'material-ui/styles';
+import Config from 'Config';
 
-ReactDOM.render(<Store/>, document.getElementById("react-root"));
+const theme = createMuiTheme(Config);
+
+ReactDOM.render(<MuiThemeProvider theme={theme}>
+        <Store/>
+    </MuiThemeProvider>, document.getElementById("react-root"));

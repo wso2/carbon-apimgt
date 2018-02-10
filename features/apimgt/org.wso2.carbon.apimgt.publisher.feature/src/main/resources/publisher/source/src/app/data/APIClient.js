@@ -27,35 +27,32 @@ import Utils from "./Utils";
  */
 class APIClient {
     /**
-     * @param {String} host : Host of apis. Host for the swagger-client's spec property.
-     * @param {{}} args : Accept as an optional argument for APIClient constructor.Merge the given args with default args.
-     * @returns {APIClient|*|null}
+     * @param {Object} environment - Environment to get host for the swagger-client's spec property.
+     * @param {{}} args - Accept as an optional argument for APIClient constructor.Merge the given args with default args.
+     * @returns {APIClient}
      */
-    constructor(host, args = {}) {
-        this.host = host || location.host;
+    constructor(environment, args = {}) {
+        this.environment = environment || Utils.getCurrentEnvironment();
 
         const authorizations = {
             OAuth2Security: {
-                token: {access_token: AuthManager.getUser().getPartialToken()}
+                token: {access_token: AuthManager.getUser(environment.label).getPartialToken()}
             }
         };
 
-        let promisedResolve = SwaggerClient.resolve({url: Utils.getSwaggerURL()});
+        SwaggerClient.http.withCredentials = true;
+        let promisedResolve = SwaggerClient.resolve({ url: Utils.getSwaggerURL() });
         APIClient.spec = promisedResolve;
         this._client = promisedResolve.then(
             resolved => {
-                const argsv = Object.assign(args,
-                    {
-                        spec: this._fixSpec(resolved.spec),
-                        authorizations: authorizations,
-                        requestInterceptor: this._getRequestInterceptor(),
-                        responseInterceptor: this._getResponseInterceptor()
-                    });
-                let swaggerClient = new SwaggerClient(argsv);
-                swaggerClient.then(client => {
-                    client.http.withCredentials = true
+                const argsv = Object.assign(args, {
+                    spec: this._fixSpec(resolved.spec),
+                    authorizations: authorizations,
+                    requestInterceptor: this._getRequestInterceptor(),
+                    responseInterceptor: this._getResponseInterceptor()
                 });
-                return swaggerClient;
+                SwaggerClient.http.withCredentials = true;
+                return new SwaggerClient(argsv);
             }
         );
         this._client.catch(AuthManager.unauthorizedErrorHandler);
@@ -71,8 +68,8 @@ class APIClient {
 
     /**
      * Get the ETag of a given resource key from the session storage
-     * @param key {string} key of resource.
-     * @returns {string} ETag value for the given key
+     * @param {String} key - key of resource.
+     * @returns {String} ETag value for the given key
      */
     static getETag(key) {
         return sessionStorage.getItem("etag_" + key);
@@ -95,7 +92,8 @@ class APIClient {
      */
     static getScopeForResource(resourcePath, resourceMethod) {
         if (!APIClient.spec) {
-            APIClient.spec = SwaggerClient.resolve({url: Utils.getSwaggerURL()});
+            SwaggerClient.http.withCredentials = true;
+            APIClient.spec = SwaggerClient.resolve({ url: Utils.getSwaggerURL() });
         }
         return APIClient.spec.then(
             resolved => {
@@ -113,7 +111,7 @@ class APIClient {
      * @private
      */
     _fixSpec(spec) {
-        spec.host = this.host;
+        spec.host = this.environment.host;
         return spec;
     }
 
@@ -127,11 +125,12 @@ class APIClient {
     }
 
     _getRequestInterceptor() {
-        return (data) => {
-            if (APIClient.getETag(data.url) && (data.method === "PUT" || data.method === "DELETE" || data.method === "POST")) {
-                data.headers["If-Match"] = APIClient.getETag(data.url);
+        return (request) => {
+            AuthManager.refreshTokenOnExpire(request, this.environment);
+            if (APIClient.getETag(request.url) && (request.method === "PUT" || request.method === "DELETE" || request.method === "POST")) {
+                request.headers["If-Match"] = APIClient.getETag(request.url);
             }
-            return data;
+            return request;
         }
     }
 }

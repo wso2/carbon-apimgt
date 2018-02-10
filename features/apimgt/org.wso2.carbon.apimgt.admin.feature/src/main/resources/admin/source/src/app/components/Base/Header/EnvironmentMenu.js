@@ -75,7 +75,7 @@ class EnvironmentMenu extends React.Component {
                     style={{alignItems: "center", justifyContent: "center"}}
                 >
                     {environments.map((environment, index) =>
-                        <MenuItem onClick={this.handleEnvironmentChange}
+                        <MenuItem onClick={this.handleEnvironmentChange} key={index}
                                   id={index}>{environment.label}</MenuItem>
                     )}
                 </Menu>

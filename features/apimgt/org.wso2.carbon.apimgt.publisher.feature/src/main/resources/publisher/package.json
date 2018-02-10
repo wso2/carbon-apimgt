@@ -27,6 +27,7 @@
     "material-ui-icons": "^1.0.0-alpha.19",
     "prop-types": "^15.5.10",
     "qs": "^6.4.0",
+    "rc-notification": "^3.0.1",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
     "react-dropzone": "^3.13.4",
@@ -39,7 +40,7 @@
     "react-tagsinput": "3.19.0",
     "react-tap-event-plugin": "^2.0.1",
     "react-toastify": "^1.7.0",
-    "swagger-client": "git://github.com/RenukaFernando/swagger-js.git#v-cors-patch",
+    "swagger-client": "3.4.8",
     "typeface-roboto": "0.0.35",
     "url-loader": "^0.5.9"
   },

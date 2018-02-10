@@ -17,6 +17,7 @@ package org.wso2.carbon.apimgt.core.impl;
  * under the License.
  */
 
+import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -43,6 +44,7 @@ import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
 import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.KeyManagerConstants;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -51,6 +53,7 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 
@@ -96,9 +99,17 @@ public class DefaultKeyManagerImpl implements KeyManager {
             map.put(KeyManagerConstants.AUTHORIZATION_HEADER, "Basic " + Base64.getEncoder().encodeToString(
                     (keyManagerConfigs.getKeyManagerCredentials().getUsername() + ":" + keyManagerConfigs
                             .getKeyManagerCredentials().getPassword()).getBytes(Charset.defaultCharset())));
-            String payload = "{'" + KeyManagerConstants.OAUTH_CLIENT_NAME + "':'" + applicationName + "'}";
+            Map<String, Object> payload = new HashMap<>();
+            payload.put(KeyManagerConstants.OAUTH_CLIENT_NAME, applicationName);
+            payload.put("grant_types", dcrClientInfo.getGrantTypes());
+            if (!StringUtils.isBlank(oauthAppRequest.getCallBackURL())) {
+                String callbackURIs[] = { oauthAppRequest.getCallBackURL() };
+                payload.put("redirect_uris", callbackURIs);
+            }
+            Gson gson = new Gson();
+            String jsonPayload = gson.toJson(payload);
             httpResponse = restCallUtil
-                    .postRequest(new URI(url), MediaType.APPLICATION_JSON_TYPE, null, Entity.text(payload),
+                    .postRequest(new URI(url), MediaType.APPLICATION_JSON_TYPE, null, Entity.text(jsonPayload),
                             MediaType.APPLICATION_JSON_TYPE, map);
         } catch (URISyntaxException e) {
             throw new KeyManagementException("Error occurred while parsing DCR endpoint", e,
@@ -266,6 +277,32 @@ public class DefaultKeyManagerImpl implements KeyManager {
             } else if (KeyManagerConstants.AUTHORIZATION_CODE_GRANT_TYPE.equals(tokenRequest.getGrantType())) {
                 //todo: implement
             } else if (KeyManagerConstants.REFRESH_GRANT_TYPE.equals(tokenRequest.getGrantType())) {
+                try {
+                    String url = keyManagerConfigs.getTokenEndpoint();
+                    Map<String, Object> payload = new HashMap<>();
+                    payload.put(KeyManagerConstants.OAUTH_CLIENT_GRANT, KeyManagerConstants.REFRESH_GRANT_TYPE);
+                    payload.put(KeyManagerConstants.REFRESH_GRANT_TYPE, tokenRequest.getRefreshToken());
+                    payload.put(KeyManagerConstants.OAUTH_CLIENT_ID, tokenRequest.getClientId());
+                    payload.put(KeyManagerConstants.OAUTH_CLIENT_SCOPE,
+                            URLEncoder.encode(tokenRequest.getScopes(), "UTF-8"));
+                    String queryString =
+                            "?" + payload.entrySet().stream().map(entry -> entry.getKey() + "=" + entry.getValue())
+                                    .collect(Collectors.joining("&"));
+                    Map<String, String> headers = new HashMap<>();
+                    headers.put(KeyManagerConstants.AUTHORIZATION_HEADER, "Basic " + Base64.getEncoder().encodeToString(
+                            (tokenRequest.getClientId() + ":" + tokenRequest.getClientSecret())
+                                    .getBytes(Charset.defaultCharset())));
+                    response = restCallUtil
+                            .postRequest(new URI(url + queryString), MediaType.APPLICATION_JSON_TYPE, null,
+                                    Entity.text(""), MediaType.APPLICATION_FORM_URLENCODED_TYPE, headers);
+                } catch (APIManagementException e) {
+                    throw new KeyManagementException("Error occurred while invoking token endpoint", e,
+                            ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
+                } catch (URISyntaxException | UnsupportedEncodingException e) {
+                    throw new KeyManagementException("Error occurred while parsing token endpoint", e,
+                            ExceptionCodes.ACCESS_TOKEN_GENERATION_FAILED);
+                }
+            } else if (KeyManagerConstants.JWT_GRANT_TYPE.equals(tokenRequest.getGrantType())) {
                 //todo: implement
             } else {
                 throw new KeyManagementException(

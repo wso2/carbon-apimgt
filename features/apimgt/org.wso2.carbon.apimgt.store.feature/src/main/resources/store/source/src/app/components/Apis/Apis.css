@@ -48,8 +48,6 @@ h2{
     font-weight: 200;
 }
 h2 span{
-    color:#ccc;
-    font-size: 11px;
     display: block;
 }
 .api-type-selector{
@@ -96,7 +94,7 @@ h2 span{
 
 /*need a better solution*/
 .default-thumb{
-    height: 200px!important;
+    height: 250px!important;
     border-radius: 0!important;
     width: 100%!important;
     font-weight: 200!important;
@@ -111,4 +109,11 @@ h2 span{
     .default-thumb {
         font-size: 7em!important;
     }
+}
+.api-list-tile {
+    list-style: none;
+}
+.api-list-title {
+    display: inline;
+    float: left;
 }

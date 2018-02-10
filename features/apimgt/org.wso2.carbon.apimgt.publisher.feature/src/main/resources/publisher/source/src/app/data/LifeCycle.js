@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,6 +15,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-.test_button.ch-item{
-    height: auto;
-}
+"use strict";
+
+
+const LifeCycleStatus = [
+    {name: "Created", color: "#0000ff"},
+    {name: "Prototyped", color: "#42dfff"},
+    {name: "Published", color: "#41830A"},
+    {name: "Maintenance", color: "#cecece"},
+    {name: "Deprecated", color: "#D7C850"},
+    {name: "Retired", color: "#000000"},
+];
+
+module.exports = {
+    LifeCycleStatus: LifeCycleStatus
+};

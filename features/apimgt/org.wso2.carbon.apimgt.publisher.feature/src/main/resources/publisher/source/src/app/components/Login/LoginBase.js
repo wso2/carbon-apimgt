@@ -38,7 +38,7 @@ const LoginBase = (props) => {
             <footer className="footer">
                 <div className="container-fluid">
                     <p>
-                        WSO2 | © 2016
+                        WSO2 | © 2018
                         <a href="http://wso2.com/" target="_blank"><i
                             className="icon fw fw-wso2"/> Inc</a>.
                     </p>

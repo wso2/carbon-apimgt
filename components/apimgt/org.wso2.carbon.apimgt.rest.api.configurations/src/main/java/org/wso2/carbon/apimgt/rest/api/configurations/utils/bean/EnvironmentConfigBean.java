@@ -26,7 +26,7 @@ import java.util.List;
  */
 public class EnvironmentConfigBean {
 
-    private List<EnvironmentConfigurations> environments = new ArrayList<EnvironmentConfigurations>();
+    private List<EnvironmentConfigurations> environments = new ArrayList<>();
 
     public List<EnvironmentConfigurations> getEnvironments() {
         return environments;

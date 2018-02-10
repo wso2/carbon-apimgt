@@ -32,18 +32,11 @@ const styles = {
 };
 
 export const Footer = (props) => {
-    const {classes} = props;
     return (
-        <div className={classes.root}>
-            <BottomNavigation className={classes.root}>
-                {/* This <p> tag introduce an warning
-                 Warning: Unknown prop `showLabel` on <p> tag. Remove this prop from the element.
-                 Ignore it till MUI fix.
-                 */}
-                <p>WSO2 APIM Store v3.0.0 | © 2017 <a href="http://wso2.com/" target="_blank">
-                    <i className="icon fw fw-wso2"/> Inc</a>
-                </p>
-            </BottomNavigation>
+        <div className='footer'>
+            <Typography type="caption" className='text-gutter text-welcome'>
+                WSO2 APIM Publisher v3.0.0 | © 2018 <span><a href="http://wso2.com/" target="_blank">
+                WSO2 Inc</a></span></Typography>
         </div>
     );
 };

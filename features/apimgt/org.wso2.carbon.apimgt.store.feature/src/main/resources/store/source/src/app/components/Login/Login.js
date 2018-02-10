@@ -18,7 +18,7 @@
 
 import React, {Component} from 'react'
 import './login.css'
-import {Redirect, Switch} from 'react-router-dom'
+import {Redirect, Switch, withRouter} from 'react-router-dom'
 import AuthManager from '../../data/AuthManager'
 import qs from 'qs'
 import TextField from 'material-ui/TextField';
@@ -34,9 +34,7 @@ import Input, {InputLabel} from 'material-ui/Input';
 import Select from 'material-ui/Select';
 import {FormControl} from 'material-ui/Form';
 import {MenuItem} from 'material-ui/Menu';
-import {CircularProgress} from "material-ui/Progress";
 import Grid from 'material-ui/Grid';
-import {withRouter} from 'react-router-dom';
 import Loading from "../Base/Loading/Loading";
 import Redirecting from "../Shared/Redirecting";
 
@@ -56,10 +54,11 @@ class Login extends Component {
             message: '',
             environments: [],
             environmentId: 0,
+            loginStatusEnvironments: [],
             authConfigs: [],
             redirectToIS: false
         };
-        this.fetch_ssoData = this.fetch_ssoData.bind(this);
+        this.fetch_DCRappInfo = this.fetch_DCRappInfo.bind(this);
     }
 
     componentDidMount() {
@@ -68,18 +67,21 @@ class Login extends Component {
         //Get Environments and SSO data
         ConfigManager.getConfigs().environments.then(response => {
             const environments = response.data.environments;
-            const environmentId = Utils.getEnvironmentID(environments);
-
-            // Do not need to render before fetch sso data
-            this.state.environments = environments;
-            this.state.environmentId = environmentId;
+            let environmentId = Utils.getEnvironmentID(environments);
+            if (environmentId === -1) {
+                environmentId = 0;
+            }
+            this.setState({environments, environmentId});
 
             // Update environment to discard default environment configuration
             const environment = environments[environmentId];
             Utils.setEnvironment(environment);
 
+            // Set authentication status of environments
+            this.setLoginStatusOfEnvironments(environments);
+
             //Fetch SSO data and render
-            this.fetch_ssoData(environments);
+            this.fetch_DCRappInfo(environments);
         });
 
         let queryString = this.props.location.search;
@@ -100,10 +102,17 @@ class Login extends Component {
         }
     }
 
-    fetch_ssoData(environments) {
+    setLoginStatusOfEnvironments(environments) {
+        let loginStatusEnvironments = environments.map(
+            environment => AuthManager.getUser(environment.label) !== null
+        );
+        this.setState({loginStatusEnvironments});
+    }
+
+    fetch_DCRappInfo(environments) {
         //Array of promises
         let promised_ssoData = environments.map(
-            environment => Utils.getPromised_ssoData(environment)
+            environment => Utils.getPromised_DCRappInfo(environment)
         );
 
         Promise.all(promised_ssoData).then(responses => {
@@ -126,7 +135,7 @@ class Login extends Component {
     };
 
     handleSsoLogin = (e) => {
-        if(e){
+        if (e) {
             e.preventDefault();
         }
         const authConfigs = this.state.authConfigs[this.state.environmentId];
@@ -178,7 +187,11 @@ class Login extends Component {
     handleEnvironmentChange = (event) => {
         const environmentId = event.target.value;
         let environment = this.state.environments[environmentId];
-        this.setState({environmentId});
+        let isLogin = this.state.loginStatusEnvironments[environmentId];
+        if (isLogin) {
+            Utils.setEnvironment(environment);
+        }
+        this.setState({environmentId, isLogin});
     };
 
     handleRequestClose = () => {
@@ -190,7 +203,8 @@ class Login extends Component {
         const isSsoUpdated = this.state.authConfigs.length !== 0;
         const isSsoEnabled = isSsoUpdated && this.state.authConfigs[this.state.environmentId].is_sso_enabled.value;
         const {appName, appLabel} = this.props;
-        //Redirect to IS
+
+        //Redirect to Identity Provider
         if (this.state.redirectToIS) {
             return (
                 <Redirecting message={"You are now being redirected to Identity Provider."}/>
@@ -316,7 +330,6 @@ class Login extends Component {
 
                         </Grid>
                     </Grid>
-                    <Footer/>
                 </div>
 
             );

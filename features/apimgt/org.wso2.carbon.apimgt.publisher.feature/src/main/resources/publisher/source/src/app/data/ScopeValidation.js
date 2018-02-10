@@ -85,4 +85,4 @@ module.exports = {
     ScopeValidation,
     resourceMethod,
     resourcePath
-}
+};

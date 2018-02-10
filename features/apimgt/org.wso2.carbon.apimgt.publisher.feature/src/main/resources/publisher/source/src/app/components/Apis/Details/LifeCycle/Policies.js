@@ -65,7 +65,7 @@ export default class Policies extends Component {
         return (
             <div>
                 <FormControl className="policies-select">
-                    <InputLabel classes={classes} htmlFor="name-multiple">Business Plans</InputLabel>
+                    <InputLabel htmlFor="name-multiple">Business Plans</InputLabel>
                     <Select
                         margin="none"
                         multiple

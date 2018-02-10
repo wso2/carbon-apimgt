@@ -299,6 +299,10 @@ public class WSO2ISKeyManagerImpl implements KeyManager {
                 response = oAuth2ServiceStubs.getTokenServiceStub().generateRefreshGrantAccessToken(
                         tokenRequest.getRefreshToken(), tokenRequest.getScopes(), tokenRequest.getValidityPeriod(),
                         tokenRequest.getClientId(), tokenRequest.getClientSecret());
+            } else if (KeyManagerConstants.JWT_GRANT_TYPE.equals(tokenRequest.getGrantType())) {
+                response = oAuth2ServiceStubs.getTokenServiceStub().generateJWTGrantAccessToken(
+                        tokenRequest.getAssertion(), KeyManagerConstants.JWT_GRANT_TYPE, tokenRequest.getScopes(),
+                        tokenRequest.getValidityPeriod(), tokenRequest.getClientId(), tokenRequest.getClientSecret());
             } else {
                 throw new KeyManagementException("Invalid access token request. Unsupported grant type: "
                         + tokenRequest.getGrantType(), ExceptionCodes.INVALID_TOKEN_REQUEST);

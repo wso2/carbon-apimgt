@@ -30,21 +30,28 @@ import Paper from 'material-ui/Paper';
 import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
+import Dialog, {DialogActions, DialogContent, DialogContentText, DialogTitle} from 'material-ui/Dialog';
 import Card, {CardActions, CardContent, CardMedia} from 'material-ui/Card';
 import {MenuItem} from 'material-ui/Menu';
-import {Delete, Edit, CreateNewFolder, Description}from 'material-ui-icons';
 import Table, {TableBody, TableCell, TableRow} from 'material-ui/Table';
 import Select from 'material-ui/Select';
 import 'react-select/dist/react-select.css';
-import Subscriptions  from 'material-ui-icons/Subscriptions';
 import {FormControl} from 'material-ui/Form';
 import NotificationSystem from 'react-notification-system';
+import FavoriteIcon from 'material-ui-icons/Favorite';
+import ShareIcon from 'material-ui-icons/Share';
+import IconButton from 'material-ui/IconButton';
+import Divider from 'material-ui/Divider';
+import CodeIcon from 'material-ui-icons/Code';
+import Input, {InputLabel} from 'material-ui/Input';
+import EmailIcon from 'material-ui-icons/Email';
+import Slide from "material-ui/transitions/Slide";
+import Popover from 'material-ui/Popover';
 
 const styles = theme => ({
-    fullWidth: {
-        width: "100%",
-        "margin-top": "1%"
-    }
+    media: {
+        height: 200,
+    },
 });
 
 class BasicInfo extends Component {
@@ -57,16 +64,23 @@ class BasicInfo extends Component {
             dropDownApplications: null,
             dropDownPolicies: null,
             notFound: false,
+            openSubscribeMenu: false,
             matDropVisible: false,
             matDropValue: 'one',
             subscribedApplicationIds: [],
             options: [],
             tiers: [],
             applicationId: null,
-            policyName: null
+            policyName: null,
+            openPopup: false,
+            anchorEl: null
         };
         this.api_uuid = this.props.uuid;
         this.logChange = this.logChange.bind(this);
+        this.openSubscribeMenu = this.openSubscribeMenu.bind(this);
+        this.closeSubscribeMenu = this.closeSubscribeMenu.bind(this);
+        this.handlePopupOpen = this.handlePopupOpen.bind(this);
+        this.handlePopupClose = this.handlePopupClose.bind(this);
     }
 
     componentDidMount() {
@@ -199,7 +213,7 @@ class BasicInfo extends Component {
     };
 
     addNotifications() {
-        this.refs.notificationSystem.addNotification( {
+        this.refs.notificationSystem.addNotification({
             message: 'Subscribe to API successfully',
             position: 'tc',
             level: 'success'
@@ -216,8 +230,8 @@ class BasicInfo extends Component {
         promised_subscribe.then(response => {
             console.log("Subscription created successfully with ID : " + response.body.subscriptionId);
             this.addNotifications();
-            let applications = this.state.options.filter(application => applicationId !== application.value );
-            this.setState({options: applications});
+            let applications = this.state.options.filter(application => applicationId !== application.value);
+            this.setState({options: applications, openSubscribeMenu: false});
         }).catch(error => {
                 console.log("Error while creating the subscription.");
                 console.error(error);
@@ -237,6 +251,21 @@ class BasicInfo extends Component {
         this.setState({redirect: true});
     }
 
+    openSubscribeMenu() {
+        this.setState({openSubscribeMenu: true});
+    }
+
+    closeSubscribeMenu() {
+        this.setState({openSubscribeMenu: false});
+    }
+
+    handlePopupClose() {
+        this.setState({openPopup: false});
+    };
+
+    handlePopupOpen(event) {
+        this.setState({openPopup: true, anchorEl: event.currentTarget});
+    };
     selectChange() {
         this.setState({matDropVisible: !this.state.matDropVisible})
     }
@@ -264,7 +293,7 @@ class BasicInfo extends Component {
             wrapperCol: {span: 18}
         };
         if (this.state.notFound) {
-            return <ResourceNotFound />
+            return <ResourceNotFound/>
         }
         if (this.state.redirect) {
             return <Redirect push to="/application-create"/>;
@@ -275,13 +304,8 @@ class BasicInfo extends Component {
         return (
             this.state.api ?
                 <div>
-                    <Grid className={classes.fullWidth} container justify="center" alignItems="center">
-                        <Grid item xs={12}>
-                            <Paper style={{display: "flex"}}>
-                                <Typography type="display2" gutterBottom className="page-title">
-                                    {api.name} - <span style={{fontSize: "50%"}}>Overview</span>
-                                </Typography>
-                                {/*<Button aria-owns="simple-menu" aria-haspopup="true" >
+                    <Grid container className="tab-grid" spacing={0}>
+                        {/*<Button aria-owns="simple-menu" aria-haspopup="true" >
                                  <Edit /> Edit
                                  </Button>
                                  <Button aria-owns="simple-menu" aria-haspopup="true" >
@@ -290,47 +314,136 @@ class BasicInfo extends Component {
                                  <Button aria-owns="simple-menu" aria-haspopup="true" >
                                  <Description /> View Swagger
                                  </Button>*/}
-                            </Paper>
-                        </Grid>
-                        <Grid item xs={12} sm={12} md={3} lg={3} xl={2} style={{paddingLeft: "40px"}}>
-
+                        <Grid item xs={12} sm={12} md={6} lg={3} xl={2}>
                             <Card>
-                                <CardMedia image="/store/public/app/images/api/api-default.png">
-                                </CardMedia>
+                                <CardMedia className={classes.media}
+                                           image="/store/public/app/images/api/api-default.png"
+                                           title="API icon"
+                                />
                                 <CardContent>
-                                    <div className="custom-card">
-                                        <Badge status="processing" text={api.lifeCycleStatus}/>
-                                        <p>11 Apps</p>
-                                        <a href={"/store/apis/" + this.api_uuid} target="_blank" title="Store">View in
-                                            store</a>
-                                    </div>
+                                    <Typography type="subheading" component="h2">
+                                        {api.name}
+                                    </Typography>
+                                    <Typography type="body 2" color="secondary">
+                                        {api.version} by {api.provider}
+                                    </Typography>
+                                    <StarRatingBar apiIdProp={this.api_uuid}></StarRatingBar>
                                 </CardContent>
-                                <CardActions>
-                                    {api.lifeCycleStatus}
-
-                                    <Button dense color="primary">
-                                        <a href={"/store/apis/" + this.api_uuid} target="_blank" title="Store">View in
-                                            store</a>
-                                    </Button>
+                                <Divider/>
+                                <CardActions disableActionSpacing>
+                                    <IconButton aria-label="Add to favorites">
+                                        <FavoriteIcon/>
+                                    </IconButton>
+                                    <IconButton aria-label="Share" onClick={this.handlePopupOpen}>
+                                        <Popover
+                                            open={this.state.openPopup}
+                                            anchorEl={this.state.anchorEl}
+                                            onClose={this.handlePopupClose}>
+                                            <div id="share_div_social" className="share_dives">
+                                                {/* Facebook */}
+                                                <a className="social_links" id="facebook"
+                                                   href="http://www.facebook.com/sharer.php?u=https%3A%2F%2F172.17.0.1%3A9444%2Fstore%2Fapis%2Finfo%3Fname%3Dfoo%26version%3D1.0.0%26provider%3Dadmin"
+                                                   target="_blank" title="facebook">
+                                                    <img src="/store/public/app/images/social/facebook.png" alt="Facebook" />
+                                                </a>
+                                                {/* Twitter */}
+                                                <a className="social_links" id="twitter"
+                                                   href="http://twitter.com/share?url=https%3A%2F%2F172.17.0.1%3A9444%2Fstore%2Fapis%2Finfo%3Fname%3Dfoo%26version%3D1.0.0%26provider%3Dadmin&text=API%20Store%20-%20foo%20%3A%20try%20this%20API%20at%20https%3A%2F%2F172.17.0.1%3A9444%2Fstore%2Fapis%2Finfo%3Fname%3Dfoo%26version%3D1.0.0%26provider%3Dadmin"
+                                                   target="_blank" title="twitter">
+                                                    <img src="/store/public/app/images/social/twitter.png" alt="Twitter" /></a>
+                                                {/* Google+ */}
+                                                <a className="social_links" id="googleplus"
+                                                   href="https://plus.google.com/share?url=https%3A%2F%2F172.17.0.1%3A9444%2Fstore%2Fapis%2Finfo%3Fname%3Dfoo%26version%3D1.0.0%26provider%3Dadmin"
+                                                   target="_blank" title="googleplus">
+                                                    <img src="/store/public/app/images/social/google.png" alt="Google" /></a>
+                                                {/* Digg */}
+                                                <a className="social_links" id="digg"
+                                                   href="http://www.digg.com/submit?url=https%3A%2F%2F172.17.0.1%3A9444%2Fstore%2Fapis%2Finfo%3Fname%3Dfoo%26version%3D1.0.0%26provider%3Dadmin"
+                                                   target="_blank" title="digg">
+                                                    <img src="/store/public/app/images/social/diggit.png" alt="Digg" /></a>
+                                                <div className="clearfix">
+                                                </div>
+                                            </div>
+                                        </Popover>
+                                        <ShareIcon/>
+                                    </IconButton>
+                                    <IconButton aria-label="Embed">
+                                        <CodeIcon/>
+                                    </IconButton>
+                                    <IconButton aria-label="Email">
+                                        <EmailIcon/>
+                                    </IconButton>
                                 </CardActions>
                             </Card>
+                            <Button onClick={this.openSubscribeMenu} color="accent" raised 
+                                    className="form-buttons full-width"> Subscribe to an Application </Button>
                         </Grid>
-                        <Grid item xs={12} sm={6} md={3} lg={3} xl={2} style={{paddingLeft: "40px"}}>
+                        <Grid item xs={12} sm={12} md={6} lg={4} xl={4} className="add-item-left-padding ">
+                                <Dialog open={this.state.openSubscribeMenu} transition={Slide}
+                                        onClose={this.closeSubscribeMenu}>
+                                    <DialogTitle>
+                                        {"Subscribe"}
+                                    </DialogTitle>
+                                    <DialogContent>
+                                        <DialogContentText>
+                                            Select the Application name and Tier to Subscribe to an Application
+                                        </DialogContentText>
+                                        {this.state.options &&
+                                        <FormControl style={{width: "100%", marginBottom: "20px"}}
+                                                     className={classes.formControl}>
+                                            <InputLabel>Applications</InputLabel>
+                                            <Select
+                                                style={{width: "100%"}}
+                                                value={this.state.applicationId}
+                                                onChange={this.handleChange('applicationId')}
+                                            >
+                                                {this.state.options.map((option) => <MenuItem key={option.value}
+                                                                                              value={option.value}>
+                                                    {option.label}</MenuItem>)}
+                                            </Select>
+                                        </FormControl>
+                                        }
+                                        {this.state.tiers &&
+                                        <FormControl style={{width: "100%"}}>
+                                            <InputLabel>Tiers</InputLabel>
+                                            <Select
+                                                style={{width: "100%"}}
+                                                value={this.state.policyName}
+                                                onChange={this.handleChange('policyName')}
+                                            >
+                                                {this.state.tiers.map((tier) => <MenuItem key={tier.value}
+                                                                                          value={tier.value}>
+                                                    {tier.label}</MenuItem>)}
+                                            </Select>
+                                        </FormControl>
+                                        }
+                                        <br/>
+                                    </DialogContent>
+                                    <DialogActions>
+                                        <Button onClick={this.closeSubscribeMenu} color="primary">
+                                            <NotificationSystem ref="notificationSystem"/>
+                                            Cancel
+                                        </Button>
+                                        <Button onClick={this.createSubscription} color="primary">
+                                            <NotificationSystem ref="notificationSystem"/>
+                                            Subscribe
+                                        </Button>
+                                    </DialogActions>
+                                </Dialog>
                             <Table>
                                 <TableBody>
-
-
                                     <TableRow>
-                                        <TableCell>Version</TableCell><TableCell>{api.version}</TableCell>
+                                        <TableCell>
+                                            Status</TableCell><TableCell><Badge status="processing"
+                                                                                text={api.lifeCycleStatus}/></TableCell>
                                     </TableRow>
-
                                     <TableRow>
                                         <TableCell>Context</TableCell><TableCell>{api.context}</TableCell>
                                     </TableRow>
                                     <TableRow>
-                                        <TableCell>Context</TableCell><TableCell>{api.provider}</TableCell>
+                                        <TableCell>Default API
+                                            Version</TableCell><TableCell>{api.isDefaultVersion}</TableCell>
                                     </TableRow>
-
                                     <TableRow>
                                         <TableCell>Date Created</TableCell><TableCell>{api.createdTime}</TableCell>
                                     </TableRow>
@@ -338,71 +451,14 @@ class BasicInfo extends Component {
                                         <TableCell>Date Last
                                             Updated</TableCell><TableCell>{api.lastUpdatedTime}</TableCell>
                                     </TableRow>
-
                                     <TableRow>
-                                        <TableCell>Default API
-                                            Version</TableCell><TableCell>{api.isDefaultVersion}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>Default API
-                                            Version</TableCell><TableCell>{api.lifeCycleStatus}</TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>Rating</TableCell>
+                                        <TableCell>Rate it</TableCell>
                                         <TableCell>
                                             <StarRatingBar apiIdProp={this.api_uuid}></StarRatingBar>
                                         </TableCell>
                                     </TableRow>
-
-
                                 </TableBody>
                             </Table>
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={6} lg={6} xl={8} style={{paddingLeft: "40px"}}>
-                            <Typography type="subheading" gutterBottom>
-                                Applications
-                            </Typography>
-                            {this.state.options &&
-                            <FormControl style={{width: "100%", marginBottom: "20px"}}>
-                                <Select
-                                    style={{width: "100%"}}
-                                    value={this.state.applicationId}
-                                    onChange={this.handleChange('applicationId')}
-                                >
-                                    {this.state.options.map((option) => <MenuItem key={option.value}
-                                                                                  value={option.value}>{option.label}</MenuItem>)}
-                                </Select>
-                            </FormControl>
-                            }
-                            <Typography type="subheading" gutterBottom>
-                                Tiers
-                            </Typography>
-                            {this.state.tiers &&
-                            <FormControl style={{width: "100%"}}>`
-                                <Select
-                                    style={{width: "100%"}}
-                                    value={this.state.policyName}
-                                    onChange={this.handleChange('policyName')}
-                                >
-                                    {this.state.tiers.map((tier) => <MenuItem key={tier.value}
-                                                                              value={tier.value}>{tier.label}</MenuItem>)}
-                                </Select>
-                            </FormControl>
-                            }
-                            <br />
-                            <Button onClick={this.createSubscription} raised color="primary"
-                                    style={{paddingTop: '20px'}}>
-                                <NotificationSystem ref="notificationSystem"/>
-                                <Subscriptions style={{paddingRight: '10px'}}/> Subscribe
-                            </Button>
-
-                            {/*<Select>
-                             {this.populateApplicationDropdown()}
-                             </Select>
-                             <Select>
-                             {this.populatePolicyDropdown()}
-                             </Select>*/}
-
                         </Grid>
                     </Grid>
                 </div>

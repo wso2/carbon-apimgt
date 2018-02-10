@@ -23,7 +23,7 @@ class ConfigManager {
     /**
      * get promised config and update the configMap
      * @param configPath: Path to read configs from
-     * @returns {Promise Object}: promised config
+     * @returns {Promise}: promised config
      * @private
      */
     static _getPromisedConfigs(configPath) {
@@ -51,7 +51,8 @@ class ConfigManager {
 }
 
 /**
- * @type {{ConstPath: StringPath}} ConfigRequestPaths: Configuration requesting url paths
+ * ConfigRequestPaths: Configuration requesting url paths
+ * @type {{ENVIRONMENT_CONFIG_PATH: string}}
  */
 const ConfigRequestPaths = {
     ENVIRONMENT_CONFIG_PATH: "/configService/environments"

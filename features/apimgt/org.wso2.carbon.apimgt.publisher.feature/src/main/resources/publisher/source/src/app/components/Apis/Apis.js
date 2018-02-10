@@ -17,21 +17,22 @@
  */
 
 import React from 'react'
-import {Route, Switch} from 'react-router-dom'
+import prototypes from 'prop-types'
+import { Route, Switch } from 'react-router-dom'
 
 import Listing from './Listing/Listing'
 import Details from './Details/index'
-import {PageNotFound} from '../Base/Errors'
+import { PageNotFound } from '../Base/Errors'
 
 
 class Apis extends React.Component {
     render() {
         return (
             <Switch>
-                <Route exact path={"/apis"} component={Listing}/>
-                <Route path={"/apis/:api_uuid/"} render={ props => (
-                    <Details {...props}/>)}/>
-                <Route component={PageNotFound}/>
+                <Route exact path={"/apis"} component={Listing} />
+                <Route path={"/apis/:api_uuid/"} render={props => (
+                    <Details {...props} />)} />
+                <Route component={PageNotFound} />
             </Switch>
         );
     }

@@ -28,7 +28,7 @@
     <groupId>org.wso2.carbon.apimgt</groupId>
     <artifactId>carbon-apimgt</artifactId>
     <packaging>pom</packaging>
-    <version>7.0.75-SNAPSHOT</version>
+    <version>7.0.99-SNAPSHOT</version>
 
     <name>WSO2 Carbon - API Management Aggregator POM</name>
 
@@ -422,8 +422,13 @@
                 <version>${h2.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.wso2.carbon.transport</groupId>
-                <artifactId>org.wso2.carbon.transport.http.netty</artifactId>
+                <groupId>org.wso2.transport</groupId>
+                <artifactId>org.wso2.transport.http.netty.feature</artifactId>
+                <version>${carbon.transport.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.transport.http</groupId>
+                <artifactId>org.wso2.transport.http.netty</artifactId>
                 <version>${carbon.transport.version}</version>
             </dependency>
             <dependency>
@@ -597,6 +602,16 @@
                 <groupId>org.wso2.orbit.io.fabric8</groupId>
                 <artifactId>kubernetes-client</artifactId>
                 <version>${wso2.kubernetes-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.messaging</groupId>
+                <artifactId>broker-amqp</artifactId>
+                <version>${broker.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.messaging</groupId>
+                <artifactId>broker-core</artifactId>
+                <version>${broker.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -848,13 +863,13 @@
         <maven.bundle.plugin.version>2.5.3</maven.bundle.plugin.version>
 
         <!-- Dependencies -->
-        <carbon.kernel.version>5.2.0</carbon.kernel.version>
+        <carbon.kernel.version>5.2.6</carbon.kernel.version>
         <carbon.kernel.package.import.version.range>[5.2.0, 6.0.0)</carbon.kernel.package.import.version.range>
-        <carbon.apimgt.version>7.0.75-SNAPSHOT</carbon.apimgt.version>
+        <carbon.apimgt.version>7.0.99-SNAPSHOT</carbon.apimgt.version>
 
         <carbon.datasources.version>1.1.4</carbon.datasources.version>
 
-        <org.wso2.msf4j.version>2.4.3</org.wso2.msf4j.version>
+        <org.wso2.msf4j.version>2.5.2</org.wso2.msf4j.version>
         <msf4j.package.import.version.range>[2.4.0, 3.0.0)</msf4j.package.import.version.range>
 
         <osgi.api.version>6.0.0</osgi.api.version>
@@ -871,8 +886,8 @@
         <pax.logging.api.version>1.9.0</pax.logging.api.version>
         <slf4j.logging.package.import.version.range>[1.7.1, 2.0.0)</slf4j.logging.package.import.version.range>
 
-        <carbon.transport.version>5.0.1</carbon.transport.version>
-        <carbon.transport.package.import.version.range>[4.0.0, 6.0.0)</carbon.transport.package.import.version.range>
+        <carbon.transport.version>6.0.64</carbon.transport.version>
+        <carbon.transport.package.import.version.range>[6.0.0, 7.0.0)</carbon.transport.package.import.version.range>
 
         <axiom.version>1.2.11-wso2v10</axiom.version>
         <axiom.import.version.range>[1.2.10-wso2v10,1.2.12-wso2v10)</axiom.import.version.range>
@@ -899,8 +914,8 @@
         <jackson.version>2.6.1.wso2v1</jackson.version>
         <jayway.version>2.1.0</jayway.version>
         <net.minidev.version>2.2</net.minidev.version>
-        <carbon.deployment.version>5.1.5</carbon.deployment.version>
-        <carbon.deployment.export.version>5.1.4</carbon.deployment.export.version>
+        <carbon.deployment.version>5.2.0</carbon.deployment.version>
+        <carbon.deployment.export.version>5.2.0</carbon.deployment.export.version>
         <rxjava.export.version>1.2.0.wso2v1</rxjava.export.version>
         <json-simple.version>1.1.1</json-simple.version>
         <json-simple.import.version.range>[1.1.0, 1.2.0)</json-simple.import.version.range>
@@ -939,7 +954,7 @@
         <snakeyaml.version.range>[1.16, 2.0.0)</snakeyaml.version.range>
         <findbug.exclude.version>3.0.0</findbug.exclude.version>
         <!--Start of Dependency for integration gateway extension-->
-        <carbon.messaging.version>3.0.1</carbon.messaging.version>
+        <carbon.messaging.version>3.0.2</carbon.messaging.version>
         <carbon.messaging.package.import.version.range>[0.0.0, 4.0.0)</carbon.messaging.package.import.version.range>
         <equinox.osgi.version>3.10.2.v20150203-1939</equinox.osgi.version>
         <equinox.osgi.services.version>3.4.0.v20140312-2051</equinox.osgi.services.version>
@@ -957,7 +972,7 @@
         <maven.surefire.plugin.version>2.18.1</maven.surefire.plugin.version>
         <google.guava.version>20.0</google.guava.version>
         <guava.bundle.version>20.0.0</guava.bundle.version>
-        <andes.version>3.0.5</andes.version>
+        <andes.version>3.2.39</andes.version>
         <securevault.version>1.0.0-wso2v2</securevault.version>
         <slf4j.version>1.7.22</slf4j.version>
         <feign.version>9.5.0</feign.version>
@@ -990,10 +1005,12 @@
         <swagger.codegen.maven.plugin.version>2.2.3</swagger.codegen.maven.plugin.version>
         <samskivert.mustache.version>1.13</samskivert.mustache.version>
         <plexus.utils.version>1.5.7</plexus.utils.version>
-        <wso2.carbon.config.version>2.1.4</wso2.carbon.config.version>
+        <wso2.carbon.config.version>2.1.5</wso2.carbon.config.version>
         <carbon.config.package.import.version.range>[2.0.0, 3.0.0)</carbon.config.package.import.version.range>
         <io.swagger.models.version>1.5.16</io.swagger.models.version>
         <atlassian.commonmark.version>0.9.0</atlassian.commonmark.version> <!-- *BSD2*: used as a plugin dependency--> 
         <joda.time.version>2.9.9</joda.time.version>
+        <broker.version>4.0.15</broker.version>
+        <broker.package.import.version.range>[4.0.0, 5.0.0)</broker.package.import.version.range>
     </properties>
 </project>

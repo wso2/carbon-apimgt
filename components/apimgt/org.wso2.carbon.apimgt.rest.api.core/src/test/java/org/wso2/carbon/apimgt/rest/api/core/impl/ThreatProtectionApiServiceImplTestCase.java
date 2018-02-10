@@ -22,33 +22,24 @@ package org.wso2.carbon.apimgt.rest.api.core.impl;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.wso2.carbon.apimgt.core.api.APIMgtAdminService;
-import org.wso2.carbon.apimgt.core.dao.ThreatProtectionDAO;
 import org.wso2.carbon.apimgt.core.dao.impl.DAOFactory;
-import org.wso2.carbon.apimgt.core.dao.impl.ThreatProtectionDAOImpl;
 import org.wso2.carbon.apimgt.core.exception.APIManagementException;
-import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 import org.wso2.carbon.apimgt.core.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.core.impl.APIMgtAdminServiceImpl;
 import org.wso2.carbon.apimgt.core.models.policy.ThreatProtectionPolicy;
 import org.wso2.carbon.apimgt.rest.api.common.util.RestApiUtil;
-import org.wso2.carbon.apimgt.rest.api.core.dto.ThreatProtectionPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.core.dto.ThreatProtectionPolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.core.utils.SampleTestObjectCreator;
-import org.wso2.carbon.messaging.CarbonMessage;
 import org.wso2.msf4j.Request;
+import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ APIManagerFactory.class, RestApiUtil.class, DAOFactory.class })
@@ -95,7 +86,7 @@ public class ThreatProtectionApiServiceImplTestCase {
     }
 
     private Request getRequest() throws Exception {
-        CarbonMessage carbonMessage = Mockito.mock(CarbonMessage.class);
+        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
         Request request = new Request(carbonMessage);
         PowerMockito.whenNew(Request.class).withArguments(carbonMessage).thenReturn(request);
         return request;

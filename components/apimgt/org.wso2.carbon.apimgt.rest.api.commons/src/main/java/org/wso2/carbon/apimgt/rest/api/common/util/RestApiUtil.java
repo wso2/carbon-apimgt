@@ -33,10 +33,10 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.common.exception.APIMgtSecurityException;
 import org.wso2.carbon.apimgt.rest.api.common.exception.BadRequestException;
-import org.wso2.carbon.transport.http.netty.config.ListenerConfiguration;
-import org.wso2.carbon.transport.http.netty.config.TransportsConfiguration;
-import org.wso2.carbon.transport.http.netty.config.YAMLTransportConfigurationBuilder;
 import org.wso2.msf4j.Request;
+import org.wso2.transport.http.netty.config.ListenerConfiguration;
+import org.wso2.transport.http.netty.config.TransportsConfiguration;
+import org.wso2.transport.http.netty.config.YAMLTransportConfigurationBuilder;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;

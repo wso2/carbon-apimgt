@@ -20,7 +20,7 @@ import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
 
 import Api from '../../../../data/api'
-import Message from '../../../Shared/Message'
+import Alert from '../../../Shared/Alert'
 
 import Typography from 'material-ui/Typography';
 import Grid from 'material-ui/Grid';
@@ -74,7 +74,7 @@ class Security extends Component {
         let promisedPolicyDelete = this.api.deleteThreatProtectionPolicyFromApi(associatedApi.id, id);
         promisedPolicyDelete.then(response => {
            if (response.status === 200) {
-               this.msg.info("Policy removed successfully.");
+               Alert.info("Policy removed successfully.");
 
                //remove policy from local api
                let index = associatedApi.threatProtectionPolicies.list.indexOf({policyId: id});
@@ -82,7 +82,7 @@ class Security extends Component {
                this.setState({api: associatedApi});
                this.updatePolicyData();
            } else {
-               this.msg.error("Failed to remove policy.");
+               Alert.error("Failed to remove policy.");
            }
         });
     }
@@ -105,7 +105,6 @@ class Security extends Component {
                         </Toolbar>
                     </AppBar>
                 </Grid>
-                <Message ref={a => this.msg = a}/>
                 <Grid item xs={12}>
                     <Paper>
                         <Typography className="page-title" type="display2">

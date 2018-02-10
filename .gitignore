@@ -37,3 +37,7 @@ components/apimgt/org.wso2.carbon.apimgt.core/src/test/resources/amdb/
 node_modules/
 dist
 npm-debug.log
+#################
+### VS_CODE
+##################
+.vscode

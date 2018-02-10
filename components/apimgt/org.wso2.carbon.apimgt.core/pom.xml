@@ -24,7 +24,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>7.0.75-SNAPSHOT</version>
+        <version>7.0.99-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -225,10 +225,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.io.fabric8</groupId>
-            <artifactId>kubernetes-client</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.wso2.orbit.io.swagger</groupId>
             <artifactId>swagger-codegen</artifactId>
         </dependency>
@@ -251,6 +247,18 @@
         <dependency>
             <groupId>org.wso2.orbit.com.squareup.okhttp</groupId>
             <artifactId>okhttp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.io.fabric8</groupId>
+            <artifactId>kubernetes-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.messaging</groupId>
+            <artifactId>broker-amqp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.messaging</groupId>
+            <artifactId>broker-core</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -577,7 +585,7 @@
                         <configuration>
                             <images>
                                 <image>
-                                    <name>tharindu1st/mssql-server-linux</name>
+                                    <name>tharindu1st/mssql-server-linux:v2</name>
                                     <alias>apim-mssql</alias>
                                     <run>
                                         <namingStrategy>alias</namingStrategy>
@@ -894,6 +902,10 @@
             io.swagger.codegen.*;version="${swagger.codegen.version}",
             org.wso2.carbon.config.*;version="${carbon.config.package.import.version.range}",
             org.wso2.carbon.utils.*;version="${carbon.utils.package.import.version.range}",
+            org.wso2.broker.amqp.*;version="${broker.package.import.version.range}",
+            org.wso2.broker.common.*;version="${broker.package.import.version.range}",
+            org.wso2.broker.core.*;version="${broker.package.import.version.range}",
+            org.wso2.broker.rest.*;version="${broker.package.import.version.range}",
             feign.gson.*;version="${feign.version}",
         </import.package>
         <export.package>

@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>7.0.75-SNAPSHOT</version>
+        <version>7.0.99-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -136,7 +136,6 @@
             org.slf4j.*;version="${slf4j.logging.package.import.version.range}",
             org.apache.commons.lang3.*; version="${apache.commons.lang3.import.version.range}",
             javax.ws.rs.*; version="${javax.ws.rs.import.version.range}",
-            org.wso2.carbon.messaging.*;version="${carbon.messaging.package.import.version.range}",
             org.wso2.carbon.kernel.*;version="${carbon.kernel.package.import.version.range}",
             org.wso2.carbon.config.*;version="${carbon.config.package.import.version.range}",
             org.wso2.carbon.utils.*;version="${carbon.utils.package.import.version.range}"

@@ -15,7 +15,6 @@
  */
 
 "use strict";
-import AuthManager from './AuthManager'
 import APIClientFactory from "./APIClientFactory";
 import Utils from "./Utils";
 
@@ -25,10 +24,10 @@ import Utils from "./Utils";
 class API {
     /**
      * @constructor
-     * @param {string} access_key - Access key for invoking the backend REST API call.
+     * @param {Object} environment - Environment object - Default current environment.
      */
-    constructor() {
-        this.client = new APIClientFactory().getAPIClient(Utils.getEnvironment().label).client;
+    constructor(environment = Utils.getCurrentEnvironment()) {
+        this.client = APIClientFactory.getInstance().getAPIClient(environment).client;
     }
 
     /**
@@ -38,7 +37,6 @@ class API {
      * @private
      */
     _requestMetaData(data = {}) {
-        AuthManager.refreshTokenOnExpire(); /* TODO: This should be moved to an interceptor ~tmkb*/
         let metaData = {
             requestContentType: data['Content-Type'] || "application/json"
         };
@@ -60,8 +58,8 @@ class API {
             "version": null,
             "endpoint": []
         };
-        var user_keys = Object.keys(api_data);
-        for (var index in user_keys) {
+        const user_keys = Object.keys(api_data);
+        for (let index in user_keys) {
             if (!(user_keys[index] in template)) {
                 throw 'Invalid key provided, Valid keys are `' + Object.keys(template) + '`';
             }
@@ -147,13 +145,14 @@ class API {
     /**
      * Get list of all the available APIs, If the call back is given (TODO: need to ask for fallback sequence as well tmkb)
      * It will be invoked upon receiving the response from REST service.Else will return a promise.
-     * @param callback {function} A callback function to invoke after receiving successful response.
+     * @param {Object} params - Parameters to filter APIs.
+     * @param {function} callback - A callback function to invoke after receiving successful response.
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getAll(callback = null) {
-        var promise_get_all = this.client.then(
+    getAll(params, callback = null) {
+        const promise_get_all = this.client.then(
             (client) => {
-                return client.apis["API (Collection)"].get_apis({}, this._requestMetaData());
+                return client.apis["API (Collection)"].get_apis(params, this._requestMetaData());
             }
         );
         if (callback) {
@@ -170,7 +169,7 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     get(id, callback = null) {
-        var promise_get = this.client.then(
+        const promise_get = this.client.then(
             (client) => {
                 return client.apis["API (Individual)"].get_apis__apiId_(
                     {apiId: id}, this._requestMetaData());
@@ -191,7 +190,7 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     createNewAPIVersion(id, version, callback = null) {
-        var promise_copy_api = this.client.then(
+        const promise_copy_api = this.client.then(
             (client) => {
                 return client.apis["API (Individual)"].post_apis_copy_api(
                     {apiId: id, newVersion: version},
@@ -212,7 +211,7 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getSwagger(id, callback = null) {
-        var promise_get = this.client.then(
+        const promise_get = this.client.then(
             (client) => {
                 return client.apis["API (Individual)"].get_apis__apiId__swagger(
                     {apiId: id}, this._requestMetaData());
@@ -232,7 +231,7 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     getScopes(id, callback = null) {
-        var promise_get = this.client.then(
+        const promise_get = this.client.then(
             (client) => {
                 return client.apis["Scope (Collection)"].get_apis__apiId__scopes(
                     {apiId: id}, this._requestMetaData());
@@ -244,18 +243,20 @@ class API {
             return promise_get;
         }
     }
+
     /**
      * Get the detail of scope of an API
-     * @param id {String} UUID of the API in which the scopes is needed
-     * @param callback {function} Function which needs to be called upon success of the API deletion
+     * @param {String} api_id - UUID of the API in which the scopes is needed
+     * @param {String} scopeName - Name of the scope
+     * @param {function} callback - Function which needs to be called upon success of the API deletion
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
-    getScopeDetail(api_id,name,callback = null) {
-        var promise_get_Scope_detail = this.client.then(
+    getScopeDetail(api_id, scopeName, callback = null) {
+        const promise_get_Scope_detail = this.client.then(
             (client) => {
                 return client.apis["Scope (Individual)"].get_apis__apiId__scopes__name_({
                         apiId: api_id,
-                        name: name
+                        name: scopeName
                     },
                     this._requestMetaData());
             }
@@ -267,8 +268,14 @@ class API {
         }
     }
 
+    /**
+     * Update a scope of an API
+     * @param {String} api_id - UUID of the API in which the scopes is needed
+     * @param {String} scopeName - Name of the scope
+     * @param {Object} body - Scope details
+     */
     updateScope(api_id, scopeName, body) {
-        var promised_updateScope = this.client.then(
+        const promised_updateScope = this.client.then(
             (client) => {
                 let payload = {
                     apiId: api_id,
@@ -282,8 +289,9 @@ class API {
         );
         return promised_updateScope;
     }
+
     addScope(api_id, body) {
-        var promised_addScope = this.client.then(
+        const promised_addScope = this.client.then(
             (client) => {
                 let payload = {
                     apiId: api_id,
@@ -296,8 +304,9 @@ class API {
         );
         return promised_addScope;
     }
+
     deleteScope(api_id, scope_name) {
-        var promise_deleteScope = this.client.then(
+        const promise_deleteScope = this.client.then(
             (client) => {
                 return client.apis["Scope (Individual)"].delete_apis__apiId__scopes__name_({
                         apiId: api_id,
@@ -308,12 +317,13 @@ class API {
         );
         return promise_deleteScope;
     }
+
     /**
      * Update an api via PUT HTTP method, Need to give the updated API object as the argument.
      * @param api {Object} Updated API object(JSON) which needs to be updated
      */
     updateSwagger(id, swagger) {
-        var promised_update = this.client.then(
+        const promised_update = this.client.then(
             (client) => {
                 let payload = {
                     "apiId": id,
@@ -333,7 +343,7 @@ class API {
      * @returns {Promise.<TResult>}
      */
     policies(tier_level) {
-        var promise_policies = this.client.then(
+        const promise_policies = this.client.then(
             (client) => {
                 return client.apis["Throttling Tier (Collection)"].get_policies__tierLevel_(
                     {tierLevel: 'subscription'}, this._requestMetaData());
@@ -349,7 +359,7 @@ class API {
      * @returns {promise} With given callback attached to the success chain else API invoke promise.
      */
     deleteAPI(id) {
-        var promised_delete = this.client.then(
+        const promised_delete = this.client.then(
             (client) => {
                 return client.apis["API (Individual)"].delete_apis__apiId_(
                     {apiId: id}, this._requestMetaData());
@@ -364,7 +374,7 @@ class API {
      * @param callback {function} Callback function which needs to be executed in the success call
      */
     getLcState(id, callback = null) {
-        var promise_lc_get = this.client.then(
+        const promise_lc_get = this.client.then(
             (client) => {
                 return client.apis["API (Individual)"].get_apis__apiId__lifecycle(
                     {apiId: id}, this._requestMetaData());
@@ -383,7 +393,7 @@ class API {
      * @param callback {function} Callback function which needs to be executed in the success call
      */
     getLcHistory(id, callback = null) {
-        var promise_lc_history_get = this.client.then(
+        const promise_lc_history_get = this.client.then(
             (client) => {
                 return client.apis["API (Individual)"].get_apis__apiId__lifecycle_history(
                     {apiId: id}, this._requestMetaData());
@@ -403,8 +413,13 @@ class API {
      * @param callback {function} Callback function which needs to be executed in the success call
      */
     updateLcState(id, state, checkedItems, callback = null) {
-        var payload = {action: state, apiId: id, lifecycleChecklist: checkedItems, "Content-Type": "application/json"};
-        var promise_lc_update = this.client.then(
+        const payload = {
+            action: state,
+            apiId: id,
+            lifecycleChecklist: checkedItems,
+            "Content-Type": "application/json"
+        };
+        const promise_lc_update = this.client.then(
             (client) => {
                 return client.apis["API (Individual)"].post_apis_change_lifecycle(
                     payload, this._requestMetaData());
@@ -423,7 +438,7 @@ class API {
      * @param callback {function} Callback function which needs to be executed in the success call
      */
     cleanupPendingTask(id, callback = null) {
-        var promise_deletePendingTask = this.client.then(
+        const promise_deletePendingTask = this.client.then(
             (client) => {
                 return client.apis["API (Individual)"].delete_apis_apiId_lifecycle_lifecycle_pending_task({apiId: id},
                     this._requestMetaData());
@@ -437,7 +452,7 @@ class API {
      * @param api {Object} Updated API object(JSON) which needs to be updated
      */
     update(api) {
-        var promised_update = this.client.then(
+        const promised_update = this.client.then(
             (client) => {
                 let payload = {apiId: api.id, body: api};
                 return client.apis["API (Individual)"].put_apis__apiId_(payload);
@@ -452,7 +467,7 @@ class API {
      * @returns {Promise} With given callback attached to the success chain else API invoke promise.
      */
     subscriptions(id, callback = null) {
-        var promise_subscription = this.client.then(
+        const promise_subscription = this.client.then(
             (client) => {
                 return client.apis["Subscription (Collection)"].get_subscriptions(
                     {apiId: id},
@@ -474,7 +489,7 @@ class API {
      * @returns {Promise} With given callback attached to the success chain else API invoke promise.
      */
     blockSubscriptions(id, state, callback = null) {
-        var promise_subscription = this.client.then(
+        const promise_subscription = this.client.then(
             (client) => {
                 return client.apis["Subscription (Individual)"].post_subscriptions_block_subscription(
                     {subscriptionId: id, blockState: state},
@@ -495,7 +510,7 @@ class API {
      * @returns {Promise} With given callback attached to the success chain else API invoke promise.
      */
     unblockSubscriptions(id, callback = null) {
-        var promise_subscription = this.client.then(
+        const promise_subscription = this.client.then(
             (client) => {
                 return client.apis["Subscription (Individual)"].post_subscriptions_unblock_subscription(
                     {subscriptionId: id},
@@ -513,10 +528,9 @@ class API {
     /**
      * Add endpoint via POST HTTP method, need to provided endpoint properties and callback function as argument
      * @param body {Object} Endpoint to be added
-     * @param callback {function} Callback function
      */
     addEndpoint(body) {
-        var promised_addEndpoint = this.client.then(
+        const promised_addEndpoint = this.client.then(
             (client) => {
                 let payload = {body: body, "Content-Type": "application/json"};
                 return client.apis["Endpoint (Collection)"].post_endpoints(
@@ -533,7 +547,7 @@ class API {
      * @returns {promise}
      */
     deleteEndpoint(id) {
-        var promised_delete = this.client.then(
+        const promised_delete = this.client.then(
             (client) => {
                 return client.apis["Endpoint (individual)"].delete_endpoints__endpointId_(
                     {
@@ -595,8 +609,8 @@ class API {
 
     /**
      * Check if an endpoint name already exists.
-     * @param name {String} Name of the Endpoint
-     * @returns {Promise.<TResult>}
+     * @param {String} endpointName - Name of the Endpoint
+     * @return {Promise}
      */
     checkIfEndpointExists(endpointName) {
         return this.client.then(
@@ -625,7 +639,7 @@ class API {
 
     addDocument(api_id, body) {
 
-        var promised_addDocument = this.client.then(
+        const promised_addDocument = this.client.then(
             (client) => {
                 let payload = {apiId: api_id, body: body, "Content-Type": "application/json"};
                 return client.apis["Document (Collection)"].post_apis__apiId__documents(
@@ -639,7 +653,7 @@ class API {
      Add a File resource to a document
      */
     addFileToDocument(api_id, docId, fileToDocument) {
-        var promised_addFileToDocument = this.client.then(
+        const promised_addFileToDocument = this.client.then(
             (client) => {
                 let payload = {
                     apiId: api_id,
@@ -659,7 +673,7 @@ class API {
      Add inline content to a INLINE type document
      */
     addInlineContentToDocument(api_id, doc_id, inline_content) {
-        var promised_addInlineContentToDocument = this.client.then(
+        const promised_addInlineContentToDocument = this.client.then(
             (client) => {
                 let payload = {
                     apiId: api_id,
@@ -675,7 +689,7 @@ class API {
     }
 
     getFileForDocument(api_id, docId) {
-        var promised_getDocContent = this.client.then(
+        const promised_getDocContent = this.client.then(
             (client) => {
                 let payload = {apiId: api_id, documentId: docId, "Accept": "application/octet-stream"};
                 return client.apis["Document (Individual)"].get_apis__apiId__documents__documentId__content(
@@ -689,7 +703,7 @@ class API {
      Get the inline content of a given document
      */
     getInlineContentOfDocument(api_id, docId) {
-        var promised_getDocContent = this.client.then(
+        const promised_getDocContent = this.client.then(
             (client) => {
                 let payload = {apiId: api_id, documentId: docId};
                 return client.apis["Document (Individual)"].get_apis__apiId__documents__documentId__content(
@@ -700,7 +714,7 @@ class API {
     }
 
     getDocuments(api_id, callback) {
-        var promise_get_all = this.client.then(
+        const promise_get_all = this.client.then(
             (client) => {
                 return client.apis["Document (Collection)"].get_apis__apiId__documents({apiId: api_id}, this._requestMetaData());
             }
@@ -713,7 +727,7 @@ class API {
     }
 
     updateDocument(api_id, docId, body) {
-        var promised_updateDocument = this.client.then(
+        const promised_updateDocument = this.client.then(
             (client) => {
                 let payload = {
                     apiId: api_id,
@@ -729,7 +743,7 @@ class API {
     }
 
     getDocument(api_id, docId, callback) {
-        var promise_get = this.client.then(
+        const promise_get = this.client.then(
             (client) => {
                 return client.apis["Document (Individual)"].get_apis__apiId__documents__documentId_({
                         apiId: api_id,
@@ -743,7 +757,7 @@ class API {
 
 
     deleteDocument(api_id, document_id) {
-        var promise_deleteDocument = this.client.then(
+        const promise_deleteDocument = this.client.then(
             (client) => {
                 return client.apis["Document (Individual)"].delete_apis__apiId__documents__documentId_({
                         apiId: api_id,
@@ -760,7 +774,7 @@ class API {
      * @returns {Promise.<TResult>}
      */
     labels() {
-        var promise_labels = this.client.then(
+        const promise_labels = this.client.then(
             (client) => {
                 return client.apis["Label (Collection)"].get_labels({},
                     this._requestMetaData());
@@ -834,8 +848,10 @@ class API {
     addThreatProtectionPolicyToApi(apiId, policyId) {
         let promisedPolicies = this.client.then(
             (client) => {
-                return client.apis["API (Individual)"].
-                    post_apis__apiId__threat_protection_policies({apiId: apiId, policyId: policyId});
+                return client.apis["API (Individual)"].post_apis__apiId__threat_protection_policies({
+                    apiId: apiId,
+                    policyId: policyId
+                });
             }
         );
         return promisedPolicies;
@@ -851,11 +867,38 @@ class API {
         let promisedDelete = this.client.then(
             (client) => {
                 console.log(client.apis);
-                return client.apis["API (Individual)"].
-                delete_apis__apiId__threat_protection_policies({apiId: apiId, policyId: policyId});
+                return client.apis["API (Individual)"].delete_apis__apiId__threat_protection_policies({
+                    apiId: apiId,
+                    policyId: policyId
+                });
             }
         );
         return promisedDelete;
+    }
+
+    /***
+     * Get inline-endpoint definitions(both prodution and sandbox due to : https://github.com/wso2/product-apim/issues/2590)
+     * giving the API parameter(name,version & endpoint url)
+     * @param apiName {String} Name of the endpoint which is going to have prod & sandbox inline-endpoints
+     * @param apiVersion {String} Version
+     * @param apiEndpoint {String} Endpoint URL
+     * @param secured {Boolean} is endpoint is secured with Basic or Digest security methods
+     * @returns {[*,*]} an Array containing Production and Sandbox endpoints
+     */
+    static getEndpoints(apiName, apiVersion, apiEndpoint, secured = false) {
+        const production = {
+            type: "production",
+            inline: {
+                name: apiName + apiVersion.replace(/\./g, "_"), // TODO: It's better to add this name property from the REST api itself, making sure no name conflicts with other inline endpoint definitions ~tmkb
+                endpointConfig: JSON.stringify({serviceUrl: apiEndpoint}),
+                endpointSecurity: {enabled: secured},
+                type: "http"
+            }
+        };
+        let sandbox = JSON.parse(JSON.stringify(production)); // deep coping the object
+        sandbox.type = "sandbox";
+        sandbox.inline.name += "_sandbox";
+        return [production, sandbox];
     }
 }
 

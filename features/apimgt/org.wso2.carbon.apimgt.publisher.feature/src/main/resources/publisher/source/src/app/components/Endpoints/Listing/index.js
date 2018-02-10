@@ -19,35 +19,51 @@
 
 import React, {Component} from 'react'
 import {Link} from 'react-router-dom'
-import {Table, Popconfirm, Button, Dropdown, Menu, message} from 'antd';
+import Menu, {MenuItem} from 'material-ui/Menu';
+import Grid from 'material-ui/Grid';
+import Button from 'material-ui/Button';
+import AddIcon from 'material-ui-icons/Add';
+import Table, {TableBody, TableCell, TableRow, TableHead} from 'material-ui/Table';
 
 import API from '../../../data/api'
 import {ScopeValidation, resourceMethod, resourcePath} from '../../../data/ScopeValidation';
+import NotificationSystem from 'react-notification-system';
+import Paper from 'material-ui/Paper';
+import EndpointTableRows from "../Create/EndpointTableRows";
 
 export default class EndpointsListing extends Component {
     constructor(props) {
         super(props);
         this.state = {
             endpoints: null,
+            openAddMenu: false,
+            openMenu: false,
+            anchorEl: null,
             selectedRowKeys: []
         };
         this.onSelectChange = this.onSelectChange.bind(this);
         this.handleEndpointDelete = this.handleEndpointDelete.bind(this);
+        this.handleRequestOpenAddMenu = this.handleRequestOpenAddMenu.bind(this);
+        this.handleRequestCloseAddMenu = this.handleRequestCloseAddMenu.bind(this);
     }
 
     handleEndpointDelete(endpointUuid, name) {
-        const hideMessage = message.loading("Deleting the Endpoint ...", 0);
         const api = new API();
         let promised_delete = api.deleteEndpoint(endpointUuid);
         promised_delete.then(
             response => {
                 if (response.status !== 200) {
                     console.log(response);
-                    message.error("Something went wrong while deleting the " + name + " Endpoint!");
-                    hideMessage();
+                    this.refs.notificationSystem.addNotification({
+                        message: 'Something went wrong while deleting the ' + name + ' Endpoint!', position: 'tc',
+                        level: 'error'
+                    });
                     return;
                 }
-                message.success(name + " Endpoint deleted successfully!");
+                this.refs.notificationSystem.addNotification({
+                    message: name + ' Endpoint deleted successfully!', position: 'tc',
+                    level: 'success'
+                });
                 let endpoints = this.state.endpoints;
                 for (let endpointIndex in endpoints) {
                     if (endpoints.hasOwnProperty(endpointIndex) && endpoints[endpointIndex].id === endpointUuid) {
@@ -55,8 +71,7 @@ export default class EndpointsListing extends Component {
                         break;
                     }
                 }
-                this.setState({active: false, endpoints: endpoints});
-                hideMessage();
+                this.setState({active: false, endpoints: endpoints, openMenu: false});
             }
         );
     }
@@ -76,66 +91,71 @@ export default class EndpointsListing extends Component {
         this.setState({selectedRowKeys: selectedRowKeys});
     }
 
+    handleRequestCloseAddMenu() {
+        this.setState({openAddMenu: false});
+    };
+
+    handleRequestOpenAddMenu(event) {
+        this.setState({openAddMenu: true, anchorEl: event.currentTarget});
+    };
+
     render() {
-        const {selectedRowKeys, endpoints} = this.state;
-        const columns = [{
-            title: 'Name',
-            dataIndex: 'name',
-            key: 'age',
-            sorter: (a, b) => a.name.length - b.name.length,
-            render: (text, record) => <Link to={"/endpoints/" + record.id}>{text}</Link>
-            // sortOrder: sortedInfo.columnKey === 'age' && sortedInfo.order,
-        }, {
-            title: 'Type',
-            dataIndex: 'type'
-        }, {
-            title: 'Service URL',
-            dataIndex: 'endpointConfig',
-            render: (text, record, index) => JSON.parse(text).serviceUrl
-        }, {
-            title: 'Max TPS',
-            dataIndex: 'maxTps',
-            sorter: (a, b) => a.maxTps - b.maxTps,
-        }, {
-            title: 'Action',
-            key: 'action',
-            render: (text, record) => {
-                return (
-                    <Popconfirm title="Confirm delete?" onConfirm={() => this.handleEndpointDelete(text.id, text.name)}>
-                        <Button type="danger" icon="delete">Delete</Button>
-                    </Popconfirm>)
-            }
-        }];
-        const rowSelection = {
-            selectedRowKeys,
-            onChange: this.onSelectChange,
-        };
-        const endpointCreateMenu = (
-            <Menu>
-                <Menu.Item key="0">
-                    <Link to="/endpoints/create">Create new Endpoint</Link>
-                </Menu.Item>
-                <Menu.Item key="1">
-                    <ScopeValidation resourcePath={resourcePath.SERVICE_DISCOVERY} resourceMethod={resourceMethod.GET}>
-                        <Link to="/endpoints/discover">Discover Endpoints</Link>
-                    </ScopeValidation>
-                </Menu.Item>
-            </Menu>
-        );
+        const {anchorEl} = this.state;
+
         return (
             <div>
-                <div className="api-add-links">
-                    <Dropdown overlay={endpointCreateMenu} placement="topRight">
-                        <Button shape="circle" icon="plus"/>
-                    </Dropdown>
-                </div>
                 <span>
                 <h3>Global Endpoints</h3>
                 </span>
-                <Table rowSelection={rowSelection} loading={endpoints === null} columns={columns}
-                       dataSource={endpoints}
-                       rowKey="id"
-                       size="middle"/>
+                <NotificationSystem ref="notificationSystem"/>
+                <Grid container>
+                    <Grid item xs>
+                        <Paper>
+                            <Table>
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell>Name</TableCell>
+                                        <TableCell>Type</TableCell>
+                                        <TableCell>Service URL</TableCell>
+                                        <TableCell>Max TPS</TableCell>
+                                        <TableCell>Action</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {this.state.endpoints && this.state.endpoints.map(endpoint => {
+                                        return <EndpointTableRows endpoint={endpoint} key={endpoint.id}
+                                                                  handleEndpointDelete={this.handleEndpointDelete}
+                                        />
+                                    })}
+                                </TableBody>
+                            </Table>
+                        </Paper>
+                    </Grid>
+                </Grid>
+                <div className="api-add-links">
+                    <Grid container justify="flex-end" alignItems="center">
+                        <Grid item xs={1}>
+                            <Menu open={this.state.openAddMenu}
+                                  onClose={this.handleRequestCloseAddMenu} id="simple-menu"
+                                  anchorEl={anchorEl}>
+                                <MenuItem onClick={this.handleRequestCloseAddMenu}>
+                                    <Link to="/endpoints/create">Create new Endpoint</Link>
+                                </MenuItem>
+                                <MenuItem onClick={this.handleRequestCloseAddMenu}>
+                                    <ScopeValidation resourcePath={resourcePath.SERVICE_DISCOVERY}
+                                                     resourceMethod={resourceMethod.GET}>
+                                        <Link to="/endpoints/discover">Discover Endpoints</Link>
+                                    </ScopeValidation>
+                                </MenuItem>
+                            </Menu>
+                            <Button aria-owns={anchorEl ? 'simple-menu' : null}
+                                    aria-haspopup="true" fab color="accent"
+                                    aria-label="add" onClick={this.handleRequestOpenAddMenu}>
+                                <AddIcon/>
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </div>
             </div>
         );
     }

@@ -51,7 +51,7 @@ import java.util.Map;
  * Kubernetes and OpenShift implementation of Service Discoverer
  */
 public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
-    private final Logger log  = LoggerFactory.getLogger(ServiceDiscovererKubernetes.class);
+    private final Logger log = LoggerFactory.getLogger(ServiceDiscovererKubernetes.class);
 
     //Constants that are also used in the configuration as keys of key-value pairs
     public static final String MASTER_URL = "masterUrl";
@@ -97,8 +97,8 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
     /**
      * Builds the Config required by DefaultOpenShiftClient
      * Also sets the system properties
-     *  (1) to not refer .kube/config file and
-     *  (2) the client to use service account procedure to get authenticated and authorised
+     * (1) to not refer .kube/config file and
+     * (2) the client to use service account procedure to get authenticated and authorised
      *
      * @return {@link io.fabric8.kubernetes.client.Config} object to build the client
      * @throws ServiceDiscoveryException if an error occurs while building the config using externally stored token
@@ -149,7 +149,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
             String msg = "Error occurred while resolving externally stored token";
             throw new ServiceDiscoveryException(msg, e, ExceptionCodes.ERROR_INITIALIZING_SERVICE_DISCOVERY);
         }
-        return token;
+        return StringUtils.replace(token, "\n", "");
     }
 
     /**
@@ -242,7 +242,7 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
      * For each service in {@code serviceList} list, methods are called to add endpoints of different types,
      * for each of service's ports
      *
-     * @param serviceList   filtered list of services
+     * @param serviceList filtered list of services
      */
     private void addServicesToEndpointList(List<Service> serviceList, List<Endpoint> endpointList)
             throws MalformedURLException {
@@ -293,11 +293,11 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
     /**
      * Adds the ExternalName Endpoint to the endpointList
      *
-     * @param serviceName    name of the service the endpoint belongs to
-     * @param externalName   externalName found in service's spec
-     * @param namespace      namespace of the service
-     * @param labels         labels of the service
-     * @param endpointList   endpointList which the endpoint has to be added to
+     * @param serviceName  name of the service the endpoint belongs to
+     * @param externalName externalName found in service's spec
+     * @param namespace    namespace of the service
+     * @param labels       labels of the service
+     * @param endpointList endpointList which the endpoint has to be added to
      * @throws MalformedURLException if protocol unknown or URL spec is null, therefore will not get thrown
      */
     private void addExternalNameEndpoint(String serviceName, String externalName,
@@ -310,14 +310,14 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
     /**
      * Adds the ClusterIP Endpoint to the endpointList
      *
-     * @param serviceName   name of the service the endpoint belongs to
-     * @param clusterIP     ClusterIP of the service
-     * @param port          port number
-     * @param protocol      whether http or https
-     * @param namespace     namespace of the service
-     * @param labels        labels of the service
-     * @param endpointList  endpointList which the endpoint has to be added to
-     * @throws MalformedURLException  if protocol unknown, therefore will not get thrown
+     * @param serviceName  name of the service the endpoint belongs to
+     * @param clusterIP    ClusterIP of the service
+     * @param port         port number
+     * @param protocol     whether http or https
+     * @param namespace    namespace of the service
+     * @param labels       labels of the service
+     * @param endpointList endpointList which the endpoint has to be added to
+     * @throws MalformedURLException if protocol unknown, therefore will not get thrown
      */
     private void addClusterIPEndpoint(String serviceName, String clusterIP, int port, String protocol,
                                       String namespace, String labels, List<Endpoint> endpointList)
@@ -329,13 +329,13 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
     /**
      * Adds the NodePort Endpoint to the endpointList
      *
-     * @param serviceName   name of the service the endpoint belongs to
-     * @param nodePort      nodePort of the service
-     * @param protocol      whether http or https
-     * @param namespace     namespace of the service
-     * @param labels        labels of the service
-     * @param endpointList  endpointList which the endpoint has to be added to
-     * @throws MalformedURLException  if protocol unknown, therefore will not get thrown
+     * @param serviceName  name of the service the endpoint belongs to
+     * @param nodePort     nodePort of the service
+     * @param protocol     whether http or https
+     * @param namespace    namespace of the service
+     * @param labels       labels of the service
+     * @param endpointList endpointList which the endpoint has to be added to
+     * @throws MalformedURLException if protocol unknown, therefore will not get thrown
      */
     private void addNodePortEndpoint(String serviceName, int nodePort, String protocol,
                                      String namespace, String labels, List<Endpoint> endpointList)
@@ -348,14 +348,14 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
     /**
      * Adds the LoadBalancer Endpoint to the endpointList
      *
-     * @param serviceName   name of the service the endpoint belongs to
-     * @param service       service object instance
-     * @param port          port number
-     * @param protocol      whether http or https
-     * @param namespace     namespace of the service
-     * @param labels        labels of the service
-     * @param endpointList  endpointList which the endpoint has to be added to
-     * @throws MalformedURLException  if protocol unknown, therefore will not get thrown
+     * @param serviceName  name of the service the endpoint belongs to
+     * @param service      service object instance
+     * @param port         port number
+     * @param protocol     whether http or https
+     * @param namespace    namespace of the service
+     * @param labels       labels of the service
+     * @param endpointList endpointList which the endpoint has to be added to
+     * @throws MalformedURLException if protocol unknown, therefore will not get thrown
      */
     private void addLoadBalancerEndpoint(String serviceName, Service service, int port, String protocol,
                                          String namespace, String labels, List<Endpoint> endpointList)
@@ -377,14 +377,14 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
     /**
      * Adds the ExternalIP Endpoint to the endpointList
      *
-     * @param serviceName   name of the service the endpoint belongs to
-     * @param externalIPs   service object instance
-     * @param port          port number
-     * @param protocol      whether http or https
-     * @param namespace     namespace of the service
-     * @param labels        labels of the service
-     * @param endpointList  endpointList which the endpoint has to be added to
-     * @throws MalformedURLException  if protocol unknown, therefore will not get thrown
+     * @param serviceName  name of the service the endpoint belongs to
+     * @param externalIPs  service object instance
+     * @param port         port number
+     * @param protocol     whether http or https
+     * @param namespace    namespace of the service
+     * @param labels       labels of the service
+     * @param endpointList endpointList which the endpoint has to be added to
+     * @throws MalformedURLException if protocol unknown, therefore will not get thrown
      */
     private void addExternalIPEndpoint(String serviceName, List<String> externalIPs, int port, String protocol,
                                        String namespace, String labels, List<Endpoint> endpointList)
@@ -401,16 +401,16 @@ public class ServiceDiscovererKubernetes extends ServiceDiscoverer {
      * Populates the necessary parameters required by the Endpoint object,
      * and call buildEndpoint method in the super class.
      *
-     * @param serviceName  service name as defined in the cluster
-     * @param namespace    service's namespace as defined in the cluster
-     * @param portType     whether http or https
-     * @param urlType      type of the service URL (eg. NodePort)
-     * @param url          endpoint URL
-     * @param labels       service's labels as defined in the cluster
+     * @param serviceName service name as defined in the cluster
+     * @param namespace   service's namespace as defined in the cluster
+     * @param portType    whether http or https
+     * @param urlType     type of the service URL (eg. NodePort)
+     * @param url         endpoint URL
+     * @param labels      service's labels as defined in the cluster
      * @return {@link org.wso2.carbon.apimgt.core.models.Endpoint} object
      */
     private Endpoint constructEndpoint(String serviceName, String namespace, String portType,
-                                                 String urlType, URL url, String labels) {
+                                       String urlType, URL url, String labels) {
         JSONObject endpointConfig = new JSONObject();
         endpointConfig.put("serviceUrl", url.toString());
         endpointConfig.put("urlType", urlType);

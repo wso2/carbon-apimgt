@@ -12,12 +12,12 @@ import org.wso2.carbon.apimgt.gateway.holders as holder;
 import org.wso2.carbon.apimgt.ballerina.util as apimgtUtil;
 
 @jms:config {
-    initialContextFactory:"org.apache.activemq.jndi.ActiveMQInitialContextFactory",
-    providerUrl:"tcp://localhost:61616",
+    initialContextFactory:"org.wso2.andes.jndi.PropertiesFileInitialContextFactory",
     connectionFactoryType:"topic",
     connectionFactoryName:"TopicConnectionFactory",
     destination:"PublisherTopic",
-    acknowledgmentMode:"AUTO_ACKNOWLEDGE"
+    acknowledgmentMode:"AUTO_ACKNOWLEDGE",
+    properties: ["connectionfactory.TopicConnectionFactory=amqp://admin:admin@clientID/carbon?brokerlist='tcp://localhost:5672'"]
 }
 service<jms> apimPublisherEventListner {
 

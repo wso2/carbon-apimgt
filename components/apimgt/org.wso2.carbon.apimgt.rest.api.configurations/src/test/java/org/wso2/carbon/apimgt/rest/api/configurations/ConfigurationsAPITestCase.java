@@ -54,6 +54,11 @@ public class ConfigurationsAPITestCase {
                 return null;
             }
 
+            @Override
+            public <T> T getConfigurationObject(String s, Class<T> aClass) throws ConfigurationException {
+                return null;
+            }
+
 
         });
 

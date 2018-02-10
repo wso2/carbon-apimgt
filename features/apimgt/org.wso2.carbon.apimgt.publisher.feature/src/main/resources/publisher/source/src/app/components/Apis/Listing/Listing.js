@@ -187,7 +187,8 @@ class Listing extends React.Component {
                         {this.state.listType === "list" ?
                             <Row type="flex" justify="start">
                                 <Col span={24}>
-                                    <Table columns={columns} dataSource={this.state.apis.list} bordered />
+                                    <Table columns={columns} dataSource={this.state.apis.list} bordered
+                                           locale={{ emptyText:'There is no data to display' }}/>
                                     <NotificationSystem ref="notificationSystem"/>
                                 </Col>
                             </Row>

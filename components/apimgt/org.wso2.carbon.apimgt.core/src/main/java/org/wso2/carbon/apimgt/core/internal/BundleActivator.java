@@ -24,6 +24,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -82,6 +83,7 @@ public class BundleActivator {
             WorkflowExtensionsConfigBuilder.build(configProvider);
             ServiceDiscoveryConfigBuilder.build(configProvider);
             ContainerBasedGatewayConfigBuilder.build(configProvider);
+            BrokerManager.start();
             Broker broker = new BrokerImpl();
             BrokerUtil.initialize(broker);
         } catch (NamingException e) {
@@ -111,6 +113,15 @@ public class BundleActivator {
             log.error("Error occurred while encrypting files", e);
         }
 
+    }
+
+    @Deactivate
+    protected void stop(BundleContext bundleContext) {
+        try {
+            BrokerManager.stop();
+        } catch (Exception e) {
+            log.error("Error while deactivating the component", e);
+        }
     }
 
     @Reference(

@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>7.0.75-SNAPSHOT</version>
+        <version>7.0.99-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -188,6 +188,10 @@
         <dependency>
             <groupId>org.wso2.orbit.io.fabric8</groupId>
             <artifactId>kubernetes-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.transport.http</groupId>
+            <artifactId>org.wso2.transport.http.netty</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -481,6 +485,14 @@
                                 <bundle>
                                     <symbolicName>kubernetes-client</symbolicName>
                                     <version>${wso2.kubernetes-client.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>kubernetes-client</symbolicName>
+                                    <version>${wso2.kubernetes-client.version}</version>
+                                </bundle>
+                                <bundle>
+                                    <symbolicName>org.wso2.transport.http.netty</symbolicName>
+                                    <version>${carbon.transport.version}</version>
                                 </bundle>
                             </bundles>
                         </configuration>

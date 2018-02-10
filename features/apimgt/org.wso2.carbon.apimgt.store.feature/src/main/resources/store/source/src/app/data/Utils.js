@@ -26,12 +26,12 @@ class Utils {
 
     /**
      * Get JavaScript accessible cookies saved in browser, by giving the cooke name.
-     * @param {String} name : Name of the cookie which need to be retrived
+     * @param {String} cookieName : Name of the cookie which need to be retrived
+     * @param {String} environmentName : label of the environment of the cookie
      * @returns {String|null} : If found a cookie with given name , return its value,Else null value is returned
      */
-    static getCookie(name) {
-        //Append environment name to cookie
-        let environmentName = "_" + Utils.getEnvironment().label;
+    static getCookie(cookieName, environmentName) {
+        environmentName = environmentName || Utils.getEnvironment().label;
 
         let pairs = document.cookie.split(";");
         let cookie = null;
@@ -39,7 +39,7 @@ class Utils {
             pair = pair.split("=");
             let cookie_name = pair[0].trim();
             let value = encodeURIComponent(pair[1]);
-            if (cookie_name === name + environmentName) {
+            if (cookie_name === `${cookieName}_${environmentName}`) {
                 cookie = value;
                 break;
             }
@@ -51,10 +51,11 @@ class Utils {
      * Delete a browser cookie given its name
      * @param {String} name : Name of the cookie which need to be deleted
      * @param {String} path : Path of the cookie which need to be deleted
+     * @param {String} environmentName: label of the environment of the cookie
      */
-    static delete_cookie(name, path) {
-        //Environment name is appended to the cookie name
-        document.cookie = `${name}_${Utils.getEnvironment().label}=; path=${path}; expires=Thu, 01 Jan 1970 00:00:01 GMT`;
+    static delete_cookie(name, path, environmentName) {
+        environmentName = environmentName || Utils.getEnvironment().label;
+        document.cookie = `${name}_${environmentName}=; path=${path}; expires=Thu, 01 Jan 1970 00:00:01 GMT`;
     }
 
     /**
@@ -66,7 +67,8 @@ class Utils {
      * @param {String} path : Path which needs to set the given cookie
      * @param {boolean} secured : secured parameter is set
      */
-    static setCookie(name, value, validityPeriod, path = "/", secured = true) {
+    static setCookie(name, value, validityPeriod, path = "/", environmentName, secured = true) {
+        environmentName = environmentName || Utils.getEnvironment().label;
         let expiresDirective = "";
         const securedDirective = secured ? "; Secure" : "";
         if (validityPeriod) {
@@ -75,7 +77,7 @@ class Utils {
             expiresDirective = "; expires=" + date.toUTCString();
         }
 
-        document.cookie = `${name}_${Utils.getEnvironment().label}=${value}; path=${path}${expiresDirective}${securedDirective}`;
+        document.cookie = `${name}_${environmentName}=${value}; path=${path}${expiresDirective}${securedDirective}`;
     }
 
     /**
@@ -106,18 +108,21 @@ class Utils {
 
     /**
      * Get current environment's index from the given environment array
-     * @param {array} environments
+     * @param {Array} environments
+     * @param {string} name: name of the environment [default]: current environment name
      * @returns {number}
      */
-    static getEnvironmentID(environments) {
-        let environment = Utils.getEnvironment();
+    static getEnvironmentID(environments, name = Utils.getEnvironment().label) {
+        if (!name) {
+            return 0;
+        }
 
         for (let i = 0; i < environments.length; i++) {
-            if (environment.label === environments[i].label) {
+            if (name === environments[i].label) {
                 return i;
             }
         }
-        return 0;
+        return -1;
     }
 
     /**
@@ -135,19 +140,14 @@ class Utils {
         //Store environment.
         Utils._environment = environment;
         localStorage.setItem(Utils.CONST.LOCALSTORAGE_ENVIRONMENT, JSON.stringify(environment));
-
-        //Read the user of stored environment.
-        let user = AuthManager.getUser(true);
-        //If user is null store only in memory.
-        AuthManager.setUser(user);
     }
 
-    static getPromised_ssoData(environment){
-        return Axios.get(Utils.getAppSSORequestURL(environment));
+    static getPromised_DCRappInfo(environment) {
+        return Axios.get(Utils.getDCRappInfoRequestURL(environment));
     }
 
-    static getAppSSORequestURL(environment = Utils.getEnvironment()) {
-        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.SSO_LOGIN}${Utils.CONST.CONTEXT_PATH}`;
+    static getDCRappInfoRequestURL(environment = Utils.getEnvironment()) {
+        return `${Utils.CONST.PROTOCOL}${environment.host}${Utils.CONST.DCR_APP_INFO}${Utils.CONST.CONTEXT_PATH}`;
     }
 
     static getAppLogoutURL() {
@@ -167,14 +167,14 @@ class Utils {
      * @returns {Object} environment: {label: string, host: string, loginTokenPath: string}
      * @private
      */
-    static _getDefaultEnvironment(){
+    static _getDefaultEnvironment() {
         return {label: 'Default', host: window.location.host, loginTokenPath: '/login/token'};
     }
 }
 
 Utils.CONST = {
     LOCALSTORAGE_ENVIRONMENT: 'environment_store',
-    SSO_LOGIN: '/login/login',
+    DCR_APP_INFO: '/login/login',
     LOGOUT: '/login/logout',
     LOGIN_TOKEN_PATH: '/login/token',
     SWAGGER_YAML: '/api/am/store/v1.0/apis/swagger.yaml',

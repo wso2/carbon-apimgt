@@ -20,7 +20,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -56,17 +55,15 @@ import org.wso2.carbon.apimgt.rest.api.publisher.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.MappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.utils.RestAPIPublisherUtil;
 import org.wso2.carbon.lcm.core.impl.LifecycleState;
-import org.wso2.carbon.messaging.CarbonMessage;
-import org.wso2.carbon.transport.http.netty.message.HTTPCarbonMessage;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.formparam.FileInfo;
+import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -2028,8 +2025,8 @@ public class ApisApiServiceImplTestCase {
 
     // Sample request to be used by tests
     private Request getRequest() throws Exception {
-        CarbonMessage carbonMessage = new HTTPCarbonMessage();
-        carbonMessage.setProperty("LOGGED_IN_USER", USER);
+        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
+        Mockito.when(carbonMessage.getProperty("LOGGED_IN_USER")).thenReturn(USER);
         Request request = new Request(carbonMessage);
         return request;
     }

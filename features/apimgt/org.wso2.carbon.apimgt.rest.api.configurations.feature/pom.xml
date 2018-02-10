@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>7.0.75-SNAPSHOT</version>
+        <version>7.0.99-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -111,6 +111,32 @@
                                     <version>${carbon.apimgt.version}</version>
                                 </feature>
                             </importFeatures>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.wso2.carbon.apimgt</groupId>
+                                    <artifactId>org.wso2.carbon.apimgt.rest.api.configurations</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>bundle</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/docs</outputDirectory>
+                                    <includes>config-docs/**</includes>
+                                </artifactItem>
+                            </artifactItems>
                         </configuration>
                     </execution>
                 </executions>

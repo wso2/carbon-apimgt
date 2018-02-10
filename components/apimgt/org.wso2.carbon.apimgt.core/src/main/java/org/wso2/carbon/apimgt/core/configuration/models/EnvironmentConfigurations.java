@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.core.configuration.models;
 
 import org.wso2.carbon.apimgt.core.util.APIMgtConstants;
@@ -10,7 +28,8 @@ import java.util.List;
 /**
  * Class to hold Environment configurations
  */
-@Configuration(description = "Environment Configurations")
+@Configuration(namespace = "wso2.carbon.apimgt.environments",
+        description = "APIM Environment Configuration Parameters")
 public class EnvironmentConfigurations {
     //Unique name for environment to set cookies by backend
     @Element(description = "current environment's label from the list of environments")
@@ -21,6 +40,9 @@ public class EnvironmentConfigurations {
             "' to allow any web client)\nthe first host is used as UI-Service")
     //If the first host is an empty string, use "wso2.carbon.apimgt.application: apimBaseUrl" as UI-Service
     private List<String> allowedHosts = Collections.singletonList("");
+
+    @Element(description = "Multi-Environment Overview Configurations")
+    private MultiEnvironmentOverview multiEnvironmentOverview = new MultiEnvironmentOverview();
 
     public String getEnvironmentLabel() {
         return environmentLabel;
@@ -36,5 +58,13 @@ public class EnvironmentConfigurations {
 
     public void setAllowedHosts(List<String> allowedHosts) {
         this.allowedHosts = allowedHosts;
+    }
+
+    public MultiEnvironmentOverview getMultiEnvironmentOverview() {
+        return multiEnvironmentOverview;
+    }
+
+    public void setMultiEnvironmentOverview(MultiEnvironmentOverview multiEnvironmentOverview) {
+        this.multiEnvironmentOverview = multiEnvironmentOverview;
     }
 }

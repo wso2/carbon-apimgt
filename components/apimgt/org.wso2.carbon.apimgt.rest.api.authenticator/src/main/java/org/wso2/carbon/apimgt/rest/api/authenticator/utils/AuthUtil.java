@@ -110,11 +110,11 @@ public class AuthUtil {
     /**
      * Method used to extract refresh token from headers.
      *
-     * @param headers headers which contains the access token
+     * @param request msf4j request to get the headers
      * @return refresh token present in the cookie and authorization header..
      */
-    public static String extractTokenFromHeaders(Headers headers, String cookieHeader) {
-        String authHeader = headers.get(AuthenticatorConstants.AUTHORIZATION_HTTP_HEADER);
+    public static String extractTokenFromHeaders(Request request, String cookieHeader) {
+        String authHeader = request.getHeader(AuthenticatorConstants.AUTHORIZATION_HTTP_HEADER);
         String token = "";
         if (authHeader != null) {
             authHeader = authHeader.trim();
@@ -132,9 +132,9 @@ public class AuthUtil {
         }
 
         //Append unique environment name in deployment.yaml
-        String environmentName = APIMConfigurationService.getInstance().getApimConfigurations()
+        String environmentName = APIMConfigurationService.getInstance()
                 .getEnvironmentConfigurations().getEnvironmentLabel();
-        String cookie = headers.get(AuthenticatorConstants.COOKIE_HEADER);
+        String cookie = request.getHeader(AuthenticatorConstants.COOKIE_HEADER);
         if (cookie != null) {
             cookie = cookie.trim();
             String[] cookies = cookie.split(";");
@@ -176,7 +176,7 @@ public class AuthUtil {
         }
 
         //Append unique environment name in deployment.yaml
-        String environmentName = APIMConfigurationService.getInstance().getApimConfigurations()
+        String environmentName = APIMConfigurationService.getInstance()
                 .getEnvironmentConfigurations().getEnvironmentLabel();
         return new NewCookie(name + "_" + environmentName, stringBuilder.toString());
     }

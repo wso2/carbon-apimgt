@@ -123,62 +123,65 @@ class Sdk extends React.Component {
 
         return (
             language_list ?
-                <Grid container style={{marginTop:"10px"}} >
-                    <Grid item xs={12} sm={6} md={9} lg={9} xl={10}>
-                        {
-                            this.state.sdkLanguages.length >= this.filter_threshold ?
-                                <Grid item style={{textAlign:"center"}}>
-                                    <TextField
-                                        id="search"
-                                        label="Search SDK"
-                                        type="text"
-                                        margin="normal"
-                                        name="searchSdk"
-                                        onChange={this.handleChange}
-                                    />
-                                </Grid>
-                                :
-                                ""
-                        }
+                <Paper>
+                    <Grid container className="tab-grid" spacing={0}>
+                        <Grid item xs={12} sm={6} md={9} lg={9} xl={10}>
+                            {
+                                this.state.sdkLanguages.length >= this.filter_threshold ?
+                                    <Grid item style={{textAlign:"center"}}>
+                                        <TextField
+                                            id="search"
+                                            label="Search SDK"
+                                            type="text"
+                                            margin="normal"
+                                            name="searchSdk"
+                                            onChange={this.handleChange}
+                                        />
+                                    </Grid>
+                                    :
+                                    ""
+                            }
 
-                        <Grid container justify="flex-start" spacing={Number(24)}>
-                            {language_list.map((language, index) => (
-                                <Grid key={index} item>
-                                    <div style={{width:"auto", textAlign:"center"}}>
-                                        <Card>
-                                            <SubHeader>{language.toString().toUpperCase()}</SubHeader>
-                                            <Divider/>
-                                            <CardMedia
-                                                title={language.toString().toUpperCase()}
-                                                src={"/store/public/app/images/sdks/"+new String(language)+".svg"}
-                                            >
-                                                <img alt={language} src={"/store/public/app/images/sdks/"+new String(language)+".svg"} style={{width:"100px",height:"100px",margin:"15px"}}/>
-                                            </CardMedia>
-                                            <CardActions>
-                                                <Grid container justify="center">
-                                                    <Button raised color="primary" onClick={event => this.handleClick(event,language)}>
-                                                        <FileDownload/> Download
-                                                    </Button>
-                                                </Grid>
-                                            </CardActions>
-                                        </Card>
-                                    </div>
-                                </Grid>
-                            ))}
+                            <Grid container justify="flex-start" spacing={Number(24)}>
+                                {language_list.map((language, index) => (
+                                    <Grid key={index} item>
+                                        <div style={{width:"auto", textAlign:"center"}}>
+                                            <Card>
+                                                <SubHeader>{language.toString().toUpperCase()}</SubHeader>
+                                                <Divider/>
+                                                <CardMedia
+                                                    title={language.toString().toUpperCase()}
+                                                    src={"/store/public/app/images/sdks/"+new String(language)+".svg"}
+                                                >
+                                                    <img alt={language} src={"/store/public/app/images/sdks/"+new String(language)+".svg"} style={{width:"100px",height:"100px",margin:"15px"}}/>
+                                                </CardMedia>
+                                                <CardActions>
+                                                    <Grid container justify="center">
+                                                        <Button color="secondary" onClick={event => this.handleClick(event,language)}>
+                                                            <FileDownload/> Download
+                                                        </Button>
+                                                    </Grid>
+                                                </CardActions>
+                                            </Card>
+                                        </div>
+                                    </Grid>
+                                ))}
+                            </Grid>
                         </Grid>
                     </Grid>
-                </Grid>
-                :
-                <Grid container style={{marginLeft: "10%",marginRight:"10%",width:"100%"}} align="center">
-                    <Grid item xs={12} sm={6} md={9} lg={9} xl={10} >
-                        <Paper>
-                            <Typography>
-                                <InfoOutline/>No languages are configured.
-                            </Typography>
-                        </Paper>
+                </Paper>
+                    :
+                <Paper>
+                    <Grid container style={{marginLeft: "10%",marginRight:"10%",width:"100%"}} align="center">
+                        <Grid item xs={12} sm={6} md={9} lg={9} xl={10} >
+                            <Paper>
+                                <Typography>
+                                    <InfoOutline/>No languages are configured.
+                                </Typography>
+                            </Paper>
+                        </Grid>
                     </Grid>
-                </Grid>
-
+                </Paper>    
         );
     }
 }

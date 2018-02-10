@@ -42,6 +42,7 @@ public class AuthenticatorConstants {
     public static final String CONSUMER_KEY = "CONSUMER_KEY";
     public static final String CONSUMER_SECRET = "CONSUMER_SECRET";
     public static final String SSO_ENABLED = "is_sso_enabled";
+    public static final String MULTI_ENVIRONMENT_OVERVIEW_ENABLED = "is_multi_environment_overview_enabled";
     public static final String APPLICATION_KEY_TYPE = "Application";
     public static final String REQUEST_URL = "REQUEST_URL";
     public static final String STORE_APPLICATION = "store";
@@ -52,5 +53,6 @@ public class AuthenticatorConstants {
     public static final String URL_PATH_SEPERATOR = "/";
     public static final String PROTOCOL_SEPERATOR = "://";
     public static final String LOGOUT_SERVICE_CONTEXT = "/login/logout";
+    public static final String LOGIN_SERVICE_CONTEXT = "/login/token";
     public static final String HTTPS_PROTOCOL = "https";
 }

@@ -78,6 +78,7 @@ public class KeyManagerConstants {
     public static final String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
     public static final String PASSWORD_GRANT_TYPE = "password";
     public static final String AUTHORIZATION_CODE_GRANT_TYPE = "authorization_code";
+    public static final String JWT_GRANT_TYPE = "urn:ietf:params:oauth:grant-type:jwt-bearer";
     public static final String REFRESH_GRANT_TYPE = "refresh_token";
     public static final String GRANT_TYPE_PARAM_VALIDITY = "validity_period";
     public static final String AUTHORIZATION_HEADER = "Authorization";

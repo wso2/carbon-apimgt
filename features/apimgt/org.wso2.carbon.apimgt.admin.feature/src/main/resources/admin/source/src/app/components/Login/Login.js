@@ -49,7 +49,8 @@ class Login extends Component {
             messageOpen: false,
             message: '',
             environments: [],
-            environmentId: 0
+            environmentId: 0,
+            loginStatusEnvironments: []
         };
     }
 
@@ -59,17 +60,26 @@ class Login extends Component {
         //Get Environments
         ConfigManager.getConfigs().environments.then(response => {
             const environments = response.data.environments;
-            const environmentId = Utils.getEnvironmentID(environments);
-
-            this.setState({
-                environments,
-                environmentId
-            });
+            let environmentId = Utils.getEnvironmentID(environments);
+            if (environmentId === -1) {
+                environmentId = 0;
+            }
+            this.setState({environments, environmentId});
 
             // Update environment to discard default environment configuration
             const environment = environments[environmentId];
             Utils.setEnvironment(environment);
+
+            // Set authentication status of environments
+            this.setLoginStatusOfEnvironments(environments);
         });
+    }
+
+    setLoginStatusOfEnvironments(environments) {
+        let loginStatusEnvironments = environments.map(
+            environment => AuthManager.getUser(environment.label) !== null
+        );
+        this.setState({loginStatusEnvironments});
     }
 
     handleSubmit = (e) => {
@@ -97,7 +107,7 @@ class Login extends Component {
                     this.setState({message: error.message});
                 }
                 console.log(error);
-                this.setState({loading: false});q
+                this.setState({loading: false});
             }
         );
     };
@@ -120,6 +130,7 @@ class Login extends Component {
             environmentId
         });
         Utils.setEnvironment(environment);
+        this.setState({environmentId, isLogin});
     };
 
     handleRequestClose = () => {

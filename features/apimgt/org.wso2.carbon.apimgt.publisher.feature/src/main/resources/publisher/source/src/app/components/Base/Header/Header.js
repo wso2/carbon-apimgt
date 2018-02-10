@@ -201,7 +201,7 @@ class Header extends React.Component {
                                     style={{alignItems: "center", justifyContent: "center"}}
                                 >
 
-                                    <Link to="/api/create/rest">
+                                    <Link to="/api/create/home">
                                         <MenuItem onClick={this.handleRequestCloseAddMenu}>Create new API</MenuItem>
                                     </Link>
                                     <Link to="/api/create/swagger">
@@ -231,7 +231,7 @@ class Header extends React.Component {
                                 </Menu>
                                 {/* Environment menu */}
                                 <EnvironmentMenu environments={this.state.environments}
-                                                 environmentLabel={Utils.getEnvironment().label}
+                                                 environmentLabel={Utils.getCurrentEnvironment().label}
                                                  handleEnvironmentChange={this.handleEnvironmentChange}/>
                                 {/* User menu */}
                                 <Button aria-owns="simple-menu" aria-haspopup="true" onClick={this.handleClickUserMenu}

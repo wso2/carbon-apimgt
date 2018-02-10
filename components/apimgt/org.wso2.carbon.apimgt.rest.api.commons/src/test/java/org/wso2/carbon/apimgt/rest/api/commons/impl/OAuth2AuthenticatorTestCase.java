@@ -31,15 +31,10 @@ import org.wso2.carbon.apimgt.core.models.AccessTokenInfo;
 import org.wso2.carbon.apimgt.rest.api.common.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.impl.OAuth2Authenticator;
-import org.wso2.carbon.messaging.CarbonMessage;
-import org.wso2.carbon.messaging.Header;
-import org.wso2.carbon.messaging.Headers;
 import org.wso2.msf4j.Request;
 import org.wso2.msf4j.Response;
 import org.wso2.msf4j.ServiceMethodInfo;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.wso2.transport.http.netty.message.HTTPCarbonMessage;
 
 import static org.mockito.Mockito.when;
 @RunWith(PowerMockRunner.class)
@@ -47,31 +42,15 @@ import static org.mockito.Mockito.when;
 public class OAuth2AuthenticatorTestCase {
     @Test
     public void testOauthAuthenticate() throws Exception {
-        CarbonMessage carbonMessage = Mockito.mock(CarbonMessage.class);
+        HTTPCarbonMessage carbonMessage = Mockito.mock(HTTPCarbonMessage.class);
         Request requestObj = new Request(carbonMessage);
         Response responseObj = Mockito.mock(Response.class);
         ServiceMethodInfo serviceMethodInfoObj = Mockito.mock(ServiceMethodInfo.class);
         final String authorizationHttpHeader = "Bearer 7d33e3cd-60f0-3484-9651-cc31f2e09fb4";
         final String accessToken = "7d33e3cd-60f0-3484-9651-cc31f2e09fb4";
 
-
-        //Valid AccessToken
-        Header authHeader1 = Mockito.mock(Header.class);
-        authHeader1.setName(RestApiConstants.AUTHORIZATION_HTTP_HEADER);
-        authHeader1.setValue(authorizationHttpHeader);
-
-        List<Header> headersList1 = new ArrayList<Header>(1);
-        headersList1.add(authHeader1);
-
-        Headers headers1 = Mockito.mock(Headers.class);
-        headers1.set(headersList1);
-
-        when(requestObj.getHeaders()).thenReturn(headers1);
-        requestObj.getHeaders().set(headersList1);
-
-        String authHeaderString2 = authorizationHttpHeader;
-        when(headers1.contains(RestApiConstants.AUTHORIZATION_HTTP_HEADER)).thenReturn(true);
-        when(headers1.get(RestApiConstants.AUTHORIZATION_HTTP_HEADER)).thenReturn(authHeaderString2);
+        Mockito.when(requestObj.getHeader(RestApiConstants.AUTHORIZATION_HTTP_HEADER)).
+                thenReturn(authorizationHttpHeader);
 
         AccessTokenInfo accessTokenInfo = new AccessTokenInfo();
         accessTokenInfo.setTokenValid(true);

@@ -22,7 +22,7 @@ import React, {Component} from 'react'
 import API from '../../../../data/api'
 import {ScopeValidation , resourceMethod, resourcePath} from '../../../../data/ScopeValidation'
 import ApiPermissionValidation from '../../../../data/ApiPermissionValidation'
-import Message from '../../../Shared/Message'
+import Alert from '../../../Shared/Alert'
 
 import Button from 'material-ui/Button';
 import Typography from 'material-ui/Typography';
@@ -73,12 +73,12 @@ export default class LifeCycleUpdate extends Component {
         }
         promisedUpdate.then(response => { /*TODO: Handle IO erros ~tmkb*/
             this.props.handleUpdate(true);
-            this.msg.info("Lifecycle state updated successfully");
+            Alert.info("Lifecycle state updated successfully");
             /*TODO: add i18n ~tmkb*/
         }).catch(
             error_response => {
                 console.log(error_response);
-                this.msg.error(JSON.stringify(error_response));
+                Alert.error(JSON.stringify(error_response));
             });
     }
 
@@ -93,8 +93,6 @@ export default class LifeCycleUpdate extends Component {
         const is_workflow_pending = api.workflowStatus.toLowerCase() === "pending";
         return (
                 <Grid container>
-                    <Message ref={a => this.msg = a}/>
-
                 {
                     is_workflow_pending ?
                         (
