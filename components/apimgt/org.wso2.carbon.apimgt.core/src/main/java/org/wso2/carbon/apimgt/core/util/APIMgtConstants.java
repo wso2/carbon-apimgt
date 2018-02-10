@@ -125,7 +125,7 @@ public class APIMgtConstants {
 
     public static final String DATE_TIME_FORMAT = "yyyy-MM-dd hh:mm:ss";
     public static final String RESOURCES = "resources";
-    public static final String TEMPLATES = "templates";
+    public static final String TEMPLATES = "template";
 
     /**
      * Application statuses.
