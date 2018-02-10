@@ -291,13 +291,13 @@ public class APIGatewayAdminClient extends AbstractAPIGatewayAdminClient {
             String endpointName = api.getId().getApiName() + "--v" + api.getId().getVersion();
             ArrayList<String> arrayList = getEndpointType(api);
             for (String type : arrayList) {
-                String t = type.replace("_endpoints", "");
+                String endpointType = type.replace("_endpoints", "");
                 if (tenantDomain != null && !("").equals(tenantDomain)
                         && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
-                    apiGatewayAdminStub.deleteEndpointForTenant(endpointName + "_API" + t + "Endpoint",
+                    apiGatewayAdminStub.deleteEndpointForTenant(endpointName + "_API" + endpointType + "Endpoint",
                             tenantDomain);
                 } else {
-                    apiGatewayAdminStub.deleteEndpoint(endpointName + "_API" + t + "Endpoint");
+                    apiGatewayAdminStub.deleteEndpoint(endpointName + "_API" + endpointType + "Endpoint");
                 }
             }
         } catch (Exception e) {

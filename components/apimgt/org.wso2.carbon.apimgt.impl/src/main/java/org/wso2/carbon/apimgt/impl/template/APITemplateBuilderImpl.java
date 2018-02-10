@@ -260,9 +260,9 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
             context.put("type", endpointType);
 
-            Template t = velocityengine.getTemplate(this.getEndpointTemplatePath());
+            Template template = velocityengine.getTemplate(this.getEndpointTemplatePath());
 
-            t.merge(context, writer);
+            template.merge(context, writer);
 
         } catch (Exception e) {
             log.error("Velocity Error");
