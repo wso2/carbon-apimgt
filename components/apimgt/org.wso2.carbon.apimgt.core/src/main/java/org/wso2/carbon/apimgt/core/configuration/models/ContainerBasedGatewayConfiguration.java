@@ -46,7 +46,7 @@ public class ContainerBasedGatewayConfiguration {
         implParameters.put(ContainerBasedGatewayConstants.API_CORE_URL, "https://localhost:9443");
         implParameters.put(ContainerBasedGatewayConstants.BROKER_HOST, "https://localhost:5672");
         implParameters.put(ContainerBasedGatewayConstants.CMS_TYPE, ContainerBasedGatewayConstants.KUBERNETES);
-        implParameters.put(ContainerBasedGatewayConstants.SA_TOKEN_FILE, "");
+        implParameters.put(ContainerBasedGatewayConstants.SA_TOKEN_FILE_NAME, "");
     }
 
     public boolean isContainerBasedGatewayEnabled() {

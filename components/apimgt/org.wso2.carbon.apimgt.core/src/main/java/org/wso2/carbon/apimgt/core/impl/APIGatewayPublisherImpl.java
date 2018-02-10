@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.core.util.APIUtils;
 import org.wso2.carbon.apimgt.core.util.BrokerUtil;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * This is responsible for handling API gateway related operations
@@ -127,7 +128,12 @@ public class APIGatewayPublisherImpl implements APIGateway {
         if (api.hasOwnGateway()) {
             // Delete the Gateway - check how we can assume that we complete the deletion
             try {
-                removeContainerBasedGateway(api.getLabels().toArray()[0].toString());
+                Set<String> labels = api.getLabels();
+                if (labels != null && !labels.isEmpty()) {
+                    removeContainerBasedGateway(labels.toArray()[0].toString());
+                } else {
+                    log.error("Could not delete container based gateways as labels could not find in the API.");
+                }
             } catch (ContainerBasedGatewayException e) {
                 String msg = "Error while removing the container based gateway";
                 throw new GatewayException(msg, e, ExceptionCodes.CONTAINER_GATEWAY_REMOVAL_FAILED);
@@ -486,6 +492,11 @@ public class APIGatewayPublisherImpl implements APIGateway {
                 //label is deleted beforehand.
                 removeContainerBasedGateway(labelName);
             }
+        } else {
+            String msg = String.format("The api [api id] %s is not in %s or %s or %s status.", api.getId(),
+                    APIStatus.PUBLISHED.getStatus(), APIStatus.PROTOTYPED.getStatus(),
+                    APIStatus.DEPRECATED.getStatus());
+            throw new ContainerBasedGatewayException(msg, ExceptionCodes.ERROR_WHILE_UPDATING_CONTAINER_BASED_GATEWAY);
         }
     }
 

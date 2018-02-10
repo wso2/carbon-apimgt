@@ -285,13 +285,14 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     List<Label> labelList = new ArrayList<>();
                     // todo : add the access URL of the gateway here itself
                     Label autoGenLabel = new Label.Builder().id(UUID.randomUUID().toString()).
-                            name(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId).
+                            name(autoGenLabelName).
                             accessUrls(null).build();
                     labelList.add(autoGenLabel);
                     //Add to the db
                     getLabelDAO().addLabels(labelList);
                 }
 
+                labelSet.add(autoGenLabelName);
                 // create or remove dedicated Gateway
                 gateway.updateDedicatedGateway(api, autoGenLabelName, dedicatedGateway.isEnabled());
                 getApiDAO().updateDedicatedGateway(dedicatedGateway, apiId, labelSet);

@@ -50,5 +50,5 @@ public final class ContainerBasedGatewayConstants {
 
     public static final String KUBERNETES_IMPL_CLASS = "org.wso2.carbon.apimgt.core.impl.KubernetesGatewayImpl";
     public static final String MASTER_URL = "masterUrl";
-    public static final String SA_TOKEN_FILE = "saTokenFile";
+    public static final String SA_TOKEN_FILE_NAME = "saTokenFileName";
 }

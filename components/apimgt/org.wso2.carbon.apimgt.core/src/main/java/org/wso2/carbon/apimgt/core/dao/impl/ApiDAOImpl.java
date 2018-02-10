@@ -1398,7 +1398,7 @@ public class ApiDAOImpl implements ApiDAO {
             String errorMessage = "getting all comments for API " + apiId;
             throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + errorMessage, e);
         }
-        return  commentList;
+        return commentList;
     }
 
     @Override
@@ -1429,7 +1429,7 @@ public class ApiDAOImpl implements ApiDAO {
                 connection.rollback();
                 String errorMessage = "adding rating for API: " + apiId;
                 throw new APIMgtDAOException(DAOUtil.DAO_ERROR_PREFIX + errorMessage, e);
-            }  finally {
+            } finally {
                 connection.setAutoCommit(DAOUtil.isAutoCommit());
             }
         } catch (SQLException e) {
@@ -1608,7 +1608,8 @@ public class ApiDAOImpl implements ApiDAO {
                     }
                 } else {
                     throw new APIMgtDAOException("Couldn't Find Endpoint Config for Endpoint: " + endpointId,
-                            ExceptionCodes.ENDPOINT_CONFIG_NOT_FOUND);                }
+                            ExceptionCodes.ENDPOINT_CONFIG_NOT_FOUND);
+                }
             }
         } catch (SQLException | IOException e) {
             String msg = "getting Endpoints Gateway Config for Endpoint: " + endpointId;
@@ -1623,10 +1624,9 @@ public class ApiDAOImpl implements ApiDAO {
     public void updateDedicatedGateway(DedicatedGateway dedicatedGateway, String apiId, Set<String> labels)
             throws APIMgtDAOException {
 
-        // labels will come in three ways.
-        // 1. auto-generated label
-        // 2. existing label set ( if the updateDedicatedGateway is doing with isEnabled=false for a normal API)
-        // 3. null - when API is updated from dedicatedGatewayIsEnabled=true from dedicatedGatewayIsEnabled=false
+        // labels will come in 2 ways.
+        // 1. auto-generated label - Update from dedicateGateway false to true
+        // 2. default label - Update from dedicatedGateway true to false
 
         final String query = "UPDATE AM_API SET HAS_OWN_GATEWAY = ?, LAST_UPDATED_TIME = ?, UPDATED_BY = ? " +
                 "WHERE UUID = ?";
@@ -1640,14 +1640,13 @@ public class ApiDAOImpl implements ApiDAO {
                 statement.setString(4, apiId);
 
                 // if the labels are null or perAPI-GW
-                if (labels == null || labels.isEmpty() ||
-                        labels.contains(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId)) {
+                if (labels != null && !labels.isEmpty()) {
                     deleteLabelsMapping(connection, apiId);
                     addLabelMapping(connection, apiId, labels);
                 }
                 statement.execute();
                 connection.commit();
-            }  catch (SQLException e) {
+            } catch (SQLException e) {
                 String msg = "Couldn't update dedicated Gateway details of API : " + apiId;
                 connection.rollback();
                 log.error(msg, e);
@@ -1682,7 +1681,8 @@ public class ApiDAOImpl implements ApiDAO {
                         return dedicatedGateway;
                     } else {
                         throw new APIMgtDAOException("Couldn't Find Dedicated Gateway details ", ExceptionCodes
-                                .ENDPOINT_CONFIG_NOT_FOUND);                    }
+                                .ENDPOINT_CONFIG_NOT_FOUND);
+                    }
                 }
             } catch (SQLException e) {
                 String errorMessage = "Error while retrieving dedicated gateway details of API : " + apiId;
@@ -2404,16 +2404,17 @@ public class ApiDAOImpl implements ApiDAO {
 
     /**
      * Associate a list of threat protection policy ids with an API
+     *
      * @param connection SQL Connection
-     * @param apiId ApiId of the API
-     * @param policies Set of threat protection policies
+     * @param apiId      ApiId of the API
+     * @param policies   Set of threat protection policies
      * @throws SQLException If failed to associate policies
      */
     private void addThreatProtectionPolicies(Connection connection, String apiId, Set<String> policies)
             throws SQLException {
         final String query = "INSERT INTO AM_THREAT_PROTECTION_MAPPING (API_ID, POLICY_ID) VALUES(?,?)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
-            for (String policy: policies) {
+            for (String policy : policies) {
                 statement.setString(1, apiId);
                 statement.setString(2, policy);
                 statement.addBatch();
@@ -2434,9 +2435,9 @@ public class ApiDAOImpl implements ApiDAO {
     /**
      * Adding API permission to database
      *
-     * @param connection connection to database
+     * @param connection    connection to database
      * @param permissionMap permission map
-     * @param apiId id of the API
+     * @param apiId         id of the API
      * @throws SQLException if error occurred when adding API permission to database
      */
     private void addAPIPermission(Connection connection, Map permissionMap, String apiId) throws SQLException {
@@ -2469,9 +2470,9 @@ public class ApiDAOImpl implements ApiDAO {
     /**
      * Update API permission
      *
-     * @param connection connection to database
+     * @param connection    connection to database
      * @param permissionMap updated permission map
-     * @param apiId id of API to be updated permission
+     * @param apiId         id of API to be updated permission
      * @throws SQLException if error occurred when updating api permission
      */
     private void updateApiPermission(Connection connection, Map permissionMap, String apiId) throws SQLException {
@@ -2511,8 +2512,9 @@ public class ApiDAOImpl implements ApiDAO {
 
     /**
      * Delete threat protection policies from an API
+     *
      * @param connection SQL Connection
-     * @param apiId ApiId of the API
+     * @param apiId      ApiId of the API
      * @throws SQLException If failed to delete policies
      */
     private void deleteThreatProtectionPolicies(Connection connection, String apiId) throws SQLException {
@@ -2628,6 +2630,7 @@ public class ApiDAOImpl implements ApiDAO {
             }
         }
     }
+
     private void addApiPolicy(Connection connection, String apiPolicy, String apiID)
             throws SQLException {
         final String query =
@@ -3070,7 +3073,7 @@ public class ApiDAOImpl implements ApiDAO {
      * This returns the json string containing the role permissions for a given API
      *
      * @param connection - DB connection
-     * @param apiId - apiId of the API
+     * @param apiId      - apiId of the API
      * @return permission string
      * @throws SQLException - if error occurred while getting permissionMap of API from DB
      */
@@ -3095,7 +3098,7 @@ public class ApiDAOImpl implements ApiDAO {
      * This constructs and returns the API permissions map from the DB
      *
      * @param connection - DB connection
-     * @param apiId - apiId of the API
+     * @param apiId      - apiId of the API
      * @return permission map for the API
      * @throws SQLException - if error occurred while getting permissionMap of API from DB
      */
@@ -3329,8 +3332,9 @@ public class ApiDAOImpl implements ApiDAO {
 
     /**
      * Get a list threat protection policy ids associated with an API
+     *
      * @param connection SQL Connection
-     * @param apiId ApiId of the API
+     * @param apiId      ApiId of the API
      * @return Set of threat protection policy ids
      * @throws SQLException If failed to retrieve the set of ids
      */

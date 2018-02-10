@@ -245,7 +245,9 @@ public enum ExceptionCodes implements ErrorHandler {
     ERROR_INITIALIZING_CONTAINER_BASED_GATEWAY(901000, "Error initializing container based gateway", 500,
                                                        "Error initializing container based gateway"),
     CONTAINER_GATEWAY_CREATION_FAILED(901001, "Error while creating Container Based Gateway", 500, "Error while " +
-            "creating Container Based Gateway");
+            "creating Container Based Gateway"),
+    ERROR_WHILE_UPDATING_CONTAINER_BASED_GATEWAY(901002, "Error while updating container based gateway", 500,
+            "Error while updating container based gateway");
 
     private final long errorCode;
     private final String errorMessage;

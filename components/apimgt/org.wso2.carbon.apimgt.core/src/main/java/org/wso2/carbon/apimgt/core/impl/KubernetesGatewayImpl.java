@@ -57,7 +57,7 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
     private String namespace;
     private String apiCoreUrl;
     private String brokerHost;
-    private String saTokenFile;
+    private String saTokenFileName;
     private OpenShiftClient client;
 
     /**
@@ -66,7 +66,7 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
     @Override
     void initImpl(Map<String, String> implParameters) throws ContainerBasedGatewayException {
         masterURL = implParameters.get(ContainerBasedGatewayConstants.MASTER_URL);
-        saTokenFile = implParameters.get(ContainerBasedGatewayConstants.SA_TOKEN_FILE);
+        saTokenFileName = implParameters.get(ContainerBasedGatewayConstants.SA_TOKEN_FILE_NAME);
         namespace = implParameters.get(ContainerBasedGatewayConstants.NAMESPACE);
         apiCoreUrl = implParameters.get(ContainerBasedGatewayConstants.API_CORE_URL);
         brokerHost = implParameters.get(ContainerBasedGatewayConstants.BROKER_HOST);
@@ -146,8 +146,8 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
 
         ConfigBuilder configBuilder = new ConfigBuilder().withMasterUrl(masterURL);
 
-        if (!StringUtils.isEmpty(saTokenFile)) {
-            configBuilder.withOauthToken(resolveToken("encrypted" + saTokenFile));
+        if (!StringUtils.isEmpty(saTokenFileName)) {
+            configBuilder.withOauthToken(resolveToken("encrypted" + saTokenFileName));
         }
 
         try {
