@@ -44,7 +44,6 @@ public final class ContainerBasedGatewayConstants {
     public static final String CMS_TYPE = "cmsType";
     public static final String KUBERNETES = "Kubernetes";
     public static final String OPENSHIFT = "Openshift";
-    public static final String CERT_FILE_LOCATION = "certFile";
     public static final String IS_DEDICATED_GATEWAY_ENABLED = "HAS_OWN_GATEWAY";
     public static final String CONTAINER_GATEWAY_TEMPLATES = "container_gateway_templates";
     public static final String GATEWAY_HOSTNAME = "gatewayHostname";

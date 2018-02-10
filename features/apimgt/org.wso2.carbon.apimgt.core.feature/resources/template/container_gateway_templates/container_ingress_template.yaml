@@ -33,8 +33,4 @@ spec:
       - path: /
         backend:
           serviceName: ${serviceName}
-          servicePort: 9090
-      - path: /
-        backend:
-          serviceName: ${serviceName}
           servicePort: 9092

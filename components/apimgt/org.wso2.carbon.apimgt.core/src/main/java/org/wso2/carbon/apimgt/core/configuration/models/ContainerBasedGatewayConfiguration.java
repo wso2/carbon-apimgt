@@ -43,11 +43,10 @@ public class ContainerBasedGatewayConfiguration {
     public ContainerBasedGatewayConfiguration() {
         implParameters.put(ContainerBasedGatewayConstants.MASTER_URL, "");
         implParameters.put(ContainerBasedGatewayConstants.NAMESPACE, "default");
-        implParameters.put(ContainerBasedGatewayConstants.API_CORE_URL, "default");
-        implParameters.put(ContainerBasedGatewayConstants.BROKER_HOST, "default");
-        implParameters.put(ContainerBasedGatewayConstants.SA_TOKEN_FILE, "default");
-        implParameters.put(ContainerBasedGatewayConstants.CERT_FILE_LOCATION,
-                "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt");
+        implParameters.put(ContainerBasedGatewayConstants.API_CORE_URL, "https://localhost:9443");
+        implParameters.put(ContainerBasedGatewayConstants.BROKER_HOST, "https://localhost:5672");
+        implParameters.put(ContainerBasedGatewayConstants.CMS_TYPE, ContainerBasedGatewayConstants.KUBERNETES);
+        implParameters.put(ContainerBasedGatewayConstants.SA_TOKEN_FILE, "");
     }
 
     public boolean isContainerBasedGatewayEnabled() {

@@ -150,7 +150,13 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
             configBuilder.withOauthToken(resolveToken("encrypted" + saTokenFile));
         }
 
-        client = new DefaultOpenShiftClient(configBuilder.build());
+        try {
+            client = new DefaultOpenShiftClient(configBuilder.build());
+        } catch (KubernetesClientException e) {
+            String msg = "Error occurred while creating Default Openshift Client";
+            throw new ContainerBasedGatewayException(msg, e, ExceptionCodes.ERROR_INITIALIZING_CONTAINER_BASED_GATEWAY);
+        }
+
     }
 
     /**
