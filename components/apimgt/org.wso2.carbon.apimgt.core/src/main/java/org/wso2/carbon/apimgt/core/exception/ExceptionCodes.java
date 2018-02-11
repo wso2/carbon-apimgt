@@ -150,7 +150,7 @@ public enum ExceptionCodes implements ErrorHandler {
             "null"),
     LABEL_EXCEPTION(900651, "Label Error", 500, "Error occurred while retrieving label information"),
     LABEL_NOT_FOUND(900652, "Label Not Found", 404, "Label with specified name cannot be found."),
-    LABEL_NOT_FOUND_IN_API(900653, "Label Not Found In API", 404, "Label with specified name" 
+    LABEL_NOT_FOUND_IN_API(900653, "Label Not Found In API", 404, "Label with specified name"
             + " cannot be found in the API."),
 
     //WSDL related codes
@@ -223,32 +223,23 @@ public enum ExceptionCodes implements ErrorHandler {
     SCOPE_DELETE_FAILED(900983, "Scope couldn't get deleted", 400, "Scope couldn't get deleted"),
     SCOPE_REGISTRATION_FAILED(900984, "Scope registration failed", 400, "Scope registration failed"),
     SCOPE_VALIDATION_FAILED(900985, "Scope validation failed", 412, "Scope validation failed"),
-    
-    //Container Based Gateway related Codes
-    NO_RESOURCE_LOADED_FROM_DEFINITION(900990, "Container based Resource Not Found", 404, "No Resource Loaded from " +
+
+    //Dedicated container based gateway related Codes
+    NO_RESOURCE_LOADED_FROM_DEFINITION(900990, "Container based resource Not Found", 404, "No resource loaded from " +
             "definition provided"),
-    LOADED_RESOURCE_IS_NOT_VALID(900991, "Loaded Resource is not valid", 400, "The Resource loaded is not a valid " +
-            "resource definition"),
-    TEMPLATE_FILE_EXCEPTION(900992, "Error writing template to file", 500, " Error writing template to file"),
-    FILE_NOT_FOUND_IN_LOCATION(900993, "No File Found in the Given Location", 404, " File Not Found"),
-    TEMPLATE_LOAD_EXCEPTION(900994, "Error in loading the template file by client as an InputStream", 500, " Error " +
+    LOADED_RESOURCE_DEFINITION_IS_NOT_VALID(900991, "Loaded resource is not valid", 400, "The loaded resource " +
+            "definition is not a valid"),
+    TEMPLATE_LOAD_EXCEPTION(900992, "Error in loading the template file by client as an InputStream", 500, " Error " +
             "in loading the FileInputStream by client"),
-    CONTENT_ENCODING_NOT_SUPPORTED(900995, "Content of the resource is not supporting UTF-8 Encoding", 500, "Content " +
-            "is not supported UTF-8 Encoding"),
-    CONTAINER_GATEWAY_REMOVAL_FAILED(900996, "Cannot complete removing Container Based Gateway", 404, "Error in " +
-            "deleting the Container based Gateway"),
-    CONTAINER_GATEWAY_CONFIG_NOT_FOUND(900997, "Container Based Gateway Configuration Not Found", 404, "Error while " +
-            "retrieving Container based Gateway Configuration."),
-    FILE_READING_EXCEPTION(900988, "Error reading token file", 500, " Error reading token file to String"),
-    DEDICATED_GATEWAY_DETAILS_NOT_FOUND(900999, "Dedicated Gateway Details not found.", 404, " Dedicated Gateway " +
-            "Details not found."),
-    ERROR_INITIALIZING_CONTAINER_BASED_GATEWAY(901000, "Error initializing container based gateway", 500,
-                                                       "Error initializing container based gateway"),
-    CONTAINER_GATEWAY_CREATION_FAILED(901001, "Error while creating Container Based Gateway", 500, "Error while " +
-            "creating Container Based Gateway"),
-    ERROR_WHILE_UPDATING_CONTAINER_BASED_GATEWAY(901002, "Error while updating container based gateway", 500,
-            "Error while updating container based gateway"),
-    INVALID_CONTAINER_BASED_GATEWAY_LABEL(901003, "Invalid gateway label is provide", 400,
+    CONTAINER_GATEWAY_REMOVAL_FAILED(900993, "Cannot complete removing dedicated container based Gateway", 404,
+            "Error in deleting the dedicated container based Gateway"),
+    ERROR_INITIALIZING_DEDICATED_CONTAINER_BASED_GATEWAY(900994, "Error initializing dedicated container based" +
+            " gateway", 500, "Error initializing dedicated container based gateway"),
+    DEDICATED_CONTAINER_GATEWAY_CREATION_FAILED(900995, "Error while creating dedicated container based gateway", 500,
+            "Error while creating dedicated container based gateway"),
+    ERROR_WHILE_UPDATING_DEDICATED_CONTAINER_BASED_GATEWAY(900996, "Error while updating dedicated container based" +
+            " gateway", 500, "The api is not in Published or Prototyped or Deprecated status"),
+    INVALID_DEDICATED_CONTAINER_BASED_GATEWAY_LABEL(900997, "Invalid gateway label is provided", 400,
             "Invalid gateway label is provided");
 
     private final long errorCode;

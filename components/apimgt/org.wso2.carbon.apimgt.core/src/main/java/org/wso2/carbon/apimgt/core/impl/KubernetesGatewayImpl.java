@@ -88,7 +88,8 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
             client.extensions().ingresses().inNamespace(namespace).withLabel(ContainerBasedGatewayConstants.GATEWAY,
                     label).delete();
 
-            log.info("Completed Deleting the Gateway deployment, service and ingress resources in " + cmsType);
+            log.info(String.format("Completed deleting the container gateway related %s deployment, service and " +
+                    "ingress resources.", cmsType));
         } catch (KubernetesClientException e) {
             throw new ContainerBasedGatewayException("Error while removing container based gateway", e,
                     ExceptionCodes.CONTAINER_GATEWAY_REMOVAL_FAILED);
@@ -154,7 +155,8 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
             client = new DefaultOpenShiftClient(configBuilder.build());
         } catch (KubernetesClientException e) {
             String msg = "Error occurred while creating Default Openshift Client";
-            throw new ContainerBasedGatewayException(msg, e, ExceptionCodes.ERROR_INITIALIZING_CONTAINER_BASED_GATEWAY);
+            throw new ContainerBasedGatewayException(msg, e,
+                    ExceptionCodes.ERROR_INITIALIZING_DEDICATED_CONTAINER_BASED_GATEWAY);
         }
 
     }
@@ -214,11 +216,11 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
                 //todo : return gateway Https and https URLs form here as an array.
             } else {
                 throw new ContainerBasedGatewayException("Loaded Resource is not a Service in " + cmsType + "! " +
-                        resource, ExceptionCodes.LOADED_RESOURCE_IS_NOT_VALID);
+                        resource, ExceptionCodes.LOADED_RESOURCE_DEFINITION_IS_NOT_VALID);
             }
         } catch (KubernetesClientException e) {
             throw new ContainerBasedGatewayException("Error while creating container based gateway service in "
-                    + cmsType + "!", e, ExceptionCodes.CONTAINER_GATEWAY_CREATION_FAILED);
+                    + cmsType + "!", e, ExceptionCodes.DEDICATED_CONTAINER_GATEWAY_CREATION_FAILED);
         }
 
     }
@@ -252,11 +254,11 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
 
             } else {
                 throw new ContainerBasedGatewayException("Loaded Resource is not a Deployment in " + cmsType + "! " +
-                        resource, ExceptionCodes.LOADED_RESOURCE_IS_NOT_VALID);
+                        resource, ExceptionCodes.LOADED_RESOURCE_DEFINITION_IS_NOT_VALID);
             }
         } catch (KubernetesClientException e) {
             throw new ContainerBasedGatewayException("Error while creating container based gateway deployment in "
-                    + cmsType + "!", e, ExceptionCodes.CONTAINER_GATEWAY_CREATION_FAILED);
+                    + cmsType + "!", e, ExceptionCodes.DEDICATED_CONTAINER_GATEWAY_CREATION_FAILED);
         }
     }
 
@@ -289,11 +291,11 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
                 //todo : return gateway Https and https URLs form here as an array.
             } else {
                 throw new ContainerBasedGatewayException("Loaded Resource is not a Service in " + cmsType + "! " +
-                        resource, ExceptionCodes.LOADED_RESOURCE_IS_NOT_VALID);
+                        resource, ExceptionCodes.LOADED_RESOURCE_DEFINITION_IS_NOT_VALID);
             }
         } catch (KubernetesClientException e) {
             throw new ContainerBasedGatewayException("Error while creating container based gateway ingress in "
-                    + cmsType + "!", e, ExceptionCodes.CONTAINER_GATEWAY_CREATION_FAILED);
+                    + cmsType + "!", e, ExceptionCodes.DEDICATED_CONTAINER_GATEWAY_CREATION_FAILED);
         }
 
     }
@@ -313,7 +315,8 @@ public class KubernetesGatewayImpl extends ContainerBasedGatewayGenerator {
             token = FileEncryptionUtility.getInstance().readFromEncryptedFile(externalSATokenFilePath);
         } catch (APIManagementException e) {
             String msg = "Error occurred while resolving externally stored token";
-            throw new ContainerBasedGatewayException(msg, e, ExceptionCodes.ERROR_INITIALIZING_CONTAINER_BASED_GATEWAY);
+            throw new ContainerBasedGatewayException(msg, e,
+                    ExceptionCodes.ERROR_INITIALIZING_DEDICATED_CONTAINER_BASED_GATEWAY);
         }
         return StringUtils.replace(token, "\n", "");
     }

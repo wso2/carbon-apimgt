@@ -496,7 +496,8 @@ public class APIGatewayPublisherImpl implements APIGateway {
             String msg = String.format("The api [api id] %s is not in %s or %s or %s status.", api.getId(),
                     APIStatus.PUBLISHED.getStatus(), APIStatus.PROTOTYPED.getStatus(),
                     APIStatus.DEPRECATED.getStatus());
-            throw new ContainerBasedGatewayException(msg, ExceptionCodes.ERROR_WHILE_UPDATING_CONTAINER_BASED_GATEWAY);
+            throw new ContainerBasedGatewayException(msg,
+                    ExceptionCodes.ERROR_WHILE_UPDATING_DEDICATED_CONTAINER_BASED_GATEWAY);
         }
     }
 

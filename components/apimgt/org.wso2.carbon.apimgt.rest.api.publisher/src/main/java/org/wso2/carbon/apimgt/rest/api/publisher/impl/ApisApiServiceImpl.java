@@ -126,7 +126,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                 }
 
             } catch (APIManagementException e) {
-                String errorMessage = "Error while retrieving dedicatedGateway of the API : " + apiId;
+                String errorMessage = "Error while retrieving dedicated gateway of the API : " + apiId;
                 HashMap<String, String> paramList = new HashMap<String, String>();
                 paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
                 ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);
@@ -180,7 +180,7 @@ public class ApisApiServiceImpl extends ApisApiService {
                     .entity(MappingUtil.toDedicatedGatewayDTO(updatedDedicatedGateway)).build();
 
         } catch (APIManagementException e) {
-            String errorMessage = "Error while updating dedicatedGateway of the API : " + apiId;
+            String errorMessage = "Error while updating dedicated gateway of the API : " + apiId;
             HashMap<String, String> paramList = new HashMap<String, String>();
             paramList.put(APIMgtConstants.ExceptionsConstants.API_ID, apiId);
             ErrorDTO errorDTO = RestApiUtil.getErrorDTO(e.getErrorHandler(), paramList);

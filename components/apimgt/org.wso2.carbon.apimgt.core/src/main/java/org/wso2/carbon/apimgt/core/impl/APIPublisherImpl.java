@@ -350,26 +350,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         apiBuilder.createdBy(getUsername());
         apiBuilder.updatedBy(getUsername());
 
-        // if has own gateway feature enabled
-        if (apiBuilder.hasOwnGateway()) {
-            // create a label
-            List<Label> labelList = new ArrayList<>();
-            List<String> accessUrls = new ArrayList<>();
-            String autoGenLabelName = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiBuilder.getId();
-            accessUrls.add(APIMgtConstants.HTTPS + APIMgtConstants.WEB_PROTOCOL_SUFFIX + autoGenLabelName);
-            Label autoGenLabel = new Label.Builder().
-                    id(UUID.randomUUID().toString()).
-                    name(autoGenLabelName).
-                    accessUrls(accessUrls).build();
-            labelList.add(autoGenLabel);
-            //Add to the db
-            getLabelDAO().addLabels(labelList);
-            //add to the API
-            Set<String> labelSet = new HashSet<>();
-            labelSet.add(autoGenLabelName);
-            apiBuilder.labels(labelSet);
-        }
-        if (apiBuilder.getLabels().isEmpty() && !apiBuilder.hasOwnGateway()) {
+        if (apiBuilder.getLabels().isEmpty()) {
             Set<String> labelSet = new HashSet<>();
             labelSet.add(APIMgtConstants.DEFAULT_LABEL_NAME);
             apiBuilder.labels(labelSet);
@@ -716,8 +697,8 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
 
         if (hasOwnGateway && labels != null && !labels.isEmpty() && !labels.contains(
                 ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX)) {
-            String msg = "API has own gateway. Hence other labels except perapigw-* are not allowed.";
-            throw new APIManagementException(msg, ExceptionCodes.INVALID_CONTAINER_BASED_GATEWAY_LABEL);
+            String msg = "API has a dedicated gateway. Hence cannot update labels";
+            throw new APIManagementException(msg, ExceptionCodes.INVALID_DEDICATED_CONTAINER_BASED_GATEWAY_LABEL);
         }
     }
 
