@@ -247,7 +247,9 @@ public enum ExceptionCodes implements ErrorHandler {
     CONTAINER_GATEWAY_CREATION_FAILED(901001, "Error while creating Container Based Gateway", 500, "Error while " +
             "creating Container Based Gateway"),
     ERROR_WHILE_UPDATING_CONTAINER_BASED_GATEWAY(901002, "Error while updating container based gateway", 500,
-            "Error while updating container based gateway");
+            "Error while updating container based gateway"),
+    INVALID_CONTAINER_BASED_GATEWAY_LABEL(901003, "Invalid gateway label is provide", 400,
+            "Invalid gateway label is provided");
 
     private final long errorCode;
     private final String errorMessage;

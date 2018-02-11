@@ -1824,15 +1824,17 @@ public class APIStoreImpl extends AbstractAPIManager implements APIStore, APIMOb
                 if (label == null) {
                     // create a label
                     List<Label> labelList = new ArrayList<>();
-                    // todo : add the access URL of the gateway here itself
+                    List<String> accessUrls = new ArrayList<>();
+                    accessUrls.add(APIMgtConstants.HTTPS + APIMgtConstants.WEB_PROTOCOL_SUFFIX + autoGenLabelName);
                     Label autoGenLabel = new Label.Builder().id(UUID.randomUUID().toString()).
-                            name(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiId).
-                            accessUrls(null).build();
+                            name(autoGenLabelName).
+                            accessUrls(accessUrls).build();
                     labelList.add(autoGenLabel);
                     //Add to the db
                     getLabelDAO().addLabels(labelList);
                 }
 
+                labelSet.add(autoGenLabelName);
                 // create or remove dedicated Gateway
                 gateway.updateDedicatedGateway(api, autoGenLabelName, dedicatedGateway.isEnabled());
                 getApiDAO().updateDedicatedGateway(dedicatedGateway, apiId, labelSet);

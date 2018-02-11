@@ -283,10 +283,11 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                 if (label == null) {
                     // create a label
                     List<Label> labelList = new ArrayList<>();
-                    // todo : add the access URL of the gateway here itself
+                    List<String> accessUrls = new ArrayList<>();
+                    accessUrls.add(APIMgtConstants.HTTPS + APIMgtConstants.WEB_PROTOCOL_SUFFIX + autoGenLabelName);
                     Label autoGenLabel = new Label.Builder().id(UUID.randomUUID().toString()).
                             name(autoGenLabelName).
-                            accessUrls(null).build();
+                            accessUrls(accessUrls).build();
                     labelList.add(autoGenLabel);
                     //Add to the db
                     getLabelDAO().addLabels(labelList);
@@ -315,7 +316,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
      */
     @Override
     public DedicatedGateway getDedicatedGateway(String apiId) throws APIManagementException {
-       DedicatedGateway dedicatedGateway;
+        DedicatedGateway dedicatedGateway;
         try {
             dedicatedGateway = getApiDAO().getDedicatedGateway(apiId);
         } catch (APIMgtDAOException e) {
@@ -353,16 +354,19 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
         if (apiBuilder.hasOwnGateway()) {
             // create a label
             List<Label> labelList = new ArrayList<>();
+            List<String> accessUrls = new ArrayList<>();
+            String autoGenLabelName = ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiBuilder.getId();
+            accessUrls.add(APIMgtConstants.HTTPS + APIMgtConstants.WEB_PROTOCOL_SUFFIX + autoGenLabelName);
             Label autoGenLabel = new Label.Builder().
                     id(UUID.randomUUID().toString()).
-                    name(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiBuilder.getId()).
-                    accessUrls(null).build();
+                    name(autoGenLabelName).
+                    accessUrls(accessUrls).build();
             labelList.add(autoGenLabel);
             //Add to the db
             getLabelDAO().addLabels(labelList);
             //add to the API
             Set<String> labelSet = new HashSet<>();
-            labelSet.add(ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX + apiBuilder.getId());
+            labelSet.add(autoGenLabelName);
             apiBuilder.labels(labelSet);
         }
         if (apiBuilder.getLabels().isEmpty() && !apiBuilder.hasOwnGateway()) {
@@ -608,6 +612,7 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
                     }
                     Map<String, Endpoint> apiEndpointMap = apiBuilder.getEndpoint();
                     validateEndpoints(apiEndpointMap, true);
+                    validateLabels(apiBuilder.getLabels(), apiBuilder.hasOwnGateway());
                     createUriTemplateList(apiBuilder, true);
                     validateApiPolicy(apiBuilder.getApiPolicy());
                     validateSubscriptionPolicies(apiBuilder);
@@ -704,6 +709,15 @@ public class APIPublisherImpl extends AbstractAPIManager implements APIPublisher
             String message = "Error occurred while updating API - " + apiBuilder.getName() + " in gateway";
             log.error(message, e);
             throw new APIManagementException(message, ExceptionCodes.GATEWAY_EXCEPTION);
+        }
+    }
+
+    private void validateLabels(Set<String> labels, boolean hasOwnGateway) throws APIManagementException {
+
+        if (hasOwnGateway && labels != null && !labels.isEmpty() && !labels.contains(
+                ContainerBasedGatewayConstants.PER_API_GATEWAY_PREFIX)) {
+            String msg = "API has own gateway. Hence other labels except perapigw-* are not allowed.";
+            throw new APIManagementException(msg, ExceptionCodes.INVALID_CONTAINER_BASED_GATEWAY_LABEL);
         }
     }
 

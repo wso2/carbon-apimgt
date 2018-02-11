@@ -1550,7 +1550,7 @@ public class ApiDAOImpl implements ApiDAO {
     public List<Rating> getRatingsListForApi(String apiId) throws APIMgtDAOException {
         final String query = "SELECT UUID, API_ID, RATING, USER_IDENTIFIER, " +
                 "CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME "
-                + "FROM AM_API_RATINGS WHERE UUID = ?";
+                + "FROM AM_API_RATINGS WHERE API_ID = ?";
         List<Rating> ratingsList = new ArrayList<>();
         try (Connection connection = DAOUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
