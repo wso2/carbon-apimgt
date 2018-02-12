@@ -25,7 +25,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.rest.api.admin.ImportApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.utils.FileBasedApplicationImportExportManager;
@@ -39,6 +41,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Set;
 import java.util.UUID;
 import javax.ws.rs.core.Response;
 
@@ -81,16 +84,17 @@ public class ImportApiServiceImpl extends ImportApiService {
             }
             importExportManager.validateOwner(ownerId, applicationDetails.getGroupId());
             int appId = consumer.addApplication(applicationDetails, ownerId);
-            boolean isImportComplete = false;
+            Set<APIIdentifier> skippedAPIs = null;
             if (skipSubscriptions == null || !skipSubscriptions) {
-                isImportComplete = importExportManager.importSubscriptions(applicationDetails, username, appId);
+                skippedAPIs = importExportManager
+                        .importSubscriptions(applicationDetails, username, appId);
             }
             Application importedApplication = consumer.getApplicationById(appId);
             ApplicationInfoDTO importedApplicationDTO = ApplicationMappingUtil
                     .fromApplicationToInfoDTO(importedApplication);
             URI location = new URI(RestApiConstants.RESOURCE_PATH_APPLICATIONS + "/" +
                     importedApplicationDTO.getApplicationId());
-            if (isImportComplete) {
+            if (skippedAPIs != null && !skippedAPIs.isEmpty()) {
                 return Response.created(location).entity(importedApplicationDTO).build();
             } else {
                 return Response.created(location).status(207)

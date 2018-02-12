@@ -33,9 +33,9 @@ public class ImportApi  {
     @Produces({ "application/json" })
     @io.swagger.annotations.ApiOperation(value = "Import an Application", notes = "This operation can be used to import an existing Application.\n", response = ApplicationInfoDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
-        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSuccessful response with the updated object as entity in the body.\n"),
+        @io.swagger.annotations.ApiResponse(code = 200, message = "OK.\nSuccessful response with the updated object information as entity in the body.\n"),
         
-        @io.swagger.annotations.ApiResponse(code = 206, message = "Partial Content.\nThe server has fulfilled the partial request for the resource.\n"),
+        @io.swagger.annotations.ApiResponse(code = 207, message = "Multi Status.\nPartially successful response with updated object information as entity in the body.\n"),
         
         @io.swagger.annotations.ApiResponse(code = 400, message = "Bad Request.\nInvalid request or validation error\n"),
         

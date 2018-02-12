@@ -30,12 +30,14 @@ import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -110,9 +112,9 @@ public class ApplicationImportExportManager {
      * @return true, if all the subscriptions are imported successfully
      * @throws APIManagementException if an error occurs while importing and adding subscriptions
      */
-    public boolean importSubscriptions(Application appDetails, String userId, int appId) throws APIManagementException,
-            UserStoreException {
-        boolean isImportComplete = true;
+    public Set<APIIdentifier> importSubscriptions(Application appDetails, String userId, int appId)
+            throws APIManagementException, UserStoreException {
+        Set<APIIdentifier> skippedAPIs = new HashSet<>();
         Set<SubscribedAPI> subscribedAPIs = appDetails.getSubscribedAPIs();
         for (SubscribedAPI subscribedAPI : subscribedAPIs) {
             APIIdentifier apiIdentifier = subscribedAPI.getApiId();
@@ -122,7 +124,7 @@ public class ApplicationImportExportManager {
                 String name = apiIdentifier.getApiName();
                 String version = apiIdentifier.getVersion();
                 //creating a solr compatible search query
-                StringBuilder searchQuery = null;
+                StringBuilder searchQuery = new StringBuilder();
                 String[] searchCriteria = {name, "version:" + version};
                 for (int i = 0; i < searchCriteria.length; i++) {
                     if (i == 0) {
@@ -132,31 +134,56 @@ public class ApplicationImportExportManager {
                                 .append(APIUtil.getSingleSearchCriteria(searchCriteria[i]));
                     }
                 }
-                Map matchedAPIs = null;
-                if (searchQuery != null) {
-                    matchedAPIs = apiConsumer.searchPaginatedAPIs(searchQuery.toString(), tenantDomain, 0,
-                            Integer.MAX_VALUE,
-                            false);
-                }
-                if (matchedAPIs != null && !matchedAPIs.isEmpty()) {
-                    Set<API> apiSet = (Set<API>) matchedAPIs.get("apis");
-                    if (apiSet != null && !apiSet.isEmpty()) {
-                        API api = apiSet.iterator().next();
-                        APIIdentifier apiId = api.getId();
-                        apiId.setTier(subscribedAPI.getTier().getName());
+                Map matchedAPIs;
+                matchedAPIs = apiConsumer.searchPaginatedAPIs(searchQuery.toString(), tenantDomain, 0,
+                        Integer.MAX_VALUE,
+                        false);
+                Set<API> apiSet = (Set<API>) matchedAPIs.get("apis");
+                if (apiSet != null && !apiSet.isEmpty()) {
+                    API api = apiSet.iterator().next();
+                    APIIdentifier apiId = api.getId();
+                    //tier of the imported subscription
+                    Tier tier = subscribedAPI.getTier();
+                    //checking whether the target tier is available
+                    if (isTierAvailable(tier, api)) {
+                        apiId.setTier(tier.getName());
                         if (api.getStatus() != null && api.getStatus().equals(APIStatus.PUBLISHED)) {
                             apiConsumer.addSubscription(apiId, userId, appId);
+                        } else {
+                            log.error("Failed to import Subscription as API " + name + "-" + version +
+                                    " may not have been published");
+                            skippedAPIs.add(api.getId());
                         }
-                    } else {
-                        log.error("API " + name + "-" + version + " is not available");
-                        isImportComplete = false;
                     }
+                } else {
+                    log.error("Failed to import Subscription API " + name + "-" + version + " is not available");
+                    skippedAPIs.add(subscribedAPI.getApiId());
                 }
             } else {
-                log.error("Tenant domain: " + tenantDomain + " is not available");
-                isImportComplete = false;
+                log.error("Failed to import Subscription as Tenant domain: " + tenantDomain + " is not available");
+                skippedAPIs.add(subscribedAPI.getApiId());
             }
         }
-        return isImportComplete;
+        return skippedAPIs;
+    }
+
+    /**
+     * Check whether a target Tier is available to subscribe
+     *
+     * @param targetTier Target Tier
+     * @param api        - {@link org.wso2.carbon.apimgt.api.model.API}
+     * @return true, if the target tier is available
+     */
+    private boolean isTierAvailable(Tier targetTier, API api) {
+        APIIdentifier apiId = api.getId();
+        Set<Tier> availableTiers = api.getAvailableTiers();
+        if (availableTiers.contains(targetTier)) {
+            return true;
+        } else {
+            log.error("Tier:" + targetTier.getName() + " is not available for API " + apiId.getApiName() + "-" +
+                    apiId.getVersion());
+            return false;
+        }
     }
 }
+
