@@ -271,7 +271,7 @@ class Layout extends React.Component {
                             </Popover>
                             {/* Environment menu */}
                             <EnvironmentMenu environments={this.state.environments}
-                                             environmentLabel={Utils.getEnvironment().label}
+                                             environmentLabel={Utils.getCurrentEnvironment().label}
                                              handleEnvironmentChange={this.handleEnvironmentChange}/>
                             {/* User menu */}
                             <IconButton color="inherit"
