@@ -20,10 +20,12 @@
 
 package org.wso2.carbon.apimgt.core.api;
 
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
+
 /**
  * This interface is having methods to exchange pseudo name with user name.
  */
 public interface UserNameMapper {
-    String getLoggedInUserIDFromPseudoName(String pseudoName);
-    String getLoggedInPseudoNameFromUserID(String userName);
+    String getLoggedInUserIDFromPseudoName(String pseudoName) throws APIManagementException;
+    String getLoggedInPseudoNameFromUserID(String userName) throws APIManagementException;
 }

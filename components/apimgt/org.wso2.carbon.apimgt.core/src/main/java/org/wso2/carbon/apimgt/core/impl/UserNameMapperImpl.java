@@ -20,8 +20,10 @@ package org.wso2.carbon.apimgt.core.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.carbon.apimgt.core.api.UserNameMapper;
 import org.wso2.carbon.apimgt.core.dao.UserMappingDAO;
 import org.wso2.carbon.apimgt.core.dao.impl.UserMappingDAOImpl;
+import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
 
 /**
@@ -30,14 +32,15 @@ import org.wso2.carbon.apimgt.core.exception.APIMgtDAOException;
  * pseudo name. Also to get logged in user's pseudo name(pseudo name used within APIM domain) using provided
  * user id.
  */
-public class UserNameMapperImpl implements org.wso2.carbon.apimgt.core.api.UserNameMapper {
+public class UserNameMapperImpl implements UserNameMapper {
     private static final Logger log = LoggerFactory.getLogger(UserNameMapperImpl.class);
     private UserMappingDAO userMappingDAO;
 
+    /**
+     * Default constructor if user do not need to pass DAO implementation specifically.
+     */
     public UserNameMapperImpl() {
-        //
     }
-
     /**
      * Initiate user name mapper with provided Data Access Object
      *
@@ -55,7 +58,7 @@ public class UserNameMapperImpl implements org.wso2.carbon.apimgt.core.api.UserN
      * @return user id of matching user in the system.
      */
     @Override
-    public String getLoggedInUserIDFromPseudoName(String pseudoName) {
+    public String getLoggedInUserIDFromPseudoName(String pseudoName) throws APIManagementException {
         //TODO implement method
         //If pseudo name in map then get from that
         //Else check mapping in database and load it to local map.
@@ -68,8 +71,7 @@ public class UserNameMapperImpl implements org.wso2.carbon.apimgt.core.api.UserN
                 String userID = getUserMappingDAO().getUserIDByPseudoName(pseudoName);
                 return userID;
             } catch (APIMgtDAOException e) {
-                log.error("Error while user getting user details for user : " + pseudoName);
-                return null;
+                throw new APIManagementException("Error while user getting user details for user : " + pseudoName);
             }
         }
     }
@@ -82,7 +84,7 @@ public class UserNameMapperImpl implements org.wso2.carbon.apimgt.core.api.UserN
      * @return pseudo name of the matching user.
      */
     @Override
-    public String getLoggedInPseudoNameFromUserID(String userID) {
+    public String getLoggedInPseudoNameFromUserID(String userID) throws APIManagementException {
         //TODO implement method
         //If userName in map then get from that
         //Else check mapping in database and load it to local map.
@@ -96,8 +98,7 @@ public class UserNameMapperImpl implements org.wso2.carbon.apimgt.core.api.UserN
                 //return APIManagerFactory.getInstance().getIdentityProvider().getIdOfUser(userName);
             } catch (APIMgtDAOException e) {
                 //Should not log real user identity due to any reason.
-                log.error("Error while user getting user details for user : XXX");
-                return null;
+                throw new APIManagementException("Error while user getting user details for user : XXX");
             }
         }
     }

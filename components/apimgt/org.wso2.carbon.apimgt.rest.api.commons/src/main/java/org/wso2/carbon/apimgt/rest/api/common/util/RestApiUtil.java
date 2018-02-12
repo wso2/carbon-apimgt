@@ -81,7 +81,13 @@ public class RestApiUtil {
         String user =
                 request.getProperty(LOGGED_IN_USER) != null ? request.getProperty(LOGGED_IN_USER).toString() : null;
         //Then get relevant pseudo name from local mapping.
-        return APIManagerFactory.getInstance().getUserNameMapper().getLoggedInPseudoNameFromUserID(user);
+        try {
+            return APIManagerFactory.getInstance().getUserNameMapper().getLoggedInPseudoNameFromUserID(user);
+        } catch (APIManagementException e) {
+            //Get username method should return null when there is error. Log and return null.
+            log.error(e.getMessage());
+            return null;
+        }
     }
 
     /**

@@ -27,7 +27,7 @@ import org.wso2.carbon.apimgt.core.exception.APIManagementException;
 
 public class UserMappingDAOImplIT extends DAOIntegrationTestBase {
 
-    @Test(description = "Get all tags")
+    @Test(description = "Get user name mapping test")
     public void testUserNameMapping() throws APIManagementException {
         UserMappingDAO userMappingDAO = DAOFactory.getUserMappingDAO();
         String pseudoName = userMappingDAO.getPseudoNameByUserID("test_user");

@@ -35,9 +35,6 @@ import java.util.UUID;
  */
 public class UserMappingDAOImpl implements UserMappingDAO {
 
-    public UserMappingDAOImpl() {
-    }
-
     /**
      *
      * @param pseudoName pseudo name parameter of the user
@@ -65,7 +62,7 @@ public class UserMappingDAOImpl implements UserMappingDAO {
 
     /**
      *
-     * @param userID user identifier 
+     * @param userID user identifier
      * @return String pseudo name parameter of the user
      * @throws APIMgtDAOException when error in data retrieving
      */
@@ -105,7 +102,6 @@ public class UserMappingDAOImpl implements UserMappingDAO {
                 connection.setAutoCommit(false);
                 statement.setString(1, pseudoName);
                 statement.setString(2, userName);
-                //statement.setTimestamp(8, Timestamp.valueOf(LocalDateTime.now()));
                 statement.execute();
                 connection.commit();
             } catch (SQLException e) {

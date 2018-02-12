@@ -95,7 +95,11 @@ public class DefaultIdentityProviderImpl implements IdentityProvider {
     public String getIdOfUser(String userName) throws IdentityProviderException {
         //Retrieve User ID before call identity provider(as that was external call).
         //should not user id outside this domain and should not log that id.
-        userName = userNameMapper.getLoggedInUserIDFromPseudoName(userName);
+        try {
+            userName = userNameMapper.getLoggedInUserIDFromPseudoName(userName);
+        } catch (APIManagementException e) {
+            throw new IdentityProviderException(e.getMessage(), ExceptionCodes.RESOURCE_RETRIEVAL_FAILED);
+        }
         Response userResponse = scimServiceStub.searchUsers(FILTER_PREFIX_USER + userName);
         String userId;
         if (userResponse == null) {
