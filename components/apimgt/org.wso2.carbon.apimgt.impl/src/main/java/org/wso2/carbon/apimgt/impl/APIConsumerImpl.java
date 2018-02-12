@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,6 +62,7 @@ import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIVersionComparator;
@@ -99,6 +102,8 @@ import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -118,6 +123,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.cache.Caching;
+import javax.wsdl.Definition;
 
 /**
  * This class provides the core API store functionality. It is implemented in a very
@@ -135,6 +141,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     private static final Log log = LogFactory.getLog(APIConsumerImpl.class);
     public static final char COLON_CHAR = ':';
     public static final String EMPTY_STRING = "";
+
+    public static final String ENVIRONMENT_NAME = "environmentName";
+    public static final String ENVIRONMENT_TYPE = "environmentType";
+    public static final String API_NAME = "apiName";
+    public static final String API_VERSION = "apiVersion";
 
     /* Map to Store APIs against Tag */
     private ConcurrentMap<String, Set<API>> taggedAPIs = new ConcurrentHashMap<String, Set<API>>();
@@ -3586,6 +3597,135 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             criteria = criteria + "&" + searchQuery;
         }
         return criteria;
+    }
+
+    @Override
+    public String getWSDLDocument(String username, String tenantDomain, String resourceUrl,
+            Map environmentDetails, Map apiDetails) throws APIManagementException {
+
+        if (username == null) {
+            username = APIConstants.END_USER_ANONYMOUS;
+        }
+        if (tenantDomain == null) {
+            tenantDomain = MultitenantConstants.SUPER_TENANT_DOMAIN_NAME;
+        }
+
+        Map<String, Object> docResourceMap = APIUtil.getDocument(username, resourceUrl, tenantDomain);
+        String wsdlContent = "";
+        if (log.isDebugEnabled()) {
+            log.debug("WSDL document resource availability: " + docResourceMap.isEmpty());
+        }
+        if (!docResourceMap.isEmpty()) {
+            try {
+                ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
+                IOUtils.copy((InputStream) docResourceMap.get("Data"), arrayOutputStream);
+                String apiName = (String) apiDetails.get(API_NAME);
+                String apiVersion = (String) apiDetails.get(API_VERSION);
+                String environmentName = (String) environmentDetails.get(ENVIRONMENT_NAME);
+                String environmentType = (String) environmentDetails.get(ENVIRONMENT_TYPE);
+                if (log.isDebugEnabled()) {
+                    log.debug("Published SOAP api gateway environment name: " + environmentName + " environment type: "
+                            + environmentType);
+                }
+                byte[] updatedWSDLContent = this.getUpdatedWSDLByEnvironment(resourceUrl,
+                        arrayOutputStream.toByteArray(), environmentName, environmentType, apiName, apiVersion);
+                wsdlContent = new String(updatedWSDLContent);
+            } catch (IOException e) {
+                handleException("Error occurred while copying wsdl content into byte array stream for resource: "
+                        + resourceUrl);
+            }
+        } else {
+            handleException("No wsdl resource found for resource path: " + resourceUrl);
+        }
+        JSONObject data = new JSONObject();
+        data.put("contentType", docResourceMap.get("contentType"));
+        data.put("name", docResourceMap.get("name"));
+        data.put("Data", wsdlContent);
+        if (log.isDebugEnabled()) {
+            log.debug("Updated wsdl content details for wsdl resource: " + docResourceMap.get("name") + " is " +
+                    data.toJSONString());
+        }
+        return data.toJSONString();
+    }
+
+    /**
+     * This method is used updated wsdl with the respective environment apis are published
+     *
+     * @param wsdlResourcePath registry resource path to the wsdl
+     * @param wsdlContent      wsdl resource content as byte array
+     * @param environmentType  gateway environment type
+     * @return updated wsdl content with environment endpoints
+     * @throws APIManagementException
+     */
+    private byte[] getUpdatedWSDLByEnvironment(String wsdlResourcePath, byte[] wsdlContent, String environmentName,
+            String environmentType, String apiName, String apiVersion) throws APIManagementException {
+        APIMWSDLReader apimwsdlReader = new APIMWSDLReader(wsdlResourcePath);
+        Definition definition = apimwsdlReader.getWSDLDefinitionFromByteContent(wsdlContent);
+        String wsdlFile = wsdlResourcePath.substring(wsdlResourcePath.lastIndexOf("/") + 1)
+                .replaceAll(APIConstants.WSDL_FILE_EXTENSION, "");
+        String provider = wsdlFile.substring(0, wsdlFile.indexOf(APIConstants.WSDL_PROVIDER_SEPERATOR));
+
+        byte[] updatedWSDLContent = null;
+        boolean isTenantFlowStarted = false;
+        try {
+            String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(provider));
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isTenantFlowStarted = true;
+                PrivilegedCarbonContext.startTenantFlow();
+                PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            }
+            RegistryService registryService = ServiceReferenceHolder.getInstance().getRegistryService();
+            int tenantId;
+            UserRegistry registry;
+
+            try {
+                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
+                APIUtil.loadTenantRegistry(tenantId);
+                registry = registryService.getGovernanceSystemRegistry(tenantId);
+                API api = null;
+                if (!StringUtils.isEmpty(apiName) && !StringUtils.isEmpty(apiVersion)) {
+                    APIIdentifier apiIdentifier = new APIIdentifier(provider, apiName, apiVersion);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Api identifier for the soap api artifact: " + apiIdentifier + "for api name: "
+                                + apiName + ", version: " + apiVersion);
+                    }
+                    GenericArtifact apiArtifact = APIUtil.getAPIArtifact(apiIdentifier, registry);
+                    api = APIUtil.getAPI(apiArtifact);
+                    if (log.isDebugEnabled()) {
+                        if (api != null) {
+                            log.debug(
+                                    "Api context for the artifact with id:" + api.getId() + " is " + api.getContext());
+                        } else {
+                            log.debug("Api does not exist for api name: " + apiIdentifier.getApiName());
+                        }
+                    }
+                } else {
+                    handleException("Artifact does not exist in the registry for api name: " + apiName +
+                            " and version: " + apiVersion);
+                }
+
+                if (api != null) {
+                    apimwsdlReader.setServiceDefinition(definition, api, environmentName, environmentType);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Soap api with context:" + api.getContext() + " in " + environmentName
+                                + " with environment type" + environmentType);
+                    }
+                    updatedWSDLContent = apimwsdlReader.getWSDL(definition);
+                } else {
+                    handleException("Error while getting API object for wsdl artifact");
+                }
+            } catch (UserStoreException e) {
+                handleException("Error while reading tenant information", e);
+            } catch (RegistryException e) {
+                handleException("Error when create registry instance", e);
+            }
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
+        }
+        return updatedWSDLContent;
     }
 
 }

@@ -632,4 +632,18 @@ public interface APIConsumer extends APIManager {
 
     boolean isMonetizationEnabled(String tenantDomain) throws APIManagementException;
 
+    /**
+     * Returns wsdl document resource to be downloaded from the API store for a SOAP api
+     *
+     * @param username           user name of the logged in user
+     * @param tenantDomain       tenant domain
+     * @param resourceUrl        registry resource url to the wsdl
+     * @param environmentDetails map of gateway names and types
+     * @param apiDetails         api details
+     * @return converted wsdl document to be download
+     * @throws APIManagementException
+     */
+    String getWSDLDocument(String username, String tenantDomain, String resourceUrl, Map environmentDetails,
+            Map apiDetails) throws APIManagementException;
+
 }

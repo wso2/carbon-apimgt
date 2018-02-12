@@ -1,10 +1,30 @@
 <%
 include("/jagg/jagg.jag");
 var store = jagg.module("manager").getAPIStoreObj();
-var tenantDomain=request.getParameter("tenant");
+var tenantDomain = request.getParameter("tenant");
 var resourceUrl = request.getParameter("resourceUrl");
+var environmentName = request.getParameter("environmentName");
+var environmentType = request.getParameter("environmentType");
+if(environmentType != null && environmentName != null) {
+    var apiName = request.getParameter("apiName");
+    var apiVersion = request.getParameter("apiVersion");
+    if(jagg.getUser()) {
+        var username = jagg.getUser().username;
+    }
+    var HashMap = Packages.java.util.HashMap;
+    var apiAttributesMap = new HashMap();
+    apiAttributesMap.put("apiName", apiName);
+    apiAttributesMap.put("apiVersion", apiVersion);
+    var environmentDetails = new HashMap();
+    environmentDetails.put("environmentName", environmentName);
+    environmentDetails.put("environmentType", environmentType);
 
-var object = store.getDocument(tenantDomain,resourceUrl);
+    var apiConsumer = new Packages.org.wso2.carbon.apimgt.impl.APIConsumerImpl();
+    var document = apiConsumer.getWSDLDocument(username, tenantDomain, resourceUrl, environmentDetails, apiAttributesMap);
+    var object = JSON.parse(document);
+} else {
+    var object = store.getDocument(tenantDomain, resourceUrl);
+}
 if(object == null){
     response.status = 500;
    }else{

@@ -1826,4 +1826,27 @@ public class APIUtilTest {
         String authHeader = getOAuthConfigurationFromAPIMConfig(property);
         Assert.assertEquals("APIM_AUTH", authHeader);
     }
+
+    @Test
+    public void testGetGatewayEndpoint () throws Exception {
+        Environment environment = new Environment();
+        environment.setType("Production");
+        environment.setName("Production");
+        environment.setApiGatewayEndpoint("http://localhost:8280,https://localhost:8243");
+        Map<String, Environment> environmentMap = new HashMap<String, Environment>();
+        environmentMap.put("Production", environment);
+
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        APIManagerConfigurationService apiManagerConfigurationService =
+                Mockito.mock(APIManagerConfigurationService.class);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService())
+                .thenReturn(apiManagerConfigurationService);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        Mockito.when(apiManagerConfiguration.getApiGatewayEnvironments()).thenReturn(environmentMap);
+        String gatewayEndpoint = APIUtil.getGatewayEndpoint("http,https", "Production", "Production");
+        Assert.assertEquals("https://localhost:8243", gatewayEndpoint);
+    }
 }

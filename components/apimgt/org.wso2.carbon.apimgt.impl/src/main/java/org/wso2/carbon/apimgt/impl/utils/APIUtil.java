@@ -1542,6 +1542,33 @@ public final class APIUtil {
     }
 
     /**
+     * Read the GateWay Endpoint from the APIConfiguration. If multiple Gateway
+     * environments defined, get the gateway endpoint according to the environment type
+     *
+     * @param transports      transports allowed for gateway endpoint
+     * @param environmentType gateway environment type
+     * @return Gateway URL
+     */
+    public static String getGatewayEndpoint(String transports, String environmentName, String environmentType) {
+        String gatewayURLs;
+        String gatewayEndpoint = "";
+
+        Map<String, Environment> gatewayEnvironments = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiGatewayEnvironments();
+        for (Environment environment : gatewayEnvironments.values()) {
+            if (environment.getType().equals(environmentType) && environment.getName().equals(environmentName)) {
+                gatewayURLs = environment.getApiGatewayEndpoint();
+                gatewayEndpoint = extractHTTPSEndpoint(gatewayURLs, transports);
+                if (log.isDebugEnabled()) {
+                    log.debug("Gateway urls are: " + gatewayURLs + " and the url with the corect transport is: "
+                            + gatewayEndpoint);
+                }
+            }
+        }
+        return gatewayEndpoint;
+    }
+
+    /**
      * Gateway endpoint  has HTTP and HTTPS endpoints.
      * If both are defined pick HTTPS only. Else, pick whatever available.
      * eg: <GatewayEndpoint>http://${carbon.local.ip}:${http.nio.port},
