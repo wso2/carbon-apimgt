@@ -27,16 +27,45 @@ import ResourceNotFound from "../../Base/Errors/ResourceNotFound";
 import {Link} from 'react-router-dom'
 import {Col, Menu, message, Row, Table} from 'antd';
 
-import Paper from 'material-ui/Paper';
 import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
-import GridIcon from 'material-ui-icons/GridOn';
-import ListIcon from 'material-ui-icons/List';
+import PropTypes from 'prop-types';
+import { withStyles } from 'material-ui/styles';
 import SampleAPI from './SampleAPI';
 import NotificationSystem from 'react-notification-system';
-import {ScopeValidation ,resourceMethod, resourcePath} from "../../../data/ScopeValidation";
+import Add from 'material-ui-icons/AddCircle';
+import Icon from 'material-ui/Icon';
+import Divider from 'material-ui/Divider'
+import IconButton from 'material-ui/IconButton';
+import List from 'material-ui-icons/List';
+import GridIcon from 'material-ui-icons/GridOn';
 
+import {ScopeValidation ,resourceMethod, resourcePath} from "../../../data/ScopeValidation";
+const styles = theme => ({
+    rightIcon: {
+        marginLeft: theme.spacing.unit
+    },
+    button: {
+        margin: theme.spacing.unit,
+        marginBottom: 20
+    },
+    titleBar: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        borderBottom: 'solid 2px #ddd'
+    },
+    buttonLeft: {
+        alignSelf: 'flex-start',
+    },
+    buttonRight: {
+        alignSelf: 'flex-end',
+    },
+    title: {
+        display: 'inline-block',
+        marginRight: 50
+    }
+});
 const menu = (
     <Menu>
         <Link to="/api/create/swagger">
@@ -122,6 +151,7 @@ class Listing extends React.Component {
     }
 
     render() {
+        const classes = this.props.classes;
         const {apis} = this.state;
         if (this.state.notFound) {
             return <ResourceNotFound/>
@@ -157,31 +187,29 @@ class Listing extends React.Component {
         } else {
             return (
                 <Grid container spacing={0} justify="center">
-                    <Grid item xs={12}>
-                        <Paper>
-                            <Typography className="page-title" type="display2" gutterBottom>
-                                All Apis
-                                <div style={{
-                                    alignSelf: "flex-end", fontSize: "11px", margin: "auto", width: "200px",
-                                    display: "block", float: "right"
-                                }}>
-                                    <Button style={{padding: "0px", margin: "0px"}} color="primary" aria-label="add"
-                                            onClick={() => this.setListType('list')}
-                                    >
-                                        <ListIcon style={{width: "30px", height: "30px"}}/>
-                                    </Button>
-                                    <Button color="accent" aria-label="edit"
-                                            onClick={() => this.setListType('grid')}
-                                    >
-                                        <GridIcon style={{width: "30px", height: "30px"}}/>
-                                    </Button>
-                                </div>
-                            </Typography>
-                            <Typography type="caption" gutterBottom align="left"
-                                        style={{fontWeight: "300", padding: "10px 0 10px 30px", margin: "0px"}}>
-                                Listing all apis
-                            </Typography>
-                        </Paper>
+                    <Grid item xs={12} className={classes.titleBar}>
+                        <div className={classes.buttonLeft}>
+                            <div className={classes.title}>
+                                <Typography variant="display2" gutterBottom>
+                                    APIs
+                                </Typography>
+                            </div>
+                            <Button className={classes.button} variant="raised" color="secondary">
+                                Create
+                                <Add className={classes.rightIcon} />
+                            </Button>
+                        </div>
+                        <div className={classes.buttonRight}>
+                            <IconButton className={classes.button} aria-label="Delete" onClick={() => this.setListType('list')}>
+                                <List />
+                            </IconButton>
+                            <IconButton className={classes.button} aria-label="Delete" onClick={() => this.setListType('grid')}>
+                                <GridIcon />
+                            </IconButton>
+                        </div>
+                    </Grid>
+                    <Grid item ex={12}>
+
                     </Grid>
                     <Grid item xs={12}>
                         {this.state.listType === "list" ?
@@ -206,4 +234,10 @@ class Listing extends React.Component {
     }
 }
 
-export default Listing
+
+Listing.propTypes = {
+    classes: PropTypes.object.isRequired,
+    theme: PropTypes.object.isRequired,
+};
+
+export default withStyles(styles, { withTheme: true })(Listing);
