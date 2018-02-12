@@ -1681,7 +1681,7 @@ public class ApiDAOImpl implements ApiDAO {
                         return dedicatedGateway;
                     } else {
                         throw new APIMgtDAOException("Couldn't Find Dedicated Gateway details ", ExceptionCodes
-                                .ENDPOINT_CONFIG_NOT_FOUND);
+                                .DEDICATED_GATEWAY_DETAILS_NOT_FOUND);
                     }
                 }
             } catch (SQLException e) {
