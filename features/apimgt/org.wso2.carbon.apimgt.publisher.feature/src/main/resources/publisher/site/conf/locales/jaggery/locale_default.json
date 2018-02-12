@@ -626,5 +626,6 @@
     "Remove Property" : "Remove Property",
     "Property name should match following criteria.<br/>1. Property name should not contain space in it. 2.Property name should not contain any of the reserved keywords.<br/> <strong>Reserved Keywords </strong> : [name, description, provider, version, context, doc,tags, lcstate, status, subcontext]" : "Property name should match following criteria.<br/>1. Property name should not contain space in it.<br/> 2. Property name should not match with any of the reserved keywords.<br/> <strong>Reserved Keywords </strong> : [name, description, provider, version, context, doc,tags, lcstate, status, subcontext]",
     "Property name can have maximum of 80 characters. Please select a different property name." : "Property name can have maximum of 80 characters. Please select a different property name.",
-    "Property value can have maximum of 900 characters." : "Property value can have maximum of 900 characters."
+    "Property value can have maximum of 900 characters." : "Property value can have maximum of 900 characters.",
+    "Number of API Subscribers" : "Number of API Subscribers"
 }
