@@ -119,7 +119,7 @@ import static org.wso2.carbon.base.CarbonBaseConstants.CARBON_HOME;
 @PrepareForTest({WorkflowExecutorFactory.class, APIUtil.class, GovernanceUtils.class, ApplicationUtils.class,
         KeyManagerHolder.class, WorkflowExecutorFactory.class, AbstractApplicationRegistrationWorkflowExecutor.class,
         PrivilegedCarbonContext.class, ServiceReferenceHolder.class, MultitenantUtils.class, CacheInvalidator.class,
-        RegistryUtils.class, Caching.class })
+        RegistryUtils.class, Caching.class})
 @SuppressStaticInitializationFor("org.wso2.carbon.apimgt.impl.utils.ApplicationUtils")
 public class APIConsumerImplTest {
 
@@ -794,6 +794,7 @@ public class APIConsumerImplTest {
         APIConsumerImpl apiConsumer = new APIConsumerImplWrapper();
         apiConsumer.apiMgtDAO = apiMgtDAO;
         Application application = Mockito.mock(Application.class);
+        Mockito.when(application.getName()).thenReturn("application");
         PowerMockito.when(APIUtil.isApplicationExist("userID", "app", "1")).
                 thenReturn(false);
         Mockito.when(apiMgtDAO.addApplication(application, "userID")).thenReturn(1);

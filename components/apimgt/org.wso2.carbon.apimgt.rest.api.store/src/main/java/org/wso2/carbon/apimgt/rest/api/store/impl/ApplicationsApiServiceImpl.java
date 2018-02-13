@@ -158,7 +158,9 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
                         "An application already exists with name " + body.getName(), e,
                         log);
             } else if (RestApiUtil.isDueToApplicationNameWhiteSpaceValidation(e)) {
-                RestApiUtil.handleBadRequest("Application name cannot contains leading or trailing white spaces", log);
+                RestApiUtil.handleBadRequest("Application name cannot contain leading or trailing white spaces", log);
+            } else if (RestApiUtil.isDueToApplicationNameWithInvalidCharacters(e)) {
+                RestApiUtil.handleBadRequest("Application name cannot contain invalid characters", log);
             } else {
                 RestApiUtil.handleInternalServerError("Error while adding a new application for the user " + username,
                         e, log);
@@ -383,6 +385,8 @@ public class ApplicationsApiServiceImpl extends ApplicationsApiService {
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToApplicationNameWhiteSpaceValidation(e)) {
                 RestApiUtil.handleBadRequest("Application name cannot contains leading or trailing white spaces", log);
+            } else if (RestApiUtil.isDueToApplicationNameWithInvalidCharacters(e)) {
+                RestApiUtil.handleBadRequest("Application name cannot contain invalid characters", log);
             } else {
                 RestApiUtil.handleInternalServerError("Error while updating application " + applicationId, e, log);
             }

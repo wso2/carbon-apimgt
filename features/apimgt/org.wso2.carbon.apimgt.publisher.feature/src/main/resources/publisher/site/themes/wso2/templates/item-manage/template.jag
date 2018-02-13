@@ -1374,9 +1374,14 @@
         });
 
         $('#save_api').click(function(e){
-          thisID=$(this).attr('id');
-          $('#apiSaved').show();
-          setTimeout("hideMsg()", 3000);
+            if(!$("#backend_tps_specify").is(":checked")) {
+                // Setting text field values to null if check box is not selected.
+                $('#productionTps').val(null);
+                $('#sandboxTps').val(null);
+            }
+            thisID=$(this).attr('id');
+            $('#apiSaved').show();
+            setTimeout("hideMsg()", 3000);
         });
 
 
