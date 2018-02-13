@@ -183,8 +183,7 @@ public class APIMWSDLReader {
             writer.writeWSDL(wsdlDefinition, byteArrayOutputStream);
             return byteArrayOutputStream.toByteArray();
         } catch (Exception e) {
-            String msg = "Error occurs when change the address URL of the WSDL";
-            throw new APIManagementException(msg, e);
+            throw new APIManagementException("Error occurs when change the address URL of the WSDL", e);
         }
     }
 
@@ -597,11 +596,10 @@ public class APIMWSDLReader {
     public void setServiceDefinition(Definition definition, API api, String environmentName, String environmentType)
             throws APIManagementException {
         Map serviceMap = definition.getAllServices();
-        Iterator serviceItr = serviceMap.entrySet().iterator();
         URL addressURI;
         try {
-            while (serviceItr.hasNext()) {
-                Map.Entry svcEntry = (Map.Entry) serviceItr.next();
+            for (Object entry : serviceMap.entrySet()) {
+                Map.Entry svcEntry = (Map.Entry) entry;
                 Service svc = (Service) svcEntry.getValue();
                 Map portMap = svc.getPorts();
                 for (Object o : portMap.entrySet()) {
@@ -620,9 +618,8 @@ public class APIMWSDLReader {
                     }
                 }
             }
-        } catch (Exception e) {
-            String errorMsg = "Error occurred while getting the wsdl address location";
-            throw new APIManagementException(errorMsg, e);
+        } catch (MalformedURLException e) {
+            throw new APIManagementException("Error occurred while getting the wsdl address location", e);
         }
     }
 
@@ -667,7 +664,7 @@ public class APIMWSDLReader {
 	}
 
     /**
-     * Set the addressURl from the Extensibility element for the given environment tyoe
+     * Set the addressURl from the Extensibility element for the given environment type
      *
      * @param exElement       {@link ExtensibilityElement}
      * @param transports      transports allowed for the address url
@@ -680,15 +677,31 @@ public class APIMWSDLReader {
         if (exElement instanceof SOAP12AddressImpl) {
             ((SOAP12AddressImpl) exElement)
                     .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType) + context);
+            if (log.isDebugEnabled()) {
+                log.debug("Gateway endpoint for environment:" + environmentName + " is: "
+                        + ((SOAP12AddressImpl) exElement).getLocationURI());
+            }
         } else if (exElement instanceof SOAPAddressImpl) {
             ((SOAPAddressImpl) exElement)
                     .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType) + context);
+            if (log.isDebugEnabled()) {
+                log.debug("Gateway endpoint for environment:" + environmentName + " is: "
+                        + ((SOAPAddressImpl) exElement).getLocationURI());
+            }
         } else if (exElement instanceof HTTPAddressImpl) {
             ((HTTPAddressImpl) exElement)
                     .setLocationURI(APIUtil.getGatewayEndpoint(transports, environmentName, environmentType) + context);
+            if (log.isDebugEnabled()) {
+                log.debug("Gateway endpoint for environment:" + environmentName + " is: "
+                        + ((HTTPAddressImpl) exElement).getLocationURI());
+            }
         } else {
-            String msg = "WSDL address element type is not supported";
-            throw new APIManagementException(msg);
+            if (log.isDebugEnabled()) {
+                log.debug("WSDL address element type is not supported for WSDL element type: " + exElement
+                        .getElementType().toString());
+            }
+            throw new APIManagementException("WSDL address element type is not supported for WSDL element type:" +
+                    exElement.getElementType().toString());
         }
     }
 

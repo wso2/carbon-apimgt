@@ -3632,7 +3632,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 wsdlContent = new String(updatedWSDLContent);
             } catch (IOException e) {
                 handleException("Error occurred while copying wsdl content into byte array stream for resource: "
-                        + resourceUrl);
+                        + resourceUrl, e);
             }
         } else {
             handleException("No wsdl resource found for resource path: " + resourceUrl);
