@@ -21,11 +21,9 @@ import Typography from 'material-ui/Typography';
 import ExpansionPanel, {ExpansionPanelDetails, ExpansionPanelSummary} from 'material-ui/ExpansionPanel';
 import ExpandMoreIcon from 'material-ui-icons/ExpandMore';
 import Grid from 'material-ui/Grid';
-import LifecycleMenu from "./LifecycleMenu";
 import ApiThumb from "../../Listing/ApiThumb";
 import API from "../../../../data/api";
 import Loading from "../../../Base/Loading/Loading";
-import {LifeCycleStatus} from "../../../../data/LifeCycle";
 import AuthManager from "../../../../data/AuthManager";
 import {withStyles} from 'material-ui/styles';
 
@@ -46,12 +44,8 @@ class EnvironmentPanel extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            lifecycleStatus: "All",
-            lifecycleStatuses: LifeCycleStatus,
             isAuthorize: true,
         };
-
-        this.handleLifecycleStateChange = this.handleLifecycleStateChange.bind(this);
     }
 
     componentDidMount() {
@@ -85,22 +79,6 @@ class EnvironmentPanel extends Component {
         });
     }
 
-    handleLifecycleStateChange(event) {
-        const lifecycleStatus = event.target.value;
-        let apis;
-
-        if (lifecycleStatus === "All") {
-            apis = this.state.allApis;
-        } else {
-            apis = this.state.allApis.filter(api => api.lifeCycleStatus === lifecycleStatus);
-        }
-
-        this.setState({
-            lifecycleStatus,
-            apis
-        });
-    }
-
     render() {
         const {environment, rootAPI, classes} = this.props;
         const {apis, isAuthorize, notFound} = this.state;
@@ -114,18 +92,6 @@ class EnvironmentPanel extends Component {
                     <ExpansionPanelDetails className={classes.header}>
                         <Grid container>
                             <Grid item xs={12}>
-                                <Grid container>
-                                    <Grid item lg={2} md={3} sm={4} xs={12} className={classes.lifeCycleMenu}>
-                                        <LifecycleMenu
-                                            lifecycleStatus={this.state.lifecycleStatus}
-                                            lifecycleStatuses={this.state.lifecycleStatuses}
-                                            handleLifecycleStateChange={this.handleLifecycleStateChange}
-                                        />
-                                    </Grid>
-                                </Grid>
-
-                            </Grid>
-                            <Grid item xs={12}>
                                 {
                                     (!apis) ? <Loading/> :
                                         (apis.length === 0) ?
@@ -136,7 +102,6 @@ class EnvironmentPanel extends Component {
                                                         No APIs found...
                                                     </Typography>
                                                 </Grid>
-
                                             </Grid>
                                             :
                                             <Grid container>
