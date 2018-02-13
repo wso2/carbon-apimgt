@@ -10,7 +10,7 @@
     var apiAdditionalProperties = parse(api.additionalProperties);
     var urlPrefix = jagg.getTenantURLPrefix();%>
 <div class="row">
-<%if(api.wsdl && api.wsdl != ""){%>
+<%if (api.wsdl && api.wsdl != ""){%>
 		  <div class="col-md-12 col-lg-12">
 		  <%} else {%>
           <div class="col-md-12 col-lg-9">
@@ -56,7 +56,7 @@
                     for( var environmentName in environmentsPerType){
                         var environmenturls = environmentsPerType[environmentName];
                         // @todo: param_string
-                        if(api.wsdl && api.wsdl != ""){
+                        if (api.wsdl && api.wsdl != "") {
                 %>  <div style="display: flex;">
                         <div class="col-md-12 col-lg-9">
     	                    <h5 class="add-margin-top-2x"><%=environmentName%> <%=i18n.localize("URLs")%>:</h5>
@@ -112,7 +112,7 @@
 	    	            <%}
     	            }
                     }
-                        if(api.wsdl && api.wsdl != ""){ %>
+                        if (api.wsdl && api.wsdl != "") { %>
                             </div>
                             </div>
                             <div class="col-md-12 col-lg-3" style="position:relative">

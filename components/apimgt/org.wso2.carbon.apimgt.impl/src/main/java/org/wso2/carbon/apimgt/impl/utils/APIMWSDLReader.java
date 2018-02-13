@@ -590,6 +590,7 @@ public class APIMWSDLReader {
      *
      * @param definition      {@link Definition} - WSDL4j wsdl definition
      * @param api             API object
+     * @param environmentName gateway environment name
      * @param environmentType gateway environment type
      * @throws APIManagementException when error occurred getting WSDL address location
      */
@@ -669,6 +670,7 @@ public class APIMWSDLReader {
      * @param exElement       {@link ExtensibilityElement}
      * @param transports      transports allowed for the address url
      * @param context         API context
+     * @param environmentName gateway environment name
      * @param environmentType gateway environment type
      * @throws APIManagementException when unsupported WSDL as a input
      */

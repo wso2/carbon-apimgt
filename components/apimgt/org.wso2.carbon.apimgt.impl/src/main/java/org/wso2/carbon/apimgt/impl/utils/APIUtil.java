@@ -1546,6 +1546,7 @@ public final class APIUtil {
      * environments defined, get the gateway endpoint according to the environment type
      *
      * @param transports      transports allowed for gateway endpoint
+     * @param environmentName gateway environment name
      * @param environmentType gateway environment type
      * @return Gateway URL
      */

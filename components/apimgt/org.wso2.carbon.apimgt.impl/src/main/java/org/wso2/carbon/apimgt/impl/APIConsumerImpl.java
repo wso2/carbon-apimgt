@@ -3638,9 +3638,11 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             handleException("No wsdl resource found for resource path: " + resourceUrl);
         }
         JSONObject data = new JSONObject();
-        data.put("contentType", docResourceMap.get("contentType"));
-        data.put("name", docResourceMap.get("name"));
-        data.put("Data", wsdlContent);
+        data.put(APIConstants.DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE,
+                docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_CONTENT_TYPE));
+        data.put(APIConstants.DOCUMENTATION_RESOURCE_MAP_NAME,
+                docResourceMap.get(APIConstants.DOCUMENTATION_RESOURCE_MAP_NAME));
+        data.put(APIConstants.DOCUMENTATION_RESOURCE_MAP_DATA, wsdlContent);
         if (log.isDebugEnabled()) {
             log.debug("Updated wsdl content details for wsdl resource: " + docResourceMap.get("name") + " is " +
                     data.toJSONString());
@@ -3649,7 +3651,7 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
     }
 
     /**
-     * This method is used updated wsdl with the respective environment apis are published
+     * This method is used to get the updated wsdl with the respective environment apis are published
      *
      * @param wsdlResourcePath registry resource path to the wsdl
      * @param wsdlContent      wsdl resource content as byte array
@@ -3706,12 +3708,16 @@ class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
                 }
 
                 if (api != null) {
-                    apimwsdlReader.setServiceDefinition(definition, api, environmentName, environmentType);
-                    if (log.isDebugEnabled()) {
-                        log.debug("Soap api with context:" + api.getContext() + " in " + environmentName
-                                + " with environment type" + environmentType);
+                    try {
+                        apimwsdlReader.setServiceDefinition(definition, api, environmentName, environmentType);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Soap api with context:" + api.getContext() + " in " + environmentName
+                                    + " with environment type" + environmentType);
+                        }
+                        updatedWSDLContent = apimwsdlReader.getWSDL(definition);
+                    } catch (APIManagementException e) {
+                        handleException("Error occurred while processing the wsdl for api: " + api.getId());
                     }
-                    updatedWSDLContent = apimwsdlReader.getWSDL(definition);
                 } else {
                     handleException("Error while getting API object for wsdl artifact");
                 }
