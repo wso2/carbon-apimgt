@@ -69,7 +69,7 @@ include("/jagg/jagg.jag");
 
             parsedDataResult = JSON.parse(dataResult);
 
-            var temp1, temp2;
+            var hyphenSeperated, colonSeperated;
             var apiDetails, apiProvider, apiName, apiVersion, apiId;
             var isExists;
             var modifiedDataResult= new Array();
@@ -79,14 +79,14 @@ include("/jagg/jagg.jag");
 
             for (i = 0; i < parsedDataResult.length; i++) {
                 apiDetails= parsedDataResult[i]["values"]["api_version"];
-                temp1 = apiDetails.split("--");
-                apiProvider = temp1[0];
-                temp2 = temp1[1].split(":");
-                apiName = temp2[0];
-                apiVersion = temp2[1].substring(1);
-                apiId = apiProvider + "_" + apiName + "_" + apiVersion;
+                hyphenSeperated = apiDetails.split("--");
+                apiProvider = hyphenSeperated[0];
+                colonSeperated = hyphenSeperated[1].split(":");
+                apiName = colonSeperated[0];
+                apiVersion = colonSeperated[1].substring(1);
 
-                isExists = APIManagerFactory.getInstance().getAPIProvider(provider).isAPIAvailable(new APIIdentifier(apiId));
+                isExists = APIManagerFactory.getInstance().getAPIProvider(provider).isAPIAvailable(
+                        new APIIdentifier(apiProvider, apiName, apiVersion));
                 if (isExists) {
                     modifiedDataResult.push(parsedDataResult[i]);
                 }
