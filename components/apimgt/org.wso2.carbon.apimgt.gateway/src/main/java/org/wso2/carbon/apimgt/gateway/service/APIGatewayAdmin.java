@@ -362,7 +362,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
      * @return An instance of EndpointAdminServiceClient
      * @throws AxisFault Thrown if an error occurred
      */
-    private EndpointAdminServiceClient getEndpointAdminServiceClient() throws AxisFault {
+    protected EndpointAdminServiceClient getEndpointAdminServiceClient() throws AxisFault {
         return new EndpointAdminServiceClient();
     }
 
